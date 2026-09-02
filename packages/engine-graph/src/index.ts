@@ -53,3 +53,11 @@ export type {
   LibraryValidationResult,
   PictogramMutation,
 } from './validate-library.js';
+export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
+export type {
+  PlacedSupport,
+  TypeQuantity,
+  BuildingQuantity,
+  LevelQuantity,
+  QuantityReport,
+} from './compute-quantities.js';
