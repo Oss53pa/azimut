@@ -1,5 +1,7 @@
 import { type JSX, useState } from 'react';
 import type { ViewId } from '../views.js';
+import { SiteDataProvider } from '../context/SiteDataContext.js';
+import { refMultilevel } from '@azimut/testkit/sites';
 import { Sidebar } from './Sidebar.js';
 import { DashboardView } from '../views/DashboardView.js';
 import { GraphView } from '../views/GraphView.js';
@@ -29,20 +31,22 @@ export function Shell(): JSX.Element {
   const [currentView, setCurrentView] = useState<ViewId>('dashboard');
 
   return (
-    <div style={{
-      display: 'flex',
-      minHeight: '100vh',
-      fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
-    }}>
-      <Sidebar currentView={currentView} onNavigate={setCurrentView} />
-      <main style={{
-        flex: 1,
-        padding: 24,
-        background: 'var(--az-main-bg)',
-        overflow: 'auto',
+    <SiteDataProvider site={refMultilevel}>
+      <div style={{
+        display: 'flex',
+        minHeight: '100vh',
+        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
       }}>
-        {renderView(currentView)}
-      </main>
-    </div>
+        <Sidebar currentView={currentView} onNavigate={setCurrentView} />
+        <main style={{
+          flex: 1,
+          padding: 24,
+          background: 'var(--az-main-bg)',
+          overflow: 'auto',
+        }}>
+          {renderView(currentView)}
+        </main>
+      </div>
+    </SiteDataProvider>
   );
 }

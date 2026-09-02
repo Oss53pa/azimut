@@ -64,9 +64,21 @@ importers:
 
   apps/studio:
     dependencies:
+      '@azimut/core-model':
+        specifier: workspace:*
+        version: link:../../packages/core-model
       '@azimut/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@azimut/engine-graph':
+        specifier: workspace:*
+        version: link:../../packages/engine-graph
+      '@azimut/engine-layout':
+        specifier: workspace:*
+        version: link:../../packages/engine-layout
+      '@azimut/testkit':
+        specifier: workspace:*
+        version: link:../../packages/testkit
       react:
         specifier: ^18.3.1
         version: 18.3.1

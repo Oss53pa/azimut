@@ -10,7 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@azimut/core-model": "workspace:*",
     "@azimut/design-tokens": "workspace:*",
+    "@azimut/engine-graph": "workspace:*",
+    "@azimut/engine-layout": "workspace:*",
+    "@azimut/testkit": "workspace:*",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

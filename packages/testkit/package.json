@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./sites": {
+      "types": "./src/sites/index.ts",
+      "import": "./src/sites/index.ts"
     }
   },
   "dependencies": {

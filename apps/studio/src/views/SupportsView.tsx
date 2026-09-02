@@ -1,25 +1,65 @@
 import { type JSX } from 'react';
+import { useSiteData } from '../context/useSiteData.js';
 
 export function SupportsView(): JSX.Element {
+  const site = useSiteData();
+
+  const types = [...site.support_types].sort((a, b) => a.key.localeCompare(b.key));
+
   return (
     <div>
-      <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
         Carnet de supports
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 14 }}>
-        Types de supports, faces et dimensionnement.
+      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+        {types.length} type{types.length !== 1 ? 's' : ''} de support
       </p>
-      <div style={{
-        marginTop: 16,
-        padding: 32,
-        borderRadius: 8,
-        border: '2px dashed var(--az-border)',
-        textAlign: 'center',
-        color: 'var(--az-text-secondary)',
-        fontSize: 14,
-      }}>
-        Connecter une source de donnees pour afficher les supports.
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: '2px solid var(--az-border)' }}>
+              <Th>Cle</Th>
+              <Th>Nom</Th>
+              <Th>Faces</Th>
+              <Th>Dimensions par defaut</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {types.map((st) => (
+              <tr key={st.id} style={{ borderBottom: '1px solid var(--az-border)' }}>
+                <td style={{ padding: '8px 12px', fontFamily: 'monospace', fontSize: 12, color: 'var(--az-text-primary)' }}>
+                  {st.key}
+                </td>
+                <td style={{ padding: '8px 12px', color: 'var(--az-text-primary)' }}>
+                  {st.name}
+                </td>
+                <td style={{ padding: '8px 12px', color: 'var(--az-text-primary)' }}>
+                  {st.face_count}
+                </td>
+                <td style={{ padding: '8px 12px', color: 'var(--az-text-secondary)', fontSize: 12 }}>
+                  {st.faces.map((f) => `${f.side}: ${f.default_width_mm}x${f.default_height_mm} mm`).join(', ')}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
+  );
+}
+
+function Th({ children }: { readonly children: string }): JSX.Element {
+  return (
+    <th style={{
+      textAlign: 'left',
+      padding: '8px 12px',
+      fontWeight: 600,
+      color: 'var(--az-text-secondary)',
+      fontSize: 11,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    }}>
+      {children}
+    </th>
   );
 }
