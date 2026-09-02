@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@azimut/core-model": "workspace:*",
-    "@azimut/rules": "workspace:*"
+    "@azimut/rules": "workspace:*",
+    "pdf-lib": "^1.17.1"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
