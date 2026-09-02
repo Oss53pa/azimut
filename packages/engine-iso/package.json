@@ -14,6 +14,7 @@
     "@azimut/rules": "workspace:*"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit"
   }
 }
