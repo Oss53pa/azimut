@@ -9,3 +9,9 @@ export type {
   OrientedPlanTheme,
   OrientedPlanOptions,
 } from './render-oriented-plan.js';
+export { renderEvacuationPlan } from './render-evacuation-plan.js';
+export type {
+  EvacuationTheme,
+  EvacuationPlanOptions,
+  EvacuationStats,
+} from './render-evacuation-plan.js';
