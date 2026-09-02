@@ -34,6 +34,13 @@ export {
 export { importSupports } from './import-supports.js';
 export { validateSupports } from './validate-supports.js';
 export type { SupportValidationResult } from './validate-supports.js';
+export { resolveFaceContent } from './resolve-face.js';
+export type {
+  ResolvedBlock,
+  ResolvedContent,
+  ResolvedDestinationEntry,
+  ResolvedFace,
+} from './resolve-face.js';
 export type {
   ImportColumnMap,
   ImportedSupport,
