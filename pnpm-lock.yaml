@@ -103,6 +103,10 @@ importers:
       '@azimut/rules':
         specifier: workspace:*
         version: link:../rules
+    devDependencies:
+      '@azimut/testkit':
+        specifier: workspace:*
+        version: link:../testkit
 
   packages/engine-iso:
     dependencies:
