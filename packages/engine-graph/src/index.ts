@@ -56,6 +56,8 @@ export type {
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
 export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
+export { renderFace } from './render-face.js';
+export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export type {
   PlacedSupport,
   TypeQuantity,
