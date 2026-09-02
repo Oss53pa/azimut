@@ -135,7 +135,7 @@ export function renderOrientedPlan(
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
     const f: Finding = {
-      code: 'ORIENTED_PLAN.LEVEL_NOT_FOUND',
+      code: 'LAYOUT.ORIENTED_PLAN_LEVEL_NOT_FOUND',
       severity: 'blocking',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },
@@ -183,7 +183,7 @@ export function renderOrientedPlan(
   const bounds = computeBounds(allRotated);
   if (!bounds) {
     warnings.push({
-      code: 'ORIENTED_PLAN.EMPTY_LEVEL',
+      code: 'LAYOUT.ORIENTED_PLAN_EMPTY_LEVEL',
       severity: 'warning',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },

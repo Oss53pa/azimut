@@ -22,7 +22,7 @@ export function crossLevelWithoutVlFindings(
     const toLevel = nodeLevelMap.get(e.to_node_id);
     if (fromLevel !== toLevel && !edgesWithVl.has(e.id)) {
       findings.push({
-        code: 'GRAPH.CROSS_LEVEL_WITHOUT_VL',
+        code: 'GRAPH.VERTICAL_LINK_MISSING',
         severity: 'blocking',
         entity: { kind: 'edge', id: e.id },
         params: {
@@ -79,7 +79,7 @@ export function multiLevelWithoutAccessibleVlFindings(
     if (!levels || levels.length < 2) continue;
     if (!buildingsWithAccessibleVl.has(building.id)) {
       findings.push({
-        code: 'GRAPH.NO_ACCESSIBLE_VERTICAL_LINK',
+        code: 'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
         severity: 'warning',
         entity: { kind: 'building', id: building.id },
         params: { name: building.name, level_count: levels.length },
@@ -120,7 +120,7 @@ export function missingDestinationNameFindings(
     for (const lang of activeLangs) {
       if (!destLangs?.has(lang)) {
         findings.push({
-          code: 'GRAPH.MISSING_DESTINATION_NAME',
+          code: 'GRAPH.DESTINATION_NAME_MISSING',
           severity: 'warning',
           entity: { kind: 'destination', id: dest.id },
           params: { lang },

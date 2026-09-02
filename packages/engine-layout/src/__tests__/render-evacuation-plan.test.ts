@@ -37,7 +37,7 @@ describe('T-2.10 renderEvacuationPlan', () => {
     const result = renderEvacuationPlan(refMultilevel, 'nonexistent', defaultOptions);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('EVAC.LEVEL_NOT_FOUND');
+    expect(result.findings[0]?.code).toBe('LAYOUT.EVAC_LEVEL_NOT_FOUND');
   });
 
   it('renders valid SVG', () => {

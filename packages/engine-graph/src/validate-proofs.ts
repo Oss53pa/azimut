@@ -37,7 +37,7 @@ export function validateProofs(
     if (proof.status === 'approved' || proof.status === 'rejected') {
       if (proofApprovals.length === 0) {
         findings.push({
-          code: 'PROOF.STATUS_WITHOUT_APPROVAL',
+          code: 'DATA.PROOF_STATUS_WITHOUT_APPROVAL',
           severity: 'blocking',
           entity: { kind: 'proof', id: proof.id },
           params: { status: proof.status },
@@ -48,7 +48,7 @@ export function validateProofs(
 
     if (proof.status === 'pending' && proofApprovals.length > 0) {
       findings.push({
-        code: 'PROOF.PENDING_WITH_APPROVAL',
+        code: 'DATA.PROOF_PENDING_WITH_APPROVAL',
         severity: 'warning',
         entity: { kind: 'proof', id: proof.id },
         params: { approval_count: proofApprovals.length },
@@ -71,7 +71,7 @@ export function validateProofs(
     const uniqueVersions = new Set(sorted);
     if (uniqueVersions.size < sorted.length) {
       findings.push({
-        code: 'PROOF.DUPLICATE_VERSION',
+        code: 'DATA.PROOF_DUPLICATE_VERSION',
         severity: 'blocking',
         entity: { kind: 'support_face', id: faceId },
         params: { versions: sorted.join(',') },

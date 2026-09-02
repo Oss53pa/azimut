@@ -65,7 +65,7 @@ describe('computeRoute', () => {
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.findings[0]?.code).toBe('ROUTE.NODE_NOT_FOUND');
+      expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_NODE_NOT_FOUND');
     }
   });
 
@@ -78,7 +78,7 @@ describe('computeRoute', () => {
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.findings[0]?.code).toBe('ROUTE.UNREACHABLE');
+      expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_UNREACHABLE');
     }
   });
 
@@ -126,7 +126,7 @@ describe('computeRoute', () => {
     );
     expect(backward.ok).toBe(false);
     if (!backward.ok) {
-      expect(backward.findings[0]?.code).toBe('ROUTE.UNREACHABLE');
+      expect(backward.findings[0]?.code).toBe('GRAPH.ROUTE_UNREACHABLE');
     }
   });
 
@@ -158,7 +158,7 @@ describe('computeRoute', () => {
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.findings[0]?.code).toBe('ROUTE.UNREACHABLE');
+      expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_UNREACHABLE');
     }
   });
 

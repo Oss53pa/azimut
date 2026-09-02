@@ -30,7 +30,7 @@ describe('T-1.8 validateLibrary', () => {
     expect(result.ok).toBe(true);
   });
 
-  describe('LIBRARY.CATEGORY_PARENT_NOT_FOUND', () => {
+  describe('DATA.CATEGORY_PARENT_NOT_FOUND', () => {
     it('flags category with non-existent parent', () => {
       const site = patchSite(refMinimal, {
         categories: [
@@ -48,13 +48,13 @@ describe('T-1.8 validateLibrary', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'LIBRARY.CATEGORY_PARENT_NOT_FOUND',
+        (f) => f.code === 'DATA.CATEGORY_PARENT_NOT_FOUND',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('LIBRARY.CATEGORY_CYCLE', () => {
+  describe('DATA.CATEGORY_CYCLE', () => {
     it('flags circular parent references', () => {
       const site = patchSite(refMinimal, {
         categories: [
@@ -78,13 +78,13 @@ describe('T-1.8 validateLibrary', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const cycles = result.findings.filter(
-        (f) => f.code === 'LIBRARY.CATEGORY_CYCLE',
+        (f) => f.code === 'DATA.CATEGORY_CYCLE',
       );
       expect(cycles.length).toBeGreaterThan(0);
     });
   });
 
-  describe('LIBRARY.PICTOGRAM_CATEGORY_NOT_FOUND', () => {
+  describe('DATA.PICTOGRAM_CATEGORY_NOT_FOUND', () => {
     it('flags pictogram referencing non-existent category', () => {
       const site = patchSite(refMinimal, {
         pictograms: [
@@ -103,13 +103,13 @@ describe('T-1.8 validateLibrary', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'LIBRARY.PICTOGRAM_CATEGORY_NOT_FOUND',
+        (f) => f.code === 'DATA.PICTOGRAM_CATEGORY_NOT_FOUND',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('LIBRARY.DEST_CATEGORY_NOT_FOUND', () => {
+  describe('DATA.DEST_CATEGORY_NOT_FOUND', () => {
     it('warns when destination references non-existent category', () => {
       const site = patchSite(refMinimal, {
         categories: [],
@@ -117,19 +117,19 @@ describe('T-1.8 validateLibrary', () => {
       const result = validateLibrary(site);
       if (result.ok) {
         const w = result.warnings.find(
-          (f) => f.code === 'LIBRARY.DEST_CATEGORY_NOT_FOUND',
+          (f) => f.code === 'DATA.DEST_CATEGORY_NOT_FOUND',
         );
         expect(w).toBeDefined();
       } else {
         const f = result.findings.find(
-          (f) => f.code === 'LIBRARY.DEST_CATEGORY_NOT_FOUND',
+          (f) => f.code === 'DATA.DEST_CATEGORY_NOT_FOUND',
         );
         expect(f).toBeDefined();
       }
     });
   });
 
-  describe('LIBRARY.EMPTY_SVG_PATH', () => {
+  describe('DATA.EMPTY_SVG_PATH', () => {
     it('flags pictogram with empty svg_path', () => {
       const site = patchSite(refMinimal, {
         pictograms: [
@@ -148,7 +148,7 @@ describe('T-1.8 validateLibrary', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'LIBRARY.EMPTY_SVG_PATH',
+        (f) => f.code === 'DATA.EMPTY_SVG_PATH',
       );
       expect(f).toBeDefined();
     });
@@ -176,7 +176,7 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     const f = result.findings.find(
-      (f) => f.code === 'LIBRARY.SAFETY_REGISTRY_IMMUTABLE',
+      (f) => f.code === 'SECURITY.REGISTRY_WRITE_DENIED',
     );
     expect(f).toBeDefined();
     expect(f?.ruleRef).toBe('INV-3');

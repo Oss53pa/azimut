@@ -33,14 +33,14 @@ describe('validateGraph', () => {
     });
   });
 
-  describe('GRAPH.SELF_LOOP', () => {
+  describe('GRAPH.EDGE_SELF_LOOP', () => {
     it('detects self-referencing edge in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const loops = findingsWithCode(
           result.findings,
-          'GRAPH.SELF_LOOP',
+          'GRAPH.EDGE_SELF_LOOP',
         );
         expect(loops.length).toBeGreaterThan(0);
         expect(loops[0]?.entity?.id).toBe('e-brk-zero-length');
@@ -51,20 +51,20 @@ describe('validateGraph', () => {
       const result = validateGraph(refMinimal);
       if (result.ok) {
         expect(
-          findingsWithCode(result.warnings, 'GRAPH.SELF_LOOP'),
+          findingsWithCode(result.warnings, 'GRAPH.EDGE_SELF_LOOP'),
         ).toHaveLength(0);
       }
     });
   });
 
-  describe('GRAPH.ORPHAN_NODE', () => {
+  describe('GRAPH.NODE_ORPHAN', () => {
     it('detects orphan node in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const orphans = findingsWithCode(
           result.findings,
-          'GRAPH.ORPHAN_NODE',
+          'GRAPH.NODE_ORPHAN',
         );
         expect(orphans.length).toBeGreaterThan(0);
         expect(orphans[0]?.entity?.id).toBe('n-brk-orphan');
@@ -75,7 +75,7 @@ describe('validateGraph', () => {
       const result = validateGraph(refMinimal);
       if (result.ok) {
         expect(
-          findingsWithCode(result.warnings, 'GRAPH.ORPHAN_NODE'),
+          findingsWithCode(result.warnings, 'GRAPH.NODE_ORPHAN'),
         ).toHaveLength(0);
       }
     });
@@ -104,14 +104,14 @@ describe('validateGraph', () => {
     });
   });
 
-  describe('GRAPH.UNREACHABLE_FROM_ENTRANCE', () => {
+  describe('GRAPH.ZONE_UNREACHABLE', () => {
     it('detects nodes unreachable from entrance in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const unreachable = findingsWithCode(
           result.findings,
-          'GRAPH.UNREACHABLE_FROM_ENTRANCE',
+          'GRAPH.ZONE_UNREACHABLE',
         );
         expect(unreachable.length).toBeGreaterThan(0);
         const ids = unreachable.map((f) => f.entity?.id);
@@ -126,7 +126,7 @@ describe('validateGraph', () => {
         expect(
           findingsWithCode(
             result.warnings,
-            'GRAPH.UNREACHABLE_FROM_ENTRANCE',
+            'GRAPH.ZONE_UNREACHABLE',
           ),
         ).toHaveLength(0);
       }
@@ -162,14 +162,14 @@ describe('validateGraph', () => {
     });
   });
 
-  describe('GRAPH.CROSS_LEVEL_WITHOUT_VL', () => {
+  describe('GRAPH.VERTICAL_LINK_MISSING', () => {
     it('detects cross-level edge without vertical link in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const crossLevel = findingsWithCode(
           result.findings,
-          'GRAPH.CROSS_LEVEL_WITHOUT_VL',
+          'GRAPH.VERTICAL_LINK_MISSING',
         );
         expect(crossLevel.length).toBeGreaterThan(0);
         expect(crossLevel[0]?.entity?.id).toBe('e-brk-cross-level');
@@ -182,21 +182,21 @@ describe('validateGraph', () => {
         expect(
           findingsWithCode(
             result.warnings,
-            'GRAPH.CROSS_LEVEL_WITHOUT_VL',
+            'GRAPH.VERTICAL_LINK_MISSING',
           ),
         ).toHaveLength(0);
       }
     });
   });
 
-  describe('GRAPH.UNJUSTIFIED_DEAD_END', () => {
+  describe('GRAPH.DEAD_END_UNJUSTIFIED', () => {
     it('detects unjustified dead end in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const deadEnds = findingsWithCode(
           result.findings,
-          'GRAPH.UNJUSTIFIED_DEAD_END',
+          'GRAPH.DEAD_END_UNJUSTIFIED',
         );
         expect(deadEnds.length).toBeGreaterThan(0);
         expect(deadEnds[0]?.entity?.id).toBe('n-brk-deadend');
@@ -209,21 +209,21 @@ describe('validateGraph', () => {
         expect(
           findingsWithCode(
             result.warnings,
-            'GRAPH.UNJUSTIFIED_DEAD_END',
+            'GRAPH.DEAD_END_UNJUSTIFIED',
           ),
         ).toHaveLength(0);
       }
     });
   });
 
-  describe('GRAPH.NO_ACCESSIBLE_VERTICAL_LINK', () => {
+  describe('GRAPH.LEVEL_NO_ACCESSIBLE_LINK', () => {
     it('detects multi-level building without accessible VL in refBroken', () => {
       const result = validateGraph(refBroken);
       expect(result.ok).toBe(false);
       if (!result.ok) {
         const noVl = findingsWithCode(
           result.findings,
-          'GRAPH.NO_ACCESSIBLE_VERTICAL_LINK',
+          'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
         );
         expect(noVl.length).toBeGreaterThan(0);
         expect(noVl[0]?.entity?.id).toBe('bldg-brk-001');
@@ -236,7 +236,7 @@ describe('validateGraph', () => {
         expect(
           findingsWithCode(
             result.warnings,
-            'GRAPH.NO_ACCESSIBLE_VERTICAL_LINK',
+            'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
           ),
         ).toHaveLength(0);
       }
@@ -296,7 +296,7 @@ describe('validateGraph', () => {
     });
   });
 
-  describe('GRAPH.MISSING_DESTINATION_NAME', () => {
+  describe('GRAPH.DESTINATION_NAME_MISSING', () => {
     it('detects destination missing a language', () => {
       const missingLang = makeSite({
         destination_names: refMinimal.destination_names.filter(
@@ -311,7 +311,7 @@ describe('validateGraph', () => {
       if (result.ok) {
         const missing = findingsWithCode(
           result.warnings,
-          'GRAPH.MISSING_DESTINATION_NAME',
+          'GRAPH.DESTINATION_NAME_MISSING',
         );
         expect(missing.length).toBeGreaterThan(0);
         expect(missing[0]?.entity?.id).toBe('dest-a');
@@ -325,14 +325,14 @@ describe('validateGraph', () => {
         expect(
           findingsWithCode(
             result.warnings,
-            'GRAPH.MISSING_DESTINATION_NAME',
+            'GRAPH.DESTINATION_NAME_MISSING',
           ),
         ).toHaveLength(0);
       }
     });
   });
 
-  describe('GRAPH.ZERO_LENGTH_EDGE', () => {
+  describe('GRAPH.EDGE_ZERO_LENGTH', () => {
     it('detects zero-length non-self-loop edge', () => {
       const zeroLength = makeSite({
         graph: {
@@ -359,7 +359,7 @@ describe('validateGraph', () => {
       if (!result.ok) {
         const zero = findingsWithCode(
           result.findings,
-          'GRAPH.ZERO_LENGTH_EDGE',
+          'GRAPH.EDGE_ZERO_LENGTH',
         );
         expect(zero.length).toBeGreaterThan(0);
         expect(zero[0]?.entity?.id).toBe('e-zero');

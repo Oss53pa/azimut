@@ -190,7 +190,7 @@ export function importSupports(
       ok: false,
       findings: [
         {
-          code: 'IMPORT.MISSING_COLUMNS',
+          code: 'IMPORT.COLUMN_MISSING',
           severity: 'blocking',
           entity: null,
           params: { required: REQUIRED_FIELDS.join(', ') },

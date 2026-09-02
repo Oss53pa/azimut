@@ -14,7 +14,7 @@ describe('T-2.5 runChecks', () => {
     expect(result.value.checks_skipped).toContain('adjacence_chromatique');
   });
 
-  describe('CHECK.DUPLICATE_DISPLAY_NAME', () => {
+  describe('GRAPH.DESTINATION_NAME_DUPLICATE', () => {
     it('detects same name for different destinations', () => {
       const site: SiteData = {
         ...refMinimal,
@@ -33,7 +33,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const dups = result.value.findings.filter(
-        (f) => f.code === 'CHECK.DUPLICATE_DISPLAY_NAME',
+        (f) => f.code === 'GRAPH.DESTINATION_NAME_DUPLICATE',
       );
       expect(dups.length).toBeGreaterThanOrEqual(2);
     });
@@ -43,7 +43,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const dups = result.value.findings.filter(
-        (f) => f.code === 'CHECK.DUPLICATE_DISPLAY_NAME',
+        (f) => f.code === 'GRAPH.DESTINATION_NAME_DUPLICATE',
       );
       expect(dups.length).toBe(0);
     });
@@ -66,13 +66,13 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const dups = result.value.findings.filter(
-        (f) => f.code === 'CHECK.DUPLICATE_DISPLAY_NAME',
+        (f) => f.code === 'GRAPH.DESTINATION_NAME_DUPLICATE',
       );
       expect(dups.length).toBeGreaterThanOrEqual(2);
     });
   });
 
-  describe('CHECK.INCOMPLETE_LANG_COVERAGE', () => {
+  describe('GRAPH.DESTINATION_LANG_INCOMPLETE', () => {
     it('detects destination missing a language', () => {
       const site: SiteData = {
         ...refMinimal,
@@ -84,7 +84,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const missing = result.value.findings.filter(
-        (f) => f.code === 'CHECK.INCOMPLETE_LANG_COVERAGE',
+        (f) => f.code === 'GRAPH.DESTINATION_LANG_INCOMPLETE',
       );
       expect(missing.length).toBe(1);
       expect(missing[0]?.entity).toStrictEqual({
@@ -98,7 +98,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const missing = result.value.findings.filter(
-        (f) => f.code === 'CHECK.INCOMPLETE_LANG_COVERAGE',
+        (f) => f.code === 'GRAPH.DESTINATION_LANG_INCOMPLETE',
       );
       expect(missing.length).toBe(0);
     });
@@ -114,13 +114,13 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const missing = result.value.findings.filter(
-        (f) => f.code === 'CHECK.INCOMPLETE_LANG_COVERAGE',
+        (f) => f.code === 'GRAPH.DESTINATION_LANG_INCOMPLETE',
       );
       expect(missing.length).toBe(0);
     });
   });
 
-  describe('CHECK.ALL_VACANT_CATEGORY', () => {
+  describe('GRAPH.CATEGORY_ALL_VACANT', () => {
     it('detects category where all destinations are vacant', () => {
       const site: SiteData = {
         ...refMinimal,
@@ -133,7 +133,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const vacant = result.value.findings.filter(
-        (f) => f.code === 'CHECK.ALL_VACANT_CATEGORY',
+        (f) => f.code === 'GRAPH.CATEGORY_ALL_VACANT',
       );
       expect(vacant.length).toBeGreaterThan(0);
     });
@@ -143,7 +143,7 @@ describe('T-2.5 runChecks', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const vacant = result.value.findings.filter(
-        (f) => f.code === 'CHECK.ALL_VACANT_CATEGORY',
+        (f) => f.code === 'GRAPH.CATEGORY_ALL_VACANT',
       );
       expect(vacant.length).toBe(0);
     });

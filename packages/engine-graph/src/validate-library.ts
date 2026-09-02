@@ -32,7 +32,7 @@ function categoryParentNotFoundFindings(
   for (const cat of sorted) {
     if (cat.parent_id !== null && !ids.has(cat.parent_id)) {
       findings.push({
-        code: 'LIBRARY.CATEGORY_PARENT_NOT_FOUND',
+        code: 'DATA.CATEGORY_PARENT_NOT_FOUND',
         severity: 'blocking',
         entity: { kind: 'category', id: cat.id },
         params: { parent_id: cat.parent_id },
@@ -64,7 +64,7 @@ function categoryCycleFindings(
     while (current !== null && !visited.has(current)) {
       if (path.has(current)) {
         findings.push({
-          code: 'LIBRARY.CATEGORY_CYCLE',
+          code: 'DATA.CATEGORY_CYCLE',
           severity: 'blocking',
           entity: { kind: 'category', id: current },
           params: {},
@@ -93,7 +93,7 @@ function pictogramCategoryNotFoundFindings(
   for (const p of sorted) {
     if (!catIds.has(p.category_id)) {
       findings.push({
-        code: 'LIBRARY.PICTOGRAM_CATEGORY_NOT_FOUND',
+        code: 'DATA.PICTOGRAM_CATEGORY_NOT_FOUND',
         severity: 'blocking',
         entity: { kind: 'pictogram', id: p.id },
         params: { category_id: p.category_id },
@@ -115,7 +115,7 @@ function destCategoryNotFoundFindings(
   for (const dest of sorted) {
     if (!catIds.has(dest.category_id)) {
       findings.push({
-        code: 'LIBRARY.DEST_CATEGORY_NOT_FOUND',
+        code: 'DATA.DEST_CATEGORY_NOT_FOUND',
         severity: 'warning',
         entity: { kind: 'destination', id: dest.id },
         params: { category_id: dest.category_id },
@@ -136,7 +136,7 @@ function emptySvgPathFindings(
   for (const p of sorted) {
     if (p.svg_path.trim() === '') {
       findings.push({
-        code: 'LIBRARY.EMPTY_SVG_PATH',
+        code: 'DATA.EMPTY_SVG_PATH',
         severity: 'blocking',
         entity: { kind: 'pictogram', id: p.id },
         params: {},
@@ -202,7 +202,7 @@ export function guardSafetyRegistry(
     if (!picto) continue;
     if (picto.registry === 'safety') {
       findings.push({
-        code: 'LIBRARY.SAFETY_REGISTRY_IMMUTABLE',
+        code: 'SECURITY.REGISTRY_WRITE_DENIED',
         severity: 'blocking',
         entity: { kind: 'pictogram', id: mut.pictogram_id },
         params: {
@@ -233,7 +233,7 @@ export function guardSafetyDeletion(
     if (!picto) continue;
     if (picto.registry === 'safety') {
       findings.push({
-        code: 'LIBRARY.SAFETY_REGISTRY_IMMUTABLE',
+        code: 'SECURITY.REGISTRY_WRITE_DENIED',
         severity: 'blocking',
         entity: { kind: 'pictogram', id },
         params: { operation: 'delete' },

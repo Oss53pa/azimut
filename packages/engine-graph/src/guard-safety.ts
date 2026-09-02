@@ -25,7 +25,7 @@ export function guardCharterOnSafety(
   for (const app of sorted) {
     if (app.target_registry !== 'safety') continue;
     findings.push({
-      code: `SAFETY.CHARTER_${app.change_kind.toUpperCase()}_BLOCKED`,
+      code: 'SECURITY.CHARTER_OVERRIDE_DENIED',
       severity: 'blocking',
       entity: { kind: 'pictogram', id: app.target_id },
       params: {

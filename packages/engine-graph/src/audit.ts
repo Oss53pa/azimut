@@ -43,7 +43,7 @@ export function auditCoverage(
       ok: false,
       findings: [
         {
-          code: 'AUDIT.VALIDATION_REQUIRED',
+          code: 'GRAPH.NOT_VALIDATED',
           severity: 'blocking',
           entity: null,
           params: {},
@@ -111,7 +111,7 @@ export function auditAccessibility(
       ok: false,
       findings: [
         {
-          code: 'AUDIT.PROFILE_NOT_ACCESSIBLE',
+          code: 'GRAPH.PROFILE_NOT_ACCESSIBLE',
           severity: 'blocking',
           entity: null,
           params: { profile_id: profile.id },

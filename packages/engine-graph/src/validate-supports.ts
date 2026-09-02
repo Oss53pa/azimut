@@ -20,7 +20,7 @@ function duplicateTypeKeyFindings(site: SiteData): Finding[] {
     const existing = seen.get(st.key);
     if (existing) {
       findings.push({
-        code: 'SUPPORT.DUPLICATE_TYPE_KEY',
+        code: 'DATA.SUPPORT_DUPLICATE_TYPE_KEY',
         severity: 'blocking',
         entity: { kind: 'support_type', id: st.id },
         params: { key: st.key, first_id: existing },
@@ -41,7 +41,7 @@ function faceCountMismatchFindings(site: SiteData): Finding[] {
   for (const st of sorted) {
     if (st.faces.length !== st.face_count) {
       findings.push({
-        code: 'SUPPORT.FACE_COUNT_MISMATCH',
+        code: 'DATA.SUPPORT_FACE_COUNT_MISMATCH',
         severity: 'blocking',
         entity: { kind: 'support_type', id: st.id },
         params: {
@@ -64,7 +64,7 @@ function templateTypeNotFoundFindings(site: SiteData): Finding[] {
   for (const tpl of sorted) {
     if (!typeKeys.has(tpl.support_type_key)) {
       findings.push({
-        code: 'SUPPORT.TEMPLATE_TYPE_NOT_FOUND',
+        code: 'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND',
         severity: 'blocking',
         entity: { kind: 'face_template', id: tpl.id },
         params: { support_type_key: tpl.support_type_key },
@@ -91,7 +91,7 @@ function templateSideNotFoundFindings(site: SiteData): Finding[] {
     const sides = typeSides.get(tpl.support_type_key);
     if (sides && !sides.has(tpl.side)) {
       findings.push({
-        code: 'SUPPORT.TEMPLATE_SIDE_NOT_FOUND',
+        code: 'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND',
         severity: 'warning',
         entity: { kind: 'face_template', id: tpl.id },
         params: {
@@ -123,7 +123,7 @@ function blockRegionFindings(site: SiteData): Finding[] {
         y_pct + h_pct > 100
       ) {
         findings.push({
-          code: 'SUPPORT.BLOCK_REGION_INVALID',
+          code: 'DATA.SUPPORT_BLOCK_REGION_INVALID',
           severity: 'blocking',
           entity: { kind: 'face_template', id: tpl.id },
           params: {

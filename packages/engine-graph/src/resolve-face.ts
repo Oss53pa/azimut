@@ -169,7 +169,7 @@ export function resolveFaceContent(
       ok: false,
       findings: [
         {
-          code: 'RESOLVE.NODE_NOT_FOUND',
+          code: 'GRAPH.RESOLVE_NODE_NOT_FOUND',
           severity: 'blocking',
           entity: { kind: 'node', id: nodeId },
           params: {},

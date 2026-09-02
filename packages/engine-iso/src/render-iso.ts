@@ -204,7 +204,7 @@ export function renderIsoView(
       return {
         ok: false,
         findings: [{
-          code: 'ISO.LEVEL_NOT_FOUND',
+          code: 'LAYOUT.ISO_LEVEL_NOT_FOUND',
           severity: 'blocking',
           entity: { kind: 'level', id },
           params: { level_id: id },
@@ -223,7 +223,7 @@ export function renderIsoView(
   const wb = computeWorldBounds(levelDataList);
   if (!wb) {
     warnings.push({
-      code: 'ISO.EMPTY_LEVELS',
+      code: 'LAYOUT.ISO_EMPTY_LEVELS',
       severity: 'warning',
       entity: null,
       params: { level_count: levelIds.length },

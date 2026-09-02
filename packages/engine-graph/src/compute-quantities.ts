@@ -91,7 +91,7 @@ export function computeQuantities(
     if (levelId === undefined) {
       orphanCount++;
       warnings.push({
-        code: 'QUANTITY.NODE_NOT_FOUND',
+        code: 'GRAPH.QUANTITY_NODE_NOT_FOUND',
         severity: 'warning',
         entity: { kind: 'support', id: sup.id },
         params: { node_id: sup.node_id },
@@ -156,7 +156,7 @@ export function computeQuantities(
 
   if (!crossCheckOk) {
     warnings.push({
-      code: 'QUANTITY.CROSS_CHECK_FAILED',
+      code: 'GRAPH.QUANTITY_CROSS_CHECK_FAILED',
       severity: 'blocking',
       entity: null,
       params: {

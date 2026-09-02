@@ -36,7 +36,7 @@ describe('T-2.9 renderOrientedPlan', () => {
     const result = renderOrientedPlan(refMultilevel, 'nonexistent', defaultOptions);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('ORIENTED_PLAN.LEVEL_NOT_FOUND');
+    expect(result.findings[0]?.code).toBe('LAYOUT.ORIENTED_PLAN_LEVEL_NOT_FOUND');
   });
 
   it('renders valid SVG at 0°', () => {

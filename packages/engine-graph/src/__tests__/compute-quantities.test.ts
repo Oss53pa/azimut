@@ -107,7 +107,7 @@ describe('T-2.13 computeQuantities', () => {
     expect(result.value.by_building[0]?.count).toBe(1);
     expect(result.value.cross_check_ok).toBe(true);
     const nodeWarning = result.warnings.find(
-      (w) => w.code === 'QUANTITY.NODE_NOT_FOUND',
+      (w) => w.code === 'GRAPH.QUANTITY_NODE_NOT_FOUND',
     );
     expect(nodeWarning).toBeDefined();
   });

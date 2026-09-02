@@ -31,7 +31,7 @@ describe('T-2.8 renderFloorPlan', () => {
     const result = renderFloorPlan(refMultilevel, 'nonexistent', defaultOptions);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('FLOOR_PLAN.LEVEL_NOT_FOUND');
+    expect(result.findings[0]?.code).toBe('LAYOUT.FLOOR_PLAN_LEVEL_NOT_FOUND');
   });
 
   it('renders RDC level as valid SVG', () => {
@@ -137,7 +137,7 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.length).toBe(1);
-    expect(result.warnings[0]?.code).toBe('FLOOR_PLAN.EMPTY_LEVEL');
+    expect(result.warnings[0]?.code).toBe('LAYOUT.FLOOR_PLAN_EMPTY_LEVEL');
     expect(result.value).toContain('aucun');
   });
 

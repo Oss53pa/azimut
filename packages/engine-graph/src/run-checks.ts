@@ -36,7 +36,7 @@ function checkDuplicateDisplayName(site: SiteData): Finding[] {
     const [lang, name] = key.split('::') as [string, string];
     for (const destId of uniqueDestIds) {
       findings.push({
-        code: 'CHECK.DUPLICATE_DISPLAY_NAME',
+        code: 'GRAPH.DESTINATION_NAME_DUPLICATE',
         severity: 'warning',
         entity: { kind: 'destination', id: destId },
         params: { lang, name, other_count: uniqueDestIds.length - 1 },
@@ -76,7 +76,7 @@ function checkIncompleteLangCoverage(site: SiteData): Finding[] {
     const missing = sortedLangs.filter((l) => !destLangs.has(l));
     if (missing.length > 0) {
       findings.push({
-        code: 'CHECK.INCOMPLETE_LANG_COVERAGE',
+        code: 'GRAPH.DESTINATION_LANG_INCOMPLETE',
         severity: 'warning',
         entity: { kind: 'destination', id: dest.id },
         params: {
@@ -116,7 +116,7 @@ function checkAllVacantCategory(site: SiteData): Finding[] {
     if (!entry || entry.total === 0) continue;
     if (entry.vacant === entry.total) {
       findings.push({
-        code: 'CHECK.ALL_VACANT_CATEGORY',
+        code: 'GRAPH.CATEGORY_ALL_VACANT',
         severity: 'warning',
         entity: { kind: 'category', id: catId },
         params: { count: entry.total },

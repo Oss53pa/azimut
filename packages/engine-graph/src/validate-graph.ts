@@ -21,7 +21,7 @@ function selfLoopFindings(edges: readonly Edge[]): Finding[] {
   for (const e of edges) {
     if (e.from_node_id === e.to_node_id) {
       findings.push({
-        code: 'GRAPH.SELF_LOOP',
+        code: 'GRAPH.EDGE_SELF_LOOP',
         severity: 'blocking',
         entity: { kind: 'edge', id: e.id },
         params: { node_id: e.from_node_id },
@@ -37,7 +37,7 @@ function zeroLengthFindings(edges: readonly Edge[]): Finding[] {
   for (const e of edges) {
     if (e.length_m === 0 && e.from_node_id !== e.to_node_id) {
       findings.push({
-        code: 'GRAPH.ZERO_LENGTH_EDGE',
+        code: 'GRAPH.EDGE_ZERO_LENGTH',
         severity: 'blocking',
         entity: { kind: 'edge', id: e.id },
         params: {
@@ -64,7 +64,7 @@ function orphanNodeFindings(
   for (const n of nodes) {
     if (!connected.has(n.id)) {
       findings.push({
-        code: 'GRAPH.ORPHAN_NODE',
+        code: 'GRAPH.NODE_ORPHAN',
         severity: 'blocking',
         entity: { kind: 'node', id: n.id },
         params: { label: n.label },
@@ -135,7 +135,7 @@ function unreachableFromEntranceFindings(
     if (n.kind === 'entrance') continue;
     if (!reachable.has(n.id)) {
       findings.push({
-        code: 'GRAPH.UNREACHABLE_FROM_ENTRANCE',
+        code: 'GRAPH.ZONE_UNREACHABLE',
         severity: 'blocking',
         entity: { kind: 'node', id: n.id },
         params: { label: n.label },
@@ -194,7 +194,7 @@ function deadEndFindings(
     const d = degree.get(n.id) ?? 0;
     if (d === 1 && !justified.has(n.kind)) {
       findings.push({
-        code: 'GRAPH.UNJUSTIFIED_DEAD_END',
+        code: 'GRAPH.DEAD_END_UNJUSTIFIED',
         severity: 'warning',
         entity: { kind: 'node', id: n.id },
         params: { kind: n.kind, label: n.label },

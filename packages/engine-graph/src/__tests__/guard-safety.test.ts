@@ -19,7 +19,7 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe(
-        'SAFETY.CHARTER_COLOR_BLOCKED',
+        'SECURITY.CHARTER_OVERRIDE_DENIED',
       );
       expect(result.findings[0]?.ruleRef).toBe('INV-3');
     });
@@ -40,7 +40,7 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe(
-        'SAFETY.CHARTER_GEOMETRY_BLOCKED',
+        'SECURITY.CHARTER_OVERRIDE_DENIED',
       );
       expect(result.findings[0]?.ruleRef).toBe('INV-3');
     });
@@ -61,7 +61,7 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe(
-        'SAFETY.CHARTER_PICTOGRAM_BLOCKED',
+        'SECURITY.CHARTER_OVERRIDE_DENIED',
       );
       expect(result.findings[0]?.ruleRef).toBe('INV-3');
     });
@@ -82,7 +82,7 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe(
-        'SAFETY.CHARTER_PROPORTION_BLOCKED',
+        'SECURITY.CHARTER_OVERRIDE_DENIED',
       );
       expect(result.findings[0]?.ruleRef).toBe('INV-3');
     });
@@ -149,13 +149,13 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       if (result.ok) return;
       expect(result.findings.length).toBe(1);
       expect(result.findings[0]?.code).toBe(
-        'SAFETY.CHARTER_COLOR_BLOCKED',
+        'SECURITY.CHARTER_OVERRIDE_DENIED',
       );
     });
   });
 
-  describe('each code is distinct', () => {
-    it('produces 4 distinct codes for 4 change kinds', () => {
+  describe('all safety kinds share the same code', () => {
+    it('produces 1 unified code for 4 change kinds', () => {
       const kinds: CharterApplication['change_kind'][] = [
         'color',
         'geometry',
@@ -179,7 +179,8 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
           codes.add(result.findings[0]?.code ?? '');
         }
       }
-      expect(codes.size).toBe(4);
+      expect(codes.size).toBe(1);
+      expect(codes.has('SECURITY.CHARTER_OVERRIDE_DENIED')).toBe(true);
     });
   });
 });

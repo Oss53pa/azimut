@@ -67,7 +67,7 @@ describe('T-1.9 travel profiles on refMultilevel', () => {
       );
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.findings[0]?.code).toBe('ROUTE.UNREACHABLE');
+        expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_UNREACHABLE');
       }
     });
   });
@@ -97,7 +97,7 @@ describe('T-1.9 travel profiles on refMultilevel', () => {
       );
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        expect(result.findings[0]?.code).toBe('ROUTE.UNREACHABLE');
+        expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_UNREACHABLE');
       }
     });
 

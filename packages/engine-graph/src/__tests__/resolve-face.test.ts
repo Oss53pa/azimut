@@ -168,7 +168,7 @@ describe('T-2.3 resolveFaceContent', () => {
     );
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('RESOLVE.NODE_NOT_FOUND');
+    expect(result.findings[0]?.code).toBe('GRAPH.RESOLVE_NODE_NOT_FOUND');
   });
 
   it('sorts blocks by ordinal', () => {

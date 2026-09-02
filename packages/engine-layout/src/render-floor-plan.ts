@@ -162,7 +162,7 @@ export function renderFloorPlan(
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
     const f: Finding = {
-      code: 'FLOOR_PLAN.LEVEL_NOT_FOUND',
+      code: 'LAYOUT.FLOOR_PLAN_LEVEL_NOT_FOUND',
       severity: 'blocking',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },
@@ -177,7 +177,7 @@ export function renderFloorPlan(
 
   if (!bounds) {
     warnings.push({
-      code: 'FLOOR_PLAN.EMPTY_LEVEL',
+      code: 'LAYOUT.FLOOR_PLAN_EMPTY_LEVEL',
       severity: 'warning',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },

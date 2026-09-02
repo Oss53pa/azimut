@@ -116,7 +116,7 @@ export function renderEvacuationPlan(
     return {
       ok: false,
       findings: [{
-        code: 'EVAC.LEVEL_NOT_FOUND',
+        code: 'LAYOUT.EVAC_LEVEL_NOT_FOUND',
         severity: 'blocking',
         entity: { kind: 'level', id: levelId },
         params: { level_id: levelId },
@@ -154,7 +154,7 @@ export function renderEvacuationPlan(
   const bounds = computeBounds(allPoints);
   if (!bounds) {
     warnings.push({
-      code: 'EVAC.EMPTY_LEVEL',
+      code: 'LAYOUT.EVAC_EMPTY_LEVEL',
       severity: 'warning',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },
@@ -191,7 +191,7 @@ export function renderEvacuationPlan(
 
   if (evacRoutes.length === 0) {
     warnings.push({
-      code: 'EVAC.NO_ROUTES',
+      code: 'LAYOUT.EVAC_NO_ROUTES',
       severity: 'warning',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },
@@ -201,7 +201,7 @@ export function renderEvacuationPlan(
 
   if (exits.length === 0) {
     warnings.push({
-      code: 'EVAC.NO_EXITS',
+      code: 'LAYOUT.EVAC_NO_EXITS',
       severity: 'warning',
       entity: { kind: 'level', id: levelId },
       params: { level_id: levelId },

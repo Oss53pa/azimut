@@ -19,7 +19,7 @@ function destNodeNotFoundFindings(site: SiteData): Finding[] {
   for (const dest of sorted) {
     if (!nodeIds.has(dest.node_id)) {
       findings.push({
-        code: 'DIRECTORY.DEST_NODE_NOT_FOUND',
+        code: 'GRAPH.DESTINATION_UNLINKED',
         severity: 'blocking',
         entity: { kind: 'destination', id: dest.id },
         params: { node_id: dest.node_id },
@@ -42,7 +42,7 @@ function destNodeWrongKindFindings(site: SiteData): Finding[] {
     const kind = nodeKind.get(dest.node_id);
     if (kind !== undefined && kind !== 'destination_access') {
       findings.push({
-        code: 'DIRECTORY.DEST_NODE_WRONG_KIND',
+        code: 'GRAPH.DESTINATION_NODE_WRONG_KIND',
         severity: 'warning',
         entity: { kind: 'destination', id: dest.id },
         params: { node_id: dest.node_id, actual_kind: kind },
@@ -62,7 +62,7 @@ function destFootprintNotFoundFindings(site: SiteData): Finding[] {
   for (const dest of sorted) {
     if (!fpIds.has(dest.footprint_id)) {
       findings.push({
-        code: 'DIRECTORY.DEST_FOOTPRINT_NOT_FOUND',
+        code: 'GRAPH.DESTINATION_FOOTPRINT_NOT_FOUND',
         severity: 'blocking',
         entity: { kind: 'destination', id: dest.id },
         params: { footprint_id: dest.footprint_id },
@@ -91,7 +91,7 @@ function duplicateDestOnNodeFindings(site: SiteData): Finding[] {
       const sorted = [...destIds].sort();
       for (const destId of sorted) {
         findings.push({
-          code: 'DIRECTORY.DUPLICATE_DEST_ON_NODE',
+          code: 'GRAPH.DESTINATION_DUPLICATE_ON_NODE',
           severity: 'warning',
           entity: { kind: 'destination', id: destId },
           params: { node_id: nodeId, count: destIds.length },
@@ -130,7 +130,7 @@ function missingNameFindings(site: SiteData): Finding[] {
     for (const lang of activeLangs) {
       if (!destLangs?.has(lang)) {
         findings.push({
-          code: 'DIRECTORY.MISSING_NAME',
+          code: 'GRAPH.DIRECTORY_NAME_MISSING',
           severity: 'warning',
           entity: { kind: 'destination', id: dest.id },
           params: { lang },
@@ -150,7 +150,7 @@ function emptyNameFindings(site: SiteData): Finding[] {
   for (const dn of sorted) {
     if (dn.value.trim() === '') {
       findings.push({
-        code: 'DIRECTORY.EMPTY_NAME',
+        code: 'GRAPH.DIRECTORY_NAME_EMPTY',
         severity: 'blocking',
         entity: { kind: 'destination_name', id: dn.id },
         params: { destination_id: dn.destination_id, lang: dn.lang },
@@ -170,7 +170,7 @@ function orphanNameFindings(site: SiteData): Finding[] {
   for (const dn of sorted) {
     if (!destIds.has(dn.destination_id)) {
       findings.push({
-        code: 'DIRECTORY.ORPHAN_NAME',
+        code: 'GRAPH.DIRECTORY_NAME_ORPHAN',
         severity: 'warning',
         entity: { kind: 'destination_name', id: dn.id },
         params: { destination_id: dn.destination_id },

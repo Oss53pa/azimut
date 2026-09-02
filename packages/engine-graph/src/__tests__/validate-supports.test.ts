@@ -28,7 +28,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     expect(result.ok).toBe(true);
   });
 
-  describe('SUPPORT.DUPLICATE_TYPE_KEY', () => {
+  describe('DATA.SUPPORT_DUPLICATE_TYPE_KEY', () => {
     it('flags duplicate support type keys', () => {
       const site = patchSite(refMinimal, {
         support_types: [
@@ -53,13 +53,13 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'SUPPORT.DUPLICATE_TYPE_KEY',
+        (f) => f.code === 'DATA.SUPPORT_DUPLICATE_TYPE_KEY',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('SUPPORT.FACE_COUNT_MISMATCH', () => {
+  describe('DATA.SUPPORT_FACE_COUNT_MISMATCH', () => {
     it('flags type with wrong face count', () => {
       const site = patchSite(refMinimal, {
         support_types: [
@@ -83,7 +83,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'SUPPORT.FACE_COUNT_MISMATCH',
+        (f) => f.code === 'DATA.SUPPORT_FACE_COUNT_MISMATCH',
       );
       expect(f).toBeDefined();
       expect(f?.params?.declared).toBe(3);
@@ -91,7 +91,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
-  describe('SUPPORT.TEMPLATE_TYPE_NOT_FOUND', () => {
+  describe('DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND', () => {
     it('flags template referencing unknown support type', () => {
       const site = patchSite(refMinimal, {
         face_templates: [
@@ -109,13 +109,13 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'SUPPORT.TEMPLATE_TYPE_NOT_FOUND',
+        (f) => f.code === 'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('SUPPORT.TEMPLATE_SIDE_NOT_FOUND', () => {
+  describe('DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND', () => {
     it('warns when template side not in type faces', () => {
       const site = patchSite(refMinimal, {
         face_templates: [
@@ -133,13 +133,13 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const w = result.warnings.find(
-        (f) => f.code === 'SUPPORT.TEMPLATE_SIDE_NOT_FOUND',
+        (f) => f.code === 'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND',
       );
       expect(w).toBeDefined();
     });
   });
 
-  describe('SUPPORT.BLOCK_REGION_INVALID', () => {
+  describe('DATA.SUPPORT_BLOCK_REGION_INVALID', () => {
     it('flags block region exceeding 100%', () => {
       const site = patchSite(refMinimal, {
         face_templates: [
@@ -169,7 +169,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'SUPPORT.BLOCK_REGION_INVALID',
+        (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
       );
       expect(f).toBeDefined();
     });

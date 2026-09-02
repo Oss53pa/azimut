@@ -188,7 +188,7 @@ export function computeRoute(
       ok: false,
       findings: [
         {
-          code: 'ROUTE.NODE_NOT_FOUND',
+          code: 'GRAPH.ROUTE_NODE_NOT_FOUND',
           severity: 'blocking',
           entity: { kind: 'node', id: from },
           params: {},
@@ -202,7 +202,7 @@ export function computeRoute(
       ok: false,
       findings: [
         {
-          code: 'ROUTE.NODE_NOT_FOUND',
+          code: 'GRAPH.ROUTE_NODE_NOT_FOUND',
           severity: 'blocking',
           entity: { kind: 'node', id: to },
           params: {},
@@ -220,7 +220,7 @@ export function computeRoute(
       ok: false,
       findings: [
         {
-          code: 'ROUTE.UNREACHABLE',
+          code: 'GRAPH.ROUTE_UNREACHABLE',
           severity: 'blocking',
           entity: { kind: 'node', id: to },
           params: { from_node_id: from, to_node_id: to },

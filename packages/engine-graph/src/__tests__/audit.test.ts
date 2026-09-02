@@ -32,7 +32,7 @@ describe('auditCoverage', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.findings[0]?.code).toBe(
-        'AUDIT.VALIDATION_REQUIRED',
+        'GRAPH.NOT_VALIDATED',
       );
     }
   });
@@ -89,7 +89,7 @@ describe('auditAccessibility', () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.findings[0]?.code).toBe(
-        'AUDIT.PROFILE_NOT_ACCESSIBLE',
+        'GRAPH.PROFILE_NOT_ACCESSIBLE',
       );
     }
   });

@@ -172,7 +172,7 @@ describe('T-1.13 importSupports', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe(
-        'IMPORT.MISSING_COLUMNS',
+        'IMPORT.COLUMN_MISSING',
       );
     });
   });

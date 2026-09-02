@@ -25,7 +25,7 @@ describe('T-1.7 validateDirectory', () => {
     expect(result.value.active_langs).toEqual(['en', 'fr']);
   });
 
-  describe('DIRECTORY.DEST_NODE_NOT_FOUND', () => {
+  describe('GRAPH.DESTINATION_UNLINKED', () => {
     it('flags destination referencing non-existent node', () => {
       const site = patchSite(refMultilevel, {
         destinations: [
@@ -45,14 +45,14 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'DIRECTORY.DEST_NODE_NOT_FOUND',
+        (f) => f.code === 'GRAPH.DESTINATION_UNLINKED',
       );
       expect(f).toBeDefined();
       expect(f?.entity?.id).toBe('dest-bad');
     });
   });
 
-  describe('DIRECTORY.DEST_FOOTPRINT_NOT_FOUND', () => {
+  describe('GRAPH.DESTINATION_FOOTPRINT_NOT_FOUND', () => {
     it('flags destination referencing non-existent footprint', () => {
       const site = patchSite(refMultilevel, {
         destinations: [
@@ -72,13 +72,13 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'DIRECTORY.DEST_FOOTPRINT_NOT_FOUND',
+        (f) => f.code === 'GRAPH.DESTINATION_FOOTPRINT_NOT_FOUND',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('DIRECTORY.DEST_NODE_WRONG_KIND', () => {
+  describe('GRAPH.DESTINATION_NODE_WRONG_KIND', () => {
     it('warns when destination node is not destination_access', () => {
       const site = patchSite(refMultilevel, {
         destinations: [
@@ -98,14 +98,14 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const w = result.warnings.find(
-        (f) => f.code === 'DIRECTORY.DEST_NODE_WRONG_KIND',
+        (f) => f.code === 'GRAPH.DESTINATION_NODE_WRONG_KIND',
       );
       expect(w).toBeDefined();
       expect(w?.params?.actual_kind).toBe('junction');
     });
   });
 
-  describe('DIRECTORY.DUPLICATE_DEST_ON_NODE', () => {
+  describe('GRAPH.DESTINATION_DUPLICATE_ON_NODE', () => {
     it('warns when two destinations share the same node', () => {
       const site = patchSite(refMultilevel, {
         destinations: [
@@ -126,13 +126,13 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const dupes = result.warnings.filter(
-        (f) => f.code === 'DIRECTORY.DUPLICATE_DEST_ON_NODE',
+        (f) => f.code === 'GRAPH.DESTINATION_DUPLICATE_ON_NODE',
       );
       expect(dupes.length).toBe(2);
     });
   });
 
-  describe('DIRECTORY.MISSING_NAME', () => {
+  describe('GRAPH.DIRECTORY_NAME_MISSING', () => {
     it('warns when a destination lacks a name in an active lang', () => {
       const site = patchSite(refMultilevel, {
         destination_names: refMultilevel.destination_names.filter(
@@ -147,7 +147,7 @@ describe('T-1.7 validateDirectory', () => {
       if (!result.ok) return;
       const missing = result.warnings.find(
         (f) =>
-          f.code === 'DIRECTORY.MISSING_NAME' &&
+          f.code === 'GRAPH.DIRECTORY_NAME_MISSING' &&
           f.entity?.id === 'dest-ml-r1',
       );
       expect(missing).toBeDefined();
@@ -155,7 +155,7 @@ describe('T-1.7 validateDirectory', () => {
     });
   });
 
-  describe('DIRECTORY.EMPTY_NAME', () => {
+  describe('GRAPH.DIRECTORY_NAME_EMPTY', () => {
     it('blocks when a destination name has empty value', () => {
       const site = patchSite(refMultilevel, {
         destination_names: [
@@ -173,13 +173,13 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(false);
       if (result.ok) return;
       const f = result.findings.find(
-        (f) => f.code === 'DIRECTORY.EMPTY_NAME',
+        (f) => f.code === 'GRAPH.DIRECTORY_NAME_EMPTY',
       );
       expect(f).toBeDefined();
     });
   });
 
-  describe('DIRECTORY.ORPHAN_NAME', () => {
+  describe('GRAPH.DIRECTORY_NAME_ORPHAN', () => {
     it('warns when a name references non-existent destination', () => {
       const site = patchSite(refMultilevel, {
         destination_names: [
@@ -197,7 +197,7 @@ describe('T-1.7 validateDirectory', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const w = result.warnings.find(
-        (f) => f.code === 'DIRECTORY.ORPHAN_NAME',
+        (f) => f.code === 'GRAPH.DIRECTORY_NAME_ORPHAN',
       );
       expect(w).toBeDefined();
     });

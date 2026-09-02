@@ -53,7 +53,7 @@ describe('T-2.14 validateProofs', () => {
     const result = validateProofs(proofs, []);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('PROOF.STATUS_WITHOUT_APPROVAL');
+    expect(result.findings[0]?.code).toBe('DATA.PROOF_STATUS_WITHOUT_APPROVAL');
   });
 
   it('detects rejected proof without approval record', () => {
@@ -64,7 +64,7 @@ describe('T-2.14 validateProofs', () => {
     const result = validateProofs(proofs, []);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('PROOF.STATUS_WITHOUT_APPROVAL');
+    expect(result.findings[0]?.code).toBe('DATA.PROOF_STATUS_WITHOUT_APPROVAL');
   });
 
   it('warns on pending proof that has approval records', () => {
@@ -75,7 +75,7 @@ describe('T-2.14 validateProofs', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.length).toBe(1);
-    expect(result.warnings[0]?.code).toBe('PROOF.PENDING_WITH_APPROVAL');
+    expect(result.warnings[0]?.code).toBe('DATA.PROOF_PENDING_WITH_APPROVAL');
   });
 
   it('detects duplicate version numbers on same face', () => {
@@ -88,7 +88,7 @@ describe('T-2.14 validateProofs', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some(
-      (f) => f.code === 'PROOF.DUPLICATE_VERSION',
+      (f) => f.code === 'DATA.PROOF_DUPLICATE_VERSION',
     )).toBe(true);
   });
 

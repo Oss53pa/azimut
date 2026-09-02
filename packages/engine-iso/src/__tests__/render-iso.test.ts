@@ -29,7 +29,7 @@ describe('T-2.7 renderIsoView', () => {
     const result = renderIsoView(refMultilevel, ['nonexistent'], defaultOptions);
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.findings[0]?.code).toBe('ISO.LEVEL_NOT_FOUND');
+    expect(result.findings[0]?.code).toBe('LAYOUT.ISO_LEVEL_NOT_FOUND');
   });
 
   it('renders single level as valid SVG', () => {
@@ -133,7 +133,7 @@ describe('T-2.7 renderIsoView', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.length).toBe(1);
-    expect(result.warnings[0]?.code).toBe('ISO.EMPTY_LEVELS');
+    expect(result.warnings[0]?.code).toBe('LAYOUT.ISO_EMPTY_LEVELS');
   });
 
   it('level order is deterministic regardless of input order', () => {
