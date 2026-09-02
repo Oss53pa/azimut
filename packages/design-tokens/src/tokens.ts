@@ -22,6 +22,13 @@ export const stateColors = {
   'state-info': '#2B6CB0',
 } as const;
 
+export const isoTokens = {
+  'iso-adjacent-opacity': 0.25,
+  'iso-exploded-offset-m': 4,
+} as const;
+
+export type IsoTokenKey = keyof typeof isoTokens;
+
 export const allTokens = {
   ...themePapier,
   ...stateColors,

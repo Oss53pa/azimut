@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderIsoView } from '../render-iso.js';
-import type { IsoOptions, IsoTheme } from '../render-iso.js';
+import type { IsoOptions, IsoTheme, IsoMultiLevelMode } from '../render-iso.js';
 import { refMultilevel } from '@azimut/testkit';
 
 const theme: IsoTheme = {
@@ -15,6 +15,8 @@ const theme: IsoTheme = {
   text_primary: 'tok-txt',
 };
 
+const allMode: IsoMultiLevelMode = { kind: 'all' };
+
 const defaultOptions: IsoOptions = {
   width_px: 800,
   height_px: 600,
@@ -22,6 +24,7 @@ const defaultOptions: IsoOptions = {
   font_family: 'Helvetica',
   padding_px: 20,
   show_nodes: true,
+  mode: allMode,
 };
 
 describe('T-2.7 renderIsoView', () => {
@@ -36,8 +39,8 @@ describe('T-2.7 renderIsoView', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).toContain('<svg');
-    expect(result.value).toContain('</svg>');
+    expect(result.value.svg).toContain('<svg');
+    expect(result.value.svg).toContain('</svg>');
   });
 
   it('renders multiple levels stacked', () => {
@@ -48,8 +51,8 @@ describe('T-2.7 renderIsoView', () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).toContain('<svg');
-    const polygonCount = (result.value.match(/<polygon/g) ?? []).length;
+    expect(result.value.svg).toContain('<svg');
+    const polygonCount = (result.value.svg.match(/<polygon/g) ?? []).length;
     expect(polygonCount).toBeGreaterThan(1);
   });
 
@@ -57,16 +60,16 @@ describe('T-2.7 renderIsoView', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).toContain('<polygon');
-    expect(result.value).toContain('tok-floor');
+    expect(result.value.svg).toContain('<polygon');
+    expect(result.value.svg).toContain('tok-floor');
   });
 
   it('includes wall polygons for volumes with height', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const hasWallFront = result.value.includes('tok-wall-f');
-    const hasWallSide = result.value.includes('tok-wall-s');
+    const hasWallFront = result.value.svg.includes('tok-wall-f');
+    const hasWallSide = result.value.svg.includes('tok-wall-s');
     expect(hasWallFront || hasWallSide).toBe(true);
   });
 
@@ -74,8 +77,8 @@ describe('T-2.7 renderIsoView', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).toContain('<circle');
-    expect(result.value).toContain('tok-node');
+    expect(result.value.svg).toContain('<circle');
+    expect(result.value.svg).toContain('tok-node');
   });
 
   it('hides nodes when show_nodes is false', () => {
@@ -83,7 +86,7 @@ describe('T-2.7 renderIsoView', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], opts);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).not.toContain('<circle');
+    expect(result.value.svg).not.toContain('<circle');
   });
 
   it('contains no hardcoded hex colors', () => {
@@ -94,7 +97,7 @@ describe('T-2.7 renderIsoView', () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.value).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    expect(result.value.svg).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });
 
   it('is deterministic (INV-4)', () => {
@@ -146,6 +149,107 @@ describe('T-2.7 renderIsoView', () => {
       refMultilevel,
       ['lvl-ml-rdc', 'lvl-ml-r1'],
       defaultOptions,
+    );
+    expect(r1).toStrictEqual(r2);
+  });
+});
+
+describe('D5.4 — hit zones', () => {
+  it('returns hit zones in reverse painter order', () => {
+    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.hitZones.length).toBeGreaterThan(0);
+    for (const zone of result.value.hitZones) {
+      expect(zone.polygon.length).toBeGreaterThan(0);
+      expect(zone.volume_id).toBeTruthy();
+    }
+  });
+
+  it('hit zones are never stored — recalculated each render', () => {
+    const r1 = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
+    const r2 = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
+    expect(r1.ok).toBe(true);
+    expect(r2.ok).toBe(true);
+    if (!r1.ok || !r2.ok) return;
+    expect(r1.value.hitZones).toStrictEqual(r2.value.hitZones);
+  });
+});
+
+describe('D5.5 — multi-level modes', () => {
+  it('active_level mode estompes non-active levels', () => {
+    const opts: IsoOptions = {
+      ...defaultOptions,
+      mode: {
+        kind: 'active_level',
+        active_level_id: 'lvl-ml-rdc',
+        adjacent_opacity: 0.25,
+      },
+    };
+    const result = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc', 'lvl-ml-r1'],
+      opts,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('opacity="0.25"');
+  });
+
+  it('active_level mode keeps active level at full opacity', () => {
+    const opts: IsoOptions = {
+      ...defaultOptions,
+      mode: {
+        kind: 'active_level',
+        active_level_id: 'lvl-ml-rdc',
+        adjacent_opacity: 0.25,
+      },
+    };
+    const result = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc'],
+      opts,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).not.toContain('opacity=');
+  });
+
+  it('exploded mode produces different SVG than all mode', () => {
+    const allResult = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc', 'lvl-ml-r1'],
+      defaultOptions,
+    );
+    const explodedOpts: IsoOptions = {
+      ...defaultOptions,
+      mode: { kind: 'exploded', offset_m: 4 },
+    };
+    const explodedResult = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc', 'lvl-ml-r1'],
+      explodedOpts,
+    );
+    expect(allResult.ok).toBe(true);
+    expect(explodedResult.ok).toBe(true);
+    if (!allResult.ok || !explodedResult.ok) return;
+    expect(explodedResult.value.svg).not.toBe(allResult.value.svg);
+  });
+
+  it('exploded mode is deterministic (INV-4)', () => {
+    const opts: IsoOptions = {
+      ...defaultOptions,
+      mode: { kind: 'exploded', offset_m: 4 },
+    };
+    const r1 = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc', 'lvl-ml-r1'],
+      opts,
+    );
+    const r2 = renderIsoView(
+      refMultilevel,
+      ['lvl-ml-rdc', 'lvl-ml-r1'],
+      opts,
     );
     expect(r1).toStrictEqual(r2);
   });

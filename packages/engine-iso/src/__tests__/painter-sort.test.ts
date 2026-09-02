@@ -1,0 +1,92 @@
+import { describe, it, expect } from 'vitest';
+import { sortVolumesPainter, detectOverlaps } from '../painter-sort.js';
+import type { VolumeEntry } from '../painter-sort.js';
+import type { Footprint, Volume } from '@azimut/core-model';
+
+function fp(id: string, vertices: { x_m: number; y_m: number }[]): Footprint {
+  return {
+    id,
+    org_id: 'org-1',
+    level_id: 'lvl-1',
+    geometry: { vertices },
+    kind: 'room',
+  };
+}
+
+function vol(id: string, fpId: string, baseElev: number, height: number): Volume {
+  return {
+    id,
+    org_id: 'org-1',
+    footprint_id: fpId,
+    base_elevation_m: baseElev,
+    height_m: height,
+    material_key: 'concrete',
+  };
+}
+
+describe('D5.2 — sortVolumesPainter', () => {
+  it('sorts by base_elevation_m ascending', () => {
+    const entries: VolumeEntry[] = [
+      { volume: vol('v2', 'f2', 3, 1), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+      { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted[0]?.volume.id).toBe('v1');
+    expect(sorted[1]?.volume.id).toBe('v2');
+  });
+
+  it('sorts by min(x)+min(y) when elevation is equal', () => {
+    const entries: VolumeEntry[] = [
+      { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 5, y_m: 5 }]) },
+      { volume: vol('v2', 'f2', 0, 1), footprint: fp('f2', [{ x_m: 1, y_m: 1 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted[0]?.volume.id).toBe('v2');
+    expect(sorted[1]?.volume.id).toBe('v1');
+  });
+
+  it('sorts by volume id as tiebreaker (D5.2 determinism)', () => {
+    const entries: VolumeEntry[] = [
+      { volume: vol('v-beta', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+      { volume: vol('v-alpha', 'f2', 0, 1), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted[0]?.volume.id).toBe('v-alpha');
+    expect(sorted[1]?.volume.id).toBe('v-beta');
+  });
+
+  it('is stable for equal entries', () => {
+    const shared = fp('f1', [{ x_m: 0, y_m: 0 }]);
+    const entry: VolumeEntry = { volume: vol('v1', 'f1', 0, 1), footprint: shared };
+    const sorted = sortVolumesPainter([entry]);
+    expect(sorted).toHaveLength(1);
+  });
+
+  it('handles empty input', () => {
+    expect(sortVolumesPainter([])).toEqual([]);
+  });
+});
+
+describe('D5.2 — detectOverlaps', () => {
+  it('detects bounding-box overlap', () => {
+    const footprints = [
+      fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 0 }, { x_m: 2, y_m: 2 }, { x_m: 0, y_m: 2 }]),
+      fp('f2', [{ x_m: 1, y_m: 1 }, { x_m: 3, y_m: 1 }, { x_m: 3, y_m: 3 }, { x_m: 1, y_m: 3 }]),
+    ];
+    const findings = detectOverlaps(footprints);
+    expect(findings.length).toBe(1);
+    expect(findings[0]?.code).toBe('GEOM.FOOTPRINTS_OVERLAP');
+  });
+
+  it('no overlap for separated footprints', () => {
+    const footprints = [
+      fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }, { x_m: 1, y_m: 1 }, { x_m: 0, y_m: 1 }]),
+      fp('f2', [{ x_m: 5, y_m: 5 }, { x_m: 6, y_m: 5 }, { x_m: 6, y_m: 6 }, { x_m: 5, y_m: 6 }]),
+    ];
+    expect(detectOverlaps(footprints)).toEqual([]);
+  });
+
+  it('handles empty footprints', () => {
+    expect(detectOverlaps([])).toEqual([]);
+  });
+});

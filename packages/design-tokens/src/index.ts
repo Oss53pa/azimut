@@ -1,5 +1,5 @@
-export { themePapier, stateColors, allTokens } from './tokens.js';
-export type { TokenKey } from './tokens.js';
+export { themePapier, stateColors, allTokens, isoTokens } from './tokens.js';
+export type { TokenKey, IsoTokenKey } from './tokens.js';
 export {
   contrastRatio,
   relativeLuminance,
