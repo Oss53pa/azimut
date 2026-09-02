@@ -1,6 +1,7 @@
 import type { Job, JobTrace } from './job.js';
 
 export type JobQueue = {
+  enqueue(job: Job): Promise<void>;
   dequeue(): Promise<Job | null>;
   markRunning(jobId: string, now: Date): Promise<void>;
   markSucceeded(
@@ -17,7 +18,7 @@ export class MemoryQueue implements JobQueue {
   private readonly jobs = new Map<string, Job>();
   private readonly traces = new Map<string, JobTrace[]>();
 
-  enqueue(job: Job): void {
+  async enqueue(job: Job): Promise<void> {
     this.jobs.set(job.id, { ...job });
   }
 
