@@ -49,7 +49,18 @@ importers:
         specifier: workspace:*
         version: link:../../packages/testkit
 
-  apps/kiosk-runtime: {}
+  apps/kiosk-runtime:
+    dependencies:
+      '@azimut/core-model':
+        specifier: workspace:*
+        version: link:../../packages/core-model
+      '@azimut/engine-graph':
+        specifier: workspace:*
+        version: link:../../packages/engine-graph
+    devDependencies:
+      '@azimut/testkit':
+        specifier: workspace:*
+        version: link:../../packages/testkit
 
   apps/studio:
     dependencies:
