@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS azimut.opening;
+DROP TABLE IF EXISTS azimut.volume;
+DROP TABLE IF EXISTS azimut.footprint;
+DROP TABLE IF EXISTS azimut.plan_calibration;
+DROP TABLE IF EXISTS azimut.plan_source;
+DROP TABLE IF EXISTS azimut.zone;
+DROP TABLE IF EXISTS azimut.level;
+DROP TABLE IF EXISTS azimut.building;
+DROP TABLE IF EXISTS azimut.site;
