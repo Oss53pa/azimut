@@ -83,3 +83,5 @@ export type {
   SiteGraph,
   SiteData,
 } from './site.js';
+export { longestVariant, textExpansionFindings } from './text-expansion.js';
+export type { LongestVariantResult } from './text-expansion.js';
