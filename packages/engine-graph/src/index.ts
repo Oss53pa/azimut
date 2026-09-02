@@ -26,3 +26,12 @@ export type {
 } from './reconciliation.js';
 export { validateDirectory } from './validate-directory.js';
 export type { DirectoryValidationResult } from './validate-directory.js';
+export {
+  validateLibrary,
+  guardSafetyRegistry,
+  guardSafetyDeletion,
+} from './validate-library.js';
+export type {
+  LibraryValidationResult,
+  PictogramMutation,
+} from './validate-library.js';

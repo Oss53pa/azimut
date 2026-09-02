@@ -145,6 +145,26 @@ export const refBroken: SiteData = {
     ],
     vertical_links: [],
   },
+  categories: [
+    {
+      id: 'cat-office',
+      org_id: 'org-test-001',
+      sector_key: 'tertiary',
+      code: 'office',
+      parent_id: null,
+    },
+  ],
+  pictograms: [
+    {
+      id: 'picto-office-wayfinding',
+      org_id: 'org-test-001',
+      category_id: 'cat-office',
+      source: 'internal',
+      standard_ref: 'WF-001',
+      svg_path: 'M10 10h20v20H10z',
+      registry: 'wayfinding',
+    },
+  ],
   destinations: [
     {
       id: 'dest-brk-unreachable',

@@ -102,6 +102,14 @@ export type VerticalLink = {
   readonly accessible: boolean;
 };
 
+export type Category = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly sector_key: string;
+  readonly code: string;
+  readonly parent_id: string | null;
+};
+
 export type PictogramRegistry = 'safety' | 'wayfinding';
 
 export type Pictogram = {
@@ -164,6 +172,8 @@ export type SiteData = {
   readonly footprints: readonly Footprint[];
   readonly volumes: readonly Volume[];
   readonly graph: SiteGraph;
+  readonly categories: readonly Category[];
+  readonly pictograms: readonly Pictogram[];
   readonly destinations: readonly Destination[];
   readonly destination_names: readonly DestinationName[];
   readonly travel_profiles: readonly TravelProfile[];

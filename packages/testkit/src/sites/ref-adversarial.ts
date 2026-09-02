@@ -152,6 +152,26 @@ export const refAdversarial: SiteData = {
     ],
     vertical_links: [],
   },
+  categories: [
+    {
+      id: 'cat-medical',
+      org_id: 'org-test-001',
+      sector_key: 'tertiary',
+      code: 'medical',
+      parent_id: null,
+    },
+  ],
+  pictograms: [
+    {
+      id: 'picto-medical-wayfinding',
+      org_id: 'org-test-001',
+      category_id: 'cat-medical',
+      source: 'internal',
+      standard_ref: 'WF-002',
+      svg_path: 'M10 10h20v20H10z',
+      registry: 'wayfinding',
+    },
+  ],
   destinations: [
     {
       id: 'dest-adv-long',

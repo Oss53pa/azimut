@@ -14,6 +14,7 @@ export type {
   Edge,
   VerticalLinkKind,
   VerticalLink,
+  Category,
   PictogramRegistry,
   Pictogram,
   OccupancyStatus,

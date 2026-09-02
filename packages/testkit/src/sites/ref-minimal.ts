@@ -173,6 +173,42 @@ export const refMinimal: SiteData = {
     ],
     vertical_links: [],
   },
+  categories: [
+    {
+      id: 'cat-office',
+      org_id: 'org-test-001',
+      sector_key: 'tertiary',
+      code: 'office',
+      parent_id: null,
+    },
+    {
+      id: 'cat-restroom',
+      org_id: 'org-test-001',
+      sector_key: 'common',
+      code: 'restroom',
+      parent_id: null,
+    },
+  ],
+  pictograms: [
+    {
+      id: 'picto-office-wayfinding',
+      org_id: 'org-test-001',
+      category_id: 'cat-office',
+      source: 'internal',
+      standard_ref: 'WF-001',
+      svg_path: 'M10 10h20v20H10z',
+      registry: 'wayfinding',
+    },
+    {
+      id: 'picto-fire-exit-safety',
+      org_id: 'org-test-001',
+      category_id: 'cat-restroom',
+      source: 'internal',
+      standard_ref: 'SF-001',
+      svg_path: 'M5 5l10 10M15 5L5 15',
+      registry: 'safety',
+    },
+  ],
   destinations: [
     {
       id: 'dest-a',
