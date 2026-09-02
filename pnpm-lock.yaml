@@ -146,6 +146,10 @@ importers:
       '@azimut/core-model':
         specifier: workspace:*
         version: link:../core-model
+    devDependencies:
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
 
 packages:
 

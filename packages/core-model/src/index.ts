@@ -1,1 +1,25 @@
 export type { Finding, Outcome } from './outcome.js';
+export type { Point, Polygon } from './geometry.js';
+export type {
+  Organization,
+  Site,
+  Building,
+  Level,
+  Footprint,
+  FootprintKind,
+  Volume,
+  NodeKind,
+  GraphNode,
+  EdgeDirection,
+  Edge,
+  VerticalLinkKind,
+  VerticalLink,
+  PictogramRegistry,
+  Pictogram,
+  OccupancyStatus,
+  Destination,
+  DestinationName,
+  TravelProfile,
+  SiteGraph,
+  SiteData,
+} from './site.js';
