@@ -3,6 +3,7 @@ import type {
   TravelProfile,
   Outcome,
 } from '@azimut/core-model';
+import { normalizeAzimuth } from '@azimut/core-model';
 import { deriveDecisionPoints } from './decision-points.js';
 
 export type SurveyedSupport = {
@@ -39,10 +40,6 @@ export type ExpectedSupport = {
   readonly min_width_m: number;
   readonly min_height_m: number;
 };
-
-function normalizeAzimuth(deg: number): number {
-  return ((deg % 360) + 360) % 360;
-}
 
 function isAzimuthInRange(
   actual: number,

@@ -8,6 +8,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
+import { roundSvg } from '@azimut/core-model';
 
 export type IsoTheme = {
   readonly background: string;
@@ -47,10 +48,13 @@ function esc(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
+const COS_30 = 0.8660254037844386;
+const SIN_30 = 0.5;
+
 function toIso(x_m: number, y_m: number, z_m: number, scale: number): IsoPoint {
   return {
-    x: Math.round(((x_m - y_m) * Math.cos(Math.PI / 6) * scale) * 100) / 100,
-    y: Math.round(((x_m + y_m) * Math.sin(Math.PI / 6) * scale - z_m * scale) * 100) / 100,
+    x: roundSvg((x_m - y_m) * COS_30 * scale),
+    y: roundSvg((x_m + y_m) * SIN_30 * scale - z_m * scale),
   };
 }
 
@@ -157,8 +161,8 @@ function isoTx(
 ): IsoPoint {
   const raw = toIso(x_m, y_m, z_m, t.scale);
   return {
-    x: Math.round((raw.x + t.offsetX) * 100) / 100,
-    y: Math.round((raw.y + t.offsetY) * 100) / 100,
+    x: roundSvg(raw.x + t.offsetX),
+    y: roundSvg(raw.y + t.offsetY),
   };
 }
 

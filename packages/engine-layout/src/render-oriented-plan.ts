@@ -4,6 +4,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
+import { roundSvg } from '@azimut/core-model';
 
 export type OrientedPlanTheme = {
   readonly background: string;
@@ -111,8 +112,8 @@ function computeTransform(
 
 function tx(p: Point, t: Transform): { x: number; y: number } {
   return {
-    x: Math.round((p.x_m * t.scale + t.offsetX) * 100) / 100,
-    y: Math.round((p.y_m * t.scale + t.offsetY) * 100) / 100,
+    x: roundSvg(p.x_m * t.scale + t.offsetX),
+    y: roundSvg(p.y_m * t.scale + t.offsetY),
   };
 }
 
@@ -316,18 +317,18 @@ export function renderOrientedPlan(
     const arrowX = options.width_px - options.padding_px - 15;
     const arrowY = options.padding_px + 15;
     const northRad = degToRad(rot);
-    const northDx = Math.round(Math.sin(northRad) * 12 * 100) / 100;
-    const northDy = Math.round(-Math.cos(northRad) * 12 * 100) / 100;
+    const northDx = roundSvg(Math.sin(northRad) * 12);
+    const northDy = roundSvg(-Math.cos(northRad) * 12);
     parts.push(
       `<line x1="${arrowX}" y1="${arrowY}"` +
-      ` x2="${Math.round((arrowX + northDx) * 100) / 100}"` +
-      ` y2="${Math.round((arrowY + northDy) * 100) / 100}"` +
+      ` x2="${roundSvg(arrowX + northDx)}"` +
+      ` y2="${roundSvg(arrowY + northDy)}"` +
       ` stroke="${esc(options.theme.text_primary)}"` +
       ` stroke-width="2" />`,
     );
     parts.push(
-      `<text x="${Math.round((arrowX + northDx * 1.5) * 100) / 100}"` +
-      ` y="${Math.round((arrowY + northDy * 1.5) * 100) / 100}"` +
+      `<text x="${roundSvg(arrowX + northDx * 1.5)}"` +
+      ` y="${roundSvg(arrowY + northDy * 1.5)}"` +
       ` text-anchor="middle" dominant-baseline="central"` +
       ` font-size="10" font-weight="bold"` +
       ` font-family="${esc(options.font_family)}"` +

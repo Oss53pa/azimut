@@ -4,6 +4,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
+import { roundSvg } from '@azimut/core-model';
 
 export type EvacuationTheme = {
   readonly background: string;
@@ -98,8 +99,8 @@ function computeTransform(
 
 function tx(p: Point, t: Transform): { x: number; y: number } {
   return {
-    x: Math.round((p.x_m * t.scale + t.offsetX) * 100) / 100,
-    y: Math.round((p.y_m * t.scale + t.offsetY) * 100) / 100,
+    x: roundSvg(p.x_m * t.scale + t.offsetX),
+    y: roundSvg(p.y_m * t.scale + t.offsetY),
   };
 }
 
@@ -281,13 +282,13 @@ export function renderEvacuationPlan(
       const ux = dx / len;
       const uy = dy / len;
       const aSize = 5;
-      const ax1 = Math.round((mx - ux * aSize + uy * aSize) * 100) / 100;
-      const ay1 = Math.round((my - uy * aSize - ux * aSize) * 100) / 100;
-      const ax2 = Math.round((mx - ux * aSize - uy * aSize) * 100) / 100;
-      const ay2 = Math.round((my - uy * aSize + ux * aSize) * 100) / 100;
+      const ax1 = roundSvg(mx - ux * aSize + uy * aSize);
+      const ay1 = roundSvg(my - uy * aSize - ux * aSize);
+      const ax2 = roundSvg(mx - ux * aSize - uy * aSize);
+      const ay2 = roundSvg(my - uy * aSize + ux * aSize);
       parts.push(
-        `<polygon points="${Math.round(mx * 100) / 100},` +
-        `${Math.round(my * 100) / 100} ${ax1},${ay1} ${ax2},${ay2}"` +
+        `<polygon points="${roundSvg(mx)},` +
+        `${roundSvg(my)} ${ax1},${ay1} ${ax2},${ay2}"` +
         ` fill="${esc(options.theme.route_arrow)}" />`,
       );
     }
@@ -362,7 +363,7 @@ export function renderEvacuationPlan(
   const stats: EvacuationStats = {
     exit_count: exits.length,
     route_count: evacRoutes.length,
-    total_route_length_m: Math.round(totalLength * 100) / 100,
+    total_route_length_m: roundSvg(totalLength),
   };
 
   return { ok: true, value: { svg: parts.join(''), stats }, warnings };

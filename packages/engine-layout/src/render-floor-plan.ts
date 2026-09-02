@@ -8,6 +8,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
+import { roundSvg } from '@azimut/core-model';
 
 export type FloorPlanTheme = {
   readonly background: string;
@@ -115,8 +116,8 @@ function computeTransform(
 
 function tx(p: Point, t: Transform): { x: number; y: number } {
   return {
-    x: Math.round((p.x_m * t.scale + t.offsetX) * 100) / 100,
-    y: Math.round((p.y_m * t.scale + t.offsetY) * 100) / 100,
+    x: roundSvg(p.x_m * t.scale + t.offsetX),
+    y: roundSvg(p.y_m * t.scale + t.offsetY),
   };
 }
 
