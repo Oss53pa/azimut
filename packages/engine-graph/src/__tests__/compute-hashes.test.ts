@@ -5,10 +5,14 @@ import { computeInputsHash, computeContentHash } from '../compute-hashes.js';
 import { resolveFaceContent } from '../resolve-face.js';
 import type { ContentHashInput } from '../compute-hashes.js';
 
-const profile = refMinimal.travel_profiles[0];
-if (!profile) throw new Error('missing profile');
-const template = refMinimal.face_templates[0];
-if (!template) throw new Error('missing template');
+function first<T>(arr: readonly T[], label: string): T {
+  const v = arr[0];
+  if (v === undefined) throw new Error(`missing ${label}`);
+  return v;
+}
+
+const profile = first(refMinimal.travel_profiles, 'profile');
+const template = first(refMinimal.face_templates, 'template');
 
 function resolveAtNode(
   site: SiteData,

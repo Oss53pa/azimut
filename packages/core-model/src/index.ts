@@ -15,6 +15,13 @@ export {
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { canonicalSerialize, sha256Hex, contentHash } from './hash.js';
+export {
+  transliterate,
+  sanitizeSegment,
+  buildFileName,
+  buildArchiveName,
+} from './file-naming.js';
+export type { FileNameParts, ArchiveNameParts } from './file-naming.js';
 export { ERROR_CATALOG } from './error-catalog.js';
 export type { ErrorCode } from './error-catalog.js';
 export {
