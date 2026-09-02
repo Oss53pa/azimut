@@ -14,6 +14,12 @@ export {
   POLYGON_MIN_AREA_M2,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
+export {
+  assertProofTransition,
+  assertJobTransition,
+  assertDivergenceTransition,
+  assertWorkOrderTransition,
+} from './state-machines.js';
 export type {
   Organization,
   Site,
