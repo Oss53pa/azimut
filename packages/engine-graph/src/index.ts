@@ -58,6 +58,8 @@ export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
 export { renderFace } from './render-face.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
+export { validateProofs } from './validate-proofs.js';
+export type { ProofValidationResult } from './validate-proofs.js';
 export type {
   PlacedSupport,
   TypeQuantity,

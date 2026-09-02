@@ -193,6 +193,36 @@ export type FaceTemplate = {
   readonly blocks: readonly ContentBlockDef[];
 };
 
+export type ProofStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'superseded';
+
+export type Proof = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly face_id: string;
+  readonly version: number;
+  readonly storage_path: string;
+  readonly status: ProofStatus;
+  readonly submitted_at: string;
+  readonly reviewed_at: string | null;
+  readonly reviewer_id: string | null;
+};
+
+export type ApprovalDecision = 'approved' | 'rejected';
+
+export type Approval = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly proof_id: string;
+  readonly decision: ApprovalDecision;
+  readonly reviewer_id: string;
+  readonly comment: string;
+  readonly decided_at: string;
+};
+
 export type TravelProfile = {
   readonly id: string;
   readonly org_id: string;
