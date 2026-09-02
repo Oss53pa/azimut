@@ -1,0 +1,19 @@
+node_modules/
+dist/
+*.tsbuildinfo
+*.local
+
+# Env
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?
