@@ -17,3 +17,10 @@ export type {
   AccessibilityReport,
   EvacuationReport,
 } from './audit.js';
+export { reconcile } from './reconciliation.js';
+export type {
+  SurveyedSupport,
+  ExpectedSupport,
+  ReconciliationLine,
+  ReconciliationReport,
+} from './reconciliation.js';
