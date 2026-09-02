@@ -69,3 +69,9 @@ export type {
   LevelQuantity,
   QuantityReport,
 } from './compute-quantities.js';
+export { importOccupancy } from './import-occupancy.js';
+export type {
+  ImportedOccupancy,
+  OccupancyLineResult,
+  OccupancyImportReport,
+} from './import-occupancy.js';

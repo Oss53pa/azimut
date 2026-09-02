@@ -1,4 +1,11 @@
 import type { SiteData, Outcome } from '@azimut/core-model';
+import {
+  parseNumber,
+  parseCsvLine,
+  detectSeparator,
+  stripBom,
+  detectColumns,
+} from './csv-utils.js';
 
 export type ImportColumnMap = {
   readonly id: string;
@@ -35,128 +42,41 @@ export type ImportReport = {
   readonly supports: readonly ImportedSupport[];
 };
 
-const REQUIRED_FIELDS: readonly (keyof ImportColumnMap)[] = [
+const SUPPORT_ALIASES: Record<string, readonly string[]> = {
+  id: ['id', 'identifiant', 'support_id', 'ref', 'reference'],
+  node_id: ['node_id', 'noeud', 'noeud_id', 'node', 'point'],
+  azimuth_deg: [
+    'azimuth_deg',
+    'azimut',
+    'azimuth',
+    'orientation',
+    'angle',
+  ],
+  width_m: [
+    'width_m',
+    'largeur',
+    'largeur_m',
+    'width',
+    'larg',
+  ],
+  height_m: [
+    'height_m',
+    'hauteur',
+    'hauteur_m',
+    'height',
+    'haut',
+  ],
+  photo_url: ['photo_url', 'photo', 'image', 'url_photo'],
+  notes: ['notes', 'remarques', 'commentaires', 'observation'],
+};
+
+const REQUIRED_FIELDS: readonly string[] = [
   'id',
   'node_id',
   'azimuth_deg',
   'width_m',
   'height_m',
 ];
-
-function normalizeDecimalSeparator(value: string): string {
-  return value.replace(',', '.');
-}
-
-function parseNumber(raw: string): number | null {
-  const cleaned = normalizeDecimalSeparator(raw.trim());
-  if (cleaned === '') return null;
-  const n = Number(cleaned);
-  if (!Number.isFinite(n)) return null;
-  return n;
-}
-
-function detectColumns(
-  headers: readonly string[],
-): ImportColumnMap | null {
-  const normalized = headers.map((h) =>
-    h
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, ''),
-  );
-
-  const aliases: Record<keyof ImportColumnMap, readonly string[]> = {
-    id: ['id', 'identifiant', 'support_id', 'ref', 'reference'],
-    node_id: ['node_id', 'noeud', 'noeud_id', 'node', 'point'],
-    azimuth_deg: [
-      'azimuth_deg',
-      'azimut',
-      'azimuth',
-      'orientation',
-      'angle',
-    ],
-    width_m: [
-      'width_m',
-      'largeur',
-      'largeur_m',
-      'width',
-      'larg',
-    ],
-    height_m: [
-      'height_m',
-      'hauteur',
-      'hauteur_m',
-      'height',
-      'haut',
-    ],
-    photo_url: ['photo_url', 'photo', 'image', 'url_photo'],
-    notes: ['notes', 'remarques', 'commentaires', 'observation'],
-  };
-
-  const found: Record<string, string> = {};
-  for (const [field, candidates] of Object.entries(aliases)) {
-    for (const candidate of candidates) {
-      const idx = normalized.indexOf(candidate);
-      if (idx !== -1) {
-        found[field] = headers[idx] as string;
-        break;
-      }
-    }
-  }
-
-  for (const req of REQUIRED_FIELDS) {
-    if (!(req in found)) return null;
-  }
-
-  return found as unknown as ImportColumnMap;
-}
-
-function parseCsvLine(line: string, separator: string): string[] {
-  const fields: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i] as string;
-    if (inQuotes) {
-      if (ch === '"') {
-        if (i + 1 < line.length && line[i + 1] === '"') {
-          current += '"';
-          i++;
-        } else {
-          inQuotes = false;
-        }
-      } else {
-        current += ch;
-      }
-    } else if (ch === '"') {
-      inQuotes = true;
-    } else if (ch === separator) {
-      fields.push(current);
-      current = '';
-    } else {
-      current += ch;
-    }
-  }
-  fields.push(current);
-  return fields;
-}
-
-function detectSeparator(headerLine: string): string {
-  const tabCount = (headerLine.match(/\t/g) ?? []).length;
-  const semiCount = (headerLine.match(/;/g) ?? []).length;
-  const commaCount = (headerLine.match(/,/g) ?? []).length;
-
-  if (tabCount >= semiCount && tabCount >= commaCount) return '\t';
-  if (semiCount >= commaCount) return ';';
-  return ',';
-}
-
-function stripBom(text: string): string {
-  if (text.charCodeAt(0) === 0xfeff) return text.slice(1);
-  return text;
-}
 
 export function importSupports(
   site: SiteData,
@@ -183,7 +103,7 @@ export function importSupports(
   const headerLine = rawLines[0] as string;
   const separator = detectSeparator(headerLine);
   const headers = parseCsvLine(headerLine, separator);
-  const columnMap = detectColumns(headers);
+  const columnMap = detectColumns(headers, SUPPORT_ALIASES, REQUIRED_FIELDS);
 
   if (!columnMap) {
     return {
