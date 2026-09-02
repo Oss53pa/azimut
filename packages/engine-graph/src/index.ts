@@ -24,3 +24,5 @@ export type {
   ReconciliationLine,
   ReconciliationReport,
 } from './reconciliation.js';
+export { validateDirectory } from './validate-directory.js';
+export type { DirectoryValidationResult } from './validate-directory.js';
