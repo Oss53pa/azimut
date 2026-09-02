@@ -14,6 +14,7 @@ export {
   POLYGON_MIN_AREA_M2,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
+export { canonicalSerialize, sha256Hex, contentHash } from './hash.js';
 export { ERROR_CATALOG } from './error-catalog.js';
 export type { ErrorCode } from './error-catalog.js';
 export {

@@ -60,6 +60,8 @@ export { renderFace } from './render-face.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export { validateProofs } from './validate-proofs.js';
 export type { ProofValidationResult } from './validate-proofs.js';
+export { computeInputsHash, computeContentHash } from './compute-hashes.js';
+export type { ContentHashInput } from './compute-hashes.js';
 export type {
   PlacedSupport,
   TypeQuantity,
