@@ -25,6 +25,13 @@ export type { FileNameParts, ArchiveNameParts } from './file-naming.js';
 export { ERROR_CATALOG } from './error-catalog.js';
 export type { ErrorCode } from './error-catalog.js';
 export {
+  ERROR_MESSAGES_FR,
+  ERROR_MESSAGES_EN,
+  getErrorMessage,
+  getSupportedErrorLangs,
+} from './i18n-errors.js';
+export type { ErrorMessages } from './i18n-errors.js';
+export {
   assertProofTransition,
   assertJobTransition,
   assertDivergenceTransition,
