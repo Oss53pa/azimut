@@ -6,3 +6,14 @@ export type { Route } from './compute-route.js';
 export { RouteCache } from './route-cache.js';
 export { deriveDecisionPoints } from './decision-points.js';
 export type { DecisionPoint } from './decision-points.js';
+export {
+  auditCoverage,
+  auditAccessibility,
+  auditEvacuation,
+} from './audit.js';
+export type {
+  Support,
+  CoverageReport,
+  AccessibilityReport,
+  EvacuationReport,
+} from './audit.js';
