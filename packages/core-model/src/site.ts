@@ -147,6 +147,52 @@ export type DestinationName = {
   readonly value: string;
 };
 
+export type SupportTypeFace = {
+  readonly side: string;
+  readonly default_width_mm: number;
+  readonly default_height_mm: number;
+};
+
+export type SupportType = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly key: string;
+  readonly name: string;
+  readonly face_count: number;
+  readonly faces: readonly SupportTypeFace[];
+};
+
+export type ContentBlockKind =
+  | 'header'
+  | 'destination_list'
+  | 'pictogram'
+  | 'arrow'
+  | 'map'
+  | 'free_text'
+  | 'logo'
+  | 'emergency_info';
+
+export type ContentBlockDef = {
+  readonly kind: ContentBlockKind;
+  readonly ordinal: number;
+  readonly region: {
+    readonly x_pct: number;
+    readonly y_pct: number;
+    readonly w_pct: number;
+    readonly h_pct: number;
+  };
+  readonly config: Record<string, unknown>;
+};
+
+export type FaceTemplate = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly support_type_key: string;
+  readonly side: string;
+  readonly name: string;
+  readonly blocks: readonly ContentBlockDef[];
+};
+
 export type TravelProfile = {
   readonly id: string;
   readonly org_id: string;
@@ -177,4 +223,6 @@ export type SiteData = {
   readonly destinations: readonly Destination[];
   readonly destination_names: readonly DestinationName[];
   readonly travel_profiles: readonly TravelProfile[];
+  readonly support_types: readonly SupportType[];
+  readonly face_templates: readonly FaceTemplate[];
 };

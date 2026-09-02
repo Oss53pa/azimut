@@ -200,4 +200,15 @@ export const refAdversarial: SiteData = {
       honor_hours: false,
     },
   ],
+  support_types: [
+    {
+      id: 'stype-directional',
+      org_id: 'org-test-001',
+      key: 'directional',
+      name: 'Panneau directionnel',
+      face_count: 1,
+      faces: [{ side: 'front', default_width_mm: 600, default_height_mm: 400 }],
+    },
+  ],
+  face_templates: [],
 };

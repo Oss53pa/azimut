@@ -273,4 +273,48 @@ export const refMinimal: SiteData = {
       honor_hours: false,
     },
   ],
+  support_types: [
+    {
+      id: 'stype-directional',
+      org_id: 'org-test-001',
+      key: 'directional',
+      name: 'Panneau directionnel',
+      face_count: 1,
+      faces: [{ side: 'front', default_width_mm: 600, default_height_mm: 400 }],
+    },
+    {
+      id: 'stype-totemic',
+      org_id: 'org-test-001',
+      key: 'totemic',
+      name: 'Totem',
+      face_count: 2,
+      faces: [
+        { side: 'front', default_width_mm: 400, default_height_mm: 1200 },
+        { side: 'back', default_width_mm: 400, default_height_mm: 1200 },
+      ],
+    },
+  ],
+  face_templates: [
+    {
+      id: 'ftpl-dir-front',
+      org_id: 'org-test-001',
+      support_type_key: 'directional',
+      side: 'front',
+      name: 'Directionnel standard',
+      blocks: [
+        {
+          kind: 'header',
+          ordinal: 0,
+          region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 20 },
+          config: {},
+        },
+        {
+          kind: 'destination_list',
+          ordinal: 1,
+          region: { x_pct: 0, y_pct: 20, w_pct: 100, h_pct: 80 },
+          config: {},
+        },
+      ],
+    },
+  ],
 };

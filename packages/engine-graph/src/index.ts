@@ -32,6 +32,8 @@ export {
   guardSafetyDeletion,
 } from './validate-library.js';
 export { importSupports } from './import-supports.js';
+export { validateSupports } from './validate-supports.js';
+export type { SupportValidationResult } from './validate-supports.js';
 export type {
   ImportColumnMap,
   ImportedSupport,
