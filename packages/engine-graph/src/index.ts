@@ -31,6 +31,13 @@ export {
   guardSafetyRegistry,
   guardSafetyDeletion,
 } from './validate-library.js';
+export { importSupports } from './import-supports.js';
+export type {
+  ImportColumnMap,
+  ImportedSupport,
+  ImportLineResult,
+  ImportReport,
+} from './import-supports.js';
 export type {
   LibraryValidationResult,
   PictogramMutation,
