@@ -32,6 +32,19 @@ export {
 } from './i18n-errors.js';
 export type { ErrorMessages } from './i18n-errors.js';
 export {
+  templateSchema,
+  TEMPLATE_BLOCK_KINDS,
+  validateTemplate,
+} from './template-schema.js';
+export type {
+  Template,
+  TemplateBlock,
+  TemplateBlockKind,
+  TemplateGrid,
+  TemplateSizing,
+  TemplateValidationError,
+} from './template-schema.js';
+export {
   assertProofTransition,
   assertJobTransition,
   assertDivergenceTransition,

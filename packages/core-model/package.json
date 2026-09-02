@@ -9,6 +9,9 @@
       "import": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "zod": "^4.5.4"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit"
