@@ -14,7 +14,11 @@
     "test:determinism": "echo \"No determinism tests configured yet\" && exit 0",
     "test:e2e": "echo \"No e2e tests configured yet\" && exit 0",
     "build": "pnpm -r --parallel run build",
-    "dev": "pnpm --filter @azimut/studio dev"
+    "dev": "pnpm --filter @azimut/studio dev",
+    "db:generate": "pnpm --filter @azimut/db db:generate",
+    "db:migrate": "pnpm --filter @azimut/db db:migrate",
+    "db:rollback": "pnpm --filter @azimut/db db:rollback",
+    "db:reset": "pnpm --filter @azimut/db db:reset"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",

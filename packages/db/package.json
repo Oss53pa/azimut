@@ -10,10 +10,19 @@
     }
   },
   "dependencies": {
-    "@azimut/core-model": "workspace:*"
+    "@azimut/core-model": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.js",
+    "db:rollback": "node scripts/rollback.js",
+    "db:reset": "node scripts/reset.js"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.10"
   }
 }
