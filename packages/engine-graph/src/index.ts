@@ -54,6 +54,8 @@ export type {
   PictogramMutation,
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
+export { runChecks } from './run-checks.js';
+export type { CheckReport } from './run-checks.js';
 export type {
   PlacedSupport,
   TypeQuantity,
