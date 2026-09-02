@@ -10,10 +10,14 @@
     }
   },
   "dependencies": {
-    "@azimut/core-model": "workspace:*"
+    "@azimut/core-model": "workspace:*",
+    "zod": "^4.5.4"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1"
   }
 }
