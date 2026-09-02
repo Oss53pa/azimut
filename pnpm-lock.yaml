@@ -33,7 +33,21 @@ importers:
         specifier: ^2
         version: 2.1.9(@types/node@26.4.1)
 
-  apps/compiler: {}
+  apps/compiler:
+    dependencies:
+      '@azimut/core-model':
+        specifier: workspace:*
+        version: link:../../packages/core-model
+      '@azimut/engine-artwork':
+        specifier: workspace:*
+        version: link:../../packages/engine-artwork
+      '@azimut/engine-graph':
+        specifier: workspace:*
+        version: link:../../packages/engine-graph
+    devDependencies:
+      '@azimut/testkit':
+        specifier: workspace:*
+        version: link:../../packages/testkit
 
   apps/kiosk-runtime: {}
 

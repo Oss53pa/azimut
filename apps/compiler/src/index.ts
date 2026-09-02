@@ -10,3 +10,8 @@ export type {
   BatchReport,
   BatchOptions,
 } from './batch.js';
+export { createArtworkHandler } from './compile-artwork.js';
+export type {
+  CompileArtworkResult,
+  CompileContext,
+} from './compile-artwork.js';

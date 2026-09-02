@@ -9,6 +9,14 @@
       "import": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "@azimut/core-model": "workspace:*",
+    "@azimut/engine-graph": "workspace:*",
+    "@azimut/engine-artwork": "workspace:*"
+  },
+  "devDependencies": {
+    "@azimut/testkit": "workspace:*"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit"
