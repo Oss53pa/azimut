@@ -78,6 +78,9 @@ export const ERROR_CATALOG = {
   'RULES.INVALID_JSON':                     { severity: 'blocking', description: 'JSON du paquet de règles invalide' },
   'RULES.VALIDATION_ERROR':                { severity: 'blocking', description: 'Paquet de règles non conforme au schéma' },
   'RULES.SCOPE_AMBIGUOUS':                 { severity: 'blocking', description: 'Règles de même code et même spécificité de portée' },
+  'RULES.OVERLAY_LESS_RESTRICTIVE':        { severity: 'blocking', description: 'Surcouche pays moins contraignante que le socle' },
+  'RULES.FILE_NOT_LISTED':                 { severity: 'blocking', description: 'Fichier de règles non listé dans le manifeste' },
+  'RULES.FILE_MISSING':                    { severity: 'blocking', description: 'Fichier listé dans le manifeste introuvable' },
 
   // ── SECURITY ──────────────────────────────────────────────
   'SECURITY.REGISTRY_WRITE_DENIED':         { severity: 'blocking', description: 'Tentative de modification du registre de sécurité' },

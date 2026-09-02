@@ -22,7 +22,7 @@ function computeChecksum(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
-function scopeSpecificity(scope: RuleScope): number {
+export function scopeSpecificity(scope: RuleScope): number {
   let n = 0;
   if (scope.supportRegistry !== undefined) n += 1;
   if (scope.context !== undefined) n += 1;
@@ -38,6 +38,44 @@ function scopeMatches(scope: RuleScope, ctx: RuleScopeContext): boolean {
   if (scope.sectorKey !== undefined
     && scope.sectorKey !== ctx.sectorKey) return false;
   return true;
+}
+
+export function groupAndCheckAmbiguity(
+  rules: readonly RulesPackRule[],
+): Outcome<ReadonlyMap<string, readonly RulesPackRule[]>> {
+  const grouped = new Map<string, RulesPackRule[]>();
+  for (const rule of rules) {
+    let group = grouped.get(rule.code);
+    if (!group) {
+      group = [];
+      grouped.set(rule.code, group);
+    }
+    group.push(rule);
+  }
+
+  const ambiguous: Finding[] = [];
+  for (const [code, group] of grouped) {
+    const specs = group.map((r) => scopeSpecificity(r.scope));
+    for (let i = 0; i < specs.length; i++) {
+      for (let j = i + 1; j < specs.length; j++) {
+        if (specs[i] === specs[j]) {
+          ambiguous.push({
+            code: 'RULES.SCOPE_AMBIGUOUS',
+            severity: 'blocking',
+            entity: null,
+            params: { rule_code: code, specificity: specs[i] as number },
+            ruleRef: null,
+          });
+        }
+      }
+    }
+  }
+
+  if (ambiguous.length > 0) {
+    return { ok: false, findings: ambiguous };
+  }
+
+  return { ok: true, value: grouped, warnings: [] };
 }
 
 export function loadRulesPack(
@@ -77,38 +115,8 @@ export function loadRulesPack(
   }
 
   const pack = result.data;
-  const grouped = new Map<string, RulesPackRule[]>();
-
-  for (const rule of pack.rules) {
-    let group = grouped.get(rule.code);
-    if (!group) {
-      group = [];
-      grouped.set(rule.code, group);
-    }
-    group.push(rule);
-  }
-
-  const ambiguous: Finding[] = [];
-  for (const [code, group] of grouped) {
-    const specs = group.map((r) => scopeSpecificity(r.scope));
-    for (let i = 0; i < specs.length; i++) {
-      for (let j = i + 1; j < specs.length; j++) {
-        if (specs[i] === specs[j]) {
-          ambiguous.push({
-            code: 'RULES.SCOPE_AMBIGUOUS',
-            severity: 'blocking',
-            entity: null,
-            params: { rule_code: code, specificity: specs[i] as number },
-            ruleRef: null,
-          });
-        }
-      }
-    }
-  }
-
-  if (ambiguous.length > 0) {
-    return { ok: false, findings: ambiguous };
-  }
+  const groupResult = groupAndCheckAmbiguity(pack.rules);
+  if (!groupResult.ok) return groupResult;
 
   return {
     ok: true,
@@ -119,7 +127,7 @@ export function loadRulesPack(
       effective_from: pack.effective_from,
       source_ref: pack.source_ref,
       checksum,
-      rules: grouped,
+      rules: groupResult.value,
     },
     warnings: [],
   };
