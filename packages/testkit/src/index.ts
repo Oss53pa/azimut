@@ -3,6 +3,7 @@ export {
   refMinimal,
   refBroken,
   refAdversarial,
+  refMultilevel,
 } from './sites/index.js';
 export { siteChecksum, stableChecksum } from './checksum.js';
 export { compareSvg, assertSvgEqual } from './svg-compare.js';

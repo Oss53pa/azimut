@@ -4,15 +4,17 @@ import {
   refMinimal,
   refBroken,
   refAdversarial,
+  refMultilevel,
   siteChecksum,
 } from '../index.js';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
-    expect(allReferenceSites.size).toBe(3);
+    expect(allReferenceSites.size).toBe(4);
     expect(allReferenceSites.get('ref-minimal')).toBe(refMinimal);
     expect(allReferenceSites.get('ref-broken')).toBe(refBroken);
     expect(allReferenceSites.get('ref-adversarial')).toBe(refAdversarial);
+    expect(allReferenceSites.get('ref-multilevel')).toBe(refMultilevel);
   });
 
   for (const [key, site] of allReferenceSites) {

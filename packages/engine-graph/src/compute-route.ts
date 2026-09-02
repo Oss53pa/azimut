@@ -23,6 +23,7 @@ function isEdgeTraversable(
   edge: Edge,
   nodeId: string,
   profile: TravelProfile,
+  nodeKindMap: Map<string, string>,
 ): boolean {
   if (profile.require_accessible && !edge.accessible) return false;
 
@@ -31,6 +32,13 @@ function isEdgeTraversable(
   }
   if (edge.direction === 'backward' && nodeId !== edge.to_node_id) {
     return false;
+  }
+
+  if (profile.excluded_edge_kinds.length > 0) {
+    const excluded = new Set(profile.excluded_edge_kinds);
+    const fromKind = nodeKindMap.get(edge.from_node_id) ?? '';
+    const toKind = nodeKindMap.get(edge.to_node_id) ?? '';
+    if (excluded.has(fromKind) || excluded.has(toKind)) return false;
   }
 
   return true;
@@ -45,8 +53,10 @@ function buildWeightedAdj(
   profile: TravelProfile,
 ): Map<string, AdjEntry[]> {
   const adj = new Map<string, AdjEntry[]>();
+  const nodeKindMap = new Map<string, string>();
   for (const n of site.graph.nodes) {
     adj.set(n.id, []);
+    nodeKindMap.set(n.id, n.kind);
   }
 
   for (const edge of site.graph.edges) {
@@ -54,7 +64,7 @@ function buildWeightedAdj(
 
     const cost = edgeCost(edge);
 
-    if (isEdgeTraversable(edge, edge.from_node_id, profile)) {
+    if (isEdgeTraversable(edge, edge.from_node_id, profile, nodeKindMap)) {
       const list = adj.get(edge.from_node_id);
       if (list) {
         list.push({
@@ -65,7 +75,7 @@ function buildWeightedAdj(
       }
     }
 
-    if (isEdgeTraversable(edge, edge.to_node_id, profile)) {
+    if (isEdgeTraversable(edge, edge.to_node_id, profile, nodeKindMap)) {
       const list = adj.get(edge.to_node_id);
       if (list) {
         list.push({
