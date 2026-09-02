@@ -46,7 +46,7 @@ function degToRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }
 
-function rotatePoint(
+function rotateAndFlip(
   p: Point,
   center: Point,
   angleDeg: number,
@@ -58,7 +58,7 @@ function rotatePoint(
   const dy = p.y_m - center.y_m;
   return {
     x_m: center.x_m + dx * cos - dy * sin,
-    y_m: center.y_m + dx * sin + dy * cos,
+    y_m: -(center.y_m + dx * sin + dy * cos),
   };
 }
 
@@ -165,19 +165,19 @@ export function renderOrientedPlan(
   const allRotated: Point[] = [];
   const rotatedFootprints = footprints.map((fp) => {
     const verts = fp.geometry.vertices.map((v) =>
-      rotatePoint(v, center, rot),
+      rotateAndFlip(v, center, rot),
     );
     allRotated.push(...verts);
     return { id: fp.id, vertices: verts, kind: fp.kind };
   });
 
   const rotatedNodes = nodes.map((n) => {
-    const rp = rotatePoint(n.position, center, rot);
+    const rp = rotateAndFlip(n.position, center, rot);
     allRotated.push(rp);
     return { ...n, position: rp };
   });
 
-  const rotatedViewer = rotatePoint(center, center, rot);
+  const rotatedViewer = rotateAndFlip(center, center, rot);
   allRotated.push(rotatedViewer);
 
   const bounds = computeBounds(allRotated);

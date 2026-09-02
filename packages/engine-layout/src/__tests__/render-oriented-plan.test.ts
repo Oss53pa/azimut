@@ -134,3 +134,52 @@ describe('T-2.9 renderOrientedPlan', () => {
     expect(r1).toStrictEqual(r2);
   });
 });
+
+describe('D6.4 — decisive test: front destination in upper half', () => {
+  it('north-facing support: destination to the north appears in upper half', () => {
+    const viewerPos = { x_m: 20, y_m: 10 };
+    const opts: OrientedPlanOptions = {
+      ...defaultOptions,
+      orientation_deg: 0,
+      viewer_position: viewerPos,
+    };
+    const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const destMatch = result.value.match(
+      /Bureau RDC<\/text>/,
+    );
+    expect(destMatch).not.toBeNull();
+
+    const yMatch = result.value.match(
+      /<text[^>]* y="([^"]+)"[^>]*>Bureau RDC<\/text>/,
+    );
+    expect(yMatch).not.toBeNull();
+    const destY = parseFloat(yMatch?.[1] ?? 'NaN');
+    const midY = defaultOptions.height_px / 2;
+    expect(destY).toBeLessThan(midY);
+  });
+
+  it('east-facing support: destination to the east appears in upper half', () => {
+    const viewerPos = { x_m: 20, y_m: 10 };
+    const opts: OrientedPlanOptions = {
+      ...defaultOptions,
+      orientation_deg: -90,
+      viewer_position: viewerPos,
+    };
+    const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const stairNode = refMultilevel.graph.nodes.find(
+      (n) => n.id === 'n-ml-stair-rdc',
+    );
+    expect(stairNode).toBeDefined();
+
+    const yMatch = result.value.match(
+      /<circle[^>]*cx="[^"]*"[^>]*cy="([^"]+)"[^>]*fill="tok-node"/,
+    );
+    expect(yMatch).not.toBeNull();
+  });
+});
