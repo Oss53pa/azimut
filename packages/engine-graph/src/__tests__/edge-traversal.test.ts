@@ -120,4 +120,35 @@ describe('buildExcludedKindsSet', () => {
     const set = buildExcludedKindsSet(profile);
     expect(set.size).toBe(0);
   });
+
+  it('deduplicates repeated excluded kinds', () => {
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator', 'elevator'] });
+    const set = buildExcludedKindsSet(profile);
+    expect(set.size).toBe(1);
+    expect(set.has('elevator')).toBe(true);
+  });
+});
+
+describe('isEdgeTraversableFrom — inline excluded set', () => {
+  const nodeKinds = new Map([
+    ['a', 'junction'],
+    ['b', 'junction'],
+    ['c', 'elevator'],
+  ]);
+
+  it('builds inline set when excludedKinds not provided', () => {
+    const edge = makeEdge({ from_node_id: 'a', to_node_id: 'c' });
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator'] });
+    // No pre-built set → source line 36-40 builds one inline
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds)).toBe(false);
+  });
+
+  it('accessible edge rejected by non-accessible profile still passes direction check first', () => {
+    const edge = makeEdge({ direction: 'forward', accessible: false });
+    const profile = makeProfile({ require_accessible: true });
+    // Rejected at line 27 (accessible), never reaches direction check
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds)).toBe(false);
+    // But from wrong node, still rejected
+    expect(isEdgeTraversableFrom(edge, 'b', profile, nodeKinds)).toBe(false);
+  });
 });

@@ -90,6 +90,31 @@ describe('T-2.12 createArtworkHandler', () => {
     await expect(handler(job)).rejects.toThrow('Resolve failed');
   });
 
+  it('falls back to job.id when support_id is missing', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+      // no support_id
+    });
+    const result = await handler(job);
+    expect(result['support_id']).toBe('job-compile-001');
+  });
+
+  it('falls back to "standard" when profile_key is not a string', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      support_id: 'sup-default',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 42,
+    });
+    const result = await handler(job);
+    expect(result['support_id']).toBe('sup-default');
+    expect((result['svg_length'] as number)).toBeGreaterThan(0);
+  });
+
   it('produces deterministic output (INV-4)', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({

@@ -89,4 +89,22 @@ describe('D5.2 — detectOverlaps', () => {
   it('handles empty footprints', () => {
     expect(detectOverlaps([])).toEqual([]);
   });
+
+  it('detects all pairs in triple overlap', () => {
+    const footprints = [
+      fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 3, y_m: 0 }, { x_m: 3, y_m: 3 }, { x_m: 0, y_m: 3 }]),
+      fp('f2', [{ x_m: 1, y_m: 1 }, { x_m: 4, y_m: 1 }, { x_m: 4, y_m: 4 }, { x_m: 1, y_m: 4 }]),
+      fp('f3', [{ x_m: 2, y_m: 2 }, { x_m: 5, y_m: 2 }, { x_m: 5, y_m: 5 }, { x_m: 2, y_m: 5 }]),
+    ];
+    const findings = detectOverlaps(footprints);
+    // 3 pairs: (f1,f2), (f1,f3), (f2,f3)
+    expect(findings.length).toBe(3);
+  });
+
+  it('single footprint produces no overlaps', () => {
+    const footprints = [
+      fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }, { x_m: 1, y_m: 1 }, { x_m: 0, y_m: 1 }]),
+    ];
+    expect(detectOverlaps(footprints)).toEqual([]);
+  });
 });
