@@ -4,5 +4,5 @@
 
 export function normalizeAzimuth(deg: number): number {
   const mod = deg % 360;
-  return mod < 0 ? mod + 360 : mod === 0 && Object.is(deg, -0) ? 0 : mod;
+  return mod < 0 ? mod + 360 : mod === 0 ? 0 : mod;
 }

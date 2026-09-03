@@ -38,4 +38,21 @@ describe('normalizeAzimuth — D1.3 compass convention', () => {
   it('normalizes small negative to near 360', () => {
     expect(normalizeAzimuth(-0.001)).toBeCloseTo(359.999, 10);
   });
+  it('normalizes -360 to 0 (not -0)', () => {
+    expect(normalizeAzimuth(-360)).toBe(0);
+    expect(Object.is(normalizeAzimuth(-360), -0)).toBe(false);
+  });
+  it('normalizes -720 to 0 (not -0)', () => {
+    expect(normalizeAzimuth(-720)).toBe(0);
+    expect(Object.is(normalizeAzimuth(-720), -0)).toBe(false);
+  });
+  it('returns NaN for NaN input', () => {
+    expect(normalizeAzimuth(NaN)).toBeNaN();
+  });
+  it('returns NaN for Infinity input', () => {
+    expect(normalizeAzimuth(Infinity)).toBeNaN();
+  });
+  it('returns NaN for -Infinity input', () => {
+    expect(normalizeAzimuth(-Infinity)).toBeNaN();
+  });
 });
