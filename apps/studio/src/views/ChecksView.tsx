@@ -1,6 +1,6 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
-import { runChecks, validateGraph, validateDirectory } from '@azimut/engine-graph';
+import { runChecks, validateGraph, validateDirectory, validateGeometry } from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 
 function collectFindings(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): Finding[] {
@@ -16,11 +16,13 @@ export function ChecksView(): JSX.Element {
     const checkResult = runChecks(site);
     const graphResult = validateGraph(site);
     const dirResult = validateDirectory(site);
+    const geomResult = validateGeometry(site);
 
     const allFindings: Finding[] = [];
     if (checkResult.ok) allFindings.push(...checkResult.value.findings);
     allFindings.push(...collectFindings(graphResult));
     allFindings.push(...collectFindings(dirResult));
+    allFindings.push(...collectFindings(geomResult));
 
     const checksRun = checkResult.ok ? checkResult.value.checks_run : [];
     const checksSkipped = checkResult.ok ? checkResult.value.checks_skipped : [];

@@ -1,6 +1,6 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
-import { runChecks, validateGraph } from '@azimut/engine-graph';
+import { runChecks, validateGraph, validateGeometry } from '@azimut/engine-graph';
 
 function outcomeFindings(result: { ok: boolean; warnings?: unknown[]; findings?: unknown[] }): number {
   if (result.ok && 'warnings' in result) return (result.warnings as unknown[]).length;
@@ -14,8 +14,10 @@ export function DashboardView(): JSX.Element {
   const stats = useMemo(() => {
     const checkResult = runChecks(site);
     const graphResult = validateGraph(site);
+    const geomResult = validateGeometry(site);
     const checkFindings = checkResult.ok ? checkResult.value.findings.length : 0;
     const graphFindings = outcomeFindings(graphResult);
+    const geomFindings = outcomeFindings(geomResult);
 
     return {
       levels: site.levels.length,
@@ -24,7 +26,7 @@ export function DashboardView(): JSX.Element {
       destinations: site.destinations.length,
       supportTypes: site.support_types.length,
       templates: site.face_templates.length,
-      findings: checkFindings + graphFindings,
+      findings: checkFindings + graphFindings + geomFindings,
     };
   }, [site]);
 
