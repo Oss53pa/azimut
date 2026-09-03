@@ -15,3 +15,13 @@ export type {
   CompileArtworkResult,
   CompileContext,
 } from './compile-artwork.js';
+export { createExportQuantitiesHandler } from './export-quantities.js';
+export type {
+  ExportQuantitiesContext,
+  ExportQuantitiesResult,
+} from './export-quantities.js';
+export { createAuditSiteHandler } from './audit-site.js';
+export type {
+  AuditSiteContext,
+  AuditSiteResult,
+} from './audit-site.js';
