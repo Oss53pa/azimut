@@ -32,6 +32,7 @@ type InstructionTemplates = {
   readonly passby: (label: string) => string;
   readonly arrival: (label: string) => string;
   readonly continueTowards: (label: string) => string;
+  readonly continueFor: (meters: number) => string;
   readonly goThrough: (label: string) => string;
 };
 
@@ -44,6 +45,7 @@ const INSTRUCTIONS: Record<WayfindingLang, InstructionTemplates> = {
     passby: (l) => `Passer devant ${l}`,
     arrival: (l) => `Arrivée : ${l}`,
     continueTowards: (l) => `Continuer vers ${l}`,
+    continueFor: (m) => `Continuer tout droit (${Math.round(m)} m)`,
     goThrough: (l) => `Passer par ${l}`,
   },
   en: {
@@ -54,6 +56,7 @@ const INSTRUCTIONS: Record<WayfindingLang, InstructionTemplates> = {
     passby: (l) => `Pass by ${l}`,
     arrival: (l) => `Arrival: ${l}`,
     continueTowards: (l) => `Continue towards ${l}`,
+    continueFor: (m) => `Continue straight (${Math.round(m)} m)`,
     goThrough: (l) => `Go through ${l}`,
   },
 };
@@ -124,7 +127,9 @@ export function computeWayfinding(
     site.graph.edges.map((e) => [e.id, e]),
   );
 
-  const steps: WayfindingStep[] = [];
+  const collapsible = new Set(['junction', 'landing']);
+
+  const rawSteps: WayfindingStep[] = [];
   let levelChanges = 0;
   let totalDistance = 0;
 
@@ -154,7 +159,7 @@ export function computeWayfinding(
       isLevelChange,
     );
 
-    steps.push({
+    rawSteps.push({
       node_id: node.id,
       label: node.label,
       level_id: node.level_id,
@@ -168,6 +173,71 @@ export function computeWayfinding(
     if (edge) {
       totalDistance += edge.length_m;
     }
+  }
+
+  // Collapse consecutive same-level junction/landing steps into
+  // a single "continue for X m" step to reduce noise.
+  const steps: WayfindingStep[] = [];
+  let runStart = -1;
+  let runDistance = 0;
+
+  for (let i = 0; i < rawSteps.length; i++) {
+    const step = rawSteps[i] as WayfindingStep;
+    const isCollapsible = collapsible.has(step.kind);
+    const prevStep = i > 0 ? rawSteps[i - 1] as WayfindingStep : null;
+    const sameLevel = prevStep !== null && prevStep.level_id === step.level_id;
+
+    if (isCollapsible && prevStep !== null && collapsible.has(prevStep.kind) && sameLevel) {
+      // Continuing a run — accumulate the edge distance.
+      const edgeId = route.edges[i - 1];
+      const edge = edgeId !== undefined ? edgeMap.get(edgeId) : undefined;
+      runDistance += edge?.length_m ?? 0;
+    } else {
+      // End previous run if any.
+      if (runStart >= 0 && runStart < i - 1) {
+        const lastInRun = rawSteps[i - 1] as WayfindingStep;
+        steps.push({
+          node_id: lastInRun.node_id,
+          label: lastInRun.label,
+          level_id: lastInRun.level_id,
+          kind: lastInRun.kind,
+          instruction: runDistance > 0
+            ? templates.continueFor(runDistance)
+            : lastInRun.instruction,
+        });
+      } else if (runStart >= 0) {
+        // Single-node run — keep original step.
+        steps.push(rawSteps[runStart] as WayfindingStep);
+      }
+
+      // Start new run or emit non-collapsible step.
+      if (isCollapsible) {
+        runStart = i;
+        // Start fresh run distance — include the edge leading to this node
+        // if the previous step was NOT collapsible.
+        runDistance = 0;
+      } else {
+        runStart = -1;
+        runDistance = 0;
+        steps.push(step);
+      }
+    }
+  }
+
+  // Flush trailing run.
+  if (runStart >= 0 && runStart < rawSteps.length - 1) {
+    const lastInRun = rawSteps[rawSteps.length - 1] as WayfindingStep;
+    steps.push({
+      node_id: lastInRun.node_id,
+      label: lastInRun.label,
+      level_id: lastInRun.level_id,
+      kind: lastInRun.kind,
+      instruction: runDistance > 0
+        ? templates.continueFor(runDistance)
+        : lastInRun.instruction,
+    });
+  } else if (runStart >= 0) {
+    steps.push(rawSteps[runStart] as WayfindingStep);
   }
 
   const result: WayfindingResult = {
