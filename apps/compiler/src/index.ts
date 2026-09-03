@@ -25,3 +25,8 @@ export type {
   AuditSiteContext,
   AuditSiteResult,
 } from './audit-site.js';
+export { createBuildKioskPackageHandler } from './build-kiosk-package.js';
+export type {
+  BuildKioskPackageContext,
+  BuildKioskPackageResult,
+} from './build-kiosk-package.js';

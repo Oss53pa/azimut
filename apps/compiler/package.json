@@ -12,7 +12,8 @@
   "dependencies": {
     "@azimut/core-model": "workspace:*",
     "@azimut/engine-graph": "workspace:*",
-    "@azimut/engine-artwork": "workspace:*"
+    "@azimut/engine-artwork": "workspace:*",
+    "@azimut/engine-package": "workspace:*"
   },
   "devDependencies": {
     "@azimut/testkit": "workspace:*"

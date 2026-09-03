@@ -44,6 +44,9 @@ importers:
       '@azimut/engine-graph':
         specifier: workspace:*
         version: link:../../packages/engine-graph
+      '@azimut/engine-package':
+        specifier: workspace:*
+        version: link:../../packages/engine-package
     devDependencies:
       '@azimut/testkit':
         specifier: workspace:*
