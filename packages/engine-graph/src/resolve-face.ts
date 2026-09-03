@@ -4,6 +4,7 @@ import type {
   FaceTemplate,
   ContentBlockDef,
   TravelProfile,
+  Finding,
   Outcome,
 } from '@azimut/core-model';
 import { normalizeAzimuth } from '@azimut/core-model';
@@ -60,11 +61,16 @@ function bearingToCardinal(fromNode: GraphNode, toNode: GraphNode): string {
   return CARDINAL_LABELS[index] as string;
 }
 
+type DestinationListResult = {
+  readonly entries: ResolvedDestinationEntry[];
+  readonly warnings: Finding[];
+};
+
 function resolveDestinationList(
   site: SiteData,
   nodeId: string,
   profile: TravelProfile,
-): ResolvedDestinationEntry[] {
+): DestinationListResult {
   const namesByDest = new Map<string, Record<string, string>>();
   for (const dn of site.destination_names) {
     const existing = namesByDest.get(dn.destination_id);
@@ -83,24 +89,61 @@ function resolveDestinationList(
   const viewNode = nodeMap.get(nodeId);
 
   const entries: ResolvedDestinationEntry[] = [];
+  const warnings: Finding[] = [];
   const sortedDests = [...site.destinations].sort((a, b) =>
     a.display_priority - b.display_priority ||
     a.id.localeCompare(b.id),
   );
 
   for (const dest of sortedDests) {
+    const names = namesByDest.get(dest.id) ?? {};
+
+    // Check destination node exists in graph
+    if (!nodeMap.has(dest.node_id)) {
+      warnings.push({
+        code: 'LAYOUT.DESTINATION_NOT_FOUND',
+        severity: 'blocking',
+        entity: { kind: 'destination', id: dest.id },
+        params: { node_id: dest.node_id },
+        ruleRef: null,
+      });
+      entries.push({
+        destination_id: dest.id,
+        names,
+        direction: null,
+        distance_m: null,
+      });
+      continue;
+    }
+
     const routeResult = computeRoute(
       site,
       profile,
       nodeId,
       dest.node_id,
     );
-    const distance =
-      routeResult.ok ? routeResult.value.cost : null;
-    const names = namesByDest.get(dest.id) ?? {};
+
+    if (!routeResult.ok) {
+      warnings.push({
+        code: 'LAYOUT.DESTINATION_UNREACHABLE',
+        severity: 'blocking',
+        entity: { kind: 'destination', id: dest.id },
+        params: { from_node: nodeId, to_node: dest.node_id },
+        ruleRef: null,
+      });
+      entries.push({
+        destination_id: dest.id,
+        names,
+        direction: null,
+        distance_m: null,
+      });
+      continue;
+    }
+
+    const distance = routeResult.value.cost;
 
     let direction: string | null = null;
-    if (routeResult.ok && viewNode && routeResult.value.path.length >= 2) {
+    if (viewNode && routeResult.value.path.length >= 2) {
       const nextNodeId = routeResult.value.path[1] as string;
       const nextNode = nodeMap.get(nextNodeId);
       if (nextNode) {
@@ -116,31 +159,40 @@ function resolveDestinationList(
     });
   }
 
-  return entries;
+  return { entries, warnings };
 }
+
+type ResolvedBlockResult = {
+  readonly block: ResolvedBlock;
+  readonly warnings: Finding[];
+};
 
 function resolveBlock(
   site: SiteData,
   nodeId: string,
   profile: TravelProfile,
-  block: ContentBlockDef,
-): ResolvedBlock {
+  blockDef: ContentBlockDef,
+): ResolvedBlockResult {
   let content: ResolvedContent;
+  let blockWarnings: Finding[] = [];
 
-  switch (block.kind) {
+  switch (blockDef.kind) {
     case 'header':
       content = { type: 'header', site_name: site.site.name };
       break;
-    case 'destination_list':
+    case 'destination_list': {
+      const listResult = resolveDestinationList(site, nodeId, profile);
       content = {
         type: 'destination_list',
-        entries: resolveDestinationList(site, nodeId, profile),
+        entries: listResult.entries,
       };
+      blockWarnings = listResult.warnings;
       break;
+    }
     case 'pictogram': {
       const catId =
-        typeof block.config['category_id'] === 'string'
-          ? block.config['category_id']
+        typeof blockDef.config['category_id'] === 'string'
+          ? blockDef.config['category_id']
           : null;
       const picto = catId
         ? site.pictograms.find((p) => p.category_id === catId)
@@ -156,8 +208,8 @@ function resolveBlock(
       content = {
         type: 'arrow',
         direction:
-          typeof block.config['direction'] === 'string'
-            ? block.config['direction']
+          typeof blockDef.config['direction'] === 'string'
+            ? blockDef.config['direction']
             : 'forward',
       };
       break;
@@ -168,8 +220,8 @@ function resolveBlock(
       content = {
         type: 'free_text',
         text:
-          typeof block.config['text'] === 'string'
-            ? block.config['text']
+          typeof blockDef.config['text'] === 'string'
+            ? blockDef.config['text']
             : '',
       };
       break;
@@ -182,10 +234,13 @@ function resolveBlock(
   }
 
   return {
-    kind: block.kind,
-    ordinal: block.ordinal,
-    region: block.region,
-    content,
+    block: {
+      kind: blockDef.kind,
+      ordinal: blockDef.ordinal,
+      region: blockDef.region,
+      content,
+    },
+    warnings: blockWarnings,
   };
 }
 
@@ -215,9 +270,14 @@ export function resolveFaceContent(
     (a, b) => a.ordinal - b.ordinal || a.kind.localeCompare(b.kind),
   );
 
-  const resolved: ResolvedBlock[] = sortedBlocks.map((block) =>
-    resolveBlock(site, nodeId, profile, block),
-  );
+  const resolved: ResolvedBlock[] = [];
+  const allWarnings: Finding[] = [];
+
+  for (const blockDef of sortedBlocks) {
+    const result = resolveBlock(site, nodeId, profile, blockDef);
+    resolved.push(result.block);
+    allWarnings.push(...result.warnings);
+  }
 
   return {
     ok: true,
@@ -227,6 +287,6 @@ export function resolveFaceContent(
       side: template.side,
       blocks: resolved,
     },
-    warnings: [],
+    warnings: allWarnings,
   };
 }

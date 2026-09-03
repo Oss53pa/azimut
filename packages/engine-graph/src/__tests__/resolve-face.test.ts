@@ -209,6 +209,91 @@ describe('T-2.3 resolveFaceContent', () => {
     }
   });
 
+  it('emits LAYOUT.DESTINATION_NOT_FOUND when destination node is missing', () => {
+    const modified: SiteData = {
+      ...refMultilevel,
+      destinations: [
+        ...refMultilevel.destinations,
+        {
+          id: 'dest-phantom',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-ml-rdc',
+          node_id: 'n-nonexistent-ghost',
+          category_id: 'cat-office',
+          occupant_name: 'Phantom',
+          occupancy_status: 'occupied' as const,
+          display_priority: 99,
+        },
+      ],
+    };
+
+    const result = resolveFaceContent(modified, tpl, 'n-ml-hall', stdProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const notFound = result.warnings.find(
+      (w) => w.code === 'LAYOUT.DESTINATION_NOT_FOUND',
+    );
+    expect(notFound).toBeDefined();
+    expect(notFound?.entity?.id).toBe('dest-phantom');
+    expect(notFound?.params['node_id']).toBe('n-nonexistent-ghost');
+  });
+
+  it('emits LAYOUT.DESTINATION_UNREACHABLE when route fails', () => {
+    // Create an isolated node with no edges connecting it
+    const modified: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          {
+            id: 'n-isolated',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'waypoint' as const,
+            position: { x_m: 999, y_m: 999 },
+          },
+        ],
+      },
+      destinations: [
+        ...refMultilevel.destinations,
+        {
+          id: 'dest-isolated',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-ml-rdc',
+          node_id: 'n-isolated',
+          category_id: 'cat-office',
+          occupant_name: 'Isolated Room',
+          occupancy_status: 'occupied' as const,
+          display_priority: 99,
+        },
+      ],
+    };
+
+    const result = resolveFaceContent(modified, tpl, 'n-ml-hall', stdProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const unreachable = result.warnings.find(
+      (w) => w.code === 'LAYOUT.DESTINATION_UNREACHABLE',
+    );
+    expect(unreachable).toBeDefined();
+    expect(unreachable?.entity?.id).toBe('dest-isolated');
+    expect(unreachable?.params['from_node']).toBe('n-ml-hall');
+    expect(unreachable?.params['to_node']).toBe('n-isolated');
+  });
+
+  it('no warnings when all destinations are reachable', () => {
+    const result = resolveFaceContent(
+      refMultilevel,
+      tpl,
+      'n-ml-hall',
+      stdProfile,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.length).toBe(0);
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = resolveFaceContent(
