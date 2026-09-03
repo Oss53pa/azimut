@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:visual": "echo \"No visual tests configured yet\" && exit 0",
     "test:rls": "echo \"No RLS tests configured yet\" && exit 0",
-    "test:determinism": "echo \"No determinism tests configured yet\" && exit 0",
+    "test:determinism": "vitest run tests/determinism.test.ts",
     "test:e2e": "echo \"No e2e tests configured yet\" && exit 0",
     "build": "pnpm -r --parallel run build",
     "dev": "pnpm --filter @azimut/studio dev",

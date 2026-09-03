@@ -1,0 +1,16 @@
+{
+  "name": "@azimut/tests-integration",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@azimut/core-model": "workspace:*",
+    "@azimut/engine-graph": "workspace:*",
+    "@azimut/engine-iso": "workspace:*",
+    "@azimut/engine-layout": "workspace:*",
+    "@azimut/testkit": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}
