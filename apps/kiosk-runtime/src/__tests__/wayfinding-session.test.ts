@@ -263,4 +263,82 @@ describe('computeWayfinding', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  describe('instruction templates coverage', () => {
+    it('stair without level change uses passby instruction', () => {
+      const result = computeWayfinding(
+        refMultilevel,
+        standardProfile,
+        'n-ml-entrance',
+        'n-ml-dest-rdc',
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      // Check that no stair instruction appears (route stays on RDC)
+      const stairSteps = result.value.steps.filter(
+        (s) => s.kind === 'stair',
+      );
+      for (const step of stairSteps) {
+        // Stair on same level → "Passer devant" (passby), not "Prendre l'escalier"
+        expect(step.instruction).toContain('Passer devant');
+      }
+    });
+
+    it('goThrough instruction for non-standard node kinds', () => {
+      // Build a site with a security_post in the route
+      const site: SiteData = {
+        ...refMultilevel,
+        graph: {
+          ...refMultilevel.graph,
+          nodes: refMultilevel.graph.nodes.map((n) =>
+            n.id === 'n-ml-hall'
+              ? { ...n, kind: 'security_post' as const }
+              : n,
+          ),
+        },
+      };
+      const result = computeWayfinding(
+        site,
+        standardProfile,
+        'n-ml-entrance',
+        'n-ml-dest-rdc',
+        { lang: 'fr' },
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const secSteps = result.value.steps.filter(
+        (s) => s.kind === 'security_post',
+      );
+      expect(secSteps.length).toBeGreaterThan(0);
+      expect(secSteps[0]?.instruction).toContain('Passer par');
+    });
+
+    it('goThrough instruction in English', () => {
+      const site: SiteData = {
+        ...refMultilevel,
+        graph: {
+          ...refMultilevel.graph,
+          nodes: refMultilevel.graph.nodes.map((n) =>
+            n.id === 'n-ml-hall'
+              ? { ...n, kind: 'security_post' as const }
+              : n,
+          ),
+        },
+      };
+      const result = computeWayfinding(
+        site,
+        standardProfile,
+        'n-ml-entrance',
+        'n-ml-dest-rdc',
+        { lang: 'en' },
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const secSteps = result.value.steps.filter(
+        (s) => s.kind === 'security_post',
+      );
+      expect(secSteps.length).toBeGreaterThan(0);
+      expect(secSteps[0]?.instruction).toContain('Go through');
+    });
+  });
 });
