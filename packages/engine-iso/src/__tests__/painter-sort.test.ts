@@ -107,4 +107,46 @@ describe('D5.2 — detectOverlaps', () => {
     ];
     expect(detectOverlaps(footprints)).toEqual([]);
   });
+
+  it('edge-touching footprints do not overlap (strict inequality)', () => {
+    const footprints = [
+      fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 0 }, { x_m: 2, y_m: 2 }, { x_m: 0, y_m: 2 }]),
+      fp('f2', [{ x_m: 2, y_m: 0 }, { x_m: 4, y_m: 0 }, { x_m: 4, y_m: 2 }, { x_m: 2, y_m: 2 }]),
+    ];
+    expect(detectOverlaps(footprints)).toEqual([]);
+  });
+
+  it('overlap params contain correct footprint IDs', () => {
+    const footprints = [
+      fp('fp-A', [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 2 }]),
+      fp('fp-B', [{ x_m: 1, y_m: 1 }, { x_m: 3, y_m: 3 }]),
+    ];
+    const findings = detectOverlaps(footprints);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.params['footprint_a']).toBe('fp-A');
+    expect(findings[0]?.params['footprint_b']).toBe('fp-B');
+    expect(findings[0]?.entity?.id).toBe('fp-A');
+  });
+
+  it('negative coordinates work correctly', () => {
+    const footprints = [
+      fp('f1', [{ x_m: -5, y_m: -5 }, { x_m: -2, y_m: -2 }]),
+      fp('f2', [{ x_m: -3, y_m: -3 }, { x_m: 0, y_m: 0 }]),
+    ];
+    const findings = detectOverlaps(footprints);
+    expect(findings).toHaveLength(1);
+  });
+});
+
+describe('sortVolumesPainter — multi-vertex minXplusY', () => {
+  it('uses minimum sum across all vertices, not just the first', () => {
+    const entries: VolumeEntry[] = [
+      // second vertex has smaller sum
+      { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 10, y_m: 10 }, { x_m: 1, y_m: 1 }]) },
+      { volume: vol('v2', 'f2', 0, 1), footprint: fp('f2', [{ x_m: 5, y_m: 5 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    // v1 min sum = 2, v2 min sum = 10 → v1 first
+    expect(sorted[0]?.volume.id).toBe('v1');
+  });
 });

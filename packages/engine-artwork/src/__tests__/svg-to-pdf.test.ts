@@ -158,4 +158,31 @@ describe('renderSvgToPage', () => {
     const { bytes } = await renderAndExtract(svg);
     expect(bytes.length).toBeGreaterThan(0);
   });
+
+  it('handles rect with fill="none" (transparent)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="10" y="10" width="80" height="40" fill="none" stroke="${BORDER}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('handles single-point polygon (skipped)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<polygon points="50,50" fill="${OK}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('handles text with no font-size (defaults to 8)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="10" y="50" fill="${FG}">No size attr</text>` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
 });

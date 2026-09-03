@@ -100,4 +100,19 @@ describe('exportArtworkPdf', () => {
     expect(x4Text).toContain('MarkInfo');
     expect(aText).not.toContain('MarkInfo');
   });
+
+  it('handles empty title', async () => {
+    const pdf = await exportArtworkPdf(makeOptions({ title: '' }));
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    expect(pdf.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(pdf.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('handles SVG with no drawable elements', async () => {
+    const empty = '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"></svg>';
+    const pdf = await exportArtworkPdf(makeOptions({ svg: empty }));
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    expect(pdf.length).toBeGreaterThan(0);
+  });
 });
