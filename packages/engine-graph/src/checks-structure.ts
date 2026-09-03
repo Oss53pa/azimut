@@ -36,6 +36,59 @@ export function crossLevelWithoutVlFindings(
   return findings;
 }
 
+export function multiLevelWithoutAnyVlFindings(
+  site: SiteData,
+): Finding[] {
+  const buildingLevels = new Map<string, string[]>();
+  for (const level of site.levels) {
+    const existing = buildingLevels.get(level.building_id);
+    if (existing) {
+      existing.push(level.id);
+    } else {
+      buildingLevels.set(level.building_id, [level.id]);
+    }
+  }
+
+  const nodeLevelMap = new Map<string, string>();
+  for (const n of site.graph.nodes) {
+    nodeLevelMap.set(n.id, n.level_id);
+  }
+
+  const buildingsWithVl = new Set<string>();
+  for (const vl of site.graph.vertical_links) {
+    const edge = site.graph.edges.find((e) => e.id === vl.edge_id);
+    if (!edge) continue;
+    const fromLevel = nodeLevelMap.get(edge.from_node_id);
+    const toLevel = nodeLevelMap.get(edge.to_node_id);
+    if (fromLevel && toLevel && fromLevel !== toLevel) {
+      for (const [buildingId, levels] of buildingLevels) {
+        if (levels.includes(fromLevel) && levels.includes(toLevel)) {
+          buildingsWithVl.add(buildingId);
+        }
+      }
+    }
+  }
+
+  const findings: Finding[] = [];
+  const sortedBuildings = [...site.buildings].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  for (const building of sortedBuildings) {
+    const levels = buildingLevels.get(building.id);
+    if (!levels || levels.length < 2) continue;
+    if (!buildingsWithVl.has(building.id)) {
+      findings.push({
+        code: 'GRAPH.LEVEL_NO_VERTICAL_LINK',
+        severity: 'blocking',
+        entity: { kind: 'building', id: building.id },
+        params: { name: building.name, level_count: levels.length },
+        ruleRef: null,
+      });
+    }
+  }
+  return findings;
+}
+
 export function multiLevelWithoutAccessibleVlFindings(
   site: SiteData,
 ): Finding[] {

@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import {
   crossLevelWithoutVlFindings,
+  multiLevelWithoutAnyVlFindings,
   multiLevelWithoutAccessibleVlFindings,
   missingDestinationNameFindings,
 } from '../checks-structure.js';
-import { refMinimal, refMultilevel } from '@azimut/testkit';
+import { refMinimal, refMultilevel, refBroken } from '@azimut/testkit';
 import type { SiteData } from '@azimut/core-model';
 
 describe('crossLevelWithoutVlFindings', () => {
@@ -79,6 +80,52 @@ describe('multiLevelWithoutAccessibleVlFindings', () => {
       expect(f.severity).toBe('warning');
       expect(f.entity?.kind).toBe('building');
     }
+  });
+});
+
+describe('multiLevelWithoutAnyVlFindings', () => {
+  it('returns no findings for single-level buildings', () => {
+    const findings = multiLevelWithoutAnyVlFindings(refMinimal);
+    expect(findings).toEqual([]);
+  });
+
+  it('returns no findings when multi-level has vertical links', () => {
+    const findings = multiLevelWithoutAnyVlFindings(refMultilevel);
+    expect(findings).toEqual([]);
+  });
+
+  it('emits blocking finding for multi-level building without any VL', () => {
+    const findings = multiLevelWithoutAnyVlFindings(refBroken);
+    expect(findings.length).toBeGreaterThan(0);
+    for (const f of findings) {
+      expect(f.code).toBe('GRAPH.LEVEL_NO_VERTICAL_LINK');
+      expect(f.severity).toBe('blocking');
+      expect(f.entity?.kind).toBe('building');
+    }
+  });
+
+  it('does not fire when VLs exist even if not accessible', () => {
+    // refMultilevel has VLs — making them non-accessible should still pass
+    // the "any VL" check (only the accessible check should fire).
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: refMultilevel.graph.vertical_links.map((vl) => ({
+          ...vl,
+          accessible: false,
+        })),
+      },
+    };
+    const findings = multiLevelWithoutAnyVlFindings(site);
+    expect(findings).toEqual([]);
+  });
+
+  it('findings are sorted by building id', () => {
+    const findings = multiLevelWithoutAnyVlFindings(refBroken);
+    const ids = findings.map((f) => f.entity?.id ?? '');
+    const sorted = [...ids].sort();
+    expect(ids).toEqual(sorted);
   });
 });
 
