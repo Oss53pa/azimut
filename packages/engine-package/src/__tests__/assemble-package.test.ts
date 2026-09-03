@@ -129,6 +129,28 @@ describe('manifestToJson', () => {
     expect(parsed['package_id']).toBe('pkg-001');
   });
 
+  it('outputs keys in the fixed order', () => {
+    const inputs = [makeInput()];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const json = manifestToJson(result.value);
+    const pkgIdx = json.indexOf('"package_id"');
+    const artIdx = json.indexOf('"artifacts"');
+    const countIdx = json.indexOf('"artifact_count"');
+    expect(pkgIdx).toBeLessThan(countIdx);
+    expect(countIdx).toBeLessThan(artIdx);
+  });
+
+  it('checksum has sha256- prefix and hex digest', () => {
+    const inputs = [makeInput()];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const checksum = result.value.artifacts[0]?.checksum ?? '';
+    expect(checksum).toMatch(/^sha256-[0-9a-f]{64}$/);
+  });
+
   it('is deterministic (INV-4)', () => {
     const inputs = [makeInput()];
     const r = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
