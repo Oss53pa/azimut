@@ -295,6 +295,99 @@ describe('T-2.3 resolveFaceContent', () => {
     expect(result.warnings.length).toBe(0);
   });
 
+  describe('block default paths', () => {
+    it('arrow block defaults to direction "forward" when config is empty', () => {
+      const arrowTpl: FaceTemplate = {
+        id: 'ftpl-arrow-test',
+        org_id: 'org-test-001',
+        support_type_key: 'directional',
+        side: 'front',
+        name: 'Arrow test',
+        blocks: [
+          {
+            kind: 'arrow',
+            ordinal: 0,
+            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+            config: {},
+          },
+        ],
+      };
+      const result = resolveFaceContent(
+        refMultilevel,
+        arrowTpl,
+        'n-ml-hall',
+        stdProfile,
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const arrow = result.value.blocks[0];
+      if (arrow?.content.type === 'arrow') {
+        expect(arrow.content.direction).toBe('forward');
+      }
+    });
+
+    it('free_text block defaults to empty string when config has no text', () => {
+      const freeTpl: FaceTemplate = {
+        id: 'ftpl-free-test',
+        org_id: 'org-test-001',
+        support_type_key: 'directional',
+        side: 'front',
+        name: 'Free text test',
+        blocks: [
+          {
+            kind: 'free_text',
+            ordinal: 0,
+            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+            config: {},
+          },
+        ],
+      };
+      const result = resolveFaceContent(
+        refMultilevel,
+        freeTpl,
+        'n-ml-hall',
+        stdProfile,
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const block = result.value.blocks[0];
+      if (block?.content.type === 'free_text') {
+        expect(block.content.text).toBe('');
+      }
+    });
+
+    it('pictogram block returns null when category does not exist', () => {
+      const pictoTpl: FaceTemplate = {
+        id: 'ftpl-picto-test',
+        org_id: 'org-test-001',
+        support_type_key: 'directional',
+        side: 'front',
+        name: 'Picto test',
+        blocks: [
+          {
+            kind: 'pictogram',
+            ordinal: 0,
+            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+            config: { category_id: 'nonexistent-cat' },
+          },
+        ],
+      };
+      const result = resolveFaceContent(
+        refMultilevel,
+        pictoTpl,
+        'n-ml-hall',
+        stdProfile,
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const block = result.value.blocks[0];
+      if (block?.content.type === 'pictogram') {
+        expect(block.content.pictogram_id).toBeNull();
+        expect(block.content.svg_path).toBeNull();
+      }
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = resolveFaceContent(

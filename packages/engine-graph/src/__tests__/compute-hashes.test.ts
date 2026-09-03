@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { refMinimal } from '@azimut/testkit';
+import { refMinimal, refMultilevel } from '@azimut/testkit';
 import type { SiteData, FaceTemplate } from '@azimut/core-model';
 import { computeInputsHash, computeContentHash } from '../compute-hashes.js';
 import { resolveFaceContent } from '../resolve-face.js';
@@ -78,6 +78,42 @@ describe('D7.1 — inputs_hash', () => {
     const after = computeInputsHash(refMinimal, altProfile);
     expect(after).not.toBe(before);
   });
+
+  it('changes when a node position changes', () => {
+    const before = computeInputsHash(refMinimal, profile);
+    const modified: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: refMinimal.graph.nodes.map((n) =>
+          n.id === 'n-junction'
+            ? { ...n, position: { x_m: 999, y_m: 999 } }
+            : n,
+        ),
+      },
+    };
+    const after = computeInputsHash(modified, profile);
+    expect(after).not.toBe(before);
+  });
+
+  it('changes when a vertical link attribute changes', () => {
+    const mlProfile = refMultilevel.travel_profiles[0];
+    if (!mlProfile) throw new Error('missing profile');
+    const before = computeInputsHash(refMultilevel, mlProfile);
+    const modified: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: refMultilevel.graph.vertical_links.map((vl) =>
+          vl === refMultilevel.graph.vertical_links[0]
+            ? { ...vl, capacity: 999 }
+            : vl,
+        ),
+      },
+    };
+    const after = computeInputsHash(modified, mlProfile);
+    expect(after).not.toBe(before);
+  });
 });
 
 describe('D7.1 — content_hash', () => {
@@ -106,6 +142,30 @@ describe('D7.1 — content_hash', () => {
     const a = computeContentHash(input);
     const b = computeContentHash({ ...input, active_langs: ['fr'] });
     expect(a).not.toBe(b);
+  });
+
+  it('changes when dimensions change', () => {
+    const input = resolveAtNode(refMinimal, template, 'n-junction');
+    const a = computeContentHash(input);
+    const b = computeContentHash({
+      ...input,
+      dimensions: { width_mm: 800, height_mm: 600 },
+    });
+    expect(a).not.toBe(b);
+  });
+
+  it('changes when rules_pack_version changes', () => {
+    const input = resolveAtNode(refMinimal, template, 'n-junction');
+    const a = computeContentHash(input);
+    const b = computeContentHash({ ...input, rules_pack_version: 'v1.2.0' });
+    expect(a).not.toBe(b);
+  });
+
+  it('active_langs order does not affect hash (sorted before hashing)', () => {
+    const input = resolveAtNode(refMinimal, template, 'n-junction');
+    const a = computeContentHash({ ...input, active_langs: ['en', 'fr'] });
+    const b = computeContentHash({ ...input, active_langs: ['fr', 'en'] });
+    expect(a).toBe(b);
   });
 });
 
