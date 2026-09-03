@@ -120,25 +120,16 @@ describe('missingDestinationNameFindings', () => {
   });
 
   it('findings are sorted by destination id', () => {
-    // Remove 'en' for all destinations to produce multiple findings
-    const site: SiteData = {
-      ...refMultilevel,
-      destination_names: refMultilevel.destination_names.filter(
-        (dn) => dn.lang !== 'en',
-      ),
-    };
-    // With only 'fr' remaining there is only one active lang → no missing
-    // Instead, add a destination with only 'fr', keeping 'en' active elsewhere
-    // This approach: remove 'en' for first dest only, ensuring sorted output
+    // Remove 'en' for first dest only, ensuring sorted output
     const firstDestId = refMultilevel.destinations[0]?.id;
     if (!firstDestId) return;
-    const site2: SiteData = {
+    const site: SiteData = {
       ...refMultilevel,
       destination_names: refMultilevel.destination_names.filter(
         (dn) => !(dn.destination_id === firstDestId && dn.lang === 'en'),
       ),
     };
-    const findings = missingDestinationNameFindings(site2);
+    const findings = missingDestinationNameFindings(site);
     const ids = findings.map((f) => f.entity?.id ?? '');
     const sorted = [...ids].sort();
     expect(ids).toEqual(sorted);
