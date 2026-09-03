@@ -3,7 +3,11 @@ import {
   computeQuantities,
   quantityReportToCsv,
 } from '../compute-quantities.js';
-import type { PlacedSupport, CsvLang } from '../compute-quantities.js';
+import type {
+  PlacedSupport,
+  CsvLang,
+  QuantityReport,
+} from '../compute-quantities.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 
 describe('T-2.13 computeQuantities', () => {
@@ -218,5 +222,60 @@ describe('T-2.13 quantityReportToCsv', () => {
     if (!result.ok) return;
     const csv = quantityReportToCsv(result.value);
     expect(csv).toContain('Recoupement OK;OUI');
+  });
+
+  it('wraps field with semicolon in double quotes', () => {
+    const report: QuantityReport = {
+      total_supports: 1,
+      total_faces: 1,
+      by_type: [
+        {
+          support_type_key: 'dir',
+          support_type_name: 'Type; special',
+          count: 1,
+          face_count: 1,
+        },
+      ],
+      by_building: [],
+      by_level: [],
+      cross_check_ok: true,
+    };
+    const csv = quantityReportToCsv(report);
+    expect(csv).toContain('"Type; special"');
+  });
+
+  it('doubles internal double quotes in field values', () => {
+    const report: QuantityReport = {
+      total_supports: 1,
+      total_faces: 1,
+      by_type: [],
+      by_building: [
+        { building_id: 'b1', building_name: 'Bât "A"', count: 1 },
+      ],
+      by_level: [],
+      cross_check_ok: true,
+    };
+    const csv = quantityReportToCsv(report);
+    expect(csv).toContain('"Bât ""A"""');
+  });
+
+  it('wraps field with newline in double quotes', () => {
+    const report: QuantityReport = {
+      total_supports: 1,
+      total_faces: 1,
+      by_type: [],
+      by_building: [],
+      by_level: [
+        {
+          level_id: 'l1',
+          level_name: 'Rez\nChaussée',
+          building_id: 'b1',
+          count: 1,
+        },
+      ],
+      cross_check_ok: true,
+    };
+    const csv = quantityReportToCsv(report);
+    expect(csv).toContain('"Rez\nChaussée"');
   });
 });

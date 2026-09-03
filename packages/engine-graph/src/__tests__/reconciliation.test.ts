@@ -46,6 +46,31 @@ describe('T-1.14 reconciliation report', () => {
       expect(sup[0]?.entity_id).toBe('sup-entrance');
       expect(result.value.superfluous_count).toBe(1);
     });
+
+    it('does NOT flag support at a decision point', () => {
+      const surveyed: SurveyedSupport[] = [
+        {
+          id: 'sup-hall',
+          node_id: 'n-ml-hall',
+          azimuth_deg: 0,
+          width_m: 0.6,
+          height_m: 1.2,
+        },
+      ];
+      const result = reconcile(
+        refMultilevel,
+        stdProfile,
+        surveyed,
+        [],
+        5,
+      );
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const sup = result.value.lines.filter(
+        (l) => l.issue === 'superfluous',
+      );
+      expect(sup.length).toBe(0);
+    });
   });
 
   describe('uncovered decision points', () => {

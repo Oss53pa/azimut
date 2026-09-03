@@ -406,3 +406,4 @@ describe('T-2.3 resolveFaceContent', () => {
     });
   });
 });
+

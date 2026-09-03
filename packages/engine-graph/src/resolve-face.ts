@@ -50,7 +50,7 @@ export type ResolvedFace = {
 
 const CARDINAL_LABELS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
 
-function bearingToCardinal(fromNode: GraphNode, toNode: GraphNode): string {
+export function bearingToCardinal(fromNode: GraphNode, toNode: GraphNode): string {
   const dx = toNode.position.x_m - fromNode.position.x_m;
   const dy = toNode.position.y_m - fromNode.position.y_m;
   if (dx === 0 && dy === 0) return 'N';
