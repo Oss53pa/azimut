@@ -7,6 +7,8 @@ import type {
 import { computeRoute } from '@azimut/engine-graph';
 import type { Route } from '@azimut/engine-graph';
 
+export type WayfindingLang = 'fr' | 'en';
+
 export type WayfindingStep = {
   readonly node_id: string;
   readonly label: string;
@@ -22,48 +24,91 @@ export type WayfindingResult = {
   readonly level_changes: number;
 };
 
+type InstructionTemplates = {
+  readonly from: (label: string) => string;
+  readonly takeElevator: (label: string) => string;
+  readonly takeStairs: (label: string) => string;
+  readonly takeEscalator: (label: string) => string;
+  readonly passby: (label: string) => string;
+  readonly arrival: (label: string) => string;
+  readonly continueTowards: (label: string) => string;
+  readonly goThrough: (label: string) => string;
+};
+
+const INSTRUCTIONS: Record<WayfindingLang, InstructionTemplates> = {
+  fr: {
+    from: (l) => `Depuis ${l}`,
+    takeElevator: (l) => `Prendre l'ascenseur (${l})`,
+    takeStairs: (l) => `Prendre l'escalier (${l})`,
+    takeEscalator: (l) => `Prendre l'escalator (${l})`,
+    passby: (l) => `Passer devant ${l}`,
+    arrival: (l) => `Arrivée : ${l}`,
+    continueTowards: (l) => `Continuer vers ${l}`,
+    goThrough: (l) => `Passer par ${l}`,
+  },
+  en: {
+    from: (l) => `From ${l}`,
+    takeElevator: (l) => `Take the elevator (${l})`,
+    takeStairs: (l) => `Take the stairs (${l})`,
+    takeEscalator: (l) => `Take the escalator (${l})`,
+    passby: (l) => `Pass by ${l}`,
+    arrival: (l) => `Arrival: ${l}`,
+    continueTowards: (l) => `Continue towards ${l}`,
+    goThrough: (l) => `Go through ${l}`,
+  },
+};
+
 function buildInstruction(
+  templates: InstructionTemplates,
   currentKind: string,
   nextKind: string | null,
   label: string,
   isLevelChange: boolean,
 ): string {
   if (currentKind === 'entrance') {
-    return `Depuis ${label}`;
+    return templates.from(label);
   }
   if (currentKind === 'elevator') {
     return isLevelChange
-      ? `Prendre l'ascenseur (${label})`
-      : `Passer devant ${label}`;
+      ? templates.takeElevator(label)
+      : templates.passby(label);
   }
   if (currentKind === 'stair') {
     return isLevelChange
-      ? `Prendre l'escalier (${label})`
-      : `Passer devant ${label}`;
+      ? templates.takeStairs(label)
+      : templates.passby(label);
   }
   if (currentKind === 'escalator') {
     return isLevelChange
-      ? `Prendre l'escalator (${label})`
-      : `Passer devant ${label}`;
+      ? templates.takeEscalator(label)
+      : templates.passby(label);
   }
   if (currentKind === 'destination_access') {
     if (nextKind === null) {
-      return `Arrivée : ${label}`;
+      return templates.arrival(label);
     }
-    return `Passer devant ${label}`;
+    return templates.passby(label);
   }
   if (currentKind === 'junction' || currentKind === 'landing') {
-    return `Continuer vers ${label}`;
+    return templates.continueTowards(label);
   }
-  return `Passer par ${label}`;
+  return templates.goThrough(label);
 }
+
+export type WayfindingOptions = {
+  readonly lang?: WayfindingLang;
+};
 
 export function computeWayfinding(
   site: SiteData,
   profile: TravelProfile,
   fromNodeId: string,
   toNodeId: string,
+  options?: WayfindingOptions,
 ): Outcome<WayfindingResult> {
+  const lang = options?.lang ?? 'fr';
+  const templates = INSTRUCTIONS[lang];
+
   const routeResult = computeRoute(site, profile, fromNodeId, toNodeId);
   if (!routeResult.ok) {
     return routeResult;
@@ -102,6 +147,7 @@ export function computeWayfinding(
     }
 
     const instruction = buildInstruction(
+      templates,
       node.kind,
       nextNode?.kind ?? null,
       node.label,

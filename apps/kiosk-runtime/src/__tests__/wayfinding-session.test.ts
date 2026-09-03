@@ -39,7 +39,7 @@ describe('computeWayfinding', () => {
     expect(result.value.level_changes).toBeGreaterThanOrEqual(1);
   });
 
-  it('generates step instructions', () => {
+  it('generates French instructions by default', () => {
     const result = computeWayfinding(
       refMultilevel,
       standardProfile,
@@ -51,6 +51,34 @@ describe('computeWayfinding', () => {
     expect(result.value.steps[0]?.instruction).toContain('Depuis');
     const lastStep = result.value.steps[result.value.steps.length - 1];
     expect(lastStep?.instruction).toContain('Arrivée');
+  });
+
+  it('generates English instructions when lang is en', () => {
+    const result = computeWayfinding(
+      refMultilevel,
+      standardProfile,
+      'n-ml-entrance',
+      'n-ml-dest-rdc',
+      { lang: 'en' },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.steps[0]?.instruction).toContain('From');
+    const lastStep = result.value.steps[result.value.steps.length - 1];
+    expect(lastStep?.instruction).toContain('Arrival');
+  });
+
+  it('generates French instructions when lang is fr', () => {
+    const result = computeWayfinding(
+      refMultilevel,
+      standardProfile,
+      'n-ml-entrance',
+      'n-ml-dest-rdc',
+      { lang: 'fr' },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.steps[0]?.instruction).toContain('Depuis');
   });
 
   it('respects accessible profile', () => {
@@ -117,5 +145,21 @@ describe('computeWayfinding', () => {
       'n-ml-dest-r1',
     );
     expect(r1).toStrictEqual(r2);
+  });
+
+  it('English cross-level uses elevator instruction', () => {
+    const result = computeWayfinding(
+      refMultilevel,
+      standardProfile,
+      'n-ml-entrance',
+      'n-ml-dest-r1',
+      { lang: 'en' },
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const instructions = result.value.steps.map((s) => s.instruction);
+    const hasElevator = instructions.some((i) => i.includes('elevator'));
+    const hasStairs = instructions.some((i) => i.includes('stairs'));
+    expect(hasElevator || hasStairs).toBe(true);
   });
 });
