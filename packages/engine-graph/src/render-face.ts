@@ -44,6 +44,14 @@ function renderHeader(
   );
 }
 
+const CARDINAL_ANGLES: Readonly<Record<string, number>> = {
+  N: 0, NE: 45, E: 90, SE: 135, S: 180, SW: 225, W: 270, NW: 315,
+};
+
+function cardinalToAngle(direction: string): number {
+  return CARDINAL_ANGLES[direction] ?? 0;
+}
+
 function renderDestinationList(
   content: Extract<ResolvedContent, { type: 'destination_list' }>,
   x: number,
@@ -74,8 +82,21 @@ function renderDestinationList(
         ? ` — ${Math.round(entry.distance_m)} m`
         : '';
 
+    if (entry.direction) {
+      const arrowSize = fontSize * 0.9;
+      const arrowX = x + arrowSize * 0.5;
+      const arrowY = ty - arrowSize * 0.35;
+      const angle = cardinalToAngle(entry.direction);
+      parts.push(
+        `<g transform="translate(${arrowX},${arrowY}) rotate(${angle})">` +
+        `<polygon points="0,${-arrowSize * 0.4} ${arrowSize * 0.25},${arrowSize * 0.2} ${-arrowSize * 0.25},${arrowSize * 0.2}"` +
+        ` fill="${esc(theme.accent)}" /></g>`,
+      );
+    }
+
+    const textX = entry.direction ? x + fontSize * 1.4 : x + fontSize * 0.5;
     parts.push(
-      `<text x="${x + fontSize * 0.5}" y="${ty}"` +
+      `<text x="${textX}" y="${ty}"` +
       ` font-family="${esc(fontFamily)}" font-size="${fontSize}"` +
       ` fill="${esc(theme.text_primary)}">${esc(name ?? '')}` +
       `<tspan fill="${esc(theme.text_secondary)}">${esc(dist)}</tspan></text>`,

@@ -9,8 +9,10 @@ exports[`Visual regression — face renders > directional face snapshot 1`] = `
 <rect x="0" y="0" width="600" height="400" fill="#ffffff" />
 <rect x="0" y="0" width="600" height="80" fill="#0066cc" />
 <text x="300" y="52.6" text-anchor="middle" font-family="Helvetica" font-size="36" fill="#ffffff">Site multi-niveaux</text>
-<text x="14.399999999999999" y="128" font-family="Helvetica" font-size="28.799999999999997" fill="#333333">Bureau RDC<tspan fill="#666666"> — 16 m</tspan></text>
-<text x="14.399999999999999" y="176" font-family="Helvetica" font-size="28.799999999999997" fill="#333333">Bureau R+1<tspan fill="#666666"> — 39 m</tspan></text>
+<g transform="translate(12.959999999999999,118.928) rotate(270)"><polygon points="0,-10.368 6.4799999999999995,5.184 -6.4799999999999995,5.184" fill="#0066cc" /></g>
+<text x="40.31999999999999" y="128" font-family="Helvetica" font-size="28.799999999999997" fill="#333333">Bureau RDC<tspan fill="#666666"> — 16 m</tspan></text>
+<g transform="translate(12.959999999999999,166.928) rotate(270)"><polygon points="0,-10.368 6.4799999999999995,5.184 -6.4799999999999995,5.184" fill="#0066cc" /></g>
+<text x="40.31999999999999" y="176" font-family="Helvetica" font-size="28.799999999999997" fill="#333333">Bureau R+1<tspan fill="#666666"> — 39 m</tspan></text>
 </svg>"
 `;
 
