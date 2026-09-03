@@ -7,6 +7,8 @@ import {
   computeWorldBounds,
   computeIsoTransform,
   projectTopFace,
+  pointsStr,
+  esc,
 } from '../projection.js';
 import type { LevelGeom } from '../projection.js';
 
@@ -109,5 +111,39 @@ describe('computeIsoTransform', () => {
     expect(isFinite(t.offsetX)).toBe(true);
     expect(isFinite(t.offsetY)).toBe(true);
     expect(t.scale).toBeGreaterThan(0);
+  });
+
+  it('handles zero-width world bounds (single point)', () => {
+    const wb = { minX: 5, maxX: 5, minY: 5, maxY: 5, minZ: 0, maxZ: 0 };
+    const t = computeIsoTransform(wb, 800, 600, 20);
+    // Zero iso width/height → scale falls back to 1
+    expect(t.scale).toBe(1);
+    expect(isFinite(t.offsetX)).toBe(true);
+    expect(isFinite(t.offsetY)).toBe(true);
+  });
+});
+
+describe('pointsStr', () => {
+  it('formats points as space-separated x,y pairs', () => {
+    const pts = [{ x: 1.5, y: 2.3 }, { x: 4, y: 5 }];
+    expect(pointsStr(pts)).toBe('1.5,2.3 4,5');
+  });
+
+  it('returns empty string for empty array', () => {
+    expect(pointsStr([])).toBe('');
+  });
+});
+
+describe('esc — XML escaping', () => {
+  it('escapes ampersand, angle brackets, and double quotes', () => {
+    expect(esc('A & B <C> "D"')).toBe('A &amp; B &lt;C&gt; &quot;D&quot;');
+  });
+
+  it('passes clean strings through unchanged', () => {
+    expect(esc('hello world')).toBe('hello world');
+  });
+
+  it('handles empty string', () => {
+    expect(esc('')).toBe('');
   });
 });

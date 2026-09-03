@@ -105,3 +105,42 @@ describe('contentHash convenience', () => {
     expect(hash).toBe(sha256Hex(canonicalSerialize({ a: 1 })));
   });
 });
+
+describe('canonicalSerialize — additional edge cases', () => {
+  it('serializes booleans correctly', () => {
+    expect(canonicalSerialize({ f: false, t: true })).toBe('{"f":false,"t":true}');
+  });
+
+  it('serializes empty object', () => {
+    expect(canonicalSerialize({})).toBe('{}');
+  });
+
+  it('serializes empty array', () => {
+    expect(canonicalSerialize([])).toBe('[]');
+  });
+
+  it('serializes strings with special characters', () => {
+    expect(canonicalSerialize({ s: 'a"b\\c' })).toBe('{"s":"a\\"b\\\\c"}');
+  });
+
+  it('serializes deeply nested structures deterministically', () => {
+    const deep = { a: { b: { c: [1, { d: 2 }] } } };
+    const s1 = canonicalSerialize(deep);
+    const s2 = canonicalSerialize(deep);
+    expect(s1).toBe(s2);
+    expect(s1).toBe('{"a":{"b":{"c":[1,{"d":2}]}}}');
+  });
+});
+
+describe('sha256Hex — additional edge cases', () => {
+  it('handles multi-byte UTF-8 (accented French)', () => {
+    const hash = sha256Hex('Façade entrée');
+    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+    // Deterministic
+    expect(sha256Hex('Façade entrée')).toBe(hash);
+  });
+
+  it('distinguishes similar strings', () => {
+    expect(sha256Hex('abc')).not.toBe(sha256Hex('abd'));
+  });
+});

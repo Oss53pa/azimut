@@ -94,6 +94,22 @@ describe('extractHitZones', () => {
     expect(zones[0]?.polygon).not.toEqual(zonesId[0]?.polygon);
   });
 
+  it('top z uses base_elevation + height', () => {
+    const low = [makeEntry('v-low', 'f1', 0, 1, squareVertices)];
+    const high = [makeEntry('v-high', 'f1', 5, 3, squareVertices)];
+    const zonesLow = extractHitZones(low, identityTransform);
+    const zonesHigh = extractHitZones(high, identityTransform);
+    // Higher topZ shifts y values down in iso projection
+    expect(zonesLow[0]?.polygon).not.toEqual(zonesHigh[0]?.polygon);
+  });
+
+  it('single entry reversal is identity', () => {
+    const entries = [makeEntry('v1', 'f1', 0, 3, squareVertices)];
+    const zones = extractHitZones(entries, identityTransform);
+    expect(zones).toHaveLength(1);
+    expect(zones[0]?.volume_id).toBe('v1');
+  });
+
   it('is deterministic (INV-4)', () => {
     const entries = [
       makeEntry('v1', 'f1', 0, 3, squareVertices),
