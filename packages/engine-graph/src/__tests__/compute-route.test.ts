@@ -162,6 +162,58 @@ describe('computeRoute', () => {
     }
   });
 
+  it('returns error for unknown from node', () => {
+    const result = computeRoute(
+      refMinimal,
+      stdProfile,
+      'n-nonexistent',
+      'n-dest-a',
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.findings[0]?.code).toBe('GRAPH.ROUTE_NODE_NOT_FOUND');
+    }
+  });
+
+  it('self-loop edge is skipped in routing', () => {
+    const selfLoopSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-self',
+            org_id: 'org-test-001',
+            from_node_id: 'n-junction',
+            to_node_id: 'n-junction',
+            length_m: 1,
+            width_m: 2,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: false,
+          },
+        ],
+      },
+    };
+    // Route should still work — self-loop is silently discarded
+    const result = computeRoute(
+      selfLoopSite,
+      stdProfile,
+      'n-entrance',
+      'n-dest-a',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      // Path goes through junction; self-loop doesn't appear as a detour
+      expect(result.value.path).toContain('n-junction');
+      expect(result.value.cost).toBeGreaterThan(0);
+      // Self-loop edge is not in the route
+      expect(result.value.edges).not.toContain('e-self');
+    }
+  });
+
   it('handles equal-cost paths deterministically on refAdversarial', () => {
     const r1 = computeRoute(
       refAdversarial,
