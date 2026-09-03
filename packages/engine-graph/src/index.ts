@@ -63,6 +63,7 @@ export type { ProofValidationResult } from './validate-proofs.js';
 export { computeInputsHash, computeContentHash } from './compute-hashes.js';
 export type { ContentHashInput } from './compute-hashes.js';
 export type {
+  CsvLang,
   PlacedSupport,
   TypeQuantity,
   BuildingQuantity,

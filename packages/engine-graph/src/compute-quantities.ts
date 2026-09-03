@@ -183,6 +183,51 @@ export function computeQuantities(
   };
 }
 
+export type CsvLang = 'fr' | 'en';
+
+type CsvLabels = {
+  readonly type: string;
+  readonly typeName: string;
+  readonly count: string;
+  readonly faces: string;
+  readonly building: string;
+  readonly level: string;
+  readonly totalSupports: string;
+  readonly totalFaces: string;
+  readonly crossCheck: string;
+  readonly yes: string;
+  readonly no: string;
+};
+
+const CSV_LABELS: Readonly<Record<CsvLang, CsvLabels>> = {
+  fr: {
+    type: 'Type',
+    typeName: 'Nom type',
+    count: 'Nombre',
+    faces: 'Faces',
+    building: 'Bâtiment',
+    level: 'Niveau',
+    totalSupports: 'Total supports',
+    totalFaces: 'Total faces',
+    crossCheck: 'Recoupement OK',
+    yes: 'OUI',
+    no: 'NON',
+  },
+  en: {
+    type: 'Type',
+    typeName: 'Type name',
+    count: 'Count',
+    faces: 'Faces',
+    building: 'Building',
+    level: 'Level',
+    totalSupports: 'Total supports',
+    totalFaces: 'Total faces',
+    crossCheck: 'Cross-check OK',
+    yes: 'YES',
+    no: 'NO',
+  },
+};
+
 function escapeCsvField(value: string): string {
   if (value.includes(';') || value.includes('"') || value.includes('\n')) {
     return `"${value.replace(/"/g, '""')}"`;
@@ -190,11 +235,15 @@ function escapeCsvField(value: string): string {
   return value;
 }
 
-export function quantityReportToCsv(report: QuantityReport): string {
+export function quantityReportToCsv(
+  report: QuantityReport,
+  lang: CsvLang = 'fr',
+): string {
+  const l = CSV_LABELS[lang];
   const lines: string[] = [];
 
   lines.push(
-    ['Type', 'Nom type', 'Nombre', 'Faces'].map(escapeCsvField).join(';'),
+    [l.type, l.typeName, l.count, l.faces].map(escapeCsvField).join(';'),
   );
   const sortedTypes = [...report.by_type].sort((a, b) =>
     a.support_type_key.localeCompare(b.support_type_key),
@@ -214,7 +263,7 @@ export function quantityReportToCsv(report: QuantityReport): string {
 
   lines.push('');
   lines.push(
-    ['Bâtiment', 'Nombre'].map(escapeCsvField).join(';'),
+    [l.building, l.count].map(escapeCsvField).join(';'),
   );
   const sortedBuildings = [...report.by_building].sort((a, b) =>
     a.building_id.localeCompare(b.building_id),
@@ -229,14 +278,14 @@ export function quantityReportToCsv(report: QuantityReport): string {
 
   lines.push('');
   lines.push(
-    ['Niveau', 'Nombre'].map(escapeCsvField).join(';'),
+    [l.level, l.count].map(escapeCsvField).join(';'),
   );
   const sortedLevels = [...report.by_level].sort((a, b) =>
     a.level_id.localeCompare(b.level_id),
   );
-  for (const l of sortedLevels) {
+  for (const lvl of sortedLevels) {
     lines.push(
-      [l.level_name, String(l.count)]
+      [lvl.level_name, String(lvl.count)]
         .map(escapeCsvField)
         .join(';'),
     );
@@ -244,13 +293,13 @@ export function quantityReportToCsv(report: QuantityReport): string {
 
   lines.push('');
   lines.push(
-    ['Total supports', String(report.total_supports)].join(';'),
+    [l.totalSupports, String(report.total_supports)].join(';'),
   );
   lines.push(
-    ['Total faces', String(report.total_faces)].join(';'),
+    [l.totalFaces, String(report.total_faces)].join(';'),
   );
   lines.push(
-    ['Recoupement OK', report.cross_check_ok ? 'OUI' : 'NON'].join(';'),
+    [l.crossCheck, report.cross_check_ok ? l.yes : l.no].join(';'),
   );
 
   return lines.join('\n');

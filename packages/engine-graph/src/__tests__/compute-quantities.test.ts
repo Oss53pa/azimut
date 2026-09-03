@@ -3,7 +3,7 @@ import {
   computeQuantities,
   quantityReportToCsv,
 } from '../compute-quantities.js';
-import type { PlacedSupport } from '../compute-quantities.js';
+import type { PlacedSupport, CsvLang } from '../compute-quantities.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 
 describe('T-2.13 computeQuantities', () => {
@@ -134,12 +134,13 @@ describe('T-2.13 computeQuantities', () => {
 });
 
 describe('T-2.13 quantityReportToCsv', () => {
-  it('produces semicolon-separated CSV', () => {
-    const supports: PlacedSupport[] = [
-      { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
-      { id: 'sup-2', node_id: 'n-junction', support_type_key: 'totemic' },
-    ];
-    const result = computeQuantities(refMinimal, supports);
+  const csvSupports: PlacedSupport[] = [
+    { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
+    { id: 'sup-2', node_id: 'n-junction', support_type_key: 'totemic' },
+  ];
+
+  it('produces French CSV by default', () => {
+    const result = computeQuantities(refMinimal, csvSupports);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const csv = quantityReportToCsv(result.value);
@@ -149,6 +150,66 @@ describe('T-2.13 quantityReportToCsv', () => {
     expect(csv).toContain('Total supports;2');
     expect(csv).toContain('Total faces;3');
     expect(csv).toContain('Recoupement OK;OUI');
+  });
+
+  it('produces French CSV with explicit lang', () => {
+    const result = computeQuantities(refMinimal, csvSupports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const csv = quantityReportToCsv(result.value, 'fr');
+    expect(csv).toContain('Bâtiment;Nombre');
+    expect(csv).toContain('Niveau;Nombre');
+  });
+
+  it('produces English CSV', () => {
+    const result = computeQuantities(refMinimal, csvSupports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const csv = quantityReportToCsv(result.value, 'en');
+    expect(csv).toContain('Type;Type name;Count;Faces');
+    expect(csv).toContain('Building;Count');
+    expect(csv).toContain('Level;Count');
+    expect(csv).toContain('Total supports;2');
+    expect(csv).toContain('Total faces;3');
+    expect(csv).toContain('Cross-check OK;YES');
+  });
+
+  it('English CSV uses NO for failed cross-check', () => {
+    const report = {
+      total_supports: 5,
+      total_faces: 10,
+      by_type: [],
+      by_building: [],
+      by_level: [],
+      cross_check_ok: false,
+    };
+    const csv = quantityReportToCsv(report, 'en');
+    expect(csv).toContain('Cross-check OK;NO');
+  });
+
+  it('French CSV uses NON for failed cross-check', () => {
+    const report = {
+      total_supports: 5,
+      total_faces: 10,
+      by_type: [],
+      by_building: [],
+      by_level: [],
+      cross_check_ok: false,
+    };
+    const csv = quantityReportToCsv(report, 'fr');
+    expect(csv).toContain('Recoupement OK;NON');
+  });
+
+  it('determinism: same lang produces identical output (INV-4)', () => {
+    const result = computeQuantities(refMinimal, csvSupports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const langs: CsvLang[] = ['fr', 'en'];
+    for (const lang of langs) {
+      const a = quantityReportToCsv(result.value, lang);
+      const b = quantityReportToCsv(result.value, lang);
+      expect(a).toBe(b);
+    }
   });
 
   it('escapes fields containing semicolons', () => {
