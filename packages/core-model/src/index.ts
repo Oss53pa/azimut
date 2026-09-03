@@ -14,7 +14,7 @@ export {
   POLYGON_MIN_AREA_M2,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
-export { canonicalSerialize, sha256Hex, contentHash } from './hash.js';
+export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
 export {
   transliterate,
   sanitizeSegment,

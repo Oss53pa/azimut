@@ -1,3 +1,6 @@
+import {
+  sha256Binary,
+} from '@azimut/core-model';
 import type {
   SiteData,
   Outcome,
@@ -41,13 +44,7 @@ export type ArtifactInput = {
 };
 
 function computeChecksum(data: Uint8Array): string {
-  let hash = 0;
-  for (let i = 0; i < data.length; i++) {
-    const byte = data[i] as number;
-    hash = ((hash << 5) - hash + byte) | 0;
-  }
-  const hex = (hash >>> 0).toString(16).padStart(8, '0');
-  return `djb2-${hex}`;
+  return `sha256-${sha256Binary(data)}`;
 }
 
 function validateArtifact(

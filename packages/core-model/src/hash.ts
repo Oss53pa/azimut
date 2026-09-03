@@ -153,6 +153,10 @@ export function sha256Hex(data: string): string {
   return hexEncode(sha256Bytes(utf8Encode(data)));
 }
 
+export function sha256Binary(data: Uint8Array): string {
+  return hexEncode(sha256Bytes(data));
+}
+
 export function contentHash(value: unknown): string {
   return sha256Hex(canonicalSerialize(value));
 }

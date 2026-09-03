@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   canonicalSerialize,
   sha256Hex,
+  sha256Binary,
   contentHash,
 } from '../index.js';
 
@@ -73,6 +74,25 @@ describe('D7.2 — SHA-256', () => {
 
   it('matches known SHA-256 vector', () => {
     expect(sha256Hex('')).toBe(
+      'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    );
+  });
+});
+
+describe('sha256Binary', () => {
+  it('produces 64-char lowercase hex', () => {
+    const hash = sha256Binary(new Uint8Array([0x41, 0x42, 0x43]));
+    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('matches sha256Hex for same ASCII content', () => {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode('hello');
+    expect(sha256Binary(bytes)).toBe(sha256Hex('hello'));
+  });
+
+  it('produces known hash for empty input', () => {
+    expect(sha256Binary(new Uint8Array(0))).toBe(
       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
     );
   });
