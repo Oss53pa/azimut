@@ -1,4 +1,4 @@
-import type { SiteData, Outcome } from '@azimut/core-model';
+import type { SiteData, Outcome, Finding } from '@azimut/core-model';
 import {
   parseNumber,
   parseCsvLine,
@@ -29,14 +29,15 @@ export type ImportedSupport = {
 
 export type ImportLineResult = {
   readonly row: number;
-  readonly status: 'ok' | 'rejected';
+  readonly status: 'imported' | 'pending' | 'rejected';
   readonly support: ImportedSupport | null;
-  readonly errors: readonly string[];
+  readonly findings: readonly Finding[];
 };
 
 export type ImportReport = {
   readonly total_rows: number;
   readonly imported: number;
+  readonly pending: number;
   readonly rejected: number;
   readonly lines: readonly ImportLineResult[];
   readonly supports: readonly ImportedSupport[];
@@ -135,65 +136,109 @@ export function importSupports(
     const line = rawLines[i] as string;
     const fields = parseCsvLine(line, separator);
     const row = i + 1;
-    const errors: string[] = [];
+    const rowFindings: Finding[] = [];
 
-    const getId = (f: string): string =>
+    const get = (f: string): string =>
       (fields[colIndex.get(f) ?? -1] ?? '').trim();
 
-    const id = getId('id');
-    const nodeId = getId('node_id');
+    const id = get('id');
+    const nodeId = get('node_id');
 
-    if (id === '') errors.push('id manquant');
-    if (nodeId === '') errors.push('node_id manquant');
-
-    if (id !== '' && seenIds.has(id)) {
-      errors.push(`doublon id=${id}`);
+    if (id === '' || nodeId === '') {
+      rowFindings.push({
+        code: 'IMPORT.ROW_INVALID',
+        severity: 'warning',
+        entity: null,
+        params: { row, reason: 'champ obligatoire vide' },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', support: null, findings: rowFindings });
+      continue;
     }
 
-    if (nodeId !== '' && !nodeIds.has(nodeId)) {
-      errors.push(`nœud inexistant node_id=${nodeId}`);
+    if (seenIds.has(id)) {
+      rowFindings.push({
+        code: 'IMPORT.DUPLICATE_KEY',
+        severity: 'warning',
+        entity: null,
+        params: { row, key: id },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', support: null, findings: rowFindings });
+      continue;
     }
 
-    const azRaw = getId('azimuth_deg');
+    const azRaw = get('azimuth_deg');
     const azimuth = parseNumber(azRaw);
-    if (azRaw === '') {
-      errors.push('azimut absent');
-    } else if (azimuth === null) {
-      errors.push(`azimut invalide: ${azRaw}`);
+    if (azRaw === '' || azimuth === null) {
+      rowFindings.push({
+        code: 'IMPORT.ROW_INVALID',
+        severity: 'warning',
+        entity: null,
+        params: { row, reason: azRaw === '' ? 'azimut absent' : `azimut invalide: ${azRaw}` },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', support: null, findings: rowFindings });
+      continue;
     }
 
-    const wRaw = getId('width_m');
+    const wRaw = get('width_m');
     const width = parseNumber(wRaw);
-    if (wRaw === '') {
-      errors.push('largeur absente');
-    } else if (width === null) {
-      errors.push(`largeur invalide: ${wRaw}`);
+    if (wRaw === '' || width === null) {
+      rowFindings.push({
+        code: 'IMPORT.ROW_INVALID',
+        severity: 'warning',
+        entity: null,
+        params: { row, reason: wRaw === '' ? 'largeur absente' : `largeur invalide: ${wRaw}` },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', support: null, findings: rowFindings });
+      continue;
     }
 
-    const hRaw = getId('height_m');
+    const hRaw = get('height_m');
     const height = parseNumber(hRaw);
-    if (hRaw === '') {
-      errors.push('hauteur absente');
-    } else if (height === null) {
-      errors.push(`hauteur invalide: ${hRaw}`);
+    if (hRaw === '' || height === null) {
+      rowFindings.push({
+        code: 'IMPORT.ROW_INVALID',
+        severity: 'warning',
+        entity: null,
+        params: { row, reason: hRaw === '' ? 'hauteur absente' : `hauteur invalide: ${hRaw}` },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', support: null, findings: rowFindings });
+      continue;
     }
 
-    if (errors.length > 0) {
-      lines.push({ row, status: 'rejected', support: null, errors });
+    seenIds.add(id);
+    const support: ImportedSupport = {
+      id,
+      node_id: nodeId,
+      azimuth_deg: azimuth,
+      width_m: width,
+      height_m: height,
+      photo_url: get('photo_url'),
+      notes: get('notes'),
+    };
+
+    if (!nodeIds.has(nodeId)) {
+      rowFindings.push({
+        code: 'IMPORT.NODE_NOT_FOUND',
+        severity: 'warning',
+        entity: null,
+        params: { row, id, node_id: nodeId },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'pending', support, findings: rowFindings });
     } else {
-      const support: ImportedSupport = {
-        id,
-        node_id: nodeId,
-        azimuth_deg: azimuth as number,
-        width_m: width as number,
-        height_m: height as number,
-        photo_url: getId('photo_url'),
-        notes: getId('notes'),
-      };
-      seenIds.add(id);
       supports.push(support);
-      lines.push({ row, status: 'ok', support, errors: [] });
+      lines.push({ row, status: 'imported', support, findings: [] });
     }
+  }
+
+  const warnings: Finding[] = [];
+  for (const line of lines) {
+    for (const f of line.findings) warnings.push(f);
   }
 
   return {
@@ -201,10 +246,11 @@ export function importSupports(
     value: {
       total_rows: rawLines.length - 1,
       imported: supports.length,
+      pending: lines.filter((l) => l.status === 'pending').length,
       rejected: lines.filter((l) => l.status === 'rejected').length,
       lines,
       supports,
     },
-    warnings: [],
+    warnings,
   };
 }

@@ -20,6 +20,7 @@ describe('T-1.13 importSupports', () => {
       if (!result.ok) return;
       expect(result.value.imported).toBe(2);
       expect(result.value.rejected).toBe(0);
+      expect(result.value.pending).toBe(0);
       expect(result.value.supports.length).toBe(2);
     });
   });
@@ -35,17 +36,17 @@ describe('T-1.13 importSupports', () => {
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(2);
-      expect(result.value.rejected).toBe(1);
-      const rejected = result.value.lines.find(
-        (l) => l.status === 'rejected',
+      expect(result.value.pending).toBe(1);
+      const pending = result.value.lines.find(
+        (l) => l.status === 'pending',
       );
-      expect(rejected?.row).toBe(3);
-      expect(rejected?.errors.length).toBeGreaterThan(0);
+      expect(pending?.row).toBe(3);
+      expect(pending?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
     });
   });
 
   describe('edge cases', () => {
-    it('rejects duplicate IDs', () => {
+    it('rejects duplicate IDs with IMPORT.DUPLICATE_KEY', () => {
       const content = csv([
         'sup-1;n-ml-hall;90;0.6;1.2',
         'sup-1;n-ml-entrance;0;0.4;0.8',
@@ -58,34 +59,55 @@ describe('T-1.13 importSupports', () => {
       const rej = result.value.lines.find(
         (l) => l.status === 'rejected',
       );
-      expect(rej?.errors.some((e) => e.includes('doublon'))).toBe(
-        true,
-      );
+      expect(rej?.findings[0]?.code).toBe('IMPORT.DUPLICATE_KEY');
+      expect(rej?.findings[0]?.params['key']).toBe('sup-1');
     });
 
-    it('rejects non-existent node_id', () => {
+    it('puts non-existent node_id in pending with IMPORT.NODE_NOT_FOUND', () => {
       const content = csv(['sup-1;n-does-not-exist;90;0.6;1.2']);
       const result = importSupports(refMultilevel, content);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const rej = result.value.lines[0];
-      expect(
-        rej?.errors.some((e) => e.includes('inexistant')),
-      ).toBe(true);
+      expect(result.value.pending).toBe(1);
+      expect(result.value.rejected).toBe(0);
+      const line = result.value.lines[0];
+      expect(line?.status).toBe('pending');
+      expect(line?.support).not.toBeNull();
+      expect(line?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
+      expect(line?.findings[0]?.params['node_id']).toBe('n-does-not-exist');
     });
 
-    it('rejects missing azimuth', () => {
+    it('rejects missing azimuth with IMPORT.ROW_INVALID', () => {
       const content = csv(['sup-1;n-ml-hall;;0.6;1.2']);
       const result = importSupports(refMultilevel, content);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
-      expect(
-        result.value.lines[0]?.errors.some((e) =>
-          e.includes('azimut'),
-        ),
-      ).toBe(true);
+      expect(result.value.lines[0]?.findings[0]?.code).toBe(
+        'IMPORT.ROW_INVALID',
+      );
+    });
+
+    it('rejects missing id or node_id with IMPORT.ROW_INVALID', () => {
+      const content = csv([';n-ml-hall;90;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.lines[0]?.findings[0]?.code).toBe(
+        'IMPORT.ROW_INVALID',
+      );
+    });
+
+    it('rejects invalid numeric fields with IMPORT.ROW_INVALID', () => {
+      const content = csv(['sup-1;n-ml-hall;abc;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.lines[0]?.findings[0]?.code).toBe(
+        'IMPORT.ROW_INVALID',
+      );
     });
 
     it('handles decimal comma (virgule)', () => {
@@ -192,6 +214,38 @@ describe('T-1.13 importSupports', () => {
         'http://example.com/p.jpg',
       );
       expect(result.value.supports[0]?.notes).toBe('RAS');
+    });
+  });
+
+  describe('warnings propagation', () => {
+    it('propagates row findings as Outcome warnings', () => {
+      const content = csv([
+        'sup-1;n-ml-hall;90;0.6;1.2',
+        'sup-2;n-nonexistent;0;0.4;0.8',
+      ]);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.warnings.length).toBe(1);
+      expect(result.warnings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
+    });
+  });
+
+  describe('line-by-line report', () => {
+    it('produces a line for every data row', () => {
+      const content = csv([
+        'sup-1;n-ml-hall;90;0.6;1.2',
+        ';n-ml-hall;90;0.6;1.2',
+        'sup-3;n-nonexistent;0;0.4;0.8',
+      ]);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.total_rows).toBe(3);
+      expect(result.value.lines).toHaveLength(3);
+      expect(result.value.imported).toBe(1);
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.pending).toBe(1);
     });
   });
 
