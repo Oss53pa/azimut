@@ -54,6 +54,28 @@ describe('parseNumber', () => {
   it('returns null for NaN', () => {
     expect(parseNumber('NaN')).toBeNull();
   });
+
+  it('parses negative integers', () => {
+    expect(parseNumber('-42')).toBe(-42);
+  });
+
+  it('parses negative float with comma', () => {
+    expect(parseNumber('-3,14')).toBe(-3.14);
+  });
+
+  it('parses leading dot', () => {
+    expect(parseNumber('.5')).toBe(0.5);
+  });
+
+  it('parses trailing dot', () => {
+    expect(parseNumber('5.')).toBe(5);
+  });
+
+  it('returns null for thousand-separator commas', () => {
+    // normalizeDecimalSeparator only replaces first comma
+    // "1,000,000" → "1.000,000" → NaN → null
+    expect(parseNumber('1,000,000')).toBeNull();
+  });
 });
 
 describe('parseCsvLine', () => {
@@ -88,6 +110,27 @@ describe('parseCsvLine', () => {
   it('handles single field', () => {
     expect(parseCsvLine('only', ';')).toEqual(['only']);
   });
+
+  it('handles empty quoted fields', () => {
+    expect(parseCsvLine('"";""', ';')).toEqual(['', '']);
+  });
+
+  it('handles newline inside quoted field', () => {
+    expect(parseCsvLine('"line1\nline2";ok', ';')).toEqual([
+      'line1\nline2',
+      'ok',
+    ]);
+  });
+
+  it('handles empty string input', () => {
+    expect(parseCsvLine('', ';')).toEqual(['']);
+  });
+
+  it('treats unclosed quote as consuming rest of line', () => {
+    expect(parseCsvLine('"unclosed;field', ';')).toEqual([
+      'unclosed;field',
+    ]);
+  });
 });
 
 describe('detectSeparator', () => {
@@ -109,6 +152,14 @@ describe('detectSeparator', () => {
 
   it('prefers semicolon over comma at equal count', () => {
     expect(detectSeparator('a;b,c')).toBe(';');
+  });
+
+  it('returns tab for empty string (all counts zero, tab wins ties)', () => {
+    expect(detectSeparator('')).toBe('\t');
+  });
+
+  it('returns tab for single character with no separators', () => {
+    expect(detectSeparator('a')).toBe('\t');
   });
 });
 
@@ -174,5 +225,11 @@ describe('detectColumns', () => {
     const aliases = { name: ['name'] };
     const result = detectColumns([], aliases, ['name']);
     expect(result).toBeNull();
+  });
+
+  it('matches first occurrence for duplicate column headers', () => {
+    const aliases = { name: ['name'] };
+    const result = detectColumns(['Name', 'Name'], aliases, ['name']);
+    expect(result).toEqual({ name: 'Name' });
   });
 });

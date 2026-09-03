@@ -64,6 +64,18 @@ describe('roundMm', () => {
   it('rounds 4.4 to 4', () => {
     expect(roundMm(4.4)).toBe(4);
   });
+  it('converts negative zero to positive zero', () => {
+    expect(Object.is(roundMm(-0), 0)).toBe(true);
+  });
+  it('rounds -0.4 to positive zero', () => {
+    const result = roundMm(-0.4);
+    expect(result).toBe(0);
+    expect(Object.is(result, 0)).toBe(true);
+  });
+  it('rounds negative values correctly', () => {
+    expect(roundMm(-3.6)).toBe(-4);
+    expect(roundMm(-3.4)).toBe(-3);
+  });
 });
 
 describe('ceilMm', () => {
@@ -72,5 +84,17 @@ describe('ceilMm', () => {
   });
   it('ceils exact 4 to 4', () => {
     expect(ceilMm(4)).toBe(4);
+  });
+  it('converts negative zero to positive zero', () => {
+    expect(Object.is(ceilMm(-0), 0)).toBe(true);
+  });
+  it('ceils -0.01 to positive zero', () => {
+    const result = ceilMm(-0.01);
+    expect(result).toBe(0);
+    expect(Object.is(result, 0)).toBe(true);
+  });
+  it('ceils negative values toward zero', () => {
+    expect(ceilMm(-3.1)).toBe(-3);
+    expect(ceilMm(-3.9)).toBe(-3);
   });
 });

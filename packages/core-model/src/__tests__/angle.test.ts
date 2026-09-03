@@ -26,4 +26,16 @@ describe('normalizeAzimuth — D1.3 compass convention', () => {
   it('handles -0', () => {
     expect(normalizeAzimuth(-0)).toBe(0);
   });
+  it('preserves small fractional value', () => {
+    expect(normalizeAzimuth(0.001)).toBeCloseTo(0.001, 10);
+  });
+  it('preserves value just below 360', () => {
+    expect(normalizeAzimuth(359.999)).toBeCloseTo(359.999, 10);
+  });
+  it('normalizes 3600 to 0', () => {
+    expect(normalizeAzimuth(3600)).toBe(0);
+  });
+  it('normalizes small negative to near 360', () => {
+    expect(normalizeAzimuth(-0.001)).toBeCloseTo(359.999, 10);
+  });
 });
