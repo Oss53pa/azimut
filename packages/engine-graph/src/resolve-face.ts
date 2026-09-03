@@ -1,10 +1,12 @@
 import type {
   SiteData,
+  GraphNode,
   FaceTemplate,
   ContentBlockDef,
   TravelProfile,
   Outcome,
 } from '@azimut/core-model';
+import { normalizeAzimuth } from '@azimut/core-model';
 import { computeRoute } from './compute-route.js';
 
 export type ResolvedBlock = {
@@ -45,6 +47,19 @@ export type ResolvedFace = {
   readonly blocks: readonly ResolvedBlock[];
 };
 
+const CARDINAL_LABELS = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'] as const;
+
+function bearingToCardinal(fromNode: GraphNode, toNode: GraphNode): string {
+  const dx = toNode.position.x_m - fromNode.position.x_m;
+  const dy = toNode.position.y_m - fromNode.position.y_m;
+  if (dx === 0 && dy === 0) return 'N';
+  // atan2 gives angle from +x axis; convert to compass bearing (N=+y)
+  const radians = Math.atan2(dx, dy);
+  const degrees = normalizeAzimuth(radians * (180 / Math.PI));
+  const index = Math.round(degrees / 45) % 8;
+  return CARDINAL_LABELS[index] as string;
+}
+
 function resolveDestinationList(
   site: SiteData,
   nodeId: string,
@@ -59,6 +74,13 @@ function resolveDestinationList(
       namesByDest.set(dn.destination_id, { [dn.lang]: dn.value });
     }
   }
+
+  const nodeMap = new Map<string, GraphNode>();
+  for (const n of site.graph.nodes) {
+    nodeMap.set(n.id, n);
+  }
+
+  const viewNode = nodeMap.get(nodeId);
 
   const entries: ResolvedDestinationEntry[] = [];
   const sortedDests = [...site.destinations].sort((a, b) =>
@@ -76,10 +98,20 @@ function resolveDestinationList(
     const distance =
       routeResult.ok ? routeResult.value.cost : null;
     const names = namesByDest.get(dest.id) ?? {};
+
+    let direction: string | null = null;
+    if (routeResult.ok && viewNode && routeResult.value.path.length >= 2) {
+      const nextNodeId = routeResult.value.path[1] as string;
+      const nextNode = nodeMap.get(nextNodeId);
+      if (nextNode) {
+        direction = bearingToCardinal(viewNode, nextNode);
+      }
+    }
+
     entries.push({
       destination_id: dest.id,
       names,
-      direction: null,
+      direction,
       distance_m: distance,
     });
   }

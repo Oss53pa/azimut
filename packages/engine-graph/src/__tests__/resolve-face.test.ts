@@ -159,6 +159,26 @@ describe('T-2.3 resolveFaceContent', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('resolves cardinal direction from route bearing', () => {
+    const result = resolveFaceContent(
+      refMultilevel,
+      tpl,
+      'n-ml-hall',
+      stdProfile,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const destList = result.value.blocks.find(
+      (b) => b.kind === 'destination_list',
+    );
+    if (destList?.content.type === 'destination_list') {
+      for (const entry of destList.content.entries) {
+        // Direction should now be a cardinal string, not null
+        expect(entry.direction).toMatch(/^(N|NE|E|SE|S|SW|W|NW)$/);
+      }
+    }
+  });
+
   it('fails on non-existent node', () => {
     const result = resolveFaceContent(
       refMultilevel,
