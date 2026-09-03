@@ -116,6 +116,57 @@ describe('assemblePackage', () => {
     if (!result.ok) return;
     expect(result.value.total_size_bytes).toBe(5 + 28);
   });
+
+  it('three duplicate IDs produce two findings', () => {
+    const inputs = [
+      makeInput({ id: 'art-dup', path: 'a.pdf' }),
+      makeInput({ id: 'art-dup', path: 'b.pdf' }),
+      makeInput({ id: 'art-dup', path: 'c.pdf' }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const dupId = result.findings.filter(
+      (f) => f.code === 'PACKAGE.DUPLICATE_ID',
+    );
+    expect(dupId.length).toBe(2);
+  });
+
+  it('combined duplicate ID and duplicate path both reported', () => {
+    const inputs = [
+      makeInput({ id: 'art-dup', path: 'same.pdf' }),
+      makeInput({ id: 'art-dup', path: 'same.pdf' }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const codes = result.findings.map((f) => f.code);
+    expect(codes).toContain('PACKAGE.DUPLICATE_ID');
+    expect(codes).toContain('PACKAGE.DUPLICATE_PATH');
+  });
+
+  it('blocking findings suppress warnings (empty artifact + dup ID)', () => {
+    const inputs = [
+      makeInput({ id: 'art-dup', path: 'a.pdf', content: new Uint8Array(0) }),
+      makeInput({ id: 'art-dup', path: 'b.pdf' }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    // Blocking return has no warnings field
+    expect(result.findings[0]?.code).toBe('PACKAGE.DUPLICATE_ID');
+  });
+
+  it('metadata is isolated from input mutation', () => {
+    const meta = { support_id: 'sup-001', face_side: 'front' };
+    const inputs = [makeInput({ metadata: meta })];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Mutate original metadata — manifest should be unaffected
+    meta['support_id'] = 'MUTATED';
+    expect(result.value.artifacts[0]?.metadata['support_id']).toBe('sup-001');
+  });
 });
 
 describe('manifestToJson', () => {

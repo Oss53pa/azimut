@@ -113,4 +113,50 @@ describe('RouteCache', () => {
     const r2 = c2.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('self-route (from === to) is cached with zero edges', () => {
+    if (!entrance) return;
+    const cache = new RouteCache();
+    const r = cache.computeOrGet(refMinimal, profile, entrance.id, entrance.id);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.path).toEqual([entrance.id]);
+    expect(r.value.edges).toEqual([]);
+    expect(r.value.cost).toBe(0);
+    expect(cache.size).toBe(1);
+  });
+
+  it('self-route is immune to invalidateForEdge', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    cache.computeOrGet(refMinimal, profile, entrance.id, entrance.id);
+    const r = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(2);
+
+    if (!r.ok) return;
+    const edgeId = r.value.edges[0];
+    if (!edgeId) return;
+
+    // Invalidating the edge removes the normal route but not the self-route
+    cache.invalidateForEdge(edgeId);
+    expect(cache.size).toBe(1);
+  });
+
+  it('selective invalidation with multiple routes', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    // Cache forward and reverse routes
+    const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    cache.computeOrGet(refMinimal, profile, dest.id, entrance.id);
+    expect(cache.size).toBe(2);
+
+    if (!r1.ok) return;
+    const edgeId = r1.value.edges[0];
+    if (!edgeId) return;
+
+    // Both routes likely share the same edge, so both get invalidated
+    cache.invalidateForEdge(edgeId);
+    // At least the forward route is gone
+    expect(cache.size).toBeLessThan(2);
+  });
 });

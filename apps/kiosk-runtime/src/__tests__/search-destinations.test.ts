@@ -115,4 +115,69 @@ describe('searchDestinations', () => {
     const r2 = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('orphaned destination_name is silently skipped', () => {
+    const site = {
+      ...refMultilevel,
+      destination_names: [
+        ...refMultilevel.destination_names,
+        {
+          id: 'dn-orphan',
+          org_id: 'org-test-001',
+          destination_id: 'dest-nonexistent',
+          lang: 'fr' as const,
+          value: 'Fantôme',
+        },
+      ],
+    };
+    const results = searchDestinations(site, 'Fantôme', 'fr', 10);
+    expect(results.length).toBe(0);
+  });
+
+  it('substring score decreases with later position', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [
+        { ...base, id: 'd-early', display_priority: 0 },
+        { ...base, id: 'd-late', display_priority: 0 },
+      ],
+      destination_names: [
+        { id: 'dn-e', org_id: 'org-test-001', destination_id: 'd-early', lang: 'fr' as const, value: 'XYZfoo' },
+        { id: 'dn-l', org_id: 'org-test-001', destination_id: 'd-late', lang: 'fr' as const, value: 'ABCDEfoo' },
+      ],
+    };
+    // "foo" at index 3 → score 77; at index 5 → score 75
+    const results = searchDestinations(site, 'foo', 'fr', 10);
+    expect(results.length).toBe(2);
+    const r0 = results[0];
+    const r1 = results[1];
+    if (!r0 || !r1) throw new Error('expected 2 results');
+    expect(r0.score).toBeGreaterThan(r1.score);
+  });
+
+  it('display_priority breaks score ties', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [
+        { ...base, id: 'd-low', display_priority: 10 },
+        { ...base, id: 'd-high', display_priority: 1 },
+      ],
+      destination_names: [
+        { id: 'dn-lo', org_id: 'org-test-001', destination_id: 'd-low', lang: 'fr' as const, value: 'Salle' },
+        { id: 'dn-hi', org_id: 'org-test-001', destination_id: 'd-high', lang: 'fr' as const, value: 'Salle' },
+      ],
+    };
+    const results = searchDestinations(site, 'Salle', 'fr', 10);
+    expect(results.length).toBe(2);
+    const r0 = results[0];
+    const r1 = results[1];
+    if (!r0 || !r1) throw new Error('expected 2 results');
+    // Higher priority (lower number) comes first
+    expect(r0.destination.id).toBe('d-high');
+    expect(r1.destination.id).toBe('d-low');
+  });
 });
