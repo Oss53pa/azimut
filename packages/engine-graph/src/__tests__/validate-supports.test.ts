@@ -173,6 +173,123 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
       );
       expect(f).toBeDefined();
     });
+
+    it('flags block with negative x_pct', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [
+          {
+            id: 'ftpl-neg-x',
+            org_id: 'org-test-001',
+            support_type_key: 'directional',
+            side: 'front',
+            name: 'Neg X',
+            blocks: [
+              {
+                kind: 'header' as const,
+                ordinal: 0,
+                region: { x_pct: -5, y_pct: 0, w_pct: 50, h_pct: 50 },
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(
+        result.findings.some(
+          (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
+        ),
+      ).toBe(true);
+    });
+
+    it('flags block with negative y_pct', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [
+          {
+            id: 'ftpl-neg-y',
+            org_id: 'org-test-001',
+            support_type_key: 'directional',
+            side: 'front',
+            name: 'Neg Y',
+            blocks: [
+              {
+                kind: 'header' as const,
+                ordinal: 0,
+                region: { x_pct: 0, y_pct: -10, w_pct: 50, h_pct: 50 },
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(false);
+    });
+
+    it('flags block with zero width', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [
+          {
+            id: 'ftpl-zero-w',
+            org_id: 'org-test-001',
+            support_type_key: 'directional',
+            side: 'front',
+            name: 'Zero W',
+            blocks: [
+              {
+                kind: 'header' as const,
+                ordinal: 0,
+                region: { x_pct: 0, y_pct: 0, w_pct: 0, h_pct: 50 },
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(false);
+    });
+
+    it('flags block with zero height', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [
+          {
+            id: 'ftpl-zero-h',
+            org_id: 'org-test-001',
+            support_type_key: 'directional',
+            side: 'front',
+            name: 'Zero H',
+            blocks: [
+              {
+                kind: 'header' as const,
+                ordinal: 0,
+                region: { x_pct: 0, y_pct: 0, w_pct: 50, h_pct: 0 },
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(false);
+    });
+  });
+
+  describe('empty inputs', () => {
+    it('accepts site with zero support types and zero templates', () => {
+      const site = patchSite(refMinimal, {
+        support_types: [],
+        face_templates: [],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.total_support_types).toBe(0);
+      expect(result.value.total_face_templates).toBe(0);
+      expect(result.value.type_keys).toEqual([]);
+    });
   });
 
   describe('adding a type requires no code change (T-2.1)', () => {

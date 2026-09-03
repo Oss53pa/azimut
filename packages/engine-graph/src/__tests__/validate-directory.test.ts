@@ -203,6 +203,37 @@ describe('T-1.7 validateDirectory', () => {
     });
   });
 
+  describe('empty destinations', () => {
+    it('accepts site with zero destinations', () => {
+      const site = patchSite(refMinimal, {
+        destinations: [],
+        destination_names: [],
+      });
+      const result = validateDirectory(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.total_destinations).toBe(0);
+      expect(result.value.total_names).toBe(0);
+      expect(result.value.active_langs).toEqual([]);
+    });
+
+    it('skips missing-name check when no names exist', () => {
+      const site = patchSite(refMultilevel, {
+        destination_names: [],
+      });
+      const result = validateDirectory(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.total_names).toBe(0);
+      expect(result.value.active_langs).toEqual([]);
+      expect(
+        result.warnings.some(
+          (f) => f.code === 'GRAPH.DIRECTORY_NAME_MISSING',
+        ),
+      ).toBe(false);
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = validateDirectory(refMultilevel);

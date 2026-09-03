@@ -125,6 +125,30 @@ describe('verifyPackage', () => {
     expect(ids).toEqual(sorted);
   });
 
+  it('ignores extra content not in manifest', () => {
+    const input = makeInput();
+    const { manifest, contents } = buildManifestAndContents([input]);
+    contents.set('art-extra', textEncoder.encode('extra stuff'));
+    const result = verifyPackage(manifest, contents);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.verified_count).toBe(1);
+    expect(result.value.total_count).toBe(1);
+  });
+
+  it('verifies empty-content artifact', () => {
+    const input = makeInput({
+      id: 'art-empty',
+      path: 'empty.pdf',
+      content: new Uint8Array(0),
+    });
+    const { manifest, contents } = buildManifestAndContents([input]);
+    const result = verifyPackage(manifest, contents);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.verified_count).toBe(1);
+  });
+
   it('is deterministic (INV-4)', () => {
     const input = makeInput();
     const { manifest, contents } = buildManifestAndContents([input]);

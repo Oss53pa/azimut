@@ -183,6 +183,41 @@ describe('scanForNetworkDependency', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('treats zero-byte artifact as clean', () => {
+    const map = new Map<string, Uint8Array>();
+    map.set('empty.js', new Uint8Array(0));
+    const result = scanForNetworkDependency(map);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.scanned_count).toBe(1);
+    expect(result.value.clean_count).toBe(1);
+  });
+
+  it('regex lastIndex does not bleed between calls', () => {
+    const dirty = artifactMap({
+      'a.js': 'fetch("https://example.com/data")',
+    });
+    const r1 = scanForNetworkDependency(dirty);
+    expect(r1.ok).toBe(false);
+
+    const clean = artifactMap({
+      'b.js': 'console.log("hello")',
+    });
+    const r2 = scanForNetworkDependency(clean);
+    expect(r2.ok).toBe(true);
+  });
+
+  it('scans text when null byte is beyond position 512', () => {
+    const prefix = 'fetch("https://example.com/api")';
+    const padding = 'x'.repeat(520 - prefix.length);
+    const withLateNull = prefix + padding + '\0rest';
+    const artifacts = artifactMap({ 'late-null.js': withLateNull });
+    const result = scanForNetworkDependency(artifacts);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.params['patterns']).toContain('fetch()');
+  });
+
   it('does not flag local script/link/img tags', () => {
     const artifacts = artifactMap({
       'page.html':

@@ -205,6 +205,36 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
     ]);
     expect(result.ok).toBe(true);
   });
+
+  it('accepts empty mutations array', () => {
+    const result = guardSafetyRegistry(refMinimal, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('blocks only safety in mixed safety+wayfinding batch', () => {
+    const result = guardSafetyRegistry(refMinimal, [
+      {
+        pictogram_id: 'picto-office-wayfinding',
+        field: 'svg_path',
+        old_value: 'M0 0',
+        new_value: 'M1 1',
+      },
+      {
+        pictogram_id: 'picto-fire-exit-safety',
+        field: 'svg_path',
+        old_value: 'M0 0',
+        new_value: 'M2 2',
+      },
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.entity?.id).toBe(
+      'picto-fire-exit-safety',
+    );
+  });
 });
 
 describe('T-1.8 INV-3 guardSafetyDeletion', () => {
@@ -222,5 +252,43 @@ describe('T-1.8 INV-3 guardSafetyDeletion', () => {
       'picto-office-wayfinding',
     ]);
     expect(result.ok).toBe(true);
+  });
+
+  it('accepts empty pictogram ids array', () => {
+    const result = guardSafetyDeletion(refMinimal, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings).toEqual([]);
+  });
+
+  it('ignores unknown pictogram ids', () => {
+    const result = guardSafetyDeletion(refMinimal, [
+      'picto-nonexistent',
+    ]);
+    expect(result.ok).toBe(true);
+  });
+});
+
+describe('DATA.CATEGORY_CYCLE — self-referencing', () => {
+  it('detects category referencing itself as parent', () => {
+    const site = patchSite(refMinimal, {
+      categories: [
+        {
+          id: 'cat-self',
+          org_id: 'org-test-001',
+          sector_key: 'tertiary',
+          code: 'self',
+          parent_id: 'cat-self',
+        },
+      ],
+    });
+    const result = validateLibrary(site);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const cycles = result.findings.filter(
+      (f) => f.code === 'DATA.CATEGORY_CYCLE',
+    );
+    expect(cycles.length).toBeGreaterThan(0);
+    expect(cycles[0]?.entity?.id).toBe('cat-self');
   });
 });
