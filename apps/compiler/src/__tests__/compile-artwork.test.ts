@@ -115,6 +115,35 @@ describe('T-2.12 createArtworkHandler', () => {
     expect((result['svg_length'] as number)).toBeGreaterThan(0);
   });
 
+  it('uses fallback dimensions when support_type not found', async () => {
+    const siteNoSupportTypes = {
+      ...refMultilevel,
+      support_types: [],
+    };
+    const ctx: CompileContext = { ...context, site: siteNoSupportTypes };
+    const handler = createArtworkHandler(ctx);
+    const job = makeJob({
+      support_id: 'sup-fallback',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    const result = await handler(job);
+    // Should still produce output using fallback 600x400 dimensions
+    expect((result['svg_length'] as number)).toBeGreaterThan(0);
+    expect((result['pdf_length'] as number)).toBeGreaterThan(0);
+  });
+
+  it('non-string node_id resolves to empty string and fails', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      node_id: 123,
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    await expect(handler(job)).rejects.toThrow('Resolve failed');
+  });
+
   it('produces deterministic output (INV-4)', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({

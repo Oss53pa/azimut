@@ -151,4 +151,24 @@ describe('isEdgeTraversableFrom — inline excluded set', () => {
     // But from wrong node, still rejected
     expect(isEdgeTraversableFrom(edge, 'b', profile, nodeKinds)).toBe(false);
   });
+
+  it('rejects edge when from_node has excluded kind', () => {
+    const edge = makeEdge({ from_node_id: 'c', to_node_id: 'a' });
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator'] });
+    // c is elevator (excluded), a is junction → rejected via fromKind
+    expect(isEdgeTraversableFrom(edge, 'c', profile, nodeKinds)).toBe(false);
+  });
+
+  it('backward direction combined with excluded kind', () => {
+    const edge = makeEdge({
+      from_node_id: 'a',
+      to_node_id: 'c',
+      direction: 'backward',
+    });
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator'] });
+    // backward → only traversable from to_node_id ('c'), but 'c' is elevator (excluded)
+    expect(isEdgeTraversableFrom(edge, 'c', profile, nodeKinds)).toBe(false);
+    // from 'a' → wrong direction
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds)).toBe(false);
+  });
 });
