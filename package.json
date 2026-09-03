@@ -9,7 +9,7 @@
     "typecheck": "pnpm -r --parallel run typecheck",
     "lint": "eslint . && node scripts/check-deps.js",
     "test": "vitest run",
-    "test:visual": "echo \"No visual tests configured yet\" && exit 0",
+    "test:visual": "vitest run tests/visual.test.ts",
     "test:rls": "echo \"No RLS tests configured yet\" && exit 0",
     "test:determinism": "vitest run tests/determinism.test.ts",
     "test:e2e": "echo \"No e2e tests configured yet\" && exit 0",
