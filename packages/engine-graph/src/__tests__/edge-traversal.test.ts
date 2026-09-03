@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isEdgeTraversableFrom } from '../edge-traversal.js';
+import { isEdgeTraversableFrom, buildExcludedKindsSet } from '../edge-traversal.js';
 import type { Edge, TravelProfile } from '@azimut/core-model';
 
 function makeEdge(overrides?: Partial<Edge>): Edge {
@@ -89,5 +89,35 @@ describe('isEdgeTraversableFrom', () => {
     const profile = makeProfile({ excluded_edge_kinds: ['elevator'] });
     const emptyKinds = new Map<string, string>();
     expect(isEdgeTraversableFrom(edge, 'x', profile, emptyKinds)).toBe(true);
+  });
+
+  it('uses pre-built excludedKinds set when provided', () => {
+    const edge = makeEdge({ from_node_id: 'a', to_node_id: 'c' });
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator'] });
+    const preBuilt = buildExcludedKindsSet(profile);
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds, preBuilt)).toBe(false);
+  });
+
+  it('pre-built empty set allows traversal', () => {
+    const edge = makeEdge({ from_node_id: 'a', to_node_id: 'c' });
+    const profile = makeProfile({ excluded_edge_kinds: [] });
+    const preBuilt = buildExcludedKindsSet(profile);
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds, preBuilt)).toBe(true);
+  });
+});
+
+describe('buildExcludedKindsSet', () => {
+  it('returns a set with the profile excluded kinds', () => {
+    const profile = makeProfile({ excluded_edge_kinds: ['elevator', 'stairs'] });
+    const set = buildExcludedKindsSet(profile);
+    expect(set.has('elevator')).toBe(true);
+    expect(set.has('stairs')).toBe(true);
+    expect(set.has('junction')).toBe(false);
+  });
+
+  it('returns empty set for no exclusions', () => {
+    const profile = makeProfile({ excluded_edge_kinds: [] });
+    const set = buildExcludedKindsSet(profile);
+    expect(set.size).toBe(0);
   });
 });

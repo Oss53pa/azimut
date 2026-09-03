@@ -4,7 +4,7 @@ import type {
   Destination,
   Outcome,
 } from '@azimut/core-model';
-import { isEdgeTraversableFrom } from './edge-traversal.js';
+import { isEdgeTraversableFrom, buildExcludedKindsSet } from './edge-traversal.js';
 
 export type DecisionPoint = {
   readonly node_id: string;
@@ -24,16 +24,18 @@ export function deriveDecisionPoints(
     nodeKindMap.set(n.id, n.kind);
   }
 
+  const excludedKinds = buildExcludedKindsSet(profile);
+
   for (const edge of site.graph.edges) {
     if (edge.from_node_id === edge.to_node_id) continue;
 
-    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds)) {
       outDegree.set(
         edge.from_node_id,
         (outDegree.get(edge.from_node_id) ?? 0) + 1,
       );
     }
-    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds)) {
       outDegree.set(
         edge.to_node_id,
         (outDegree.get(edge.to_node_id) ?? 0) + 1,

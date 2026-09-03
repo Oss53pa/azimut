@@ -35,7 +35,7 @@ function selfLoopFindings(edges: readonly Edge[]): Finding[] {
 function zeroLengthFindings(edges: readonly Edge[]): Finding[] {
   const findings: Finding[] = [];
   for (const e of edges) {
-    if (e.length_m === 0 && e.from_node_id !== e.to_node_id) {
+    if (e.length_m <= 0 && e.from_node_id !== e.to_node_id) {
       findings.push({
         code: 'GRAPH.EDGE_ZERO_LENGTH',
         severity: 'blocking',

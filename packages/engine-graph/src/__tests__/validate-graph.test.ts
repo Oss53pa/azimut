@@ -365,6 +365,39 @@ describe('validateGraph', () => {
         expect(zero[0]?.entity?.id).toBe('e-zero');
       }
     });
+
+    it('detects negative-length edge', () => {
+      const negativeLength = makeSite({
+        graph: {
+          ...refMinimal.graph,
+          edges: [
+            ...refMinimal.graph.edges,
+            {
+              id: 'e-negative',
+              org_id: 'org-test-001',
+              from_node_id: 'n-entrance',
+              to_node_id: 'n-junction',
+              width_m: 1.5,
+              slope_pct: 0,
+              accessible: true,
+              direction: 'both',
+              evacuation_route: false,
+              length_m: -3.5,
+            },
+          ],
+        },
+      });
+      const result = validateGraph(negativeLength);
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        const neg = findingsWithCode(
+          result.findings,
+          'GRAPH.EDGE_ZERO_LENGTH',
+        );
+        expect(neg.length).toBeGreaterThan(0);
+        expect(neg[0]?.entity?.id).toBe('e-negative');
+      }
+    });
   });
 
   describe('determinism (INV-4)', () => {

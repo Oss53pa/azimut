@@ -4,7 +4,7 @@ import type {
   TravelProfile,
   Outcome,
 } from '@azimut/core-model';
-import { isEdgeTraversableFrom } from './edge-traversal.js';
+import { isEdgeTraversableFrom, buildExcludedKindsSet } from './edge-traversal.js';
 
 export type Route = {
   readonly from_node_id: string;
@@ -35,12 +35,14 @@ function buildWeightedAdj(
     nodeKindMap.set(n.id, n.kind);
   }
 
+  const excludedKinds = buildExcludedKindsSet(profile);
+
   for (const edge of site.graph.edges) {
     if (edge.from_node_id === edge.to_node_id) continue;
 
     const cost = edgeCost(edge);
 
-    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds)) {
       const list = adj.get(edge.from_node_id);
       if (list) {
         list.push({
@@ -51,7 +53,7 @@ function buildWeightedAdj(
       }
     }
 
-    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds)) {
       const list = adj.get(edge.to_node_id);
       if (list) {
         list.push({
