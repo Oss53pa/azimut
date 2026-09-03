@@ -275,4 +275,113 @@ describe('T-2.10 renderEvacuationPlan', () => {
     const r2 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('escapes special characters in level name', () => {
+    const site = {
+      ...refMultilevel,
+      levels: refMultilevel.levels.map((l) =>
+        l.id === 'lvl-ml-rdc'
+          ? { ...l, name: 'Hall "B" & <C>' }
+          : l,
+      ),
+    };
+    const result = renderEvacuationPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('&amp;');
+    expect(result.value.svg).toContain('&lt;C&gt;');
+    expect(result.value.svg).toContain('&quot;B&quot;');
+    expect(result.value.svg).not.toContain('"B"');
+  });
+
+  it('escapes special characters in exit labels', () => {
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: refMultilevel.graph.nodes.map((n) =>
+          n.kind === 'entrance'
+            ? { ...n, label: 'Sortie <A>' }
+            : n,
+        ),
+      },
+    };
+    const result = renderEvacuationPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('&lt;A&gt;');
+  });
+
+  it('single-point geometry uses fallback scale', () => {
+    const site = {
+      ...refMultilevel,
+      levels: [
+        ...refMultilevel.levels,
+        {
+          id: 'lvl-1pt',
+          org_id: 'org-test-001',
+          building_id: 'bldg-ml-001',
+          name: 'Un point',
+          ordinal: 97,
+          elevation_m: 97,
+        },
+      ],
+      footprints: [
+        ...refMultilevel.footprints,
+        {
+          id: 'fp-1pt',
+          org_id: 'org-test-001',
+          level_id: 'lvl-1pt',
+          geometry: {
+            vertices: [{ x_m: 5, y_m: 5 }],
+          },
+          kind: 'room' as const,
+        },
+      ],
+    };
+    const opts = { ...defaultOptions, viewer_position: null };
+    const result = renderEvacuationPlan(site, 'lvl-1pt', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('<svg');
+    expect(result.value.svg).toContain('</svg>');
+    // Level has geometry (single vertex) but no routes or exits → those warnings
+    const warnCodes = result.warnings.map((w) => w.code);
+    expect(warnCodes).not.toContain('LAYOUT.EVAC_EMPTY_LEVEL');
+  });
+
+  it('viewer far outside geometry still renders valid SVG', () => {
+    const opts = {
+      ...defaultOptions,
+      viewer_position: { x_m: 1000, y_m: 1000 },
+    };
+    const result = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('tok-marker');
+    expect(result.value.svg).toContain('<svg');
+  });
+
+  it('shuffled node/edge order produces same output (sort determinism)', () => {
+    const reversed = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [...refMultilevel.graph.nodes].reverse(),
+        edges: [...refMultilevel.graph.edges].reverse(),
+      },
+      footprints: [...refMultilevel.footprints].reverse(),
+    };
+    const r1 = renderEvacuationPlan(
+      refMultilevel, 'lvl-ml-rdc', defaultOptions,
+    );
+    const r2 = renderEvacuationPlan(
+      reversed, 'lvl-ml-rdc', defaultOptions,
+    );
+    expect(r1.ok).toBe(true);
+    expect(r2.ok).toBe(true);
+    if (!r1.ok || !r2.ok) return;
+    expect(r1.value.svg).toBe(r2.value.svg);
+    expect(r1.value.stats).toStrictEqual(r2.value.stats);
+  });
 });

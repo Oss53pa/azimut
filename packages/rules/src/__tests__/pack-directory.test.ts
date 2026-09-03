@@ -153,6 +153,53 @@ describe('D3.1 — loadPackDirectory', () => {
     expect(result.findings[0]?.code).toBe('RULES.SCOPE_AMBIGUOUS');
   });
 
+  it('rejects manifest missing version', () => {
+    const files = { 'rules.json': makeRuleFile([]) };
+    const manifest = makeManifest(files, { version: '' });
+    const result = loadPackDirectory(manifest, files);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('RULES.VALIDATION_ERROR');
+  });
+
+  it('rejects non-array rule file content', () => {
+    const files = { 'rules.json': JSON.stringify({ not: 'array' }) };
+    const manifest = makeManifest(files);
+    const result = loadPackDirectory(manifest, files);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('RULES.VALIDATION_ERROR');
+  });
+
+  it('reports multiple missing files', () => {
+    const checksum = `sha256:${sha256Hex('')}`;
+    const manifest = JSON.stringify({
+      key: 'test', version: '1.0', jurisdiction: 'FR',
+      effective_from: '2026-01-01',
+      files: ['a.json', 'b.json'],
+      checksum,
+    });
+    const result = loadPackDirectory(manifest, {});
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.length).toBe(2);
+    expect(result.findings.every((f) => f.code === 'RULES.FILE_MISSING')).toBe(true);
+  });
+
+  it('reports multiple extra files', () => {
+    const files = {
+      'legibility.json': legibilityRules,
+      'extra1.json': makeRuleFile([]),
+      'extra2.json': makeRuleFile([]),
+    };
+    const manifest = makeManifest({ 'legibility.json': legibilityRules });
+    const result = loadPackDirectory(manifest, files);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const extras = result.findings.filter((f) => f.code === 'RULES.FILE_NOT_LISTED');
+    expect(extras.length).toBe(2);
+  });
+
   it('preserves rule kind and notes fields (D3.3)', () => {
     const rules = makeRuleFile([{
       code: 'LEGIBILITY.MIN_CHAR_HEIGHT',
