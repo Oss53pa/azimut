@@ -64,6 +64,34 @@ describe('searchDestinations', () => {
     }
   });
 
+  it('fuzzy matches a one-char deletion typo', () => {
+    // "Burau" is "Bureau" with one char deleted (distance 1)
+    const results = searchDestinations(refMultilevel, 'Burau', 'fr', 10);
+    expect(results.length).toBeGreaterThanOrEqual(1);
+    expect(results[0]?.score).toBeGreaterThan(0);
+    expect(results[0]?.score).toBeLessThan(70);
+  });
+
+  it('fuzzy scores lower than exact/prefix/substring', () => {
+    const exact = searchDestinations(refMultilevel, 'Bureau RDC', 'fr', 10);
+    const prefix = searchDestinations(refMultilevel, 'Bur', 'fr', 10);
+    const fuzzy = searchDestinations(refMultilevel, 'Burau', 'fr', 10);
+    expect(exact[0]?.score).toBeGreaterThan(prefix[0]?.score ?? 0);
+    expect(prefix[0]?.score).toBeGreaterThan(fuzzy[0]?.score ?? 0);
+  });
+
+  it('rejects queries with too many errors', () => {
+    // "Xyzeau" — too far from any destination name
+    const results = searchDestinations(refMultilevel, 'Xyzeau', 'fr', 10);
+    expect(results.length).toBe(0);
+  });
+
+  it('fuzzy match is deterministic (INV-4)', () => {
+    const r1 = searchDestinations(refMultilevel, 'Burau', 'fr', 10);
+    const r2 = searchDestinations(refMultilevel, 'Burau', 'fr', 10);
+    expect(r1).toStrictEqual(r2);
+  });
+
   it('is deterministic (INV-4)', () => {
     const r1 = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);
     const r2 = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);

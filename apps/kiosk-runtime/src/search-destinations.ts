@@ -14,6 +14,33 @@ function normalize(s: string): string {
     .trim();
 }
 
+function levenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+
+  let prev = new Uint16Array(n + 1);
+  let curr = new Uint16Array(n + 1);
+
+  for (let j = 0; j <= n; j++) prev[j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    curr[0] = i;
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(
+        (prev[j] ?? 0) + 1,
+        (curr[j - 1] ?? 0) + 1,
+        (prev[j - 1] ?? 0) + cost,
+      );
+    }
+    [prev, curr] = [curr, prev];
+  }
+
+  return prev[n] ?? m;
+}
+
 function computeScore(query: string, value: string): number {
   const nq = normalize(query);
   const nv = normalize(value);
@@ -28,6 +55,23 @@ function computeScore(query: string, value: string): number {
   const words = nv.split(/\s+/);
   for (const w of words) {
     if (w.startsWith(nq)) return 70;
+  }
+
+  // Fuzzy match: compare against each word, keep the best score.
+  // Allow up to ~30% edit distance relative to query length.
+  const maxDist = Math.max(1, Math.floor(nq.length * 0.3));
+  let bestDist = maxDist + 1;
+  for (const w of words) {
+    const d = levenshtein(nq, w);
+    if (d < bestDist) bestDist = d;
+  }
+  // Also compare against the whole value for short queries.
+  if (nq.length <= nv.length) {
+    const d = levenshtein(nq, nv.slice(0, nq.length));
+    if (d < bestDist) bestDist = d;
+  }
+  if (bestDist <= maxDist) {
+    return 50 - bestDist * 5;
   }
 
   return 0;
