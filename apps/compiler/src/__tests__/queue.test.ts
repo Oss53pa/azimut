@@ -136,6 +136,31 @@ describe('MemoryQueue', () => {
     expect(traces).toEqual([]);
   });
 
+  it('markSucceeded on unknown id is a no-op', async () => {
+    const q = new MemoryQueue();
+    await q.markSucceeded('unknown', { x: 1 }, new Date());
+    // No error thrown, no job created
+    expect(await q.getJob('unknown')).toBeNull();
+  });
+
+  it('markFailed on unknown id is a no-op', async () => {
+    const q = new MemoryQueue();
+    await q.markFailed('unknown', 'err', new Date());
+    expect(await q.getJob('unknown')).toBeNull();
+  });
+
+  it('dequeue order is FIFO among queued jobs', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ id: 'j1' }));
+    await q.enqueue(makeJob({ id: 'j2' }));
+    await q.enqueue(makeJob({ id: 'j3' }));
+    const first = await q.dequeue();
+    expect(first?.id).toBe('j1');
+    await q.markRunning('j1', new Date());
+    const second = await q.dequeue();
+    expect(second?.id).toBe('j2');
+  });
+
   it('multiple retry cycles produce correct traces', async () => {
     const q = new MemoryQueue();
     await q.enqueue(makeJob({ max_attempts: 3 }));

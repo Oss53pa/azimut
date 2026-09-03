@@ -149,6 +149,29 @@ describe('verifyPackage', () => {
     expect(result.value.verified_count).toBe(1);
   });
 
+  it('detects size mismatch even when checksum matches', () => {
+    const input = makeInput();
+    const { manifest, contents } = buildManifestAndContents([input]);
+    // Mutate manifest to have wrong size but keep correct checksum
+    const badManifest = {
+      ...manifest,
+      artifacts: manifest.artifacts.map((a) => ({
+        ...a,
+        size_bytes: a.size_bytes + 999,
+      })),
+    };
+    const result = verifyPackage(badManifest, contents);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('PACKAGE.CHECKSUM_MISMATCH');
+    expect(result.findings[0]?.params['expected_size']).toBe(
+      input.content.length + 999,
+    );
+    expect(result.findings[0]?.params['actual_size']).toBe(
+      input.content.length,
+    );
+  });
+
   it('is deterministic (INV-4)', () => {
     const input = makeInput();
     const { manifest, contents } = buildManifestAndContents([input]);
