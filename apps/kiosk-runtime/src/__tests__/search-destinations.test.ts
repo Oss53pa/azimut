@@ -92,6 +92,24 @@ describe('searchDestinations', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('returns empty for whitespace-only query', () => {
+    const results = searchDestinations(refMultilevel, '   ', null, 10);
+    expect(results.length).toBe(0);
+  });
+
+  it('returns empty when maxResults is 0', () => {
+    const results = searchDestinations(refMultilevel, 'Bureau', 'fr', 0);
+    expect(results.length).toBe(0);
+  });
+
+  it('word-start prefix scores lower than full prefix', () => {
+    // "RDC" matches as a word-start prefix (score 70), not full prefix (90)
+    const wordStart = searchDestinations(refMultilevel, 'RDC', 'fr', 10);
+    const fullPrefix = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);
+    expect(wordStart.length).toBeGreaterThanOrEqual(1);
+    expect(fullPrefix[0]?.score).toBeGreaterThan(wordStart[0]?.score ?? 0);
+  });
+
   it('is deterministic (INV-4)', () => {
     const r1 = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);
     const r2 = searchDestinations(refMultilevel, 'Bureau', 'fr', 10);

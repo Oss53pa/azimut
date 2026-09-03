@@ -94,12 +94,22 @@ describe('computeWayfinding', () => {
     expect(kinds).not.toContain('stair');
   });
 
-  it('returns error for unknown node', () => {
+  it('returns error for unknown origin node', () => {
     const result = computeWayfinding(
       refMultilevel,
       standardProfile,
       'nonexistent',
       'n-ml-dest-rdc',
+    );
+    expect(result.ok).toBe(false);
+  });
+
+  it('returns error for unknown destination node', () => {
+    const result = computeWayfinding(
+      refMultilevel,
+      standardProfile,
+      'n-ml-entrance',
+      'nonexistent',
     );
     expect(result.ok).toBe(false);
   });

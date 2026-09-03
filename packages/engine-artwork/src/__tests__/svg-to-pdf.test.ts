@@ -116,4 +116,46 @@ describe('renderSvgToPage', () => {
     const { bytes } = await renderAndExtract(svg);
     expect(bytes.length).toBeGreaterThan(0);
   });
+
+  it('ignores unknown SVG elements (circle, line)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<circle cx="100" cy="50" r="40" fill="${FG}" />` +
+      `<line x1="0" y1="0" x2="200" y2="100" stroke="${ACCENT}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    // Produces a valid PDF even though circle/line are not rendered.
+    expect(bytes.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(bytes.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('handles path with empty d attribute', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<path d="" fill="${OK}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('handles text with empty content', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="10" y="50" font-size="12" fill="${FG}">   </text>` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('renders polygon with rotation transform', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="rotate(45)">' +
+      `<polygon points="50,10 70,80 30,80" fill="${ACCENT2}" />` +
+      '</g>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
 });
