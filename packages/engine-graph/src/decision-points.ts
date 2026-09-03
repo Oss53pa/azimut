@@ -1,37 +1,15 @@
 import type {
   SiteData,
-  Edge,
   TravelProfile,
   Destination,
   Outcome,
 } from '@azimut/core-model';
+import { isEdgeTraversableFrom } from './edge-traversal.js';
 
 export type DecisionPoint = {
   readonly node_id: string;
   readonly branch_count: number;
 };
-
-function isEdgeTraversableFrom(
-  edge: Edge,
-  nodeId: string,
-  profile: TravelProfile,
-  nodeKindMap: Map<string, string>,
-): boolean {
-  if (profile.require_accessible && !edge.accessible) return false;
-  if (edge.direction === 'forward' && nodeId !== edge.from_node_id) {
-    return false;
-  }
-  if (edge.direction === 'backward' && nodeId !== edge.to_node_id) {
-    return false;
-  }
-  if (profile.excluded_edge_kinds.length > 0) {
-    const excluded = new Set(profile.excluded_edge_kinds);
-    const fromKind = nodeKindMap.get(edge.from_node_id) ?? '';
-    const toKind = nodeKindMap.get(edge.to_node_id) ?? '';
-    if (excluded.has(fromKind) || excluded.has(toKind)) return false;
-  }
-  return true;
-}
 
 export function deriveDecisionPoints(
   site: SiteData,

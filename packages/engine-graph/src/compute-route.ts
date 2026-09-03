@@ -4,6 +4,7 @@ import type {
   TravelProfile,
   Outcome,
 } from '@azimut/core-model';
+import { isEdgeTraversableFrom } from './edge-traversal.js';
 
 export type Route = {
   readonly from_node_id: string;
@@ -18,31 +19,6 @@ type AdjEntry = {
   readonly edge_id: string;
   readonly cost: number;
 };
-
-function isEdgeTraversable(
-  edge: Edge,
-  nodeId: string,
-  profile: TravelProfile,
-  nodeKindMap: Map<string, string>,
-): boolean {
-  if (profile.require_accessible && !edge.accessible) return false;
-
-  if (edge.direction === 'forward' && nodeId !== edge.from_node_id) {
-    return false;
-  }
-  if (edge.direction === 'backward' && nodeId !== edge.to_node_id) {
-    return false;
-  }
-
-  if (profile.excluded_edge_kinds.length > 0) {
-    const excluded = new Set(profile.excluded_edge_kinds);
-    const fromKind = nodeKindMap.get(edge.from_node_id) ?? '';
-    const toKind = nodeKindMap.get(edge.to_node_id) ?? '';
-    if (excluded.has(fromKind) || excluded.has(toKind)) return false;
-  }
-
-  return true;
-}
 
 function edgeCost(edge: Edge): number {
   return edge.length_m;
@@ -64,7 +40,7 @@ function buildWeightedAdj(
 
     const cost = edgeCost(edge);
 
-    if (isEdgeTraversable(edge, edge.from_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap)) {
       const list = adj.get(edge.from_node_id);
       if (list) {
         list.push({
@@ -75,7 +51,7 @@ function buildWeightedAdj(
       }
     }
 
-    if (isEdgeTraversable(edge, edge.to_node_id, profile, nodeKindMap)) {
+    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap)) {
       const list = adj.get(edge.to_node_id);
       if (list) {
         list.push({
