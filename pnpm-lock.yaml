@@ -214,6 +214,24 @@ importers:
         specifier: ^26.4.1
         version: 26.4.1
 
+  tests:
+    dependencies:
+      '@azimut/core-model':
+        specifier: workspace:*
+        version: link:../packages/core-model
+      '@azimut/engine-graph':
+        specifier: workspace:*
+        version: link:../packages/engine-graph
+      '@azimut/engine-iso':
+        specifier: workspace:*
+        version: link:../packages/engine-iso
+      '@azimut/engine-layout':
+        specifier: workspace:*
+        version: link:../packages/engine-layout
+      '@azimut/testkit':
+        specifier: workspace:*
+        version: link:../packages/testkit
+
 packages:
 
   '@babel/code-frame@7.29.7':
