@@ -156,4 +156,56 @@ describe('T-2.5 runChecks', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  describe('GRAPH.DESTINATION_NAME_DUPLICATE — whitespace normalization', () => {
+    it('trims whitespace before comparing names', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        destination_names: [
+          ...refMinimal.destination_names,
+          {
+            id: 'dn-ws-fr',
+            org_id: 'org-test-001',
+            destination_id: 'dest-b',
+            lang: 'fr',
+            value: '  Bureau A  ',
+          },
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const dups = result.value.findings.filter(
+        (f) => f.code === 'GRAPH.DESTINATION_NAME_DUPLICATE',
+      );
+      expect(dups.length).toBeGreaterThanOrEqual(2);
+    });
+  });
+
+  describe('GRAPH.CATEGORY_ALL_VACANT — mixed categories', () => {
+    it('flags only the all-vacant category, not the mixed one', () => {
+      const d0 = refMinimal.destinations[0];
+      const d1 = refMinimal.destinations[1];
+      const d2 = refMinimal.destinations[2];
+      if (!d0 || !d1 || !d2) throw new Error('need 3 destinations');
+      const site: SiteData = {
+        ...refMinimal,
+        destinations: [
+          // cat-a: all vacant
+          { ...d0, occupancy_status: 'vacant' as const, category_id: 'cat-a' },
+          // cat-b: one occupied
+          { ...d1, occupancy_status: 'occupied' as const, category_id: 'cat-b' },
+          { ...d2, occupancy_status: 'vacant' as const, category_id: 'cat-b' },
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const vacant = result.value.findings.filter(
+        (f) => f.code === 'GRAPH.CATEGORY_ALL_VACANT',
+      );
+      expect(vacant.length).toBe(1);
+      expect(vacant[0]?.entity?.id).toBe('cat-a');
+    });
+  });
 });
