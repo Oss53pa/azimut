@@ -81,6 +81,7 @@ describe('auditCoverage', () => {
     const r2 = auditCoverage(refMinimal, stdProfile, supports);
     expect(r1).toStrictEqual(r2);
   });
+
 });
 
 describe('auditAccessibility', () => {
@@ -107,6 +108,25 @@ describe('auditAccessibility', () => {
       expect(result.value.unreachable).toHaveLength(0);
       expect(result.value.reachable_destinations).toBe(4);
     }
+  });
+
+  it('returns zero unreachable when site has no destinations', () => {
+    const noDestSite: SiteData = {
+      ...refMinimal,
+      destinations: [],
+    };
+    const accProfile: TravelProfile = {
+      ...stdProfile,
+      id: 'tp-acc',
+      key: 'accessible',
+      require_accessible: true,
+    };
+    const result = auditAccessibility(noDestSite, accProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_destinations).toBe(0);
+    expect(result.value.reachable_destinations).toBe(0);
+    expect(result.value.unreachable).toHaveLength(0);
   });
 
   it('reports unreachable destination via non-accessible edge', () => {
@@ -151,6 +171,26 @@ describe('auditEvacuation', () => {
       expect(result.value.uncovered_nodes).not.toContain('n-entrance');
       expect(result.value.uncovered_nodes).not.toContain('n-junction');
     }
+  });
+
+  it('all nodes uncovered when no evacuation edges', () => {
+    const noEvacSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          evacuation_route: false,
+        })),
+      },
+    };
+    const result = auditEvacuation(noEvacSite);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.nodes_with_evacuation_route).toBe(0);
+    expect(result.value.uncovered_nodes.length).toBe(
+      noEvacSite.graph.nodes.length,
+    );
   });
 
   it('deterministic results (INV-4)', () => {

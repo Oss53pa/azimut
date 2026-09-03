@@ -18,6 +18,10 @@ describe('D11 — transliterate', () => {
     expect(transliterate('Über')).toBe('Uber');
   });
 
+  it('handles German ß ligature', () => {
+    expect(transliterate('Straße')).toBe('StraSSe');
+  });
+
   it('preserves ASCII', () => {
     expect(transliterate('ABC-123')).toBe('ABC-123');
   });
@@ -43,6 +47,14 @@ describe('D11 — sanitizeSegment', () => {
 
   it('strips special characters', () => {
     expect(sanitizeSegment('Hall #1 (bis)')).toBe('HALL1BIS');
+  });
+
+  it('returns empty string for empty input', () => {
+    expect(sanitizeSegment('')).toBe('');
+  });
+
+  it('returns empty for all-special-characters input', () => {
+    expect(sanitizeSegment('!@#$%^&*()')).toBe('');
   });
 });
 
@@ -131,6 +143,35 @@ describe('D11 — buildFileName', () => {
     });
     expect(result).toBe('X_Y_Z_DIR_R-01_V1_F1.PDF');
   });
+
+  it('handles version 0', () => {
+    const result = buildFileName({
+      site_code: 'X',
+      building: 'Y',
+      level: 'Z',
+      type_code: 'DIR',
+      reference: 'R-01',
+      version: 0,
+      face: 'F1',
+      extension: 'svg',
+    });
+    expect(result).toContain('V0');
+    expect(result).toBe('X_Y_Z_DIR_R-01_V0_F1.SVG');
+  });
+
+  it('produces empty segments for all-special inputs', () => {
+    const result = buildFileName({
+      site_code: '!!!',
+      building: '@@@',
+      level: '###',
+      type_code: 'DIR',
+      reference: 'R-01',
+      version: 1,
+      face: 'F1',
+      extension: 'pdf',
+    });
+    expect(result).toBe('___DIR_R-01_V1_F1.PDF');
+  });
 });
 
 describe('D11 — buildArchiveName', () => {
@@ -154,5 +195,16 @@ describe('D11 — buildArchiveName', () => {
       extension: 'zip',
     });
     expect(result.length).toBeLessThanOrEqual(120);
+  });
+
+  it('is deterministic (INV-4)', () => {
+    const parts = {
+      site_code: 'Hôpital',
+      building: 'Bât-C',
+      level: 'R1',
+      version: 2,
+      extension: 'zip',
+    } as const;
+    expect(buildArchiveName(parts)).toBe(buildArchiveName(parts));
   });
 });

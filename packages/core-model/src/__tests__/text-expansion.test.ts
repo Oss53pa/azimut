@@ -50,6 +50,14 @@ describe('D12.2 — longestVariant', () => {
     expect(result?.text).toBe('Cafétéria');
   });
 
+  it('returns null for empty names object', () => {
+    expect(longestVariant({}, ['fr', 'en'])).toBeNull();
+  });
+
+  it('returns null for empty activeLangs', () => {
+    expect(longestVariant({ fr: 'Accueil' }, [])).toBeNull();
+  });
+
   it('skips languages not in active list', () => {
     const names = {
       fr: 'Court',
@@ -91,6 +99,12 @@ describe('D12.2 — textExpansionFindings', () => {
   it('emits nothing when lengths are equal', () => {
     const names = { fr: 'Porte', en: 'Entry' };
     const findings = textExpansionFindings(names, 'fr', ['fr', 'en'], 'dest-4');
+    expect(findings).toEqual([]);
+  });
+
+  it('emits nothing with single active language (primary only)', () => {
+    const names = { fr: 'Accueil' };
+    const findings = textExpansionFindings(names, 'fr', ['fr'], 'dest-5');
     expect(findings).toEqual([]);
   });
 
