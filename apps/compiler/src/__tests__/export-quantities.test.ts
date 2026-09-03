@@ -121,6 +121,42 @@ describe('createExportQuantitiesHandler', () => {
     expect(result['cross_check_ok']).toBe(true);
   });
 
+  it('falls back to French for unknown lang string', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [
+        { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
+      ],
+      lang: 'de',
+    });
+    const result = await handler(job);
+    expect(result['lang']).toBe('fr');
+  });
+
+  it('falls back to French for null lang', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [
+        { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
+      ],
+      lang: null,
+    });
+    const result = await handler(job);
+    expect(result['lang']).toBe('fr');
+  });
+
+  it('falls back to French for numeric lang', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [
+        { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
+      ],
+      lang: 42,
+    });
+    const result = await handler(job);
+    expect(result['lang']).toBe('fr');
+  });
+
   it('is deterministic (INV-4)', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({

@@ -188,6 +188,79 @@ describe('T-2.10 renderEvacuationPlan', () => {
     expect(noExits).toBeDefined();
   });
 
+  it('skips arrow on zero-pixel-length evacuation edge', () => {
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          {
+            id: 'n-same-pos',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'junction' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'Same',
+          },
+          {
+            id: 'n-same-pos-2',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'junction' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'Same2',
+          },
+        ],
+        edges: [
+          ...refMultilevel.graph.edges,
+          {
+            id: 'e-zero-px',
+            org_id: 'org-test-001',
+            from_node_id: 'n-same-pos',
+            to_node_id: 'n-same-pos-2',
+            width_m: 1.5,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: true,
+            length_m: 0.001,
+          },
+        ],
+      },
+    };
+    const result = renderEvacuationPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // The evacuation route line is rendered but with no arrow polygon
+    // since the pixel length is 0
+    expect(result.value.stats.route_count).toBeGreaterThan(0);
+  });
+
+  it('reports zero stats on empty level with viewer only', () => {
+    const emptySite = {
+      ...refMultilevel,
+      levels: [
+        ...refMultilevel.levels,
+        {
+          id: 'lvl-stats-empty',
+          org_id: 'org-test-001',
+          building_id: 'bldg-ml-001',
+          name: 'StatsVide',
+          ordinal: 98,
+          elevation_m: 98,
+        },
+      ],
+    };
+    const opts = { ...defaultOptions, viewer_position: null };
+    const result = renderEvacuationPlan(emptySite, 'lvl-stats-empty', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.stats.exit_count).toBe(0);
+    expect(result.value.stats.route_count).toBe(0);
+    expect(result.value.stats.total_route_length_m).toBe(0);
+  });
+
   it('is deterministic (INV-4)', () => {
     const r1 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     const r2 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);

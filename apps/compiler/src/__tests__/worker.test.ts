@@ -157,6 +157,38 @@ describe('processNextJob', () => {
     expect(traces[0]?.finished_at).toBeInstanceOf(Date);
   });
 
+  it('captures non-Error thrown values as string', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ max_attempts: 1 }));
+
+    const handler: JobHandler = async () => {
+      throw 'raw string error';
+    };
+    const handlers = new Map([['compile_artworks', handler]]);
+    const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
+
+    await processNextJob({ queue, handlers, now: clock });
+
+    const job = await queue.getJob('job-001');
+    expect(job?.state).toBe('failed');
+    expect(job?.error).toBe('raw string error');
+  });
+
+  it('handles handler returning empty object', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob());
+
+    const handler: JobHandler = async () => ({});
+    const handlers = new Map([['compile_artworks', handler]]);
+    const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
+
+    await processNextJob({ queue, handlers, now: clock });
+
+    const job = await queue.getJob('job-001');
+    expect(job?.state).toBe('succeeded');
+    expect(job?.result).toEqual({});
+  });
+
   it('fails gracefully when no handler is registered', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ kind: 'audit_site', max_attempts: 1 }));

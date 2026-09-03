@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { relativeLuminance, contrastRatio, WCAG_AA_NORMAL } from '../contrast.js';
+import {
+  relativeLuminance,
+  contrastRatio,
+  WCAG_AA_NORMAL,
+  WCAG_AA_LARGE,
+} from '../contrast.js';
 import { themePapier, stateColors } from '../tokens.js';
 
 const surfaces = [
@@ -76,6 +81,40 @@ describe('contrastRatio known values', () => {
     const ratio = contrastRatio('#777777', '#ffffff');
     expect(ratio).toBeGreaterThan(4);
     expect(ratio).toBeLessThan(5);
+  });
+});
+
+describe('parseHex edge cases', () => {
+  it('accepts hex without # prefix', () => {
+    const withHash = relativeLuminance('#ff0000');
+    const withoutHash = relativeLuminance('ff0000');
+    expect(withoutHash).toBe(withHash);
+  });
+
+  it('returns NaN for 3-char shorthand hex', () => {
+    // parseHex expects 6-char hex; 3-char shorthand is not expanded
+    const lum = relativeLuminance('#fff');
+    expect(lum).toBeNaN();
+  });
+
+  it('returns NaN for empty string', () => {
+    const lum = relativeLuminance('');
+    expect(lum).toBeNaN();
+  });
+});
+
+describe('WCAG_AA_LARGE threshold', () => {
+  it('exports the correct large-text threshold', () => {
+    expect(WCAG_AA_LARGE).toBe(3);
+  });
+
+  it('a pair can pass AA-large but fail AA-normal', () => {
+    // #767676 on white → ratio ≈ 4.54 (passes AA-normal)
+    // #949494 on white → ratio ≈ 2.8 (fails AA-normal but below AA-large too)
+    // #888888 on white → ratio ≈ 3.54 (passes AA-large, fails AA-normal)
+    const ratio = contrastRatio('#888888', '#ffffff');
+    expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
+    expect(ratio).toBeLessThan(WCAG_AA_NORMAL);
   });
 });
 

@@ -141,6 +141,46 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.value).toContain('aucun');
   });
 
+  it('escapes special characters in destination names', () => {
+    const site = {
+      ...refMultilevel,
+      destinations: refMultilevel.destinations.map((d) =>
+        d.id === 'dest-ml-rdc'
+          ? { ...d, occupant_name: 'Salle <A> & "B"' }
+          : d,
+      ),
+    };
+    const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('&amp;');
+    expect(result.value).toContain('&lt;A&gt;');
+    expect(result.value).toContain('&quot;B&quot;');
+    expect(result.value).not.toContain('<A>');
+  });
+
+  it('escapes double quotes in theme values', () => {
+    const xssTheme: FloorPlanTheme = {
+      ...theme,
+      background: 'color"injected',
+    };
+    const opts = { ...defaultOptions, theme: xssTheme };
+    const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('color&quot;injected');
+    expect(result.value).not.toContain('color"injected');
+  });
+
+  it('escapes font family', () => {
+    const opts = { ...defaultOptions, font_family: '"Helvetica Neue" & Co' };
+    const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('&amp;');
+    expect(result.value).not.toContain('" & Co');
+  });
+
   it('filters cross-level edges out', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
