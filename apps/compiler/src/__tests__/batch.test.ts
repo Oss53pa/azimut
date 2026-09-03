@@ -221,6 +221,76 @@ describe('T-2.16 runBatch', () => {
     expect(job?.kind).toBe('export_quantities');
   });
 
+  it('skips running jobs without re-creating them', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+
+    const runningJob: Job = {
+      id: 'compile_artworks-sup-000',
+      org_id: 'org-001',
+      kind: 'compile_artworks',
+      state: 'running',
+      payload: { item_id: 'sup-000' },
+      result: null,
+      attempts: 1,
+      max_attempts: 3,
+      created_at: new Date('2024-01-01T00:00:00Z'),
+      started_at: new Date('2024-01-01T00:00:01Z'),
+      finished_at: null,
+      error: null,
+    };
+    await queue.enqueue(runningJob);
+
+    const items: BatchItem[] = [
+      { item_id: 'sup-000', payload: {} },
+      { item_id: 'sup-001', payload: {} },
+    ];
+    const report = await runBatch(
+      items,
+      makeOptions(queue, handler),
+    );
+
+    expect(report.total).toBe(2);
+    expect(report.created).toBe(1);
+    expect(report.skipped).toBe(0);
+    expect(report.succeeded).toBe(1);
+    // running job is not re-created, counted as failed (still running)
+    const runningResult = report.results.find(
+      (r) => r.item_id === 'sup-000',
+    );
+    expect(runningResult?.status).toBe('failed');
+  });
+
+  it('handles mixed success and failure in one batch', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async (job) => {
+      const itemId = (job.payload as Record<string, unknown>)['item_id'];
+      if (itemId === 'fail-me') {
+        throw new Error('selective failure');
+      }
+      return { ok: true };
+    };
+
+    const items: BatchItem[] = [
+      { item_id: 'ok-1', payload: {} },
+      { item_id: 'fail-me', payload: {} },
+      { item_id: 'ok-2', payload: {} },
+    ];
+    const report = await runBatch(
+      items,
+      makeOptions(queue, handler, { max_attempts: 1 }),
+    );
+
+    expect(report.succeeded).toBe(2);
+    expect(report.failed).toBe(1);
+    expect(
+      report.results.find((r) => r.item_id === 'fail-me')?.status,
+    ).toBe('failed');
+    expect(
+      report.results.find((r) => r.item_id === 'fail-me')?.error,
+    ).toBe('selective failure');
+  });
+
   it('is deterministic (INV-4)', async () => {
     const handler: JobHandler = async (job) => ({
       id: job.id,

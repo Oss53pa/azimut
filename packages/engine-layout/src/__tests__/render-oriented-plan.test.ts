@@ -127,6 +127,33 @@ describe('T-2.9 renderOrientedPlan', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('360° rotation produces same output as 0°', () => {
+    const r0 = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
+    const r360 = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', {
+      ...defaultOptions,
+      orientation_deg: 360,
+    });
+    expect(r0).toStrictEqual(r360);
+  });
+
+  it('renders minimal SVG with edges and destinations hidden', () => {
+    const opts = {
+      ...defaultOptions,
+      show_edges: false,
+      show_destinations: false,
+      show_north_arrow: false,
+    };
+    const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).not.toContain('<line');
+    expect(result.value).not.toContain('Bureau RDC');
+    expect(result.value).not.toContain('>N</text>');
+    // But still has viewer marker and nodes
+    expect(result.value).toContain('tok-marker');
+    expect(result.value).toContain('<circle');
+  });
+
   it('is deterministic at 45° (INV-4)', () => {
     const opts = { ...defaultOptions, orientation_deg: 45 };
     const r1 = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
