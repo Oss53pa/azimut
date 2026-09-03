@@ -26,6 +26,8 @@ export type {
 } from './reconciliation.js';
 export { validateDirectory } from './validate-directory.js';
 export type { DirectoryValidationResult } from './validate-directory.js';
+export { validateGeometry } from './validate-geometry.js';
+export type { GeometryValidationResult } from './validate-geometry.js';
 export {
   validateLibrary,
   guardSafetyRegistry,
