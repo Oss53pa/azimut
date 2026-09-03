@@ -1,4 +1,5 @@
 import { PDFDocument, PDFName, PDFString, PDFArray, PDFHexString } from 'pdf-lib';
+import { renderSvgToPage } from './svg-to-pdf.js';
 
 export type PdfTarget = 'pdf-x4' | 'pdf-a';
 
@@ -30,10 +31,7 @@ export async function exportArtworkPdf(
 
   const page = doc.addPage([widthPt, heightPt]);
 
-  page.drawText(
-    `[SVG placeholder — ${svg.length} bytes]`,
-    { x: 10, y: heightPt - 20, size: 8 },
-  );
+  renderSvgToPage(page, svg, widthPt, heightPt);
 
   applyConformanceMetadata(doc, target, title);
 

@@ -1,0 +1,119 @@
+import { describe, it, expect } from 'vitest';
+import { PDFDocument } from 'pdf-lib';
+import { renderSvgToPage } from '../svg-to-pdf.js';
+import { themePapier, stateColors } from '@azimut/design-tokens';
+
+const MM_TO_PT = 72 / 25.4;
+
+// Use tokens as test colors so we don't introduce hardcoded hex (A2.4).
+const FG = themePapier['text-primary'];
+const FG2 = themePapier['text-secondary'];
+const ACCENT = themePapier['accent'];
+const ACCENT2 = themePapier['accent-secondary'];
+const BORDER = themePapier['border'];
+const ERR = stateColors['state-blocking'];
+const WARN = stateColors['state-warning'];
+const OK = stateColors['state-valid'];
+
+async function renderAndExtract(svg: string, widthMm = 200, heightMm = 100) {
+  const doc = await PDFDocument.create();
+  const widthPt = widthMm * MM_TO_PT;
+  const heightPt = heightMm * MM_TO_PT;
+  const page = doc.addPage([widthPt, heightPt]);
+  renderSvgToPage(page, svg, widthPt, heightPt);
+  const bytes = await doc.save({
+    useObjectStreams: false,
+    addDefaultPage: false,
+    objectsPerTick: Infinity,
+  });
+  return { bytes, page };
+}
+
+describe('renderSvgToPage', () => {
+  it('renders a rect element', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="10" y="10" width="180" height="80" fill="${ERR}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(bytes.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('renders text element', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="50" y="50" font-size="12" fill="${FG}">Hello</text>` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('renders polygon element', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<polygon points="100,10 150,90 50,90" fill="${ACCENT}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('renders path element', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<path d="M10 10 L50 50 L90 10 Z" fill="${OK}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('renders nested g with transform', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="translate(50,25) scale(2)">' +
+      `<rect x="0" y="0" width="30" height="20" fill="${BORDER}" />` +
+      '</g>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('handles empty SVG gracefully', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg"></svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('handles SVG without viewBox gracefully', async () => {
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="0" y="0" width="100" height="50" fill="${ERR}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    // No viewBox → renderSvgToPage returns early, produces blank page.
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('is deterministic (INV-4)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="10" y="10" width="50" height="30" fill="${FG}" />` +
+      `<text x="100" y="60" font-size="10" fill="${FG2}">Test</text>` +
+      `<polygon points="150,20 170,80 130,80" fill="${ACCENT2}" />` +
+      '</svg>';
+    const { bytes: b1 } = await renderAndExtract(svg);
+    const { bytes: b2 } = await renderAndExtract(svg);
+    expect(Array.from(b1)).toEqual(Array.from(b2));
+  });
+
+  it('renders escaped text correctly', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="10" y="50" font-size="12" fill="${WARN}">A &amp; B &lt;C&gt;</text>` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+});

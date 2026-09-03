@@ -14,6 +14,9 @@
     "@azimut/rules": "workspace:*",
     "pdf-lib": "^1.17.1"
   },
+  "devDependencies": {
+    "@azimut/design-tokens": "workspace:*"
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "build": "tsc --noEmit"

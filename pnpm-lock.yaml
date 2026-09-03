@@ -138,6 +138,10 @@ importers:
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
+    devDependencies:
+      '@azimut/design-tokens':
+        specifier: workspace:*
+        version: link:../design-tokens
 
   packages/engine-graph:
     dependencies:

@@ -176,7 +176,11 @@ describe('computeWayfinding', () => {
       }],
       footprints: [{
         id: 'fp1', org_id: 'org1', level_id: 'l1',
-        vertices: [{ x_m: 0, y_m: 0 }, { x_m: 50, y_m: 0 }, { x_m: 50, y_m: 10 }, { x_m: 0, y_m: 10 }],
+        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 50, y_m: 0 }, { x_m: 50, y_m: 10 }, { x_m: 0, y_m: 10 }] },
+        kind: 'room',
+      }],
+      volumes: [{
+        id: 'vol1', org_id: 'org1', footprint_id: 'fp1',
         base_elevation_m: 0, height_m: 3, material_key: 'concrete',
       }],
       graph: {
@@ -193,8 +197,11 @@ describe('computeWayfinding', () => {
           { id: 'e3', org_id: 'org1', from_node_id: 'n-j2', to_node_id: 'n-j3', width_m: 2, slope_pct: 0, accessible: true, direction: 'both', evacuation_route: false, length_m: 10 },
           { id: 'e4', org_id: 'org1', from_node_id: 'n-j3', to_node_id: 'n-dest', width_m: 2, slope_pct: 0, accessible: true, direction: 'both', evacuation_route: false, length_m: 10 },
         ],
+        vertical_links: [],
       },
-      destinations: [{ id: 'd1', org_id: 'org1', footprint_id: 'fp1', node_id: 'n-dest', category_id: null, occupant_name: 'Bureau', occupancy_status: 'active', display_priority: 1 }],
+      categories: [{ id: 'cat1', org_id: 'org1', sector_key: 'tertiary', code: 'office', parent_id: null }],
+      pictograms: [],
+      destinations: [{ id: 'd1', org_id: 'org1', footprint_id: 'fp1', node_id: 'n-dest', category_id: 'cat1', occupant_name: 'Bureau', occupancy_status: 'occupied', display_priority: 1 }],
       destination_names: [{ id: 'dn1', org_id: 'org1', destination_id: 'd1', lang: 'fr', value: 'Bureau' }],
       travel_profiles: [{
         id: 'tp1', org_id: 'org1', site_id: 's1', key: 'standard', name: 'Standard',
@@ -202,7 +209,6 @@ describe('computeWayfinding', () => {
       }],
       support_types: [],
       face_templates: [],
-      pictogram_library: { id: 'pl1', org_id: 'org1', name: 'Default', entries: [] },
     };
 
     const corridorProfile = corridorSite.travel_profiles[0] as TravelProfile;
