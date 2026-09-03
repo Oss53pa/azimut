@@ -162,4 +162,67 @@ describe('deriveDecisionPoints', () => {
       expect(result.value).toHaveLength(0);
     }
   });
+
+  it('self-loop edge does not inflate degree', () => {
+    const selfLoopSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-self',
+            org_id: 'org-ref',
+            from_node_id: 'n-entrance',
+            to_node_id: 'n-entrance',
+            length_m: 0,
+            width_m: 1,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: false,
+          },
+        ],
+      },
+    };
+    const result = deriveDecisionPoints(
+      selfLoopSite,
+      stdProfile,
+      refMinimal.destinations,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const ids = result.value.map((dp) => dp.node_id);
+      // Entrance still has only 1 real edge → not a decision point
+      expect(ids).not.toContain('n-entrance');
+    }
+  });
+
+  it('fully inaccessible graph yields zero decision points', () => {
+    const inaccessibleSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          accessible: false,
+        })),
+      },
+    };
+    const accProfile: TravelProfile = {
+      ...stdProfile,
+      id: 'tp-acc',
+      key: 'accessible',
+      require_accessible: true,
+    };
+    const result = deriveDecisionPoints(
+      inaccessibleSite,
+      accProfile,
+      refMinimal.destinations,
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.value).toHaveLength(0);
+    }
+  });
 });

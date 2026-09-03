@@ -155,4 +155,42 @@ describe('T-2.14 validateProofs', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  it('orphaned approvals referencing nonexistent proofs are silently ignored', () => {
+    const proofs = [makeProof({ id: 'proof-001', status: 'pending' })];
+    const approvals = [
+      makeApproval({ id: 'a-orphan', proof_id: 'proof-missing' }),
+    ];
+    const result = validateProofs(proofs, approvals);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Orphaned approval still counted in total_approvals
+    expect(result.value.total_approvals).toBe(1);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('multiple approvals on pending proof reports correct count', () => {
+    const proofs = [makeProof({ id: 'proof-001', status: 'pending' })];
+    const approvals = [
+      makeApproval({ id: 'a1', proof_id: 'proof-001' }),
+      makeApproval({ id: 'a2', proof_id: 'proof-001' }),
+      makeApproval({ id: 'a3', proof_id: 'proof-001' }),
+    ];
+    const result = validateProofs(proofs, approvals);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings).toHaveLength(1);
+    expect(result.warnings[0]?.params?.['approval_count']).toBe(3);
+  });
+
+  it('superseded proof without approvals produces no finding', () => {
+    const proofs = [
+      makeProof({ id: 'proof-001', status: 'superseded', face_id: 'f1', version: 1 }),
+    ];
+    const result = validateProofs(proofs, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.superseded).toBe(1);
+    expect(result.warnings).toHaveLength(0);
+  });
 });

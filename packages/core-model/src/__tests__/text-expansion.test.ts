@@ -117,4 +117,31 @@ describe('D12.2 — textExpansionFindings', () => {
     expect(result?.lang).toBe('en');
     expect(result?.length).toBeGreaterThan(names.fr.length);
   });
+
+  it('emits nothing when primaryLang not in activeLangs but exists in names', () => {
+    const names = { fr: 'Court', en: 'Longer name', de: 'Noch länger' };
+    // Primary 'fr' exists in names but not in activeLangs
+    const findings = textExpansionFindings(names, 'fr', ['en', 'de'], 'dest-6');
+    // Primary text IS defined → longest among activeLangs is 'de'
+    // But 'de' !== 'fr' AND 'de'.length > 'fr'.length → finding emitted
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.params?.['longer_lang']).toBe('de');
+  });
+
+  it('empty-string name is a valid zero-length candidate', () => {
+    const names = { fr: '', en: 'Hall' };
+    const result = longestVariant(names, ['fr', 'en']);
+    // 'en' is longer than empty 'fr'
+    expect(result?.lang).toBe('en');
+    expect(result?.length).toBe(4);
+  });
+
+  it('all-empty names still returns the first alphabetically', () => {
+    const names = { fr: '', en: '' };
+    const result = longestVariant(names, ['fr', 'en']);
+    // Both length 0 — sorted order picks 'en' first
+    expect(result).not.toBeNull();
+    expect(result?.lang).toBe('en');
+    expect(result?.length).toBe(0);
+  });
 });

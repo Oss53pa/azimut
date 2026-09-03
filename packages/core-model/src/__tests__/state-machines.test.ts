@@ -119,3 +119,43 @@ describe('D9.4 — work order state machine', () => {
     },
   );
 });
+
+// ── Edge cases ────────────────────────────────────
+
+describe('D9 — unknown and edge-case states', () => {
+  it('rejects completely unknown from-state', () => {
+    expect(() => assertJobTransition('nonexistent', 'running')).toThrow(/forbidden/);
+  });
+
+  it('rejects completely unknown to-state', () => {
+    expect(() => assertProofTransition('draft', 'nonexistent')).toThrow(/forbidden/);
+  });
+
+  it('rejects empty string as from-state', () => {
+    expect(() => assertJobTransition('', 'running')).toThrow(/forbidden/);
+  });
+
+  it('rejects empty string as to-state', () => {
+    expect(() => assertDivergenceTransition('detected', '')).toThrow(/forbidden/);
+  });
+
+  it('error message includes domain name — Job', () => {
+    expect(() => assertJobTransition('succeeded', 'queued'))
+      .toThrow(/Job/);
+  });
+
+  it('error message includes domain name — ProofVersion', () => {
+    expect(() => assertProofTransition('superseded', 'draft'))
+      .toThrow(/ProofVersion/);
+  });
+
+  it('error message includes domain name — Divergence', () => {
+    expect(() => assertDivergenceTransition('resolved', 'detected'))
+      .toThrow(/Divergence/);
+  });
+
+  it('error message includes domain name — WorkOrder', () => {
+    expect(() => assertWorkOrderTransition('done', 'draft'))
+      .toThrow(/WorkOrder/);
+  });
+});

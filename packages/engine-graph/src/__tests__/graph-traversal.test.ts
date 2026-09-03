@@ -117,3 +117,31 @@ describe('bfs', () => {
     expect(visited.size).toBe(3);
   });
 });
+
+describe('buildAdjacency — additional edge cases', () => {
+  it('returns empty map for zero nodes and zero edges', () => {
+    const adj = buildAdjacency([], []);
+    expect(adj.size).toBe(0);
+  });
+
+  it('edge with unknown from but known to adds to known node', () => {
+    const adj = buildAdjacency(
+      [node('a')],
+      [edge('e1', 'x', 'a')],
+    );
+    // 'a' knows about 'x' as a neighbor
+    expect(adj.get('a')?.has('x')).toBe(true);
+    // 'x' has no entry in the map (not a node)
+    expect(adj.has('x')).toBe(false);
+  });
+});
+
+describe('bfs — additional edge cases', () => {
+  it('node with explicit empty neighbor set terminates immediately', () => {
+    const adj = new Map<string, Set<string>>();
+    adj.set('solo', new Set());
+    const visited = bfs(adj, 'solo');
+    expect(visited.size).toBe(1);
+    expect(visited.has('solo')).toBe(true);
+  });
+});

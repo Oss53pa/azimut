@@ -170,4 +170,33 @@ describe('diffManifest', () => {
     // art-2 divergent + art-3 added = 2 findings
     expect(result.findings.length).toBe(2);
   });
+
+  it('full baseline vs empty candidate marks all as removed', () => {
+    const baseline = buildManifest([
+      makeInput({ id: 'art-1', path: 'a.pdf' }),
+      makeInput({ id: 'art-2', path: 'b.pdf' }),
+    ]);
+    const candidate = buildManifest([]);
+    const result = diffManifest(baseline, candidate);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const removedFindings = result.findings.filter(
+      (f) => f.params['reason'] === 'removed_in_candidate',
+    );
+    expect(removedFindings).toHaveLength(2);
+  });
+
+  it('two distinct empty manifests compare as identical', () => {
+    const m1 = buildManifest([]);
+    const m2: typeof m1 = {
+      ...m1,
+      package_id: 'pkg-other',
+      created_at: '2025-01-01T00:00:00Z',
+    };
+    const result = diffManifest(m1, m2);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.matched_count).toBe(0);
+    expect(result.value.divergent_count).toBe(0);
+  });
 });
