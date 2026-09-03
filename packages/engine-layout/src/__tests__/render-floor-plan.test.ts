@@ -181,6 +181,19 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.value).not.toContain('" & Co');
   });
 
+  it('renders entrance node with larger radius than junction', () => {
+    const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Extract all circle r= values
+    const radii = [...result.value.matchAll(/<circle[^>]+r="(\d+)"/g)].map(
+      (m) => parseInt(m[1] ?? '0', 10),
+    );
+    // Entrance radius is 6, junction is 3. Both should be present.
+    expect(radii).toContain(6);
+    expect(radii).toContain(3);
+  });
+
   it('filters cross-level edges out', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);

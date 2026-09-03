@@ -261,6 +261,15 @@ describe('T-2.10 renderEvacuationPlan', () => {
     expect(result.value.stats.total_route_length_m).toBe(0);
   });
 
+  it('renders non-exit node circles with node theme tokens', () => {
+    const result = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Regular nodes should use the node_fill and node_stroke tokens.
+    expect(result.value.svg).toContain('tok-node');
+    expect(result.value.svg).toContain('tok-node-s');
+  });
+
   it('is deterministic (INV-4)', () => {
     const r1 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     const r2 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);

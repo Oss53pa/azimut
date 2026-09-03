@@ -269,7 +269,7 @@ describe('T-1.8 INV-3 guardSafetyDeletion', () => {
   });
 });
 
-describe('DATA.CATEGORY_CYCLE — self-referencing', () => {
+describe('DATA.CATEGORY_CYCLE', () => {
   it('detects category referencing itself as parent', () => {
     const site = patchSite(refMinimal, {
       categories: [
@@ -290,5 +290,22 @@ describe('DATA.CATEGORY_CYCLE — self-referencing', () => {
     );
     expect(cycles.length).toBeGreaterThan(0);
     expect(cycles[0]?.entity?.id).toBe('cat-self');
+  });
+
+  it('detects 3-node category cycle (A → B → C → A)', () => {
+    const site = patchSite(refMinimal, {
+      categories: [
+        { id: 'cat-a', org_id: 'org-test-001', sector_key: 'tertiary', code: 'a', parent_id: 'cat-c' },
+        { id: 'cat-b', org_id: 'org-test-001', sector_key: 'tertiary', code: 'b', parent_id: 'cat-a' },
+        { id: 'cat-c', org_id: 'org-test-001', sector_key: 'tertiary', code: 'c', parent_id: 'cat-b' },
+      ],
+    });
+    const result = validateLibrary(site);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const cycles = result.findings.filter(
+      (f) => f.code === 'DATA.CATEGORY_CYCLE',
+    );
+    expect(cycles.length).toBeGreaterThanOrEqual(1);
   });
 });

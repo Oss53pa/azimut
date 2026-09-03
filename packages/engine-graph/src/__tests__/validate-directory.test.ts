@@ -234,6 +234,45 @@ describe('T-1.7 validateDirectory', () => {
     });
   });
 
+  describe('blocking and warning coexistence', () => {
+    it('includes warnings alongside blockings in findings', () => {
+      // One destination has a missing node (blocking), another points
+      // to a junction node (warning).
+      const site = patchSite(refMultilevel, {
+        destinations: [
+          ...refMultilevel.destinations,
+          {
+            id: 'dest-missing-node',
+            org_id: 'org-test-001',
+            footprint_id: 'fp-ml-rdc',
+            node_id: 'n-nonexistent',
+            category_id: 'cat-office',
+            occupant_name: 'Ghost',
+            occupancy_status: 'occupied',
+            display_priority: 9,
+          },
+          {
+            id: 'dest-wrong-kind',
+            org_id: 'org-test-001',
+            footprint_id: 'fp-ml-rdc',
+            node_id: 'n-ml-hall',
+            category_id: 'cat-office',
+            occupant_name: 'Wrong',
+            occupancy_status: 'occupied',
+            display_priority: 10,
+          },
+        ],
+      });
+      const result = validateDirectory(site);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      const blocking = result.findings.filter((f) => f.severity === 'blocking');
+      const warning = result.findings.filter((f) => f.severity === 'warning');
+      expect(blocking.length).toBeGreaterThanOrEqual(1);
+      expect(warning.length).toBeGreaterThanOrEqual(1);
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = validateDirectory(refMultilevel);

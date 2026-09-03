@@ -71,4 +71,33 @@ describe('exportArtworkPdf', () => {
     );
     expect(small.length).not.toBe(large.length);
   });
+
+  it('handles unicode title in ID hash', async () => {
+    const pdf = await exportArtworkPdf(
+      makeOptions({ title: 'Façade entrée — étage 1' }),
+    );
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    expect(pdf.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(pdf.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('unicode title is deterministic (INV-4)', async () => {
+    const opts = makeOptions({ title: 'Accès PMR — bâtiment B' });
+    const pdf1 = await exportArtworkPdf(opts);
+    const pdf2 = await exportArtworkPdf(opts);
+    expect(Array.from(pdf1)).toEqual(Array.from(pdf2));
+  });
+
+  it('pdf-x4 and pdf-a differ in metadata', async () => {
+    const x4 = await exportArtworkPdf(makeOptions({ target: 'pdf-x4' }));
+    const a = await exportArtworkPdf(makeOptions({ target: 'pdf-a' }));
+    // Both are valid PDFs but differ in conformance metadata.
+    expect(x4.length).not.toBe(a.length);
+    const x4Text = new TextDecoder().decode(x4);
+    const aText = new TextDecoder().decode(a);
+    // pdf-x4 includes MarkInfo, pdf-a does not.
+    expect(x4Text).toContain('MarkInfo');
+    expect(aText).not.toContain('MarkInfo');
+  });
 });

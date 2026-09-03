@@ -20,6 +20,11 @@ describe('normalizeDecimalSeparator', () => {
   it('handles no decimal', () => {
     expect(normalizeDecimalSeparator('42')).toBe('42');
   });
+
+  it('replaces only the first comma', () => {
+    // String.replace without /g replaces only the first occurrence.
+    expect(normalizeDecimalSeparator('1,000,50')).toBe('1.000,50');
+  });
 });
 
 describe('parseNumber', () => {
@@ -37,6 +42,10 @@ describe('parseNumber', () => {
 
   it('returns null for empty string', () => {
     expect(parseNumber('')).toBeNull();
+  });
+
+  it('returns null for whitespace-only string', () => {
+    expect(parseNumber('   ')).toBeNull();
   });
 
   it('returns null for non-numeric', () => {
@@ -231,5 +240,19 @@ describe('detectColumns', () => {
     const aliases = { name: ['name'] };
     const result = detectColumns(['Name', 'Name'], aliases, ['name']);
     expect(result).toEqual({ name: 'Name' });
+  });
+
+  it('succeeds with empty required array', () => {
+    const aliases = { name: ['name'] };
+    const result = detectColumns(['Name'], aliases, []);
+    expect(result).not.toBeNull();
+    expect(result).toEqual({ name: 'Name' });
+  });
+
+  it('returns empty object when no aliases match and required is empty', () => {
+    const aliases = { name: ['xyz'] };
+    const result = detectColumns(['Name'], aliases, []);
+    expect(result).not.toBeNull();
+    expect(result).toEqual({});
   });
 });
