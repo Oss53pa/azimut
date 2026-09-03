@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { loadRulesPack, resolveRule } from '../loader.js';
+import {
+  loadRulesPack,
+  resolveRule,
+  scopeSpecificity,
+  groupAndCheckAmbiguity,
+} from '../loader.js';
+import type { RulesPackRule } from '../schema.js';
 
 function validPack(overrides?: Record<string, unknown>) {
   return JSON.stringify({
@@ -25,6 +31,103 @@ function validPack(overrides?: Record<string, unknown>) {
     ...overrides,
   });
 }
+
+function makeRule(
+  code: string,
+  scope: Record<string, string>,
+): RulesPackRule {
+  return {
+    code,
+    scope,
+    params: {},
+    source_ref: 'Test ref',
+  };
+}
+
+describe('scopeSpecificity', () => {
+  it('returns 0 for empty scope', () => {
+    expect(scopeSpecificity({})).toBe(0);
+  });
+
+  it('returns 1 for one field', () => {
+    expect(scopeSpecificity({ supportRegistry: 'wayfinding' })).toBe(1);
+  });
+
+  it('returns 2 for two fields', () => {
+    expect(scopeSpecificity({
+      supportRegistry: 'wayfinding',
+      context: 'interior',
+    })).toBe(2);
+  });
+
+  it('returns 3 for all three fields', () => {
+    expect(scopeSpecificity({
+      supportRegistry: 'wayfinding',
+      context: 'interior',
+      sectorKey: 'commercial',
+    })).toBe(3);
+  });
+});
+
+describe('groupAndCheckAmbiguity', () => {
+  it('groups a single rule', () => {
+    const result = groupAndCheckAmbiguity([makeRule('R1', {})]);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.size).toBe(1);
+    const group = result.value.get('R1');
+    expect(group).toHaveLength(1);
+  });
+
+  it('groups distinct codes without ambiguity', () => {
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', {}),
+      makeRule('R2', { supportRegistry: 'wayfinding' }),
+    ]);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.size).toBe(2);
+  });
+
+  it('accepts same code at different specificities', () => {
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', {}),
+      makeRule('R1', { supportRegistry: 'wayfinding' }),
+    ]);
+    expect(result.ok).toBe(true);
+  });
+
+  it('rejects same code at same specificity', () => {
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', { context: 'interior' }),
+      makeRule('R1', { supportRegistry: 'wayfinding' }),
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('RULES.SCOPE_AMBIGUOUS');
+    expect(result.findings[0]?.params['rule_code']).toBe('R1');
+    expect(result.findings[0]?.params['specificity']).toBe(1);
+  });
+
+  it('returns ok for empty array', () => {
+    const result = groupAndCheckAmbiguity([]);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.size).toBe(0);
+  });
+
+  it('reports only ambiguous codes, not others', () => {
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', { context: 'interior' }),
+      makeRule('R1', { supportRegistry: 'wayfinding' }),
+      makeRule('R2', {}),
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.params['rule_code']).toBe('R1');
+  });
+});
 
 describe('loadRulesPack', () => {
   it('loads a valid pack', () => {
