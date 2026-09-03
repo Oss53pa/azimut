@@ -194,6 +194,68 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(radii).toContain(3);
   });
 
+  it('renders escalator node with radius 5', () => {
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          {
+            id: 'n-escalator-test',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'escalator' as const,
+            position: { x_m: 10, y_m: 10 },
+            label: 'Escalier mécanique',
+          },
+        ],
+      },
+    };
+    const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Escalator radius is 5
+    const radii = [...result.value.matchAll(/<circle[^>]+r="(\d+)"/g)].map(
+      (m) => parseInt(m[1] ?? '0', 10),
+    );
+    expect(radii).toContain(5);
+  });
+
+  it('renders safety node with safety fill color', () => {
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          {
+            id: 'n-emergency-test',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'emergency_exit' as const,
+            position: { x_m: 15, y_m: 15 },
+            label: 'Sortie secours',
+          },
+        ],
+      },
+    };
+    const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('tok-safety');
+  });
+
+  it('renders destination_access node with radius 4', () => {
+    const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const radii = [...result.value.matchAll(/<circle[^>]+r="(\d+)"/g)].map(
+      (m) => parseInt(m[1] ?? '0', 10),
+    );
+    expect(radii).toContain(4);
+  });
+
   it('filters cross-level edges out', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
