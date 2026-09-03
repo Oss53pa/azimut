@@ -98,3 +98,47 @@ describe('ceilMm', () => {
     expect(ceilMm(-3.9)).toBe(-3);
   });
 });
+
+describe('roundHalfAwayFromZero — additional edge cases', () => {
+  it('handles large positive integer', () => {
+    expect(roundHalfAwayFromZero(1e10)).toBe(1e10);
+  });
+
+  it('handles large negative integer', () => {
+    expect(roundHalfAwayFromZero(-1e10)).toBe(-1e10);
+  });
+
+  it('rounds -1.5 to -2 (away from zero)', () => {
+    expect(roundHalfAwayFromZero(-1.5)).toBe(-2);
+  });
+
+  it('zero returns zero', () => {
+    expect(roundHalfAwayFromZero(0)).toBe(0);
+  });
+});
+
+describe('roundSvg — additional edge cases', () => {
+  it('preserves integer values', () => {
+    expect(roundSvg(42)).toBe(42);
+  });
+
+  it('rounds negative 3-decimal value', () => {
+    expect(roundSvg(-1.23456)).toBe(-1.235);
+  });
+});
+
+describe('formatSvg — additional edge cases', () => {
+  it('serialises negative value', () => {
+    expect(formatSvg(-1.23456)).toBe('-1.235');
+  });
+
+  it('serialises zero as "0"', () => {
+    expect(formatSvg(0)).toBe('0');
+  });
+});
+
+describe('ceilMm — additional edge cases', () => {
+  it('exact negative integer stays unchanged', () => {
+    expect(ceilMm(-5)).toBe(-5);
+  });
+});

@@ -153,4 +153,48 @@ describe('D4.2 — importOccupancy', () => {
     const r2 = importOccupancy(refMultilevel, content);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('strips BOM before parsing', () => {
+    const bom = '﻿';
+    const content = bom + csv([header, 'Bureau RDC;Bâtiment ML;RDC;occupied;;;;;']);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_rows).toBe(1);
+  });
+
+  it('accepts empty effective_from as valid', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;RDC;occupied;Acme;office;Bureau;Office;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Not rejected — empty date is valid
+    expect(result.value.rejected).toBe(0);
+  });
+
+  it('unknown building yields pending (node not found)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment Inexistant;RDC;occupied;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.pending).toBe(1);
+    expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
+  });
+
+  it('unknown level in known building yields pending', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;R99;occupied;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.pending).toBe(1);
+  });
 });

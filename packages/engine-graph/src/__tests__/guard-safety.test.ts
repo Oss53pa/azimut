@@ -183,4 +183,40 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(codes.has('SECURITY.CHARTER_OVERRIDE_DENIED')).toBe(true);
     });
   });
+
+  describe('empty applications', () => {
+    it('returns ok for empty array', () => {
+      const result = guardCharterOnSafety(refMinimal, []);
+      expect(result.ok).toBe(true);
+    });
+  });
+
+  describe('sort order and params', () => {
+    it('findings sorted by target_id then change_kind', () => {
+      const apps: CharterApplication[] = [
+        { target_id: 'z-target', target_registry: 'safety', change_kind: 'color', field: 'f', value: 'v' },
+        { target_id: 'a-target', target_registry: 'safety', change_kind: 'proportion', field: 'f', value: 'v' },
+        { target_id: 'a-target', target_registry: 'safety', change_kind: 'color', field: 'f', value: 'v' },
+      ];
+      const result = guardCharterOnSafety(refMinimal, apps);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.findings).toHaveLength(3);
+      const ids = result.findings.map((f) => f.entity?.id);
+      // a-target(color), a-target(proportion), z-target(color)
+      expect(ids).toEqual(['a-target', 'a-target', 'z-target']);
+    });
+
+    it('finding params contain the attempted value', () => {
+      const apps: CharterApplication[] = [
+        { target_id: 'tgt-1', target_registry: 'safety', change_kind: 'geometry', field: 'width_mm', value: '500' },
+      ];
+      const result = guardCharterOnSafety(refMinimal, apps);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.findings[0]?.params['attempted_value']).toBe('500');
+      expect(result.findings[0]?.params['change_kind']).toBe('geometry');
+      expect(result.findings[0]?.params['field']).toBe('width_mm');
+    });
+  });
 });
