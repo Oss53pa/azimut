@@ -124,6 +124,70 @@ describe('T-2.10 renderEvacuationPlan', () => {
     expect(result.value.svg).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });
 
+  it('warns EVAC_EMPTY_LEVEL on level with no geometry', () => {
+    const emptySite = {
+      ...refMultilevel,
+      levels: [
+        ...refMultilevel.levels,
+        {
+          id: 'lvl-empty',
+          org_id: 'org-test-001',
+          building_id: 'bldg-ml-001',
+          name: 'Vide',
+          ordinal: 99,
+          elevation_m: 99,
+        },
+      ],
+    };
+    const opts = { ...defaultOptions, viewer_position: null };
+    const result = renderEvacuationPlan(emptySite, 'lvl-empty', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.length).toBe(1);
+    expect(result.warnings[0]?.code).toBe('LAYOUT.EVAC_EMPTY_LEVEL');
+  });
+
+  it('warns EVAC_NO_ROUTES when no evacuation routes on level', () => {
+    const noEvacSite = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        edges: refMultilevel.graph.edges.map((e) => ({
+          ...e,
+          evacuation_route: false,
+        })),
+      },
+    };
+    const result = renderEvacuationPlan(noEvacSite, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const noRoutes = result.warnings.find(
+      (w) => w.code === 'LAYOUT.EVAC_NO_ROUTES',
+    );
+    expect(noRoutes).toBeDefined();
+  });
+
+  it('warns EVAC_NO_EXITS when no exit nodes on level', () => {
+    const noExitSite = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: refMultilevel.graph.nodes.map((n) =>
+          n.kind === 'entrance' || n.kind === 'emergency_exit'
+            ? { ...n, kind: 'junction' as const }
+            : n,
+        ),
+      },
+    };
+    const result = renderEvacuationPlan(noExitSite, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const noExits = result.warnings.find(
+      (w) => w.code === 'LAYOUT.EVAC_NO_EXITS',
+    );
+    expect(noExits).toBeDefined();
+  });
+
   it('is deterministic (INV-4)', () => {
     const r1 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     const r2 = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
