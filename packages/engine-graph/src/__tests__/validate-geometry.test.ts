@@ -247,6 +247,71 @@ describe('validateGeometry', () => {
     expect(result.value.total_volumes).toBe(0);
   });
 
+  it('detects polygon with zero vertices', () => {
+    const fp: Footprint = {
+      id: 'fp-empty', org_id: 'org1', level_id: 'l1',
+      geometry: { vertices: [] },
+      kind: 'room',
+    };
+    const result = validateGeometry(siteWith([fp]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) =>
+      f.code === 'GEOM.POLYGON_TOO_FEW_VERTICES' && f.entity?.id === 'fp-empty',
+    )).toBe(true);
+    const finding = result.findings.find((f) => f.entity?.id === 'fp-empty');
+    expect((finding?.params as Record<string, unknown>)['vertex_count']).toBe(0);
+  });
+
+  it('detects collinear vertices as degenerate (area = 0)', () => {
+    const fp: Footprint = {
+      id: 'fp-line', org_id: 'org1', level_id: 'l1',
+      geometry: { vertices: [
+        { x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 }, { x_m: 10, y_m: 0 },
+      ] },
+      kind: 'room',
+    };
+    const result = validateGeometry(siteWith([fp]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) =>
+      f.code === 'GEOM.POLYGON_DEGENERATE' && f.entity?.id === 'fp-line',
+    )).toBe(true);
+  });
+
+  it('does not flag a valid triangle as self-intersecting', () => {
+    const fp: Footprint = {
+      id: 'fp-tri', org_id: 'org1', level_id: 'l1',
+      geometry: { vertices: [
+        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 5, y_m: 8 },
+      ] },
+      kind: 'room',
+    };
+    const result = validateGeometry(siteWith([fp]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((f) =>
+      f.code === 'GEOM.POLYGON_SELF_INTERSECTING',
+    )).toBe(false);
+  });
+
+  it('detects exactly coincident first/last vertex (distance 0)', () => {
+    const fp: Footprint = {
+      id: 'fp-dup0', org_id: 'org1', level_id: 'l1',
+      geometry: { vertices: [
+        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
+        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 0 },
+      ] },
+      kind: 'room',
+    };
+    const result = validateGeometry(siteWith([fp]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) =>
+      f.code === 'GEOM.POLYGON_NOT_CLOSED' && f.entity?.id === 'fp-dup0',
+    )).toBe(true);
+  });
+
   it('reports correct valid counts with mixed issues', () => {
     const good: Footprint = {
       id: 'fp-ok', org_id: 'org1', level_id: 'l1',
