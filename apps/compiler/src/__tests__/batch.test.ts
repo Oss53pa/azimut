@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { compileBatch } from '../batch.js';
+import { runBatch } from '../batch.js';
 import type { BatchItem, BatchOptions } from '../batch.js';
 import { MemoryQueue } from '../queue.js';
 import type { JobHandler } from '../worker.js';
@@ -14,7 +14,7 @@ function makeItems(count: number): BatchItem[] {
   const items: BatchItem[] = [];
   for (let i = 0; i < count; i++) {
     items.push({
-      support_id: `sup-${String(i).padStart(3, '0')}`,
+      item_id: `sup-${String(i).padStart(3, '0')}`,
       payload: { index: i },
     });
   }
@@ -28,6 +28,7 @@ function makeOptions(
 ): BatchOptions {
   return {
     org_id: 'org-001',
+    kind: 'compile_artworks',
     queue,
     handler,
     now: fixedClock(new Date('2024-01-01T00:00:00Z')),
@@ -36,13 +37,13 @@ function makeOptions(
   };
 }
 
-describe('T-2.16 compileBatch', () => {
-  it('compiles all items successfully', async () => {
+describe('T-2.16 runBatch', () => {
+  it('processes all items successfully', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ svg: '<svg/>' });
     const items = makeItems(5);
 
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler),
     );
@@ -64,11 +65,11 @@ describe('T-2.16 compileBatch', () => {
     const items = makeItems(3);
 
     const preExisting: Job = {
-      id: 'compile-sup-000',
+      id: 'compile_artworks-sup-000',
       org_id: 'org-001',
       kind: 'compile_artworks',
       state: 'succeeded',
-      payload: { support_id: 'sup-000' },
+      payload: { item_id: 'sup-000' },
       result: { svg: '<svg/>' },
       attempts: 1,
       max_attempts: 3,
@@ -79,7 +80,7 @@ describe('T-2.16 compileBatch', () => {
     };
     await queue.enqueue(preExisting);
 
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler),
     );
@@ -88,7 +89,7 @@ describe('T-2.16 compileBatch', () => {
     expect(report.skipped).toBe(1);
     expect(report.created).toBe(2);
     expect(report.succeeded).toBe(2);
-    expect(report.results.find((r) => r.support_id === 'sup-000')?.status).toBe(
+    expect(report.results.find((r) => r.item_id === 'sup-000')?.status).toBe(
       'skipped',
     );
   });
@@ -102,11 +103,11 @@ describe('T-2.16 compileBatch', () => {
     };
 
     const failedJob: Job = {
-      id: 'compile-sup-000',
+      id: 'compile_artworks-sup-000',
       org_id: 'org-001',
       kind: 'compile_artworks',
       state: 'failed',
-      payload: { support_id: 'sup-000' },
+      payload: { item_id: 'sup-000' },
       result: null,
       attempts: 1,
       max_attempts: 3,
@@ -118,9 +119,9 @@ describe('T-2.16 compileBatch', () => {
     await queue.enqueue(failedJob);
 
     const items: BatchItem[] = [
-      { support_id: 'sup-000', payload: {} },
+      { item_id: 'sup-000', payload: {} },
     ];
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler),
     );
@@ -137,9 +138,9 @@ describe('T-2.16 compileBatch', () => {
     };
 
     const items: BatchItem[] = [
-      { support_id: 'sup-fail', payload: {} },
+      { item_id: 'sup-fail', payload: {} },
     ];
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler, { max_attempts: 1 }),
     );
@@ -153,7 +154,7 @@ describe('T-2.16 compileBatch', () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({});
 
-    const report = await compileBatch(
+    const report = await runBatch(
       [],
       makeOptions(queue, handler),
     );
@@ -169,7 +170,7 @@ describe('T-2.16 compileBatch', () => {
     const items = makeItems(300);
 
     const start = Date.now();
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler),
     );
@@ -181,24 +182,66 @@ describe('T-2.16 compileBatch', () => {
     expect(elapsed).toBeLessThan(10_000);
   });
 
-  it('results are sorted by support_id', async () => {
+  it('results are sorted by item_id', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({});
     const items: BatchItem[] = [
-      { support_id: 'sup-c', payload: {} },
-      { support_id: 'sup-a', payload: {} },
-      { support_id: 'sup-b', payload: {} },
+      { item_id: 'sup-c', payload: {} },
+      { item_id: 'sup-a', payload: {} },
+      { item_id: 'sup-b', payload: {} },
     ];
 
-    const report = await compileBatch(
+    const report = await runBatch(
       items,
       makeOptions(queue, handler),
     );
 
-    expect(report.results.map((r) => r.support_id)).toEqual([
+    expect(report.results.map((r) => r.item_id)).toEqual([
       'sup-a',
       'sup-b',
       'sup-c',
     ]);
+  });
+
+  it('uses the specified kind for jobs', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ csv: 'data' });
+    const items: BatchItem[] = [
+      { item_id: 'qty-001', payload: {} },
+    ];
+
+    const report = await runBatch(
+      items,
+      makeOptions(queue, handler, { kind: 'export_quantities' }),
+    );
+
+    expect(report.succeeded).toBe(1);
+    const job = await queue.getJob('export_quantities-qty-001');
+    expect(job).not.toBeNull();
+    expect(job?.kind).toBe('export_quantities');
+  });
+
+  it('job IDs include the kind to prevent cross-kind collisions', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+    const items: BatchItem[] = [
+      { item_id: 'item-001', payload: {} },
+    ];
+
+    await runBatch(
+      items,
+      makeOptions(queue, handler, { kind: 'compile_artworks' }),
+    );
+    await runBatch(
+      items,
+      makeOptions(queue, handler, { kind: 'audit_site' }),
+    );
+
+    const compileJob = await queue.getJob('compile_artworks-item-001');
+    const auditJob = await queue.getJob('audit_site-item-001');
+    expect(compileJob).not.toBeNull();
+    expect(auditJob).not.toBeNull();
+    expect(compileJob?.kind).toBe('compile_artworks');
+    expect(auditJob?.kind).toBe('audit_site');
   });
 });

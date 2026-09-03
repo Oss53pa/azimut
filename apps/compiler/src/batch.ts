@@ -1,15 +1,16 @@
+import type { JobKind } from './job.js';
 import type { Job } from './job.js';
 import type { JobQueue } from './queue.js';
 import type { JobHandler } from './worker.js';
 import { processNextJob } from './worker.js';
 
 export type BatchItem = {
-  readonly support_id: string;
+  readonly item_id: string;
   readonly payload: Record<string, unknown>;
 };
 
 export type BatchResult = {
-  readonly support_id: string;
+  readonly item_id: string;
   readonly status: 'succeeded' | 'failed' | 'skipped';
   readonly error: string | null;
 };
@@ -25,36 +26,37 @@ export type BatchReport = {
 
 export type BatchOptions = {
   readonly org_id: string;
+  readonly kind: JobKind;
   readonly queue: JobQueue;
   readonly handler: JobHandler;
   readonly now: () => Date;
   readonly max_attempts: number;
 };
 
-function jobIdForSupport(supportId: string): string {
-  return `compile-${supportId}`;
+function jobIdForItem(kind: JobKind, itemId: string): string {
+  return `${kind}-${itemId}`;
 }
 
-export async function compileBatch(
+export async function runBatch(
   items: readonly BatchItem[],
   options: BatchOptions,
 ): Promise<BatchReport> {
-  const { org_id, queue, handler, now, max_attempts } = options;
+  const { org_id, kind, queue, handler, now, max_attempts } = options;
   const results: BatchResult[] = [];
   const sortedItems = [...items].sort((a, b) =>
-    a.support_id.localeCompare(b.support_id),
+    a.item_id.localeCompare(b.item_id),
   );
 
   let created = 0;
   let skipped = 0;
 
   for (const item of sortedItems) {
-    const jobId = jobIdForSupport(item.support_id);
+    const jobId = jobIdForItem(kind, item.item_id);
     const existing = await queue.getJob(jobId);
 
     if (existing !== null && existing.state === 'succeeded') {
       results.push({
-        support_id: item.support_id,
+        item_id: item.item_id,
         status: 'skipped',
         error: null,
       });
@@ -69,9 +71,9 @@ export async function compileBatch(
     const job: Job = {
       id: jobId,
       org_id,
-      kind: 'compile_artworks',
+      kind,
       state: 'queued',
-      payload: { support_id: item.support_id, ...item.payload },
+      payload: { item_id: item.item_id, ...item.payload },
       result: null,
       attempts: 0,
       max_attempts,
@@ -85,7 +87,7 @@ export async function compileBatch(
   }
 
   const handlers = new Map<string, JobHandler>([
-    ['compile_artworks', handler],
+    [kind, handler],
   ]);
   const workerOpts = { queue, handlers, now };
 
@@ -97,28 +99,28 @@ export async function compileBatch(
   let failed = 0;
 
   for (const item of sortedItems) {
-    const existing = results.find((r) => r.support_id === item.support_id);
+    const existing = results.find((r) => r.item_id === item.item_id);
     if (existing) continue;
 
-    const jobId = jobIdForSupport(item.support_id);
+    const jobId = jobIdForItem(kind, item.item_id);
     const job = await queue.getJob(jobId);
     if (job === null) {
       results.push({
-        support_id: item.support_id,
+        item_id: item.item_id,
         status: 'failed',
         error: 'job not found',
       });
       failed++;
     } else if (job.state === 'succeeded') {
       results.push({
-        support_id: item.support_id,
+        item_id: item.item_id,
         status: 'succeeded',
         error: null,
       });
       succeeded++;
     } else {
       results.push({
-        support_id: item.support_id,
+        item_id: item.item_id,
         status: 'failed',
         error: job.error,
       });
@@ -133,7 +135,7 @@ export async function compileBatch(
     succeeded,
     failed,
     results: results.sort((a, b) =>
-      a.support_id.localeCompare(b.support_id),
+      a.item_id.localeCompare(b.item_id),
     ),
   };
 }
