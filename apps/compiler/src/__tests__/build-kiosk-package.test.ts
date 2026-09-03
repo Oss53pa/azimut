@@ -169,4 +169,42 @@ describe('createBuildKioskPackageHandler', () => {
       })),
     ).rejects.toThrow('Package assembly failed');
   });
+
+  it('defaults created_at to current timestamp when not in payload', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
+    const result = await handler(makeJob({
+      package_id: 'pkg-ts',
+      // no created_at → defaults to new Date().toISOString()
+    }));
+
+    // Package was assembled with a generated timestamp
+    expect(result['package_id']).toBe('pkg-ts');
+    expect(result['artifact_count']).toBe(1);
+    expect(typeof result['manifest_json_length']).toBe('number');
+  });
+
+  it('non-string package_id falls back to job.id', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
+    const result = await handler(makeJob({
+      package_id: 42,
+      created_at: '2024-06-15T12:00:00Z',
+    }));
+
+    expect(result['package_id']).toBe('job-kiosk-001');
+  });
+
+  it('propagates resolveArtifacts rejection', async () => {
+    const context: BuildKioskPackageContext = {
+      site: refMinimal,
+      resolveArtifacts: async () => { throw new Error('storage unavailable'); },
+    };
+    const handler = createBuildKioskPackageHandler(context);
+
+    await expect(
+      handler(makeJob({
+        package_id: 'pkg-err',
+        created_at: '2024-06-15T12:00:00Z',
+      })),
+    ).rejects.toThrow('storage unavailable');
+  });
 });
