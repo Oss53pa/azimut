@@ -142,4 +142,15 @@ describe('D4.2 — importOccupancy', () => {
     expect(result.value.rejected).toBe(1);
     expect(result.value.pending).toBe(1);
   });
+
+  it('is deterministic (INV-4)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;RDC;occupied;Acme;office;Bureau;Office;2026-01-15',
+      'Unknown;Bâtiment ML;RDC;vacant;;;;;',
+    ]);
+    const r1 = importOccupancy(refMultilevel, content);
+    const r2 = importOccupancy(refMultilevel, content);
+    expect(r1).toStrictEqual(r2);
+  });
 });

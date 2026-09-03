@@ -221,6 +221,22 @@ describe('T-2.16 runBatch', () => {
     expect(job?.kind).toBe('export_quantities');
   });
 
+  it('is deterministic (INV-4)', async () => {
+    const handler: JobHandler = async (job) => ({
+      id: job.id,
+      result: 'done',
+    });
+    const items = makeItems(3);
+
+    const queue1 = new MemoryQueue();
+    const r1 = await runBatch(items, makeOptions(queue1, handler));
+
+    const queue2 = new MemoryQueue();
+    const r2 = await runBatch(items, makeOptions(queue2, handler));
+
+    expect(r1).toStrictEqual(r2);
+  });
+
   it('job IDs include the kind to prevent cross-kind collisions', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ ok: true });
