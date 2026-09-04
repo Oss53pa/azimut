@@ -307,6 +307,42 @@ describe('T-2.16 runBatch', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('skips pre-existing queued jobs without re-creating them', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+
+    const queuedJob: Job = {
+      id: 'compile_artworks-sup-q',
+      org_id: 'org-001',
+      kind: 'compile_artworks',
+      state: 'queued',
+      payload: { item_id: 'sup-q' },
+      result: null,
+      attempts: 0,
+      max_attempts: 3,
+      created_at: new Date('2024-01-01T00:00:00Z'),
+      started_at: null,
+      finished_at: null,
+      error: null,
+    };
+    await queue.enqueue(queuedJob);
+
+    const items: BatchItem[] = [{ item_id: 'sup-q', payload: {} }];
+    const report = await runBatch(items, makeOptions(queue, handler));
+    // The pre-existing queued job should be processed (not re-created)
+    expect(report.created).toBe(0);
+    expect(report.succeeded).toBe(1);
+  });
+
+  it('propagates org_id onto created jobs', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+    const items: BatchItem[] = [{ item_id: 'org-test', payload: {} }];
+    await runBatch(items, makeOptions(queue, handler));
+    const job = await queue.getJob('compile_artworks-org-test');
+    expect(job?.org_id).toBe('org-001');
+  });
+
   it('job IDs include the kind to prevent cross-kind collisions', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ ok: true });

@@ -319,4 +319,69 @@ describe('resolveRule', () => {
     expect(result.ok).toBe(true);
     if (result.ok) expect(result.value.params['v']).toBe(10);
   });
+
+  it('returns RULE_NOT_FOUND when no scope matches (line 163)', () => {
+    const pack = JSON.stringify({
+      key: 'test', version: '1.0', jurisdiction: 'FR',
+      effective_from: '2024-01-01', source_ref: 'Ref',
+      rules: [
+        {
+          code: 'R1',
+          scope: { supportRegistry: 'wayfinding' },
+          params: { v: 10 },
+          source_ref: 'A',
+        },
+      ],
+    });
+    const loaded = loadRulesPack(pack);
+    if (!loaded.ok) throw new Error('pack should load');
+    const result = resolveRule(loaded.value, 'R1', {
+      supportRegistry: 'safety',
+    });
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('RULES.RULE_NOT_FOUND');
+  });
+
+  it('matches by context scope field', () => {
+    const pack = JSON.stringify({
+      key: 'test', version: '1.0', jurisdiction: 'FR',
+      effective_from: '2024-01-01', source_ref: 'Ref',
+      rules: [
+        {
+          code: 'R1',
+          scope: { context: 'indoor' },
+          params: { v: 30 },
+          source_ref: 'C',
+        },
+      ],
+    });
+    const loaded = loadRulesPack(pack);
+    if (!loaded.ok) throw new Error('pack should load');
+    const hit = resolveRule(loaded.value, 'R1', { context: 'indoor' });
+    expect(hit.ok).toBe(true);
+    const miss = resolveRule(loaded.value, 'R1', { context: 'outdoor' });
+    expect(miss.ok).toBe(false);
+  });
+
+  it('matches by sectorKey scope field', () => {
+    const pack = JSON.stringify({
+      key: 'test', version: '1.0', jurisdiction: 'FR',
+      effective_from: '2024-01-01', source_ref: 'Ref',
+      rules: [
+        {
+          code: 'R1',
+          scope: { sectorKey: 'health' },
+          params: { v: 40 },
+          source_ref: 'D',
+        },
+      ],
+    });
+    const loaded = loadRulesPack(pack);
+    if (!loaded.ok) throw new Error('pack should load');
+    const hit = resolveRule(loaded.value, 'R1', { sectorKey: 'health' });
+    expect(hit.ok).toBe(true);
+    const miss = resolveRule(loaded.value, 'R1', { sectorKey: 'retail' });
+    expect(miss.ok).toBe(false);
+  });
 });
