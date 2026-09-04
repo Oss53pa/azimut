@@ -190,7 +190,7 @@ describe('T-1.8 validateLibrary', () => {
           org_id: 'org-test-001',
           sector_key: 'tertiary',
           code: 'child',
-          parent_id: refMinimal.categories[0]!.id,
+          parent_id: (refMinimal.categories[0] ?? { id: 'fallback' }).id,
         },
       ],
     });

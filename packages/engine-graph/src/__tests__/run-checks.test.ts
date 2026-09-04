@@ -182,6 +182,42 @@ describe('T-2.5 runChecks', () => {
     });
   });
 
+  describe('GRAPH.DESTINATION_LANG_INCOMPLETE — dest with zero names', () => {
+    it('skips dest with no names at all when other dests have names', () => {
+      // Destination with no names → not in langsByDest → continue path
+      const site: SiteData = {
+        ...refMinimal,
+        destination_names: refMinimal.destination_names.filter(
+          (dn) => dn.destination_id !== 'dest-a',
+        ),
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      // dest-a has no names at all → skipped by !destLangs continue
+      const missing = result.value.findings.filter(
+        (f) =>
+          f.code === 'GRAPH.DESTINATION_LANG_INCOMPLETE'
+          && f.entity?.id === 'dest-a',
+      );
+      expect(missing.length).toBe(0);
+    });
+  });
+
+  describe('empty inputs', () => {
+    it('returns clean report with no destinations/names', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        destinations: [],
+        destination_names: [],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.findings.length).toBe(0);
+    });
+  });
+
   describe('GRAPH.CATEGORY_ALL_VACANT — mixed categories', () => {
     it('flags only the all-vacant category, not the mixed one', () => {
       const d0 = refMinimal.destinations[0];

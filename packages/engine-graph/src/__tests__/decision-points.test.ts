@@ -198,6 +198,56 @@ describe('deriveDecisionPoints', () => {
     }
   });
 
+  it('forward-only edge increments only from-node degree', () => {
+    const fwdSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          direction: 'forward' as const,
+        })),
+      },
+    };
+    const result = deriveDecisionPoints(
+      fwdSite,
+      stdProfile,
+      refMinimal.destinations,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // With forward-only edges, to-nodes don't see traversals from them
+    // n-junction: still has 3 forward out-edges → degree 3 → DP
+    const dp = result.value.find((p) => p.node_id === 'n-junction');
+    expect(dp).toBeDefined();
+  });
+
+  it('degree exactly 2 qualifies as decision point', () => {
+    // Build a Y-graph: 3 nodes, center has degree 2
+    const ySite: SiteData = {
+      ...refMinimal,
+      destinations: [],
+      graph: {
+        nodes: [
+          { id: 'n-1', org_id: 'org-test-001', level_id: 'lvl-gf', kind: 'junction' as const, position: { x_m: 0, y_m: 0 }, label: '1' },
+          { id: 'n-2', org_id: 'org-test-001', level_id: 'lvl-gf', kind: 'junction' as const, position: { x_m: 1, y_m: 0 }, label: '2' },
+          { id: 'n-3', org_id: 'org-test-001', level_id: 'lvl-gf', kind: 'junction' as const, position: { x_m: 2, y_m: 0 }, label: '3' },
+        ],
+        edges: [
+          { id: 'e-12', org_id: 'org-test-001', from_node_id: 'n-1', to_node_id: 'n-2', direction: 'both' as const, accessible: true, evacuation_route: false, length_m: 1, width_m: 1.5, slope_pct: 0 },
+          { id: 'e-23', org_id: 'org-test-001', from_node_id: 'n-2', to_node_id: 'n-3', direction: 'both' as const, accessible: true, evacuation_route: false, length_m: 1, width_m: 1.5, slope_pct: 0 },
+        ],
+        vertical_links: [],
+      },
+    };
+    const result = deriveDecisionPoints(ySite, stdProfile, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const dp = result.value.find((p) => p.node_id === 'n-2');
+    expect(dp).toBeDefined();
+    expect(dp?.branch_count).toBe(2);
+  });
+
   it('fully inaccessible graph yields zero decision points', () => {
     const inaccessibleSite: SiteData = {
       ...refMinimal,

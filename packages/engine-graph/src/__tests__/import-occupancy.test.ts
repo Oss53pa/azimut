@@ -187,6 +187,56 @@ describe('D4.2 — importOccupancy', () => {
     expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
   });
 
+  it('case-insensitive building and level matching', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;bâtiment ml;rdc;occupied;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.imported).toBe(1);
+    expect(result.value.lines[0]?.entry?.node_id).toBe('n-ml-dest-rdc');
+  });
+
+  it('recognizes French column aliases', () => {
+    const frHeader = 'code_unite;batiment;niveau;statut;nom_occupant;categorie;nom_fr;nom_en;date_effet';
+    const content = csv([
+      frHeader,
+      'Bureau RDC;Bâtiment ML;RDC;occupied;Locataire;office;Bureau;Office;2026-01-15',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.imported).toBe(1);
+    expect(result.value.lines[0]?.entry?.occupant_name).toBe('Locataire');
+  });
+
+  it('handles CRLF line endings', () => {
+    const content = `${header}\r\nBureau RDC;Bâtiment ML;RDC;occupied;;;;;\r\n`;
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_rows).toBe(1);
+    expect(result.value.imported).toBe(1);
+  });
+
+  it('optional columns missing from header still work', () => {
+    const minHeader = 'unit_code;building;level;occupancy_status';
+    const content = csv([
+      minHeader,
+      'Bureau RDC;Bâtiment ML;RDC;occupied',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.imported).toBe(1);
+    const entry = result.value.lines[0]?.entry;
+    expect(entry?.occupant_name).toBe('');
+    expect(entry?.name_fr).toBe('');
+    expect(entry?.name_en).toBe('');
+  });
+
   it('unknown level in known building yields pending', () => {
     const content = csv([
       header,

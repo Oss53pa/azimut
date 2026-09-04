@@ -8,6 +8,7 @@ import type { Support } from '../audit.js';
 import {
   refMinimal,
   refBroken,
+  refMultilevel,
 } from '@azimut/testkit';
 import type { SiteData, TravelProfile } from '@azimut/core-model';
 
@@ -73,6 +74,24 @@ describe('auditCoverage', () => {
     }
   });
 
+  it('fractional coverage_ratio when only some DPs are covered', () => {
+    const p = refMultilevel.travel_profiles[0];
+    if (!p) throw new Error('No profile in refMultilevel');
+    const mlProfile = p;
+    // Cover only n-ml-hall, leave n-ml-hall-r1 uncovered.
+    const supports: Support[] = [
+      { id: 'sup-hall', node_id: 'n-ml-hall' },
+    ];
+    const result = auditCoverage(refMultilevel, mlProfile, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_decision_points).toBeGreaterThanOrEqual(2);
+    expect(result.value.covered_decision_points).toBe(1);
+    expect(result.value.coverage_ratio).toBeGreaterThan(0);
+    expect(result.value.coverage_ratio).toBeLessThan(1);
+    expect(result.value.uncovered_points).toContain('n-ml-hall-r1');
+  });
+
   it('deterministic results (INV-4)', () => {
     const supports: Support[] = [
       { id: 'sup-1', node_id: 'n-junction' },
@@ -127,6 +146,31 @@ describe('auditAccessibility', () => {
     expect(result.value.total_destinations).toBe(0);
     expect(result.value.reachable_destinations).toBe(0);
     expect(result.value.unreachable).toHaveLength(0);
+  });
+
+  it('all destinations unreachable when site has no entrance nodes', () => {
+    const noEntranceSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: refMinimal.graph.nodes.map((n) =>
+          n.kind === 'entrance' ? { ...n, kind: 'junction' as const } : n,
+        ),
+      },
+    };
+    const accProfile: TravelProfile = {
+      ...stdProfile,
+      id: 'tp-acc',
+      key: 'accessible',
+      require_accessible: true,
+    };
+    const result = auditAccessibility(noEntranceSite, accProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.reachable_destinations).toBe(0);
+    expect(result.value.unreachable.length).toBe(
+      noEntranceSite.destinations.length,
+    );
   });
 
   it('reports unreachable destination via non-accessible edge', () => {
@@ -280,6 +324,39 @@ describe('auditEvacuation', () => {
     expect(result.value.uncovered_nodes.length).toBe(
       noEvacSite.graph.nodes.length,
     );
+  });
+
+  it('returns empty uncovered_nodes when all edges are evacuation routes', () => {
+    const allEvacSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          evacuation_route: true,
+        })),
+      },
+    };
+    const result = auditEvacuation(allEvacSite);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.uncovered_nodes).toEqual([]);
+    expect(result.value.nodes_with_evacuation_route).toBe(
+      allEvacSite.graph.nodes.length,
+    );
+  });
+
+  it('handles empty graph without crashing', () => {
+    const emptySite: SiteData = {
+      ...refMinimal,
+      graph: { nodes: [], edges: [], vertical_links: [] },
+    };
+    const result = auditEvacuation(emptySite);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_nodes).toBe(0);
+    expect(result.value.nodes_with_evacuation_route).toBe(0);
+    expect(result.value.uncovered_nodes).toEqual([]);
   });
 
   it('deterministic results (INV-4)', () => {
