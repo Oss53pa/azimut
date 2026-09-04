@@ -199,4 +199,28 @@ describe('diffManifest', () => {
     expect(result.value.matched_count).toBe(0);
     expect(result.value.divergent_count).toBe(0);
   });
+
+  it('divergent_count includes removed, changed, and added', () => {
+    const baseline = buildManifest([
+      makeInput({ id: 'art-1', path: 'a.pdf', content: textEncoder.encode('a') }),
+      makeInput({ id: 'art-2', path: 'b.pdf', content: textEncoder.encode('b') }),
+    ]);
+    const candidate = buildManifest([
+      makeInput({ id: 'art-2', path: 'b.pdf', content: textEncoder.encode('B') }),
+      makeInput({ id: 'art-3', path: 'c.pdf', content: textEncoder.encode('c') }),
+    ]);
+    const result = diffManifest(baseline, candidate);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    // art-1 removed, art-2 divergent checksum, art-3 added = 3 findings
+    expect(result.findings.length).toBe(3);
+  });
+
+  it('is deterministic (INV-4)', () => {
+    const m1 = buildManifest([makeInput({ id: 'a1', path: 'x.pdf' })]);
+    const m2 = buildManifest([makeInput({ id: 'a1', path: 'x.pdf', content: textEncoder.encode('diff') })]);
+    const r1 = diffManifest(m1, m2);
+    const r2 = diffManifest(m1, m2);
+    expect(r1).toStrictEqual(r2);
+  });
 });

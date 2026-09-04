@@ -192,4 +192,25 @@ describe('verifyPackage', () => {
     if (!result.ok) return;
     expect(result.value.verified_count).toBe(3);
   });
+
+  it('reports distinct codes for mixed failure types', () => {
+    const inputs = [
+      makeInput({ id: 'art-ok', path: 'ok.pdf', content: textEncoder.encode('good') }),
+      makeInput({ id: 'art-miss', path: 'miss.pdf', content: textEncoder.encode('data') }),
+      makeInput({ id: 'art-bad', path: 'bad.pdf', content: textEncoder.encode('original') }),
+    ];
+    const { manifest } = buildManifestAndContents(inputs);
+    // Build contents that omit art-miss and corrupt art-bad
+    const contents = new Map<string, Uint8Array>();
+    contents.set('art-ok', textEncoder.encode('good'));
+    // art-miss is absent
+    contents.set('art-bad', textEncoder.encode('corrupted'));
+    const result = verifyPackage(manifest, contents);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const ids = result.findings.map((f) => f.entity?.id);
+    expect(ids).toContain('art-miss');
+    expect(ids).toContain('art-bad');
+    expect(result.findings.length).toBe(2);
+  });
 });

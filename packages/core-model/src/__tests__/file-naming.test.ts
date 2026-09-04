@@ -207,4 +207,38 @@ describe('D11 — buildArchiveName', () => {
     } as const;
     expect(buildArchiveName(parts)).toBe(buildArchiveName(parts));
   });
+
+  it('truncation inserts ~ marker when over limit', () => {
+    const result = buildArchiveName({
+      site_code: 'LONG'.repeat(20),
+      building: 'NAME'.repeat(20),
+      level: 'LVL'.repeat(20),
+      version: 99,
+      extension: 'zip',
+    });
+    expect(result).toContain('~');
+    expect(result.length).toBe(120);
+  });
+});
+
+describe('D11 — buildFileName truncation symmetry', () => {
+  it('head is at least as long as tail after truncation', () => {
+    const result = buildFileName({
+      site_code: 'A'.repeat(30),
+      building: 'B'.repeat(30),
+      level: 'C'.repeat(20),
+      type_code: 'D'.repeat(10),
+      reference: 'E'.repeat(10),
+      version: 1,
+      face: 'F1',
+      extension: 'pdf',
+    });
+    expect(result.length).toBeLessThanOrEqual(120);
+    if (result.includes('~')) {
+      const tildeIdx = result.indexOf('~');
+      const head = result.slice(0, tildeIdx);
+      const tail = result.slice(tildeIdx + 1);
+      expect(head.length).toBeGreaterThanOrEqual(tail.length);
+    }
+  });
 });

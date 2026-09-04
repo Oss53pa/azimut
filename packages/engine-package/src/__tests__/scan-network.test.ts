@@ -228,4 +228,24 @@ describe('scanForNetworkDependency', () => {
     const result = scanForNetworkDependency(artifacts);
     expect(result.ok).toBe(true);
   });
+
+  it('pattern labels in findings are sorted alphabetically', () => {
+    const artifacts = artifactMap({
+      'multi.js': 'new WebSocket("ws://x"); fetch("/a"); new XMLHttpRequest();',
+    });
+    const result = scanForNetworkDependency(artifacts);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const patternsStr = result.findings[0]?.params['patterns'] as string;
+    expect(patternsStr).toBeDefined();
+    const labels = patternsStr.split(', ');
+    const sorted = [...labels].sort();
+    expect(labels).toEqual(sorted);
+  });
+
+  it('empty artifact map passes', () => {
+    const artifacts = artifactMap({});
+    const result = scanForNetworkDependency(artifacts);
+    expect(result.ok).toBe(true);
+  });
 });

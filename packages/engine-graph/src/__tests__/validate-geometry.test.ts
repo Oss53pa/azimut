@@ -274,4 +274,31 @@ describe('validateGeometry', () => {
     expect(result.findings.filter((f) => f.entity?.kind === 'footprint').length).toBeGreaterThanOrEqual(1);
     expect(result.findings.filter((f) => f.entity?.kind === 'volume').length).toBeGreaterThanOrEqual(1);
   });
+
+  it('does not double-report POLYGON_NOT_CLOSED for a 2-vertex polygon', () => {
+    const result = validateGeometry(siteWith([fp('fp-2v', [[0, 0], [5, 5]])]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    // polygonNotClosedFindings skips < 3 vertices, so no NOT_CLOSED finding
+    expect(result.findings.filter(
+      (f) => f.code === 'GEOM.POLYGON_NOT_CLOSED',
+    )).toHaveLength(0);
+    // tooFewVerticesFindings catches it instead
+    expect(result.findings.filter(
+      (f) => f.code === 'GEOM.POLYGON_TOO_FEW_VERTICES',
+    )).toHaveLength(1);
+  });
+
+  it('non-overlapping L-shapes with overlapping bounding boxes pass', () => {
+    // Two L-shaped polygons whose bboxes overlap but shapes do not
+    const result = validateGeometry(siteWith([
+      fp('fp-L1', [[0, 0], [5, 0], [5, 3], [3, 3], [3, 5], [0, 5]]),
+      fp('fp-L2', [[6, 0], [10, 0], [10, 5], [8, 5], [8, 3], [6, 3]]),
+    ]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some(
+      (f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP',
+    )).toBe(false);
+  });
 });
