@@ -249,6 +249,58 @@ describe('T-1.13 importSupports', () => {
     });
   });
 
+  describe('missing/invalid width_m rejection', () => {
+    it('rejects missing width with largeur absente', () => {
+      const content = csv(['sup-1;n-ml-hall;90;;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const line = result.value.lines[0];
+      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
+      expect(line?.findings[0]?.params['reason']).toBe('largeur absente');
+    });
+
+    it('rejects invalid width with largeur invalide', () => {
+      const content = csv(['sup-1;n-ml-hall;90;abc;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const line = result.value.lines[0];
+      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
+      expect(line?.findings[0]?.params['reason']).toBe(
+        'largeur invalide: abc',
+      );
+    });
+  });
+
+  describe('missing/invalid height_m rejection', () => {
+    it('rejects missing height with hauteur absente', () => {
+      const content = csv(['sup-1;n-ml-hall;90;0.6;']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const line = result.value.lines[0];
+      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
+      expect(line?.findings[0]?.params['reason']).toBe('hauteur absente');
+    });
+
+    it('rejects invalid height with hauteur invalide', () => {
+      const content = csv(['sup-1;n-ml-hall;90;0.6;xyz']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const line = result.value.lines[0];
+      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
+      expect(line?.findings[0]?.params['reason']).toBe(
+        'hauteur invalide: xyz',
+      );
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same report on two calls', () => {
       const content = csv([

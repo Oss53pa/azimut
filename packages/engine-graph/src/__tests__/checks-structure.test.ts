@@ -181,4 +181,90 @@ describe('missingDestinationNameFindings', () => {
     const sorted = [...ids].sort();
     expect(ids).toEqual(sorted);
   });
+
+  it('emits findings for destination with zero name entries', () => {
+    // Add a destination that has NO entries in destination_names at all.
+    // Other destinations keep their names → langs set is non-empty →
+    // the new dest triggers DESTINATION_NAME_MISSING for every active lang.
+    const site: SiteData = {
+      ...refMultilevel,
+      destinations: [
+        ...refMultilevel.destinations,
+        {
+          id: 'dest-nonames',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-ml-hall',
+          node_id: 'n-ml-hall',
+          category_id: 'cat-ml-office',
+          occupant_name: 'No Names',
+          occupancy_status: 'occupied' as const,
+          display_priority: 0,
+        },
+      ],
+    };
+    const findings = missingDestinationNameFindings(site);
+    const noNameFindings = findings.filter(
+      (f) => f.entity?.id === 'dest-nonames',
+    );
+    // Should have one finding per active language
+    const activeLangs = new Set(
+      site.destination_names.map((dn) => dn.lang),
+    );
+    expect(noNameFindings).toHaveLength(activeLangs.size);
+    for (const f of noNameFindings) {
+      expect(f.code).toBe('GRAPH.DESTINATION_NAME_MISSING');
+    }
+  });
+});
+
+describe('multiLevelWithoutAnyVlFindings — VL edge not found', () => {
+  it('skips VL whose edge_id does not exist in edges', () => {
+    // Give a VL that references a non-existent edge. The check should
+    // still report no VL for the building (the orphan VL is skipped).
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: [
+          {
+            id: 'vl-orphan',
+            org_id: 'org-test-001',
+            edge_id: 'e-does-not-exist',
+            kind: 'elevator' as const,
+            capacity: 10,
+            accessible: true,
+          },
+        ],
+      },
+    };
+    const findings = multiLevelWithoutAnyVlFindings(site);
+    // The building has 2+ levels but the only VL references
+    // a non-existent edge → building should be flagged
+    expect(findings.length).toBeGreaterThan(0);
+    expect(findings[0]?.code).toBe('GRAPH.LEVEL_NO_VERTICAL_LINK');
+  });
+});
+
+describe('multiLevelWithoutAccessibleVlFindings — VL edge not found', () => {
+  it('skips VL whose edge_id does not exist in edges', () => {
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: [
+          {
+            id: 'vl-orphan',
+            org_id: 'org-test-001',
+            edge_id: 'e-does-not-exist',
+            kind: 'elevator' as const,
+            capacity: 10,
+            accessible: true,
+          },
+        ],
+      },
+    };
+    const findings = multiLevelWithoutAccessibleVlFindings(site);
+    expect(findings.length).toBeGreaterThan(0);
+    expect(findings[0]?.code).toBe('GRAPH.LEVEL_NO_ACCESSIBLE_LINK');
+  });
 });

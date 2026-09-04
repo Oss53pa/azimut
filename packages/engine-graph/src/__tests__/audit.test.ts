@@ -154,6 +154,95 @@ describe('auditAccessibility', () => {
   });
 });
 
+describe('auditCoverage — zero decision points', () => {
+  it('coverage_ratio is 1 when total is 0', () => {
+    // Build a linear graph: two nodes with one edge → max out-degree 1 → no DPs.
+    const linearSite: SiteData = {
+      ...refMinimal,
+      destinations: [],
+      graph: {
+        ...refMinimal.graph,
+        nodes: [
+          {
+            id: 'n-a',
+            org_id: 'org-test-001',
+            level_id: 'lvl-gf',
+            kind: 'entrance' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'A',
+          },
+          {
+            id: 'n-b',
+            org_id: 'org-test-001',
+            level_id: 'lvl-gf',
+            kind: 'junction' as const,
+            position: { x_m: 5, y_m: 0 },
+            label: 'B',
+          },
+        ],
+        edges: [
+          {
+            id: 'e-ab',
+            org_id: 'org-test-001',
+            from_node_id: 'n-a',
+            to_node_id: 'n-b',
+            direction: 'both' as const,
+            accessible: true,
+            evacuation_route: true,
+            length_m: 5,
+            width_m: 1.5,
+            slope_pct: 0,
+          },
+        ],
+        vertical_links: [],
+      },
+    };
+    const result = auditCoverage(linearSite, stdProfile, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_decision_points).toBe(0);
+    expect(result.value.coverage_ratio).toBe(1);
+    expect(result.value.uncovered_points).toHaveLength(0);
+  });
+});
+
+describe('auditAccessibility — self-loop edge', () => {
+  it('self-loop edge is skipped in adjacency graph', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-self',
+            org_id: 'org-test-001',
+            from_node_id: 'n-junction',
+            to_node_id: 'n-junction',
+            direction: 'both' as const,
+            accessible: true,
+            evacuation_route: false,
+            length_m: 0,
+            width_m: 1.5,
+            slope_pct: 0,
+          },
+        ],
+      },
+    };
+    const accProfile: TravelProfile = {
+      ...stdProfile,
+      id: 'tp-acc',
+      key: 'accessible',
+      require_accessible: true,
+    };
+    const result = auditAccessibility(site, accProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Self-loop should not affect reachability
+    expect(result.value.unreachable).toHaveLength(0);
+  });
+});
+
 describe('auditEvacuation', () => {
   it('reports nodes not on evacuation routes', () => {
     const result = auditEvacuation(refMinimal);

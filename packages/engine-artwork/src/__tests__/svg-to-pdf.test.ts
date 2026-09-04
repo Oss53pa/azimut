@@ -185,4 +185,136 @@ describe('renderSvgToPage', () => {
     const { bytes } = await renderAndExtract(svg);
     expect(bytes.length).toBeGreaterThan(0);
   });
+
+  it('rect with non-hex fill (named color) falls back gracefully', async () => {
+    // parseHexColor returns null for non-hex → no color override, still valid PDF
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="10" y="10" width="50" height="30" fill="red" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(bytes.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('parseHexColor NaN guard for non-hex digits', async () => {
+    // #gggggg has 6 chars but parseInt produces NaN
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="10" y="10" width="50" height="30" fill="#gggggg" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('two-value scale transform scale(x, y)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="scale(2, 3)">' +
+      `<rect x="0" y="0" width="20" height="10" fill="${ACCENT}" />` +
+      '</g>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('rect with stroke-dasharray', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="10" y="10" width="80" height="40" fill="none" stroke="${BORDER}" stroke-dasharray="5,3" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('text with nested tspan elements', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="10" y="50" font-size="12" fill="${FG}">` +
+      '<tspan x="10" dy="0">First</tspan>' +
+      '<tspan x="10" dy="14">Second</tspan>' +
+      '</text>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('text with &quot; entity decoding', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<text x="10" y="50" font-size="12" fill="${WARN}">A &amp;quot;B&amp;quot;</text>` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('text without fill attribute', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<text x="10" y="50" font-size="12">No fill</text>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('polygon without points attribute (early return)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<polygon fill="${OK}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('polygon without fill attribute', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<polygon points="10,10 50,50 10,50" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('path without fill attribute', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M10 10 L50 50 L90 10 Z" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('<g> without transform passes parent transform through', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g>' +
+      `<rect x="10" y="10" width="50" height="30" fill="${FG2}" />` +
+      '</g>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('rect without fill attribute (implicit else)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="10" y="10" width="50" height="30" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('two-value scale is deterministic (INV-4)', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="scale(1.5, 2.5)">' +
+      `<rect x="5" y="5" width="40" height="20" fill="${ACCENT2}" />` +
+      `<text x="10" y="50" font-size="10" fill="${FG}">Scaled</text>` +
+      '</g>' +
+      '</svg>';
+    const { bytes: b1 } = await renderAndExtract(svg);
+    const { bytes: b2 } = await renderAndExtract(svg);
+    expect(Array.from(b1)).toEqual(Array.from(b2));
+  });
 });
