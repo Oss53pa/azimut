@@ -68,6 +68,13 @@ describe('parseNumber', () => {
     expect(parseNumber('-42')).toBe(-42);
   });
 
+  it('parses "-0" as a finite number', () => {
+    const result = parseNumber('-0');
+    expect(result).not.toBeNull();
+    // Number("-0") is -0, which is finite → returned as-is
+    expect(Number.isFinite(result)).toBe(true);
+  });
+
   it('parses negative float with comma', () => {
     expect(parseNumber('-3,14')).toBe(-3.14);
   });

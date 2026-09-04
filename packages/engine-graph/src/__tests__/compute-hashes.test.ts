@@ -72,9 +72,16 @@ describe('D7.1 — inputs_hash', () => {
     expect(after).toBe(before);
   });
 
-  it('changes when the profile changes', () => {
+  it('changes when require_accessible changes', () => {
     const before = computeInputsHash(refMinimal, profile);
     const altProfile = { ...profile, require_accessible: true };
+    const after = computeInputsHash(refMinimal, altProfile);
+    expect(after).not.toBe(before);
+  });
+
+  it('changes when honor_hours changes', () => {
+    const before = computeInputsHash(refMinimal, profile);
+    const altProfile = { ...profile, honor_hours: !profile.honor_hours };
     const after = computeInputsHash(refMinimal, altProfile);
     expect(after).not.toBe(before);
   });

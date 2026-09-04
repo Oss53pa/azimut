@@ -247,4 +247,16 @@ describe('D4.2 — importOccupancy', () => {
     if (!result.ok) return;
     expect(result.value.pending).toBe(1);
   });
+
+  it('unknown building yields pending with NODE_NOT_FOUND', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Unknown Building;RDC;occupied;Acme;office;Bureau;Office;2026-01-15',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.pending).toBe(1);
+    expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
+  });
 });

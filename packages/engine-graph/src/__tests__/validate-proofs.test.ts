@@ -199,6 +199,27 @@ describe('T-2.14 validateProofs', () => {
     expect(codes).toContain('DATA.PROOF_PENDING_WITH_APPROVAL');
   });
 
+  it('multiple faces each with duplicate versions report independently', () => {
+    const proofs = [
+      makeProof({ id: 'p1', face_id: 'face-A', version: 1 }),
+      makeProof({ id: 'p2', face_id: 'face-A', version: 1 }),
+      makeProof({ id: 'p3', face_id: 'face-B', version: 2 }),
+      makeProof({ id: 'p4', face_id: 'face-B', version: 2 }),
+    ];
+    const result = validateProofs(proofs, []);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const dupFindings = result.findings.filter(
+      (f) => f.code === 'DATA.PROOF_DUPLICATE_VERSION',
+    );
+    expect(dupFindings.length).toBe(2);
+    const ids = dupFindings.map((f) => f.entity?.id);
+    expect(ids).toContain('face-A');
+    expect(ids).toContain('face-B');
+    // Sorted by face id
+    expect(ids[0]).toBe('face-A');
+  });
+
   it('superseded proof without approvals produces no finding', () => {
     const proofs = [
       makeProof({ id: 'proof-001', status: 'superseded', face_id: 'f1', version: 1 }),

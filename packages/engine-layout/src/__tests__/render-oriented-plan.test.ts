@@ -209,4 +209,14 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
     );
     expect(yMatch).not.toBeNull();
   });
+
+  it('level with no destinations omits destination labels', () => {
+    // Remove all destinations so show_destinations finds nothing to render
+    const site = { ...refMultilevel, destinations: [] };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('<svg');
+    expect(result.value).not.toContain('tok-txt2');
+  });
 });

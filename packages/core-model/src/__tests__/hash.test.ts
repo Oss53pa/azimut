@@ -144,3 +144,20 @@ describe('sha256Hex — additional edge cases', () => {
     expect(sha256Hex('abc')).not.toBe(sha256Hex('abd'));
   });
 });
+
+describe('canonicalSerialize — non-primitive fallbacks', () => {
+  it('serializes function values as null', () => {
+    const fn = () => 0;
+    expect(canonicalSerialize({ fn })).toBe('{"fn":null}');
+  });
+
+  it('serializes symbol values as null', () => {
+    const s = Symbol('x');
+    expect(canonicalSerialize({ s })).toBe('{"s":null}');
+  });
+
+  it('serializes bigint values as null', () => {
+    const b = BigInt(42);
+    expect(canonicalSerialize({ b })).toBe('{"b":null}');
+  });
+});
