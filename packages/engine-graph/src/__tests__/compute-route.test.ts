@@ -235,6 +235,23 @@ describe('computeRoute', () => {
     }
   });
 
+  it('backward direction allows to→from but blocks from→to', () => {
+    const bwdSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) =>
+          e.id === 'e-02' ? { ...e, direction: 'backward' as const } : e,
+        ),
+      },
+    };
+    // backward on e-02 (junction→dest-a): traversable only dest-a→junction
+    const fwd = computeRoute(bwdSite, stdProfile, 'n-junction', 'n-dest-a');
+    expect(fwd.ok).toBe(false);
+    const rev = computeRoute(bwdSite, stdProfile, 'n-dest-a', 'n-junction');
+    expect(rev.ok).toBe(true);
+  });
+
   it('ignores edges referencing phantom nodes not in graph', () => {
     const phantomSite: SiteData = {
       ...refMinimal,
@@ -341,5 +358,25 @@ describe('RouteCache', () => {
 
     cache.invalidateAll();
     expect(cache.size).toBe(0);
+  });
+
+  it('does not cache failed routes', () => {
+    const cache = new RouteCache();
+    const result = cache.computeOrGet(
+      refBroken,
+      getProfile(refBroken.travel_profiles, 0),
+      'n-brk-entrance',
+      'n-brk-island-a',
+    );
+    expect(result.ok).toBe(false);
+    expect(cache.size).toBe(0);
+  });
+
+  it('invalidateForEdge is no-op for unrelated edge', () => {
+    const cache = new RouteCache();
+    cache.computeOrGet(refMinimal, stdProfile, 'n-entrance', 'n-dest-a');
+    expect(cache.size).toBe(1);
+    cache.invalidateForEdge('e-nonexistent');
+    expect(cache.size).toBe(1);
   });
 });

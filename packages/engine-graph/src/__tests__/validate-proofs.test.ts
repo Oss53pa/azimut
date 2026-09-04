@@ -183,6 +183,22 @@ describe('T-2.14 validateProofs', () => {
     expect(result.warnings[0]?.params?.['approval_count']).toBe(3);
   });
 
+  it('blocking and warning findings coexist in findings array', () => {
+    const proofs = [
+      makeProof({ id: 'p-block', status: 'approved', face_id: 'f1', version: 1 }),
+      makeProof({ id: 'p-warn', status: 'pending', face_id: 'f2', version: 1 }),
+    ];
+    const approvals = [
+      makeApproval({ id: 'a-warn', proof_id: 'p-warn' }),
+    ];
+    const result = validateProofs(proofs, approvals);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const codes = result.findings.map((f) => f.code);
+    expect(codes).toContain('DATA.PROOF_STATUS_WITHOUT_APPROVAL');
+    expect(codes).toContain('DATA.PROOF_PENDING_WITH_APPROVAL');
+  });
+
   it('superseded proof without approvals produces no finding', () => {
     const proofs = [
       makeProof({ id: 'proof-001', status: 'superseded', face_id: 'f1', version: 1 }),

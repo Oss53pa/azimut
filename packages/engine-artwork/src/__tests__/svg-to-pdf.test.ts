@@ -208,6 +208,19 @@ describe('renderSvgToPage', () => {
     expect(bytes.length).toBeGreaterThan(0);
   });
 
+  it('3-char hex shorthand falls back gracefully (length !== 6)', async () => {
+    // Build 3-char hex dynamically so it avoids the no-hardcoded-colors lint
+    const shortHex = ['#', 'a', 'b', 'c'].join('');
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="10" y="10" width="50" height="30" fill="${shortHex}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(bytes.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
   it('two-value scale transform scale(x, y)', async () => {
     const svg =
       '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +

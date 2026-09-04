@@ -245,6 +245,30 @@ describe('multiLevelWithoutAnyVlFindings — VL edge not found', () => {
   });
 });
 
+describe('multiLevelWithoutAnyVlFindings — same-level VL ignored', () => {
+  it('flags building when VL edge connects nodes on same level', () => {
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: [
+          {
+            id: 'vl-same-level',
+            org_id: 'org-test-001',
+            edge_id: 'e-ml-hall-dest',
+            kind: 'elevator' as const,
+            capacity: 8,
+            accessible: true,
+          },
+        ],
+      },
+    };
+    const findings = multiLevelWithoutAnyVlFindings(site);
+    expect(findings.length).toBeGreaterThan(0);
+    expect(findings[0]?.code).toBe('GRAPH.LEVEL_NO_VERTICAL_LINK');
+  });
+});
+
 describe('multiLevelWithoutAccessibleVlFindings — VL edge not found', () => {
   it('skips VL whose edge_id does not exist in edges', () => {
     const site: SiteData = {
