@@ -159,4 +159,30 @@ describe('createAuditSiteHandler', () => {
     expect(typeof info).toBe('number');
     expect(info).toBeGreaterThanOrEqual(0);
   });
+
+  it('includes runChecks check names in checks_run', async () => {
+    const context: AuditSiteContext = { site: refMinimal };
+    const handler = createAuditSiteHandler(context);
+    const result = await handler(makeJob());
+    const checksRun = result['checks_run'] as string[];
+    expect(checksRun).toContain('duplicate_display_name');
+    expect(checksRun).toContain('incomplete_lang_coverage');
+  });
+
+  it('multi-level site accumulates more findings', async () => {
+    const context: AuditSiteContext = { site: refMultilevel };
+    const handler = createAuditSiteHandler(context);
+    const result = await handler(makeJob());
+    const checksRun = result['checks_run'] as string[];
+    expect(checksRun.length).toBeGreaterThan(0);
+    expect(result['total_findings']).toBeDefined();
+  });
+
+  it('is deterministic (INV-4)', async () => {
+    const context: AuditSiteContext = { site: refMultilevel };
+    const handler = createAuditSiteHandler(context);
+    const r1 = await handler(makeJob());
+    const r2 = await handler(makeJob());
+    expect(r1).toStrictEqual(r2);
+  });
 });

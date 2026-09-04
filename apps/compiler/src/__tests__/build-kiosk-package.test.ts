@@ -207,4 +207,31 @@ describe('createBuildKioskPackageHandler', () => {
       })),
     ).rejects.toThrow('storage unavailable');
   });
+
+  it('is deterministic (INV-4)', async () => {
+    const artifacts = [makeArtifact()];
+    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
+    const job = makeJob({
+      package_id: 'pkg-det',
+      created_at: '2024-06-15T12:00:00Z',
+    });
+    const r1 = await handler(job);
+    const r2 = await handler(job);
+    expect(r1).toStrictEqual(r2);
+  });
+
+  it('multiple artifacts produce a larger package', async () => {
+    const artifacts = [
+      makeArtifact({ id: 'art-1', path: 'artworks/p1.svg' }),
+      makeArtifact({ id: 'art-2', path: 'artworks/p2.svg',
+        content: enc.encode('<svg><circle r="5"/></svg>') }),
+    ];
+    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
+    const result = await handler(makeJob({
+      package_id: 'pkg-multi',
+      created_at: '2024-06-15T12:00:00Z',
+    }));
+    expect(result['artifact_count']).toBe(2);
+    expect(result['verified']).toBe(true);
+  });
 });

@@ -170,4 +170,18 @@ describe('createExportQuantitiesHandler', () => {
     const r2 = await handler(job);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('treats non-array supports as empty (string input)', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({ supports: 'not-an-array', lang: 'fr' });
+    const result = await handler(job);
+    expect(result['total_supports']).toBe(0);
+  });
+
+  it('treats non-array supports as empty (number input)', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({ supports: 42, lang: 'fr' });
+    const result = await handler(job);
+    expect(result['total_supports']).toBe(0);
+  });
 });

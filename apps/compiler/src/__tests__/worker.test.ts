@@ -204,4 +204,38 @@ describe('processNextJob', () => {
     expect(job?.state).toBe('failed');
     expect(job?.error).toContain('No handler');
   });
+
+  it('captures thrown null as "null"', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ max_attempts: 1 }));
+    const handler: JobHandler = async () => {
+      throw null;
+    };
+    const handlers = new Map([['compile_artworks', handler]]);
+    await processNextJob({
+      queue,
+      handlers,
+      now: fixedClock(new Date()),
+    });
+    const job = await queue.getJob('job-001');
+    expect(job?.state).toBe('failed');
+    expect(job?.error).toBe('null');
+  });
+
+  it('captures thrown undefined as "undefined"', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ max_attempts: 1 }));
+    const handler: JobHandler = async () => {
+      throw undefined;
+    };
+    const handlers = new Map([['compile_artworks', handler]]);
+    await processNextJob({
+      queue,
+      handlers,
+      now: fixedClock(new Date()),
+    });
+    const job = await queue.getJob('job-001');
+    expect(job?.state).toBe('failed');
+    expect(job?.error).toBe('undefined');
+  });
 });

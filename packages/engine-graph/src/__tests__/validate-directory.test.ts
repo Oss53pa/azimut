@@ -307,4 +307,35 @@ describe('T-1.7 validateDirectory', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  describe('UNLINKED vs WRONG_KIND exclusion', () => {
+    it('missing node produces UNLINKED but not WRONG_KIND', () => {
+      const site = patchSite(refMultilevel, {
+        destinations: [
+          ...refMultilevel.destinations,
+          {
+            id: 'dest-ghost',
+            org_id: 'org-test-001',
+            footprint_id: 'fp-ml-hall',
+            node_id: 'n-nonexistent',
+            category_id: 'cat-ml-office',
+            occupant_name: 'Ghost',
+            occupancy_status: 'occupied' as const,
+            display_priority: 0,
+          },
+        ],
+      });
+      const result = validateDirectory(site);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      const unlinked = result.findings.filter(
+        (f) => f.code === 'GRAPH.DESTINATION_UNLINKED' && f.entity?.id === 'dest-ghost',
+      );
+      const wrongKind = result.findings.filter(
+        (f) => f.code === 'GRAPH.DESTINATION_NODE_WRONG_KIND' && f.entity?.id === 'dest-ghost',
+      );
+      expect(unlinked.length).toBe(1);
+      expect(wrongKind.length).toBe(0);
+    });
+  });
 });
