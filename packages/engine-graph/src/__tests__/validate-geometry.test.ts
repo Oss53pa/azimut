@@ -26,14 +26,14 @@ function siteWith(
   };
 }
 
-const GOOD_FP: Footprint = {
-  id: 'fp-good', org_id: 'org1', level_id: 'l1',
-  geometry: { vertices: [
-    { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-    { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 },
-  ] },
-  kind: 'room',
-};
+function fp(id: string, verts: [number, number][], level = 'l1'): Footprint {
+  return {
+    id, org_id: 'org1', level_id: level,
+    geometry: { vertices: verts.map(([x, y]) => ({ x_m: x, y_m: y })) },
+    kind: 'room',
+  };
+}
+const GOOD_FP = fp('fp-good', [[0, 0], [10, 0], [10, 10], [0, 10]]);
 
 describe('validateGeometry', () => {
   it('passes for valid footprints and volumes', () => {
@@ -49,27 +49,16 @@ describe('validateGeometry', () => {
   });
 
   it('detects polygon with too few vertices', () => {
-    const fp: Footprint = {
-      id: 'fp-2v', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 5, y_m: 5 }] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([fp('fp-2v', [[0, 0], [5, 5]])]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_TOO_FEW_VERTICES')).toBe(true);
   });
 
   it('detects polygon with coincident first and last vertex', () => {
-    const fp: Footprint = {
-      id: 'fp-dup', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 0.0005 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([
+      fp('fp-dup', [[0, 0], [10, 0], [10, 10], [0, 0.0005]]),
+    ]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_NOT_CLOSED')).toBe(true);
@@ -91,15 +80,9 @@ describe('validateGeometry', () => {
   });
 
   it('detects self-intersecting polygon (bowtie)', () => {
-    const fp: Footprint = {
-      id: 'fp-bowtie', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 10 },
-        { x_m: 10, y_m: 0 }, { x_m: 0, y_m: 10 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([
+      fp('fp-bowtie', [[0, 0], [10, 10], [10, 0], [0, 10]]),
+    ]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_SELF_INTERSECTING')).toBe(true);
@@ -137,92 +120,40 @@ describe('validateGeometry', () => {
   });
 
   it('detects overlapping footprints on same level', () => {
-    const fpA: Footprint = {
-      id: 'fp-a', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 },
-      ] },
-      kind: 'room',
-    };
-    const fpB: Footprint = {
-      id: 'fp-b', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 5, y_m: 5 }, { x_m: 15, y_m: 5 },
-        { x_m: 15, y_m: 15 }, { x_m: 5, y_m: 15 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fpA, fpB]));
+    const result = validateGeometry(siteWith([
+      fp('fp-a', [[0, 0], [10, 0], [10, 10], [0, 10]]),
+      fp('fp-b', [[5, 5], [15, 5], [15, 15], [5, 15]]),
+    ]));
     expect(result.ok).toBe(true); // overlap is a warning, not blocking
     if (!result.ok) return;
     expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(true);
   });
 
   it('does not flag non-overlapping same-level footprints', () => {
-    const fpA: Footprint = {
-      id: 'fp-a', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 },
-        { x_m: 5, y_m: 5 }, { x_m: 0, y_m: 5 },
-      ] },
-      kind: 'room',
-    };
-    const fpB: Footprint = {
-      id: 'fp-b', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 10, y_m: 0 }, { x_m: 15, y_m: 0 },
-        { x_m: 15, y_m: 5 }, { x_m: 10, y_m: 5 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fpA, fpB]));
+    const result = validateGeometry(siteWith([
+      fp('fp-a', [[0, 0], [5, 0], [5, 5], [0, 5]]),
+      fp('fp-b', [[10, 0], [15, 0], [15, 5], [10, 5]]),
+    ]));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(false);
   });
 
   it('does not flag overlapping footprints on different levels', () => {
-    const fpA: Footprint = {
-      id: 'fp-a', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 },
-      ] },
-      kind: 'room',
-    };
-    const fpB: Footprint = {
-      id: 'fp-b', org_id: 'org1', level_id: 'l2',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fpA, fpB]));
+    const result = validateGeometry(siteWith([
+      fp('fp-a', [[0, 0], [10, 0], [10, 10], [0, 10]], 'l1'),
+      fp('fp-b', [[0, 0], [10, 0], [10, 10], [0, 10]], 'l2'),
+    ]));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(false);
   });
 
   it('detects containment overlap (one inside the other)', () => {
-    const fpOuter: Footprint = {
-      id: 'fp-outer', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 20, y_m: 0 },
-        { x_m: 20, y_m: 20 }, { x_m: 0, y_m: 20 },
-      ] },
-      kind: 'room',
-    };
-    const fpInner: Footprint = {
-      id: 'fp-inner', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 5, y_m: 5 }, { x_m: 15, y_m: 5 },
-        { x_m: 15, y_m: 15 }, { x_m: 5, y_m: 15 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fpOuter, fpInner]));
+    const result = validateGeometry(siteWith([
+      fp('fp-outer', [[0, 0], [20, 0], [20, 20], [0, 20]]),
+      fp('fp-inner', [[5, 5], [15, 5], [15, 15], [5, 15]]),
+    ]));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(true);
@@ -231,6 +162,40 @@ describe('validateGeometry', () => {
   it('passes refMinimal without geometry errors', () => {
     const result = validateGeometry(refMinimal);
     expect(result.ok).toBe(true);
+  });
+
+  it('detects collinear-overlap self-intersection', () => {
+    // Pentagon with collinear edges that backtrack (overlap).
+    const result = validateGeometry(siteWith([
+      fp('fp-collinear', [[0, 0], [10, 0], [5, 0], [5, 10], [0, 10]]),
+    ]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) =>
+      f.code === 'GEOM.POLYGON_SELF_INTERSECTING',
+    )).toBe(true);
+  });
+
+  it('does not flag touching bboxes as overlap', () => {
+    const result = validateGeometry(siteWith([
+      fp('fp-left', [[0, 0], [5, 0], [5, 5], [0, 5]]),
+      fp('fp-right', [[5, 0], [10, 0], [10, 5], [5, 5]]),
+    ]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(false);
+  });
+
+  it('returns blockings and warnings together when both exist', () => {
+    const result = validateGeometry(siteWith([
+      fp('fp-bad', [[0, 0]]),
+      fp('fp-ov-a', [[0, 0], [10, 0], [10, 10], [0, 10]]),
+      fp('fp-ov-b', [[5, 5], [15, 5], [15, 15], [5, 15]]),
+    ]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) => f.severity === 'blocking')).toBe(true);
+    expect(result.findings.some((f) => f.severity === 'warning')).toBe(true);
   });
 
   it('is deterministic (INV-4)', () => {
@@ -248,12 +213,7 @@ describe('validateGeometry', () => {
   });
 
   it('detects polygon with zero vertices', () => {
-    const fp: Footprint = {
-      id: 'fp-empty', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([fp('fp-empty', [])]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) =>
@@ -264,14 +224,9 @@ describe('validateGeometry', () => {
   });
 
   it('detects collinear vertices as degenerate (area = 0)', () => {
-    const fp: Footprint = {
-      id: 'fp-line', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 }, { x_m: 10, y_m: 0 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([
+      fp('fp-line', [[0, 0], [5, 0], [10, 0]]),
+    ]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) =>
@@ -280,14 +235,9 @@ describe('validateGeometry', () => {
   });
 
   it('does not flag a valid triangle as self-intersecting', () => {
-    const fp: Footprint = {
-      id: 'fp-tri', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 5, y_m: 8 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([
+      fp('fp-tri', [[0, 0], [10, 0], [5, 8]]),
+    ]));
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings.some((f) =>
@@ -296,15 +246,9 @@ describe('validateGeometry', () => {
   });
 
   it('detects exactly coincident first/last vertex (distance 0)', () => {
-    const fp: Footprint = {
-      id: 'fp-dup0', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 0 },
-      ] },
-      kind: 'room',
-    };
-    const result = validateGeometry(siteWith([fp]));
+    const result = validateGeometry(siteWith([
+      fp('fp-dup0', [[0, 0], [10, 0], [10, 10], [0, 0]]),
+    ]));
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) =>
@@ -313,19 +257,6 @@ describe('validateGeometry', () => {
   });
 
   it('reports correct valid counts with mixed issues', () => {
-    const good: Footprint = {
-      id: 'fp-ok', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [
-        { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
-        { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 },
-      ] },
-      kind: 'room',
-    };
-    const bad: Footprint = {
-      id: 'fp-bad', org_id: 'org1', level_id: 'l1',
-      geometry: { vertices: [{ x_m: 0, y_m: 0 }] },
-      kind: 'room',
-    };
     const goodVol: Volume = {
       id: 'v-ok', org_id: 'org1', footprint_id: 'fp-ok',
       base_elevation_m: 0, height_m: 3, material_key: 'concrete',
@@ -334,13 +265,13 @@ describe('validateGeometry', () => {
       id: 'v-bad', org_id: 'org1', footprint_id: 'fp-ok',
       base_elevation_m: 0, height_m: 0, material_key: 'glass',
     };
-    const result = validateGeometry(siteWith([good, bad], [goodVol, badVol]));
+    const result = validateGeometry(siteWith(
+      [fp('fp-ok', [[0, 0], [10, 0], [10, 10], [0, 10]]), fp('fp-bad', [[0, 0]])],
+      [goodVol, badVol],
+    ));
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    // Check that findings report counts implicitly via entity ids.
-    const fpCodes = result.findings.filter((f) => f.entity?.kind === 'footprint');
-    const volCodes = result.findings.filter((f) => f.entity?.kind === 'volume');
-    expect(fpCodes.length).toBeGreaterThanOrEqual(1);
-    expect(volCodes.length).toBeGreaterThanOrEqual(1);
+    expect(result.findings.filter((f) => f.entity?.kind === 'footprint').length).toBeGreaterThanOrEqual(1);
+    expect(result.findings.filter((f) => f.entity?.kind === 'volume').length).toBeGreaterThanOrEqual(1);
   });
 });

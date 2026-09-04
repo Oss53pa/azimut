@@ -154,6 +154,67 @@ describe('T-1.8 validateLibrary', () => {
     });
   });
 
+  it('returns ok:true with DEST_CATEGORY_NOT_FOUND warnings', () => {
+    // Categories exist for pictograms, but not for destinations.
+    const site = patchSite(refMinimal, {
+      destinations: [
+        ...refMinimal.destinations,
+        {
+          id: 'dest-orphan',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-001',
+          node_id: 'n-entrance',
+          category_id: 'cat-missing',
+          occupant_name: 'Orphan',
+          occupancy_status: 'occupied' as const,
+          display_priority: 0,
+        },
+      ],
+    });
+    const result = validateLibrary(site);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const w = result.warnings.find(
+      (f) => f.code === 'DATA.DEST_CATEGORY_NOT_FOUND',
+    );
+    expect(w).toBeDefined();
+    expect(w?.severity).toBe('warning');
+  });
+
+  it('accepts categories with valid non-null parent_id', () => {
+    const site = patchSite(refMinimal, {
+      categories: [
+        ...refMinimal.categories,
+        {
+          id: 'cat-child',
+          org_id: 'org-test-001',
+          sector_key: 'tertiary',
+          code: 'child',
+          parent_id: refMinimal.categories[0]!.id,
+        },
+      ],
+    });
+    const result = validateLibrary(site);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_categories).toBe(refMinimal.categories.length + 1);
+  });
+
+  it('reports multiple sectors from categories', () => {
+    const site = patchSite(refMinimal, {
+      pictograms: [],
+      categories: [
+        { id: 'cat-a', org_id: 'org-test-001', sector_key: 'health', code: 'a', parent_id: null },
+        { id: 'cat-b', org_id: 'org-test-001', sector_key: 'retail', code: 'b', parent_id: null },
+        { id: 'cat-c', org_id: 'org-test-001', sector_key: 'health', code: 'c', parent_id: null },
+      ],
+    });
+    const result = validateLibrary(site);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.sectors).toEqual(['health', 'retail']);
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = validateLibrary(refMinimal);
@@ -259,6 +320,18 @@ describe('T-1.8 INV-3 guardSafetyDeletion', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings).toEqual([]);
+  });
+
+  it('blocks only safety in mixed safety+wayfinding deletion batch', () => {
+    const result = guardSafetyDeletion(refMinimal, [
+      'picto-office-wayfinding',
+      'picto-fire-exit-safety',
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.entity?.id).toBe('picto-fire-exit-safety');
+    expect(result.findings[0]?.params['operation']).toBe('delete');
   });
 
   it('ignores unknown pictogram ids', () => {
