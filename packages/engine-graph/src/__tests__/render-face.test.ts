@@ -338,6 +338,58 @@ describe('T-2.15 renderFace', () => {
     expect(svg).toContain('15 m');
   });
 
+  it('empty names record falls back to empty string', () => {
+    const face: ResolvedFace = {
+      template_id: 'ftpl-dir-front',
+      support_type_key: 'directional',
+      side: 'front',
+      blocks: [
+        {
+          kind: 'destination_list',
+          ordinal: 0,
+          region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+          content: {
+            type: 'destination_list',
+            entries: [
+              { destination_id: 'd1', names: {}, direction: 'N', distance_m: 5 },
+            ],
+          },
+        },
+      ],
+    };
+    const svg = renderFace(face, opts);
+    // Should render without crashing; empty name produces <text> with no label
+    expect(svg).toContain('<text');
+    expect(svg).toContain('5 m');
+  });
+
+  it('block sort tiebreaks on kind when ordinals equal', () => {
+    const face: ResolvedFace = {
+      template_id: 'ftpl-dir-front',
+      support_type_key: 'directional',
+      side: 'front',
+      blocks: [
+        {
+          kind: 'header',
+          ordinal: 0,
+          region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 50 },
+          content: { type: 'free_text', text: 'HEADER' },
+        },
+        {
+          kind: 'destination_list',
+          ordinal: 0,
+          region: { x_pct: 0, y_pct: 50, w_pct: 100, h_pct: 50 },
+          content: { type: 'destination_list', entries: [] },
+        },
+      ],
+    };
+    const svg1 = renderFace(face, opts);
+    const svg2 = renderFace(face, opts);
+    expect(svg1).toBe(svg2);
+    const headerIdx = svg1.indexOf('HEADER');
+    expect(headerIdx).toBeGreaterThan(0);
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const face = resolveFace();
