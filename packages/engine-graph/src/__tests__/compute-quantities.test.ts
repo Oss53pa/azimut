@@ -9,6 +9,7 @@ import type {
   QuantityReport,
 } from '../compute-quantities.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
+import type { SiteData } from '@azimut/core-model';
 
 describe('T-2.13 computeQuantities', () => {
   const minimalSupports: PlacedSupport[] = [
@@ -277,5 +278,61 @@ describe('T-2.13 quantityReportToCsv', () => {
     };
     const csv = quantityReportToCsv(report);
     expect(csv).toContain('"Rez\nChaussée"');
+  });
+});
+
+describe('computeQuantities — fallback paths', () => {
+  it('unknown support_type_key falls back to key as name', () => {
+    const supports: PlacedSupport[] = [
+      { id: 'sup-1', node_id: 'n-junction', support_type_key: 'unknown-key' },
+    ];
+    const result = computeQuantities(refMinimal, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const t = result.value.by_type.find(
+      (t) => t.support_type_key === 'unknown-key',
+    );
+    expect(t).toBeDefined();
+    // name falls back to key itself
+    expect(t?.support_type_name).toBe('unknown-key');
+    // faceCount falls back to 1
+    expect(t?.face_count).toBe(1);
+  });
+
+  it('node on unlisted level skips by_building', () => {
+    // Node references a level_id not present in site.levels →
+    // levelToBuilding returns undefined → by_building skipped.
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: [
+          ...refMinimal.graph.nodes,
+          {
+            id: 'n-ghost-lvl',
+            org_id: 'org-test-001',
+            level_id: 'lvl-does-not-exist',
+            kind: 'junction' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'Ghost level node',
+          },
+        ],
+      },
+    };
+    const supports: PlacedSupport[] = [
+      { id: 'sup-ghost', node_id: 'n-ghost-lvl', support_type_key: 'directional' },
+    ];
+    const result = computeQuantities(site, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // by_level includes the missing level id
+    const lvl = result.value.by_level.find(
+      (l) => l.level_id === 'lvl-does-not-exist',
+    );
+    expect(lvl).toBeDefined();
+    expect(lvl?.count).toBe(1);
+    // by_building should have NO entry for this support
+    // since levelToBuilding.get('lvl-does-not-exist') is undefined
+    expect(result.value.by_building.length).toBe(0);
   });
 });

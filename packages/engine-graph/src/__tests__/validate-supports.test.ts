@@ -365,6 +365,38 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
+  describe('DATA.SUPPORT_BLOCK_REGION_INVALID — y_pct + h_pct > 100', () => {
+    it('flags block where only vertical overflow fails', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [
+          {
+            id: 'ftpl-y-overflow',
+            org_id: 'org-test-001',
+            support_type_key: 'directional',
+            side: 'front',
+            name: 'Vertical overflow',
+            blocks: [
+              {
+                kind: 'header' as const,
+                ordinal: 0,
+                region: { x_pct: 0, y_pct: 50, w_pct: 50, h_pct: 60 },
+                config: {},
+              },
+            ],
+          },
+        ],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(
+        result.findings.some(
+          (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
+        ),
+      ).toBe(true);
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = validateSupports(refMinimal);
