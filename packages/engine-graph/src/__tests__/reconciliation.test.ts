@@ -366,4 +366,25 @@ describe('T-1.14 reconciliation report', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  describe('azimuth boundary with tolerance', () => {
+    it('accepts azimuth at wrapping boundary (355° in 0-45 range, tol=5)', () => {
+      const sv: SurveyedSupport[] = [{
+        id: 'sup-wrap', node_id: 'n-ml-hall',
+        azimuth_deg: 355, width_m: 0.6, height_m: 1.2,
+      }];
+      const ex: ExpectedSupport[] = [{
+        node_id: 'n-ml-hall',
+        min_azimuth_deg: 0, max_azimuth_deg: 45,
+        min_width_m: 0.4, min_height_m: 0.8,
+      }];
+      const result = reconcile(refMultilevel, stdProfile, sv, ex, 5);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const orient = result.value.lines.filter(
+        (l) => l.issue === 'wrong_orientation',
+      );
+      expect(orient).toHaveLength(0);
+    });
+  });
 });

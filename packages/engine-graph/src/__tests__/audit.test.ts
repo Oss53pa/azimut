@@ -365,3 +365,16 @@ describe('auditEvacuation', () => {
     expect(r1).toStrictEqual(r2);
   });
 });
+
+describe('auditAccessibility — multi-level fixture', () => {
+  it('multi-level accessible destinations reachable from entrance', () => {
+    const accProfile = refMultilevel.travel_profiles.find(
+      (p) => p.key === 'accessible',
+    );
+    if (!accProfile) return;
+    const result = auditAccessibility(refMultilevel, accProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_destinations).toBeGreaterThan(0);
+  });
+});
