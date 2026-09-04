@@ -312,4 +312,25 @@ describe('T-1.13 importSupports', () => {
       expect(r1).toStrictEqual(r2);
     });
   });
+
+  describe('edge-case inputs', () => {
+    it('rejects row with non-empty id but empty node_id', () => {
+      const content = csv(['sup-1;;90;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const f = result.value.lines[0]?.findings[0];
+      expect(f?.code).toBe('IMPORT.ROW_INVALID');
+    });
+
+    it('header-only CSV produces zero rows', () => {
+      const result = importSupports(refMultilevel, HEADER);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.total_rows).toBe(0);
+      expect(result.value.imported).toBe(0);
+      expect(result.value.rejected).toBe(0);
+    });
+  });
 });

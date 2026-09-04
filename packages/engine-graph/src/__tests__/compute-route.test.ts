@@ -234,6 +234,28 @@ describe('computeRoute', () => {
       expect(r1.value.cost).toBe(r2.value.cost);
     }
   });
+
+  it('ignores edges referencing phantom nodes not in graph', () => {
+    const phantomSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-phantom', org_id: 'org-test-001',
+            from_node_id: 'n-junction', to_node_id: 'n-ghost',
+            length_m: 1, width_m: 2, slope_pct: 0,
+            accessible: true, direction: 'both' as const, evacuation_route: false,
+          },
+        ],
+      },
+    };
+    const result = computeRoute(phantomSite, stdProfile, 'n-entrance', 'n-dest-a');
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.path).not.toContain('n-ghost');
+  });
 });
 
 describe('RouteCache', () => {

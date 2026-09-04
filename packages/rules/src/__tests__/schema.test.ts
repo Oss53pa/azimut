@@ -76,6 +76,18 @@ describe('rulesPackRuleSchema', () => {
     const result = rulesPackRuleSchema.safeParse(rule);
     expect(result.success).toBe(true);
   });
+
+  it('rejects non-primitive params value (object)', () => {
+    const rule = { ...validRule, params: { nested: { foo: 'bar' } } };
+    const result = rulesPackRuleSchema.safeParse(rule);
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty-string kind', () => {
+    const rule = { ...validRule, kind: '' };
+    const result = rulesPackRuleSchema.safeParse(rule);
+    expect(result.success).toBe(false);
+  });
 });
 
 describe('rulesPackSchema', () => {
@@ -110,6 +122,11 @@ describe('rulesPackSchema', () => {
   it('accepts empty rules array', () => {
     const result = rulesPackSchema.safeParse({ ...validPack, rules: [] });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects empty-string version', () => {
+    const result = rulesPackSchema.safeParse({ ...validPack, version: '' });
+    expect(result.success).toBe(false);
   });
 });
 
@@ -149,6 +166,18 @@ describe('manifestSchema', () => {
     const result = manifestSchema.safeParse(noChecksum);
     expect(result.success).toBe(false);
   });
+
+  it('rejects empty string inside files array', () => {
+    const result = manifestSchema.safeParse({ ...validManifest, files: ['ok.json', ''] });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts omitted supersedes (undefined)', () => {
+    const { supersedes: _s, ...noSup } = { ...validManifest, supersedes: 'x' };
+    void _s;
+    const result = manifestSchema.safeParse(noSup);
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('ruleFileSchema', () => {
@@ -172,6 +201,15 @@ describe('ruleFileSchema', () => {
 
   it('rejects non-array', () => {
     const result = ruleFileSchema.safeParse({});
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects array containing one invalid rule (empty code)', () => {
+    const rules = [
+      { code: 'OK', scope: {}, params: { x: 1 }, source_ref: 'ref' },
+      { code: '', scope: {}, params: {}, source_ref: 'ref' },
+    ];
+    const result = ruleFileSchema.safeParse(rules);
     expect(result.success).toBe(false);
   });
 });

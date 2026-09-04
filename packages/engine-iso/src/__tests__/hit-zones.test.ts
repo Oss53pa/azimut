@@ -119,4 +119,19 @@ describe('extractHitZones', () => {
     const z2 = extractHitZones(entries, identityTransform);
     expect(z1).toStrictEqual(z2);
   });
+
+  it('zero-height volume projects polygon at base elevation', () => {
+    const entries = [makeEntry('v-flat', 'f-flat', 5, 0, squareVertices)];
+    const zones = extractHitZones(entries, identityTransform);
+    expect(zones).toHaveLength(1);
+    expect(zones[0]?.volume_id).toBe('v-flat');
+    expect(zones[0]?.polygon.length).toBeGreaterThan(0);
+  });
+
+  it('negative base_elevation_m computes correct topZ', () => {
+    const entries = [makeEntry('v-neg', 'f-neg', -2, 5, squareVertices)];
+    const zones = extractHitZones(entries, identityTransform);
+    expect(zones).toHaveLength(1);
+    expect(zones[0]?.volume_id).toBe('v-neg');
+  });
 });
