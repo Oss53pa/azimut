@@ -159,4 +159,13 @@ describe('RouteCache', () => {
     // At least the forward route is gone
     expect(cache.size).toBeLessThan(2);
   });
+
+  it('different profiles produce separate cache entries for same from/to', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    const profile2: TravelProfile = { ...profile, id: 'profile-alt' };
+    cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    cache.computeOrGet(refMinimal, profile2, entrance.id, dest.id);
+    expect(cache.size).toBe(2);
+  });
 });

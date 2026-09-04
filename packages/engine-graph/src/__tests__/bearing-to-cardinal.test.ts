@@ -76,4 +76,32 @@ describe('bearingToCardinal boundary values', () => {
   it('very small positive displacement returns N', () => {
     expect(bearingToCardinal(origin, node(0, 0.001))).toBe('N');
   });
+
+  it('bearing near 180° (due south) returns S', () => {
+    expect(bearingToCardinal(origin, node(0, -1))).toBe('S');
+    // Also via trigonometric displacement near 180°
+    const rad = (179 * Math.PI) / 180;
+    expect(bearingToCardinal(origin, node(Math.sin(rad), Math.cos(rad)))).toBe('S');
+  });
+
+  it('boundary near E/SE (112° → E, 113° → SE)', () => {
+    const rad112 = (112 * Math.PI) / 180;
+    const rad113 = (113 * Math.PI) / 180;
+    expect(bearingToCardinal(origin, node(Math.sin(rad112), Math.cos(rad112)))).toBe('E');
+    expect(bearingToCardinal(origin, node(Math.sin(rad113), Math.cos(rad113)))).toBe('SE');
+  });
+
+  it('very large displacement returns correct cardinal', () => {
+    expect(bearingToCardinal(origin, node(0, 1e6))).toBe('N');
+    expect(bearingToCardinal(origin, node(0, -1e6))).toBe('S');
+    expect(bearingToCardinal(origin, node(1e6, 0))).toBe('E');
+    expect(bearingToCardinal(origin, node(-1e6, 0))).toBe('W');
+  });
+
+  it('boundary near SW/W (247° → SW, 248° → W)', () => {
+    const rad247 = (247 * Math.PI) / 180;
+    const rad248 = (248 * Math.PI) / 180;
+    expect(bearingToCardinal(origin, node(Math.sin(rad247), Math.cos(rad247)))).toBe('SW');
+    expect(bearingToCardinal(origin, node(Math.sin(rad248), Math.cos(rad248)))).toBe('W');
+  });
 });

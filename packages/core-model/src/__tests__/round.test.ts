@@ -142,3 +142,26 @@ describe('ceilMm — additional edge cases', () => {
     expect(ceilMm(-5)).toBe(-5);
   });
 });
+
+describe('roundHalfAwayFromZero — additional', () => {
+  it('rounds 1.5 to 2 (away from zero)', () => {
+    expect(roundHalfAwayFromZero(1.5)).toBe(2);
+  });
+
+  it('rounds -1.5 to -2 (away from zero)', () => {
+    expect(roundHalfAwayFromZero(-1.5)).toBe(-2);
+  });
+});
+
+describe('roundSvg — negative-to-zero boundary', () => {
+  it('rounds small negative to positive zero (not -0)', () => {
+    expect(roundSvg(-0.0004)).toBe(0);
+    expect(Object.is(roundSvg(-0.0004), 0)).toBe(true);
+  });
+});
+
+describe('formatSvg — negative-to-zero', () => {
+  it('serialises small negative as "0" (not "-0")', () => {
+    expect(formatSvg(-0.0004)).toBe('0');
+  });
+});

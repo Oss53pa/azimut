@@ -229,4 +229,24 @@ describe('searchDestinations', () => {
     const results = searchDestinations(refMultilevel, '̀́̂', null, 10);
     expect(results.length).toBe(0);
   });
+
+  it('excludes substring match when position exceeds score threshold', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const longPrefix = 'A'.repeat(85);
+    const site = {
+      ...refMultilevel,
+      destinations: [{ ...base, id: 'd-long', display_priority: 1 }],
+      destination_names: [{
+        id: 'dn-long',
+        org_id: 'org-test-001',
+        destination_id: 'd-long',
+        lang: 'fr' as const,
+        value: longPrefix + 'Bureau',
+      }],
+    };
+    // "Bureau" at index 85 → score = 80 - 85 = -5 → filtered out
+    const results = searchDestinations(site, 'Bureau', 'fr', 10);
+    expect(results.length).toBe(0);
+  });
 });

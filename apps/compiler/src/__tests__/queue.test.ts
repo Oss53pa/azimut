@@ -187,4 +187,26 @@ describe('MemoryQueue', () => {
     expect(job?.state).toBe('succeeded');
     expect(job?.attempts).toBe(3);
   });
+
+  it('retains error string after re-queue for retry', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 3 }));
+    await q.markRunning('j1', new Date());
+    await q.markFailed('j1', 'transient-error', new Date());
+    const job = await q.getJob('j1');
+    expect(job?.state).toBe('queued');
+    expect(job?.error).toBe('transient-error');
+    expect(job?.started_at).toBeNull();
+  });
+
+  it('re-queued job maintains original FIFO position', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ id: 'j1' }));
+    await q.markRunning('j1', new Date());
+    await q.enqueue(makeJob({ id: 'j2' }));
+    await q.markFailed('j1', 'err', new Date());
+    // j1 was inserted before j2, so it should dequeue first
+    const next = await q.dequeue();
+    expect(next?.id).toBe('j1');
+  });
 });

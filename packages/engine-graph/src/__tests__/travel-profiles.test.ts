@@ -135,4 +135,36 @@ describe('T-1.9 travel profiles on refMultilevel', () => {
       }
     });
   });
+
+  describe('ground-floor-only routes', () => {
+    it('all profiles agree on ground-floor route (no vertical link)', () => {
+      for (const p of [stdProfile, accProfile, evacProfile]) {
+        const result = computeRoute(
+          refMultilevel,
+          p,
+          'n-ml-entrance',
+          'n-ml-dest-rdc',
+        );
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.value.path).not.toContain('n-ml-elevator-rdc');
+        expect(result.value.path).not.toContain('n-ml-stair-rdc');
+      }
+    });
+
+    it('self-route returns zero cost for all profiles', () => {
+      for (const p of [stdProfile, accProfile, evacProfile]) {
+        const result = computeRoute(
+          refMultilevel,
+          p,
+          'n-ml-entrance',
+          'n-ml-entrance',
+        );
+        expect(result.ok).toBe(true);
+        if (!result.ok) return;
+        expect(result.value.cost).toBe(0);
+        expect(result.value.path).toEqual(['n-ml-entrance']);
+      }
+    });
+  });
 });
