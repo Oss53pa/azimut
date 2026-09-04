@@ -332,5 +332,25 @@ describe('T-1.13 importSupports', () => {
       expect(result.value.imported).toBe(0);
       expect(result.value.rejected).toBe(0);
     });
+
+    it('empty azimuth reports "azimut absent" reason', () => {
+      const content = csv(['sup-az1;n-ml-hall;;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const reason = result.value.lines[0]?.findings[0]?.params['reason'];
+      expect(reason).toBe('azimut absent');
+    });
+
+    it('invalid azimuth reports "azimut invalide" reason with value', () => {
+      const content = csv(['sup-az2;n-ml-hall;abc;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const reason = result.value.lines[0]?.findings[0]?.params['reason'];
+      expect(reason).toBe('azimut invalide: abc');
+    });
   });
 });
