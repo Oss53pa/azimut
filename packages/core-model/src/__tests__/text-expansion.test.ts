@@ -144,4 +144,21 @@ describe('D12.2 — textExpansionFindings', () => {
     expect(result?.lang).toBe('en');
     expect(result?.length).toBe(0);
   });
+
+  it('tiebreaks among equal-length non-primary languages alphabetically', () => {
+    const names = { fr: 'Hi', en: 'Hello!', de: 'Hallo!' };
+    const result = longestVariant(names, ['fr', 'en', 'de']);
+    // Both 'de' and 'en' are length 6; sorted alphabetically 'de' comes first
+    // Since > is strict, 'en' at same length does not replace 'de'
+    expect(result?.lang).toBe('de');
+    expect(result?.length).toBe(6);
+  });
+
+  it('finding entity references the destination id', () => {
+    const names = { fr: 'AB', en: 'ABCDEF' };
+    const findings = textExpansionFindings(names, 'fr', ['fr', 'en'], 'dest-ratio');
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.entity?.id).toBe('dest-ratio');
+    expect(findings[0]?.params?.['longer_lang']).toBe('en');
+  });
 });

@@ -158,4 +158,22 @@ describe('D9 — unknown and edge-case states', () => {
     expect(() => assertWorkOrderTransition('done', 'draft'))
       .toThrow(/WorkOrder/);
   });
+
+  it('error message includes from and to state names', () => {
+    try {
+      assertJobTransition('succeeded', 'queued');
+      expect.unreachable('should have thrown');
+    } catch (e: unknown) {
+      const msg = (e as Error).message;
+      expect(msg).toContain('succeeded');
+      expect(msg).toContain('queued');
+    }
+  });
+
+  it('self-transition on terminal state throws', () => {
+    expect(() => assertProofTransition('superseded', 'superseded')).toThrow(/forbidden/);
+    expect(() => assertJobTransition('succeeded', 'succeeded')).toThrow(/forbidden/);
+    expect(() => assertDivergenceTransition('resolved', 'resolved')).toThrow(/forbidden/);
+    expect(() => assertWorkOrderTransition('done', 'done')).toThrow(/forbidden/);
+  });
 });

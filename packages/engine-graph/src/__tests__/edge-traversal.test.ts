@@ -171,4 +171,18 @@ describe('isEdgeTraversableFrom — inline excluded set', () => {
     // from 'a' → wrong direction
     expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds)).toBe(false);
   });
+
+  it('inline fallback produces null when excluded_edge_kinds is empty (no pre-built)', () => {
+    const edge = makeEdge({ from_node_id: 'a', to_node_id: 'c' });
+    const profile = makeProfile({ excluded_edge_kinds: [] });
+    // No pre-built set → inline path: empty array → excluded = null → allows traversal
+    expect(isEdgeTraversableFrom(edge, 'a', profile, nodeKinds)).toBe(true);
+  });
+
+  it('forward accessible edge rejected from wrong end for accessible profile', () => {
+    const edge = makeEdge({ direction: 'forward', accessible: true });
+    const profile = makeProfile({ require_accessible: true });
+    // From 'b' (to_node_id) on a forward edge: passes accessible check but fails direction
+    expect(isEdgeTraversableFrom(edge, 'b', profile, nodeKinds)).toBe(false);
+  });
 });

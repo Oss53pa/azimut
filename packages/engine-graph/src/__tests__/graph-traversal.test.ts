@@ -145,3 +145,27 @@ describe('bfs — additional edge cases', () => {
     expect(visited.has('solo')).toBe(true);
   });
 });
+
+describe('buildAdjacency — both endpoints unknown', () => {
+  it('edge with both unknown from and to is silently ignored', () => {
+    const adj = buildAdjacency(
+      [node('a')],
+      [edge('e1', 'x', 'y')],
+    );
+    // 'a' has no neighbors since the edge doesn't touch it
+    expect(adj.get('a')?.size).toBe(0);
+    // Neither 'x' nor 'y' are registered as nodes
+    expect(adj.has('x')).toBe(false);
+    expect(adj.has('y')).toBe(false);
+  });
+
+  it('multiple edges form star topology', () => {
+    const adj = buildAdjacency(
+      [node('hub'), node('s1'), node('s2'), node('s3')],
+      [edge('e1', 'hub', 's1'), edge('e2', 'hub', 's2'), edge('e3', 'hub', 's3')],
+    );
+    expect(adj.get('hub')?.size).toBe(3);
+    const fromHub = bfs(adj, 'hub');
+    expect(fromHub.size).toBe(4);
+  });
+});

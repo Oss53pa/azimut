@@ -67,6 +67,21 @@ describe('D12.1 — getErrorMessage', () => {
   it('returns undefined for unknown language', () => {
     expect(getErrorMessage('GRAPH.NODE_ORPHAN', 'de')).toBeUndefined();
   });
+
+  it('returns undefined for empty-string language', () => {
+    expect(getErrorMessage('GRAPH.NODE_ORPHAN', '')).toBeUndefined();
+  });
+
+  it('returns a message for every catalog code in each supported lang', () => {
+    const langs = getSupportedErrorLangs();
+    for (const lang of langs) {
+      for (const code of allCodes) {
+        const msg = getErrorMessage(code, lang);
+        expect(msg).toBeDefined();
+        expect(typeof msg).toBe('string');
+      }
+    }
+  });
 });
 
 describe('D12.1 — getSupportedErrorLangs', () => {

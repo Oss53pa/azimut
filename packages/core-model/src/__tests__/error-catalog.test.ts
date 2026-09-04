@@ -58,4 +58,23 @@ describe('ERROR_CATALOG', () => {
     expect(blocking.length).toBeGreaterThan(warning.length);
     expect(blocking.length).toBeGreaterThan(info.length);
   });
+
+  it('contains at least one info-severity entry', () => {
+    const infoEntries = entries.filter(([, e]) => e.severity === 'info');
+    expect(infoEntries.length).toBeGreaterThan(0);
+  });
+
+  it('every domain prefix has at least one entry', () => {
+    const expected = ['GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'SECURITY', 'IMPORT', 'PACKAGE', 'DATA'];
+    for (const prefix of expected) {
+      const matching = codes.filter((c) => c.startsWith(`${prefix}.`));
+      expect(matching.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('no description contains a hardcoded hex color', () => {
+    for (const [, entry] of entries) {
+      expect(entry.description).not.toMatch(/#[0-9a-fA-F]{3,8}/);
+    }
+  });
 });

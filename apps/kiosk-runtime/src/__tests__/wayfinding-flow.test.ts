@@ -131,4 +131,42 @@ describe('kiosk wayfinding flow (integration)', () => {
     if (!wayfinding.ok) return;
     expect(wayfinding.value.total_distance_m).toBe(0);
   });
+
+  it('returns error when from-node does not exist', () => {
+    const wayfinding = computeWayfinding(
+      site,
+      profile,
+      'nonexistent-node',
+      'n-ml-dest-rdc',
+      { lang: 'fr' },
+    );
+    expect(wayfinding.ok).toBe(false);
+    if (wayfinding.ok) return;
+    expect(wayfinding.findings.length).toBeGreaterThan(0);
+  });
+
+  it('returns error when to-node does not exist', () => {
+    const wayfinding = computeWayfinding(
+      site,
+      profile,
+      entranceNode,
+      'nonexistent-dest',
+      { lang: 'fr' },
+    );
+    expect(wayfinding.ok).toBe(false);
+    if (wayfinding.ok) return;
+    expect(wayfinding.findings.length).toBeGreaterThan(0);
+  });
+
+  it('defaults to French when no options provided', () => {
+    const wayfinding = computeWayfinding(
+      site,
+      profile,
+      entranceNode,
+      'n-ml-dest-rdc',
+    );
+    expect(wayfinding.ok).toBe(true);
+    if (!wayfinding.ok) return;
+    expect(wayfinding.value.steps.length).toBeGreaterThan(0);
+  });
 });

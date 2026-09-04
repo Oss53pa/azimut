@@ -218,5 +218,31 @@ describe('T-2.6 INV-3 guardCharterOnSafety', () => {
       expect(result.findings[0]?.params['change_kind']).toBe('geometry');
       expect(result.findings[0]?.params['field']).toBe('width_mm');
     });
+
+    it('same target_id and change_kind but different fields produce separate findings', () => {
+      const apps: CharterApplication[] = [
+        { target_id: 'same', target_registry: 'safety', change_kind: 'color', field: 'fg', value: 'red-val' },
+        { target_id: 'same', target_registry: 'safety', change_kind: 'color', field: 'bg', value: 'blue-val' },
+      ];
+      const result = guardCharterOnSafety(refMinimal, apps);
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.findings).toHaveLength(2);
+      const fields = result.findings.map((f) => f.params['field']);
+      expect(fields).toContain('fg');
+      expect(fields).toContain('bg');
+    });
+  });
+
+  describe('determinism (INV-4)', () => {
+    it('same result on two calls', () => {
+      const apps: CharterApplication[] = [
+        { target_id: 'a', target_registry: 'safety', change_kind: 'color', field: 'f', value: 'v' },
+        { target_id: 'b', target_registry: 'wayfinding', change_kind: 'geometry', field: 'g', value: 'w' },
+      ];
+      const r1 = guardCharterOnSafety(refMinimal, apps);
+      const r2 = guardCharterOnSafety(refMinimal, apps);
+      expect(r1).toStrictEqual(r2);
+    });
   });
 });
