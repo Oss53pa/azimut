@@ -273,5 +273,25 @@ describe('computeWayfinding', () => {
       for (const step of mid) expect(step.instruction).toContain('Pass by');
       expect(da[da.length - 1]?.instruction).toContain('Arrival');
     });
+
+    it('elevator without level change uses passby instruction', () => {
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'elevator');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const elev = r.value.steps.filter((s) => s.kind === 'elevator');
+      expect(elev.length).toBeGreaterThan(0);
+      expect(elev[0]?.instruction).toContain('Pass by');
+    });
+
+    it('landing node kind produces continueTowards instruction', () => {
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'landing');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'fr' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const land = r.value.steps.filter((s) => s.kind === 'landing');
+      expect(land.length).toBeGreaterThan(0);
+      expect(land[0]?.instruction).toContain('Continuer vers');
+    });
   });
 });

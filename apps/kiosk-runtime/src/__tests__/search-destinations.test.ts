@@ -249,4 +249,45 @@ describe('searchDestinations', () => {
     const results = searchDestinations(site, 'Bureau', 'fr', 10);
     expect(results.length).toBe(0);
   });
+
+  it('handles destination name that normalizes to empty (combining marks only)', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [{ ...base, id: 'd-marks', display_priority: 1 }],
+      destination_names: [{
+        id: 'dn-marks',
+        org_id: 'org-test-001',
+        destination_id: 'd-marks',
+        lang: 'fr' as const,
+        value: '́̀',
+      }],
+    };
+    // query "Bureau" vs empty normalized value → score 0 → no results
+    const results = searchDestinations(site, 'Bureau', 'fr', 10);
+    expect(results.length).toBe(0);
+  });
+
+  it('fuzzy match at boundary: query same length as value', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [{ ...base, id: 'd-exact', display_priority: 1 }],
+      destination_names: [{
+        id: 'dn-exact',
+        org_id: 'org-test-001',
+        destination_id: 'd-exact',
+        lang: 'fr' as const,
+        value: 'ABCDF',
+      }],
+    };
+    // query "ABCDE" vs value "ABCDF" — same length, edit distance 1
+    // nq.length <= nv.length → slice(0, 5) = "abcdf" → levenshtein("abcde","abcdf")=1
+    // maxDist = max(1, floor(5*0.3))=1, bestDist=1 → score = 50 - 5 = 45
+    const results = searchDestinations(site, 'ABCDE', 'fr', 10);
+    expect(results.length).toBe(1);
+    expect(results[0]?.score).toBe(45);
+  });
 });

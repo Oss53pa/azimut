@@ -304,4 +304,33 @@ describe('deriveDecisionPoints', () => {
       expect(result.value).toHaveLength(0);
     }
   });
+
+  it('handles edges referencing orphan node ids (fallback ?? 0)', () => {
+    // Edge endpoints not in nodes array — outDegree.get returns undefined
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-orphan',
+            org_id: 'org-test-001',
+            from_node_id: 'n-orphan-a',
+            to_node_id: 'n-orphan-b',
+            width_m: 2,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: false,
+            length_m: 5,
+          },
+        ],
+      },
+    };
+    // Should not crash — orphan edges increment via ?? 0 but orphan nodes
+    // are not in the nodes array so they never appear in sorted results.
+    const result = deriveDecisionPoints(site, stdProfile, refMinimal.destinations);
+    expect(result.ok).toBe(true);
+  });
 });

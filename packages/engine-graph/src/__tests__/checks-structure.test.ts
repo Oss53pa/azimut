@@ -316,3 +316,43 @@ describe('multiLevelWithoutAccessibleVlFindings — VL edge not found', () => {
     expect(findings[0]?.code).toBe('GRAPH.LEVEL_NO_ACCESSIBLE_LINK');
   });
 });
+
+describe('multiLevelWithoutAnyVlFindings — orphan node in VL edge', () => {
+  it('VL edge with orphan to_node_id does not count as cross-level', () => {
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        edges: [
+          ...refMultilevel.graph.edges,
+          {
+            id: 'e-orphan-vl',
+            org_id: 'org-test-001',
+            from_node_id: 'n-ml-elevator-rdc',
+            to_node_id: 'n-orphan-missing',
+            width_m: 2,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: false,
+            length_m: 0,
+          },
+        ],
+        vertical_links: [
+          {
+            id: 'vl-orphan-node',
+            org_id: 'org-test-001',
+            edge_id: 'e-orphan-vl',
+            kind: 'elevator' as const,
+            capacity: 10,
+            accessible: true,
+          },
+        ],
+      },
+    };
+    const findings = multiLevelWithoutAnyVlFindings(site);
+    expect(findings.some(
+      (f) => f.code === 'GRAPH.LEVEL_NO_VERTICAL_LINK',
+    )).toBe(true);
+  });
+});
