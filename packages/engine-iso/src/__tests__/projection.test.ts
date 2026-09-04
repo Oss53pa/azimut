@@ -146,4 +146,74 @@ describe('esc — XML escaping', () => {
   it('handles empty string', () => {
     expect(esc('')).toBe('');
   });
+
+  it('escapes consecutive special characters', () => {
+    expect(esc('<<&&>>"')).toBe('&lt;&lt;&amp;&amp;&gt;&gt;&quot;');
+  });
+});
+
+describe('computeWorldBounds — multi-level merging', () => {
+  it('merges XY bounds across two levels', () => {
+    const levels: LevelGeom[] = [
+      { vertices: [{ x_m: 0, y_m: 0 }], elevation_m: 0, maxZ: 3 },
+      { vertices: [{ x_m: 10, y_m: 20 }], elevation_m: 3, maxZ: 6 },
+    ];
+    const wb = computeWorldBounds(levels);
+    expect(wb).not.toBeNull();
+    expect(wb?.minX).toBe(0);
+    expect(wb?.maxX).toBe(10);
+    expect(wb?.minY).toBe(0);
+    expect(wb?.maxY).toBe(20);
+    expect(wb?.minZ).toBe(0);
+    expect(wb?.maxZ).toBe(6);
+  });
+
+  it('handles negative coordinates', () => {
+    const levels: LevelGeom[] = [{
+      vertices: [
+        { x_m: -5, y_m: -10 },
+        { x_m: 5, y_m: 10 },
+      ],
+      elevation_m: -2,
+      maxZ: 4,
+    }];
+    const wb = computeWorldBounds(levels);
+    expect(wb?.minX).toBe(-5);
+    expect(wb?.maxX).toBe(5);
+    expect(wb?.minZ).toBe(-2);
+    expect(wb?.maxZ).toBe(4);
+  });
+});
+
+describe('computeIsoTransform — edge cases', () => {
+  it('handles vertical-only extent (isoW = 0, isoH > 0)', () => {
+    // Single XY point but different Z — projects to same iso X but different iso Y
+    const wb = { minX: 5, maxX: 5, minY: 5, maxY: 5, minZ: 0, maxZ: 10 };
+    const t = computeIsoTransform(wb, 800, 600, 20);
+    expect(t.scale).toBeGreaterThan(0);
+    expect(isFinite(t.offsetX)).toBe(true);
+    expect(isFinite(t.offsetY)).toBe(true);
+  });
+
+  it('is deterministic (INV-4)', () => {
+    const wb = { minX: 0, maxX: 10, minY: 0, maxY: 10, minZ: 0, maxZ: 5 };
+    const t1 = computeIsoTransform(wb, 800, 600, 20);
+    const t2 = computeIsoTransform(wb, 800, 600, 20);
+    expect(t1).toStrictEqual(t2);
+  });
+});
+
+describe('projectTopFace — edge cases', () => {
+  it('returns empty array for empty vertices', () => {
+    const t = { scale: 10, offsetX: 0, offsetY: 0 };
+    expect(projectTopFace([], 5, t)).toEqual([]);
+  });
+
+  it('projects single vertex', () => {
+    const t = { scale: 1, offsetX: 0, offsetY: 0 };
+    const pts = projectTopFace([{ x_m: 0, y_m: 0 }], 0, t);
+    expect(pts).toHaveLength(1);
+    expect(pts[0]?.x).toBe(0);
+    expect(pts[0]?.y).toBe(0);
+  });
 });

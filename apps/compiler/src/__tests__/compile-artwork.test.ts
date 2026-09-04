@@ -144,6 +144,38 @@ describe('T-2.12 createArtworkHandler', () => {
     await expect(handler(job)).rejects.toThrow('Resolve failed');
   });
 
+  it('non-string template_id defaults to empty and fails', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      support_id: 'sup-001',
+      node_id: 'n-ml-hall',
+      template_id: 42,
+      profile_key: 'standard',
+    });
+    await expect(handler(job)).rejects.toThrow('Template not found');
+  });
+
+  it('face lookup miss when support type has no matching face side', async () => {
+    const siteNoFace = {
+      ...refMultilevel,
+      support_types: refMultilevel.support_types.map((st) => ({
+        ...st,
+        faces: st.faces.map((f) => ({ ...f, side: 'back' as const })),
+      })),
+    };
+    const ctx: CompileContext = { ...context, site: siteNoFace };
+    const handler = createArtworkHandler(ctx);
+    const job = makeJob({
+      support_id: 'sup-001',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    const result = await handler(job);
+    // Falls back to 600x400 dimensions
+    expect((result['svg_length'] as number)).toBeGreaterThan(0);
+  });
+
   it('produces deterministic output (INV-4)', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({

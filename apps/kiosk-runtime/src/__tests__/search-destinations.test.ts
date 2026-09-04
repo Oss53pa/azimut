@@ -180,4 +180,43 @@ describe('searchDestinations', () => {
     expect(r0.destination.id).toBe('d-high');
     expect(r1.destination.id).toBe('d-low');
   });
+
+  it('id tiebreaker when score and priority are equal', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [
+        { ...base, id: 'd-beta', display_priority: 5 },
+        { ...base, id: 'd-alpha', display_priority: 5 },
+      ],
+      destination_names: [
+        { id: 'dn-b', org_id: 'org-test-001', destination_id: 'd-beta', lang: 'fr' as const, value: 'Salle' },
+        { id: 'dn-a', org_id: 'org-test-001', destination_id: 'd-alpha', lang: 'fr' as const, value: 'Salle' },
+      ],
+    };
+    const results = searchDestinations(site, 'Salle', 'fr', 10);
+    expect(results.length).toBe(2);
+    // Same score, same priority → sorted by id alphabetically
+    expect(results[0]?.destination.id).toBe('d-alpha');
+    expect(results[1]?.destination.id).toBe('d-beta');
+  });
+
+  it('query longer than destination name value scores via fuzzy only', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [
+        { ...base, id: 'd-short', display_priority: 1 },
+      ],
+      destination_names: [
+        { id: 'dn-s', org_id: 'org-test-001', destination_id: 'd-short', lang: 'fr' as const, value: 'AB' },
+      ],
+    };
+    // Query much longer than value — cannot match via prefix or substring
+    const results = searchDestinations(site, 'ABCDEFGHIJ', 'fr', 10);
+    // Score is likely 0 (fuzzy distance too large) → empty results
+    expect(results.length).toBe(0);
+  });
 });

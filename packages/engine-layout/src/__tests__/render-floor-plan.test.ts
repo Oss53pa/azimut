@@ -271,4 +271,77 @@ describe('T-2.8 renderFloorPlan', () => {
     });
     expect(lineCount).toBe(rdcEdges.length);
   });
+
+  it('security_post node uses safety fill color', () => {
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          {
+            id: 'n-secpost',
+            org_id: 'org-test-001',
+            level_id: 'lvl-ml-rdc',
+            kind: 'security_post' as const,
+            position: { x_m: 15, y_m: 5 },
+            label: 'Poste sécurité',
+          },
+        ],
+      },
+    };
+    const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // security_post is a SAFETY_KINDS member → gets tok-safety fill and radius 5
+    expect(result.value).toContain('tok-safety');
+    const circles = [...result.value.matchAll(/<circle[^>]+r="5"/g)];
+    expect(circles.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('destination sort tiebreaks on id when display_priority is equal', () => {
+    const site = {
+      ...refMultilevel,
+      destinations: [
+        ...refMultilevel.destinations,
+        {
+          id: 'dest-tie-beta',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-ml-hall',
+          node_id: 'n-ml-hall',
+          category_id: 'cat-ml-office',
+          occupant_name: 'Beta',
+          occupancy_status: 'occupied' as const,
+          display_priority: 1,
+        },
+        {
+          id: 'dest-tie-alpha',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-ml-hall',
+          node_id: 'n-ml-hall',
+          category_id: 'cat-ml-office',
+          occupant_name: 'Alpha',
+          occupancy_status: 'occupied' as const,
+          display_priority: 1,
+        },
+      ],
+      destination_names: [
+        ...refMultilevel.destination_names,
+        { id: 'dn-tie-beta', org_id: 'org-test-001', destination_id: 'dest-tie-beta', lang: 'fr' as const, value: 'Beta' },
+        { id: 'dn-tie-alpha', org_id: 'org-test-001', destination_id: 'dest-tie-alpha', lang: 'fr' as const, value: 'Alpha' },
+      ],
+    };
+    const r1 = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    const r2 = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(r1.ok).toBe(true);
+    expect(r2.ok).toBe(true);
+    if (!r1.ok || !r2.ok) return;
+    expect(r1.value).toBe(r2.value);
+    // alpha should appear before beta in the SVG (id sort)
+    const alphaIdx = r1.value.indexOf('Alpha');
+    const betaIdx = r1.value.indexOf('Beta');
+    expect(alphaIdx).toBeGreaterThan(0);
+    expect(betaIdx).toBeGreaterThan(0);
+    expect(alphaIdx).toBeLessThan(betaIdx);
+  });
 });
