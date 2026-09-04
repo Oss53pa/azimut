@@ -184,4 +184,30 @@ describe('createExportQuantitiesHandler', () => {
     const result = await handler(job);
     expect(result['total_supports']).toBe(0);
   });
+
+  it('filters partial support: id present but node_id is number', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [
+        { id: 'sup-1', node_id: 123, support_type_key: 'directional' },
+        { id: 'sup-2', node_id: 'n-entrance', support_type_key: 'directional' },
+      ],
+      lang: 'fr',
+    });
+    const result = await handler(job);
+    // Only sup-2 passes the type guard
+    expect(result['total_supports']).toBe(1);
+  });
+
+  it('filters partial support: support_type_key missing', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [
+        { id: 'sup-1', node_id: 'n-entrance' },
+      ],
+      lang: 'fr',
+    });
+    const result = await handler(job);
+    expect(result['total_supports']).toBe(0);
+  });
 });

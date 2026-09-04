@@ -259,4 +259,54 @@ describe('D4.2 — importOccupancy', () => {
     expect(result.value.pending).toBe(1);
     expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
   });
+
+  it('rejects regex-valid but semantically invalid date (month 13)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;RDC;occupied;Acme;office;Bureau;Office;2024-13-01',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.rejected).toBe(1);
+    const finding = result.value.lines[0]?.findings[0];
+    expect(finding?.code).toBe('IMPORT.ROW_INVALID');
+    expect(finding?.params?.['reason']).toContain('date invalide');
+  });
+
+  it('rejects empty building (second required field)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;;RDC;occupied;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.rejected).toBe(1);
+    expect(result.value.lines[0]?.findings[0]?.params?.['reason']).toBe(
+      'champ obligatoire vide',
+    );
+  });
+
+  it('rejects empty level (third required field)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;;occupied;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.rejected).toBe(1);
+  });
+
+  it('rejects empty occupancy_status (fourth required field)', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;RDC;;;;;;',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.rejected).toBe(1);
+  });
 });

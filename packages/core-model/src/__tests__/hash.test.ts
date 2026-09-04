@@ -161,3 +161,44 @@ describe('canonicalSerialize — non-primitive fallbacks', () => {
     expect(canonicalSerialize({ b })).toBe('{"b":null}');
   });
 });
+
+describe('canonicalSerialize — top-level primitives', () => {
+  it('serializes top-level null', () => {
+    expect(canonicalSerialize(null)).toBe('null');
+  });
+
+  it('serializes top-level undefined', () => {
+    expect(canonicalSerialize(undefined)).toBe('null');
+  });
+
+  it('serializes top-level number', () => {
+    expect(canonicalSerialize(42)).toBe('42');
+  });
+
+  it('serializes top-level float (rounded)', () => {
+    expect(canonicalSerialize(1.23456)).toBe('1.235');
+  });
+
+  it('serializes top-level string', () => {
+    expect(canonicalSerialize('hello')).toBe('"hello"');
+  });
+
+  it('serializes top-level boolean true', () => {
+    expect(canonicalSerialize(true)).toBe('true');
+  });
+
+  it('serializes top-level boolean false', () => {
+    expect(canonicalSerialize(false)).toBe('false');
+  });
+
+  it('contentHash of a bare string is deterministic', () => {
+    const h1 = contentHash('test');
+    const h2 = contentHash('test');
+    expect(h1).toBe(h2);
+    expect(h1).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('contentHash of a bare number differs from its string', () => {
+    expect(contentHash(42)).not.toBe(contentHash('42'));
+  });
+});

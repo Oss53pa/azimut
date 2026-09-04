@@ -161,4 +161,17 @@ describe('D12.2 — textExpansionFindings', () => {
     expect(findings[0]?.entity?.id).toBe('dest-ratio');
     expect(findings[0]?.params?.['longer_lang']).toBe('en');
   });
+
+  it('returns [] when primary exists but no activeLang has a name', () => {
+    // primary 'fr' is in names, but activeLangs=['en'] has no entry
+    const names = { fr: 'Accueil' };
+    const findings = textExpansionFindings(names, 'fr', ['en'], 'dest-no-active');
+    expect(findings).toEqual([]);
+  });
+
+  it('returns [] when activeLangs is empty (longest is null)', () => {
+    const names = { fr: 'Accueil' };
+    const findings = textExpansionFindings(names, 'fr', [], 'dest-empty-active');
+    expect(findings).toEqual([]);
+  });
 });

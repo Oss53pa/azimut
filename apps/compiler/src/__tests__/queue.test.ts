@@ -209,4 +209,38 @@ describe('MemoryQueue', () => {
     const next = await q.dequeue();
     expect(next?.id).toBe('j1');
   });
+
+  it('markSucceeded without markRunning uses now as started_at fallback', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob());
+    const now = new Date('2025-06-01T12:00:00Z');
+    await q.markSucceeded('j1', { direct: true }, now);
+    const traces = await q.getTraces('j1');
+    expect(traces).toHaveLength(1);
+    // started_at should equal now (the ?? now fallback)
+    expect(traces[0]?.started_at).toEqual(now);
+    expect(traces[0]?.finished_at).toEqual(now);
+    expect(traces[0]?.outcome).toBe('succeeded');
+  });
+
+  it('markFailed without markRunning uses now as started_at fallback', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 1 }));
+    const now = new Date('2025-06-01T13:00:00Z');
+    await q.markFailed('j1', 'direct-fail', now);
+    const traces = await q.getTraces('j1');
+    expect(traces).toHaveLength(1);
+    expect(traces[0]?.started_at).toEqual(now);
+    expect(traces[0]?.error).toBe('direct-fail');
+  });
+
+  it('markRunning on already-running job increments attempts again', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob());
+    await q.markRunning('j1', new Date('2025-01-01T00:01:00Z'));
+    await q.markRunning('j1', new Date('2025-01-01T00:02:00Z'));
+    const job = await q.getJob('j1');
+    expect(job?.attempts).toBe(2);
+    expect(job?.state).toBe('running');
+  });
 });

@@ -219,4 +219,54 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
     expect(result.value).toContain('<svg');
     expect(result.value).not.toContain('tok-txt2');
   });
+
+  it('evacuation edges use evacuation stroke and dash', () => {
+    const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // refMultilevel has evacuation_route: true edges on RDC level
+    expect(result.value).toContain('tok-evac');
+    expect(result.value).toContain('stroke-dasharray="6 3"');
+    // Also has non-evacuation edges
+    expect(result.value).toContain('tok-edge');
+  });
+
+  it('safety-kind node uses node_safety_fill', () => {
+    // Patch refMultilevel to add an emergency_exit node on RDC
+    const safetyNode = {
+      id: 'n-ml-exit-rdc',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      kind: 'emergency_exit' as const,
+      position: { x_m: 25, y_m: 15 },
+      label: 'Sortie secours',
+    };
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [...refMultilevel.graph.nodes, safetyNode],
+      },
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('tok-safety');
+  });
+
+  it('single-point geometry uses fallback scale of 1', () => {
+    // Level with zero footprints and zero nodes — only the viewer marker
+    const site = {
+      ...refMultilevel,
+      footprints: [],
+      graph: { ...refMultilevel.graph, nodes: [], edges: [] },
+      destinations: [],
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // SVG should render with the viewer marker only
+    expect(result.value).toContain('tok-marker');
+    expect(result.value).toContain('<circle');
+  });
 });
