@@ -248,6 +248,35 @@ describe('deriveDecisionPoints', () => {
     expect(dp?.branch_count).toBe(2);
   });
 
+  it('dead-end junction (degree 1) is not a decision point', () => {
+    const brkProfile = getProfile(refBroken.travel_profiles, 0);
+    const result = deriveDecisionPoints(refBroken, brkProfile, refBroken.destinations);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const ids = result.value.map((dp) => dp.node_id);
+    expect(ids).not.toContain('n-brk-deadend');
+  });
+
+  it('backward-only edge increments only to-node degree', () => {
+    const bwdSite: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          direction: 'backward' as const,
+        })),
+      },
+    };
+    const result = deriveDecisionPoints(bwdSite, stdProfile, refMinimal.destinations);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // With backward-only, from_node cannot traverse → degree comes from to-side only
+    const dp = result.value.find((p) => p.node_id === 'n-junction');
+    // n-junction is from_node on most edges → cannot traverse backward → low degree
+    expect(dp).toBeUndefined();
+  });
+
   it('fully inaccessible graph yields zero decision points', () => {
     const inaccessibleSite: SiteData = {
       ...refMinimal,

@@ -323,4 +323,25 @@ describe('renderIsoView — edge-case geometry', () => {
     expect(result.value.svg).not.toContain('tok-wall-f');
     expect(result.value.svg).not.toContain('tok-wall-s');
   });
+
+  it('back-face culling renders fewer walls than footprint edges', () => {
+    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Count fill="tok-wall-f" or fill="tok-wall-s" (not stroke tok-wall-str)
+    const wallFills = (result.value.svg.match(/fill="tok-wall-[fs]"/g) ?? []).length;
+    // A rectangular footprint has 4 edges; back-face culling shows only 2
+    expect(wallFills).toBe(2);
+  });
+
+  it('active_level mode with adjacent_opacity=1 omits opacity wrapper', () => {
+    const opts: IsoOptions = {
+      ...defaultOptions,
+      mode: { kind: 'active_level', active_level_id: 'lvl-ml-rdc', adjacent_opacity: 1 },
+    };
+    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc', 'lvl-ml-r1'], opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).not.toContain('opacity=');
+  });
 });

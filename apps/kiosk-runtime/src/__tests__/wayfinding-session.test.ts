@@ -2,175 +2,128 @@ import { describe, it, expect } from 'vitest';
 import { computeWayfinding } from '../wayfinding-session.js';
 import { refMultilevel } from '@azimut/testkit';
 import type { SiteData, TravelProfile } from '@azimut/core-model';
+import type { WayfindingOptions } from '../wayfinding-session.js';
 
-const standardProfile: TravelProfile = refMultilevel.travel_profiles.find(
+const stdP: TravelProfile = refMultilevel.travel_profiles.find(
   (p) => p.key === 'standard',
 ) as TravelProfile;
 
-const accessibleProfile: TravelProfile = refMultilevel.travel_profiles.find(
+const accP: TravelProfile = refMultilevel.travel_profiles.find(
   (p) => p.key === 'accessible',
 ) as TravelProfile;
 
+/** Compact wayfinding call — returns value or throws. */
+function wf(
+  from: string, to: string,
+  opts?: { site?: SiteData; profile?: TravelProfile; lang?: WayfindingOptions['lang'] },
+) {
+  const result = computeWayfinding(
+    opts?.site ?? refMultilevel, opts?.profile ?? stdP, from, to,
+    opts?.lang ? { lang: opts.lang } : undefined,
+  );
+  if (!result.ok) return result;
+  return result;
+}
+
+/** Return a copy of refMultilevel with nodes matching `pred` set to `kind`. */
+function withNodeKind(
+  pred: (n: { id: string; kind: string }) => boolean,
+  kind: string,
+): SiteData {
+  return {
+    ...refMultilevel,
+    graph: {
+      ...refMultilevel.graph,
+      nodes: refMultilevel.graph.nodes.map((n) =>
+        pred(n) ? { ...n, kind: kind as typeof n.kind } : n,
+      ),
+    },
+  };
+}
+
 describe('computeWayfinding', () => {
   it('computes route from entrance to RDC destination', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-rdc',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.route.path.length).toBeGreaterThan(1);
-    expect(result.value.steps.length).toBeGreaterThan(1);
-    expect(result.value.total_distance_m).toBeGreaterThan(0);
-    expect(result.value.level_changes).toBe(0);
+    const r = wf('n-ml-entrance', 'n-ml-dest-rdc');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.route.path.length).toBeGreaterThan(1);
+    expect(r.value.steps.length).toBeGreaterThan(1);
+    expect(r.value.total_distance_m).toBeGreaterThan(0);
+    expect(r.value.level_changes).toBe(0);
   });
 
   it('computes cross-level route', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.level_changes).toBeGreaterThanOrEqual(1);
+    const r = wf('n-ml-entrance', 'n-ml-dest-r1');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.level_changes).toBeGreaterThanOrEqual(1);
   });
 
   it('generates French instructions by default', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-rdc',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.steps[0]?.instruction).toContain('Depuis');
-    const lastStep = result.value.steps[result.value.steps.length - 1];
-    expect(lastStep?.instruction).toContain('Arrivée');
+    const r = wf('n-ml-entrance', 'n-ml-dest-rdc');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.steps[0]?.instruction).toContain('Depuis');
+    expect(r.value.steps[r.value.steps.length - 1]?.instruction).toContain('Arrivée');
   });
 
   it('generates English instructions when lang is en', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-rdc',
-      { lang: 'en' },
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.steps[0]?.instruction).toContain('From');
-    const lastStep = result.value.steps[result.value.steps.length - 1];
-    expect(lastStep?.instruction).toContain('Arrival');
+    const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { lang: 'en' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.steps[0]?.instruction).toContain('From');
+    expect(r.value.steps[r.value.steps.length - 1]?.instruction).toContain('Arrival');
   });
 
   it('generates French instructions when lang is fr', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-rdc',
-      { lang: 'fr' },
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.steps[0]?.instruction).toContain('Depuis');
+    const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { lang: 'fr' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.steps[0]?.instruction).toContain('Depuis');
   });
 
   it('respects accessible profile', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      accessibleProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    const kinds = result.value.steps.map((s) => s.kind);
-    expect(kinds).not.toContain('stair');
+    const r = wf('n-ml-entrance', 'n-ml-dest-r1', { profile: accP });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.steps.map((s) => s.kind)).not.toContain('stair');
   });
 
   it('returns error for unknown origin node', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'nonexistent',
-      'n-ml-dest-rdc',
-    );
-    expect(result.ok).toBe(false);
+    expect(wf('nonexistent', 'n-ml-dest-rdc').ok).toBe(false);
   });
 
   it('returns error for unknown destination node', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'nonexistent',
-    );
-    expect(result.ok).toBe(false);
+    expect(wf('n-ml-entrance', 'nonexistent').ok).toBe(false);
   });
 
   it('handles same origin and destination', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-entrance',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.total_distance_m).toBe(0);
-    expect(result.value.level_changes).toBe(0);
+    const r = wf('n-ml-entrance', 'n-ml-entrance');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.total_distance_m).toBe(0);
+    expect(r.value.level_changes).toBe(0);
   });
 
   it('each step has level_id', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    for (const step of result.value.steps) {
-      expect(step.level_id).toBeTruthy();
-    }
+    const r = wf('n-ml-entrance', 'n-ml-dest-r1');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    for (const step of r.value.steps) expect(step.level_id).toBeTruthy();
   });
 
   it('is deterministic (INV-4)', () => {
-    const r1 = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-    );
-    const r2 = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-    );
+    const r1 = wf('n-ml-entrance', 'n-ml-dest-r1');
+    const r2 = wf('n-ml-entrance', 'n-ml-dest-r1');
     expect(r1).toStrictEqual(r2);
   });
 
   it('English cross-level uses elevator instruction', () => {
-    const result = computeWayfinding(
-      refMultilevel,
-      standardProfile,
-      'n-ml-entrance',
-      'n-ml-dest-r1',
-      { lang: 'en' },
-    );
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    const instructions = result.value.steps.map((s) => s.instruction);
-    const hasElevator = instructions.some((i) => i.includes('elevator'));
-    const hasStairs = instructions.some((i) => i.includes('stairs'));
-    expect(hasElevator || hasStairs).toBe(true);
+    const r = wf('n-ml-entrance', 'n-ml-dest-r1', { lang: 'en' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const ins = r.value.steps.map((s) => s.instruction);
+    expect(ins.some((i) => i.includes('elevator') || i.includes('stairs'))).toBe(true);
   });
 
   describe('junction collapsing', () => {
@@ -221,124 +174,104 @@ describe('computeWayfinding', () => {
       face_templates: [],
     };
 
-    const corridorProfile = corridorSite.travel_profiles[0] as TravelProfile;
+    const cP = corridorSite.travel_profiles[0] as TravelProfile;
 
     it('collapses consecutive junction nodes into a single step', () => {
-      const result = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest');
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      // Without collapsing: entrance + j1 + j2 + j3 + dest = 5 steps.
-      // With collapsing: entrance + collapsed(j1-j3) + dest = 3 steps.
-      expect(result.value.steps.length).toBe(3);
+      const r = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.steps.length).toBe(3);
     });
 
     it('collapsed step uses "continue for X m" instruction (fr)', () => {
-      const result = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest');
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      const collapsedStep = result.value.steps[1];
-      expect(collapsedStep?.instruction).toContain('Continuer tout droit');
-      expect(collapsedStep?.instruction).toContain('20 m');
+      const r = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.steps[1]?.instruction).toContain('Continuer tout droit');
+      expect(r.value.steps[1]?.instruction).toContain('20 m');
     });
 
     it('collapsed step uses "continue straight" instruction (en)', () => {
-      const result = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest', { lang: 'en' });
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      const collapsedStep = result.value.steps[1];
-      expect(collapsedStep?.instruction).toContain('Continue straight');
-      expect(collapsedStep?.instruction).toContain('20 m');
+      const r = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.steps[1]?.instruction).toContain('Continue straight');
+      expect(r.value.steps[1]?.instruction).toContain('20 m');
     });
 
     it('total distance is preserved after collapsing', () => {
-      const result = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest');
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.total_distance_m).toBe(40);
+      const r = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.total_distance_m).toBe(40);
     });
 
     it('collapsed result is deterministic (INV-4)', () => {
-      const r1 = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest');
-      const r2 = computeWayfinding(corridorSite, corridorProfile, 'n-ent', 'n-dest');
+      const r1 = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
+      const r2 = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
       expect(r1).toStrictEqual(r2);
     });
   });
 
   describe('instruction templates coverage', () => {
     it('stair without level change uses passby instruction', () => {
-      const result = computeWayfinding(
-        refMultilevel,
-        standardProfile,
-        'n-ml-entrance',
-        'n-ml-dest-rdc',
-      );
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      // Check that no stair instruction appears (route stays on RDC)
-      const stairSteps = result.value.steps.filter(
-        (s) => s.kind === 'stair',
-      );
-      for (const step of stairSteps) {
-        // Stair on same level → "Passer devant" (passby), not "Prendre l'escalier"
-        expect(step.instruction).toContain('Passer devant');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc');
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      for (const s of r.value.steps.filter((s) => s.kind === 'stair')) {
+        expect(s.instruction).toContain('Passer devant');
       }
     });
 
-    it('goThrough instruction for non-standard node kinds', () => {
-      // Build a site with a security_post in the route
-      const site: SiteData = {
-        ...refMultilevel,
-        graph: {
-          ...refMultilevel.graph,
-          nodes: refMultilevel.graph.nodes.map((n) =>
-            n.id === 'n-ml-hall'
-              ? { ...n, kind: 'security_post' as const }
-              : n,
-          ),
-        },
-      };
-      const result = computeWayfinding(
-        site,
-        standardProfile,
-        'n-ml-entrance',
-        'n-ml-dest-rdc',
-        { lang: 'fr' },
-      );
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      const secSteps = result.value.steps.filter(
-        (s) => s.kind === 'security_post',
-      );
-      expect(secSteps.length).toBeGreaterThan(0);
-      expect(secSteps[0]?.instruction).toContain('Passer par');
+    it('goThrough instruction for non-standard node kinds (fr)', () => {
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'security_post');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'fr' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const sec = r.value.steps.filter((s) => s.kind === 'security_post');
+      expect(sec.length).toBeGreaterThan(0);
+      expect(sec[0]?.instruction).toContain('Passer par');
     });
 
     it('goThrough instruction in English', () => {
-      const site: SiteData = {
-        ...refMultilevel,
-        graph: {
-          ...refMultilevel.graph,
-          nodes: refMultilevel.graph.nodes.map((n) =>
-            n.id === 'n-ml-hall'
-              ? { ...n, kind: 'security_post' as const }
-              : n,
-          ),
-        },
-      };
-      const result = computeWayfinding(
-        site,
-        standardProfile,
-        'n-ml-entrance',
-        'n-ml-dest-rdc',
-        { lang: 'en' },
-      );
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      const secSteps = result.value.steps.filter(
-        (s) => s.kind === 'security_post',
-      );
-      expect(secSteps.length).toBeGreaterThan(0);
-      expect(secSteps[0]?.instruction).toContain('Go through');
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'security_post');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const sec = r.value.steps.filter((s) => s.kind === 'security_post');
+      expect(sec.length).toBeGreaterThan(0);
+      expect(sec[0]?.instruction).toContain('Go through');
+    });
+
+    it('escalator with level change uses takeEscalator instruction', () => {
+      const site = withNodeKind((n) => n.kind === 'elevator', 'escalator');
+      const r = wf('n-ml-entrance', 'n-ml-dest-r1', { site, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const esc = r.value.steps.filter((s) => s.kind === 'escalator');
+      expect(esc.length).toBeGreaterThan(0);
+      expect(esc[0]?.instruction).toContain('Take the escalator');
+    });
+
+    it('escalator without level change uses passby instruction', () => {
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'escalator');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const esc = r.value.steps.filter((s) => s.kind === 'escalator');
+      expect(esc.length).toBeGreaterThan(0);
+      expect(esc[0]?.instruction).toContain('Pass by');
+    });
+
+    it('destination_access mid-route uses passby instruction', () => {
+      const site = withNodeKind((n) => n.id === 'n-ml-hall', 'destination_access');
+      const r = wf('n-ml-entrance', 'n-ml-dest-rdc', { site, lang: 'en' });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const da = r.value.steps.filter((s) => s.kind === 'destination_access');
+      const mid = da.slice(0, -1);
+      for (const step of mid) expect(step.instruction).toContain('Pass by');
+      expect(da[da.length - 1]?.instruction).toContain('Arrival');
     });
   });
 });

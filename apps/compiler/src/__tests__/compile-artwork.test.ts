@@ -176,6 +176,33 @@ describe('T-2.12 createArtworkHandler', () => {
     expect((result['svg_length'] as number)).toBeGreaterThan(0);
   });
 
+  it('uses fallback dimensions when support_type has empty faces', async () => {
+    const siteEmptyFaces = {
+      ...refMultilevel,
+      support_types: refMultilevel.support_types.map((st) => ({
+        ...st,
+        faces: [],
+      })),
+    };
+    const ctx: CompileContext = { ...context, site: siteEmptyFaces };
+    const handler = createArtworkHandler(ctx);
+    const job = makeJob({
+      support_id: 'sup-ef',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    const result = await handler(job);
+    expect((result['svg_length'] as number)).toBeGreaterThan(0);
+    expect((result['pdf_length'] as number)).toBeGreaterThan(0);
+  });
+
+  it('throws on completely empty payload', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({});
+    await expect(handler(job)).rejects.toThrow('Template not found');
+  });
+
   it('produces deterministic output (INV-4)', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({

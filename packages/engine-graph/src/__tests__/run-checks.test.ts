@@ -243,5 +243,52 @@ describe('T-2.5 runChecks', () => {
       expect(vacant.length).toBe(1);
       expect(vacant[0]?.entity?.id).toBe('cat-a');
     });
+
+    it('single-destination vacant category reports count 1', () => {
+      const d0 = refMinimal.destinations[0];
+      const d1 = refMinimal.destinations[1];
+      if (!d0 || !d1) return;
+      const site: SiteData = {
+        ...refMinimal,
+        destinations: [
+          { ...d0, occupancy_status: 'vacant' as const, category_id: 'cat-lonely' },
+          { ...d1, occupancy_status: 'occupied' as const, category_id: 'cat-ok' },
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const vacant = result.value.findings.filter(
+        (f) => f.code === 'GRAPH.CATEGORY_ALL_VACANT',
+      );
+      expect(vacant.length).toBe(1);
+      expect(vacant[0]?.entity?.id).toBe('cat-lonely');
+      expect(vacant[0]?.params?.['count']).toBe(1);
+    });
+  });
+
+  describe('GRAPH.DESTINATION_NAME_DUPLICATE — same dest dedup', () => {
+    it('ignores duplicate name rows for the same destination', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        destination_names: [
+          ...refMinimal.destination_names,
+          {
+            id: 'dn-a-fr-dup',
+            org_id: 'org-test-001',
+            destination_id: 'dest-a',
+            lang: 'fr',
+            value: 'Bureau A',
+          },
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const dups = result.value.findings.filter(
+        (f) => f.code === 'GRAPH.DESTINATION_NAME_DUPLICATE',
+      );
+      expect(dups.length).toBe(0);
+    });
   });
 });
