@@ -344,4 +344,34 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(betaIdx).toBeGreaterThan(0);
     expect(alphaIdx).toBeLessThan(betaIdx);
   });
+
+  it('handles collinear nodes (zero-extent x) without crashing', () => {
+    const site = {
+      ...refMultilevel,
+      levels: [
+        ...refMultilevel.levels,
+        {
+          id: 'lvl-col',
+          org_id: 'org-test-001',
+          building_id: 'bldg-ml-001',
+          name: 'Collinear',
+          ordinal: 50,
+          elevation_m: 0,
+        },
+      ],
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [
+          ...refMultilevel.graph.nodes,
+          { id: 'n-col-a', org_id: 'org-test-001', level_id: 'lvl-col', kind: 'junction' as const, position: { x_m: 5, y_m: 0 }, label: 'A' },
+          { id: 'n-col-b', org_id: 'org-test-001', level_id: 'lvl-col', kind: 'junction' as const, position: { x_m: 5, y_m: 10 }, label: 'B' },
+        ],
+      },
+    };
+    const opts = { ...defaultOptions, show_destinations: false, show_edges: false };
+    const result = renderFloorPlan(site, 'lvl-col', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('<svg');
+  });
 });

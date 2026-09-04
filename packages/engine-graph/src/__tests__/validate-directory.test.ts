@@ -273,6 +273,33 @@ describe('T-1.7 validateDirectory', () => {
     });
   });
 
+  describe('GRAPH.DIRECTORY_NAME_MISSING — dest with zero names', () => {
+    it('flags all active langs for a dest with no names at all', () => {
+      // Remove all names for dest-a but keep names for others.
+      const site = patchSite(refMultilevel, {
+        destination_names: refMultilevel.destination_names.filter(
+          (dn) => dn.destination_id !== 'dest-ml-rdc',
+        ),
+      });
+      const result = validateDirectory(site);
+      if (result.ok) {
+        const missing = result.warnings.filter(
+          (f) =>
+            f.code === 'GRAPH.DIRECTORY_NAME_MISSING'
+            && f.entity?.id === 'dest-ml-rdc',
+        );
+        expect(missing.length).toBeGreaterThan(0);
+      } else {
+        const missing = result.findings.filter(
+          (f) =>
+            f.code === 'GRAPH.DIRECTORY_NAME_MISSING'
+            && f.entity?.id === 'dest-ml-rdc',
+        );
+        expect(missing.length).toBeGreaterThan(0);
+      }
+    });
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = validateDirectory(refMultilevel);

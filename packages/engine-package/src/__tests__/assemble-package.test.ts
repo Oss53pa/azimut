@@ -202,6 +202,30 @@ describe('manifestToJson', () => {
     expect(checksum).toMatch(/^sha256-[0-9a-f]{64}$/);
   });
 
+  it('accumulates multiple EMPTY_ARTIFACT warnings', () => {
+    const inputs = [
+      makeInput({ id: 'art-e1', path: 'a.pdf', content: new Uint8Array(0) }),
+      makeInput({ id: 'art-e2', path: 'b.pdf', content: new Uint8Array(0) }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const emptyWarns = result.warnings.filter(
+      (f) => f.code === 'PACKAGE.EMPTY_ARTIFACT',
+    );
+    expect(emptyWarns.length).toBe(2);
+  });
+
+  it('manifestToJson with zero artifacts produces valid JSON', () => {
+    const result = assemblePackage(refMinimal, 'pkg-empty', '2024-06-15T12:00:00Z', []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const json = manifestToJson(result.value);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
+    expect(parsed['artifact_count']).toBe(0);
+    expect(parsed['artifacts']).toEqual([]);
+  });
+
   it('is deterministic (INV-4)', () => {
     const inputs = [makeInput()];
     const r = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);

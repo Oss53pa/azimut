@@ -219,4 +219,14 @@ describe('searchDestinations', () => {
     // Score is likely 0 (fuzzy distance too large) → empty results
     expect(results.length).toBe(0);
   });
+
+  it('returns empty for diacritic-only query', () => {
+    const results = searchDestinations(refMultilevel, '́', 'fr', 10);
+    expect(results.length).toBe(0);
+  });
+
+  it('returns empty for multiple combining marks query', () => {
+    const results = searchDestinations(refMultilevel, '̀́̂', null, 10);
+    expect(results.length).toBe(0);
+  });
 });

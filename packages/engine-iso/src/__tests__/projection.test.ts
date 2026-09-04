@@ -217,3 +217,44 @@ describe('projectTopFace — edge cases', () => {
     expect(pts[0]?.y).toBe(0);
   });
 });
+
+describe('computeWorldBounds — non-finite elevation', () => {
+  it('clamps Infinity elevation_m to zero', () => {
+    const levels: LevelGeom[] = [{
+      vertices: [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 10 }],
+      elevation_m: Infinity,
+      maxZ: 5,
+    }];
+    const wb = computeWorldBounds(levels);
+    expect(wb).not.toBeNull();
+    if (!wb) return;
+    expect(wb.minZ).toBe(0);
+    expect(wb.maxZ).toBe(5);
+  });
+
+  it('clamps -Infinity maxZ to zero', () => {
+    const levels: LevelGeom[] = [{
+      vertices: [{ x_m: 0, y_m: 0 }],
+      elevation_m: 3,
+      maxZ: -Infinity,
+    }];
+    const wb = computeWorldBounds(levels);
+    expect(wb).not.toBeNull();
+    if (!wb) return;
+    expect(wb.minZ).toBe(3);
+    expect(wb.maxZ).toBe(0);
+  });
+
+  it('clamps NaN elevation_m and maxZ to zero', () => {
+    const levels: LevelGeom[] = [{
+      vertices: [{ x_m: 1, y_m: 1 }],
+      elevation_m: NaN,
+      maxZ: NaN,
+    }];
+    const wb = computeWorldBounds(levels);
+    expect(wb).not.toBeNull();
+    if (!wb) return;
+    expect(wb.minZ).toBe(0);
+    expect(wb.maxZ).toBe(0);
+  });
+});
