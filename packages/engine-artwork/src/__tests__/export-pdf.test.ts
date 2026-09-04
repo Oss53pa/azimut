@@ -115,4 +115,13 @@ describe('exportArtworkPdf', () => {
     expect(pdf).toBeInstanceOf(Uint8Array);
     expect(pdf.length).toBeGreaterThan(0);
   });
+
+  it('produces valid PDF for zero-dimension page', async () => {
+    const pdf = await exportArtworkPdf(
+      makeOptions({ width_mm: 0, height_mm: 0 }),
+    );
+    expect(pdf).toBeInstanceOf(Uint8Array);
+    const header = new TextDecoder().decode(pdf.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
 });

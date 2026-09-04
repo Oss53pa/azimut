@@ -254,3 +254,73 @@ describe('D5.5 — multi-level modes', () => {
     expect(r1).toStrictEqual(r2);
   });
 });
+
+describe('renderIsoView — edge-case geometry', () => {
+  it('skips walls for zero-height volume', () => {
+    const site = {
+      ...refMultilevel,
+      volumes: refMultilevel.volumes.map((v) => ({ ...v, height_m: 0 })),
+    };
+    const result = renderIsoView(site, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Top-face polygons present, but no wall polygons
+    expect(result.value.svg).toContain('<polygon');
+    expect(result.value.svg).not.toContain('tok-wall-f');
+    expect(result.value.svg).not.toContain('tok-wall-s');
+  });
+
+  it('renders bare footprints without matching volume', () => {
+    // Remove all volumes → all footprints become "bare"
+    const site = { ...refMultilevel, volumes: [] };
+    const result = renderIsoView(site, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Floor polygons drawn for bare footprints
+    expect(result.value.svg).toContain('tok-floor');
+    expect(result.value.svg).toContain('<polygon');
+    // No wall polygons since no volumes exist
+    expect(result.value.svg).not.toContain('tok-wall-f');
+  });
+
+  it('node Z falls back to elevation_m when no volumes', () => {
+    const site = { ...refMultilevel, volumes: [] };
+    const opts = { ...defaultOptions, show_nodes: true };
+    const result = renderIsoView(site, ['lvl-ml-rdc'], opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.svg).toContain('<circle');
+  });
+
+  it('single-vertex footprint skips walls (n < 2 guard)', () => {
+    const site = {
+      ...refMultilevel,
+      footprints: [
+        {
+          id: 'fp-single',
+          org_id: 'org-test-001',
+          level_id: 'lvl-ml-rdc',
+          geometry: { vertices: [{ x_m: 5, y_m: 5 }] },
+          kind: 'room' as const,
+        },
+      ],
+      volumes: [
+        {
+          id: 'vol-single',
+          org_id: 'org-test-001',
+          footprint_id: 'fp-single',
+          base_elevation_m: 0,
+          height_m: 3,
+          material_key: 'concrete',
+        },
+      ],
+    };
+    const result = renderIsoView(site, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Top face polygon exists but no walls
+    expect(result.value.svg).toContain('<polygon');
+    expect(result.value.svg).not.toContain('tok-wall-f');
+    expect(result.value.svg).not.toContain('tok-wall-s');
+  });
+});

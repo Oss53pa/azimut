@@ -335,4 +335,64 @@ describe('computeQuantities — fallback paths', () => {
     // since levelToBuilding.get('lvl-does-not-exist') is undefined
     expect(result.value.by_building.length).toBe(0);
   });
+
+  it('cross_check_ok is false when by_building sum ≠ located count', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: [
+          ...refMinimal.graph.nodes,
+          {
+            id: 'n-ghost-lvl',
+            org_id: 'org-test-001',
+            level_id: 'lvl-does-not-exist',
+            kind: 'junction' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'Ghost',
+          },
+        ],
+      },
+    };
+    const supports: PlacedSupport[] = [
+      { id: 'sup-ghost', node_id: 'n-ghost-lvl', support_type_key: 'directional' },
+    ];
+    const result = computeQuantities(site, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.cross_check_ok).toBe(false);
+    const w = result.warnings.find(
+      (f) => f.code === 'GRAPH.QUANTITY_CROSS_CHECK_FAILED',
+    );
+    expect(w).toBeDefined();
+  });
+
+  it('level name falls back to raw id for unlisted level', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: [
+          ...refMinimal.graph.nodes,
+          {
+            id: 'n-ghost',
+            org_id: 'org-test-001',
+            level_id: 'lvl-phantom',
+            kind: 'junction' as const,
+            position: { x_m: 0, y_m: 0 },
+            label: 'G',
+          },
+        ],
+      },
+    };
+    const supports: PlacedSupport[] = [
+      { id: 'sup-g', node_id: 'n-ghost', support_type_key: 'directional' },
+    ];
+    const result = computeQuantities(site, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const lvl = result.value.by_level.find((l) => l.level_id === 'lvl-phantom');
+    expect(lvl?.level_name).toBe('lvl-phantom');
+    expect(lvl?.building_id).toBe('');
+  });
 });

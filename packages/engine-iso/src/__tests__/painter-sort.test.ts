@@ -149,4 +149,14 @@ describe('sortVolumesPainter — multi-vertex minXplusY', () => {
     // v1 min sum = 2, v2 min sum = 10 → v1 first
     expect(sorted[0]?.volume.id).toBe('v1');
   });
+
+  it('empty vertices returns Infinity sum → sorts last', () => {
+    const entries: VolumeEntry[] = [
+      { volume: vol('v-empty', 'f-empty', 0, 1), footprint: fp('f-empty', []) },
+      { volume: vol('v-real', 'f-real', 0, 1), footprint: fp('f-real', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted[0]?.volume.id).toBe('v-real');
+    expect(sorted[1]?.volume.id).toBe('v-empty');
+  });
 });
