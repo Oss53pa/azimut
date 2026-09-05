@@ -32,6 +32,10 @@ const defaultOptions: EvacuationPlanOptions = {
   show_non_evacuation: true,
 };
 
+function siteWithEmptyLevel(id: string, name = 'Vide', ordinal = 99) {
+  return { ...refMultilevel, levels: [...refMultilevel.levels, { id, org_id: 'org-test-001', building_id: 'bldg-ml-001', name, ordinal, elevation_m: ordinal }] };
+}
+
 describe('T-2.10 renderEvacuationPlan', () => {
   it('returns error for unknown level', () => {
     const result = renderEvacuationPlan(refMultilevel, 'nonexistent', defaultOptions);
@@ -125,20 +129,7 @@ describe('T-2.10 renderEvacuationPlan', () => {
   });
 
   it('warns EVAC_EMPTY_LEVEL on level with no geometry', () => {
-    const emptySite = {
-      ...refMultilevel,
-      levels: [
-        ...refMultilevel.levels,
-        {
-          id: 'lvl-empty',
-          org_id: 'org-test-001',
-          building_id: 'bldg-ml-001',
-          name: 'Vide',
-          ordinal: 99,
-          elevation_m: 99,
-        },
-      ],
-    };
+    const emptySite = siteWithEmptyLevel('lvl-empty');
     const opts = { ...defaultOptions, viewer_position: null };
     const result = renderEvacuationPlan(emptySite, 'lvl-empty', opts);
     expect(result.ok).toBe(true);
@@ -238,20 +229,7 @@ describe('T-2.10 renderEvacuationPlan', () => {
   });
 
   it('reports zero stats on empty level with viewer only', () => {
-    const emptySite = {
-      ...refMultilevel,
-      levels: [
-        ...refMultilevel.levels,
-        {
-          id: 'lvl-stats-empty',
-          org_id: 'org-test-001',
-          building_id: 'bldg-ml-001',
-          name: 'StatsVide',
-          ordinal: 98,
-          elevation_m: 98,
-        },
-      ],
-    };
+    const emptySite = siteWithEmptyLevel('lvl-stats-empty', 'StatsVide', 98);
     const opts = { ...defaultOptions, viewer_position: null };
     const result = renderEvacuationPlan(emptySite, 'lvl-stats-empty', opts);
     expect(result.ok).toBe(true);
@@ -386,10 +364,7 @@ describe('T-2.10 renderEvacuationPlan', () => {
   });
 
   it('viewer position on empty level skips EVAC_EMPTY_LEVEL', () => {
-    const emptySite = {
-      ...refMultilevel,
-      levels: [...refMultilevel.levels, { id: 'lvl-empty', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'Vide', ordinal: 99, elevation_m: 99 }],
-    };
+    const emptySite = siteWithEmptyLevel('lvl-empty');
     const opts = { ...defaultOptions, viewer_position: { x_m: 10, y_m: 10 } };
     const result = renderEvacuationPlan(emptySite, 'lvl-empty', opts);
     expect(result.ok).toBe(true);

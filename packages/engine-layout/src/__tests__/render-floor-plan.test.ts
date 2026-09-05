@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderFloorPlan } from '../render-floor-plan.js';
 import type { FloorPlanOptions, FloorPlanTheme } from '../render-floor-plan.js';
 import { refMultilevel } from '@azimut/testkit';
+import type { GraphNode } from '@azimut/core-model';
 
 const theme: FloorPlanTheme = {
   background: 'tok-bg',
@@ -25,6 +26,10 @@ const defaultOptions: FloorPlanOptions = {
   show_edges: true,
   padding_px: 20,
 };
+
+function siteWithNode(id: string, kind: GraphNode['kind'], pos: { x_m: number; y_m: number }, label: string) {
+  return { ...refMultilevel, graph: { ...refMultilevel.graph, nodes: [...refMultilevel.graph.nodes, { id, org_id: 'org-test-001', level_id: 'lvl-ml-rdc', kind, position: pos, label }] } };
+}
 
 describe('T-2.8 renderFloorPlan', () => {
   it('returns error for unknown level', () => {
@@ -193,23 +198,7 @@ describe('T-2.8 renderFloorPlan', () => {
   });
 
   it('renders escalator node with radius 5', () => {
-    const site = {
-      ...refMultilevel,
-      graph: {
-        ...refMultilevel.graph,
-        nodes: [
-          ...refMultilevel.graph.nodes,
-          {
-            id: 'n-escalator-test',
-            org_id: 'org-test-001',
-            level_id: 'lvl-ml-rdc',
-            kind: 'escalator' as const,
-            position: { x_m: 10, y_m: 10 },
-            label: 'Escalier mécanique',
-          },
-        ],
-      },
-    };
+    const site = siteWithNode('n-escalator-test', 'escalator', { x_m: 10, y_m: 10 }, 'Escalier mécanique');
     const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -221,23 +210,7 @@ describe('T-2.8 renderFloorPlan', () => {
   });
 
   it('renders safety node with safety fill color', () => {
-    const site = {
-      ...refMultilevel,
-      graph: {
-        ...refMultilevel.graph,
-        nodes: [
-          ...refMultilevel.graph.nodes,
-          {
-            id: 'n-emergency-test',
-            org_id: 'org-test-001',
-            level_id: 'lvl-ml-rdc',
-            kind: 'emergency_exit' as const,
-            position: { x_m: 15, y_m: 15 },
-            label: 'Sortie secours',
-          },
-        ],
-      },
-    };
+    const site = siteWithNode('n-emergency-test', 'emergency_exit', { x_m: 15, y_m: 15 }, 'Sortie secours');
     const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
@@ -271,23 +244,7 @@ describe('T-2.8 renderFloorPlan', () => {
   });
 
   it('security_post node uses safety fill color', () => {
-    const site = {
-      ...refMultilevel,
-      graph: {
-        ...refMultilevel.graph,
-        nodes: [
-          ...refMultilevel.graph.nodes,
-          {
-            id: 'n-secpost',
-            org_id: 'org-test-001',
-            level_id: 'lvl-ml-rdc',
-            kind: 'security_post' as const,
-            position: { x_m: 15, y_m: 5 },
-            label: 'Poste sécurité',
-          },
-        ],
-      },
-    };
+    const site = siteWithNode('n-secpost', 'security_post', { x_m: 15, y_m: 5 }, 'Poste sécurité');
     const result = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
