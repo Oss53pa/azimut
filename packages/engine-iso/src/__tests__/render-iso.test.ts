@@ -382,4 +382,16 @@ describe('renderIsoView — edge-case geometry', () => {
     expect(overlap?.params).toHaveProperty('footprint_a', 'fp-1');
     expect(overlap?.params).toHaveProperty('footprint_b', 'fp-2');
   });
+
+  it('renders mixed bare and volume footprints on same level', () => {
+    const site = { ...refMultilevel, footprints: [...refMultilevel.footprints,
+      { id: 'fp-bare-mix', org_id: 'org-test-001', level_id: 'lvl-ml-rdc', kind: 'corridor' as const,
+        geometry: { vertices: [{ x_m: 50, y_m: 0 }, { x_m: 60, y_m: 0 }, { x_m: 60, y_m: 10 }, { x_m: 50, y_m: 10 }] } }] };
+    const result = renderIsoView(site, ['lvl-ml-rdc'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Both bare (tok-floor) and volume-backed (tok-wall) polygons present
+    expect(result.value.svg).toContain('tok-floor');
+    expect(result.value.svg).toMatch(/tok-wall/);
+  });
 });

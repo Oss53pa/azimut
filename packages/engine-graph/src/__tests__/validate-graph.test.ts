@@ -144,6 +144,20 @@ describe('validateGraph', () => {
         ).toHaveLength(0);
       }
     });
+
+    it('destination with zero names gets flagged for all active languages', () => {
+      const noNames = makeSite({
+        destination_names: refMinimal.destination_names.filter(
+          (dn: { destination_id: string }) => dn.destination_id !== 'dest-a',
+        ),
+      });
+      const result = validateGraph(noNames);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const missing = findingsWithCode(result.warnings, 'GRAPH.DESTINATION_NAME_MISSING')
+        .filter((f) => f.entity?.id === 'dest-a');
+      expect(missing.length).toBe(2); // one for 'fr', one for 'en'
+    });
   });
 
   describe('GRAPH.EDGE_ZERO_LENGTH', () => {
