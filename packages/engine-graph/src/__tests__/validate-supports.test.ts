@@ -140,140 +140,27 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
   });
 
   describe('DATA.SUPPORT_BLOCK_REGION_INVALID', () => {
-    it('flags block region exceeding 100%', () => {
-      const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-overflow',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Débordement',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: {
-                  x_pct: 50,
-                  y_pct: 0,
-                  w_pct: 60,
-                  h_pct: 20,
-                },
-                config: {},
-              },
-            ],
-          },
-        ],
+    function regionSite(region: { x_pct: number; y_pct: number; w_pct: number; h_pct: number }): SiteData {
+      return patchSite(refMinimal, {
+        face_templates: [{
+          id: 'ftpl-region-test', org_id: 'org-test-001', support_type_key: 'directional',
+          side: 'front', name: 'Region test',
+          blocks: [{ kind: 'header' as const, ordinal: 0, region, config: {} }],
+        }],
       });
-      const result = validateSupports(site);
+    }
+
+    it.each([
+      ['x+w > 100', { x_pct: 50, y_pct: 0, w_pct: 60, h_pct: 20 }],
+      ['negative x', { x_pct: -5, y_pct: 0, w_pct: 50, h_pct: 50 }],
+      ['negative y', { x_pct: 0, y_pct: -10, w_pct: 50, h_pct: 50 }],
+      ['zero width', { x_pct: 0, y_pct: 0, w_pct: 0, h_pct: 50 }],
+      ['zero height', { x_pct: 0, y_pct: 0, w_pct: 50, h_pct: 0 }],
+    ] as const)('flags block with %s', (_label, region) => {
+      const result = validateSupports(regionSite(region));
       expect(result.ok).toBe(false);
       if (result.ok) return;
-      const f = result.findings.find(
-        (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
-      );
-      expect(f).toBeDefined();
-    });
-
-    it('flags block with negative x_pct', () => {
-      const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-neg-x',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Neg X',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: { x_pct: -5, y_pct: 0, w_pct: 50, h_pct: 50 },
-                config: {},
-              },
-            ],
-          },
-        ],
-      });
-      const result = validateSupports(site);
-      expect(result.ok).toBe(false);
-      if (result.ok) return;
-      expect(
-        result.findings.some(
-          (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
-        ),
-      ).toBe(true);
-    });
-
-    it('flags block with negative y_pct', () => {
-      const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-neg-y',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Neg Y',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: { x_pct: 0, y_pct: -10, w_pct: 50, h_pct: 50 },
-                config: {},
-              },
-            ],
-          },
-        ],
-      });
-      const result = validateSupports(site);
-      expect(result.ok).toBe(false);
-    });
-
-    it('flags block with zero width', () => {
-      const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-zero-w',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Zero W',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: { x_pct: 0, y_pct: 0, w_pct: 0, h_pct: 50 },
-                config: {},
-              },
-            ],
-          },
-        ],
-      });
-      const result = validateSupports(site);
-      expect(result.ok).toBe(false);
-    });
-
-    it('flags block with zero height', () => {
-      const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-zero-h',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Zero H',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: { x_pct: 0, y_pct: 0, w_pct: 50, h_pct: 0 },
-                config: {},
-              },
-            ],
-          },
-        ],
-      });
-      const result = validateSupports(site);
-      expect(result.ok).toBe(false);
+      expect(result.findings.some((f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID')).toBe(true);
     });
   });
 
@@ -368,32 +255,16 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
   describe('DATA.SUPPORT_BLOCK_REGION_INVALID — y_pct + h_pct > 100', () => {
     it('flags block where only vertical overflow fails', () => {
       const site = patchSite(refMinimal, {
-        face_templates: [
-          {
-            id: 'ftpl-y-overflow',
-            org_id: 'org-test-001',
-            support_type_key: 'directional',
-            side: 'front',
-            name: 'Vertical overflow',
-            blocks: [
-              {
-                kind: 'header' as const,
-                ordinal: 0,
-                region: { x_pct: 0, y_pct: 50, w_pct: 50, h_pct: 60 },
-                config: {},
-              },
-            ],
-          },
-        ],
+        face_templates: [{
+          id: 'ftpl-y-overflow', org_id: 'org-test-001', support_type_key: 'directional',
+          side: 'front', name: 'Vertical overflow',
+          blocks: [{ kind: 'header' as const, ordinal: 0, region: { x_pct: 0, y_pct: 50, w_pct: 50, h_pct: 60 }, config: {} }],
+        }],
       });
       const result = validateSupports(site);
       expect(result.ok).toBe(false);
       if (result.ok) return;
-      expect(
-        result.findings.some(
-          (f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID',
-        ),
-      ).toBe(true);
+      expect(result.findings.some((f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID')).toBe(true);
     });
   });
 
