@@ -5,6 +5,7 @@ import type {
   FaceTemplate,
   TravelProfile,
   SiteData,
+  ContentBlockKind,
 } from '@azimut/core-model';
 
 function getProfile(
@@ -25,14 +26,16 @@ function getTemplate(
   return t;
 }
 
-const stdProfile = getProfile(
-  refMultilevel.travel_profiles,
-  'standard',
-);
-const tpl = getTemplate(
-  refMultilevel.face_templates,
-  'ftpl-dir-front',
-);
+const stdProfile = getProfile(refMultilevel.travel_profiles, 'standard');
+const tpl = getTemplate(refMultilevel.face_templates, 'ftpl-dir-front');
+
+function singleBlockTpl(kind: ContentBlockKind, config: Record<string, unknown>): FaceTemplate {
+  return {
+    id: `ftpl-${kind}-test`, org_id: 'org-test-001', support_type_key: 'directional',
+    side: 'front', name: `${kind} test`,
+    blocks: [{ kind, ordinal: 0, region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 }, config }],
+  };
+}
 
 describe('T-2.3 resolveFaceContent', () => {
   it('resolves header with site name', () => {
@@ -297,87 +300,39 @@ describe('T-2.3 resolveFaceContent', () => {
 
   describe('block default paths', () => {
     it('arrow block defaults to direction "forward" when config is empty', () => {
-      const arrowTpl: FaceTemplate = {
-        id: 'ftpl-arrow-test',
-        org_id: 'org-test-001',
-        support_type_key: 'directional',
-        side: 'front',
-        name: 'Arrow test',
-        blocks: [
-          {
-            kind: 'arrow',
-            ordinal: 0,
-            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
-            config: {},
-          },
-        ],
-      };
-      const result = resolveFaceContent(
-        refMultilevel,
-        arrowTpl,
-        'n-ml-hall',
-        stdProfile,
-      );
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('arrow', {}), 'n-ml-hall', stdProfile);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const arrow = result.value.blocks[0];
-      if (arrow?.content.type === 'arrow') {
-        expect(arrow.content.direction).toBe('forward');
-      }
+      if (arrow?.content.type === 'arrow') expect(arrow.content.direction).toBe('forward');
+    });
+
+    it('arrow block uses explicit config direction', () => {
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('arrow', { direction: 'left' }), 'n-ml-hall', stdProfile);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const arrow = result.value.blocks[0];
+      if (arrow?.content.type === 'arrow') expect(arrow.content.direction).toBe('left');
     });
 
     it('free_text block defaults to empty string when config has no text', () => {
-      const freeTpl: FaceTemplate = {
-        id: 'ftpl-free-test',
-        org_id: 'org-test-001',
-        support_type_key: 'directional',
-        side: 'front',
-        name: 'Free text test',
-        blocks: [
-          {
-            kind: 'free_text',
-            ordinal: 0,
-            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
-            config: {},
-          },
-        ],
-      };
-      const result = resolveFaceContent(
-        refMultilevel,
-        freeTpl,
-        'n-ml-hall',
-        stdProfile,
-      );
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('free_text', {}), 'n-ml-hall', stdProfile);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const block = result.value.blocks[0];
-      if (block?.content.type === 'free_text') {
-        expect(block.content.text).toBe('');
-      }
+      if (block?.content.type === 'free_text') expect(block.content.text).toBe('');
+    });
+
+    it('free_text block uses explicit config text', () => {
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('free_text', { text: 'Bienvenue' }), 'n-ml-hall', stdProfile);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const block = result.value.blocks[0];
+      if (block?.content.type === 'free_text') expect(block.content.text).toBe('Bienvenue');
     });
 
     it('pictogram block returns null when category does not exist', () => {
-      const pictoTpl: FaceTemplate = {
-        id: 'ftpl-picto-test',
-        org_id: 'org-test-001',
-        support_type_key: 'directional',
-        side: 'front',
-        name: 'Picto test',
-        blocks: [
-          {
-            kind: 'pictogram',
-            ordinal: 0,
-            region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
-            config: { category_id: 'nonexistent-cat' },
-          },
-        ],
-      };
-      const result = resolveFaceContent(
-        refMultilevel,
-        pictoTpl,
-        'n-ml-hall',
-        stdProfile,
-      );
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('pictogram', { category_id: 'nonexistent-cat' }), 'n-ml-hall', stdProfile);
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       const block = result.value.blocks[0];
@@ -386,22 +341,34 @@ describe('T-2.3 resolveFaceContent', () => {
         expect(block.content.svg_path).toBeNull();
       }
     });
+
+    it('pictogram block returns null when config has no category_id', () => {
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('pictogram', {}), 'n-ml-hall', stdProfile);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const block = result.value.blocks[0];
+      if (block?.content.type === 'pictogram') {
+        expect(block.content.pictogram_id).toBeNull();
+        expect(block.content.svg_path).toBeNull();
+      }
+    });
+
+    it('pictogram block finds matching pictogram via category', () => {
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl('pictogram', { category_id: 'cat-office' }), 'n-ml-hall', stdProfile);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const block = result.value.blocks[0];
+      if (block?.content.type === 'pictogram') {
+        expect(block.content.pictogram_id).not.toBeNull();
+        expect(block.content.svg_path).not.toBeNull();
+      }
+    });
   });
 
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
-      const r1 = resolveFaceContent(
-        refMultilevel,
-        tpl,
-        'n-ml-hall',
-        stdProfile,
-      );
-      const r2 = resolveFaceContent(
-        refMultilevel,
-        tpl,
-        'n-ml-hall',
-        stdProfile,
-      );
+      const r1 = resolveFaceContent(refMultilevel, tpl, 'n-ml-hall', stdProfile);
+      const r2 = resolveFaceContent(refMultilevel, tpl, 'n-ml-hall', stdProfile);
       expect(r1).toStrictEqual(r2);
     });
   });

@@ -36,6 +36,19 @@ describe('crossLevelWithoutVlFindings', () => {
     }
   });
 
+  it('partial VL removal: only uncovered edge emits finding', () => {
+    const site: SiteData = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        vertical_links: refMultilevel.graph.vertical_links.filter((vl) => vl.id !== 'vl-ml-elevator'),
+      },
+    };
+    const findings = crossLevelWithoutVlFindings(site);
+    expect(findings.length).toBe(1);
+    expect(findings[0]?.entity?.id).toBe('e-ml-elevator-vl');
+  });
+
   it('findings are sorted by edge id', () => {
     const site: SiteData = {
       ...refMultilevel,

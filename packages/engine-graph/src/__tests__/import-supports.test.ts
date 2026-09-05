@@ -313,6 +313,21 @@ describe('T-1.13 importSupports', () => {
     });
   });
 
+  describe('duplicate-id ordering', () => {
+    it('rejected row does not block a later valid row with the same id', () => {
+      const content = csv([
+        'sup-dup;n-ml-hall;abc;0.6;1.2',   // rejected: azimut invalide → seenIds not set
+        'sup-dup;n-ml-hall;90;0.6;1.2',     // valid: same id passes
+      ]);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.imported).toBe(1);
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.supports[0]?.id).toBe('sup-dup');
+    });
+  });
+
   describe('edge-case inputs', () => {
     it('rejects row with non-empty id but empty node_id', () => {
       const content = csv(['sup-1;;90;0.6;1.2']);

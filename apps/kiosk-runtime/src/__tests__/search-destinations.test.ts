@@ -269,6 +269,38 @@ describe('searchDestinations', () => {
     expect(results.length).toBe(0);
   });
 
+  it('same destination matched via both languages when lang is null', () => {
+    const results = searchDestinations(refMultilevel, 'Bureau RDC', null, 10);
+    const rdcResults = results.filter((r) => r.destination.id === 'dest-ml-rdc');
+    // Should find FR name "Bureau RDC" — EN name unlikely to match
+    expect(rdcResults.length).toBeGreaterThanOrEqual(1);
+    // When lang is null, both FR and EN names are searched
+    const frMatch = rdcResults.find((r) => r.matched_name.lang === 'fr');
+    expect(frMatch).toBeDefined();
+  });
+
+  it('fuzzy whole-value-slice scores better than word-by-word', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [{ ...base, id: 'd-wv', display_priority: 1 }],
+      destination_names: [{
+        id: 'dn-wv',
+        org_id: 'org-test-001',
+        destination_id: 'd-wv',
+        lang: 'fr' as const,
+        value: 'Abcde fghij',
+      }],
+    };
+    // "Abcdf" has edit distance 1 from "Abcde" (the first word)
+    // AND edit distance 1 from "Abcde" (value.slice(0,5))
+    // Both paths should produce the same result
+    const results = searchDestinations(site, 'Abcdf', 'fr', 10);
+    expect(results.length).toBe(1);
+    expect(results[0]?.score).toBe(45); // 50 - 1*5
+  });
+
   it('fuzzy match at boundary: query same length as value', () => {
     const base = refMultilevel.destinations[0];
     if (!base) throw new Error('need at least 1 destination');

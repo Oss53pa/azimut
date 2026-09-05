@@ -174,6 +174,36 @@ describe('D7.1 — content_hash', () => {
     const b = computeContentHash({ ...input, active_langs: ['fr', 'en'] });
     expect(a).toBe(b);
   });
+  it('excluded_edge_kinds order does not affect hash', () => {
+    const a = computeInputsHash(refMinimal, { ...profile, excluded_edge_kinds: ['stairs', 'elevator'] });
+    const b = computeInputsHash(refMinimal, { ...profile, excluded_edge_kinds: ['elevator', 'stairs'] });
+    expect(a).toBe(b);
+  });
+
+  it('node array order does not affect hash', () => {
+    const reversed: SiteData = {
+      ...refMinimal,
+      graph: { ...refMinimal.graph, nodes: [...refMinimal.graph.nodes].reverse() },
+    };
+    expect(computeInputsHash(reversed, profile)).toBe(computeInputsHash(refMinimal, profile));
+  });
+
+  it('edge array order does not affect hash', () => {
+    const reversed: SiteData = {
+      ...refMinimal,
+      graph: { ...refMinimal.graph, edges: [...refMinimal.graph.edges].reverse() },
+    };
+    expect(computeInputsHash(reversed, profile)).toBe(computeInputsHash(refMinimal, profile));
+  });
+
+  it('vertical_links order does not affect hash', () => {
+    const mlProfile = first(refMultilevel.travel_profiles, 'ml-profile');
+    const reversed: SiteData = {
+      ...refMultilevel,
+      graph: { ...refMultilevel.graph, vertical_links: [...refMultilevel.graph.vertical_links].reverse() },
+    };
+    expect(computeInputsHash(reversed, mlProfile)).toBe(computeInputsHash(refMultilevel, mlProfile));
+  });
 });
 
 const headerOnlyTemplate: FaceTemplate = {
