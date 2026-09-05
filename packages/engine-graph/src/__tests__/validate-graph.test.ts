@@ -5,7 +5,7 @@ import {
   refBroken,
   refAdversarial,
 } from '@azimut/testkit';
-import type { SiteData, Finding } from '@azimut/core-model';
+import type { SiteData, Finding, NodeKind } from '@azimut/core-model';
 
 function findingsWithCode(
   findings: readonly Finding[],
@@ -16,6 +16,14 @@ function findingsWithCode(
 
 function makeSite(patch: Partial<SiteData>): SiteData {
   return { ...refMinimal, ...patch };
+}
+
+function mkNode(id: string, kind: NodeKind) {
+  return { id, org_id: 'org-test-001', level_id: 'lvl-001', kind, position: { x_m: 0, y_m: 0 }, label: id };
+}
+
+function mkEdge(id: string, from: string, to: string, len = 5) {
+  return { id, org_id: 'org-test-001', from_node_id: from, to_node_id: to, width_m: 1.5, slope_pct: 0, accessible: true, direction: 'both' as const, evacuation_route: false, length_m: len };
 }
 
 describe('validateGraph', () => {
@@ -33,212 +41,53 @@ describe('validateGraph', () => {
     });
   });
 
-  describe('GRAPH.EDGE_SELF_LOOP', () => {
-    it('detects self-referencing edge in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const loops = findingsWithCode(
-          result.findings,
-          'GRAPH.EDGE_SELF_LOOP',
-        );
-        expect(loops.length).toBeGreaterThan(0);
-        expect(loops[0]?.entity?.id).toBe('e-brk-zero-length');
-      }
+  describe('refBroken finding codes', () => {
+    const brokenResult = validateGraph(refBroken);
+
+    it.each([
+      ['GRAPH.EDGE_SELF_LOOP', 'e-brk-zero-length'],
+      ['GRAPH.NODE_ORPHAN', 'n-brk-orphan'],
+      ['GRAPH.DESTINATION_UNREACHABLE', 'dest-brk-unreachable'],
+      ['GRAPH.VERTICAL_LINK_MISSING', 'e-brk-cross-level'],
+      ['GRAPH.DEAD_END_UNJUSTIFIED', 'n-brk-deadend'],
+      ['GRAPH.LEVEL_NO_ACCESSIBLE_LINK', 'bldg-brk-001'],
+    ] as const)('detects %s on entity %s', (code, entityId) => {
+      expect(brokenResult.ok).toBe(false);
+      if (brokenResult.ok) return;
+      const hits = findingsWithCode(brokenResult.findings, code);
+      expect(hits.length).toBeGreaterThan(0);
+      expect(hits[0]?.entity?.id).toBe(entityId);
     });
 
-    it('not triggered on refMinimal', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(result.warnings, 'GRAPH.EDGE_SELF_LOOP'),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.NODE_ORPHAN', () => {
-    it('detects orphan node in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const orphans = findingsWithCode(
-          result.findings,
-          'GRAPH.NODE_ORPHAN',
-        );
-        expect(orphans.length).toBeGreaterThan(0);
-        expect(orphans[0]?.entity?.id).toBe('n-brk-orphan');
-      }
+    it('detects GRAPH.DISCONNECTED', () => {
+      expect(brokenResult.ok).toBe(false);
+      if (brokenResult.ok) return;
+      expect(findingsWithCode(brokenResult.findings, 'GRAPH.DISCONNECTED').length).toBeGreaterThan(0);
     });
 
-    it('not triggered on refMinimal', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(result.warnings, 'GRAPH.NODE_ORPHAN'),
-        ).toHaveLength(0);
-      }
+    it('detects GRAPH.ZONE_UNREACHABLE for island nodes', () => {
+      expect(brokenResult.ok).toBe(false);
+      if (brokenResult.ok) return;
+      const ids = findingsWithCode(brokenResult.findings, 'GRAPH.ZONE_UNREACHABLE').map((f) => f.entity?.id);
+      expect(ids).toContain('n-brk-island-a');
+      expect(ids).toContain('n-brk-island-b');
     });
   });
 
-  describe('GRAPH.DISCONNECTED', () => {
-    it('detects disconnected subgraph in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const disconnected = findingsWithCode(
-          result.findings,
-          'GRAPH.DISCONNECTED',
-        );
-        expect(disconnected.length).toBeGreaterThan(0);
-      }
-    });
-
-    it('not triggered on refMinimal (connected)', () => {
+  describe('refMinimal negative checks', () => {
+    it.each([
+      'GRAPH.EDGE_SELF_LOOP',
+      'GRAPH.NODE_ORPHAN',
+      'GRAPH.DISCONNECTED',
+      'GRAPH.ZONE_UNREACHABLE',
+      'GRAPH.DESTINATION_UNREACHABLE',
+      'GRAPH.VERTICAL_LINK_MISSING',
+      'GRAPH.DEAD_END_UNJUSTIFIED',
+      'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
+    ] as const)('%s not triggered on refMinimal', (code) => {
       const result = validateGraph(refMinimal);
       if (result.ok) {
-        expect(
-          findingsWithCode(result.warnings, 'GRAPH.DISCONNECTED'),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.ZONE_UNREACHABLE', () => {
-    it('detects nodes unreachable from entrance in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const unreachable = findingsWithCode(
-          result.findings,
-          'GRAPH.ZONE_UNREACHABLE',
-        );
-        expect(unreachable.length).toBeGreaterThan(0);
-        const ids = unreachable.map((f) => f.entity?.id);
-        expect(ids).toContain('n-brk-island-a');
-        expect(ids).toContain('n-brk-island-b');
-      }
-    });
-
-    it('not triggered on refMinimal (all reachable)', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(
-            result.warnings,
-            'GRAPH.ZONE_UNREACHABLE',
-          ),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.DESTINATION_UNREACHABLE', () => {
-    it('detects unreachable destination in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const destFindings = findingsWithCode(
-          result.findings,
-          'GRAPH.DESTINATION_UNREACHABLE',
-        );
-        expect(destFindings.length).toBeGreaterThan(0);
-        expect(destFindings[0]?.entity?.id).toBe(
-          'dest-brk-unreachable',
-        );
-      }
-    });
-
-    it('not triggered on refMinimal', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(
-            result.warnings,
-            'GRAPH.DESTINATION_UNREACHABLE',
-          ),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.VERTICAL_LINK_MISSING', () => {
-    it('detects cross-level edge without vertical link in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const crossLevel = findingsWithCode(
-          result.findings,
-          'GRAPH.VERTICAL_LINK_MISSING',
-        );
-        expect(crossLevel.length).toBeGreaterThan(0);
-        expect(crossLevel[0]?.entity?.id).toBe('e-brk-cross-level');
-      }
-    });
-
-    it('not triggered on refMinimal (single level)', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(
-            result.warnings,
-            'GRAPH.VERTICAL_LINK_MISSING',
-          ),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.DEAD_END_UNJUSTIFIED', () => {
-    it('detects unjustified dead end in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const deadEnds = findingsWithCode(
-          result.findings,
-          'GRAPH.DEAD_END_UNJUSTIFIED',
-        );
-        expect(deadEnds.length).toBeGreaterThan(0);
-        expect(deadEnds[0]?.entity?.id).toBe('n-brk-deadend');
-      }
-    });
-
-    it('entrance at dead end is justified', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(
-            result.warnings,
-            'GRAPH.DEAD_END_UNJUSTIFIED',
-          ),
-        ).toHaveLength(0);
-      }
-    });
-  });
-
-  describe('GRAPH.LEVEL_NO_ACCESSIBLE_LINK', () => {
-    it('detects multi-level building without accessible VL in refBroken', () => {
-      const result = validateGraph(refBroken);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        const noVl = findingsWithCode(
-          result.findings,
-          'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
-        );
-        expect(noVl.length).toBeGreaterThan(0);
-        expect(noVl[0]?.entity?.id).toBe('bldg-brk-001');
-      }
-    });
-
-    it('not triggered on single-level building', () => {
-      const result = validateGraph(refMinimal);
-      if (result.ok) {
-        expect(
-          findingsWithCode(
-            result.warnings,
-            'GRAPH.LEVEL_NO_ACCESSIBLE_LINK',
-          ),
-        ).toHaveLength(0);
+        expect(findingsWithCode(result.warnings, code)).toHaveLength(0);
       }
     });
   });
@@ -247,51 +96,16 @@ describe('validateGraph', () => {
     it('detects site with no entrance', () => {
       const noEntrance = makeSite({
         graph: {
-          nodes: [
-            {
-              id: 'n-1',
-              org_id: 'org-test-001',
-              level_id: 'lvl-001',
-              kind: 'junction',
-              position: { x_m: 0, y_m: 0 },
-              label: 'J1',
-            },
-            {
-              id: 'n-2',
-              org_id: 'org-test-001',
-              level_id: 'lvl-001',
-              kind: 'junction',
-              position: { x_m: 10, y_m: 0 },
-              label: 'J2',
-            },
-          ],
-          edges: [
-            {
-              id: 'e-1',
-              org_id: 'org-test-001',
-              from_node_id: 'n-1',
-              to_node_id: 'n-2',
-              width_m: 1.5,
-              slope_pct: 0,
-              accessible: true,
-              direction: 'both',
-              evacuation_route: false,
-              length_m: 10,
-            },
-          ],
+          nodes: [mkNode('n-1', 'junction'), mkNode('n-2', 'junction')],
+          edges: [mkEdge('e-1', 'n-1', 'n-2', 10)],
           vertical_links: [],
         },
-        destinations: [],
-        destination_names: [],
+        destinations: [], destination_names: [],
       });
       const result = validateGraph(noEntrance);
       expect(result.ok).toBe(false);
       if (!result.ok) {
-        const noEntr = findingsWithCode(
-          result.findings,
-          'GRAPH.NO_ENTRANCE',
-        );
-        expect(noEntr).toHaveLength(1);
+        expect(findingsWithCode(result.findings, 'GRAPH.NO_ENTRANCE')).toHaveLength(1);
       }
     });
   });
@@ -398,6 +212,50 @@ describe('validateGraph', () => {
         expect(neg[0]?.entity?.id).toBe('e-negative');
       }
     });
+  });
+
+  it('emergency_exit at dead end is justified', () => {
+    const site = makeSite({
+      graph: {
+        nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction'), mkNode('n-exit', 'emergency_exit')],
+        edges: [mkEdge('e-1', 'n-entrance', 'n-j'), mkEdge('e-2', 'n-j', 'n-exit')],
+        vertical_links: [],
+      },
+      destinations: [], destination_names: [],
+    });
+    const result = validateGraph(site);
+    if (result.ok) {
+      expect(findingsWithCode(result.warnings, 'GRAPH.DEAD_END_UNJUSTIFIED')).toHaveLength(0);
+    } else {
+      expect(findingsWithCode(result.findings, 'GRAPH.DEAD_END_UNJUSTIFIED')).toHaveLength(0);
+    }
+  });
+
+  it('self-loop edge excluded from EDGE_ZERO_LENGTH', () => {
+    // refBroken has e-brk-zero-length which is a self-loop with length 0
+    const result = validateGraph(refBroken);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const zeroLen = findingsWithCode(result.findings, 'GRAPH.EDGE_ZERO_LENGTH');
+      const selfLoopZero = zeroLen.filter((f) => f.entity?.id === 'e-brk-zero-length');
+      expect(selfLoopZero).toHaveLength(0);
+    }
+  });
+
+  it('self-loop does not inflate degree for dead-end check', () => {
+    const site = makeSite({
+      graph: {
+        nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction')],
+        edges: [mkEdge('e-real', 'n-entrance', 'n-j'), mkEdge('e-self', 'n-j', 'n-j', 0)],
+        vertical_links: [],
+      },
+      destinations: [], destination_names: [],
+    });
+    const result = validateGraph(site);
+    // n-j has 1 real edge + 1 self-loop → degree should be 1, flagged as dead end
+    const findings = result.ok ? result.warnings : result.findings;
+    const deadEnds = findingsWithCode(findings, 'GRAPH.DEAD_END_UNJUSTIFIED');
+    expect(deadEnds.some((f) => f.entity?.id === 'n-j')).toBe(true);
   });
 
   describe('determinism (INV-4)', () => {

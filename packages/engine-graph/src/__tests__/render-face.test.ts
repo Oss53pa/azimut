@@ -128,29 +128,13 @@ describe('T-2.15 renderFace', () => {
   });
 
   it('renders placeholder for map/logo/emergency', () => {
+    const r = { x_pct: 0, y_pct: 0, w_pct: 50, h_pct: 33 };
     const face: ResolvedFace = {
-      template_id: 'test',
-      support_type_key: 'directional',
-      side: 'front',
+      template_id: 'test', support_type_key: 'directional', side: 'front',
       blocks: [
-        {
-          kind: 'map',
-          ordinal: 0,
-          region: { x_pct: 0, y_pct: 0, w_pct: 50, h_pct: 33 },
-          content: { type: 'map' },
-        },
-        {
-          kind: 'logo',
-          ordinal: 1,
-          region: { x_pct: 50, y_pct: 0, w_pct: 50, h_pct: 33 },
-          content: { type: 'logo' },
-        },
-        {
-          kind: 'emergency_info',
-          ordinal: 2,
-          region: { x_pct: 0, y_pct: 33, w_pct: 100, h_pct: 33 },
-          content: { type: 'emergency_info' },
-        },
+        { kind: 'map', ordinal: 0, region: r, content: { type: 'map' } },
+        { kind: 'logo', ordinal: 1, region: { ...r, x_pct: 50 }, content: { type: 'logo' } },
+        { kind: 'emergency_info', ordinal: 2, region: { ...r, w_pct: 100, y_pct: 33 }, content: { type: 'emergency_info' } },
       ],
     };
     const svg = renderFace(face, opts);
@@ -200,6 +184,7 @@ describe('T-2.15 renderFace', () => {
     ['up', 'rotate(-90)'],
     ['down', 'rotate(90)'],
     ['forward', 'rotate(0)'],
+    ['unknown_dir', 'rotate(0)'],
   ])('renders arrow direction %s with %s', (direction, expected) => {
     const face: ResolvedFace = {
       template_id: 'test',
