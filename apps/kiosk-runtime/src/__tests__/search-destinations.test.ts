@@ -301,6 +301,24 @@ describe('searchDestinations', () => {
     expect(results[0]?.score).toBe(45); // 50 - 1*5
   });
 
+  it('value-slice fuzzy beats word-level when value is one long word', () => {
+    const base = refMultilevel.destinations[0];
+    if (!base) throw new Error('need at least 1 destination');
+    const site = {
+      ...refMultilevel,
+      destinations: [{ ...base, id: 'd-long', display_priority: 1 }],
+      destination_names: [{
+        id: 'dn-long', org_id: 'org-test-001', destination_id: 'd-long',
+        lang: 'fr' as const, value: 'Abcdefghij',
+      }],
+    };
+    // query "Abcxe" (5 chars): word levenshtein vs full 10-char word is large (6);
+    // but slice(0,5) = "abcde" → levenshtein("abcxe","abcde") = 1 → strictly beats word result
+    const results = searchDestinations(site, 'Abcxe', 'fr', 10);
+    expect(results.length).toBe(1);
+    expect(results[0]?.score).toBe(45);
+  });
+
   it('fuzzy match at boundary: query same length as value', () => {
     const base = refMultilevel.destinations[0];
     if (!base) throw new Error('need at least 1 destination');
