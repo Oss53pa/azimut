@@ -35,12 +35,12 @@ export function Shell(): JSX.Element {
       <div style={{
         display: 'flex',
         minHeight: '100vh',
-        fontFamily: "'Inter', system-ui, -apple-system, sans-serif",
+        fontFamily: 'var(--az-font-body)',
       }}>
         <Sidebar currentView={currentView} onNavigate={setCurrentView} />
         <main style={{
           flex: 1,
-          padding: 24,
+          padding: '28px 32px',
           background: 'var(--az-main-bg)',
           overflow: 'auto',
         }}>

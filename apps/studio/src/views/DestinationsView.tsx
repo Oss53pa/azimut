@@ -1,4 +1,4 @@
-import { type JSX, useMemo } from 'react';
+import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 
 export function DestinationsView(): JSX.Element {
@@ -16,19 +16,13 @@ export function DestinationsView(): JSX.Element {
     }
 
     const nodeMap = new Map<string, string>();
-    for (const n of site.graph.nodes) {
-      nodeMap.set(n.id, n.label);
-    }
+    for (const n of site.graph.nodes) nodeMap.set(n.id, n.label);
 
     const levelMap = new Map<string, string>();
-    for (const l of site.levels) {
-      levelMap.set(l.id, l.name);
-    }
+    for (const l of site.levels) levelMap.set(l.id, l.name);
 
     const nodeLevelMap = new Map<string, string>();
-    for (const n of site.graph.nodes) {
-      nodeLevelMap.set(n.id, n.level_id);
-    }
+    for (const n of site.graph.nodes) nodeLevelMap.set(n.id, n.level_id);
 
     return [...site.destinations]
       .sort((a, b) => a.display_priority - b.display_priority || a.id.localeCompare(b.id))
@@ -49,38 +43,53 @@ export function DestinationsView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
-        Destinations
-      </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        {rows.length} destination{rows.length !== 1 ? 's' : ''} enregistree{rows.length !== 1 ? 's' : ''}
-      </p>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          fontSize: 13,
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--az-text-primary)' }}>
+          Destinations
+        </h1>
+        <span style={{
+          background: 'var(--az-accent-soft)',
+          color: 'var(--az-accent)',
+          fontSize: 12,
+          fontWeight: 600,
+          padding: '2px 10px',
+          borderRadius: 12,
         }}>
+          {rows.length}
+        </span>
+      </div>
+      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 20 }}>
+        Points d'intérêt et occupants du site
+      </p>
+      <div style={{
+        overflowX: 'auto',
+        borderRadius: 12,
+        border: '1px solid var(--az-border)',
+        boxShadow: 'var(--az-shadow-card)',
+      }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid var(--az-border)' }}>
+            <tr style={{ background: 'var(--az-sidebar-bg)' }}>
               <Th>Nom (fr)</Th>
               <Th>Nom (en)</Th>
               <Th>Niveau</Th>
-              <Th>Noeud</Th>
+              <Th>Nœud</Th>
               <Th>Statut</Th>
-              <Th>Priorite</Th>
+              <Th align="center">Priorité</Th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
-              <tr key={r.id} style={{ borderBottom: '1px solid var(--az-border)' }}>
-                <Td>{r.nameFr}</Td>
+            {rows.map((r, i) => (
+              <TRow key={r.id} even={i % 2 === 0}>
+                <Td bold>{r.nameFr}</Td>
                 <Td>{r.nameEn}</Td>
-                <Td>{r.level}</Td>
-                <Td>{r.node}</Td>
+                <Td>
+                  <LevelBadge>{r.level}</LevelBadge>
+                </Td>
+                <Td secondary>{r.node}</Td>
                 <Td><StatusBadge status={r.status} /></Td>
-                <Td>{String(r.priority)}</Td>
-              </tr>
+                <Td align="center">{String(r.priority)}</Td>
+              </TRow>
             ))}
           </tbody>
         </table>
@@ -89,52 +98,115 @@ export function DestinationsView(): JSX.Element {
   );
 }
 
-function Th({ children }: { readonly children: string }): JSX.Element {
+function Th({ children, align }: { readonly children: string; readonly align?: string }): JSX.Element {
   return (
     <th style={{
-      textAlign: 'left',
-      padding: '8px 12px',
+      textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
+      padding: '10px 14px',
       fontWeight: 600,
       color: 'var(--az-text-secondary)',
       fontSize: 11,
       textTransform: 'uppercase',
-      letterSpacing: '0.05em',
+      letterSpacing: '0.06em',
+      borderBottom: '2px solid var(--az-border)',
     }}>
       {children}
     </th>
   );
 }
 
-function Td({ children }: { readonly children: string | JSX.Element }): JSX.Element {
+function TRow({ children, even }: {
+  readonly children: JSX.Element | readonly JSX.Element[];
+  readonly even: boolean;
+}): JSX.Element {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <tr
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        borderBottom: '1px solid var(--az-border)',
+        background: hovered
+          ? 'var(--az-row-hover)'
+          : even
+            ? 'var(--az-card-bg)'
+            : 'var(--az-row-stripe)',
+        transition: 'background 0.12s',
+      }}
+    >
+      {children}
+    </tr>
+  );
+}
+
+type TdProps = {
+  readonly children: string | JSX.Element;
+  readonly bold?: boolean;
+  readonly secondary?: boolean;
+  readonly align?: string;
+};
+
+function Td({ children, bold, secondary, align }: TdProps): JSX.Element {
   return (
     <td style={{
-      padding: '8px 12px',
-      color: 'var(--az-text-primary)',
+      padding: '10px 14px',
+      color: secondary ? 'var(--az-text-secondary)' : 'var(--az-text-primary)',
+      fontWeight: bold ? 600 : 400,
+      textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
     }}>
       {children}
     </td>
   );
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  occupied: 'Occupe',
-  vacant: 'Vacant',
-  reserved: 'Reserve',
-  under_fit_out: 'En amenagement',
-};
-
-function StatusBadge({ status }: { readonly status: string }): JSX.Element {
+function LevelBadge({ children }: { readonly children: string }): JSX.Element {
   return (
     <span style={{
       display: 'inline-block',
-      padding: '2px 8px',
-      borderRadius: 4,
-      fontSize: 11,
+      padding: '2px 10px',
+      borderRadius: 6,
+      fontSize: 12,
       fontWeight: 600,
-      background: 'var(--az-active-bg)',
-      color: 'var(--az-active-text)',
+      background: 'var(--az-accent-soft)',
+      color: 'var(--az-accent)',
     }}>
-      {STATUS_LABELS[status] ?? status}
+      {children}
+    </span>
+  );
+}
+
+const STATUS_CONFIG: Record<string, { label: string; colorVar: string; bgVar: string }> = {
+  occupied: { label: 'Occupé', colorVar: 'var(--az-status-occupied)', bgVar: 'var(--az-status-occupied-bg)' },
+  vacant: { label: 'Vacant', colorVar: 'var(--az-status-vacant)', bgVar: 'var(--az-status-vacant-bg)' },
+  reserved: { label: 'Réservé', colorVar: 'var(--az-status-reserved)', bgVar: 'var(--az-status-reserved-bg)' },
+  under_fit_out: { label: 'En aménagement', colorVar: 'var(--az-status-fitout)', bgVar: 'var(--az-status-fitout-bg)' },
+};
+
+function StatusBadge({ status }: { readonly status: string }): JSX.Element {
+  const config = STATUS_CONFIG[status] ?? {
+    label: status,
+    colorVar: 'var(--az-text-secondary)',
+    bgVar: 'var(--az-hover-bg)',
+  };
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 5,
+      padding: '3px 10px',
+      borderRadius: 20,
+      fontSize: 11.5,
+      fontWeight: 600,
+      background: config.bgVar,
+      color: config.colorVar,
+    }}>
+      <span style={{
+        width: 6,
+        height: 6,
+        borderRadius: '50%',
+        background: config.colorVar,
+      }} />
+      {config.label}
     </span>
   );
 }

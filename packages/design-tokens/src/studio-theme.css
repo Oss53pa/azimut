@@ -2,11 +2,31 @@
   --az-text-primary: #1a1a2e;
   --az-text-secondary: #6b7280;
   --az-border: #e5e7eb;
-  --az-sidebar-bg: #f9fafb;
-  --az-main-bg: #ffffff;
+  --az-sidebar-bg: #f8f7ff;
+  --az-main-bg: #fafafa;
   --az-card-bg: #ffffff;
   --az-active-bg: #eef2ff;
   --az-active-text: #4338ca;
+  --az-hover-bg: #f3f0ff;
+  --az-accent: #6366f1;
+  --az-accent-soft: #e0e7ff;
+  --az-status-occupied: #059669;
+  --az-status-occupied-bg: #ecfdf5;
+  --az-status-vacant: #d97706;
+  --az-status-vacant-bg: #fffbeb;
+  --az-status-reserved: #7c3aed;
+  --az-status-reserved-bg: #f5f3ff;
+  --az-status-fitout: #2563eb;
+  --az-status-fitout-bg: #eff6ff;
+  --az-warn: #dc2626;
+  --az-warn-bg: #fef2f2;
+  --az-row-hover: #f5f3ff;
+  --az-row-stripe: #fafaff;
+  --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.12);
+  --az-sidebar-brand: #4338ca;
+  --az-font-body: 'Dosis', system-ui, -apple-system, sans-serif;
+  --az-font-title: 'Grand Hotel', cursive;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -14,11 +34,29 @@
     --az-text-primary: #e5e7eb;
     --az-text-secondary: #9ca3af;
     --az-border: #374151;
-    --az-sidebar-bg: #111827;
-    --az-main-bg: #1f2937;
-    --az-card-bg: #1f2937;
+    --az-sidebar-bg: #0f0e1a;
+    --az-main-bg: #1a1a2e;
+    --az-card-bg: #232340;
     --az-active-bg: #312e81;
     --az-active-text: #a5b4fc;
+    --az-hover-bg: #1e1b4b;
+    --az-accent: #818cf8;
+    --az-accent-soft: #312e81;
+    --az-status-occupied: #34d399;
+    --az-status-occupied-bg: #064e3b;
+    --az-status-vacant: #fbbf24;
+    --az-status-vacant-bg: #78350f;
+    --az-status-reserved: #a78bfa;
+    --az-status-reserved-bg: #4c1d95;
+    --az-status-fitout: #60a5fa;
+    --az-status-fitout-bg: #1e3a5f;
+    --az-warn: #f87171;
+    --az-warn-bg: #450a0a;
+    --az-row-hover: #1e1b4b;
+    --az-row-stripe: #1f1f35;
+    --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
+    --az-sidebar-brand: #a5b4fc;
   }
 }
 
@@ -26,9 +64,27 @@
   --az-text-primary: #e5e7eb;
   --az-text-secondary: #9ca3af;
   --az-border: #374151;
-  --az-sidebar-bg: #111827;
-  --az-main-bg: #1f2937;
-  --az-card-bg: #1f2937;
+  --az-sidebar-bg: #0f0e1a;
+  --az-main-bg: #1a1a2e;
+  --az-card-bg: #232340;
   --az-active-bg: #312e81;
   --az-active-text: #a5b4fc;
+  --az-hover-bg: #1e1b4b;
+  --az-accent: #818cf8;
+  --az-accent-soft: #312e81;
+  --az-status-occupied: #34d399;
+  --az-status-occupied-bg: #064e3b;
+  --az-status-vacant: #fbbf24;
+  --az-status-vacant-bg: #78350f;
+  --az-status-reserved: #a78bfa;
+  --az-status-reserved-bg: #4c1d95;
+  --az-status-fitout: #60a5fa;
+  --az-status-fitout-bg: #1e3a5f;
+  --az-warn: #f87171;
+  --az-warn-bg: #450a0a;
+  --az-row-hover: #1e1b4b;
+  --az-row-stripe: #1f1f35;
+  --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
+  --az-sidebar-brand: #a5b4fc;
 }

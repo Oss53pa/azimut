@@ -1,4 +1,4 @@
-import { type JSX, useMemo } from 'react';
+import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
 
@@ -32,30 +32,37 @@ export function DashboardView(): JSX.Element {
     };
   }, [site]);
 
+  const cards: readonly { label: string; value: string; icon: string; warn?: boolean }[] = [
+    { label: 'Niveaux', value: String(stats.levels), icon: '🏢' },
+    { label: 'Nœuds', value: String(stats.nodes), icon: '⬡' },
+    { label: 'Arêtes', value: String(stats.edges), icon: '↔️' },
+    { label: 'Destinations', value: String(stats.destinations), icon: '📍' },
+    { label: 'Types support', value: String(stats.supportTypes), icon: '🪧' },
+    { label: 'Gabarits', value: String(stats.templates), icon: '📐' },
+    { label: 'Alertes', value: String(stats.findings), icon: '⚠️', warn: stats.findings > 0 },
+  ];
+
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{
+        margin: '0 0 4px',
+        fontSize: 24,
+        fontWeight: 600,
+        color: 'var(--az-text-primary)',
+      }}>
         Tableau de bord
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13.5, marginBottom: 24 }}>
         {site.site.name} — {site.organization.name}
       </p>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: 12,
+        gap: 16,
       }}>
-        <StatCard label="Niveaux" value={String(stats.levels)} />
-        <StatCard label="Noeuds" value={String(stats.nodes)} />
-        <StatCard label="Aretes" value={String(stats.edges)} />
-        <StatCard label="Destinations" value={String(stats.destinations)} />
-        <StatCard label="Types support" value={String(stats.supportTypes)} />
-        <StatCard label="Gabarits" value={String(stats.templates)} />
-        <StatCard
-          label="Alertes"
-          value={String(stats.findings)}
-          warn={stats.findings > 0}
-        />
+        {cards.map((c) => (
+          <StatCard key={c.label} {...c} />
+        ))}
       </div>
     </div>
   );
@@ -64,24 +71,42 @@ export function DashboardView(): JSX.Element {
 type StatCardProps = {
   readonly label: string;
   readonly value: string;
+  readonly icon: string;
   readonly warn?: boolean;
 };
 
-function StatCard({ label, value, warn }: StatCardProps): JSX.Element {
+function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
+  const [hovered, setHovered] = useState(false);
   return (
-    <div style={{
-      padding: 16,
-      borderRadius: 8,
-      border: '1px solid var(--az-border)',
-      background: 'var(--az-card-bg)',
-    }}>
-      <div style={{ fontSize: 12, color: 'var(--az-text-secondary)', marginBottom: 4 }}>
-        {label}
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        padding: 20,
+        borderRadius: 12,
+        border: `1px solid ${warn ? 'var(--az-warn)' : 'var(--az-border)'}`,
+        background: warn ? 'var(--az-warn-bg)' : 'var(--az-card-bg)',
+        boxShadow: hovered ? 'var(--az-shadow-hover)' : 'var(--az-shadow-card)',
+        transition: 'box-shadow 0.2s, transform 0.2s',
+        transform: hovered ? 'translateY(-2px)' : 'none',
+        cursor: 'default',
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+      }}>
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--az-text-secondary)' }}>
+          {label}
+        </span>
+        <span style={{ fontSize: 18 }}>{icon}</span>
       </div>
       <div style={{
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 700,
-        color: warn ? 'var(--az-active-text)' : 'var(--az-text-primary)',
+        color: warn ? 'var(--az-warn)' : 'var(--az-text-primary)',
       }}>
         {value}
       </div>

@@ -5,8 +5,34 @@
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--az-font-body);
   background: var(--az-main-bg);
   color: var(--az-text-primary);
   -webkit-font-smoothing: antialiased;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
+
+h1, h2, h3 {
+  font-family: var(--az-font-body);
+  font-weight: 600;
+}
+
+::selection {
+  background: var(--az-accent-soft);
+  color: var(--az-accent);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--az-border);
+  border-radius: 3px;
 }
