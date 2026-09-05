@@ -301,4 +301,39 @@ describe('validateGeometry', () => {
       (f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP',
     )).toBe(false);
   });
+
+  it('first-last distance below POINT_COINCIDENCE_M flagged as not-closed', () => {
+    // distance = 0.0005 < 0.001 (POINT_COINCIDENCE_M) → triggers NOT_CLOSED
+    // Use 3 vertices (triangle) to skip self-intersection check (n < 4)
+    const result = validateGeometry(siteWith([
+      fp('fp-close', [[0, 0], [10, 0], [0.0005, 0]]),
+    ]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_NOT_CLOSED')).toBe(true);
+  });
+
+  it('polygon area exactly at POLYGON_MIN_AREA_M2 is not degenerate', () => {
+    // Triangle with area = 0.5 * 0.02 * 0.01 = 0.0001 m² = POLYGON_MIN_AREA_M2
+    const result = validateGeometry(siteWith([
+      fp('fp-exact-area', [[0, 0], [0.02, 0], [0, 0.01]]),
+    ]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((f) => f.code === 'GEOM.POLYGON_DEGENERATE')).toBe(false);
+  });
+
+  it('containment detected via third overlap check (large A contains small B)', () => {
+    // fp-a (big square) sorted first alphabetically contains fp-b (small square)
+    // Edges don't cross, vertsA[0]=(0,0) not inside vertsB, but vertsB[0]=(5,5) inside vertsA
+    const result = validateGeometry(siteWith([
+      fp('fp-a', [[0, 0], [20, 0], [20, 20], [0, 20]]),
+      fp('fp-b', [[5, 5], [15, 5], [15, 15], [5, 15]]),
+    ]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const overlap = result.warnings.find((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP');
+    expect(overlap).toBeDefined();
+    expect(overlap?.params).toHaveProperty('other_footprint_id', 'fp-b');
+  });
 });

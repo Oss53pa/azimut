@@ -292,28 +292,12 @@ describe('D8.3 — validateTemplate', () => {
 });
 
 describe('D8.2 — templateSchema boundaries', () => {
-  it('rejects faceCount: 0', () => {
-    expect(() => templateSchema.parse({
-      key: 'test', faceCount: 0,
-      grid: { columns: 6, margin_mm: 0, gutter_mm: 0 },
-      blocks: [],
-    })).toThrow();
-  });
-
-  it('rejects grid.columns: 0', () => {
-    expect(() => templateSchema.parse({
-      key: 'test', faceCount: 1,
-      grid: { columns: 0, margin_mm: 0, gutter_mm: 0 },
-      blocks: [],
-    })).toThrow();
-  });
-
-  it('rejects negative margin_mm', () => {
-    expect(() => templateSchema.parse({
-      key: 'test', faceCount: 1,
-      grid: { columns: 6, margin_mm: -1, gutter_mm: 0 },
-      blocks: [],
-    })).toThrow();
+  it.each([
+    ['faceCount: 0', { key: 'test', faceCount: 0, grid: { columns: 6, margin_mm: 0, gutter_mm: 0 }, blocks: [] }],
+    ['columns: 0', { key: 'test', faceCount: 1, grid: { columns: 0, margin_mm: 0, gutter_mm: 0 }, blocks: [] }],
+    ['negative margin_mm', { key: 'test', faceCount: 1, grid: { columns: 6, margin_mm: -1, gutter_mm: 0 }, blocks: [] }],
+  ] as const)('rejects %s', (_label, input) => {
+    expect(() => templateSchema.parse(input)).toThrow();
   });
 
   it('rejects area.col: 0', () => {
@@ -373,6 +357,30 @@ describe('D8.2 — templateSchema boundaries', () => {
         binding: { source: 'route', field: 'x', limit: 0 },
         area: { col: 1, colSpan: 1, row: 1 },
       }],
+    })).toThrow();
+  });
+
+  it('rejects empty binding.field', () => {
+    expect(() => templateSchema.parse({
+      key: 'test', faceCount: 1,
+      grid: { columns: 6, margin_mm: 0, gutter_mm: 0 },
+      blocks: [{ index: 0, kind: 'resolved', binding: { source: 'route', field: '' }, area: { col: 1, colSpan: 1, row: 1 } }],
+    })).toThrow();
+  });
+
+  it('rejects negative gutter_mm', () => {
+    expect(() => templateSchema.parse({
+      key: 'test', faceCount: 1,
+      grid: { columns: 6, margin_mm: 0, gutter_mm: -1 },
+      blocks: [],
+    })).toThrow();
+  });
+
+  it('rejects area.colSpan: 0', () => {
+    expect(() => templateSchema.parse({
+      key: 'test', faceCount: 1,
+      grid: { columns: 6, margin_mm: 0, gutter_mm: 0 },
+      blocks: [{ index: 0, kind: 'free', area: { col: 1, colSpan: 0, row: 1 } }],
     })).toThrow();
   });
 });

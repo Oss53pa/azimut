@@ -35,42 +35,23 @@ describe('T-2.7 renderIsoView', () => {
     expect(result.findings[0]?.code).toBe('LAYOUT.ISO_LEVEL_NOT_FOUND');
   });
 
-  it('renders single level as valid SVG', () => {
+  it('renders single level with floor and wall polygons', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.svg).toContain('<svg');
     expect(result.value.svg).toContain('</svg>');
+    expect(result.value.svg).toContain('<polygon');
+    expect(result.value.svg).toContain('tok-floor');
+    expect(result.value.svg.includes('tok-wall-f') || result.value.svg.includes('tok-wall-s')).toBe(true);
   });
 
   it('renders multiple levels stacked', () => {
-    const result = renderIsoView(
-      refMultilevel,
-      ['lvl-ml-rdc', 'lvl-ml-r1'],
-      defaultOptions,
-    );
+    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc', 'lvl-ml-r1'], defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.svg).toContain('<svg');
-    const polygonCount = (result.value.svg.match(/<polygon/g) ?? []).length;
-    expect(polygonCount).toBeGreaterThan(1);
-  });
-
-  it('includes floor top polygons', () => {
-    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    expect(result.value.svg).toContain('<polygon');
-    expect(result.value.svg).toContain('tok-floor');
-  });
-
-  it('includes wall polygons for volumes with height', () => {
-    const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
-    expect(result.ok).toBe(true);
-    if (!result.ok) return;
-    const hasWallFront = result.value.svg.includes('tok-wall-f');
-    const hasWallSide = result.value.svg.includes('tok-wall-s');
-    expect(hasWallFront || hasWallSide).toBe(true);
+    expect((result.value.svg.match(/<polygon/g) ?? []).length).toBeGreaterThan(1);
   });
 
   it('includes node circles when show_nodes is true', () => {
@@ -343,5 +324,62 @@ describe('renderIsoView — edge-case geometry', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.svg).not.toContain('opacity=');
+  });
+
+  it('empty levelIds array produces ISO_EMPTY_LEVELS with level_count 0', () => {
+    const result = renderIsoView(refMultilevel, [], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.length).toBe(1);
+    expect(result.warnings[0]?.code).toBe('LAYOUT.ISO_EMPTY_LEVELS');
+    expect(result.warnings[0]?.params).toHaveProperty('level_count', 0);
+  });
+
+  it('same-ordinal levels sort deterministically by id', () => {
+    const sameOrdinalSite = {
+      ...refMultilevel,
+      levels: [
+        { id: 'lvl-b', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'B', ordinal: 0, elevation_m: 0 },
+        { id: 'lvl-a', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'A', ordinal: 0, elevation_m: 0 },
+      ],
+      footprints: [
+        { id: 'fp-a', org_id: 'org-test-001', level_id: 'lvl-a', kind: 'floor', geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 }, { x_m: 5, y_m: 5 }, { x_m: 0, y_m: 5 }] } },
+        { id: 'fp-b', org_id: 'org-test-001', level_id: 'lvl-b', kind: 'floor', geometry: { vertices: [{ x_m: 10, y_m: 0 }, { x_m: 15, y_m: 0 }, { x_m: 15, y_m: 5 }, { x_m: 10, y_m: 5 }] } },
+      ],
+      volumes: [
+        { id: 'vol-a', org_id: 'org-test-001', footprint_id: 'fp-a', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
+        { id: 'vol-b', org_id: 'org-test-001', footprint_id: 'fp-b', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
+      ],
+      graph: { ...refMultilevel.graph, nodes: [], edges: [] },
+    };
+    // Provide level IDs in both orders — result must be identical
+    const r1 = renderIsoView(sameOrdinalSite, ['lvl-b', 'lvl-a'], defaultOptions);
+    const r2 = renderIsoView(sameOrdinalSite, ['lvl-a', 'lvl-b'], defaultOptions);
+    expect(r1).toStrictEqual(r2);
+  });
+
+  it('overlapping footprints on same level produce GEOM.FOOTPRINTS_OVERLAP warning', () => {
+    const overlapSite = {
+      ...refMultilevel,
+      levels: [
+        { id: 'lvl-ol', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'Overlap', ordinal: 0, elevation_m: 0 },
+      ],
+      footprints: [
+        { id: 'fp-1', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'floor', geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 }] } },
+        { id: 'fp-2', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'floor', geometry: { vertices: [{ x_m: 5, y_m: 5 }, { x_m: 15, y_m: 5 }, { x_m: 15, y_m: 15 }, { x_m: 5, y_m: 15 }] } },
+      ],
+      volumes: [
+        { id: 'vol-1', org_id: 'org-test-001', footprint_id: 'fp-1', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
+        { id: 'vol-2', org_id: 'org-test-001', footprint_id: 'fp-2', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
+      ],
+      graph: { ...refMultilevel.graph, nodes: [], edges: [] },
+    };
+    const result = renderIsoView(overlapSite, ['lvl-ol'], defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const overlap = result.warnings.find((w) => w.code === 'GEOM.FOOTPRINTS_OVERLAP');
+    expect(overlap).toBeDefined();
+    expect(overlap?.params).toHaveProperty('footprint_a', 'fp-1');
+    expect(overlap?.params).toHaveProperty('footprint_b', 'fp-2');
   });
 });

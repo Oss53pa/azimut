@@ -50,6 +50,7 @@ describe('auditCoverage', () => {
       expect(result.value.coverage_ratio).toBe(1);
       expect(result.value.uncovered_points).toHaveLength(0);
       expect(result.value.unused_supports).toHaveLength(0);
+      expect(Array.isArray(result.warnings)).toBe(true);
     }
   });
 
