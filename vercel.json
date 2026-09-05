@@ -3,5 +3,5 @@
   "buildCommand": "pnpm build",
   "outputDirectory": "apps/studio/dist",
   "installCommand": "pnpm install",
-  "framework": "vite"
+  "framework": null
 }
