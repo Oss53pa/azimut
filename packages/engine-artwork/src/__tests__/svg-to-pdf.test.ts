@@ -387,4 +387,13 @@ describe('renderSvgToPage', () => {
     const { bytes } = await renderAndExtract(svg);
     expect(bytes.length).toBeGreaterThan(0);
   });
+
+  it('renders nested g groups with composed transforms', async () => {
+    const svg = '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="translate(10,10)"><g transform="scale(2)">' +
+      `<rect x="0" y="0" width="20" height="10" fill="${ACCENT}" />` +
+      '</g></g></svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
 });

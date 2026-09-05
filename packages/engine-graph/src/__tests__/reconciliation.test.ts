@@ -386,5 +386,14 @@ describe('T-1.14 reconciliation report', () => {
       );
       expect(orient).toHaveLength(0);
     });
+
+    it('flags azimuth outside non-wrapping range (lo <= hi path)', () => {
+      const sv: SurveyedSupport[] = [{ id: 'sup-hall', node_id: 'n-ml-hall', azimuth_deg: 270, width_m: 0.6, height_m: 1.2 }];
+      const ex: ExpectedSupport[] = [{ node_id: 'n-ml-hall', min_azimuth_deg: 90, max_azimuth_deg: 180, min_width_m: 0.4, min_height_m: 0.8 }];
+      const result = reconcile(refMultilevel, stdProfile, sv, ex, 5);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.orientation_count).toBe(1);
+    });
   });
 });
