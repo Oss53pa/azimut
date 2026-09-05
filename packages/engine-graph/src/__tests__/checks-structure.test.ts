@@ -62,6 +62,13 @@ describe('crossLevelWithoutVlFindings', () => {
     const sorted = [...ids].sort();
     expect(ids).toEqual(sorted);
   });
+
+  it('edge referencing orphan node is treated as cross-level', () => {
+    const site: SiteData = { ...refMinimal, graph: { ...refMinimal.graph,
+      edges: [...refMinimal.graph.edges, { id: 'e-orphan', org_id: 'org-test-001', from_node_id: 'n-nonexistent', to_node_id: 'n-entrance', width_m: 2, slope_pct: 0, accessible: true, direction: 'both' as const, evacuation_route: false, length_m: 0 }] } };
+    const findings = crossLevelWithoutVlFindings(site);
+    expect(findings.some((f) => f.entity?.id === 'e-orphan')).toBe(true);
+  });
 });
 
 describe('multiLevelWithoutAccessibleVlFindings', () => {
