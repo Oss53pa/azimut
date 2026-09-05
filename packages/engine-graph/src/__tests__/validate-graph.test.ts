@@ -258,6 +258,20 @@ describe('validateGraph', () => {
     expect(deadEnds.some((f) => f.entity?.id === 'n-j')).toBe(true);
   });
 
+  it('destination_access at dead end is justified', () => {
+    const site = makeSite({
+      graph: {
+        nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction'), mkNode('n-da', 'destination_access')],
+        edges: [mkEdge('e-1', 'n-entrance', 'n-j'), mkEdge('e-2', 'n-j', 'n-da')],
+        vertical_links: [],
+      },
+      destinations: [], destination_names: [],
+    });
+    const result = validateGraph(site);
+    const findings = result.ok ? result.warnings : result.findings;
+    expect(findingsWithCode(findings, 'GRAPH.DEAD_END_UNJUSTIFIED').some((f) => f.entity?.id === 'n-da')).toBe(false);
+  });
+
   describe('determinism (INV-4)', () => {
     it('produces identical findings on two runs', () => {
       const r1 = validateGraph(refBroken);

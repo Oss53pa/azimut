@@ -220,6 +220,13 @@ describe('createBuildKioskPackageHandler', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('non-string created_at falls back to auto-generated timestamp', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
+    const result = await handler(makeJob({ package_id: 'pkg-ts-num', created_at: 42 }));
+    expect(result['package_id']).toBe('pkg-ts-num');
+    expect(result['verified']).toBe(true);
+  });
+
   it('multiple artifacts produce a larger package', async () => {
     const artifacts = [
       makeArtifact({ id: 'art-1', path: 'artworks/p1.svg' }),

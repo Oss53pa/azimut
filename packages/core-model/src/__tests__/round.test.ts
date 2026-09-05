@@ -160,6 +160,24 @@ describe('roundSvg — negative-to-zero boundary', () => {
   });
 });
 
+describe('roundMm — exact half-point boundaries', () => {
+  it('roundMm(-0.5) yields positive zero (JS half-to-positive-infinity)', () => {
+    const result = roundMm(-0.5);
+    expect(result).toBe(0);
+    expect(Object.is(result, 0)).toBe(true);
+  });
+});
+
+describe('roundSvg — exact 3-decimal half-points', () => {
+  it('rounds positive half-point 1.2345 up to 1.235', () => {
+    expect(roundSvg(1.2345)).toBe(1.235);
+  });
+
+  it('rounds negative half-point -1.2345 down to -1.235', () => {
+    expect(roundSvg(-1.2345)).toBe(-1.235);
+  });
+});
+
 describe('formatSvg — negative-to-zero', () => {
   it('serialises small negative as "0" (not "-0")', () => {
     expect(formatSvg(-0.0004)).toBe('0');
