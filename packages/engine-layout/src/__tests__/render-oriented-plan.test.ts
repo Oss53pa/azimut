@@ -298,6 +298,8 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
 
   it.each([
     ['stair', '5'],
+    ['elevator', '5'],
+    ['escalator', '5'],
     ['security_post', '5'],
     ['destination_access', '4'],
   ] as const)('nodeRadius for %s renders r="%s"', (kind, expectedR) => {

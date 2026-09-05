@@ -323,6 +323,17 @@ describe('validateGeometry', () => {
     expect(result.warnings.some((f) => f.code === 'GEOM.POLYGON_DEGENERATE')).toBe(false);
   });
 
+  it('containment detected via second overlap check (small A inside large B)', () => {
+    // fp-aaa (small, sorted first) is inside fp-bbb (big), so vertsA[0] inside vertsB fires
+    const result = validateGeometry(siteWith([
+      fp('fp-aaa', [[5, 5], [15, 5], [15, 15], [5, 15]]),
+      fp('fp-bbb', [[0, 0], [20, 0], [20, 20], [0, 20]]),
+    ]));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((f) => f.code === 'GEOM.FOOTPRINTS_OVERLAP')).toBe(true);
+  });
+
   it('containment detected via third overlap check (large A contains small B)', () => {
     // fp-a (big square) sorted first alphabetically contains fp-b (small square)
     // Edges don't cross, vertsA[0]=(0,0) not inside vertsB, but vertsB[0]=(5,5) inside vertsA
