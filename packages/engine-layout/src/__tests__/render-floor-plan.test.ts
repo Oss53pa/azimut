@@ -254,6 +254,17 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(circles.length).toBeGreaterThanOrEqual(1);
   });
 
+  it.each([
+    ['elevator', '5'],
+    ['stair', '5'],
+  ] as const)('nodeRadius for %s renders r="%s"', (kind, expectedR) => {
+    const site = siteWithNode(`n-${kind}-test`, kind, { x_m: 12, y_m: 12 }, kind);
+    const result = renderFloorPlan(site, 'lvl-ml-rdc', { ...defaultOptions, show_destinations: false, show_edges: false });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain(`r="${expectedR}"`);
+  });
+
   it('destination sort tiebreaks on id when display_priority is equal', () => {
     const site = {
       ...refMultilevel,

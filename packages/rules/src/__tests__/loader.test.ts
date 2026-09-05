@@ -384,4 +384,15 @@ describe('resolveRule', () => {
     const miss = resolveRule(loaded.value, 'R1', { sectorKey: 'retail' });
     expect(miss.ok).toBe(false);
   });
+
+  it('requires all scope fields to match (multi-field)', () => {
+    const pack = JSON.stringify({ key: 'test', version: '1.0', jurisdiction: 'FR', effective_from: '2024-01-01', source_ref: 'Ref',
+      rules: [{ code: 'R1', scope: { supportRegistry: 'wayfinding', context: 'indoor' }, params: { v: 50 }, source_ref: 'E' }] });
+    const loaded = loadRulesPack(pack);
+    if (!loaded.ok) throw new Error('pack should load');
+    const hit = resolveRule(loaded.value, 'R1', { supportRegistry: 'wayfinding', context: 'indoor' });
+    expect(hit.ok).toBe(true);
+    const miss2 = resolveRule(loaded.value, 'R1', { supportRegistry: 'wayfinding', context: 'outdoor' });
+    expect(miss2.ok).toBe(false);
+  });
 });
