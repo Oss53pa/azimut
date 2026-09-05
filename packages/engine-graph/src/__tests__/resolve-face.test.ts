@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { resolveFaceContent } from '../resolve-face.js';
+import { resolveFaceContent, bearingToCardinal } from '../resolve-face.js';
 import { refMultilevel } from '@azimut/testkit';
 import type {
   FaceTemplate,
@@ -385,6 +385,11 @@ describe('T-2.3 resolveFaceContent', () => {
     }
   });
 
+  it('bearingToCardinal returns N for co-located nodes', () => {
+    const n = refMultilevel.graph.nodes[0] as typeof refMultilevel.graph.nodes[0];
+    expect(bearingToCardinal(n, n)).toBe('N');
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = resolveFaceContent(refMultilevel, tpl, 'n-ml-hall', stdProfile);
@@ -393,4 +398,3 @@ describe('T-2.3 resolveFaceContent', () => {
     });
   });
 });
-
