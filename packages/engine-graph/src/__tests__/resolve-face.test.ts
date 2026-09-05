@@ -365,6 +365,26 @@ describe('T-2.3 resolveFaceContent', () => {
     });
   });
 
+  describe('pass-through block kinds', () => {
+    it.each(['map', 'logo', 'emergency_info'] as const)('%s block resolves to its type', (kind) => {
+      const result = resolveFaceContent(refMultilevel, singleBlockTpl(kind, {}), 'n-ml-hall', stdProfile);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(result.value.blocks[0]?.content.type).toBe(kind);
+    });
+  });
+
+  it('self-route destination yields null direction', () => {
+    const result = resolveFaceContent(refMultilevel, tpl, 'n-ml-dest-rdc', stdProfile);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const dirBlock = result.value.blocks.find((b) => b.content.type === 'destination_list');
+    if (dirBlock?.content.type === 'destination_list') {
+      const selfDest = dirBlock.content.entries.find((e) => e.destination_id === 'dest-ml-rdc');
+      expect(selfDest?.direction).toBeNull();
+    }
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const r1 = resolveFaceContent(refMultilevel, tpl, 'n-ml-hall', stdProfile);
