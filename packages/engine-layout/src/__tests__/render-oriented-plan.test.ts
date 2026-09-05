@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { renderOrientedPlan } from '../render-oriented-plan.js';
 import type { OrientedPlanOptions, OrientedPlanTheme } from '../render-oriented-plan.js';
 import { refMultilevel } from '@azimut/testkit';
+import type { GraphNode, Destination } from '@azimut/core-model';
 
 const theme: OrientedPlanTheme = {
   background: 'tok-bg',
@@ -268,5 +269,59 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
     // SVG should render with the viewer marker only
     expect(result.value).toContain('tok-marker');
     expect(result.value).toContain('<circle');
+  });
+
+  it('node radius differs by kind (entrance > junction)', () => {
+    const mkNode = (id: string, kind: GraphNode['kind']): GraphNode => ({
+      id, org_id: 'org-test-001', level_id: 'lvl-ml-rdc',
+      kind, label: id, position: { x_m: 10 + Math.random() * 5, y_m: 10 },
+    });
+    const site = {
+      ...refMultilevel,
+      graph: {
+        ...refMultilevel.graph,
+        nodes: [mkNode('n-ent', 'entrance'), mkNode('n-junc', 'junction')],
+        edges: [],
+      },
+      footprints: refMultilevel.footprints.filter((f) => f.level_id === 'lvl-ml-rdc'),
+      destinations: [],
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', {
+      ...defaultOptions, show_destinations: false, show_edges: false,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // entrance → r=6, junction → r=3
+    expect(result.value).toContain('r="6"');
+    expect(result.value).toContain('r="3"');
+  });
+
+  it('destination sort tiebreaker uses id when priorities match', () => {
+    const nodeA = {
+      id: 'n-tie-a', org_id: 'org-test-001', level_id: 'lvl-ml-rdc',
+      kind: 'destination_access' as const, label: 'A', position: { x_m: 15, y_m: 12 },
+    };
+    const nodeB = {
+      id: 'n-tie-b', org_id: 'org-test-001', level_id: 'lvl-ml-rdc',
+      kind: 'destination_access' as const, label: 'B', position: { x_m: 25, y_m: 12 },
+    };
+    const mkDest = (id: string, nodeId: string, name: string): Destination => ({
+      id, org_id: 'org-test-001', footprint_id: 'fp-1', node_id: nodeId,
+      category_id: 'cat-1', occupant_name: name, occupancy_status: 'occupied', display_priority: 5,
+    });
+    const site = {
+      ...refMultilevel,
+      graph: { ...refMultilevel.graph, nodes: [...refMultilevel.graph.nodes, nodeA, nodeB], edges: [] },
+      destinations: [mkDest('dest-z', 'n-tie-b', 'Zeta'), mkDest('dest-a', 'n-tie-a', 'Alpha')],
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const idxA = result.value.indexOf('Alpha');
+    const idxZ = result.value.indexOf('Zeta');
+    expect(idxA).toBeGreaterThan(-1);
+    expect(idxZ).toBeGreaterThan(-1);
+    // dest-a (id < dest-z) comes first in SVG output
+    expect(idxA).toBeLessThan(idxZ);
   });
 });

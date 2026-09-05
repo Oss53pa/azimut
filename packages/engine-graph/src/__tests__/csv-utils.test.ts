@@ -262,4 +262,19 @@ describe('detectColumns', () => {
     expect(result).not.toBeNull();
     expect(result).toEqual({});
   });
+
+  it('matches whitespace-padded header values via trim', () => {
+    const aliases = { name: ['name', 'nom'], code: ['code'] };
+    const result = detectColumns([' Name ', '  Code  '], aliases, ['name', 'code']);
+    expect(result).not.toBeNull();
+    expect(result).toEqual({ name: ' Name ', code: '  Code  ' });
+  });
+});
+
+describe('parseCsvLine — complex quoting', () => {
+  it('handles separator inside quoted field with escaped quotes', () => {
+    // Field: a;"b";c  (with escaped quotes inside)
+    const result = parseCsvLine('"a;""b"";c";d', ';');
+    expect(result).toEqual(['a;"b";c', 'd']);
+  });
 });

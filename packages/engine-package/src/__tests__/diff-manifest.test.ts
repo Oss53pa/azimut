@@ -223,4 +223,18 @@ describe('diffManifest', () => {
     const r2 = diffManifest(m1, m2);
     expect(r1).toStrictEqual(r2);
   });
+
+  it('matched_count equals artifact count for identical multi-artifact manifests', () => {
+    const inputs = [
+      makeInput({ id: 'art-1', path: 'a.pdf' }),
+      makeInput({ id: 'art-2', path: 'b.pdf', content: textEncoder.encode('other') }),
+      makeInput({ id: 'art-3', path: 'c.pdf', content: textEncoder.encode('third') }),
+    ];
+    const m = buildManifest(inputs);
+    const result = diffManifest(m, m);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.matched_count).toBe(3);
+    expect(result.value.divergent_count).toBe(0);
+  });
 });

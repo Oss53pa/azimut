@@ -168,4 +168,37 @@ describe('RouteCache', () => {
     cache.computeOrGet(refMinimal, profile2, entrance.id, dest.id);
     expect(cache.size).toBe(2);
   });
+
+  it('recomputes when vertical_links change', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(1);
+    const modified = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        vertical_links: [
+          ...refMinimal.graph.vertical_links,
+          { id: 'vl-new', org_id: 'org-test-001', edge_id: 'e-fake', kind: 'elevator' as const, capacity: 8, accessible: true },
+        ],
+      },
+    };
+    cache.computeOrGet(modified, profile, entrance.id, dest.id);
+    // Hash changed → recomputed, still size 1
+    expect(cache.size).toBe(1);
+  });
+
+  it('invalidateForEdge works on second edge of multi-edge route', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    const r = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    // Use the last edge instead of the first
+    const lastEdge = r.value.edges[r.value.edges.length - 1];
+    if (!lastEdge) return;
+    cache.invalidateForEdge(lastEdge);
+    expect(cache.size).toBe(0);
+  });
 });

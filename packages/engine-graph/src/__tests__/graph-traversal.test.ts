@@ -168,4 +168,18 @@ describe('buildAdjacency — both endpoints unknown', () => {
     const fromHub = bfs(adj, 'hub');
     expect(fromHub.size).toBe(4);
   });
+
+  it('forward-only edge produces bidirectional adjacency (connectivity analysis)', () => {
+    const fwdEdge: Edge = {
+      ...edge('e-fwd', 'a', 'b'),
+      direction: 'forward',
+    };
+    const adj = buildAdjacency([node('a'), node('b')], [fwdEdge]);
+    // buildAdjacency ignores direction → both directions available
+    expect(adj.get('a')?.has('b')).toBe(true);
+    expect(adj.get('b')?.has('a')).toBe(true);
+    // BFS from 'b' can still reach 'a'
+    const fromB = bfs(adj, 'b');
+    expect(fromB.has('a')).toBe(true);
+  });
 });
