@@ -178,6 +178,35 @@ describe('createAuditSiteHandler', () => {
     expect(result['total_findings']).toBeDefined();
   });
 
+  it('collects directory validation findings when destinations are orphaned', async () => {
+    const site = {
+      ...refMinimal,
+      destinations: [{
+        id: 'd-orphan', org_id: 'org-test-001', footprint_id: 'fp-missing',
+        node_id: 'n-missing', category_id: 'cat-missing',
+        occupant_name: 'Ghost', occupancy_status: 'occupied' as const, display_priority: 0,
+      }],
+    };
+    const handler = createAuditSiteHandler({ site });
+    const result = await handler(makeJob());
+    const findings = result['findings'] as { code: string }[];
+    expect(findings.some((f) => f.code === 'GRAPH.DESTINATION_UNLINKED')).toBe(true);
+  });
+
+  it('collects geometry validation findings for degenerate footprint', async () => {
+    const site = {
+      ...refMinimal,
+      footprints: [{
+        id: 'fp-degen', org_id: 'org-test-001', level_id: refMinimal.levels[0]?.id ?? 'l1',
+        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }] }, kind: 'room' as const,
+      }],
+    };
+    const handler = createAuditSiteHandler({ site });
+    const result = await handler(makeJob());
+    const findings = result['findings'] as { code: string }[];
+    expect(findings.some((f) => f.code === 'GEOM.POLYGON_TOO_FEW_VERTICES')).toBe(true);
+  });
+
   it('is deterministic (INV-4)', async () => {
     const context: AuditSiteContext = { site: refMultilevel };
     const handler = createAuditSiteHandler(context);
