@@ -338,4 +338,23 @@ describe('T-1.7 validateDirectory', () => {
       expect(wrongKind.length).toBe(0);
     });
   });
+
+  describe('orphan name inflating active languages', () => {
+    it('orphan name with new lang causes DIRECTORY_NAME_MISSING for all destinations', () => {
+      const site: SiteData = {
+        ...refMultilevel,
+        destination_names: [
+          ...refMultilevel.destination_names,
+          { id: 'dn-orphan-de', org_id: 'org-test-001', destination_id: 'dest-nonexistent', lang: 'de' as never, value: 'Geist' },
+        ],
+      };
+      const result = validateDirectory(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const missingDe = result.warnings.filter(
+        (w) => w.code === 'GRAPH.DIRECTORY_NAME_MISSING' && w.params['lang'] === 'de',
+      );
+      expect(missingDe.length).toBe(site.destinations.length);
+    });
+  });
 });

@@ -296,6 +296,19 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
       'picto-fire-exit-safety',
     );
   });
+
+  it('multiple mutations on same safety pictogram produce multiple findings', () => {
+    const result = guardSafetyRegistry(refMinimal, [
+      { pictogram_id: 'picto-fire-exit-safety', field: 'svg_path', old_value: 'M0 0', new_value: 'M1 1' },
+      { pictogram_id: 'picto-fire-exit-safety', field: 'source', old_value: 'internal', new_value: 'external' },
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(2);
+    const fields = result.findings.map((f) => f.params['field']);
+    expect(fields).toContain('svg_path');
+    expect(fields).toContain('source');
+  });
 });
 
 describe('T-1.8 INV-3 guardSafetyDeletion', () => {

@@ -207,6 +207,17 @@ describe('scanForNetworkDependency', () => {
     expect(r2.ok).toBe(true);
   });
 
+  it('null byte at position 511 (last byte of 512-window) classifies as binary', () => {
+    const prefix = 'fetch("https://example.com/api")';
+    const padding = 'x'.repeat(511 - prefix.length);
+    const withBoundaryNull = prefix + padding + '\0more';
+    const artifacts = artifactMap({ 'boundary.js': withBoundaryNull });
+    const result = scanForNetworkDependency(artifacts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.clean_count).toBe(1);
+  });
+
   it('scans text when null byte is beyond position 512', () => {
     const prefix = 'fetch("https://example.com/api")';
     const padding = 'x'.repeat(520 - prefix.length);
