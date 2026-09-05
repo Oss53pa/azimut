@@ -335,6 +335,17 @@ describe('deriveDecisionPoints', () => {
     expect(result.ok).toBe(true);
   });
 
+  it('returns decision points sorted by node id', () => {
+    const mlProfile = getProfile(refMultilevel.travel_profiles, 0);
+    const result = deriveDecisionPoints(refMultilevel, mlProfile, refMultilevel.destinations);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const ids = result.value.map((dp) => dp.node_id);
+    expect(ids.length).toBeGreaterThan(1);
+    const sorted = [...ids].sort();
+    expect(ids).toEqual(sorted);
+  });
+
   it('excluded_edge_kinds reduces traversable edges and branch count', () => {
     const evacProfile = refMultilevel.travel_profiles.find((p) => p.key === 'evacuation');
     if (!evacProfile) return;

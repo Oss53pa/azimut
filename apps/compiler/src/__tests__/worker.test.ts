@@ -222,6 +222,42 @@ describe('processNextJob', () => {
     expect(job?.error).toBe('null');
   });
 
+  it('no-handler exhausts max_attempts through retry loop', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ kind: 'audit_site', max_attempts: 3 }));
+    const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
+    const opts = { queue, handlers: new Map<string, JobHandler>(), now: clock };
+
+    expect(await processNextJob(opts)).toBe(true);
+    const after1 = await queue.getJob('job-001');
+    expect(after1?.state).toBe('queued');
+    expect(after1?.attempts).toBe(1);
+
+    expect(await processNextJob(opts)).toBe(true);
+    expect(await processNextJob(opts)).toBe(true);
+
+    const final = await queue.getJob('job-001');
+    expect(final?.state).toBe('failed');
+    expect(final?.attempts).toBe(3);
+    expect(final?.error).toContain('No handler');
+
+    // Queue is now empty (job is terminal)
+    expect(await processNextJob(opts)).toBe(false);
+  });
+
+  it('handler throws object coerced via String()', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ max_attempts: 1 }));
+    const handler: JobHandler = async () => {
+      throw { code: 42 };
+    };
+    const handlers = new Map([['compile_artworks', handler]]);
+    await processNextJob({ queue, handlers, now: fixedClock(new Date()) });
+    const job = await queue.getJob('job-001');
+    expect(job?.state).toBe('failed');
+    expect(job?.error).toBe('[object Object]');
+  });
+
   it('captures thrown undefined as "undefined"', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ max_attempts: 1 }));

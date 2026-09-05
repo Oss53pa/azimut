@@ -296,6 +296,51 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
     expect(result.value).toContain('r="3"');
   });
 
+  it.each([
+    ['stair', '5'],
+    ['security_post', '5'],
+    ['destination_access', '4'],
+  ] as const)('nodeRadius for %s renders r="%s"', (kind, expectedR) => {
+    const node: GraphNode = {
+      id: 'n-test', org_id: 'org-test-001', level_id: 'lvl-ml-rdc',
+      kind, label: 'test', position: { x_m: 15, y_m: 12 },
+    };
+    const site = {
+      ...refMultilevel,
+      graph: { ...refMultilevel.graph, nodes: [node], edges: [] },
+      footprints: refMultilevel.footprints.filter((f) => f.level_id === 'lvl-ml-rdc'),
+      destinations: [],
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', {
+      ...defaultOptions, show_destinations: false, show_edges: false,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain(`r="${expectedR}"`);
+  });
+
+  it('escapes HTML entities in occupant_name', () => {
+    const node: GraphNode = {
+      id: 'n-esc', org_id: 'org-test-001', level_id: 'lvl-ml-rdc',
+      kind: 'destination_access', label: 'esc', position: { x_m: 15, y_m: 12 },
+    };
+    const dest: Destination = {
+      id: 'dest-esc', org_id: 'org-test-001', footprint_id: 'fp-1',
+      node_id: 'n-esc', category_id: 'cat-1', occupant_name: 'A & B <Corp>',
+      occupancy_status: 'occupied', display_priority: 5,
+    };
+    const site = {
+      ...refMultilevel,
+      graph: { ...refMultilevel.graph, nodes: [...refMultilevel.graph.nodes, node], edges: [] },
+      destinations: [dest],
+    };
+    const result = renderOrientedPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('A &amp; B &lt;Corp&gt;');
+    expect(result.value).not.toContain('A & B <Corp>');
+  });
+
   it('destination sort tiebreaker uses id when priorities match', () => {
     const nodeA = {
       id: 'n-tie-a', org_id: 'org-test-001', level_id: 'lvl-ml-rdc',

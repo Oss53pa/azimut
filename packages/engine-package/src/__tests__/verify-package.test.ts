@@ -186,6 +186,32 @@ describe('verifyPackage', () => {
     expect(result.findings.every((f) => f.params['actual'] === 'missing')).toBe(true);
   });
 
+  it('mixed missing and size mismatch in same verification', () => {
+    const inputs = [
+      makeInput({ id: 'art-gone', path: 'gone.pdf', content: textEncoder.encode('vanished') }),
+      makeInput({ id: 'art-sized', path: 'sized.pdf', content: textEncoder.encode('right content') }),
+    ];
+    const { manifest } = buildManifestAndContents(inputs);
+    const contents = new Map<string, Uint8Array>();
+    // art-gone is absent → missing branch
+    contents.set('art-sized', textEncoder.encode('right content'));
+    // Mutate manifest to wrong size for art-sized (checksum still matches)
+    const badManifest = {
+      ...manifest,
+      artifacts: manifest.artifacts.map((a) =>
+        a.id === 'art-sized' ? { ...a, size_bytes: a.size_bytes + 100 } : a,
+      ),
+    };
+    const result = verifyPackage(badManifest, contents);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(2);
+    const missing = result.findings.find((f) => f.entity?.id === 'art-gone');
+    const sized = result.findings.find((f) => f.entity?.id === 'art-sized');
+    expect(missing?.params['actual']).toBe('missing');
+    expect(sized?.params['actual_size']).toBeDefined();
+  });
+
   it('is deterministic (INV-4)', () => {
     const input = makeInput();
     const { manifest, contents } = buildManifestAndContents([input]);

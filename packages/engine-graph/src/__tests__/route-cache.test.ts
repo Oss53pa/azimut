@@ -229,6 +229,26 @@ describe('RouteCache', () => {
     expect(cache.size).toBe(1);
   });
 
+  it('recomputes when node level_id changes', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(1);
+    const modified = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        nodes: refMinimal.graph.nodes.map((n) => ({
+          ...n,
+          level_id: n.level_id + '-x',
+        })),
+      },
+    };
+    cache.computeOrGet(modified, profile, entrance.id, dest.id);
+    // Hash changed → recomputed, still size 1
+    expect(cache.size).toBe(1);
+  });
+
   it('invalidateForEdge works on second edge of multi-edge route', () => {
     if (!entrance || !dest) return;
     const cache = new RouteCache();

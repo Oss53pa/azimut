@@ -236,6 +236,41 @@ describe('manifestToJson', () => {
     expect(j1).toBe(j2);
   });
 
+  it('three duplicate paths produce two DUPLICATE_PATH findings', () => {
+    const inputs = [
+      makeInput({ id: 'art-1', path: 'same.pdf' }),
+      makeInput({ id: 'art-2', path: 'same.pdf' }),
+      makeInput({ id: 'art-3', path: 'same.pdf' }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const dupPath = result.findings.filter((f) => f.code === 'PACKAGE.DUPLICATE_PATH');
+    expect(dupPath.length).toBe(2);
+  });
+
+  it('manifestToJson with multiple artifacts preserves all fields', () => {
+    const inputs = [
+      makeInput({ id: 'art-1', kind: 'artwork_pdf', path: 'a.pdf' }),
+      makeInput({ id: 'art-2', kind: 'floor_plan', path: 'b.svg', content: textEncoder.encode('svg data') }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const json = manifestToJson(result.value);
+    const parsed = JSON.parse(json) as Record<string, unknown>;
+    const arts = parsed['artifacts'] as Record<string, unknown>[];
+    expect(arts).toHaveLength(2);
+    for (const art of arts) {
+      expect(art['id']).toBeDefined();
+      expect(art['kind']).toBeDefined();
+      expect(art['path']).toBeDefined();
+      expect(art['size_bytes']).toBeDefined();
+      expect(art['checksum']).toBeDefined();
+      expect(art['metadata']).toBeDefined();
+    }
+  });
+
   it('EMPTY_ARTIFACT warning index reflects sorted position', () => {
     const inputs = [
       makeInput({ id: 'art-z', kind: 'floor_plan', path: 'plans/z.svg', content: new Uint8Array(0) }),

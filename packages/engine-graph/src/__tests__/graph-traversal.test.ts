@@ -169,6 +169,16 @@ describe('buildAdjacency — both endpoints unknown', () => {
     expect(fromHub.size).toBe(4);
   });
 
+  it('bfs visits neighbor not keyed in adj map (skips its children)', () => {
+    // Manually build an adj map where 'x' is a neighbor of 'a' but not a key
+    const adj = new Map<string, Set<string>>();
+    adj.set('a', new Set(['x']));
+    const visited = bfs(adj, 'a');
+    expect(visited.size).toBe(2);
+    expect(visited.has('a')).toBe(true);
+    expect(visited.has('x')).toBe(true);
+  });
+
   it('forward-only edge produces bidirectional adjacency (connectivity analysis)', () => {
     const fwdEdge: Edge = {
       ...edge('e-fwd', 'a', 'b'),
