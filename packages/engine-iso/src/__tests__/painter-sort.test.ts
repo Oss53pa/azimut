@@ -150,6 +150,19 @@ describe('sortVolumesPainter — multi-vertex minXplusY', () => {
     expect(sorted[0]?.volume.id).toBe('v1');
   });
 
+  it('identical entries yield comparator 0 (same id, elevation, minXplusY)', () => {
+    const shared = fp('f-same', [{ x_m: 3, y_m: 3 }]);
+    const entries: VolumeEntry[] = [
+      { volume: vol('v-same', 'f-same', 0, 1), footprint: shared },
+      { volume: vol('v-same', 'f-same', 0, 1), footprint: shared },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted).toHaveLength(2);
+    // Both survive — comparator returning 0 keeps original order
+    expect(sorted[0]?.volume.id).toBe('v-same');
+    expect(sorted[1]?.volume.id).toBe('v-same');
+  });
+
   it('empty vertices returns Infinity sum → sorts last', () => {
     const entries: VolumeEntry[] = [
       { volume: vol('v-empty', 'f-empty', 0, 1), footprint: fp('f-empty', []) },

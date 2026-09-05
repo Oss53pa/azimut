@@ -318,6 +318,44 @@ describe('renderSvgToPage', () => {
     expect(bytes.length).toBeGreaterThan(0);
   });
 
+  it('rect with non-hex stroke (named color) skips borderColor', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<rect x="10" y="10" width="50" height="30" fill="none" stroke="red" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+    const header = new TextDecoder().decode(bytes.slice(0, 5));
+    expect(header).toBe('%PDF-');
+  });
+
+  it('text with named fill color falls back gracefully', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<text x="10" y="50" font-size="12" fill="blue">Named</text>' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('polygon with named fill color falls back gracefully', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<polygon points="10,10 50,50 10,50" fill="green" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('path with named fill color falls back gracefully', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M10 10 L50 50 L90 10 Z" fill="orange" />' +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
   it('two-value scale is deterministic (INV-4)', async () => {
     const svg =
       '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +

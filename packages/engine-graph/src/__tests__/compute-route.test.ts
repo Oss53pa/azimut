@@ -252,7 +252,7 @@ describe('computeRoute', () => {
     expect(rev.ok).toBe(true);
   });
 
-  it('ignores edges referencing phantom nodes not in graph', () => {
+  it('ignores edges with phantom to_node_id not in graph', () => {
     const phantomSite: SiteData = {
       ...refMinimal,
       graph: {
@@ -272,6 +272,23 @@ describe('computeRoute', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value.path).not.toContain('n-ghost');
+  });
+
+  it('ignores edges with phantom from_node_id not in graph', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: [...refMinimal.graph.edges, {
+          id: 'e-phantom-from', org_id: 'org-test-001',
+          from_node_id: 'n-ghost', to_node_id: 'n-junction',
+          length_m: 1, width_m: 2, slope_pct: 0,
+          accessible: true, direction: 'both' as const, evacuation_route: false,
+        }],
+      },
+    };
+    const result = computeRoute(site, stdProfile, 'n-entrance', 'n-dest-a');
+    expect(result.ok).toBe(true);
   });
 });
 
