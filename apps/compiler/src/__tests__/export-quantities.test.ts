@@ -210,4 +210,24 @@ describe('createExportQuantitiesHandler', () => {
     const result = await handler(job);
     expect(result['total_supports']).toBe(0);
   });
+
+  it('filters support with numeric id', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [{ id: 123, node_id: 'n-entrance', support_type_key: 'directional' }],
+      lang: 'fr',
+    });
+    const result = await handler(job);
+    expect(result['total_supports']).toBe(0);
+  });
+
+  it('filters nested array items in supports', async () => {
+    const handler = createExportQuantitiesHandler(context);
+    const job = makeJob({
+      supports: [['sup-1', 'n-entrance', 'directional']],
+      lang: 'fr',
+    });
+    const result = await handler(job);
+    expect(result['total_supports']).toBe(0);
+  });
 });

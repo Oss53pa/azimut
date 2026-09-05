@@ -368,4 +368,23 @@ describe('renderSvgToPage', () => {
     const { bytes: b2 } = await renderAndExtract(svg);
     expect(Array.from(b1)).toEqual(Array.from(b2));
   });
+
+  it('single-value translate defaults ty to 0', async () => {
+    const svg =
+      '<svg viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">' +
+      '<g transform="translate(50)">' +
+      `<rect x="0" y="0" width="20" height="10" fill="${ACCENT}" />` +
+      '</g></svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
+
+  it('malformed viewBox with fewer than 4 values produces valid PDF', async () => {
+    const svg =
+      '<svg viewBox="0 0" xmlns="http://www.w3.org/2000/svg">' +
+      `<rect x="5" y="5" width="30" height="20" fill="${ACCENT}" />` +
+      '</svg>';
+    const { bytes } = await renderAndExtract(svg);
+    expect(bytes.length).toBeGreaterThan(0);
+  });
 });

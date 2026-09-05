@@ -309,4 +309,27 @@ describe('D4.2 — importOccupancy', () => {
     if (!result.ok) return;
     expect(result.value.rejected).toBe(1);
   });
+
+  it('header-only CSV yields zero-row success', () => {
+    const content = header;
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.total_rows).toBe(0);
+    expect(result.value.imported).toBe(0);
+    expect(result.value.pending).toBe(0);
+    expect(result.value.rejected).toBe(0);
+  });
+
+  it('warnings propagated to top-level result', () => {
+    const content = csv([
+      header,
+      'Unknown Unit;Unknown Bldg;Unknown Lvl;occupied;Corp;office;Bureau;Office;2026-01-15',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.pending).toBe(1);
+    expect(result.warnings.length).toBeGreaterThan(0);
+  });
 });

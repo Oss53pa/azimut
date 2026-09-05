@@ -235,4 +235,18 @@ describe('manifestToJson', () => {
     const j2 = manifestToJson(r.value);
     expect(j1).toBe(j2);
   });
+
+  it('EMPTY_ARTIFACT warning index reflects sorted position', () => {
+    const inputs = [
+      makeInput({ id: 'art-z', kind: 'floor_plan', path: 'plans/z.svg', content: new Uint8Array(0) }),
+      makeInput({ id: 'art-a', kind: 'artwork_pdf', path: 'artworks/a.pdf' }),
+    ];
+    const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // After sorting by kind then id: artwork_pdf (art-a) at 0, floor_plan (art-z) at 1
+    const emptyWarning = result.warnings.find((w) => w.code === 'PACKAGE.EMPTY_ARTIFACT');
+    expect(emptyWarning).toBeDefined();
+    expect(emptyWarning?.params['index']).toBe(1);
+  });
 });

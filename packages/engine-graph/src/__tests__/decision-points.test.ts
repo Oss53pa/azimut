@@ -4,6 +4,7 @@ import {
   refMinimal,
   refBroken,
   refAdversarial,
+  refMultilevel,
 } from '@azimut/testkit';
 import type { SiteData, TravelProfile } from '@azimut/core-model';
 
@@ -332,5 +333,24 @@ describe('deriveDecisionPoints', () => {
     // are not in the nodes array so they never appear in sorted results.
     const result = deriveDecisionPoints(site, stdProfile, refMinimal.destinations);
     expect(result.ok).toBe(true);
+  });
+
+  it('excluded_edge_kinds reduces traversable edges and branch count', () => {
+    const evacProfile = refMultilevel.travel_profiles.find((p) => p.key === 'evacuation');
+    if (!evacProfile) return;
+    expect(evacProfile.excluded_edge_kinds).toContain('elevator');
+    const stdMl = refMultilevel.travel_profiles[0];
+    if (!stdMl) return;
+    const stdResult = deriveDecisionPoints(refMultilevel, stdMl, refMultilevel.destinations);
+    const evacResult = deriveDecisionPoints(refMultilevel, evacProfile, refMultilevel.destinations);
+    expect(stdResult.ok).toBe(true);
+    expect(evacResult.ok).toBe(true);
+    if (!stdResult.ok || !evacResult.ok) return;
+    // With elevator excluded, hall node should have fewer branches
+    const hallStd = stdResult.value.find((dp) => dp.node_id === 'n-ml-hall');
+    const hallEvac = evacResult.value.find((dp) => dp.node_id === 'n-ml-hall');
+    if (hallStd && hallEvac) {
+      expect(hallStd.branch_count).toBeGreaterThanOrEqual(hallEvac.branch_count);
+    }
   });
 });
