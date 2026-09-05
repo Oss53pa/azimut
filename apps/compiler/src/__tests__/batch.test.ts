@@ -5,6 +5,15 @@ import { MemoryQueue } from '../queue.js';
 import type { JobHandler } from '../worker.js';
 import type { Job } from '../job.js';
 
+function makeQueuedJob(itemId: string, overrides?: Partial<Job>): Job {
+  return {
+    id: `compile_artworks-${itemId}`, org_id: 'org-001', kind: 'compile_artworks',
+    state: 'queued', payload: { item_id: itemId }, result: null, attempts: 0,
+    max_attempts: 3, created_at: new Date('2024-01-01T00:00:00Z'),
+    started_at: null, finished_at: null, error: null, ...overrides,
+  };
+}
+
 function fixedClock(start: Date): () => Date {
   let tick = start.getTime();
   return () => new Date(tick++);
@@ -310,26 +319,9 @@ describe('T-2.16 runBatch', () => {
   it('skips pre-existing queued jobs without re-creating them', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ ok: true });
-
-    const queuedJob: Job = {
-      id: 'compile_artworks-sup-q',
-      org_id: 'org-001',
-      kind: 'compile_artworks',
-      state: 'queued',
-      payload: { item_id: 'sup-q' },
-      result: null,
-      attempts: 0,
-      max_attempts: 3,
-      created_at: new Date('2024-01-01T00:00:00Z'),
-      started_at: null,
-      finished_at: null,
-      error: null,
-    };
-    await queue.enqueue(queuedJob);
-
+    await queue.enqueue(makeQueuedJob('sup-q'));
     const items: BatchItem[] = [{ item_id: 'sup-q', payload: {} }];
     const report = await runBatch(items, makeOptions(queue, handler));
-    // The pre-existing queued job should be processed (not re-created)
     expect(report.created).toBe(0);
     expect(report.succeeded).toBe(1);
   });
@@ -379,5 +371,16 @@ describe('T-2.16 runBatch', () => {
     expect(auditJob).not.toBeNull();
     expect(compileJob?.kind).toBe('compile_artworks');
     expect(auditJob?.kind).toBe('audit_site');
+  });
+
+  it('pre-existing queued job that fails reports failure', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => { throw new Error('boom'); };
+    await queue.enqueue(makeQueuedJob('sup-fail', { max_attempts: 1 }));
+    const items: BatchItem[] = [{ item_id: 'sup-fail', payload: {} }];
+    const report = await runBatch(items, makeOptions(queue, handler));
+    expect(report.created).toBe(0);
+    expect(report.failed).toBe(1);
+    expect(report.results[0]?.error).toBe('boom');
   });
 });
