@@ -220,6 +220,44 @@ describe('T-2.14 validateProofs', () => {
     expect(ids[0]).toBe('face-A');
   });
 
+  it('superseded proof with approvals produces no finding', () => {
+    const proofs = [
+      makeProof({ id: 'proof-001', status: 'superseded', face_id: 'f1', version: 1 }),
+    ];
+    const approvals = [
+      makeApproval({ id: 'a1', proof_id: 'proof-001' }),
+    ];
+    const result = validateProofs(proofs, approvals);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.superseded).toBe(1);
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('multiple proofs same face different versions produce no duplicate finding', () => {
+    const proofs = [
+      makeProof({ id: 'p1', face_id: 'face-A', version: 1 }),
+      makeProof({ id: 'p2', face_id: 'face-A', version: 2 }),
+      makeProof({ id: 'p3', face_id: 'face-A', version: 3 }),
+    ];
+    const result = validateProofs(proofs, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings).toHaveLength(0);
+  });
+
+  it('unsorted proof ids produce deterministic finding order', () => {
+    const proofs = [
+      makeProof({ id: 'p-z', face_id: 'face-A', version: 1, status: 'approved' }),
+      makeProof({ id: 'p-a', face_id: 'face-B', version: 1, status: 'rejected' }),
+    ];
+    const result = validateProofs(proofs, []);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.entity?.id).toBe('p-a');
+    expect(result.findings[1]?.entity?.id).toBe('p-z');
+  });
+
   it('superseded proof without approvals produces no finding', () => {
     const proofs = [
       makeProof({ id: 'proof-001', status: 'superseded', face_id: 'f1', version: 1 }),

@@ -343,6 +343,20 @@ describe('T-2.16 runBatch', () => {
     expect(job?.org_id).toBe('org-001');
   });
 
+  it('duplicate item_ids: second is silently absorbed', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+    const items: BatchItem[] = [
+      { item_id: 'dup', payload: { v: 1 } },
+      { item_id: 'dup', payload: { v: 2 } },
+    ];
+    const report = await runBatch(items, makeOptions(queue, handler));
+    expect(report.total).toBe(2);
+    expect(report.created).toBe(1);
+    expect(report.results).toHaveLength(1);
+    expect(report.results[0]?.status).toBe('succeeded');
+  });
+
   it('job IDs include the kind to prevent cross-kind collisions', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ ok: true });

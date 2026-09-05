@@ -242,3 +242,91 @@ describe('D11 — buildFileName truncation symmetry', () => {
     }
   });
 });
+
+describe('D11 — edge cases', () => {
+  it('does not truncate a filename exactly at max length (120)', () => {
+    // A_B_C_D_{R*103}_V1_F.PDF  →  17 + 103 = 120
+    const result = buildFileName({
+      site_code: 'A',
+      building: 'B',
+      level: 'C',
+      type_code: 'D',
+      reference: 'R'.repeat(103),
+      version: 1,
+      face: 'F',
+      extension: 'pdf',
+    });
+    expect(result.length).toBe(120);
+    expect(result).not.toContain('~');
+  });
+
+  it('truncates a filename one character over max length', () => {
+    // A_B_C_D_{R*104}_V1_F.PDF  →  17 + 104 = 121  →  truncated to 120
+    const result = buildFileName({
+      site_code: 'A',
+      building: 'B',
+      level: 'C',
+      type_code: 'D',
+      reference: 'R'.repeat(104),
+      version: 1,
+      face: 'F',
+      extension: 'pdf',
+    });
+    expect(result.length).toBe(120);
+    expect(result).toContain('~');
+  });
+
+  it('treats multi-dot extension as a single token', () => {
+    const result = buildFileName({
+      site_code: 'X',
+      building: 'Y',
+      level: 'Z',
+      type_code: 'DIR',
+      reference: 'R-01',
+      version: 1,
+      face: 'F1',
+      extension: 'v2.svg',
+    });
+    expect(result).toBe('X_Y_Z_DIR_R-01_V1_F1.V2.SVG');
+  });
+
+  it('produces a trailing dot when extension is empty', () => {
+    const result = buildFileName({
+      site_code: 'X',
+      building: 'Y',
+      level: 'Z',
+      type_code: 'DIR',
+      reference: 'R-01',
+      version: 1,
+      face: 'F1',
+      extension: '',
+    });
+    expect(result).toBe('X_Y_Z_DIR_R-01_V1_F1.');
+  });
+
+  it('strips dot-prefix in buildArchiveName via sanitization', () => {
+    const result = buildArchiveName({
+      site_code: '.hidden',
+      building: 'B',
+      level: 'L1',
+      version: 1,
+      extension: 'zip',
+    });
+    expect(result).toBe('HIDDEN_B_L1_V1.ZIP');
+    expect(result[0]).not.toBe('.');
+  });
+
+  it('transliterates accented characters end-to-end', () => {
+    const result = buildFileName({
+      site_code: 'CPL',
+      building: 'étage',
+      level: 'rdc',
+      type_code: 'DIR',
+      reference: 'café-01',
+      version: 1,
+      face: 'F1',
+      extension: 'svg',
+    });
+    expect(result).toBe('CPL_ETAGE_RDC_DIR_CAFE-01_V1_F1.SVG');
+  });
+});

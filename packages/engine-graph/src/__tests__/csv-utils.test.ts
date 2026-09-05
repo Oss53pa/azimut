@@ -92,6 +92,21 @@ describe('parseNumber', () => {
     // "1,000,000" → "1.000,000" → NaN → null
     expect(parseNumber('1,000,000')).toBeNull();
   });
+
+  it.each([
+    ['1e5', 1e5],
+    ['1.23e-4', 1.23e-4],
+    ['-2.5E3', -2.5e3],
+  ] as const)(
+    'parses scientific notation %s as a finite number',
+    (input, expected) => {
+      expect(parseNumber(input)).toBe(expected);
+    },
+  );
+
+  it('returns null for -Infinity', () => {
+    expect(parseNumber('-Infinity')).toBeNull();
+  });
 });
 
 describe('parseCsvLine', () => {
@@ -147,6 +162,18 @@ describe('parseCsvLine', () => {
       'unclosed;field',
     ]);
   });
+
+  it('closing quote at end of line', () => {
+    expect(parseCsvLine('"hello"', ';')).toEqual(['hello']);
+  });
+
+  it('text after closing quote appends to field', () => {
+    expect(parseCsvLine('"hello"world;x', ';')).toEqual(['helloworld', 'x']);
+  });
+
+  it('multiple consecutive commas produce empty fields', () => {
+    expect(parseCsvLine('a,,,,b', ',')).toEqual(['a', '', '', '', 'b']);
+  });
 });
 
 describe('detectSeparator', () => {
@@ -190,6 +217,10 @@ describe('stripBom', () => {
 
   it('handles empty string', () => {
     expect(stripBom('')).toBe('');
+  });
+
+  it('BOM-only input returns empty string', () => {
+    expect(stripBom('﻿')).toBe('');
   });
 });
 
@@ -247,6 +278,12 @@ describe('detectColumns', () => {
     const aliases = { name: ['name'] };
     const result = detectColumns(['Name', 'Name'], aliases, ['name']);
     expect(result).toEqual({ name: 'Name' });
+  });
+
+  it('matches via second alias in list', () => {
+    const aliases = { level: ['etage', 'niveau'] };
+    const result = detectColumns(['Niveau'], aliases, ['level']);
+    expect(result).toEqual({ level: 'Niveau' });
   });
 
   it('succeeds with empty required array', () => {

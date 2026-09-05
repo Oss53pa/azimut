@@ -189,6 +189,46 @@ describe('RouteCache', () => {
     expect(cache.size).toBe(1);
   });
 
+  it('invalidateForEdge on empty cache is a no-op', () => {
+    const cache = new RouteCache();
+    cache.invalidateForEdge('any-edge');
+    expect(cache.size).toBe(0);
+  });
+
+  it('computeOrGet after invalidateAll rebuilds the cache', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(1);
+    cache.invalidateAll();
+    expect(cache.size).toBe(0);
+    const r2 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(r2.ok).toBe(true);
+    expect(cache.size).toBe(1);
+    if (r1.ok && r2.ok) {
+      expect(r2.value).toStrictEqual(r1.value);
+    }
+  });
+
+  it('recomputes when edge accessible flag changes', () => {
+    if (!entrance || !dest) return;
+    const cache = new RouteCache();
+    cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(1);
+    const modified = {
+      ...refMinimal,
+      graph: {
+        ...refMinimal.graph,
+        edges: refMinimal.graph.edges.map((e) => ({
+          ...e,
+          accessible: !e.accessible,
+        })),
+      },
+    };
+    cache.computeOrGet(modified, profile, entrance.id, dest.id);
+    expect(cache.size).toBe(1);
+  });
+
   it('invalidateForEdge works on second edge of multi-edge route', () => {
     if (!entrance || !dest) return;
     const cache = new RouteCache();

@@ -224,6 +224,48 @@ describe('diffManifest', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  it('empty baseline vs non-empty candidate: pure all-added', () => {
+    const baseline = buildManifest([]);
+    const candidate = buildManifest([
+      makeInput({ id: 'art-new', path: 'new.pdf' }),
+    ]);
+    const result = diffManifest(baseline, candidate);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0]?.params['reason']).toBe('added_in_candidate');
+    expect(result.findings[0]?.entity?.id).toBe('art-new');
+  });
+
+  it('completely disjoint manifests: all removed + all added', () => {
+    const baseline = buildManifest([
+      makeInput({ id: 'art-old', path: 'old.pdf' }),
+    ]);
+    const candidate = buildManifest([
+      makeInput({ id: 'art-new', path: 'new.pdf' }),
+    ]);
+    const result = diffManifest(baseline, candidate);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(2);
+    const reasons = result.findings.map((f) => f.params['reason']);
+    expect(reasons).toContain('removed_in_candidate');
+    expect(reasons).toContain('added_in_candidate');
+  });
+
+  it('checksum-divergent finding includes size params', () => {
+    const baseline = buildManifest([makeInput()]);
+    const candidate = buildManifest([
+      makeInput({ content: textEncoder.encode('tampered') }),
+    ]);
+    const result = diffManifest(baseline, candidate);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    const f = result.findings[0];
+    expect(typeof f?.params['baseline_size']).toBe('number');
+    expect(typeof f?.params['candidate_size']).toBe('number');
+  });
+
   it('matched_count equals artifact count for identical multi-artifact manifests', () => {
     const inputs = [
       makeInput({ id: 'art-1', path: 'a.pdf' }),

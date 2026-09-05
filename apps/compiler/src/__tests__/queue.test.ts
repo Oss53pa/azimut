@@ -243,4 +243,67 @@ describe('MemoryQueue', () => {
     expect(job?.attempts).toBe(2);
     expect(job?.state).toBe('running');
   });
+
+  it('duplicate ID overwrite replaces the existing job', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ id: 'dup', kind: 'import_plan' }));
+    await q.enqueue(makeJob({ id: 'dup', kind: 'audit_site', max_attempts: 5 }));
+    const job = await q.getJob('dup');
+    expect(job?.kind).toBe('audit_site');
+    expect(job?.max_attempts).toBe(5);
+  });
+
+  it('error cleared on success after a failed attempt', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 2 }));
+    const t1 = new Date('2025-01-01T00:01:00Z');
+    const t2 = new Date('2025-01-01T00:02:00Z');
+    const t3 = new Date('2025-01-01T00:03:00Z');
+    const t4 = new Date('2025-01-01T00:04:00Z');
+    // Attempt 1: fail
+    await q.markRunning('j1', t1);
+    await q.markFailed('j1', 'transient', t2);
+    const afterFail = await q.getJob('j1');
+    expect(afterFail?.error).toBe('transient');
+    // Attempt 2: succeed — error must be cleared
+    await q.markRunning('j1', t3);
+    await q.markSucceeded('j1', { ok: true }, t4);
+    const afterSuccess = await q.getJob('j1');
+    expect(afterSuccess?.error).toBeNull();
+    expect(afterSuccess?.state).toBe('succeeded');
+  });
+
+  it('dequeue skips running and failed jobs, returns queued', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ id: 'r1' }));
+    await q.enqueue(makeJob({ id: 'f1', max_attempts: 1 }));
+    await q.enqueue(makeJob({ id: 'q1' }));
+    // r1 -> running
+    await q.markRunning('r1', new Date('2025-01-01T00:01:00Z'));
+    // f1 -> failed (exhausted)
+    await q.markRunning('f1', new Date('2025-01-01T00:01:00Z'));
+    await q.markFailed('f1', 'fatal', new Date('2025-01-01T00:02:00Z'));
+    const next = await q.dequeue();
+    expect(next?.id).toBe('q1');
+  });
+
+  it('markFailed at max_attempts is terminal and not dequeueable', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 2 }));
+    // Attempt 1: fail — still below max, should re-queue
+    await q.markRunning('j1', new Date('2025-01-01T00:01:00Z'));
+    await q.markFailed('j1', 'err1', new Date('2025-01-01T00:02:00Z'));
+    const afterFirst = await q.getJob('j1');
+    expect(afterFirst?.state).toBe('queued');
+    expect(afterFirst?.attempts).toBe(1);
+    // Attempt 2: fail — attempts === max_attempts, terminal
+    await q.markRunning('j1', new Date('2025-01-01T00:03:00Z'));
+    await q.markFailed('j1', 'err2', new Date('2025-01-01T00:04:00Z'));
+    const afterSecond = await q.getJob('j1');
+    expect(afterSecond?.state).toBe('failed');
+    expect(afterSecond?.attempts).toBe(2);
+    expect(afterSecond?.error).toBe('err2');
+    // Terminal job must not be returned by dequeue
+    expect(await q.dequeue()).toBeNull();
+  });
 });

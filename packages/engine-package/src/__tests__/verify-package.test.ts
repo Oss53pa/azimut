@@ -172,6 +172,20 @@ describe('verifyPackage', () => {
     );
   });
 
+  it('multiple artifacts all missing from contents map', () => {
+    const inputs = [
+      makeInput({ id: 'art-1', path: 'a.pdf' }),
+      makeInput({ id: 'art-2', path: 'b.pdf' }),
+    ];
+    const { manifest } = buildManifestAndContents(inputs);
+    const emptyContents = new Map<string, Uint8Array>();
+    const result = verifyPackage(manifest, emptyContents);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings).toHaveLength(2);
+    expect(result.findings.every((f) => f.params['actual'] === 'missing')).toBe(true);
+  });
+
   it('is deterministic (INV-4)', () => {
     const input = makeInput();
     const { manifest, contents } = buildManifestAndContents([input]);
