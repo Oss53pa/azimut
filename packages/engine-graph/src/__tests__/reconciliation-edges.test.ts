@@ -130,6 +130,39 @@ describe('reconciliation — combined issues', () => {
     expect(result.value.lines.filter((l) => l.issue === 'undersized').length).toBe(0);
   });
 
+  it('accepts negative azimuth normalised into wrapping range', () => {
+    const result = run([sv({ azimuth_deg: -10 })], [ex({ min_azimuth_deg: 340, max_azimuth_deg: 20 })], 0);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.lines.filter((l) => l.issue === 'wrong_orientation').length).toBe(0);
+  });
+
+  it('accepts azimuth exactly at max+tolerance boundary (<=)', () => {
+    const result = run([sv({ azimuth_deg: 50 })], [ex()]);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.lines.filter((l) => l.issue === 'wrong_orientation').length).toBe(0);
+  });
+
+  it('normalises azimuth 360 to 0', () => {
+    const result = run([sv({ azimuth_deg: 360 })], [ex({ min_azimuth_deg: 350, max_azimuth_deg: 10 })], 0);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.lines.filter((l) => l.issue === 'wrong_orientation').length).toBe(0);
+  });
+
+  it('two surveyed supports at same decision-point node', () => {
+    const result = run(
+      [sv({ id: 'sup-a', azimuth_deg: 180 }), sv({ id: 'sup-b', azimuth_deg: 20 })],
+      [ex()],
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const orient = result.value.lines.filter((l) => l.issue === 'wrong_orientation');
+    expect(orient.length).toBe(1);
+    expect(orient[0]?.entity_id).toBe('sup-a');
+  });
+
   it('accepts azimuth within non-wrapping range (lo ≤ hi)', () => {
     const result = run([sv({ azimuth_deg: 120 })], [ex({ min_azimuth_deg: 90, max_azimuth_deg: 180 })]);
     expect(result.ok).toBe(true);

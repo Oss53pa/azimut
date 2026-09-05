@@ -197,6 +197,31 @@ describe('T-2.12 createArtworkHandler', () => {
     expect((result['pdf_length'] as number)).toBeGreaterThan(0);
   });
 
+  it('profile_key absent from payload falls back to standard', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      support_id: 'sup-no-profile',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      // no profile_key key at all
+    });
+    const result = await handler(job);
+    expect(result['support_id']).toBe('sup-no-profile');
+    expect((result['svg_length'] as number)).toBeGreaterThan(0);
+  });
+
+  it('empty string support_id is propagated as-is', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      support_id: '',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    const result = await handler(job);
+    expect(result['support_id']).toBe('');
+  });
+
   it('throws on completely empty payload', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({});
