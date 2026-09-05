@@ -41,14 +41,12 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.value).toContain('<svg');
     expect(result.value).toContain('</svg>');
   });
-
   it('renders R+1 level as valid SVG', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-r1', defaultOptions);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toContain('<svg');
   });
-
   it('includes footprint polygons', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', defaultOptions);
     expect(result.ok).toBe(true);
@@ -387,5 +385,16 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toContain('<svg');
+  });
+
+  it('zero extent in both X and Y (single-point geometry)', () => {
+    const lvl = { id: 'lvl-pt', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'Point', ordinal: 99, elevation_m: 0 };
+    const site = { ...refMultilevel, levels: [...refMultilevel.levels, lvl],
+      graph: { ...refMultilevel.graph, nodes: [...refMultilevel.graph.nodes,
+        { id: 'n-pt', org_id: 'org-test-001', level_id: 'lvl-pt', kind: 'junction' as const, position: { x_m: 5, y_m: 5 }, label: 'Pt' }] } };
+    const result = renderFloorPlan(site, 'lvl-pt', { ...defaultOptions, show_destinations: false, show_edges: false });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value).toContain('<circle');
   });
 });

@@ -384,4 +384,17 @@ describe('T-2.10 renderEvacuationPlan', () => {
     expect(r1.value.svg).toBe(r2.value.svg);
     expect(r1.value.stats).toStrictEqual(r2.value.stats);
   });
+
+  it('viewer position on empty level skips EVAC_EMPTY_LEVEL', () => {
+    const emptySite = {
+      ...refMultilevel,
+      levels: [...refMultilevel.levels, { id: 'lvl-empty', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'Vide', ordinal: 99, elevation_m: 99 }],
+    };
+    const opts = { ...defaultOptions, viewer_position: { x_m: 10, y_m: 10 } };
+    const result = renderEvacuationPlan(emptySite, 'lvl-empty', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings.some((w) => w.code === 'LAYOUT.EVAC_EMPTY_LEVEL')).toBe(false);
+    expect(result.warnings.some((w) => w.code === 'LAYOUT.EVAC_NO_ROUTES')).toBe(true);
+  });
 });
