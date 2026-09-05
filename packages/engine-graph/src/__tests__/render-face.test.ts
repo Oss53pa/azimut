@@ -375,6 +375,19 @@ describe('T-2.15 renderFace', () => {
     expect(headerIdx).toBeGreaterThan(0);
   });
 
+  it('cardinalToAngle falls back to 0 for unknown direction', () => {
+    const face: ResolvedFace = {
+      template_id: 'test', support_type_key: 'directional', side: 'front',
+      blocks: [{ kind: 'destination_list', ordinal: 0,
+        region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+        content: { type: 'destination_list', entries: [
+          { destination_id: 'd1', names: { fr: 'Test' }, direction: 'UNKNOWN', distance_m: 10 },
+        ] } }],
+    };
+    const svg = renderFace(face, opts);
+    expect(svg).toContain('rotate(0)');
+  });
+
   describe('determinism (INV-4)', () => {
     it('same result on two calls', () => {
       const face = resolveFace();

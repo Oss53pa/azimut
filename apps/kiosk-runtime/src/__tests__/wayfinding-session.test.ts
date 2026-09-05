@@ -229,12 +229,40 @@ describe('computeWayfinding', () => {
       expect(jStep?.instruction).toContain('Continuer vers');
     });
 
+    it('zero-distance junction run uses continueTowards instead of continueFor', () => {
+      const zeroSite: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+        edges: corridorSite.graph.edges.map((e) =>
+          ['e2', 'e3'].includes(e.id) ? { ...e, length_m: 0 } : e,
+        ),
+      }};
+      const r = computeWayfinding(zeroSite, cP, 'n-ent', 'n-dest');
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const collapsed = r.value.steps[1];
+      expect(collapsed?.instruction).toContain('Continuer vers');
+      expect(collapsed?.instruction).not.toMatch(/\d+ m/);
+    });
+
     it('trailing collapsible run is flushed with continueFor', () => {
       const r = computeWayfinding(corridorSite, cP, 'n-ent', 'n-j3');
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       const last = r.value.steps[r.value.steps.length - 1];
       expect(last?.instruction).toContain('20 m');
+    });
+
+    it('trailing zero-distance run uses continueTowards', () => {
+      const zeroSite: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+        edges: corridorSite.graph.edges.map((e) =>
+          ['e2', 'e3'].includes(e.id) ? { ...e, length_m: 0 } : e,
+        ),
+      }};
+      const r = computeWayfinding(zeroSite, cP, 'n-ent', 'n-j3');
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const last = r.value.steps[r.value.steps.length - 1];
+      expect(last?.instruction).toContain('Continuer vers');
+      expect(last?.instruction).not.toMatch(/\d+ m/);
     });
   });
 

@@ -347,4 +347,17 @@ describe('validateGeometry', () => {
     expect(overlap).toBeDefined();
     expect(overlap?.params).toHaveProperty('other_footprint_id', 'fp-b');
   });
+
+  it.each([
+    ['d1=0 (p1 on [p3,p4])', [[5, 0], [10, 5], [0, 10], [0, 0], [10, 0]]],
+    ['d2=0 (p2 on [p3,p4])', [[0, 5], [5, 0], [10, 5], [10, 0], [0, 0]]],
+    ['d4=0 (p4 on [p1,p2])', [[0, 0], [10, 0], [5, 10], [10, 10], [5, 0]]],
+  ] as const)('collinear self-intersection sub-case %s', (_label, verts) => {
+    const result = validateGeometry(siteWith([
+      fp('fp-col', verts as unknown as [number, number][]),
+    ]));
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_SELF_INTERSECTING')).toBe(true);
+  });
 });
