@@ -202,3 +202,25 @@ describe('canonicalSerialize — top-level primitives', () => {
     expect(contentHash(42)).not.toBe(contentHash('42'));
   });
 });
+
+describe('sha256Hex — multi-block input', () => {
+  it('hashes 64-byte input requiring two SHA-256 blocks', () => {
+    expect(sha256Hex('a'.repeat(64))).toBe(
+      'ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb',
+    );
+  });
+});
+
+describe('canonicalSerialize — additional edge cases', () => {
+  it('top-level function serializes to null', () => {
+    expect(canonicalSerialize(() => 0)).toBe('null');
+  });
+
+  it('array containing null and undefined elements', () => {
+    expect(canonicalSerialize([null, undefined, 1])).toBe('[null,null,1]');
+  });
+
+  it('negative infinity at top level serializes to null', () => {
+    expect(canonicalSerialize(-Infinity)).toBe('null');
+  });
+});

@@ -321,6 +321,22 @@ describe('D4.2 — importOccupancy', () => {
     expect(result.value.rejected).toBe(0);
   });
 
+  it('rejected row does not block a later valid row with same unit_code', () => {
+    const content = csv([
+      header,
+      'Bureau RDC;Bâtiment ML;RDC;INVALID_STATUS;Corp;office;Bureau;Office;2026-01-15',
+      'Bureau RDC;Bâtiment ML;RDC;occupied;Acme;office;Bureau;Office;2026-01-15',
+    ]);
+    const result = importOccupancy(refMultilevel, content);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.rejected).toBe(1);
+    // Second row with same unit_code is NOT rejected as duplicate
+    const statuses = result.value.lines.map((l) => l.status);
+    expect(statuses[0]).toBe('rejected');
+    expect(statuses[1]).not.toBe('rejected');
+  });
+
   it('warnings propagated to top-level result', () => {
     const content = csv([
       header,

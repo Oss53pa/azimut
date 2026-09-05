@@ -23,6 +23,16 @@ describe('T-1.13 importSupports', () => {
       expect(result.value.pending).toBe(0);
       expect(result.value.supports.length).toBe(2);
     });
+
+    it('optional columns default to empty string when absent from header', () => {
+      const content = csv(['sup-opt;n-ml-hall;90;0.6;1.2']);
+      const result = importSupports(refMultilevel, content);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const s = result.value.supports[0];
+      expect(s?.photo_url).toBe('');
+      expect(s?.notes).toBe('');
+    });
   });
 
   describe('partial import', () => {
