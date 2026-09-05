@@ -212,6 +212,23 @@ describe('computeWayfinding', () => {
       expect(r1).toStrictEqual(r2);
     });
 
+    it('single-node junction run keeps continueTowards instruction', () => {
+      const makeEdge = (id: string, from: string, to: string) => ({
+        id, org_id: 'org1', from_node_id: from, to_node_id: to,
+        width_m: 2, slope_pct: 0, accessible: true, direction: 'both' as const, evacuation_route: false, length_m: 10,
+      });
+      const site: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+        nodes: corridorSite.graph.nodes.filter((n) => ['n-ent', 'n-j1', 'n-dest'].includes(n.id)),
+        edges: [makeEdge('e1', 'n-ent', 'n-j1'), makeEdge('e2', 'n-j1', 'n-dest')],
+      } };
+      const r = computeWayfinding(site, cP, 'n-ent', 'n-dest');
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.steps.length).toBe(3);
+      const jStep = r.value.steps.find((s) => s.kind === 'junction');
+      expect(jStep?.instruction).toContain('Continuer vers');
+    });
+
     it('trailing collapsible run is flushed with continueFor', () => {
       const r = computeWayfinding(corridorSite, cP, 'n-ent', 'n-j3');
       expect(r.ok).toBe(true);

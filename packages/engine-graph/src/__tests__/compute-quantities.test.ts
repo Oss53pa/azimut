@@ -11,6 +11,11 @@ import type {
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 import type { SiteData } from '@azimut/core-model';
 
+function siteWithGhostNode(nodeId: string, levelId: string): SiteData {
+  return { ...refMinimal, graph: { ...refMinimal.graph, nodes: [...refMinimal.graph.nodes,
+    { id: nodeId, org_id: 'org-test-001', level_id: levelId, kind: 'junction' as const, position: { x_m: 0, y_m: 0 }, label: nodeId }] } };
+}
+
 describe('T-2.13 computeQuantities', () => {
   const minimalSupports: PlacedSupport[] = [
     { id: 'sup-1', node_id: 'n-entrance', support_type_key: 'directional' },
@@ -302,23 +307,7 @@ describe('computeQuantities — fallback paths', () => {
   it('node on unlisted level skips by_building', () => {
     // Node references a level_id not present in site.levels →
     // levelToBuilding returns undefined → by_building skipped.
-    const site: SiteData = {
-      ...refMinimal,
-      graph: {
-        ...refMinimal.graph,
-        nodes: [
-          ...refMinimal.graph.nodes,
-          {
-            id: 'n-ghost-lvl',
-            org_id: 'org-test-001',
-            level_id: 'lvl-does-not-exist',
-            kind: 'junction' as const,
-            position: { x_m: 0, y_m: 0 },
-            label: 'Ghost level node',
-          },
-        ],
-      },
-    };
+    const site = siteWithGhostNode('n-ghost-lvl', 'lvl-does-not-exist');
     const supports: PlacedSupport[] = [
       { id: 'sup-ghost', node_id: 'n-ghost-lvl', support_type_key: 'directional' },
     ];
@@ -337,23 +326,7 @@ describe('computeQuantities — fallback paths', () => {
   });
 
   it('cross_check_ok is false when by_building sum ≠ located count', () => {
-    const site: SiteData = {
-      ...refMinimal,
-      graph: {
-        ...refMinimal.graph,
-        nodes: [
-          ...refMinimal.graph.nodes,
-          {
-            id: 'n-ghost-lvl',
-            org_id: 'org-test-001',
-            level_id: 'lvl-does-not-exist',
-            kind: 'junction' as const,
-            position: { x_m: 0, y_m: 0 },
-            label: 'Ghost',
-          },
-        ],
-      },
-    };
+    const site = siteWithGhostNode('n-ghost-lvl', 'lvl-does-not-exist');
     const supports: PlacedSupport[] = [
       { id: 'sup-ghost', node_id: 'n-ghost-lvl', support_type_key: 'directional' },
     ];
@@ -368,23 +341,7 @@ describe('computeQuantities — fallback paths', () => {
   });
 
   it('level name falls back to raw id for unlisted level', () => {
-    const site: SiteData = {
-      ...refMinimal,
-      graph: {
-        ...refMinimal.graph,
-        nodes: [
-          ...refMinimal.graph.nodes,
-          {
-            id: 'n-ghost',
-            org_id: 'org-test-001',
-            level_id: 'lvl-phantom',
-            kind: 'junction' as const,
-            position: { x_m: 0, y_m: 0 },
-            label: 'G',
-          },
-        ],
-      },
-    };
+    const site = siteWithGhostNode('n-ghost', 'lvl-phantom');
     const supports: PlacedSupport[] = [
       { id: 'sup-g', node_id: 'n-ghost', support_type_key: 'directional' },
     ];
@@ -394,5 +351,20 @@ describe('computeQuantities — fallback paths', () => {
     const lvl = result.value.by_level.find((l) => l.level_id === 'lvl-phantom');
     expect(lvl?.level_name).toBe('lvl-phantom');
     expect(lvl?.building_id).toBe('');
+  });
+
+  it('building name falls back to raw id for orphan building_id', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      levels: [...refMinimal.levels, { id: 'lvl-orphan-bldg', org_id: 'org-test-001', building_id: 'bldg-missing', name: 'Orphan', ordinal: 50, elevation_m: 50 }],
+      graph: { ...refMinimal.graph, nodes: [...refMinimal.graph.nodes,
+        { id: 'n-orph', org_id: 'org-test-001', level_id: 'lvl-orphan-bldg', kind: 'junction' as const, position: { x_m: 0, y_m: 0 }, label: 'O' }] },
+    };
+    const supports: PlacedSupport[] = [{ id: 'sup-orph', node_id: 'n-orph', support_type_key: 'directional' }];
+    const result = computeQuantities(site, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const bldg = result.value.by_building.find((b) => b.building_id === 'bldg-missing');
+    expect(bldg?.building_name).toBe('bldg-missing');
   });
 });
