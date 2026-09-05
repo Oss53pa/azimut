@@ -211,6 +211,14 @@ describe('computeWayfinding', () => {
       const r2 = wf('n-ent', 'n-dest', { site: corridorSite, profile: cP });
       expect(r1).toStrictEqual(r2);
     });
+
+    it('trailing collapsible run is flushed with continueFor', () => {
+      const r = computeWayfinding(corridorSite, cP, 'n-ent', 'n-j3');
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const last = r.value.steps[r.value.steps.length - 1];
+      expect(last?.instruction).toContain('20 m');
+    });
   });
 
   describe('instruction templates coverage', () => {
@@ -241,6 +249,16 @@ describe('computeWayfinding', () => {
       const sec = r.value.steps.filter((s) => s.kind === 'security_post');
       expect(sec.length).toBeGreaterThan(0);
       expect(sec[0]?.instruction).toContain('Go through');
+    });
+
+    it('stair with level change uses takeStairs instruction', () => {
+      const site = withNodeKind((n) => n.kind === 'elevator', 'stair');
+      const r = wf('n-ml-entrance', 'n-ml-dest-r1', { site });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const stairSteps = r.value.steps.filter((s) => s.kind === 'stair');
+      expect(stairSteps.length).toBeGreaterThan(0);
+      expect(stairSteps[0]?.instruction).toContain('escalier');
     });
 
     it('escalator with level change uses takeEscalator instruction', () => {
