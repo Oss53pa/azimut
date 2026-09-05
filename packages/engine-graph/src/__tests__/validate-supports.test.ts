@@ -164,6 +164,48 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
+  describe('DATA.SUPPORT_BLOCK_REGION_INVALID — boundary acceptance', () => {
+    function regionSite(region: { x_pct: number; y_pct: number; w_pct: number; h_pct: number }): SiteData {
+      return patchSite(refMinimal, {
+        face_templates: [{
+          id: 'ftpl-region-bnd', org_id: 'org-test-001', support_type_key: 'directional',
+          side: 'front', name: 'Boundary test',
+          blocks: [{ kind: 'header' as const, ordinal: 0, region, config: {} }],
+        }],
+      });
+    }
+
+    it('accepts block exactly at x+w=100 boundary', () => {
+      const result = validateSupports(regionSite({ x_pct: 50, y_pct: 0, w_pct: 50, h_pct: 50 }));
+      const findings = result.ok ? result.warnings : result.findings;
+      expect(findings.some((f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID')).toBe(false);
+    });
+
+    it('accepts block exactly at y+h=100 boundary', () => {
+      const result = validateSupports(regionSite({ x_pct: 0, y_pct: 50, w_pct: 50, h_pct: 50 }));
+      const findings = result.ok ? result.warnings : result.findings;
+      expect(findings.some((f) => f.code === 'DATA.SUPPORT_BLOCK_REGION_INVALID')).toBe(false);
+    });
+  });
+
+  describe('DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND — available_sides param', () => {
+    it('includes sorted available sides in finding params', () => {
+      const site = patchSite(refMinimal, {
+        face_templates: [{
+          id: 'ftpl-sides', org_id: 'org-test-001', support_type_key: 'directional',
+          side: 'top', name: 'Invalid side', blocks: [],
+        }],
+      });
+      const result = validateSupports(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const w = result.warnings.find((f) => f.code === 'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND');
+      expect(w).toBeDefined();
+      expect(typeof w?.params['available_sides']).toBe('string');
+      expect((w?.params['available_sides'] as string).length).toBeGreaterThan(0);
+    });
+  });
+
   describe('empty inputs', () => {
     it('accepts site with zero support types and zero templates', () => {
       const site = patchSite(refMinimal, {
