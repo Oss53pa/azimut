@@ -39,33 +39,33 @@ const PANEL_STYLE: React.CSSProperties = {
   alignItems: 'center',
   gap: 4,
   padding: '4px 8px',
-  background: 'var(--az-sidebar-bg)',
-  borderTop: '1px solid var(--az-border)',
+  background: 'var(--surface-panel)',
+  borderTop: '1px solid var(--border-hairline)',
   fontSize: 11,
   flexShrink: 0,
 };
 
 const BUTTON_STYLE: React.CSSProperties = {
-  border: '1px solid var(--az-border)',
-  background: 'var(--az-card-bg)',
+  border: '1px solid var(--border-hairline)',
+  background: 'var(--surface-panel)',
   cursor: 'pointer',
   fontSize: 11,
   padding: '3px 6px',
   borderRadius: 3,
-  color: 'var(--az-text-secondary)',
+  color: 'var(--text-secondary)',
   lineHeight: 1,
 };
 
 const SEPARATOR_STYLE: React.CSSProperties = {
   width: 1,
   height: 18,
-  background: 'var(--az-border)',
+  background: 'var(--border-hairline)',
   margin: '0 4px',
   flexShrink: 0,
 };
 
 const LABEL_STYLE: React.CSSProperties = {
-  color: 'var(--az-text-secondary)',
+  color: 'var(--text-secondary)',
   fontSize: 10,
   marginRight: 2,
   flexShrink: 0,

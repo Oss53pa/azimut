@@ -5,11 +5,11 @@ import type { FaceTheme } from '@azimut/engine-graph';
 import type { FaceTemplate, TravelProfile, GraphNode } from '@azimut/core-model';
 
 const FACE_THEME: FaceTheme = {
-  background: 'var(--az-card-bg)',
-  text_primary: 'var(--az-text-primary)',
-  text_secondary: 'var(--az-text-secondary)',
-  accent: 'var(--az-active-bg)',
-  border: 'var(--az-border)',
+  background: 'var(--surface-panel)',
+  text_primary: 'var(--text-primary)',
+  text_secondary: 'var(--text-secondary)',
+  accent: 'var(--surface-sunken)',
+  border: 'var(--border-hairline)',
 };
 
 function findPreviewNode(
@@ -79,16 +79,16 @@ export function FacesView(): JSX.Element {
   if (templates.length === 0) {
     return (
       <div>
-        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+        <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text-primary)' }}>
           Rendus de faces
         </h1>
         <div style={{
           marginTop: 16,
           padding: 32,
-          borderRadius: 8,
-          border: '2px dashed var(--az-border)',
+          borderRadius: 4,
+          border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
           fontSize: 14,
         }}>
           Aucun gabarit de face configure.
@@ -99,10 +99,10 @@ export function FacesView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
         Rendus de faces
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
         Apercu SVG des faces resolues pour chaque gabarit.
       </p>
 
@@ -113,11 +113,11 @@ export function FacesView(): JSX.Element {
             onClick={() => setSelectedId(t.id)}
             style={{
               padding: '6px 14px',
-              border: '1px solid var(--az-border)',
+              border: '1px solid var(--border-hairline)',
               borderRadius: 6,
-              background: selectedId === t.id ? 'var(--az-active-bg)' : 'var(--az-card-bg)',
-              color: selectedId === t.id ? 'var(--az-active-text)' : 'var(--az-text-primary)',
-              fontWeight: selectedId === t.id ? 600 : 400,
+              background: selectedId === t.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
+              color: selectedId === t.id ? 'var(--accent)' : 'var(--text-primary)',
+              fontWeight: selectedId === t.id ? 500 : 400,
               fontSize: 13,
               cursor: 'pointer',
             }}
@@ -131,7 +131,7 @@ export function FacesView(): JSX.Element {
         <div style={{
           marginBottom: 16,
           fontSize: 12,
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
         }}>
           Type : {selected.support_type_key} / Face : {selected.side} / {selected.blocks.length} bloc{selected.blocks.length !== 1 ? 's' : ''}
         </div>
@@ -139,16 +139,16 @@ export function FacesView(): JSX.Element {
 
       {preview ? (
         <div style={{
-          borderRadius: 8,
-          border: '1px solid var(--az-border)',
+          borderRadius: 4,
+          border: '1px solid var(--border-hairline)',
           overflow: 'hidden',
-          background: 'var(--az-card-bg)',
+          background: 'var(--surface-panel)',
         }}>
           <div style={{
             padding: '8px 12px',
-            borderBottom: '1px solid var(--az-border)',
+            borderBottom: '1px solid var(--border-hairline)',
             fontSize: 12,
-            color: 'var(--az-text-secondary)',
+            color: 'var(--text-secondary)',
           }}>
             Noeud : {preview.node.label} ({preview.node.kind})
           </div>
@@ -160,10 +160,10 @@ export function FacesView(): JSX.Element {
       ) : (
         <div style={{
           padding: 32,
-          borderRadius: 8,
-          border: '2px dashed var(--az-border)',
+          borderRadius: 4,
+          border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
           fontSize: 14,
         }}>
           {!profile

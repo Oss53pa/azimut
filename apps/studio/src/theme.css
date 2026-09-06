@@ -5,22 +5,31 @@
 }
 
 body {
-  font-family: var(--az-font-body);
-  background: var(--az-main-bg);
-  color: var(--az-text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--surface-page);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
-  font-weight: 400;
-  letter-spacing: 0.01em;
 }
 
 h1, h2, h3 {
-  font-family: var(--az-font-body);
-  font-weight: 600;
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 ::selection {
-  background: var(--az-accent-soft);
-  color: var(--az-accent);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 ::-webkit-scrollbar {
@@ -33,6 +42,20 @@ h1, h2, h3 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--az-border);
+  background: var(--border-hairline);
   border-radius: 3px;
+}
+
+/* Reduced motion (F11) */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Panel entry animation (F11) */
+@keyframes az-panel {
+  from { transform: translateX(8px); }
+  to { transform: translateX(0); }
 }

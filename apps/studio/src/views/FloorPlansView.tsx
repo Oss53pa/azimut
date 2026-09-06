@@ -69,7 +69,7 @@ export function FloorPlansView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
         Plans de niveaux
       </h1>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
@@ -79,11 +79,11 @@ export function FloorPlansView(): JSX.Element {
             onClick={() => handleLevelChange(l.id)}
             style={{
               padding: '6px 14px',
-              border: '1px solid var(--az-border)',
+              border: '1px solid var(--border-hairline)',
               borderRadius: 6,
-              background: selectedLevel === l.id ? 'var(--az-active-bg)' : 'var(--az-card-bg)',
-              color: selectedLevel === l.id ? 'var(--az-active-text)' : 'var(--az-text-primary)',
-              fontWeight: selectedLevel === l.id ? 600 : 400,
+              background: selectedLevel === l.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
+              color: selectedLevel === l.id ? 'var(--accent)' : 'var(--text-primary)',
+              fontWeight: selectedLevel === l.id ? 500 : 400,
               fontSize: 13,
               cursor: 'pointer',
             }}
@@ -95,8 +95,8 @@ export function FloorPlansView(): JSX.Element {
 
       <div
         style={{
-          borderRadius: 8,
-          border: '1px solid var(--az-border)',
+          borderRadius: 4,
+          border: '1px solid var(--border-hairline)',
           overflow: 'hidden',
           height: 500,
         }}
@@ -119,7 +119,7 @@ export function FloorPlansView(): JSX.Element {
             alignItems: 'center',
             justifyContent: 'center',
             height: '100%',
-            color: 'var(--az-text-secondary)',
+            color: 'var(--text-secondary)',
             fontSize: 14,
           }}>
             Sélectionnez un niveau.
@@ -132,10 +132,10 @@ export function FloorPlansView(): JSX.Element {
           marginTop: 12,
           padding: '8px 12px',
           borderRadius: 6,
-          background: 'var(--az-card-bg)',
-          border: '1px solid var(--az-border)',
+          background: 'var(--surface-panel)',
+          border: '1px solid var(--border-hairline)',
           fontSize: 12,
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
         }}>
           Sélection : {selection.selectedIds.join(', ')}
         </div>

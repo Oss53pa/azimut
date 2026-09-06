@@ -7,4 +7,5 @@ export type ViewId =
   | 'floor-plans'
   | 'faces'
   | 'checks'
-  | 'proofs';
+  | 'proofs'
+  | 'editor';

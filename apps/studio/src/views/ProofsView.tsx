@@ -57,10 +57,10 @@ export function ProofsView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
         Bons a tirer
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
         {statuses.length} gabarit{statuses.length !== 1 ? 's' : ''} /{' '}
         {resolvedCount} resolu{resolvedCount !== 1 ? 's' : ''} /{' '}
         {totalWarnings} avertissement{totalWarnings !== 1 ? 's' : ''}
@@ -68,7 +68,7 @@ export function ProofsView(): JSX.Element {
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
-            <tr style={{ borderBottom: '2px solid var(--az-border)' }}>
+            <tr style={{ borderBottom: '2px solid var(--border-hairline)' }}>
               <Th>Gabarit</Th>
               <Th>Type / Face</Th>
               <Th>Noeud test</Th>
@@ -82,20 +82,20 @@ export function ProofsView(): JSX.Element {
                 <td colSpan={5} style={{
                   padding: 24,
                   textAlign: 'center',
-                  color: 'var(--az-text-secondary)',
+                  color: 'var(--text-secondary)',
                 }}>
                   Aucun gabarit configure.
                 </td>
               </tr>
             ) : statuses.map((s) => (
-              <tr key={s.template.id} style={{ borderBottom: '1px solid var(--az-border)' }}>
-                <td style={{ padding: '8px 12px', color: 'var(--az-text-primary)', fontWeight: 500 }}>
+              <tr key={s.template.id} style={{ borderBottom: '1px solid var(--border-hairline)' }}>
+                <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontWeight: 500 }}>
                   {s.template.name}
                 </td>
-                <td style={{ padding: '8px 12px', color: 'var(--az-text-secondary)', fontSize: 12 }}>
+                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
                   {s.template.support_type_key} / {s.template.side}
                 </td>
-                <td style={{ padding: '8px 12px', color: 'var(--az-text-secondary)', fontSize: 12 }}>
+                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
                   {s.node?.label ?? '—'}
                 </td>
                 <td style={{ padding: '8px 12px' }}>
@@ -104,14 +104,14 @@ export function ProofsView(): JSX.Element {
                     padding: '2px 8px',
                     borderRadius: 4,
                     fontSize: 11,
-                    fontWeight: 600,
-                    background: s.resolved ? 'var(--az-active-bg)' : 'var(--az-border)',
-                    color: s.resolved ? 'var(--az-active-text)' : 'var(--az-text-secondary)',
+                    fontWeight: 500,
+                    background: s.resolved ? 'var(--surface-sunken)' : 'var(--border-hairline)',
+                    color: s.resolved ? 'var(--accent)' : 'var(--text-secondary)',
                   }}>
                     {s.resolved ? 'Resolu' : 'Echec'}
                   </span>
                 </td>
-                <td style={{ padding: '8px 12px', color: 'var(--az-text-secondary)', fontSize: 12, textAlign: 'center' }}>
+                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12, textAlign: 'center' }}>
                   {s.warningCount > 0 ? s.warningCount : '—'}
                 </td>
               </tr>
@@ -128,8 +128,8 @@ function Th({ children }: { readonly children: string }): JSX.Element {
     <th style={{
       textAlign: 'left',
       padding: '8px 12px',
-      fontWeight: 600,
-      color: 'var(--az-text-secondary)',
+      fontWeight: 500,
+      color: 'var(--text-secondary)',
       fontSize: 11,
       textTransform: 'uppercase',
       letterSpacing: '0.05em',

@@ -37,10 +37,10 @@ export function GraphView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
         Graphe de circulation
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
         {site.graph.nodes.length} noeuds, {summary.totalEdges} aretes,
         {' '}{summary.verticalLinks} liens verticaux
       </p>
@@ -81,16 +81,16 @@ function Section({ title, children }: {
   return (
     <div style={{
       padding: 16,
-      borderRadius: 8,
-      border: '1px solid var(--az-border)',
-      background: 'var(--az-card-bg)',
+      borderRadius: 4,
+      border: '1px solid var(--border-hairline)',
+      background: 'var(--surface-panel)',
     }}>
       <div style={{
         fontSize: 11,
-        fontWeight: 600,
+        fontWeight: 500,
         textTransform: 'uppercase',
         letterSpacing: '0.05em',
-        color: 'var(--az-text-secondary)',
+        color: 'var(--text-secondary)',
         marginBottom: 8,
       }}>
         {title}
@@ -107,10 +107,10 @@ function Row({ label, value }: { readonly label: string; readonly value: string 
       justifyContent: 'space-between',
       padding: '4px 0',
       fontSize: 13,
-      color: 'var(--az-text-primary)',
+      color: 'var(--text-primary)',
     }}>
       <span>{label}</span>
-      <span style={{ fontWeight: 600 }}>{value}</span>
+      <span style={{ fontWeight: 500 }}>{value}</span>
     </div>
   );
 }

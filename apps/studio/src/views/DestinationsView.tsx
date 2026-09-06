@@ -44,32 +44,32 @@ export function DestinationsView(): JSX.Element {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 600, color: 'var(--az-text-primary)' }}>
+        <h1 style={{ fontSize: 24, fontWeight: 500, color: 'var(--text-primary)' }}>
           Destinations
         </h1>
         <span style={{
-          background: 'var(--az-accent-soft)',
-          color: 'var(--az-accent)',
+          background: 'var(--accent-soft)',
+          color: 'var(--accent)',
           fontSize: 12,
-          fontWeight: 600,
+          fontWeight: 500,
           padding: '2px 10px',
           borderRadius: 12,
         }}>
           {rows.length}
         </span>
       </div>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 20 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 20 }}>
         Points d'intérêt et occupants du site
       </p>
       <div style={{
         overflowX: 'auto',
         borderRadius: 12,
-        border: '1px solid var(--az-border)',
-        boxShadow: 'var(--az-shadow-card)',
+        border: '1px solid var(--border-hairline)',
+        boxShadow: 'var(--shadow-float)',
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
           <thead>
-            <tr style={{ background: 'var(--az-sidebar-bg)' }}>
+            <tr style={{ background: 'var(--surface-panel)' }}>
               <Th>Nom (fr)</Th>
               <Th>Nom (en)</Th>
               <Th>Niveau</Th>
@@ -103,12 +103,12 @@ function Th({ children, align }: { readonly children: string; readonly align?: s
     <th style={{
       textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
       padding: '10px 14px',
-      fontWeight: 600,
-      color: 'var(--az-text-secondary)',
+      fontWeight: 500,
+      color: 'var(--text-secondary)',
       fontSize: 11,
       textTransform: 'uppercase',
       letterSpacing: '0.06em',
-      borderBottom: '2px solid var(--az-border)',
+      borderBottom: '2px solid var(--border-hairline)',
     }}>
       {children}
     </th>
@@ -125,12 +125,12 @@ function TRow({ children, even }: {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        borderBottom: '1px solid var(--az-border)',
+        borderBottom: '1px solid var(--border-hairline)',
         background: hovered
-          ? 'var(--az-row-hover)'
+          ? 'var(--surface-sunken)'
           : even
-            ? 'var(--az-card-bg)'
-            : 'var(--az-row-stripe)',
+            ? 'var(--surface-panel)'
+            : 'var(--surface-page)',
         transition: 'background 0.12s',
       }}
     >
@@ -150,8 +150,8 @@ function Td({ children, bold, secondary, align }: TdProps): JSX.Element {
   return (
     <td style={{
       padding: '10px 14px',
-      color: secondary ? 'var(--az-text-secondary)' : 'var(--az-text-primary)',
-      fontWeight: bold ? 600 : 400,
+      color: secondary ? 'var(--text-secondary)' : 'var(--text-primary)',
+      fontWeight: bold ? 500 : 400,
       textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
     }}>
       {children}
@@ -166,9 +166,9 @@ function LevelBadge({ children }: { readonly children: string }): JSX.Element {
       padding: '2px 10px',
       borderRadius: 6,
       fontSize: 12,
-      fontWeight: 600,
-      background: 'var(--az-accent-soft)',
-      color: 'var(--az-accent)',
+      fontWeight: 500,
+      background: 'var(--accent-soft)',
+      color: 'var(--accent)',
     }}>
       {children}
     </span>
@@ -176,17 +176,17 @@ function LevelBadge({ children }: { readonly children: string }): JSX.Element {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; colorVar: string; bgVar: string }> = {
-  occupied: { label: 'Occupé', colorVar: 'var(--az-status-occupied)', bgVar: 'var(--az-status-occupied-bg)' },
-  vacant: { label: 'Vacant', colorVar: 'var(--az-status-vacant)', bgVar: 'var(--az-status-vacant-bg)' },
-  reserved: { label: 'Réservé', colorVar: 'var(--az-status-reserved)', bgVar: 'var(--az-status-reserved-bg)' },
-  under_fit_out: { label: 'En aménagement', colorVar: 'var(--az-status-fitout)', bgVar: 'var(--az-status-fitout-bg)' },
+  occupied: { label: 'Occupé', colorVar: 'var(--state-valid)', bgVar: 'var(--accent-soft)' },
+  vacant: { label: 'Vacant', colorVar: 'var(--state-warning)', bgVar: 'var(--accent-soft)' },
+  reserved: { label: 'Réservé', colorVar: 'var(--state-info)', bgVar: 'var(--accent-soft)' },
+  under_fit_out: { label: 'En aménagement', colorVar: 'var(--accent)', bgVar: 'var(--accent-soft)' },
 };
 
 function StatusBadge({ status }: { readonly status: string }): JSX.Element {
   const config = STATUS_CONFIG[status] ?? {
     label: status,
-    colorVar: 'var(--az-text-secondary)',
-    bgVar: 'var(--az-hover-bg)',
+    colorVar: 'var(--text-secondary)',
+    bgVar: 'var(--surface-sunken)',
   };
   return (
     <span style={{
@@ -196,7 +196,7 @@ function StatusBadge({ status }: { readonly status: string }): JSX.Element {
       padding: '3px 10px',
       borderRadius: 20,
       fontSize: 11.5,
-      fontWeight: 600,
+      fontWeight: 500,
       background: config.bgVar,
       color: config.colorVar,
     }}>

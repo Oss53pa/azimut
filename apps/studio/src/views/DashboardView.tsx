@@ -47,12 +47,12 @@ export function DashboardView(): JSX.Element {
       <h1 style={{
         margin: '0 0 4px',
         fontSize: 24,
-        fontWeight: 600,
-        color: 'var(--az-text-primary)',
+        fontWeight: 500,
+        color: 'var(--text-primary)',
       }}>
         Tableau de bord
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13.5, marginBottom: 24 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13.5, marginBottom: 24 }}>
         {site.site.name} — {site.organization.name}
       </p>
       <div style={{
@@ -84,9 +84,9 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
       style={{
         padding: 20,
         borderRadius: 12,
-        border: `1px solid ${warn ? 'var(--az-warn)' : 'var(--az-border)'}`,
-        background: warn ? 'var(--az-warn-bg)' : 'var(--az-card-bg)',
-        boxShadow: hovered ? 'var(--az-shadow-hover)' : 'var(--az-shadow-card)',
+        border: `1px solid ${warn ? 'var(--state-blocking)' : 'var(--border-hairline)'}`,
+        background: warn ? 'var(--accent-soft)' : 'var(--surface-panel)',
+        boxShadow: hovered ? 'var(--shadow-dialog)' : 'var(--shadow-float)',
         transition: 'box-shadow 0.2s, transform 0.2s',
         transform: hovered ? 'translateY(-2px)' : 'none',
         cursor: 'default',
@@ -98,7 +98,7 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
         alignItems: 'center',
         marginBottom: 8,
       }}>
-        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--az-text-secondary)' }}>
+        <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
           {label}
         </span>
         <span style={{ fontSize: 18 }}>{icon}</span>
@@ -106,7 +106,7 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
       <div style={{
         fontSize: 28,
         fontWeight: 700,
-        color: warn ? 'var(--az-warn)' : 'var(--az-text-primary)',
+        color: warn ? 'var(--state-blocking)' : 'var(--text-primary)',
       }}>
         {value}
       </div>

@@ -32,10 +32,10 @@ export function ChecksView(): JSX.Element {
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--az-text-primary)' }}>
+      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
         Controles qualite
       </h1>
-      <p style={{ color: 'var(--az-text-secondary)', fontSize: 13, marginBottom: 16 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
         {report.checksRun.length} controle{report.checksRun.length !== 1 ? 's' : ''} execute{report.checksRun.length !== 1 ? 's' : ''},
         {' '}{report.checksSkipped.length} ignore{report.checksSkipped.length !== 1 ? 's' : ''}
         {' '}(valeurs normatives manquantes)
@@ -46,10 +46,10 @@ export function ChecksView(): JSX.Element {
           marginBottom: 16,
           padding: '8px 12px',
           borderRadius: 6,
-          border: '1px solid var(--az-border)',
-          background: 'var(--az-card-bg)',
+          border: '1px solid var(--border-hairline)',
+          background: 'var(--surface-panel)',
           fontSize: 12,
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
         }}>
           Ignores : {report.checksSkipped.join(', ')}
         </div>
@@ -58,10 +58,10 @@ export function ChecksView(): JSX.Element {
       {report.findings.length === 0 ? (
         <div style={{
           padding: 32,
-          borderRadius: 8,
-          border: '2px dashed var(--az-border)',
+          borderRadius: 4,
+          border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
-          color: 'var(--az-text-secondary)',
+          color: 'var(--text-secondary)',
           fontSize: 14,
         }}>
           Aucune alerte detectee.
@@ -70,7 +70,7 @@ export function ChecksView(): JSX.Element {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
-              <tr style={{ borderBottom: '2px solid var(--az-border)' }}>
+              <tr style={{ borderBottom: '2px solid var(--border-hairline)' }}>
                 <Th>Severite</Th>
                 <Th>Code</Th>
                 <Th>Entite</Th>
@@ -79,7 +79,7 @@ export function ChecksView(): JSX.Element {
             </thead>
             <tbody>
               {report.findings.map((f, i) => (
-                <tr key={`${f.code}-${i}`} style={{ borderBottom: '1px solid var(--az-border)' }}>
+                <tr key={`${f.code}-${i}`} style={{ borderBottom: '1px solid var(--border-hairline)' }}>
                   <td style={{ padding: '8px 12px' }}>
                     <SeverityBadge severity={f.severity} />
                   </td>
@@ -87,14 +87,14 @@ export function ChecksView(): JSX.Element {
                     padding: '8px 12px',
                     fontFamily: 'monospace',
                     fontSize: 12,
-                    color: 'var(--az-text-primary)',
+                    color: 'var(--text-primary)',
                   }}>
                     {f.code}
                   </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--az-text-secondary)', fontSize: 12 }}>
+                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
                     {f.entity ? `${f.entity.kind}:${f.entity.id}` : '—'}
                   </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--az-text-primary)', fontSize: 12 }}>
+                  <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
                     {formatParams(f.params)}
                   </td>
                 </tr>
@@ -112,8 +112,8 @@ function Th({ children }: { readonly children: string }): JSX.Element {
     <th style={{
       textAlign: 'left',
       padding: '8px 12px',
-      fontWeight: 600,
-      color: 'var(--az-text-secondary)',
+      fontWeight: 500,
+      color: 'var(--text-secondary)',
       fontSize: 11,
       textTransform: 'uppercase',
       letterSpacing: '0.05em',
@@ -130,9 +130,9 @@ function SeverityBadge({ severity }: { readonly severity: string }): JSX.Element
       padding: '2px 8px',
       borderRadius: 4,
       fontSize: 11,
-      fontWeight: 600,
-      background: 'var(--az-active-bg)',
-      color: 'var(--az-active-text)',
+      fontWeight: 500,
+      background: 'var(--surface-sunken)',
+      color: 'var(--accent)',
     }}>
       {severity}
     </span>

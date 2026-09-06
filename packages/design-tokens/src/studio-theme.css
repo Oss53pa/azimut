@@ -1,99 +1,94 @@
+/* ─── Partie F tokens ─── */
+
 :root {
-  --az-text-primary: #1a1a2e;
-  --az-text-secondary: #6b7280;
-  --az-border: #e5e7eb;
-  --az-sidebar-bg: #f8f7ff;
-  --az-main-bg: #fafafa;
-  --az-card-bg: #ffffff;
-  --az-active-bg: #eef2ff;
-  --az-active-text: #4338ca;
-  --az-hover-bg: #f3f0ff;
-  --az-accent: #6366f1;
-  --az-accent-soft: #e0e7ff;
-  --az-status-occupied: #059669;
-  --az-status-occupied-bg: #ecfdf5;
-  --az-status-vacant: #d97706;
-  --az-status-vacant-bg: #fffbeb;
-  --az-status-reserved: #7c3aed;
-  --az-status-reserved-bg: #f5f3ff;
-  --az-status-fitout: #2563eb;
-  --az-status-fitout-bg: #eff6ff;
-  --az-warn: #dc2626;
-  --az-warn-bg: #fef2f2;
-  --az-row-hover: #f5f3ff;
-  --az-row-stripe: #fafaff;
-  --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.12);
-  --az-sidebar-brand: #4338ca;
-  --az-snap-indicator: #6366f1;
-  --az-tool-preview: #6366f1;
-  --az-selection-handle: #4338ca;
-  --az-font-body: 'Dosis', system-ui, -apple-system, sans-serif;
-  --az-font-title: 'Grand Hotel', cursive;
+  /* Surfaces – Papier (F2) */
+  --surface-page: #FBFAF8;
+  --surface-panel: #FFFFFF;
+  --surface-canvas: #F7F5F1;
+  --surface-sunken: #F2EEE8;
+
+  /* Borders */
+  --border-hairline: #E3DFD8;
+  --border-strong: #CFC8BC;
+  --border-interactive: #8E867C;
+
+  /* Text */
+  --text-primary: #1C1F24;
+  --text-secondary: #5A606B;
+  --text-muted: #656B75;
+
+  /* Accent */
+  --accent: #17457A;
+  --accent-soft: #EDF2F8;
+  --accent-secondary: #26695C;
+
+  /* State (F2.3) */
+  --state-blocking: #B32F26;
+  --state-warning: #96560A;
+  --state-valid: #2A7047;
+  --state-info: #2B6CB0;
+
+  /* Radii (F2.2) */
+  --radius-small: 4px;
+  --radius-floating: 6px;
+
+  /* Motion (F11) */
+  --duration-state: 120ms;
+  --duration-float: 200ms;
+  --duration-panel: 240ms;
+
+  /* Shadow — tooltip and dialog only (F6) */
+  --shadow-float: 0 1px 3px rgba(28, 31, 36, 0.10);
+  --shadow-dialog: 0 2px 6px rgba(28, 31, 36, 0.12);
+
+  /* Typography (F2.1) */
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  /* Editor-specific — derived from design tokens */
+  --az-snap-indicator: var(--accent);
+  --az-tool-preview: var(--accent);
+  --az-selection-handle: var(--text-primary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --az-text-primary: #e5e7eb;
-    --az-text-secondary: #9ca3af;
-    --az-border: #374151;
-    --az-sidebar-bg: #0f0e1a;
-    --az-main-bg: #1a1a2e;
-    --az-card-bg: #232340;
-    --az-active-bg: #312e81;
-    --az-active-text: #a5b4fc;
-    --az-hover-bg: #1e1b4b;
-    --az-accent: #818cf8;
-    --az-accent-soft: #312e81;
-    --az-status-occupied: #34d399;
-    --az-status-occupied-bg: #064e3b;
-    --az-status-vacant: #fbbf24;
-    --az-status-vacant-bg: #78350f;
-    --az-status-reserved: #a78bfa;
-    --az-status-reserved-bg: #4c1d95;
-    --az-status-fitout: #60a5fa;
-    --az-status-fitout-bg: #1e3a5f;
-    --az-warn: #f87171;
-    --az-warn-bg: #450a0a;
-    --az-row-hover: #1e1b4b;
-    --az-row-stripe: #1f1f35;
-    --az-snap-indicator: #a5b4fc;
-    --az-tool-preview: #a5b4fc;
-    --az-selection-handle: #818cf8;
-    --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
-    --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
-    --az-sidebar-brand: #a5b4fc;
-  }
+/* ─── Instrument theme (dark) ─── */
+
+:root[data-theme="instrument"] {
+  --surface-page: #16181C;
+  --surface-panel: #1E2126;
+  --surface-canvas: #F7F5F1;
+  --surface-sunken: #24272D;
+
+  --border-hairline: #32363D;
+  --border-strong: #4A4F58;
+  --border-interactive: #8A9099;
+
+  --text-primary: #E9E7E3;
+  --text-secondary: #A6ADB7;
+  --text-muted: #7C838D;
+
+  --accent: #8FB4E0;
+  --accent-soft: #20303F;
+  --accent-secondary: #77C4B2;
+
+  --state-blocking: #E88478;
+  --state-warning: #DCA24A;
+  --state-valid: #63C08A;
+  --state-info: #79ACDF;
 }
 
-:root[data-theme="dark"] {
-  --az-text-primary: #e5e7eb;
-  --az-text-secondary: #9ca3af;
-  --az-border: #374151;
-  --az-sidebar-bg: #0f0e1a;
-  --az-main-bg: #1a1a2e;
-  --az-card-bg: #232340;
-  --az-active-bg: #312e81;
-  --az-active-text: #a5b4fc;
-  --az-hover-bg: #1e1b4b;
-  --az-accent: #818cf8;
-  --az-accent-soft: #312e81;
-  --az-status-occupied: #34d399;
-  --az-status-occupied-bg: #064e3b;
-  --az-status-vacant: #fbbf24;
-  --az-status-vacant-bg: #78350f;
-  --az-status-reserved: #a78bfa;
-  --az-status-reserved-bg: #4c1d95;
-  --az-status-fitout: #60a5fa;
-  --az-status-fitout-bg: #1e3a5f;
-  --az-warn: #f87171;
-  --az-warn-bg: #450a0a;
-  --az-row-hover: #1e1b4b;
-  --az-row-stripe: #1f1f35;
-  --az-snap-indicator: #a5b4fc;
-  --az-tool-preview: #a5b4fc;
-  --az-selection-handle: #818cf8;
-  --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
-  --az-sidebar-brand: #a5b4fc;
+/* ─── Kiosk tokens (F13) ─── */
+
+.az-kiosk {
+  --k-bg: #FFFFFF;
+  --k-fg: #1C1F24;
+  --k-line: #CFC8BC;
+  --k-sunken: #F2EEE8;
+}
+
+.az-kiosk[data-hc="1"] {
+  --k-bg: #000000;
+  --k-fg: #FFFFFF;
+  --k-line: #FFFFFF;
+  --k-sunken: #000000;
 }

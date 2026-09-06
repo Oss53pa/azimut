@@ -5,11 +5,17 @@ import {
   WCAG_AA_NORMAL,
   WCAG_AA_LARGE,
 } from '../contrast.js';
-import { themePapier, stateColors } from '../tokens.js';
+import { themePapier, stateColorsPapier } from '../tokens.js';
 
+/**
+ * Partie F specifies five surfaces that can carry text.
+ * Contrast is computed on all of them (F2.3).
+ */
 const surfaces = [
   { key: 'surface-page', hex: themePapier['surface-page'] },
   { key: 'surface-panel', hex: themePapier['surface-panel'] },
+  { key: 'surface-canvas', hex: themePapier['surface-canvas'] },
+  { key: 'surface-sunken', hex: themePapier['surface-sunken'] },
 ] as const;
 
 const foregrounds = [
@@ -17,10 +23,10 @@ const foregrounds = [
   { key: 'text-secondary', hex: themePapier['text-secondary'] },
   { key: 'accent', hex: themePapier['accent'] },
   { key: 'accent-secondary', hex: themePapier['accent-secondary'] },
-  { key: 'state-blocking', hex: stateColors['state-blocking'] },
-  { key: 'state-warning', hex: stateColors['state-warning'] },
-  { key: 'state-valid', hex: stateColors['state-valid'] },
-  { key: 'state-info', hex: stateColors['state-info'] },
+  { key: 'state-blocking', hex: stateColorsPapier['state-blocking'] },
+  { key: 'state-warning', hex: stateColorsPapier['state-warning'] },
+  { key: 'state-valid', hex: stateColorsPapier['state-valid'] },
+  { key: 'state-info', hex: stateColorsPapier['state-info'] },
 ] as const;
 
 describe('relativeLuminance', () => {
@@ -45,10 +51,7 @@ describe('relativeLuminance', () => {
   });
 
   it('handles the sRGB linearization threshold boundary', () => {
-    // 0.04045 / 255 ≈ channel value 10 (0x0a)
-    // Just below threshold: channel 10 → 0.04045... / 12.92
     const belowThreshold = relativeLuminance('#0a0a0a');
-    // Just above threshold: channel 11 → ((0.043137..) + 0.055) / 1.055) ^ 2.4
     const aboveThreshold = relativeLuminance('#0b0b0b');
     expect(belowThreshold).toBeGreaterThan(0);
     expect(aboveThreshold).toBeGreaterThan(belowThreshold);
@@ -75,9 +78,6 @@ describe('contrastRatio known values', () => {
   });
 
   it('mid-gray on white produces a plausible ratio', () => {
-    // #777777 relative luminance ≈ 0.184
-    // White ≈ 1.0
-    // Ratio = (1.0 + 0.05) / (0.184 + 0.05) ≈ 4.48
     const ratio = contrastRatio('#777777', '#ffffff');
     expect(ratio).toBeGreaterThan(4);
     expect(ratio).toBeLessThan(5);
@@ -92,7 +92,6 @@ describe('parseHex edge cases', () => {
   });
 
   it('returns NaN for 3-char shorthand hex', () => {
-    // parseHex expects 6-char hex; 3-char shorthand is not expanded
     const lum = relativeLuminance('#fff');
     expect(lum).toBeNaN();
   });
@@ -109,16 +108,13 @@ describe('WCAG_AA_LARGE threshold', () => {
   });
 
   it('a pair can pass AA-large but fail AA-normal', () => {
-    // #767676 on white → ratio ≈ 4.54 (passes AA-normal)
-    // #949494 on white → ratio ≈ 2.8 (fails AA-normal but below AA-large too)
-    // #888888 on white → ratio ≈ 3.54 (passes AA-large, fails AA-normal)
     const ratio = contrastRatio('#888888', '#ffffff');
     expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
     expect(ratio).toBeLessThan(WCAG_AA_NORMAL);
   });
 });
 
-describe('WCAG AA contrast (A11.1)', () => {
+describe('WCAG AA contrast — Papier theme (F2.3)', () => {
   for (const fg of foregrounds) {
     for (const bg of surfaces) {
       it(`${fg.key} on ${bg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
@@ -126,5 +122,14 @@ describe('WCAG AA contrast (A11.1)', () => {
         expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
       });
     }
+  }
+});
+
+describe('border-interactive meets 3.0 threshold (F2.4)', () => {
+  for (const bg of surfaces) {
+    it(`border-interactive on ${bg.key} meets ${WCAG_AA_LARGE}:1`, () => {
+      const ratio = contrastRatio(themePapier['border-interactive'], bg.hex);
+      expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
+    });
   }
 });

@@ -160,7 +160,7 @@ export function Viewport({
         height,
         display: 'block',
         cursor: spaceHeld.current ? 'grab' : 'default',
-        background: 'var(--az-main-bg)',
+        background: 'var(--surface-page)',
       }}
       aria-label={ariaLabel}
       role="img"

@@ -28,8 +28,10 @@ import { EMPTY_CLIPBOARD } from './clipboard.js';
 import type { ClipboardPayload, PasteResult } from './clipboard.js';
 import { AlignmentPanel } from './AlignmentPanel.js';
 import type { AlignAxis, DistributeAxis, ZOrderOp } from './alignment.js';
+import { ShortcutHelpPanel } from './ShortcutHelpPanel.js';
+import { useShortcuts } from './use-shortcuts.js';
 import { StatusBar } from './StatusBar.js';
-import type { ToolState } from './tool-state.js';
+import type { ToolId, ToolState } from './tool-state.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -136,6 +138,32 @@ export function EditorView(): JSX.Element {
     return footprintsToSceneObjects(levelFootprints);
   }, [site, selectedLevel]);
 
+  // Shortcut help panel
+  const [showShortcuts, setShowShortcuts] = useState(false);
+
+  const handleToolSwitch = useCallback((toolId: ToolId) => {
+    // Stub: dispatch tool change to EditorCanvas
+    void toolId;
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    dispatchSelection({ type: 'select_all', ids: sceneObjects.map(o => o.id) });
+  }, [sceneObjects]);
+
+  const handleDeselect = useCallback(() => {
+    dispatchSelection({ type: 'clear' });
+    setShowShortcuts(false);
+  }, []);
+
+  // Central shortcut dispatcher (E16)
+  useShortcuts({
+    onUndo: undoRedo.undo,
+    onRedo: undoRedo.redo,
+    onSelectAll: handleSelectAll,
+    onDeselect: handleDeselect,
+    onToolSwitch: handleToolSwitch,
+  });
+
   // Initial view to fit level content
   const initialView = useMemo((): ViewState | undefined => {
     if (selectedLevel === '') return undefined;
@@ -199,11 +227,11 @@ export function EditorView(): JSX.Element {
             onClick={() => handleLevelChange(l.id)}
             style={{
               padding: '6px 14px',
-              border: '1px solid var(--az-border)',
+              border: '1px solid var(--border-hairline)',
               borderRadius: 6,
-              background: selectedLevel === l.id ? 'var(--az-active-bg)' : 'var(--az-card-bg)',
-              color: selectedLevel === l.id ? 'var(--az-active-text)' : 'var(--az-text-primary)',
-              fontWeight: selectedLevel === l.id ? 600 : 400,
+              background: selectedLevel === l.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
+              color: selectedLevel === l.id ? 'var(--accent)' : 'var(--text-primary)',
+              fontWeight: selectedLevel === l.id ? 500 : 400,
               fontSize: 13,
               cursor: 'pointer',
             }}
@@ -235,7 +263,7 @@ export function EditorView(): JSX.Element {
             alignItems: 'center',
             justifyContent: 'center',
             height: '100%',
-            color: 'var(--az-text-secondary)',
+            color: 'var(--text-secondary)',
             fontSize: 14,
           }}>
             Sélectionnez un niveau.
@@ -260,6 +288,12 @@ export function EditorView(): JSX.Element {
         canRedo={undoRedo.canRedo}
         onUndo={undoRedo.undo}
         onRedo={undoRedo.redo}
+      />
+
+      {/* Shortcut help panel (E16) */}
+      <ShortcutHelpPanel
+        visible={showShortcuts}
+        onClose={() => setShowShortcuts(false)}
       />
     </div>
   );

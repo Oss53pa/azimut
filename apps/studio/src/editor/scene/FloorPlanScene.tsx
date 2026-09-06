@@ -110,8 +110,8 @@ export function FloorPlanScene({
               data-id={fp.id}
               data-kind={fp.kind}
               points={points}
-              fill="var(--az-card-bg)"
-              stroke={isSelected ? 'var(--az-active-bg)' : 'var(--az-text-secondary)'}
+              fill="var(--surface-panel)"
+              stroke={isSelected ? 'var(--surface-sunken)' : 'var(--text-secondary)'}
               strokeWidth={isSelected ? 0.15 : 0.05}
               style={{ cursor: 'pointer' }}
               role="graphics-symbol"
@@ -139,7 +139,7 @@ export function FloorPlanScene({
                 y1={formatSvg(from.position.y_m)}
                 x2={formatSvg(to.position.x_m)}
                 y2={formatSvg(to.position.y_m)}
-                stroke={isSelected ? 'var(--az-active-bg)' : 'var(--az-text-secondary)'}
+                stroke={isSelected ? 'var(--surface-sunken)' : 'var(--text-secondary)'}
                 strokeWidth={isSelected ? 0.15 : 0.08}
                 strokeDasharray={edge.evacuation_route ? '0.3 0.15' : undefined}
                 style={{ cursor: 'pointer' }}
@@ -158,8 +158,8 @@ export function FloorPlanScene({
           const r = nodeRadius(node.kind);
           const isSelected = selectedSet.has(node.id);
           const fill = SAFETY_KINDS.has(node.kind)
-            ? 'var(--az-active-text)'
-            : 'var(--az-active-bg)';
+            ? 'var(--accent)'
+            : 'var(--surface-sunken)';
 
           return (
             <circle
@@ -170,7 +170,7 @@ export function FloorPlanScene({
               cy={formatSvg(node.position.y_m)}
               r={r}
               fill={fill}
-              stroke={isSelected ? 'var(--az-active-text)' : 'var(--az-text-primary)'}
+              stroke={isSelected ? 'var(--accent)' : 'var(--text-primary)'}
               strokeWidth={isSelected ? 0.1 : 0.03}
               style={{ cursor: 'pointer' }}
               role="graphics-symbol"
@@ -197,7 +197,7 @@ export function FloorPlanScene({
                 y={formatSvg(node.position.y_m - 1)}
                 textAnchor="middle"
                 fontSize={0.8}
-                fill="var(--az-text-primary)"
+                fill="var(--text-primary)"
                 style={{ cursor: 'pointer', pointerEvents: 'all' }}
                 role="graphics-symbol"
                 aria-label={`Destination ${dest.occupant_name}`}

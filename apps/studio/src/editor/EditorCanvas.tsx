@@ -233,7 +233,7 @@ export function EditorCanvas({
             height: '100%',
             display: 'block',
             cursor,
-            background: 'var(--az-main-bg)',
+            background: 'var(--surface-page)',
           }}
           aria-label={ariaLabel}
           role="img"

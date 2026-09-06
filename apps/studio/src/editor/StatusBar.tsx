@@ -41,10 +41,10 @@ const BAR_STYLE: React.CSSProperties = {
   alignItems: 'center',
   gap: 16,
   padding: '4px 12px',
-  background: 'var(--az-sidebar-bg)',
-  borderTop: '1px solid var(--az-border)',
+  background: 'var(--surface-panel)',
+  borderTop: '1px solid var(--border-hairline)',
   fontSize: 11,
-  color: 'var(--az-text-secondary)',
+  color: 'var(--text-secondary)',
   flexShrink: 0,
   minHeight: 28,
 };
@@ -56,7 +56,7 @@ const BUTTON_STYLE: React.CSSProperties = {
   fontSize: 11,
   padding: '2px 6px',
   borderRadius: 3,
-  color: 'var(--az-text-secondary)',
+  color: 'var(--text-secondary)',
 };
 
 const DISABLED_BUTTON: React.CSSProperties = {
@@ -99,7 +99,7 @@ export function StatusBar({
       </span>
 
       {/* Separator */}
-      <span style={{ color: 'var(--az-border)' }}>|</span>
+      <span style={{ color: 'var(--border-hairline)' }}>|</span>
 
       {/* Cursor position */}
       {cursorPosition !== null ? (
@@ -114,8 +114,8 @@ export function StatusBar({
       {/* Snap indicator */}
       {snapResult.target !== null && (
         <>
-          <span style={{ color: 'var(--az-border)' }}>|</span>
-          <span style={{ color: 'var(--az-accent)' }}>
+          <span style={{ color: 'var(--border-hairline)' }}>|</span>
+          <span style={{ color: 'var(--accent)' }}>
             ◆ {snapResult.target.kind}
           </span>
         </>

@@ -33,14 +33,14 @@ const TOOLBAR_STYLE: React.CSSProperties = {
   flexDirection: 'column',
   gap: '2px',
   padding: '6px',
-  background: 'var(--az-sidebar-bg)',
-  borderRight: '1px solid var(--az-border)',
+  background: 'var(--surface-panel)',
+  borderRight: '1px solid var(--border-hairline)',
   minWidth: '44px',
 };
 
 const GROUP_DIVIDER_STYLE: React.CSSProperties = {
   height: '1px',
-  background: 'var(--az-border)',
+  background: 'var(--border-hairline)',
   margin: '4px 0',
 };
 
@@ -55,9 +55,9 @@ function buttonStyle(active: boolean): React.CSSProperties {
     borderRadius: '4px',
     cursor: 'pointer',
     fontSize: '11px',
-    fontWeight: active ? 600 : 400,
-    background: active ? 'var(--az-active-bg)' : 'transparent',
-    color: active ? 'var(--az-active-text)' : 'var(--az-text-primary)',
+    fontWeight: active ? 500 : 400,
+    background: active ? 'var(--surface-sunken)' : 'transparent',
+    color: active ? 'var(--accent)' : 'var(--text-primary)',
   };
 }
 
