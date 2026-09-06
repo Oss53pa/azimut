@@ -127,6 +127,12 @@ describe('E16 — shortcut matching', () => {
     });
   });
 
+  describe('help shortcuts', () => {
+    it('Shift+? matches show_help', () => {
+      expect(matchShortcut(event('?', { shiftKey: true }), DEFAULT_SHORTCUTS)).toBe('show_help');
+    });
+  });
+
   describe('no match', () => {
     it('unregistered key returns null', () => {
       expect(matchShortcut(event('q'), DEFAULT_SHORTCUTS)).toBeNull();

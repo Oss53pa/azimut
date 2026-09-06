@@ -1,11 +1,13 @@
 /**
- * E3 + E5 + E7 + E8 — Full editor view.
+ * E3 + E5 + E7 + E8 + E16 — Full editor view.
  *
  * Assembles EditorCanvas with FloorPlanScene, editing context,
- * undo/redo, and status bar.
+ * undo/redo, clipboard, alignment, and central shortcut dispatcher.
  *
  * This is the top-level view for editing site geometry (context 1).
  * Replaces the read-only FloorPlansView when editing mode is active.
+ *
+ * All keyboard handling converges in useShortcuts (E16).
  */
 
 import {
@@ -13,11 +15,13 @@ import {
   useCallback,
   useMemo,
   useReducer,
+  useRef,
   useState,
 } from 'react';
 import type { Point, ViewState, Footprint } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { EditorCanvas } from './EditorCanvas.js';
+import type { EditorCanvasApi } from './EditorCanvas.js';
 import type { SceneObject } from './snap-integration.js';
 import { FloorPlanScene } from './scene/FloorPlanScene.js';
 import { selectionReducer, EMPTY_SELECTION } from './selection.js';
@@ -67,11 +71,20 @@ export function EditorView(): JSX.Element {
   const [cursorPosition] = useState<Point | null>(null);
   const [clipboard, setClipboard] = useState(EMPTY_CLIPBOARD);
 
+  // Tool switch requested by keyboard shortcut (E16)
+  const [requestedTool, setRequestedTool] = useState<ToolId | undefined>(undefined);
+
+  // Canvas API ref — zoom functions exposed by EditorCanvas
+  const canvasApiRef = useRef<EditorCanvasApi | null>(null);
+  const handleCanvasReady = useCallback((api: EditorCanvasApi) => {
+    canvasApiRef.current = api;
+  }, []);
+
   const undoRedo = useUndoRedo({ history, dispatchHistory });
 
-  // Clipboard integration
+  // Clipboard integration — actions only, keyboard via useShortcuts (E16)
   const buildPayload = useCallback(
-    (/** selectedIds */ _ids: readonly string[]): ClipboardPayload | null => {
+    (_ids: readonly string[]): ClipboardPayload | null => {
       // Stub: real payload from selected footprints/objects will be
       // wired when scene objects carry full data.
       void _ids;
@@ -102,9 +115,7 @@ export function EditorView(): JSX.Element {
     dispatchSelection({ type: 'clear' });
   }, []);
 
-  // Clipboard hook registers Ctrl+C/X/V listeners as a side effect.
-  // The returned actions are available for toolbar buttons when added.
-  useClipboard({
+  const clipboardActions = useClipboard({
     clipboard,
     setClipboard,
     selection,
@@ -142,8 +153,7 @@ export function EditorView(): JSX.Element {
   const [showShortcuts, setShowShortcuts] = useState(false);
 
   const handleToolSwitch = useCallback((toolId: ToolId) => {
-    // Stub: dispatch tool change to EditorCanvas
-    void toolId;
+    setRequestedTool(toolId);
   }, []);
 
   const handleSelectAll = useCallback(() => {
@@ -155,13 +165,32 @@ export function EditorView(): JSX.Element {
     setShowShortcuts(false);
   }, []);
 
-  // Central shortcut dispatcher (E16)
+  const handleDelete = useCallback(() => {
+    if (selection.selectedIds.length === 0) return;
+    // Stub: create delete commands for selected objects.
+    // When wired, this will dispatch a Command to the history reducer.
+    dispatchSelection({ type: 'clear' });
+  }, [selection.selectedIds]);
+
+  const handleShowHelp = useCallback(() => {
+    setShowShortcuts(prev => !prev);
+  }, []);
+
+  // Central shortcut dispatcher (E16) — sole keyboard handler
   useShortcuts({
     onUndo: undoRedo.undo,
     onRedo: undoRedo.redo,
+    onCopy: clipboardActions.copy,
+    onCut: clipboardActions.cut,
+    onPaste: clipboardActions.paste,
+    onDelete: handleDelete,
     onSelectAll: handleSelectAll,
     onDeselect: handleDeselect,
     onToolSwitch: handleToolSwitch,
+    onShowHelp: handleShowHelp,
+    onZoomIn: () => canvasApiRef.current?.zoomIn(),
+    onZoomOut: () => canvasApiRef.current?.zoomOut(),
+    onZoomFit: () => canvasApiRef.current?.zoomFit(),
   });
 
   // Initial view to fit level content
@@ -247,7 +276,9 @@ export function EditorView(): JSX.Element {
           <EditorCanvas
             initialView={initialView}
             sceneObjects={sceneObjects}
+            requestedTool={requestedTool}
             onToolChange={handleToolChange}
+            onReady={handleCanvasReady}
             ariaLabel={`Éditeur: ${sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel}`}
           >
             <FloorPlanScene

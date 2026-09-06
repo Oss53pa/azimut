@@ -30,12 +30,22 @@ import type { ViewState, ViewportSize } from '@azimut/core-model';
 import { viewTransformSvg } from '@azimut/core-model';
 import { viewReducer, DEFAULT_VIEW } from './viewport-state.js';
 import { createToolReducer, DEFAULT_TOOL_STATE } from './tool-state.js';
-import type { ToolAction, ToolState } from './tool-state.js';
+import type { ToolAction, ToolId, ToolState } from './tool-state.js';
 import { Toolbar } from './Toolbar.js';
 import { ToolPreviewRenderer } from './scene/ToolPreviewRenderer.js';
 import { SnapIndicator } from './scene/SnapIndicator.js';
 import { useToolGesture } from './use-tool-gesture.js';
 import type { SceneObject } from './snap-integration.js';
+
+// ---------------------------------------------------------------------------
+// Public API — exposed via onReady callback
+// ---------------------------------------------------------------------------
+
+export type EditorCanvasApi = {
+  readonly zoomIn: () => void;
+  readonly zoomOut: () => void;
+  readonly zoomFit: () => void;
+};
 
 // ---------------------------------------------------------------------------
 // Props
@@ -48,10 +58,14 @@ type EditorCanvasProps = {
   readonly sceneObjects?: readonly SceneObject[] | undefined;
   /** Initial view state. */
   readonly initialView?: ViewState | undefined;
+  /** Tool to switch to (set by parent, e.g. from keyboard shortcut). */
+  readonly requestedTool?: ToolId | undefined;
   /** Callback when view changes. */
   readonly onViewChange?: ((view: ViewState) => void) | undefined;
   /** Callback when tool state changes. */
   readonly onToolChange?: ((state: ToolState) => void) | undefined;
+  /** Called once with the canvas API so the parent can trigger zoom etc. */
+  readonly onReady?: ((api: EditorCanvasApi) => void) | undefined;
   /** Accessibility label for the SVG viewport. */
   readonly ariaLabel?: string | undefined;
 };
@@ -81,8 +95,10 @@ export function EditorCanvas({
   children,
   sceneObjects = [],
   initialView,
+  requestedTool,
   onViewChange,
   onToolChange,
+  onReady,
   ariaLabel = 'Éditeur de plan',
 }: EditorCanvasProps): JSX.Element {
   // ---- View state ----
@@ -102,6 +118,17 @@ export function EditorCanvas({
 
   useEffect(() => { onToolChange?.(toolState); }, [toolState, onToolChange]);
 
+  // Respond to tool switch requested by parent (e.g. keyboard shortcut via E16)
+  useEffect(() => {
+    if (requestedTool !== undefined && requestedTool !== toolState.currentTool) {
+      dispatchToolRaw({ type: 'set_tool', tool: requestedTool });
+    }
+  }, [requestedTool, toolState.currentTool]);
+
+  // ---- Scene objects ref (stable access for zoom fit) ----
+  const sceneObjectsRef = useRef(sceneObjects);
+  sceneObjectsRef.current = sceneObjects;
+
   // ---- Viewport measurement ----
   const svgRef = useRef<SVGSVGElement>(null);
   const getViewport = useCallback((): ViewportSize => {
@@ -109,6 +136,51 @@ export function EditorCanvas({
     if (el === null) return { width_px: 800, height_px: 600 };
     return { width_px: el.clientWidth, height_px: el.clientHeight };
   }, []);
+
+  // ---- Zoom API (exposed via onReady) ----
+  const zoomIn = useCallback(() => {
+    const vp = getViewport();
+    dispatchView({
+      type: 'zoom', steps: 1,
+      pivot: { x: vp.width_px / 2, y: vp.height_px / 2 },
+      viewport: vp,
+    });
+  }, [getViewport]);
+
+  const zoomOut = useCallback(() => {
+    const vp = getViewport();
+    dispatchView({
+      type: 'zoom', steps: -1,
+      pivot: { x: vp.width_px / 2, y: vp.height_px / 2 },
+      viewport: vp,
+    });
+  }, [getViewport]);
+
+  const zoomFit = useCallback(() => {
+    const vp = getViewport();
+    const objs = sceneObjectsRef.current;
+    if (objs.length === 0) return;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const obj of objs) {
+      for (const v of obj.vertices) {
+        if (v.x_m < minX) minX = v.x_m;
+        if (v.y_m < minY) minY = v.y_m;
+        if (v.x_m > maxX) maxX = v.x_m;
+        if (v.y_m > maxY) maxY = v.y_m;
+      }
+    }
+    if (minX === Infinity) return;
+    dispatchView({
+      type: 'fit',
+      bounds: { minX, minY, maxX, maxY },
+      viewport: vp,
+      padding_px: 40,
+    });
+  }, [getViewport]);
+
+  useEffect(() => {
+    onReady?.({ zoomIn, zoomOut, zoomFit });
+  }, [onReady, zoomIn, zoomOut, zoomFit]);
 
   // ---- Pan state ----
   const spaceHeld = useRef(false);
@@ -175,28 +247,13 @@ export function EditorCanvas({
     toolPointerUp(e);
   }, [toolPointerUp]);
 
-  // ---- Keyboard: space for pan, +/- for zoom, tool shortcuts in Toolbar ----
+  // ---- Keyboard: space for pan (gesture modifier, not a shortcut) ----
+  // Zoom +/- is handled centrally by useShortcuts (E16).
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent): void => {
       if (e.key === ' ') {
         e.preventDefault();
         spaceHeld.current = true;
-      }
-      if (e.key === '+' || e.key === '=') {
-        const vp = getViewport();
-        dispatchView({
-          type: 'zoom', steps: 1,
-          pivot: { x: vp.width_px / 2, y: vp.height_px / 2 },
-          viewport: vp,
-        });
-      }
-      if (e.key === '-') {
-        const vp = getViewport();
-        dispatchView({
-          type: 'zoom', steps: -1,
-          pivot: { x: vp.width_px / 2, y: vp.height_px / 2 },
-          viewport: vp,
-        });
       }
     };
 
@@ -210,7 +267,7 @@ export function EditorCanvas({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [getViewport]);
+  }, []);
 
   // ---- Render ----
   const transform = viewTransformSvg(view, viewport);

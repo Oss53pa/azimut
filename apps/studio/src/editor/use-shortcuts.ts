@@ -43,6 +43,9 @@ export type ShortcutHandlers = {
 
   // Tools
   readonly onToolSwitch?: ((toolId: ToolId) => void) | undefined;
+
+  // Help
+  readonly onShowHelp?: (() => void) | undefined;
 };
 
 // ---------------------------------------------------------------------------
@@ -100,6 +103,9 @@ export function useShortcuts(handlers: ShortcutHandlers): void {
       case 'zoom_in':   handlers.onZoomIn?.();   return true;
       case 'zoom_out':  handlers.onZoomOut?.();  return true;
       case 'zoom_fit':  handlers.onZoomFit?.();  return true;
+
+      // Help
+      case 'show_help': handlers.onShowHelp?.();  return true;
 
       default: {
         // Tool switch

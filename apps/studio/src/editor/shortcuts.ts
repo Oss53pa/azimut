@@ -81,6 +81,9 @@ export const DEFAULT_SHORTCUTS: readonly ShortcutDef[] = [
   { action: 'tool_text',   label: 'Outil texte',             key: 't',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
   { action: 'tool_node',   label: 'Outil placement de nœud', key: 'n',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
   { action: 'tool_measure',label: 'Outil mesure',            key: 'm',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+
+  // File / help
+  { action: 'show_help',  label: 'Raccourcis clavier',       key: '?',      modifiers: SHIFT,      category: 'file',      destructive: false },
 ];
 
 // ---------------------------------------------------------------------------

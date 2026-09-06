@@ -122,6 +122,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 const CATEGORY_ORDER: readonly string[] = ['edit', 'selection', 'view', 'tool', 'file'];
 
 function formatKey(def: ShortcutDef): string {
+  // ? is typed as Shift+/ but displayed as just "?"
+  if (def.key === '?') return '?';
+
   const parts: string[] = [];
   if (def.modifiers.ctrl) parts.push('Ctrl');
   if (def.modifiers.shift) parts.push('Maj');

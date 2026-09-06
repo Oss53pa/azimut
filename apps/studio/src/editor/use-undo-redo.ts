@@ -1,13 +1,14 @@
 /**
- * E5 — Undo/redo keyboard hook.
+ * E5 — Undo/redo actions.
  *
- * Listens for Ctrl+Z (undo) and Ctrl+Shift+Z / Ctrl+Y (redo).
- * Dispatches to the history reducer.
+ * Provides undo/redo callbacks and state queries.
+ * Keyboard shortcuts are handled by useShortcuts (E16) — this hook
+ * only exposes the action functions.
  *
  * Separated from EditorCanvas to keep file sizes under 400 lines (A2.4).
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { HistoryAction, HistoryState } from './command.js';
 import { canUndo, canRedo } from './command.js';
 
@@ -24,7 +25,9 @@ type UndoRedoActions = {
 };
 
 /**
- * Hook that provides undo/redo actions and listens for keyboard shortcuts.
+ * Hook that provides undo/redo actions.
+ *
+ * Keyboard binding is handled centrally by useShortcuts (E16).
  */
 export function useUndoRedo(options: UseUndoRedoOptions): UndoRedoActions {
   const { history, dispatchHistory } = options;
@@ -39,33 +42,6 @@ export function useUndoRedo(options: UseUndoRedoOptions): UndoRedoActions {
     if (canRedo(history)) {
       dispatchHistory({ type: 'redo' });
     }
-  }, [history, dispatchHistory]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      const isCtrl = e.ctrlKey || e.metaKey;
-      if (!isCtrl) return;
-
-      // Skip if in text input
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-      if (e.key === 'z' && !e.shiftKey) {
-        e.preventDefault();
-        if (canUndo(history)) {
-          dispatchHistory({ type: 'undo' });
-        }
-      } else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') {
-        e.preventDefault();
-        if (canRedo(history)) {
-          dispatchHistory({ type: 'redo' });
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
   }, [history, dispatchHistory]);
 
   return {

@@ -17,3 +17,6 @@ dist/
 .idea
 .DS_Store
 *.sw?
+
+# Claude Code worktrees
+.claude/worktrees/

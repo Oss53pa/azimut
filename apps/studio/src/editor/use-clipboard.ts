@@ -1,8 +1,11 @@
 /**
- * E7.3 — Clipboard keyboard hook.
+ * E7.3 — Clipboard actions hook.
  *
- * Listens for Ctrl+C (copy), Ctrl+X (cut), Ctrl+V (paste).
- * Bridges keyboard events to the clipboard pure functions.
+ * Provides copy, cut, and paste callbacks bridging
+ * the internal ClipboardState to clipboard pure functions.
+ *
+ * Keyboard shortcuts are handled by useShortcuts (E16) — this hook
+ * only exposes the action functions.
  *
  * The hook does NOT access the browser clipboard API — it operates
  * on the internal ClipboardState. Browser clipboard integration
@@ -11,7 +14,7 @@
  * Separated from EditorView to keep file sizes under 400 lines (A2.4).
  */
 
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import type { SelectionState } from './selection.js';
 import type {
   ClipboardState,
@@ -30,7 +33,7 @@ import type { Point } from '@azimut/core-model';
 // Types
 // ---------------------------------------------------------------------------
 
-type UseClipboardOptions = {
+export type UseClipboardOptions = {
   readonly clipboard: ClipboardState;
   readonly setClipboard: (state: ClipboardState) => void;
   readonly selection: SelectionState;
@@ -46,7 +49,7 @@ type UseClipboardOptions = {
   readonly onCut: (selectedIds: readonly string[]) => void;
 };
 
-type ClipboardActions = {
+export type ClipboardActions = {
   readonly copy: () => void;
   readonly cut: () => void;
   readonly paste: () => PasteResult | null;
@@ -58,7 +61,9 @@ type ClipboardActions = {
 // ---------------------------------------------------------------------------
 
 /**
- * Hook that provides clipboard actions and listens for keyboard shortcuts.
+ * Hook that provides clipboard actions.
+ *
+ * Keyboard binding is handled centrally by useShortcuts (E16).
  */
 export function useClipboard(options: UseClipboardOptions): ClipboardActions {
   const {
@@ -95,32 +100,6 @@ export function useClipboard(options: UseClipboardOptions): ClipboardActions {
     }
     return result;
   }, [clipboard, pasteContext, viewportCenter, onPaste]);
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent): void => {
-      const isCtrl = e.ctrlKey || e.metaKey;
-      if (!isCtrl) return;
-
-      // Skip if in text input
-      const tag = (e.target as HTMLElement).tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-
-      if (e.key === 'c' && !e.shiftKey) {
-        e.preventDefault();
-        copy();
-      } else if (e.key === 'x' && !e.shiftKey) {
-        e.preventDefault();
-        cut();
-      } else if (e.key === 'v' && !e.shiftKey) {
-        e.preventDefault();
-        paste();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [copy, cut, paste]);
 
   return {
     copy,
