@@ -1,9 +1,10 @@
 /**
- * E3 + E7 + E8 — Full editor view.
+ * E3 + E5 + E7 + E8 — Full editor view.
  *
- * Assembles EditorCanvas with FloorPlanScene and editing context.
+ * Assembles EditorCanvas with FloorPlanScene, editing context,
+ * undo/redo, and status bar.
+ *
  * This is the top-level view for editing site geometry (context 1).
- *
  * Replaces the read-only FloorPlansView when editing mode is active.
  */
 
@@ -14,12 +15,16 @@ import {
   useReducer,
   useState,
 } from 'react';
-import type { ViewState, Footprint } from '@azimut/core-model';
+import type { Point, ViewState, Footprint } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { EditorCanvas } from './EditorCanvas.js';
 import type { SceneObject } from './snap-integration.js';
 import { FloorPlanScene } from './scene/FloorPlanScene.js';
 import { selectionReducer, EMPTY_SELECTION } from './selection.js';
+import { historyReducer, EMPTY_HISTORY } from './command.js';
+import { useUndoRedo } from './use-undo-redo.js';
+import { StatusBar } from './StatusBar.js';
+import type { ToolState } from './tool-state.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -50,6 +55,11 @@ export function EditorView(): JSX.Element {
 
   const [selectedLevel, setSelectedLevel] = useState(sortedLevels[0]?.id ?? '');
   const [selection, dispatchSelection] = useReducer(selectionReducer, EMPTY_SELECTION);
+  const [history, dispatchHistory] = useReducer(historyReducer, EMPTY_HISTORY);
+  const [toolState, setToolState] = useState<ToolState | null>(null);
+  const [cursorPosition] = useState<Point | null>(null);
+
+  const undoRedo = useUndoRedo({ history, dispatchHistory });
 
   // Scene objects for snap pipeline
   const sceneObjects = useMemo(() => {
@@ -107,6 +117,10 @@ export function EditorView(): JSX.Element {
     dispatchSelection({ type: 'clear' });
   }, []);
 
+  const handleToolChange = useCallback((state: ToolState) => {
+    setToolState(state);
+  }, []);
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Level selector */}
@@ -137,6 +151,7 @@ export function EditorView(): JSX.Element {
           <EditorCanvas
             initialView={initialView}
             sceneObjects={sceneObjects}
+            onToolChange={handleToolChange}
             ariaLabel={`Éditeur: ${sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel}`}
           >
             <FloorPlanScene
@@ -159,6 +174,17 @@ export function EditorView(): JSX.Element {
           </div>
         )}
       </div>
+
+      {/* Status bar */}
+      <StatusBar
+        currentTool={toolState?.currentTool ?? 'select'}
+        cursorPosition={cursorPosition}
+        snapResult={{ point: { x_m: 0, y_m: 0 }, target: null }}
+        canUndo={undoRedo.canUndo}
+        canRedo={undoRedo.canRedo}
+        onUndo={undoRedo.undo}
+        onRedo={undoRedo.redo}
+      />
 
       {/* Selection info */}
       {selection.selectedIds.length > 0 && (
