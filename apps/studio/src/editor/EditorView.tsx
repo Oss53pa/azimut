@@ -23,6 +23,11 @@ import { FloorPlanScene } from './scene/FloorPlanScene.js';
 import { selectionReducer, EMPTY_SELECTION } from './selection.js';
 import { historyReducer, EMPTY_HISTORY } from './command.js';
 import { useUndoRedo } from './use-undo-redo.js';
+import { useClipboard } from './use-clipboard.js';
+import { EMPTY_CLIPBOARD } from './clipboard.js';
+import type { ClipboardPayload, PasteResult } from './clipboard.js';
+import { AlignmentPanel } from './AlignmentPanel.js';
+import type { AlignAxis, DistributeAxis, ZOrderOp } from './alignment.js';
 import { StatusBar } from './StatusBar.js';
 import type { ToolState } from './tool-state.js';
 
@@ -58,8 +63,71 @@ export function EditorView(): JSX.Element {
   const [history, dispatchHistory] = useReducer(historyReducer, EMPTY_HISTORY);
   const [toolState, setToolState] = useState<ToolState | null>(null);
   const [cursorPosition] = useState<Point | null>(null);
+  const [clipboard, setClipboard] = useState(EMPTY_CLIPBOARD);
 
   const undoRedo = useUndoRedo({ history, dispatchHistory });
+
+  // Clipboard integration
+  const buildPayload = useCallback(
+    (/** selectedIds */ _ids: readonly string[]): ClipboardPayload | null => {
+      // Stub: real payload from selected footprints/objects will be
+      // wired when scene objects carry full data.
+      void _ids;
+      return null;
+    },
+    [],
+  );
+
+  const pasteContext = useMemo(() => ({
+    targetOrgId: site.organization.id,
+    targetSiteId: site.site.id,
+    targetLevelId: selectedLevel,
+  }), [site, selectedLevel]);
+
+  const viewportCenter = useMemo((): Point => ({
+    x_m: 0,
+    y_m: 0,
+  }), []);
+
+  const handlePaste = useCallback((result: PasteResult & { ok: true }) => {
+    // Stub: create commands to paste items at offset positions.
+    void result;
+  }, []);
+
+  const handleCut = useCallback((ids: readonly string[]) => {
+    // Stub: create delete command for cut source objects.
+    void ids;
+    dispatchSelection({ type: 'clear' });
+  }, []);
+
+  // Clipboard hook registers Ctrl+C/X/V listeners as a side effect.
+  // The returned actions are available for toolbar buttons when added.
+  useClipboard({
+    clipboard,
+    setClipboard,
+    selection,
+    buildPayload,
+    pasteContext,
+    viewportCenter,
+    onPaste: handlePaste,
+    onCut: handleCut,
+  });
+
+  // Alignment / distribution / z-order callbacks
+  const handleAlign = useCallback((axis: AlignAxis) => {
+    // Stub: compute alignment deltas and create move commands.
+    void axis;
+  }, []);
+
+  const handleDistribute = useCallback((axis: DistributeAxis) => {
+    // Stub: compute distribution deltas and create move commands.
+    void axis;
+  }, []);
+
+  const handleZOrder = useCallback((op: ZOrderOp) => {
+    // Stub: compute new z-order and create reorder command.
+    void op;
+  }, []);
 
   // Scene objects for snap pipeline
   const sceneObjects = useMemo(() => {
@@ -175,6 +243,14 @@ export function EditorView(): JSX.Element {
         )}
       </div>
 
+      {/* Alignment panel (visible when 2+ selected) */}
+      <AlignmentPanel
+        selectedCount={selection.selectedIds.length}
+        onAlign={handleAlign}
+        onDistribute={handleDistribute}
+        onZOrder={handleZOrder}
+      />
+
       {/* Status bar */}
       <StatusBar
         currentTool={toolState?.currentTool ?? 'select'}
@@ -185,20 +261,6 @@ export function EditorView(): JSX.Element {
         onUndo={undoRedo.undo}
         onRedo={undoRedo.redo}
       />
-
-      {/* Selection info */}
-      {selection.selectedIds.length > 0 && (
-        <div style={{
-          padding: '8px 12px',
-          borderTop: '1px solid var(--az-border)',
-          background: 'var(--az-card-bg)',
-          fontSize: 12,
-          color: 'var(--az-text-secondary)',
-          flexShrink: 0,
-        }}>
-          Sélection : {selection.selectedIds.join(', ')}
-        </div>
-      )}
     </div>
   );
 }
