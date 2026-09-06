@@ -25,6 +25,9 @@
   --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.12);
   --az-sidebar-brand: #4338ca;
+  --az-snap-indicator: #6366f1;
+  --az-tool-preview: #6366f1;
+  --az-selection-handle: #4338ca;
   --az-font-body: 'Dosis', system-ui, -apple-system, sans-serif;
   --az-font-title: 'Grand Hotel', cursive;
 }
@@ -54,6 +57,9 @@
     --az-warn-bg: #450a0a;
     --az-row-hover: #1e1b4b;
     --az-row-stripe: #1f1f35;
+    --az-snap-indicator: #a5b4fc;
+    --az-tool-preview: #a5b4fc;
+    --az-selection-handle: #818cf8;
     --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
     --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
     --az-sidebar-brand: #a5b4fc;
@@ -84,6 +90,9 @@
   --az-warn-bg: #450a0a;
   --az-row-hover: #1e1b4b;
   --az-row-stripe: #1f1f35;
+  --az-snap-indicator: #a5b4fc;
+  --az-tool-preview: #a5b4fc;
+  --az-selection-handle: #818cf8;
   --az-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
   --az-shadow-hover: 0 4px 12px rgba(99, 102, 241, 0.2);
   --az-sidebar-brand: #a5b4fc;
