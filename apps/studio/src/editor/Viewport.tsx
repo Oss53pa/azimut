@@ -24,10 +24,10 @@ import { viewReducer, DEFAULT_VIEW } from './viewport-state.js';
 
 type ViewportProps = {
   readonly children: ReactNode;
-  readonly initialView?: ViewState;
-  readonly onViewChange?: (view: ViewState) => void;
-  readonly width?: string;
-  readonly height?: string;
+  readonly initialView?: ViewState | undefined;
+  readonly onViewChange?: ((view: ViewState) => void) | undefined;
+  readonly width?: string | undefined;
+  readonly height?: string | undefined;
   readonly ariaLabel: string;
 };
 
