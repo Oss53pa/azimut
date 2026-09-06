@@ -14,7 +14,6 @@
 import type { Point, Finding } from '@azimut/core-model';
 import {
   type Polygon,
-  signedArea,
   polygonArea,
   ensureCCW,
   pointInPolygon,
