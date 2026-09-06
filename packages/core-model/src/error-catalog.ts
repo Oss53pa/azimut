@@ -117,6 +117,24 @@ export const ERROR_CATALOG = {
   'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND':   { severity: 'blocking', description: 'Type de support du gabarit introuvable' },
   'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND':   { severity: 'warning',  description: 'Face du gabarit absente du type de support' },
   'DATA.SUPPORT_BLOCK_REGION_INVALID':      { severity: 'blocking', description: 'Région de bloc hors limites' },
+
+  // ── EDIT (E17) ────────────────────────────────────────────
+  'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },
+  'EDIT.BOOLEAN_RESULT_INVALID':            { severity: 'blocking', description: 'Opération booléenne produisant une géométrie invalide' },
+  'EDIT.CROSS_ORG_PASTE_DENIED':            { severity: 'blocking', description: 'Collage entre organisations refusé' },
+  'EDIT.UNDO_AFTER_SYNC':                   { severity: 'warning',  description: "Annulation demandée sur une modification déjà synchronisée" },
+  'EDIT.TEMPLATE_BLOCK_OVERFLOW':           { severity: 'blocking', description: 'Bloc débordant de la grille du gabarit' },
+
+  // ── ASSET (E17) ───────────────────────────────────────────
+  'ASSET.SANITIZATION_FAILED':              { severity: 'blocking', description: 'Actif importé non assainissable' },
+  'ASSET.RASTER_IN_LOGO':                   { severity: 'blocking', description: 'Image en mode point dans un logo' },
+  'ASSET.FONT_MISSING_GLYPHS':              { severity: 'blocking', description: 'Police sans les caractères requis' },
+
+  // ── TYPO (E17) ────────────────────────────────────────────
+  'TYPO.TEXT_OVERFLOW':                      { severity: 'blocking', description: 'Débordement de texte calculé' },
+
+  // ── COLOR (E17) ───────────────────────────────────────────
+  'COLOR.PROFILE_MISSING':                   { severity: 'warning',  description: 'Profil de sortie absent pour ce substrat' },
 } as const satisfies Record<string, { severity: 'blocking' | 'warning' | 'info'; description: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CATALOG;

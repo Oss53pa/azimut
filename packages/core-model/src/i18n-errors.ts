@@ -98,6 +98,16 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND': 'Type de support du gabarit introuvable',
   'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND': 'Face du gabarit absente du type de support',
   'DATA.SUPPORT_BLOCK_REGION_INVALID': 'Région de bloc hors limites',
+  'EDIT.CONTEXT_VIOLATION': 'Opération interdite dans ce contexte d\'édition',
+  'EDIT.BOOLEAN_RESULT_INVALID': 'Opération booléenne produisant une géométrie invalide',
+  'EDIT.CROSS_ORG_PASTE_DENIED': 'Collage entre organisations refusé',
+  'EDIT.UNDO_AFTER_SYNC': 'Annulation demandée sur une modification déjà synchronisée',
+  'EDIT.TEMPLATE_BLOCK_OVERFLOW': 'Bloc débordant de la grille du gabarit',
+  'ASSET.SANITIZATION_FAILED': 'Actif importé non assainissable',
+  'ASSET.RASTER_IN_LOGO': 'Image en mode point dans un logo',
+  'ASSET.FONT_MISSING_GLYPHS': 'Police sans les caractères requis',
+  'TYPO.TEXT_OVERFLOW': 'Débordement de texte calculé',
+  'COLOR.PROFILE_MISSING': 'Profil de sortie absent pour ce substrat',
 };
 
 export const ERROR_MESSAGES_EN: ErrorMessages = {
@@ -196,6 +206,16 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND': 'Template support type not found',
   'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND': 'Template face not found in support type',
   'DATA.SUPPORT_BLOCK_REGION_INVALID': 'Block region out of bounds',
+  'EDIT.CONTEXT_VIOLATION': 'Operation forbidden in this editing context',
+  'EDIT.BOOLEAN_RESULT_INVALID': 'Boolean operation producing invalid geometry',
+  'EDIT.CROSS_ORG_PASTE_DENIED': 'Cross-organization paste denied',
+  'EDIT.UNDO_AFTER_SYNC': 'Undo requested on already-synced change',
+  'EDIT.TEMPLATE_BLOCK_OVERFLOW': 'Block overflowing template grid',
+  'ASSET.SANITIZATION_FAILED': 'Imported asset could not be sanitized',
+  'ASSET.RASTER_IN_LOGO': 'Raster image in logo',
+  'ASSET.FONT_MISSING_GLYPHS': 'Font missing required glyphs',
+  'TYPO.TEXT_OVERFLOW': 'Computed text overflow',
+  'COLOR.PROFILE_MISSING': 'Output profile missing for this substrate',
 };
 
 const ERROR_DICTIONARIES: Readonly<Record<string, ErrorMessages>> = {
