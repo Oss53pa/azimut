@@ -85,3 +85,19 @@ export type {
 } from './site.js';
 export { longestVariant, textExpansionFindings } from './text-expansion.js';
 export type { LongestVariantResult } from './text-expansion.js';
+export {
+  meterToPixel,
+  pixelToMeter,
+  clampScale,
+  applyZoomStep,
+  quantizePosition,
+  quantizePoint,
+  quantizeAngle,
+  viewTransformSvg,
+  MIN_SCALE_PX_PER_M,
+  MAX_SCALE_PX_PER_M,
+  ZOOM_STEP_FACTOR,
+  POSITION_STEP_M,
+  ANGLE_STEP_DEG,
+} from './view-transform.js';
+export type { ViewState, ViewportSize } from './view-transform.js';
