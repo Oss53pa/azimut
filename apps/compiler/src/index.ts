@@ -35,3 +35,9 @@ export type {
   BuildKioskPackageContext,
   BuildKioskPackageResult,
 } from './build-kiosk-package.js';
+export {
+  buildKioskTree,
+  buildKioskDataFiles,
+  buildKioskMapFiles,
+} from './build-kiosk-tree.js';
+export type { KioskAppAssets } from './build-kiosk-tree.js';

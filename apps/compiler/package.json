@@ -13,7 +13,9 @@
     "@azimut/core-model": "workspace:*",
     "@azimut/engine-graph": "workspace:*",
     "@azimut/engine-artwork": "workspace:*",
-    "@azimut/engine-package": "workspace:*"
+    "@azimut/engine-layout": "workspace:*",
+    "@azimut/engine-package": "workspace:*",
+    "@azimut/design-tokens": "workspace:*"
   },
   "devDependencies": {
     "@azimut/testkit": "workspace:*"

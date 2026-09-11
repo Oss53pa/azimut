@@ -38,12 +38,18 @@ importers:
       '@azimut/core-model':
         specifier: workspace:*
         version: link:../../packages/core-model
+      '@azimut/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       '@azimut/engine-artwork':
         specifier: workspace:*
         version: link:../../packages/engine-artwork
       '@azimut/engine-graph':
         specifier: workspace:*
         version: link:../../packages/engine-graph
+      '@azimut/engine-layout':
+        specifier: workspace:*
+        version: link:../../packages/engine-layout
       '@azimut/engine-package':
         specifier: workspace:*
         version: link:../../packages/engine-package
