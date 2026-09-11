@@ -37,6 +37,7 @@ export type ResolvedContent =
     }
   | { readonly type: 'arrow'; readonly direction: string }
   | { readonly type: 'map' }
+  | { readonly type: 'legend' }
   | { readonly type: 'free_text'; readonly text: string }
   | { readonly type: 'logo' }
   | { readonly type: 'emergency_info' };
@@ -70,6 +71,7 @@ function resolveDestinationList(
   site: SiteData,
   nodeId: string,
   profile: TravelProfile,
+  limit: number | null,
 ): DestinationListResult {
   const namesByDest = new Map<string, Record<string, string>>();
   for (const dn of site.destination_names) {
@@ -159,7 +161,8 @@ function resolveDestinationList(
     });
   }
 
-  return { entries, warnings };
+  const limited = limit !== null && limit >= 0 ? entries.slice(0, limit) : entries;
+  return { entries: limited, warnings };
 }
 
 type ResolvedBlockResult = {
@@ -181,7 +184,10 @@ function resolveBlock(
       content = { type: 'header', site_name: site.site.name };
       break;
     case 'destination_list': {
-      const listResult = resolveDestinationList(site, nodeId, profile);
+      const limit = typeof blockDef.config['limit'] === 'number'
+        ? blockDef.config['limit']
+        : null;
+      const listResult = resolveDestinationList(site, nodeId, profile, limit);
       content = {
         type: 'destination_list',
         entries: listResult.entries,
@@ -215,6 +221,9 @@ function resolveBlock(
       break;
     case 'map':
       content = { type: 'map' };
+      break;
+    case 'legend':
+      content = { type: 'legend' };
       break;
     case 'free_text':
       content = {

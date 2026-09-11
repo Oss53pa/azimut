@@ -62,6 +62,19 @@ export type TemplateValidationError = {
   readonly message: string;
 };
 
+/**
+ * D8.3 — a style role must reference a charter role, never a direct colour.
+ * Reject anything that reads as a literal colour value.
+ */
+function looksLikeColor(role: string): boolean {
+  const r = role.trim().toLowerCase();
+  return (
+    r.startsWith('#')
+    || /^(rgb|rgba|hsl|hsla)\(/.test(r)
+    || /^var\(--/.test(r)
+  );
+}
+
 export function validateTemplate(
   template: Template,
 ): readonly TemplateValidationError[] {
@@ -80,6 +93,13 @@ export function validateTemplate(
       errors.push({
         block_index: block.index,
         message: `non-free block '${block.kind}' requires a binding`,
+      });
+    }
+
+    if (block.style !== undefined && looksLikeColor(block.style.role)) {
+      errors.push({
+        block_index: block.index,
+        message: `style.role must reference a charter role, not a direct color: '${block.style.role}'`,
       });
     }
   }

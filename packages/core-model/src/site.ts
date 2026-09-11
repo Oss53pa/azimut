@@ -168,6 +168,7 @@ export type ContentBlockKind =
   | 'pictogram'
   | 'arrow'
   | 'map'
+  | 'legend'
   | 'free_text'
   | 'logo'
   | 'emergency_info';

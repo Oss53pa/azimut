@@ -59,6 +59,8 @@ export { computeQuantities, quantityReportToCsv } from './compute-quantities.js'
 export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
 export { renderFace } from './render-face.js';
+export { compileTemplate } from './compile-template.js';
+export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export { validateProofs } from './validate-proofs.js';
 export type { ProofValidationResult } from './validate-proofs.js';

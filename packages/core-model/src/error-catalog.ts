@@ -52,6 +52,8 @@ export const ERROR_CATALOG = {
   'LAYOUT.CONTRAST_BELOW_MIN':             { severity: 'blocking', description: 'Contraste de luminance insuffisant' },
   'LAYOUT.CONTENT_OVERFLOW':               { severity: 'blocking', description: 'Contenu ne tenant pas dans le format' },
   'LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM': { severity: 'blocking', description: 'Format saisi manuellement et non conforme' },
+  'LAYOUT.TEMPLATE_INVALID':                { severity: 'blocking', description: 'Gabarit non conforme au chargement (grille, liaison ou rôle)' },
+  'LAYOUT.TEMPLATE_BINDING_UNSUPPORTED':    { severity: 'blocking', description: 'Liaison de bloc non prise en charge par le compilateur de gabarit' },
   'LAYOUT.DESTINATION_NOT_FOUND':           { severity: 'blocking', description: 'Destination affichée inexistante' },
   'LAYOUT.DESTINATION_UNREACHABLE':         { severity: 'blocking', description: 'Destination affichée non atteignable' },
   'LAYOUT.LANG_VARIANT_MISSING':            { severity: 'warning',  description: 'Dénomination absente dans une langue active' },

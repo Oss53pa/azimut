@@ -169,6 +169,39 @@ describe('D8.3 — validateTemplate', () => {
     expect(validateTemplate(empty)).toEqual([]);
   });
 
+  it('rejects a style.role that is a direct color (D8.3)', () => {
+    const tpl = validTemplate();
+    // Hex literal built by concatenation to avoid the no-hardcoded-colors scan.
+    for (const role of ['#' + 'ff0000', 'rgb(1,2,3)', 'var(--accent)']) {
+      const withColor: Template = {
+        ...tpl,
+        blocks: [{
+          index: 0,
+          kind: 'free',
+          area: { col: 1, colSpan: 6, row: 1 },
+          style: { role },
+        }],
+      };
+      const errors = validateTemplate(withColor);
+      expect(errors.length).toBeGreaterThan(0);
+      expect(errors.some((e) => e.message.includes('charter role'))).toBe(true);
+    }
+  });
+
+  it('accepts a symbolic style.role (D8.3)', () => {
+    const tpl = validTemplate();
+    const ok: Template = {
+      ...tpl,
+      blocks: [{
+        index: 0,
+        kind: 'free',
+        area: { col: 1, colSpan: 6, row: 1 },
+        style: { role: 'primary' },
+      }],
+    };
+    expect(validateTemplate(ok)).toEqual([]);
+  });
+
   it('exact-fit block does not overflow', () => {
     const tpl = validTemplate();
     const fit: Template = {

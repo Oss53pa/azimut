@@ -236,6 +236,8 @@ function renderBlock(
       return renderFreeText(content, x, y, w, h, theme, fontFamily);
     case 'map':
       return renderPlaceholder('[Plan]', x, y, w, h, theme, fontFamily);
+    case 'legend':
+      return renderPlaceholder('[Légende]', x, y, w, h, theme, fontFamily);
     case 'logo':
       return renderPlaceholder('[Logo]', x, y, w, h, theme, fontFamily);
     case 'emergency_info':
