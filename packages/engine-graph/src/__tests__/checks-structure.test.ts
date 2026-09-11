@@ -3,6 +3,7 @@ import {
   crossLevelWithoutVlFindings,
   multiLevelWithoutAnyVlFindings,
   multiLevelWithoutAccessibleVlFindings,
+  buildingIsolatedFindings,
   missingDestinationNameFindings,
 } from '../checks-structure.js';
 import { refMinimal, refMultilevel, refBroken } from '@azimut/testkit';
@@ -146,6 +147,145 @@ describe('multiLevelWithoutAnyVlFindings', () => {
     const ids = findings.map((f) => f.entity?.id ?? '');
     const sorted = [...ids].sort();
     expect(ids).toEqual(sorted);
+  });
+});
+
+describe('buildingIsolatedFindings', () => {
+  it('returns no findings when buildings have independent access', () => {
+    // All reference sites set independent_access: true.
+    expect(buildingIsolatedFindings(refMinimal)).toEqual([]);
+    expect(buildingIsolatedFindings(refMultilevel)).toEqual([]);
+  });
+
+  it('emits a warning for a building with no link nor independent access', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      buildings: refMinimal.buildings.map((b) => ({
+        ...b,
+        independent_access: false,
+      })),
+    };
+    const findings = buildingIsolatedFindings(site);
+    expect(findings.length).toBe(1);
+    expect(findings[0]?.code).toBe('GRAPH.BUILDING_ISOLATED');
+    expect(findings[0]?.severity).toBe('warning');
+    expect(findings[0]?.entity?.kind).toBe('building');
+    expect(findings[0]?.entity?.id).toBe('bldg-001');
+  });
+
+  it('does not flag a building linked to another building by an edge', () => {
+    // Two buildings: bldg-001 (independent access) and bldg-002 (no independent
+    // access) tied together by an inter-building edge → neither is isolated.
+    const site: SiteData = {
+      ...refMinimal,
+      buildings: [
+        ...refMinimal.buildings,
+        {
+          id: 'bldg-002',
+          org_id: 'org-test-001',
+          site_id: refMinimal.site.id,
+          name: 'Annexe',
+          independent_access: false,
+        },
+      ],
+      levels: [
+        ...refMinimal.levels,
+        {
+          id: 'lvl-002',
+          org_id: 'org-test-001',
+          building_id: 'bldg-002',
+          name: 'RDC Annexe',
+          ordinal: 0,
+          elevation_m: 0,
+        },
+      ],
+      graph: {
+        ...refMinimal.graph,
+        nodes: [
+          ...refMinimal.graph.nodes,
+          {
+            id: 'n-annexe',
+            org_id: 'org-test-001',
+            level_id: 'lvl-002',
+            kind: 'junction' as const,
+            position: { x_m: 50, y_m: 0 },
+            label: 'Annexe',
+          },
+        ],
+        edges: [
+          ...refMinimal.graph.edges,
+          {
+            id: 'e-link-buildings',
+            org_id: 'org-test-001',
+            from_node_id: 'n-junction',
+            to_node_id: 'n-annexe',
+            width_m: 2,
+            slope_pct: 0,
+            accessible: true,
+            direction: 'both' as const,
+            evacuation_route: false,
+            length_m: 50,
+          },
+        ],
+      },
+    };
+    expect(buildingIsolatedFindings(site)).toEqual([]);
+  });
+
+  it('flags the isolated building but not the linked one', () => {
+    // bldg-002 has no independent access AND no link → isolated.
+    // bldg-001 has independent access → not flagged.
+    const site: SiteData = {
+      ...refMinimal,
+      buildings: [
+        ...refMinimal.buildings,
+        {
+          id: 'bldg-002',
+          org_id: 'org-test-001',
+          site_id: refMinimal.site.id,
+          name: 'Annexe',
+          independent_access: false,
+        },
+      ],
+      levels: [
+        ...refMinimal.levels,
+        {
+          id: 'lvl-002',
+          org_id: 'org-test-001',
+          building_id: 'bldg-002',
+          name: 'RDC Annexe',
+          ordinal: 0,
+          elevation_m: 0,
+        },
+      ],
+    };
+    const findings = buildingIsolatedFindings(site);
+    expect(findings.length).toBe(1);
+    expect(findings[0]?.entity?.id).toBe('bldg-002');
+  });
+
+  it('findings are sorted by building id', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      buildings: [
+        {
+          id: 'bldg-zzz',
+          org_id: 'org-test-001',
+          site_id: refMinimal.site.id,
+          name: 'Z',
+          independent_access: false,
+        },
+        {
+          id: 'bldg-aaa',
+          org_id: 'org-test-001',
+          site_id: refMinimal.site.id,
+          name: 'A',
+          independent_access: false,
+        },
+      ],
+    };
+    const ids = buildingIsolatedFindings(site).map((f) => f.entity?.id ?? '');
+    expect(ids).toEqual([...ids].sort());
   });
 });
 

@@ -49,23 +49,30 @@ describe('scopeSpecificity', () => {
     expect(scopeSpecificity({})).toBe(0);
   });
 
-  it('returns 1 for one field', () => {
-    expect(scopeSpecificity({ supportRegistry: 'wayfinding' })).toBe(1);
+  it('weights each dimension by D3.5 priority (supportRegistry > context > sectorKey)', () => {
+    expect(scopeSpecificity({ supportRegistry: 'wayfinding' })).toBe(4);
+    expect(scopeSpecificity({ context: 'interior' })).toBe(2);
+    expect(scopeSpecificity({ sectorKey: 'commercial' })).toBe(1);
   });
 
-  it('returns 2 for two fields', () => {
+  it('supportRegistry outranks any combination of lower dimensions', () => {
+    // 4 > 2 + 1: a supportRegistry-only scope is more specific than one
+    // carrying both context and sectorKey.
+    expect(scopeSpecificity({ supportRegistry: 'wayfinding' })).toBeGreaterThan(
+      scopeSpecificity({ context: 'interior', sectorKey: 'commercial' }),
+    );
+  });
+
+  it('sums bit weights for combined scopes', () => {
     expect(scopeSpecificity({
       supportRegistry: 'wayfinding',
       context: 'interior',
-    })).toBe(2);
-  });
-
-  it('returns 3 for all three fields', () => {
+    })).toBe(6);
     expect(scopeSpecificity({
       supportRegistry: 'wayfinding',
       context: 'interior',
       sectorKey: 'commercial',
-    })).toBe(3);
+    })).toBe(7);
   });
 });
 
@@ -97,16 +104,27 @@ describe('groupAndCheckAmbiguity', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('rejects same code at same specificity', () => {
+  it('rejects same code at same specificity (same scope dimension)', () => {
     const result = groupAndCheckAmbiguity([
       makeRule('R1', { context: 'interior' }),
-      makeRule('R1', { supportRegistry: 'wayfinding' }),
+      makeRule('R1', { context: 'exterior' }),
     ]);
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings[0]?.code).toBe('RULES.SCOPE_AMBIGUOUS');
     expect(result.findings[0]?.params['rule_code']).toBe('R1');
-    expect(result.findings[0]?.params['specificity']).toBe(1);
+    // Both scopes carry only `context` → specificity 2 (D3.5 bit weights).
+    expect(result.findings[0]?.params['specificity']).toBe(2);
+  });
+
+  it('does not flag supportRegistry vs context as ambiguous (D3.5 order)', () => {
+    // Different scope dimensions are different specificities: supportRegistry
+    // (4) outranks context (2), so there is a deterministic winner.
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', { context: 'interior' }),
+      makeRule('R1', { supportRegistry: 'wayfinding' }),
+    ]);
+    expect(result.ok).toBe(true);
   });
 
   it('returns ok for empty array', () => {
@@ -119,7 +137,7 @@ describe('groupAndCheckAmbiguity', () => {
   it('reports only ambiguous codes, not others', () => {
     const result = groupAndCheckAmbiguity([
       makeRule('R1', { context: 'interior' }),
-      makeRule('R1', { supportRegistry: 'wayfinding' }),
+      makeRule('R1', { context: 'exterior' }),
       makeRule('R2', {}),
     ]);
     expect(result.ok).toBe(false);
@@ -222,7 +240,7 @@ describe('loadRulesPack', () => {
         },
         {
           code: 'R1',
-          scope: { supportRegistry: 'wayfinding' },
+          scope: { context: 'exterior' },
           params: {},
           source_ref: 'B',
         },
@@ -232,6 +250,37 @@ describe('loadRulesPack', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings[0]?.code).toBe('RULES.SCOPE_AMBIGUOUS');
+  });
+
+  it('resolves supportRegistry over context by specificity order (D3.5)', () => {
+    const pack = JSON.stringify({
+      key: 'test', version: '1.0', jurisdiction: 'FR',
+      effective_from: '2024-01-01', source_ref: 'Ref',
+      rules: [
+        {
+          code: 'R1',
+          scope: { context: 'interior' },
+          params: { v: 2 },
+          source_ref: 'A',
+        },
+        {
+          code: 'R1',
+          scope: { supportRegistry: 'wayfinding' },
+          params: { v: 4 },
+          source_ref: 'B',
+        },
+      ],
+    });
+    const loaded = loadRulesPack(pack);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+    // Both scopes match this context; supportRegistry (4) wins over context (2).
+    const resolved = resolveRule(loaded.value, 'R1', {
+      supportRegistry: 'wayfinding',
+      context: 'interior',
+    });
+    expect(resolved.ok).toBe(true);
+    if (resolved.ok) expect(resolved.value.params['v']).toBe(4);
   });
 
   it('produces stable checksums for identical content', () => {

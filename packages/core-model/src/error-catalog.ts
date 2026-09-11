@@ -19,6 +19,7 @@ export const ERROR_CATALOG = {
   'GRAPH.DISCONNECTED':                     { severity: 'blocking', description: 'Graphe non connexe' },
   'GRAPH.DEAD_END_UNJUSTIFIED':             { severity: 'warning',  description: 'Impasse sans destination ni justification' },
   'GRAPH.VERTICAL_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre niveaux sans liaison verticale' },
+  'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
   'GRAPH.PROFILE_NOT_ACCESSIBLE':           { severity: 'blocking', description: 'Profil non accessible pour audit d’accessibilité' },
@@ -79,6 +80,7 @@ export const ERROR_CATALOG = {
   'RULES.VALIDATION_ERROR':                { severity: 'blocking', description: 'Paquet de règles non conforme au schéma' },
   'RULES.SCOPE_AMBIGUOUS':                 { severity: 'blocking', description: 'Règles de même code et même spécificité de portée' },
   'RULES.OVERLAY_LESS_RESTRICTIVE':        { severity: 'blocking', description: 'Surcouche pays moins contraignante que le socle' },
+  'RULES.OVERLAY_NOT_COMPARABLE':          { severity: 'warning',  description: 'Surcouche pays non comparable au socle, règle du socle conservée' },
   'RULES.FILE_NOT_LISTED':                 { severity: 'blocking', description: 'Fichier de règles non listé dans le manifeste' },
   'RULES.FILE_MISSING':                    { severity: 'blocking', description: 'Fichier listé dans le manifeste introuvable' },
 
@@ -138,3 +140,18 @@ export const ERROR_CATALOG = {
 } as const satisfies Record<string, { severity: 'blocking' | 'warning' | 'info'; description: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CATALOG;
+
+/**
+ * D2.1 — the only anomaly domains allowed, and them alone. The nine domains
+ * authorized by the complement (partie D, §D2.1): GRAPH, GEOM, LAYOUT, RULES,
+ * CHARTER, IMPORT, PACKAGE, SECURITY, DATA — plus the four introduced by the
+ * vector-editing addendum (partie E, E17): EDIT, ASSET, TYPO, COLOR. This
+ * extension is a deliberate amendment reconciling parties D and E; any code
+ * whose domain is not in this list is rejected by the catalog test.
+ */
+export const ANOMALY_DOMAINS = [
+  'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
+  'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
+] as const;
+
+export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
