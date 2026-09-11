@@ -15,8 +15,20 @@ const ERR = stateColors['state-blocking'];
 const WARN = stateColors['state-warning'];
 const OK = stateColors['state-valid'];
 
+/**
+ * Fixed date, as the production export requires from its caller
+ * (export-pdf.ts takes `creation_date`). Without it pdf-lib stamps the
+ * wall clock into CreationDate and ModDate at second granularity, and
+ * two renders straddling a tick differ on those bytes alone — which
+ * made the determinism test below measure the clock instead of the
+ * renderer, and fail intermittently.
+ */
+const FIXED_DATE = new Date('2026-01-01T00:00:00.000Z');
+
 async function renderAndExtract(svg: string, widthMm = 200, heightMm = 100) {
   const doc = await PDFDocument.create();
+  doc.setCreationDate(FIXED_DATE);
+  doc.setModificationDate(FIXED_DATE);
   const widthPt = widthMm * MM_TO_PT;
   const heightPt = heightMm * MM_TO_PT;
   const page = doc.addPage([widthPt, heightPt]);
