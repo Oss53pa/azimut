@@ -106,6 +106,9 @@ export const ERROR_CATALOG = {
   'PACKAGE.EMPTY_ARTIFACT':                { severity: 'blocking', description: 'Artefact vide dans le paquet' },
   'PACKAGE.DUPLICATE_ID':                  { severity: 'blocking', description: 'Identifiant en double dans le paquet' },
   'PACKAGE.DUPLICATE_PATH':                { severity: 'blocking', description: 'Chemin en double dans le paquet' },
+  'PACKAGE.FILE_MISSING':                  { severity: 'blocking', description: 'Fichier requis absent de l’arborescence du paquet de borne' },
+  'PACKAGE.ABSOLUTE_PATH':                 { severity: 'blocking', description: 'Chemin absolu interdit dans le paquet de borne' },
+  'PACKAGE.INTEGRITY_MISMATCH':            { severity: 'blocking', description: 'Fichier téléchargé non conforme au manifeste' },
 
   // ── DATA ──────────────────────────────────────────────────
   'DATA.CATEGORY_PARENT_NOT_FOUND':         { severity: 'blocking', description: 'Catégorie parente introuvable' },

@@ -11,3 +11,13 @@ export { diffManifest } from './diff-manifest.js';
 export type { ManifestDiffReport } from './diff-manifest.js';
 export { scanForNetworkDependency } from './scan-network.js';
 export type { NetworkScanResult } from './scan-network.js';
+export {
+  assembleKioskPackage,
+  kioskManifestToJson,
+} from './assemble-kiosk-package.js';
+export type {
+  KioskManifest,
+  KioskManifestFile,
+  KioskPackageInput,
+  KioskPackage,
+} from './assemble-kiosk-package.js';
