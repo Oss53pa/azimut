@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState, useCallback, useReducer } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 import type { ViewState } from '@azimut/core-model';
 import { Viewport } from '../editor/Viewport.js';
 import { FloorPlanScene } from '../editor/scene/FloorPlanScene.js';
@@ -7,6 +8,7 @@ import { selectionReducer, EMPTY_SELECTION } from '../editor/selection.js';
 
 export function FloorPlansView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
   const sortedLevels = useMemo(
     () => [...site.levels].sort((a, b) => a.ordinal - b.ordinal),
     [site],
@@ -70,7 +72,7 @@ export function FloorPlansView(): JSX.Element {
   return (
     <div>
       <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        Plans de niveaux
+        {t('floorplans.title')}
       </h1>
       <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
         {sortedLevels.map((l) => (
@@ -104,7 +106,9 @@ export function FloorPlansView(): JSX.Element {
         {selectedLevel ? (
           <Viewport
             initialView={initialView}
-            ariaLabel={`Plan du niveau ${sortedLevels.find((l) => l.id === selectedLevel)?.name ?? selectedLevel}`}
+            ariaLabel={t('floorplans.viewport.aria', {
+              level: sortedLevels.find((l) => l.id === selectedLevel)?.name ?? selectedLevel,
+            })}
           >
             <FloorPlanScene
               site={site}
@@ -122,7 +126,7 @@ export function FloorPlansView(): JSX.Element {
             color: 'var(--text-secondary)',
             fontSize: 14,
           }}>
-            Sélectionnez un niveau.
+            {t('floorplans.empty')}
           </div>
         )}
       </div>
@@ -137,7 +141,7 @@ export function FloorPlansView(): JSX.Element {
           fontSize: 12,
           color: 'var(--text-secondary)',
         }}>
-          Sélection : {selection.selectedIds.join(', ')}
+          {t('floorplans.selection', { ids: selection.selectedIds.join(', ') })}
         </div>
       )}
     </div>

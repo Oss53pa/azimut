@@ -1,8 +1,10 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 
 export function GraphView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
 
   const summary = useMemo(() => {
     const kindCounts = new Map<string, number>();
@@ -38,35 +40,42 @@ export function GraphView(): JSX.Element {
   return (
     <div>
       <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        Graphe de circulation
+        {t('graph.title')}
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        {site.graph.nodes.length} noeuds, {summary.totalEdges} aretes,
-        {' '}{summary.verticalLinks} liens verticaux
+        {t('graph.summary', {
+          nodes: site.graph.nodes.length,
+          edges: summary.totalEdges,
+          vlinks: summary.verticalLinks,
+        })}
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        <Section title="Noeuds par type">
+        <Section title={t('graph.section.nodesbykind')}>
           {summary.nodesByKind.map(([kind, count]) => (
             <Row key={kind} label={kind} value={String(count)} />
           ))}
         </Section>
 
-        <Section title="Noeuds par niveau">
+        <Section title={t('graph.section.nodesbylevel')}>
           {summary.nodesByLevel.map((l) => (
             <Row key={l.name} label={l.name} value={String(l.count)} />
           ))}
         </Section>
 
-        <Section title="Aretes">
-          <Row label="Total" value={String(summary.totalEdges)} />
-          <Row label="Accessibles" value={String(summary.accessibleEdges)} />
-          <Row label="Evacuation" value={String(summary.evacCount)} />
+        <Section title={t('graph.section.edges')}>
+          <Row label={t('graph.row.total')} value={String(summary.totalEdges)} />
+          <Row label={t('graph.row.accessible')} value={String(summary.accessibleEdges)} />
+          <Row label={t('graph.row.evacuation')} value={String(summary.evacCount)} />
         </Section>
 
-        <Section title="Liens verticaux">
+        <Section title={t('graph.section.verticallinks')}>
           {site.graph.vertical_links.map((vl) => (
-            <Row key={vl.id} label={vl.kind} value={`capacite ${vl.capacity}`} />
+            <Row
+              key={vl.id}
+              label={vl.kind}
+              value={t('graph.vlink.capacity', { capacity: vl.capacity })}
+            />
           ))}
         </Section>
       </div>

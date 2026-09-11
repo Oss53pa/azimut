@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { resolveFaceContent, renderFace } from '@azimut/engine-graph';
 import type { FaceTheme } from '@azimut/engine-graph';
 import type { FaceTemplate, TravelProfile, GraphNode } from '@azimut/core-model';
@@ -34,6 +35,7 @@ function renderPreview(
   profile: TravelProfile,
   typeWidth: number,
   typeHeight: number,
+  lang: string,
 ): RenderedPreview | null {
   const node = findPreviewNode(nodes);
   if (!node) return null;
@@ -46,12 +48,14 @@ function renderPreview(
     height_mm: typeHeight,
     theme: FACE_THEME,
     font_family: 'system-ui, sans-serif',
+    lang,
   });
   return { svg, node };
 }
 
 export function FacesView(): JSX.Element {
   const site = useSiteData();
+  const { t, lang } = useI18n();
 
   const templates = useMemo(
     () => [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id)),
@@ -59,7 +63,7 @@ export function FacesView(): JSX.Element {
   );
 
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? '');
-  const selected = templates.find((t) => t.id === selectedId);
+  const selected = templates.find((tpl) => tpl.id === selectedId);
 
   const profile = site.travel_profiles[0] ?? null;
 
@@ -72,15 +76,15 @@ export function FacesView(): JSX.Element {
     const width = face?.default_width_mm ?? 600;
     const height = face?.default_height_mm ?? 400;
     return renderPreview(
-      site, selected, site.graph.nodes, profile, width, height,
+      site, selected, site.graph.nodes, profile, width, height, lang,
     );
-  }, [site, selected, profile]);
+  }, [site, selected, profile, lang]);
 
   if (templates.length === 0) {
     return (
       <div>
         <h1 style={{ margin: '0 0 16px', fontSize: 22, color: 'var(--text-primary)' }}>
-          Rendus de faces
+          {t('faces.title')}
         </h1>
         <div style={{
           marginTop: 16,
@@ -91,7 +95,7 @@ export function FacesView(): JSX.Element {
           color: 'var(--text-secondary)',
           fontSize: 14,
         }}>
-          Aucun gabarit de face configure.
+          {t('faces.empty.notemplate')}
         </div>
       </div>
     );
@@ -100,29 +104,29 @@ export function FacesView(): JSX.Element {
   return (
     <div>
       <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        Rendus de faces
+        {t('faces.title')}
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        Apercu SVG des faces resolues pour chaque gabarit.
+        {t('faces.subtitle')}
       </p>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-        {templates.map((t) => (
+        {templates.map((tpl) => (
           <button
-            key={t.id}
-            onClick={() => setSelectedId(t.id)}
+            key={tpl.id}
+            onClick={() => setSelectedId(tpl.id)}
             style={{
               padding: '6px 14px',
               border: '1px solid var(--border-hairline)',
               borderRadius: 6,
-              background: selectedId === t.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
-              color: selectedId === t.id ? 'var(--accent)' : 'var(--text-primary)',
-              fontWeight: selectedId === t.id ? 500 : 400,
+              background: selectedId === tpl.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
+              color: selectedId === tpl.id ? 'var(--accent)' : 'var(--text-primary)',
+              fontWeight: selectedId === tpl.id ? 500 : 400,
               fontSize: 13,
               cursor: 'pointer',
             }}
           >
-            {t.name}
+            {tpl.name}
           </button>
         ))}
       </div>
@@ -133,7 +137,11 @@ export function FacesView(): JSX.Element {
           fontSize: 12,
           color: 'var(--text-secondary)',
         }}>
-          Type : {selected.support_type_key} / Face : {selected.side} / {selected.blocks.length} bloc{selected.blocks.length !== 1 ? 's' : ''}
+          {t('faces.meta', {
+            type: selected.support_type_key,
+            side: selected.side,
+            blocks: selected.blocks.length,
+          })}
         </div>
       )}
 
@@ -150,7 +158,10 @@ export function FacesView(): JSX.Element {
             fontSize: 12,
             color: 'var(--text-secondary)',
           }}>
-            Noeud : {preview.node.label} ({preview.node.kind})
+            {t('faces.previewnode', {
+              label: preview.node.label,
+              kind: preview.node.kind,
+            })}
           </div>
           <div
             style={{ padding: 16 }}
@@ -167,8 +178,8 @@ export function FacesView(): JSX.Element {
           fontSize: 14,
         }}>
           {!profile
-            ? 'Aucun profil de parcours disponible.'
-            : 'Apercu indisponible pour ce gabarit.'}
+            ? t('faces.noprofile')
+            : t('faces.nopreview')}
         </div>
       )}
     </div>

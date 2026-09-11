@@ -1,8 +1,11 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
+import type { UiMessageKey } from '../i18n/messages.js';
 
 export function DestinationsView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
 
   const rows = useMemo(() => {
     const nameMap = new Map<string, Map<string, string>>();
@@ -45,7 +48,7 @@ export function DestinationsView(): JSX.Element {
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
         <h1 style={{ fontSize: 24, fontWeight: 500, color: 'var(--text-primary)' }}>
-          Destinations
+          {t('destinations.title')}
         </h1>
         <span style={{
           background: 'var(--accent-soft)',
@@ -59,7 +62,7 @@ export function DestinationsView(): JSX.Element {
         </span>
       </div>
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 20 }}>
-        Points d'intérêt et occupants du site
+        {t('destinations.subtitle')}
       </p>
       <div style={{
         overflowX: 'auto',
@@ -70,12 +73,12 @@ export function DestinationsView(): JSX.Element {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
           <thead>
             <tr style={{ background: 'var(--surface-panel)' }}>
-              <Th>Nom (fr)</Th>
-              <Th>Nom (en)</Th>
-              <Th>Niveau</Th>
-              <Th>Nœud</Th>
-              <Th>Statut</Th>
-              <Th align="center">Priorité</Th>
+              <Th>{t('destinations.col.namefr')}</Th>
+              <Th>{t('destinations.col.nameen')}</Th>
+              <Th>{t('destinations.col.level')}</Th>
+              <Th>{t('destinations.col.node')}</Th>
+              <Th>{t('destinations.col.status')}</Th>
+              <Th align="center">{t('destinations.col.priority')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -87,7 +90,12 @@ export function DestinationsView(): JSX.Element {
                   <LevelBadge>{r.level}</LevelBadge>
                 </Td>
                 <Td secondary>{r.node}</Td>
-                <Td><StatusBadge status={r.status} /></Td>
+                <Td>
+                  <StatusBadge
+                    status={r.status}
+                    label={statusKey(r.status) ? t(statusKey(r.status) as UiMessageKey) : r.status}
+                  />
+                </Td>
                 <Td align="center">{String(r.priority)}</Td>
               </TRow>
             ))}
@@ -175,16 +183,29 @@ function LevelBadge({ children }: { readonly children: string }): JSX.Element {
   );
 }
 
-const STATUS_CONFIG: Record<string, { label: string; colorVar: string; bgVar: string }> = {
-  occupied: { label: 'Occupé', colorVar: 'var(--state-valid)', bgVar: 'var(--accent-soft)' },
-  vacant: { label: 'Vacant', colorVar: 'var(--state-warning)', bgVar: 'var(--accent-soft)' },
-  reserved: { label: 'Réservé', colorVar: 'var(--state-info)', bgVar: 'var(--accent-soft)' },
-  under_fit_out: { label: 'En aménagement', colorVar: 'var(--accent)', bgVar: 'var(--accent-soft)' },
+const STATUS_LABEL_KEYS: Record<string, UiMessageKey> = {
+  occupied: 'status.occupied',
+  vacant: 'status.vacant',
+  reserved: 'status.reserved',
+  under_fit_out: 'status.underfitout',
 };
 
-function StatusBadge({ status }: { readonly status: string }): JSX.Element {
-  const config = STATUS_CONFIG[status] ?? {
-    label: status,
+/** The message key for an occupancy status, or null when unknown. */
+function statusKey(status: string): UiMessageKey | null {
+  return STATUS_LABEL_KEYS[status] ?? null;
+}
+
+const STATUS_COLORS: Record<string, { colorVar: string; bgVar: string }> = {
+  occupied: { colorVar: 'var(--state-valid)', bgVar: 'var(--accent-soft)' },
+  vacant: { colorVar: 'var(--state-warning)', bgVar: 'var(--accent-soft)' },
+  reserved: { colorVar: 'var(--state-info)', bgVar: 'var(--accent-soft)' },
+  under_fit_out: { colorVar: 'var(--accent)', bgVar: 'var(--accent-soft)' },
+};
+
+function StatusBadge(
+  { status, label }: { readonly status: string; readonly label: string },
+): JSX.Element {
+  const config = STATUS_COLORS[status] ?? {
     colorVar: 'var(--text-secondary)',
     bgVar: 'var(--surface-sunken)',
   };
@@ -206,7 +227,7 @@ function StatusBadge({ status }: { readonly status: string }): JSX.Element {
         borderRadius: '50%',
         background: config.colorVar,
       }} />
-      {config.label}
+      {label}
     </span>
   );
 }

@@ -1,5 +1,6 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { resolveFaceContent } from '@azimut/engine-graph';
 import type { FaceTemplate, TravelProfile, GraphNode } from '@azimut/core-model';
 
@@ -40,6 +41,7 @@ function evaluateFaces(
 
 export function ProofsView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
   const profile = site.travel_profiles[0] ?? null;
 
   const statuses = useMemo(
@@ -58,22 +60,24 @@ export function ProofsView(): JSX.Element {
   return (
     <div>
       <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        Bons a tirer
+        {t('proofs.title')}
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        {statuses.length} gabarit{statuses.length !== 1 ? 's' : ''} /{' '}
-        {resolvedCount} resolu{resolvedCount !== 1 ? 's' : ''} /{' '}
-        {totalWarnings} avertissement{totalWarnings !== 1 ? 's' : ''}
+        {t('proofs.summary', {
+          templates: statuses.length,
+          resolved: resolvedCount,
+          warnings: totalWarnings,
+        })}
       </p>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '2px solid var(--border-hairline)' }}>
-              <Th>Gabarit</Th>
-              <Th>Type / Face</Th>
-              <Th>Noeud test</Th>
-              <Th>Statut</Th>
-              <Th>Avertissements</Th>
+              <Th>{t('proofs.col.template')}</Th>
+              <Th>{t('proofs.col.typeface')}</Th>
+              <Th>{t('proofs.col.testnode')}</Th>
+              <Th>{t('proofs.col.status')}</Th>
+              <Th>{t('proofs.col.warnings')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -84,7 +88,7 @@ export function ProofsView(): JSX.Element {
                   textAlign: 'center',
                   color: 'var(--text-secondary)',
                 }}>
-                  Aucun gabarit configure.
+                  {t('proofs.empty')}
                 </td>
               </tr>
             ) : statuses.map((s) => (
@@ -108,7 +112,7 @@ export function ProofsView(): JSX.Element {
                     background: s.resolved ? 'var(--surface-sunken)' : 'var(--border-hairline)',
                     color: s.resolved ? 'var(--accent)' : 'var(--text-secondary)',
                   }}>
-                    {s.resolved ? 'Resolu' : 'Echec'}
+                    {s.resolved ? t('proofs.status.resolved') : t('proofs.status.failed')}
                   </span>
                 </td>
                 <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12, textAlign: 'center' }}>
