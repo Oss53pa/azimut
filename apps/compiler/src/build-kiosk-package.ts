@@ -1,108 +1,82 @@
 import type { SiteData } from '@azimut/core-model';
-import {
-  assemblePackage,
-  manifestToJson,
-  verifyPackage,
-  scanForNetworkDependency,
-} from '@azimut/engine-package';
-import type { ArtifactInput } from '@azimut/engine-package';
+import { assembleKioskPackage } from '@azimut/engine-package';
 import type { Job } from './job.js';
 
+/**
+ * D10 — `build_kiosk_package` job handler.
+ *
+ * Produces the kiosk deployment tree (index.html, assets, data, maps) and its
+ * D10.2 manifest via assembleKioskPackage. The runtime app assets and the
+ * generated data/map files are resolved from storage by the context; assembly
+ * validates the tree (required files, no absolute path, no outbound reference)
+ * and computes the deterministic contentHash (builtAt excluded).
+ */
 export type BuildKioskPackageContext = {
   readonly site: SiteData;
   /**
-   * Resolve all artifact inputs for the kiosk package.
-   * In production this reads from compiled-artifact storage;
-   * in tests it returns mock data.
+   * Resolve the kiosk tree files, keyed by relative path. In production this
+   * reads compiled artifacts from storage; in tests it returns fixture bytes.
    */
-  readonly resolveArtifacts: () => Promise<readonly ArtifactInput[]>;
+  readonly resolveKioskFiles: () => Promise<ReadonlyMap<string, Uint8Array>>;
+  /** Site content version stamped on the manifest. */
+  readonly version: number;
+  /** Active languages of the site. */
+  readonly langs: readonly string[];
+  /** Minimum kiosk runtime version required. */
+  readonly minRuntime: string;
 };
 
 export type BuildKioskPackageResult = {
-  readonly package_id: string;
-  readonly artifact_count: number;
+  readonly site_id: string;
+  readonly version: number;
+  readonly content_hash: string;
+  readonly file_count: number;
   readonly total_size_bytes: number;
-  readonly manifest_json_length: number;
-  readonly verified: boolean;
+  readonly built_at: string;
   readonly network_clean: boolean;
 };
 
-/**
- * Create a job handler for `build_kiosk_package`.
- *
- * Assembles a kiosk deployment package:
- *   1. Resolves artifact inputs from context
- *   2. Assembles manifest via assemblePackage
- *   3. Verifies checksums via verifyPackage
- *   4. Scans for network dependencies via scanForNetworkDependency
- *
- * Payload:
- *   - package_id: string — unique package identifier
- *   - created_at: string — ISO timestamp for the manifest
- *
- * Throws when assembly, verification, or network scan fails.
- */
 export function createBuildKioskPackageHandler(
   context: BuildKioskPackageContext,
 ): (job: Job) => Promise<Record<string, unknown>> {
-  const { site, resolveArtifacts } = context;
+  const { site, resolveKioskFiles, version, langs, minRuntime } = context;
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const payload = job.payload;
-    const packageId =
-      typeof payload['package_id'] === 'string'
-        ? payload['package_id']
-        : job.id;
-    const createdAt =
-      typeof payload['created_at'] === 'string'
-        ? payload['created_at']
+    const builtAt =
+      typeof payload['built_at'] === 'string'
+        ? payload['built_at']
         : new Date().toISOString();
 
-    // 1. Resolve artifacts
-    const inputs = await resolveArtifacts();
+    const files = await resolveKioskFiles();
 
-    // 2. Assemble package
-    const assembleResult = assemblePackage(
-      site,
-      packageId,
-      createdAt,
-      inputs,
-    );
-    if (!assembleResult.ok) {
-      const codes = assembleResult.findings.map((f) => f.code).join(', ');
-      throw new Error(`Package assembly failed: ${codes}`);
-    }
-    const manifest = assembleResult.value;
+    const result = assembleKioskPackage({
+      siteId: site.site.id,
+      version,
+      builtAt,
+      langs,
+      minRuntime,
+      files,
+    });
 
-    // 3. Verify checksums (round-trip integrity)
-    const contentMap = new Map<string, Uint8Array>();
-    for (const input of inputs) {
-      contentMap.set(input.id, input.content);
-    }
-    const verifyResult = verifyPackage(manifest, contentMap);
-    if (!verifyResult.ok) {
-      const codes = verifyResult.findings.map((f) => f.code).join(', ');
-      throw new Error(`Package verification failed: ${codes}`);
+    if (!result.ok) {
+      const codes = result.findings.map((f) => f.code).join(', ');
+      throw new Error(`Kiosk package assembly failed: ${codes}`);
     }
 
-    // 4. Scan for network dependencies
-    const scanResult = scanForNetworkDependency(contentMap);
-    if (!scanResult.ok) {
-      const codes = scanResult.findings
-        .map((f) => `${f.entity?.id ?? '?'}:${f.params['patterns']}`)
-        .join('; ');
-      throw new Error(`Network dependency detected: ${codes}`);
-    }
+    const { manifest, files: tree } = result.value;
+    let totalSize = 0;
+    for (const bytes of tree.values()) totalSize += bytes.length;
 
-    const manifestJson = manifestToJson(manifest);
-
-    return {
-      package_id: manifest.package_id,
-      artifact_count: manifest.artifact_count,
-      total_size_bytes: manifest.total_size_bytes,
-      manifest_json_length: manifestJson.length,
-      verified: true,
+    const summary: BuildKioskPackageResult = {
+      site_id: manifest.siteId,
+      version: manifest.version,
+      content_hash: manifest.contentHash,
+      file_count: manifest.files.length,
+      total_size_bytes: totalSize,
+      built_at: manifest.builtAt,
       network_clean: true,
     };
+    return { ...summary };
   };
 }

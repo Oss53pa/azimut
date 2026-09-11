@@ -2,20 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { createBuildKioskPackageHandler } from '../build-kiosk-package.js';
 import type { BuildKioskPackageContext } from '../build-kiosk-package.js';
 import type { Job } from '../job.js';
-import type { ArtifactInput } from '@azimut/engine-package';
 import { refMinimal } from '@azimut/testkit';
 
 const enc = new TextEncoder();
 
-function makeArtifact(overrides?: Partial<ArtifactInput>): ArtifactInput {
-  return {
-    id: 'art-001',
-    kind: 'artwork_svg',
-    path: 'artworks/panel-001.svg',
-    content: enc.encode('<svg><rect width="10" height="10"/></svg>'),
-    metadata: { support_id: 'sup-001' },
-    ...overrides,
-  };
+function kioskFiles(): Map<string, Uint8Array> {
+  return new Map<string, Uint8Array>([
+    ['index.html', enc.encode('<!doctype html><title>Borne</title>')],
+    ['assets/app.js', enc.encode('export const app = 1;')],
+    ['assets/app.css', enc.encode('body{margin:0}')],
+    ['data/graph.json', enc.encode('{"nodes":[]}')],
+    ['data/directory.json', enc.encode('{"destinations":[]}')],
+    ['data/scene.json', enc.encode('{"volumes":[]}')],
+    ['maps/level-0.svg', enc.encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')],
+  ]);
 }
 
 function makeJob(payload?: Record<string, unknown>): Job {
@@ -36,209 +36,82 @@ function makeJob(payload?: Record<string, unknown>): Job {
 }
 
 function makeContext(
-  artifacts: readonly ArtifactInput[],
+  files: ReadonlyMap<string, Uint8Array>,
 ): BuildKioskPackageContext {
   return {
     site: refMinimal,
-    resolveArtifacts: async () => artifacts,
+    resolveKioskFiles: async () => files,
+    version: 42,
+    langs: ['fr', 'en'],
+    minRuntime: '1.0.0',
   };
 }
 
-describe('createBuildKioskPackageHandler', () => {
-  it('assembles a valid package from clean artifacts', async () => {
-    const artifacts = [makeArtifact()];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-    const job = makeJob({
-      package_id: 'pkg-001',
-      created_at: '2024-06-15T12:00:00Z',
-    });
+describe('createBuildKioskPackageHandler (D10)', () => {
+  it('assembles a valid kiosk package tree and manifest', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext(kioskFiles()));
+    const result = await handler(makeJob({ built_at: '2026-09-01T00:00:00Z' }));
 
-    const result = await handler(job);
-    expect(result['package_id']).toBe('pkg-001');
-    expect(result['artifact_count']).toBe(1);
+    expect(result['site_id']).toBe(refMinimal.site.id);
+    expect(result['version']).toBe(42);
+    expect(result['content_hash']).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(result['file_count']).toBe(7);
     expect(result['total_size_bytes']).toBeGreaterThan(0);
-    expect(result['manifest_json_length']).toBeGreaterThan(0);
-    expect(result['verified']).toBe(true);
+    expect(result['built_at']).toBe('2026-09-01T00:00:00Z');
     expect(result['network_clean']).toBe(true);
   });
 
-  it('handles multiple artifacts', async () => {
-    const artifacts = [
-      makeArtifact({ id: 'art-1', path: 'a.svg' }),
-      makeArtifact({
-        id: 'art-2',
-        path: 'b.svg',
-        content: enc.encode('<svg><text>Hello</text></svg>'),
-      }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-    const result = await handler(makeJob({
-      package_id: 'pkg-multi',
-      created_at: '2024-06-15T12:00:00Z',
-    }));
-
-    expect(result['artifact_count']).toBe(2);
-    expect(result['verified']).toBe(true);
+  it('content_hash is independent of built_at (D10.2)', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext(kioskFiles()));
+    const a = await handler(makeJob({ built_at: '2026-01-01T00:00:00Z' }));
+    const b = await handler(makeJob({ built_at: '2030-12-31T23:59:59Z' }));
+    expect(a['content_hash']).toBe(b['content_hash']);
+    expect(a['built_at']).not.toBe(b['built_at']);
   });
 
-  it('handles empty artifact list', async () => {
-    const handler = createBuildKioskPackageHandler(makeContext([]));
-    const result = await handler(makeJob({
-      package_id: 'pkg-empty',
-      created_at: '2024-06-15T12:00:00Z',
-    }));
-
-    expect(result['artifact_count']).toBe(0);
-    expect(result['total_size_bytes']).toBe(0);
+  it('defaults built_at to now when absent from payload', async () => {
+    const handler = createBuildKioskPackageHandler(makeContext(kioskFiles()));
+    const result = await handler(makeJob({}));
+    expect(typeof result['built_at']).toBe('string');
+    expect(result['content_hash']).toMatch(/^sha256:/);
   });
 
-  it('defaults package_id to job id when not in payload', async () => {
-    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
-    const result = await handler(makeJob({
-      created_at: '2024-06-15T12:00:00Z',
-    }));
-
-    expect(result['package_id']).toBe('job-kiosk-001');
+  it('throws when a required file is missing', async () => {
+    const files = kioskFiles();
+    files.delete('data/scene.json');
+    const handler = createBuildKioskPackageHandler(makeContext(files));
+    await expect(handler(makeJob())).rejects.toThrow('Kiosk package assembly failed');
   });
 
-  it('throws when artifacts contain network dependencies', async () => {
-    const artifacts = [
-      makeArtifact({
-        id: 'art-net',
-        path: 'bad.js',
-        kind: 'artwork_svg',
-        content: enc.encode('fetch("https://evil.com/data")'),
-      }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-
-    await expect(
-      handler(makeJob({
-        package_id: 'pkg-net',
-        created_at: '2024-06-15T12:00:00Z',
-      })),
-    ).rejects.toThrow('Network dependency detected');
+  it('throws on an absolute path', async () => {
+    const files = kioskFiles();
+    files.set('/etc/passwd', enc.encode('x'));
+    const handler = createBuildKioskPackageHandler(makeContext(files));
+    await expect(handler(makeJob())).rejects.toThrow('Kiosk package assembly failed');
   });
 
-  it('throws when artifacts have duplicate ids', async () => {
-    const artifacts = [
-      makeArtifact({ id: 'art-dup', path: 'a.svg' }),
-      makeArtifact({ id: 'art-dup', path: 'b.svg' }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-
-    await expect(
-      handler(makeJob({
-        package_id: 'pkg-dup',
-        created_at: '2024-06-15T12:00:00Z',
-      })),
-    ).rejects.toThrow('Package assembly failed');
+  it('throws on an outbound network reference (D10.1)', async () => {
+    const files = kioskFiles();
+    files.set('assets/app.js', enc.encode('fetch("https://evil.com/x")'));
+    const handler = createBuildKioskPackageHandler(makeContext(files));
+    await expect(handler(makeJob())).rejects.toThrow('Kiosk package assembly failed');
   });
 
-  it('is deterministic (INV-4)', async () => {
-    const artifacts = [
-      makeArtifact({ id: 'art-1', path: 'a.svg' }),
-      makeArtifact({
-        id: 'art-2',
-        path: 'b.svg',
-        content: enc.encode('<svg><circle r="5"/></svg>'),
-      }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-    const job = makeJob({
-      package_id: 'pkg-det',
-      created_at: '2024-06-15T12:00:00Z',
-    });
-
-    const r1 = await handler(job);
-    const r2 = await handler(job);
-    expect(r1).toStrictEqual(r2);
-  });
-
-  it('throws when duplicate paths', async () => {
-    const artifacts = [
-      makeArtifact({ id: 'art-1', path: 'same.svg' }),
-      makeArtifact({ id: 'art-2', path: 'same.svg' }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-
-    await expect(
-      handler(makeJob({
-        package_id: 'pkg-dup-path',
-        created_at: '2024-06-15T12:00:00Z',
-      })),
-    ).rejects.toThrow('Package assembly failed');
-  });
-
-  it('defaults created_at to current timestamp when not in payload', async () => {
-    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
-    const result = await handler(makeJob({
-      package_id: 'pkg-ts',
-      // no created_at → defaults to new Date().toISOString()
-    }));
-
-    // Package was assembled with a generated timestamp
-    expect(result['package_id']).toBe('pkg-ts');
-    expect(result['artifact_count']).toBe(1);
-    expect(typeof result['manifest_json_length']).toBe('number');
-  });
-
-  it('non-string package_id falls back to job.id', async () => {
-    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
-    const result = await handler(makeJob({
-      package_id: 42,
-      created_at: '2024-06-15T12:00:00Z',
-    }));
-
-    expect(result['package_id']).toBe('job-kiosk-001');
-  });
-
-  it('propagates resolveArtifacts rejection', async () => {
+  it('propagates a resolveKioskFiles rejection', async () => {
     const context: BuildKioskPackageContext = {
       site: refMinimal,
-      resolveArtifacts: async () => { throw new Error('storage unavailable'); },
+      resolveKioskFiles: async () => { throw new Error('storage unavailable'); },
+      version: 1,
+      langs: ['fr'],
+      minRuntime: '1.0.0',
     };
     const handler = createBuildKioskPackageHandler(context);
-
-    await expect(
-      handler(makeJob({
-        package_id: 'pkg-err',
-        created_at: '2024-06-15T12:00:00Z',
-      })),
-    ).rejects.toThrow('storage unavailable');
+    await expect(handler(makeJob())).rejects.toThrow('storage unavailable');
   });
 
   it('is deterministic (INV-4)', async () => {
-    const artifacts = [makeArtifact()];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-    const job = makeJob({
-      package_id: 'pkg-det',
-      created_at: '2024-06-15T12:00:00Z',
-    });
-    const r1 = await handler(job);
-    const r2 = await handler(job);
-    expect(r1).toStrictEqual(r2);
-  });
-
-  it('non-string created_at falls back to auto-generated timestamp', async () => {
-    const handler = createBuildKioskPackageHandler(makeContext([makeArtifact()]));
-    const result = await handler(makeJob({ package_id: 'pkg-ts-num', created_at: 42 }));
-    expect(result['package_id']).toBe('pkg-ts-num');
-    expect(result['verified']).toBe(true);
-  });
-
-  it('multiple artifacts produce a larger package', async () => {
-    const artifacts = [
-      makeArtifact({ id: 'art-1', path: 'artworks/p1.svg' }),
-      makeArtifact({ id: 'art-2', path: 'artworks/p2.svg',
-        content: enc.encode('<svg><circle r="5"/></svg>') }),
-    ];
-    const handler = createBuildKioskPackageHandler(makeContext(artifacts));
-    const result = await handler(makeJob({
-      package_id: 'pkg-multi',
-      created_at: '2024-06-15T12:00:00Z',
-    }));
-    expect(result['artifact_count']).toBe(2);
-    expect(result['verified']).toBe(true);
+    const handler = createBuildKioskPackageHandler(makeContext(kioskFiles()));
+    const job = makeJob({ built_at: '2026-09-01T00:00:00Z' });
+    expect(await handler(job)).toStrictEqual(await handler(job));
   });
 });
