@@ -1,8 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { createBuildKioskPackageHandler } from '../build-kiosk-package.js';
+import {
+  createBuildKioskPackageHandler,
+  kioskContextFromAssets,
+} from '../build-kiosk-package.js';
 import type { BuildKioskPackageContext } from '../build-kiosk-package.js';
+import type { KioskAppAssets } from '../build-kiosk-tree.js';
 import type { Job } from '../job.js';
-import { refMinimal } from '@azimut/testkit';
+import { refMinimal, refMultilevel } from '@azimut/testkit';
 
 const enc = new TextEncoder();
 
@@ -113,5 +117,41 @@ describe('createBuildKioskPackageHandler (D10)', () => {
     const handler = createBuildKioskPackageHandler(makeContext(kioskFiles()));
     const job = makeJob({ built_at: '2026-09-01T00:00:00Z' });
     expect(await handler(job)).toStrictEqual(await handler(job));
+  });
+});
+
+describe('kioskContextFromAssets (D10 — end to end)', () => {
+  const appAssets: KioskAppAssets = {
+    indexHtml: enc.encode('<!doctype html><title>Borne</title><div id="app"></div>'),
+    appJs: enc.encode('export const boot = () => {};'),
+    appCss: enc.encode('body{margin:0;font-family:system-ui}'),
+  };
+
+  it('composes a context that assembles a real site into a manifest', async () => {
+    const context = kioskContextFromAssets(refMultilevel, appAssets, {
+      version: 7,
+      langs: ['fr', 'en'],
+      minRuntime: '1.0.0',
+    });
+    const handler = createBuildKioskPackageHandler(context);
+    const result = await handler(makeJob({ built_at: '2026-09-01T00:00:00Z' }));
+
+    expect(result['site_id']).toBe(refMultilevel.site.id);
+    expect(result['version']).toBe(7);
+    expect(result['content_hash']).toMatch(/^sha256:[0-9a-f]{64}$/);
+    // index.html + app.js + app.css + 3 data files + one map per level (2).
+    expect(result['file_count']).toBe(8);
+    expect(result['network_clean']).toBe(true);
+  });
+
+  it('is deterministic across two independent composed contexts (INV-4)', async () => {
+    const meta = { version: 7, langs: ['fr', 'en'], minRuntime: '1.0.0' };
+    const a = await createBuildKioskPackageHandler(
+      kioskContextFromAssets(refMultilevel, appAssets, meta),
+    )(makeJob({ built_at: '2026-09-01T00:00:00Z' }));
+    const b = await createBuildKioskPackageHandler(
+      kioskContextFromAssets(refMultilevel, appAssets, meta),
+    )(makeJob({ built_at: '2030-12-31T23:59:59Z' }));
+    expect(a['content_hash']).toBe(b['content_hash']);
   });
 });

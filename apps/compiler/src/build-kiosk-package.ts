@@ -1,5 +1,7 @@
 import type { SiteData } from '@azimut/core-model';
 import { assembleKioskPackage } from '@azimut/engine-package';
+import { buildKioskTree } from './build-kiosk-tree.js';
+import type { KioskAppAssets } from './build-kiosk-tree.js';
 import type { Job } from './job.js';
 
 /**
@@ -35,6 +37,25 @@ export type BuildKioskPackageResult = {
   readonly built_at: string;
   readonly network_clean: boolean;
 };
+
+/**
+ * Compose a {@link BuildKioskPackageContext} from a site and the built runtime
+ * app assets. The generated data/map files are produced deterministically by
+ * {@link buildKioskTree}, closing the D10 loop: site → tree → manifest.
+ */
+export function kioskContextFromAssets(
+  site: SiteData,
+  appAssets: KioskAppAssets,
+  meta: { version: number; langs: readonly string[]; minRuntime: string },
+): BuildKioskPackageContext {
+  return {
+    site,
+    resolveKioskFiles: async () => buildKioskTree(site, appAssets),
+    version: meta.version,
+    langs: meta.langs,
+    minRuntime: meta.minRuntime,
+  };
+}
 
 export function createBuildKioskPackageHandler(
   context: BuildKioskPackageContext,
