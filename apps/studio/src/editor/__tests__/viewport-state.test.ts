@@ -199,6 +199,23 @@ describe('E3 — viewport-state reducer', () => {
     });
   });
 
+  describe("action 'set'", () => {
+    it('replaces the view wholesale when framing another level', () => {
+      const target: ViewState = {
+        centerX_m: 12, centerY_m: -4, scale_px_per_m: 80, rotationDeg: 90,
+      };
+      expect(viewReducer(DEFAULT_VIEW, { type: 'set', view: target })).toStrictEqual(target);
+    });
+
+    it('clamps an out-of-range scale rather than accepting it', () => {
+      const next = viewReducer(DEFAULT_VIEW, {
+        type: 'set',
+        view: { centerX_m: 0, centerY_m: 0, scale_px_per_m: 1e9, rotationDeg: 0 },
+      });
+      expect(next.scale_px_per_m).toBeLessThan(1e9);
+    });
+  });
+
   describe('INV-4 determinism', () => {
     it('same actions produce same state', () => {
       const actions: ViewAction[] = [

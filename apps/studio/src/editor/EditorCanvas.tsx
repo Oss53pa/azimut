@@ -36,6 +36,9 @@ import { ToolPreviewRenderer } from './scene/ToolPreviewRenderer.js';
 import { SnapIndicator } from './scene/SnapIndicator.js';
 import { useToolGesture } from './use-tool-gesture.js';
 import type { SceneObject } from './snap-integration.js';
+import type { SnapResult } from './snap.js';
+import type { ShapeCommandData } from './command-integration.js';
+import { previewToData } from './command-integration.js';
 
 // ---------------------------------------------------------------------------
 // Public API — exposed via onReady callback
@@ -66,6 +69,13 @@ type EditorCanvasProps = {
   readonly onToolChange?: ((state: ToolState) => void) | undefined;
   /** Called once with the canvas API so the parent can trigger zoom etc. */
   readonly onReady?: ((api: EditorCanvasApi) => void) | undefined;
+  /**
+   * Called when a gesture completes, with the quantized shape data it
+   * produced (E4.1). The gesture is then reset so the tool stays armed.
+   */
+  readonly onGestureCommit?: ((data: ShapeCommandData) => void) | undefined;
+  /** Called as the pointer moves, with the snapped position (E8). */
+  readonly onPointerSnap?: ((snap: SnapResult) => void) | undefined;
   /** Accessibility label for the SVG viewport. */
   readonly ariaLabel?: string | undefined;
 };
@@ -99,6 +109,8 @@ export function EditorCanvas({
   onViewChange,
   onToolChange,
   onReady,
+  onGestureCommit,
+  onPointerSnap,
   ariaLabel = 'Éditeur de plan',
 }: EditorCanvasProps): JSX.Element {
   // ---- View state ----
@@ -198,6 +210,32 @@ export function EditorCanvas({
     dispatchTool,
     isPanMode,
   });
+
+  // ---- Re-frame when the parent supplies a new initial view ----
+  // The reducer only reads `initialView` once, so a level change has to
+  // be applied explicitly or the viewport would keep the old framing.
+  const framedRef = useRef(initialView);
+  useEffect(() => {
+    if (initialView === undefined || initialView === framedRef.current) return;
+    framedRef.current = initialView;
+    dispatchView({ type: 'set', view: initialView });
+  }, [initialView]);
+
+  // ---- Gesture commit (E5) ----
+  // A finished gesture becomes document data exactly once, then the
+  // tool returns to idle with the same tool still selected.
+  const commitRef = useRef(onGestureCommit);
+  commitRef.current = onGestureCommit;
+
+  useEffect(() => {
+    if (toolState.phase !== 'done') return;
+    const data = previewToData(toolState.preview);
+    if (data !== null) commitRef.current?.(data);
+    dispatchToolRaw({ type: 'reset_gesture' });
+  }, [toolState.phase, toolState.preview]);
+
+  // ---- Snap reporting (E8) ----
+  useEffect(() => { onPointerSnap?.(snapResult); }, [snapResult, onPointerSnap]);
 
   // ---- Viewport pan/zoom handlers ----
   const handleWheel = useCallback((e: React.WheelEvent<SVGSVGElement>) => {

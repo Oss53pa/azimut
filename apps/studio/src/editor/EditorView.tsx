@@ -1,11 +1,13 @@
 /**
- * E3 + E5 + E7 + E8 + E16 — Full editor view.
+ * E3 + E5 + E7 + E8 + E16 — Editor view, context 1.
  *
- * Assembles EditorCanvas with FloorPlanScene, editing context,
- * undo/redo, clipboard, alignment, and central shortcut dispatcher.
+ * Assembles the editor over a real document: tool gestures, clipboard,
+ * alignment, draw order and deletion all produce reversible commands
+ * (E5.1) that the document applies, so undo and redo move geometry
+ * rather than only popping a stack.
  *
- * This is the top-level view for editing site geometry (context 1).
- * Replaces the read-only FloorPlansView when editing mode is active.
+ * Selection, pan, zoom and the active level are interface state and
+ * never enter the undo stack (E5.2).
  *
  * All keyboard handling converges in useShortcuts (E16).
  */
@@ -18,39 +20,63 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { Point, ViewState, Footprint } from '@azimut/core-model';
+import type { Point } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { EditorCanvas } from './EditorCanvas.js';
 import type { EditorCanvasApi } from './EditorCanvas.js';
 import type { SceneObject } from './snap-integration.js';
+import type { SnapResult } from './snap.js';
 import { FloorPlanScene } from './scene/FloorPlanScene.js';
+import { DecorationScene } from './scene/DecorationScene.js';
 import { selectionReducer, EMPTY_SELECTION } from './selection.js';
-import { historyReducer, EMPTY_HISTORY } from './command.js';
-import { useUndoRedo } from './use-undo-redo.js';
 import { useClipboard } from './use-clipboard.js';
 import { EMPTY_CLIPBOARD } from './clipboard.js';
-import type { ClipboardPayload, PasteResult } from './clipboard.js';
 import { AlignmentPanel } from './AlignmentPanel.js';
-import type { AlignAxis, DistributeAxis, ZOrderOp } from './alignment.js';
 import { ShortcutHelpPanel } from './ShortcutHelpPanel.js';
 import { useShortcuts } from './use-shortcuts.js';
 import { StatusBar } from './StatusBar.js';
+import { LevelTabs } from './LevelTabs.js';
 import type { ToolId, ToolState } from './tool-state.js';
+import { useEditorDocument } from './use-editor-document.js';
+import { useEditorOperations } from './use-editor-operations.js';
+import {
+  levelSceneObjects,
+  levelSelectableItems,
+  shapesOfLevel,
+} from './editor-document.js';
+import { levelInitialView } from './level-view.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
-/**
- * Convert footprints to SceneObjects for the snap pipeline.
- */
-function footprintsToSceneObjects(
-  footprints: readonly Footprint[],
-): readonly SceneObject[] {
-  return footprints.map(fp => ({
-    id: fp.id,
-    vertices: fp.geometry.vertices,
-  }));
+const NO_SNAP: SnapResult = { point: { x_m: 0, y_m: 0 }, target: null };
+
+const EMPTY_STYLE: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100%',
+  color: 'var(--text-secondary)',
+  fontSize: 14,
+};
+
+/** Live region announcing operation results (E6.3). */
+function Announcer({ message }: { readonly message: string }): JSX.Element {
+  return (
+    <div
+      aria-live="polite"
+      style={{
+        position: 'absolute',
+        width: 1,
+        height: 1,
+        overflow: 'hidden',
+        clipPath: 'inset(50%)',
+      }}
+    >
+      {message}
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -66,33 +92,59 @@ export function EditorView(): JSX.Element {
 
   const [selectedLevel, setSelectedLevel] = useState(sortedLevels[0]?.id ?? '');
   const [selection, dispatchSelection] = useReducer(selectionReducer, EMPTY_SELECTION);
-  const [history, dispatchHistory] = useReducer(historyReducer, EMPTY_HISTORY);
   const [toolState, setToolState] = useState<ToolState | null>(null);
-  const [cursorPosition] = useState<Point | null>(null);
+  const [snap, setSnap] = useState<SnapResult>(NO_SNAP);
   const [clipboard, setClipboard] = useState(EMPTY_CLIPBOARD);
-
-  // Tool switch requested by keyboard shortcut (E16)
+  const [announcement, setAnnouncement] = useState('');
   const [requestedTool, setRequestedTool] = useState<ToolId | undefined>(undefined);
+  const [showShortcuts, setShowShortcuts] = useState(false);
 
-  // Canvas API ref — zoom functions exposed by EditorCanvas
+  // Framing is captured when a level is opened. Later edits must not
+  // move the view under the operator's hands.
+  const [initialView, setInitialView] = useState(
+    () => levelInitialView(site, sortedLevels[0]?.id ?? '', []),
+  );
+
+  // ---- Document and history (E5) ----
+  const documentApi = useEditorDocument(site.site.id);
+  const { document, undo, redo, canUndo, canRedo } = documentApi;
+
+  const operations = useEditorOperations({
+    documentApi,
+    orgId: site.organization.id,
+    siteId: site.site.id,
+    levelId: selectedLevel,
+    selectedIds: selection.selectedIds,
+    onAnnounce: setAnnouncement,
+  });
+
+  // ---- Level content ----
+  const decorationShapes = useMemo(
+    () => shapesOfLevel(document, selectedLevel),
+    [document, selectedLevel],
+  );
+
+  const selectableItems = useMemo(
+    () => levelSelectableItems(document, selectedLevel),
+    [document, selectedLevel],
+  );
+
+  /** Snap targets: business footprints plus the habillage layer (E8.1). */
+  const sceneObjects = useMemo((): readonly SceneObject[] => {
+    if (selectedLevel === '') return [];
+    const footprints = site.footprints
+      .filter(f => f.level_id === selectedLevel)
+      .map(f => ({ id: f.id, vertices: f.geometry.vertices }));
+    return [...footprints, ...levelSceneObjects(document, selectedLevel)];
+  }, [site, document, selectedLevel]);
+
+  // ---- Canvas API ----
   const canvasApiRef = useRef<EditorCanvasApi | null>(null);
   const handleCanvasReady = useCallback((api: EditorCanvasApi) => {
     canvasApiRef.current = api;
   }, []);
 
-  const undoRedo = useUndoRedo({ history, dispatchHistory });
-
-  // Clipboard integration — actions only, keyboard via useShortcuts (E16)
-  const buildPayload = useCallback(
-    (_ids: readonly string[]): ClipboardPayload | null => {
-      // Stub: real payload from selected footprints/objects will be
-      // wired when scene objects carry full data.
-      void _ids;
-      return null;
-    },
-    [],
-  );
-
+  // ---- Clipboard (E7.3) ----
   const pasteContext = useMemo(() => ({
     targetOrgId: site.organization.id,
     targetSiteId: site.site.id,
@@ -100,186 +152,104 @@ export function EditorView(): JSX.Element {
   }), [site, selectedLevel]);
 
   const viewportCenter = useMemo((): Point => ({
-    x_m: 0,
-    y_m: 0,
-  }), []);
-
-  const handlePaste = useCallback((result: PasteResult & { ok: true }) => {
-    // Stub: create commands to paste items at offset positions.
-    void result;
-  }, []);
+    x_m: initialView?.centerX_m ?? 0,
+    y_m: initialView?.centerY_m ?? 0,
+  }), [initialView]);
 
   const handleCut = useCallback((ids: readonly string[]) => {
-    // Stub: create delete command for cut source objects.
-    void ids;
+    operations.cut(ids);
     dispatchSelection({ type: 'clear' });
-  }, []);
+  }, [operations]);
 
   const clipboardActions = useClipboard({
     clipboard,
     setClipboard,
     selection,
-    buildPayload,
+    buildPayload: operations.buildPayload,
     pasteContext,
     viewportCenter,
-    onPaste: handlePaste,
+    onPaste: operations.paste,
     onCut: handleCut,
   });
 
-  // Alignment / distribution / z-order callbacks
-  const handleAlign = useCallback((axis: AlignAxis) => {
-    // Stub: compute alignment deltas and create move commands.
-    void axis;
-  }, []);
+  const handlePaste = useCallback(() => {
+    const result = clipboardActions.paste();
+    if (result !== null && !result.ok) {
+      setAnnouncement(`Collage refusé : ${result.finding.code}.`);
+    }
+  }, [clipboardActions]);
 
-  const handleDistribute = useCallback((axis: DistributeAxis) => {
-    // Stub: compute distribution deltas and create move commands.
-    void axis;
-  }, []);
-
-  const handleZOrder = useCallback((op: ZOrderOp) => {
-    // Stub: compute new z-order and create reorder command.
-    void op;
-  }, []);
-
-  // Scene objects for snap pipeline
-  const sceneObjects = useMemo(() => {
-    if (selectedLevel === '') return [];
-    const levelFootprints = site.footprints.filter(f => f.level_id === selectedLevel);
-    return footprintsToSceneObjects(levelFootprints);
-  }, [site, selectedLevel]);
-
-  // Shortcut help panel
-  const [showShortcuts, setShowShortcuts] = useState(false);
-
-  const handleToolSwitch = useCallback((toolId: ToolId) => {
-    setRequestedTool(toolId);
+  // ---- Selection (E6) ----
+  const handleSelect = useCallback((id: string, additive: boolean) => {
+    dispatchSelection(additive ? { type: 'toggle', id } : { type: 'select', id });
   }, []);
 
   const handleSelectAll = useCallback(() => {
-    dispatchSelection({ type: 'select_all', ids: sceneObjects.map(o => o.id) });
-  }, [sceneObjects]);
+    dispatchSelection({ type: 'select_all', ids: selectableItems.map(i => i.id) });
+  }, [selectableItems]);
 
   const handleDeselect = useCallback(() => {
     dispatchSelection({ type: 'clear' });
     setShowShortcuts(false);
   }, []);
 
+  const handleNavigate = useCallback((direction: 'next' | 'prev') => {
+    dispatchSelection({ type: 'navigate', direction, items: selectableItems });
+  }, [selectableItems]);
+
+  const handleLevelChange = useCallback((levelId: string) => {
+    setSelectedLevel(levelId);
+    setInitialView(levelInitialView(site, levelId, shapesOfLevel(document, levelId)));
+    dispatchSelection({ type: 'clear' });
+  }, [site, document]);
+
+  // ---- Deletion (E7.3) ----
   const handleDelete = useCallback(() => {
     if (selection.selectedIds.length === 0) return;
-    // Stub: create delete commands for selected objects.
-    // When wired, this will dispatch a Command to the history reducer.
+    operations.deleteSelected();
     dispatchSelection({ type: 'clear' });
-  }, [selection.selectedIds]);
+  }, [selection.selectedIds, operations]);
 
-  const handleShowHelp = useCallback(() => {
-    setShowShortcuts(prev => !prev);
-  }, []);
-
-  // Central shortcut dispatcher (E16) — sole keyboard handler
+  // ---- Shortcut dispatcher (E16) — sole keyboard handler ----
   useShortcuts({
-    onUndo: undoRedo.undo,
-    onRedo: undoRedo.redo,
+    onUndo: undo,
+    onRedo: redo,
     onCopy: clipboardActions.copy,
     onCut: clipboardActions.cut,
-    onPaste: clipboardActions.paste,
+    onPaste: handlePaste,
     onDelete: handleDelete,
     onSelectAll: handleSelectAll,
     onDeselect: handleDeselect,
-    onToolSwitch: handleToolSwitch,
-    onShowHelp: handleShowHelp,
+    onNavigateNext: () => handleNavigate('next'),
+    onNavigatePrev: () => handleNavigate('prev'),
+    onToolSwitch: setRequestedTool,
+    onShowHelp: () => setShowShortcuts(prev => !prev),
     onZoomIn: () => canvasApiRef.current?.zoomIn(),
     onZoomOut: () => canvasApiRef.current?.zoomOut(),
     onZoomFit: () => canvasApiRef.current?.zoomFit(),
   });
 
-  // Initial view to fit level content
-  const initialView = useMemo((): ViewState | undefined => {
-    if (selectedLevel === '') return undefined;
-    const levelFootprints = site.footprints.filter(f => f.level_id === selectedLevel);
-    const levelNodes = site.graph.nodes.filter(n => n.level_id === selectedLevel);
-
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    let hasPoints = false;
-
-    for (const fp of levelFootprints) {
-      for (const v of fp.geometry.vertices) {
-        minX = Math.min(minX, v.x_m);
-        minY = Math.min(minY, v.y_m);
-        maxX = Math.max(maxX, v.x_m);
-        maxY = Math.max(maxY, v.y_m);
-        hasPoints = true;
-      }
-    }
-    for (const n of levelNodes) {
-      minX = Math.min(minX, n.position.x_m);
-      minY = Math.min(minY, n.position.y_m);
-      maxX = Math.max(maxX, n.position.x_m);
-      maxY = Math.max(maxY, n.position.y_m);
-      hasPoints = true;
-    }
-
-    if (!hasPoints) return undefined;
-
-    const spanX = maxX - minX;
-    const spanY = maxY - minY;
-    const scale = Math.min(700 / Math.max(spanX, 0.1), 400 / Math.max(spanY, 0.1)) * 0.85;
-
-    return {
-      centerX_m: (minX + maxX) / 2,
-      centerY_m: (minY + maxY) / 2,
-      scale_px_per_m: Math.max(0.05, Math.min(500, scale)),
-      rotationDeg: 0,
-    };
-  }, [site, selectedLevel]);
-
-  const handleSelect = useCallback((id: string, additive: boolean) => {
-    dispatchSelection(additive ? { type: 'toggle', id } : { type: 'select', id });
-  }, []);
-
-  const handleLevelChange = useCallback((levelId: string) => {
-    setSelectedLevel(levelId);
-    dispatchSelection({ type: 'clear' });
-  }, []);
-
-  const handleToolChange = useCallback((state: ToolState) => {
-    setToolState(state);
-  }, []);
+  const levelName = sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Level selector */}
-      <div style={{ display: 'flex', gap: 8, padding: '8px 12px', flexShrink: 0 }}>
-        {sortedLevels.map(l => (
-          <button
-            key={l.id}
-            onClick={() => handleLevelChange(l.id)}
-            style={{
-              padding: '6px 14px',
-              border: '1px solid var(--border-hairline)',
-              borderRadius: 6,
-              background: selectedLevel === l.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
-              color: selectedLevel === l.id ? 'var(--accent)' : 'var(--text-primary)',
-              fontWeight: selectedLevel === l.id ? 500 : 400,
-              fontSize: 13,
-              cursor: 'pointer',
-            }}
-          >
-            {l.name}
-          </button>
-        ))}
-      </div>
+      <LevelTabs
+        levels={sortedLevels}
+        selectedId={selectedLevel}
+        onSelect={handleLevelChange}
+      />
 
-      {/* Editor canvas */}
       <div style={{ flex: 1, minHeight: 0 }}>
         {selectedLevel !== '' ? (
           <EditorCanvas
             initialView={initialView}
             sceneObjects={sceneObjects}
             requestedTool={requestedTool}
-            onToolChange={handleToolChange}
+            onToolChange={setToolState}
             onReady={handleCanvasReady}
-            ariaLabel={`Éditeur: ${sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel}`}
+            onGestureCommit={operations.commitShape}
+            onPointerSnap={setSnap}
+            ariaLabel={`Éditeur : ${levelName}`}
           >
             <FloorPlanScene
               site={site}
@@ -287,45 +257,41 @@ export function EditorView(): JSX.Element {
               selectedIds={selection.selectedIds}
               onSelect={handleSelect}
             />
+            <DecorationScene
+              shapes={decorationShapes}
+              selectedIds={selection.selectedIds}
+              activeId={selection.activeId}
+              onSelect={handleSelect}
+            />
           </EditorCanvas>
         ) : (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            color: 'var(--text-secondary)',
-            fontSize: 14,
-          }}>
-            Sélectionnez un niveau.
-          </div>
+          <div style={EMPTY_STYLE}>Sélectionnez un niveau.</div>
         )}
       </div>
 
-      {/* Alignment panel (visible when 2+ selected) */}
       <AlignmentPanel
         selectedCount={selection.selectedIds.length}
-        onAlign={handleAlign}
-        onDistribute={handleDistribute}
-        onZOrder={handleZOrder}
+        onAlign={operations.align}
+        onDistribute={operations.distribute}
+        onZOrder={operations.setZOrder}
       />
 
-      {/* Status bar */}
       <StatusBar
         currentTool={toolState?.currentTool ?? 'select'}
-        cursorPosition={cursorPosition}
-        snapResult={{ point: { x_m: 0, y_m: 0 }, target: null }}
-        canUndo={undoRedo.canUndo}
-        canRedo={undoRedo.canRedo}
-        onUndo={undoRedo.undo}
-        onRedo={undoRedo.redo}
+        cursorPosition={snap.point}
+        snapResult={snap}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
       />
 
-      {/* Shortcut help panel (E16) */}
       <ShortcutHelpPanel
         visible={showShortcuts}
         onClose={() => setShowShortcuts(false)}
       />
+
+      <Announcer message={announcement} />
     </div>
   );
 }

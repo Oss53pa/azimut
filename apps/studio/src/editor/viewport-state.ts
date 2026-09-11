@@ -18,6 +18,8 @@ import {
 // ---------------------------------------------------------------------------
 
 export type ViewAction =
+  /** Replace the view wholesale, e.g. when framing another level. */
+  | { readonly type: 'set'; readonly view: ViewState }
   | { readonly type: 'pan'; readonly dx_px: number; readonly dy_px: number }
   | { readonly type: 'zoom'; readonly steps: number; readonly pivot: { readonly x: number; readonly y: number }; readonly viewport: ViewportSize }
   | { readonly type: 'zoom_to_scale'; readonly scale: number }
@@ -31,6 +33,13 @@ export type ViewAction =
 
 export function viewReducer(state: ViewState, action: ViewAction): ViewState {
   switch (action.type) {
+    case 'set': {
+      return {
+        ...action.view,
+        scale_px_per_m: clampScale(action.view.scale_px_per_m),
+      };
+    }
+
     case 'pan': {
       return {
         ...state,

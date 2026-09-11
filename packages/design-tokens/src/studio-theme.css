@@ -49,6 +49,11 @@
   --az-snap-indicator: var(--accent);
   --az-tool-preview: var(--accent);
   --az-selection-handle: var(--text-primary);
+
+  /* Habillage layer roles (E9) — roles, never direct colours */
+  --az-decoration-fill: var(--surface-sunken);
+  --az-decoration-stroke: var(--border-strong);
+  --az-decoration-selected: var(--accent);
 }
 
 /* ─── Instrument theme (dark) ─── */
