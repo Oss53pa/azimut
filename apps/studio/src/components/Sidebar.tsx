@@ -1,5 +1,7 @@
 import { type JSX, useState } from 'react';
 import type { ViewId } from '../views.js';
+import { useI18n } from '../i18n/useI18n.js';
+import type { UiMessageKey } from '../i18n/messages.js';
 
 type SidebarProps = {
   readonly currentView: ViewId;
@@ -8,21 +10,21 @@ type SidebarProps = {
 
 type NavItem = {
   readonly id: ViewId;
-  readonly label: string;
-  readonly section: string;
+  readonly labelKey: UiMessageKey;
+  readonly sectionKey: UiMessageKey;
 };
 
 const NAV_ITEMS: readonly NavItem[] = [
-  { id: 'dashboard', label: 'Tableau de bord', section: 'Général' },
-  { id: 'editor', label: 'Tracé', section: 'Général' },
-  { id: 'graph', label: 'Graphe', section: 'Données' },
-  { id: 'destinations', label: 'Destinations', section: 'Données' },
-  { id: 'supports', label: 'Supports', section: 'Données' },
-  { id: 'templates', label: 'Gabarits', section: 'Données' },
-  { id: 'floor-plans', label: 'Plans de niveaux', section: 'Rendus' },
-  { id: 'faces', label: 'Faces', section: 'Rendus' },
-  { id: 'checks', label: 'Contrôles', section: 'Qualité' },
-  { id: 'proofs', label: 'BAT', section: 'Qualité' },
+  { id: 'dashboard', labelKey: 'nav.item.dashboard', sectionKey: 'nav.section.general' },
+  { id: 'editor', labelKey: 'nav.item.editor', sectionKey: 'nav.section.general' },
+  { id: 'graph', labelKey: 'nav.item.graph', sectionKey: 'nav.section.data' },
+  { id: 'destinations', labelKey: 'nav.item.destinations', sectionKey: 'nav.section.data' },
+  { id: 'supports', labelKey: 'nav.item.supports', sectionKey: 'nav.section.data' },
+  { id: 'templates', labelKey: 'nav.item.templates', sectionKey: 'nav.section.data' },
+  { id: 'floor-plans', labelKey: 'nav.item.floorplans', sectionKey: 'nav.section.renders' },
+  { id: 'faces', labelKey: 'nav.item.faces', sectionKey: 'nav.section.renders' },
+  { id: 'checks', labelKey: 'nav.item.checks', sectionKey: 'nav.section.quality' },
+  { id: 'proofs', labelKey: 'nav.item.proofs', sectionKey: 'nav.section.quality' },
 ];
 
 const NAV_STYLE: React.CSSProperties = {
@@ -71,11 +73,12 @@ function itemStyle(active: boolean, hovered: boolean): React.CSSProperties {
 }
 
 export function Sidebar({ currentView, onNavigate }: SidebarProps): JSX.Element {
+  const { t } = useI18n();
   const [hoveredItem, setHoveredItem] = useState<ViewId | null>(null);
   let lastSection = '';
 
   return (
-    <nav style={NAV_STYLE} aria-label="Navigation principale">
+    <nav style={NAV_STYLE} aria-label={t('nav.aria.main')}>
       <div style={{
         padding: '6px 12px',
         borderBottom: '1px solid var(--border-hairline)',
@@ -86,19 +89,19 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps): JSX.Element 
         justifyContent: 'space-between',
         minHeight: 36,
       }}>
-        <span>Navigation</span>
+        <span>{t('nav.title')}</span>
       </div>
       <div style={{ flex: 1, overflow: 'auto', padding: '4px 0' }}>
         {NAV_ITEMS.map((item) => {
-          const showSection = item.section !== lastSection;
-          lastSection = item.section;
+          const showSection = item.sectionKey !== lastSection;
+          lastSection = item.sectionKey;
           const isActive = currentView === item.id;
           const isHovered = hoveredItem === item.id;
           return (
             <div key={item.id}>
               {showSection && (
                 <div style={SECTION_STYLE}>
-                  {item.section}
+                  {t(item.sectionKey)}
                 </div>
               )}
               <button
@@ -109,7 +112,7 @@ export function Sidebar({ currentView, onNavigate }: SidebarProps): JSX.Element 
                 style={itemStyle(isActive, isHovered)}
                 aria-current={isActive ? 'page' : undefined}
               >
-                {item.label}
+                {t(item.labelKey)}
               </button>
             </div>
           );

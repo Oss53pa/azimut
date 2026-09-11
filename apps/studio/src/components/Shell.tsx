@@ -1,6 +1,7 @@
 import { type JSX, useState } from 'react';
 import type { ViewId } from '../views.js';
 import { SiteDataProvider } from '../context/SiteDataContext.js';
+import { I18nProvider } from '../i18n/index.js';
 import { refMultilevel } from '@azimut/testkit/sites';
 import { Sidebar } from './Sidebar.js';
 import { HeaderBar } from './HeaderBar.js';
@@ -40,6 +41,7 @@ export function Shell(): JSX.Element {
 
   return (
     <SiteDataProvider site={refMultilevel}>
+      <I18nProvider>
       <div style={{
         display: 'flex',
         flexDirection: 'column',
@@ -65,6 +67,7 @@ export function Shell(): JSX.Element {
           </main>
         </div>
       </div>
+      </I18nProvider>
     </SiteDataProvider>
   );
 }

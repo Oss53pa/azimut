@@ -1,5 +1,6 @@
 import { type JSX } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 
 const HEADER_STYLE: React.CSSProperties = {
   display: 'flex',
@@ -46,7 +47,8 @@ const PRIMARY_BUTTON_STYLE: React.CSSProperties = {
 
 export function HeaderBar(): JSX.Element {
   const siteData = useSiteData();
-  const buildingName = siteData.buildings[0]?.name ?? 'Site';
+  const { t } = useI18n();
+  const buildingName = siteData.buildings[0]?.name ?? t('header.building.fallback');
   const siteName = siteData.site.name;
 
   return (
@@ -79,13 +81,13 @@ export function HeaderBar(): JSX.Element {
         gap: 8,
       }}>
         <button type="button" style={BUTTON_STYLE}>
-          Enregistrer
+          {t('header.action.save')}
         </button>
         <button type="button" style={BUTTON_STYLE}>
-          Ouvrir l'audit
+          {t('header.action.openaudit')}
         </button>
         <button type="button" style={PRIMARY_BUTTON_STYLE}>
-          Publier
+          {t('header.action.publish')}
         </button>
       </div>
     </header>

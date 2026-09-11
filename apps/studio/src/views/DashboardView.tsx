@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
 
 function outcomeFindings(result: { ok: boolean; warnings?: unknown[]; findings?: unknown[] }): number {
@@ -10,6 +11,7 @@ function outcomeFindings(result: { ok: boolean; warnings?: unknown[]; findings?:
 
 export function DashboardView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
 
   const stats = useMemo(() => {
     const checkResult = runChecks(site);
@@ -33,13 +35,13 @@ export function DashboardView(): JSX.Element {
   }, [site]);
 
   const cards: readonly { label: string; value: string; icon: string; warn?: boolean }[] = [
-    { label: 'Niveaux', value: String(stats.levels), icon: '🏢' },
-    { label: 'Nœuds', value: String(stats.nodes), icon: '⬡' },
-    { label: 'Arêtes', value: String(stats.edges), icon: '↔️' },
-    { label: 'Destinations', value: String(stats.destinations), icon: '📍' },
-    { label: 'Types support', value: String(stats.supportTypes), icon: '🪧' },
-    { label: 'Gabarits', value: String(stats.templates), icon: '📐' },
-    { label: 'Alertes', value: String(stats.findings), icon: '⚠️', warn: stats.findings > 0 },
+    { label: t('dashboard.stat.levels'), value: String(stats.levels), icon: '🏢' },
+    { label: t('dashboard.stat.nodes'), value: String(stats.nodes), icon: '⬡' },
+    { label: t('dashboard.stat.edges'), value: String(stats.edges), icon: '↔️' },
+    { label: t('dashboard.stat.destinations'), value: String(stats.destinations), icon: '📍' },
+    { label: t('dashboard.stat.supporttypes'), value: String(stats.supportTypes), icon: '🪧' },
+    { label: t('dashboard.stat.templates'), value: String(stats.templates), icon: '📐' },
+    { label: t('dashboard.stat.findings'), value: String(stats.findings), icon: '⚠️', warn: stats.findings > 0 },
   ];
 
   return (
@@ -50,7 +52,7 @@ export function DashboardView(): JSX.Element {
         fontWeight: 500,
         color: 'var(--text-primary)',
       }}>
-        Tableau de bord
+        {t('dashboard.title')}
       </h1>
       <p style={{ color: 'var(--text-secondary)', fontSize: 13.5, marginBottom: 24 }}>
         {site.site.name} — {site.organization.name}
