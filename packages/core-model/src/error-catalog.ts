@@ -124,6 +124,7 @@ export const ERROR_CATALOG = {
   'DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND':   { severity: 'blocking', description: 'Type de support du gabarit introuvable' },
   'DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND':   { severity: 'warning',  description: 'Face du gabarit absente du type de support' },
   'DATA.SUPPORT_BLOCK_REGION_INVALID':      { severity: 'blocking', description: 'Région de bloc hors limites' },
+  'DATA.KIOSK_CONFIG_INVALID':              { severity: 'blocking', description: 'Configuration locale de borne invalide' },
 
   // ── EDIT (E17) ────────────────────────────────────────────
   'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },

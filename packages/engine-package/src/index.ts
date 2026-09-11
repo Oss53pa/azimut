@@ -21,3 +21,15 @@ export type {
   KioskPackageInput,
   KioskPackage,
 } from './assemble-kiosk-package.js';
+export {
+  shouldUpdate,
+  verifyAgainstManifest,
+  commitUpdate,
+  rollback,
+} from './update-protocol.js';
+export type {
+  InstalledVersion,
+  KioskInstallation,
+} from './update-protocol.js';
+export { parseKioskConfig } from './kiosk-config.js';
+export type { KioskLocalConfig } from './kiosk-config.js';
