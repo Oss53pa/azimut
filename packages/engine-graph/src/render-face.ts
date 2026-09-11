@@ -13,7 +13,28 @@ export type RenderFaceOptions = {
   readonly height_mm: number;
   readonly theme: FaceTheme;
   readonly font_family: string;
+  /**
+   * D12 — active language to render destination names in. When omitted, the
+   * first available variant is used (deterministic by resolution order),
+   * preserving the previous behavior. When set, the named variant is used,
+   * falling back to the first available one if that language is missing.
+   */
+  readonly lang?: string;
 };
+
+/**
+ * D12 — pick the destination name for the active language, falling back
+ * deterministically to the first available variant when the language is
+ * absent (a missing variant is reported separately as LAYOUT.LANG_VARIANT_MISSING).
+ */
+function pickName(
+  names: Readonly<Record<string, string>>,
+  lang: string | undefined,
+): string {
+  if (lang !== undefined && names[lang] !== undefined) return names[lang];
+  const firstKey = Object.keys(names)[0];
+  return firstKey !== undefined ? (names[firstKey] as string) : '';
+}
 
 function esc(text: string): string {
   return text
@@ -60,6 +81,7 @@ function renderDestinationList(
   h: number,
   theme: FaceTheme,
   fontFamily: string,
+  lang: string | undefined,
 ): string {
   const entries = content.entries;
   if (entries.length === 0) return '';
@@ -74,8 +96,7 @@ function renderDestinationList(
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
     if (!entry) continue;
-    const nameValues = Object.values(entry.names);
-    const name = nameValues.length > 0 ? nameValues[0] : '';
+    const name = pickName(entry.names, lang);
     const ty = y + lineHeight * (i + 1);
     const dist =
       entry.distance_m !== null
@@ -98,7 +119,7 @@ function renderDestinationList(
     parts.push(
       `<text x="${textX}" y="${ty}"` +
       ` font-family="${esc(fontFamily)}" font-size="${fontSize}"` +
-      ` fill="${esc(theme.text_primary)}">${esc(name ?? '')}` +
+      ` fill="${esc(theme.text_primary)}">${esc(name)}` +
       `<tspan fill="${esc(theme.text_secondary)}">${esc(dist)}</tspan></text>`,
     );
   }
@@ -199,13 +220,14 @@ function renderBlock(
   h: number,
   theme: FaceTheme,
   fontFamily: string,
+  lang: string | undefined,
 ): string {
   const content = block.content;
   switch (content.type) {
     case 'header':
       return renderHeader(content, x, y, w, h, theme, fontFamily);
     case 'destination_list':
-      return renderDestinationList(content, x, y, w, h, theme, fontFamily);
+      return renderDestinationList(content, x, y, w, h, theme, fontFamily, lang);
     case 'pictogram':
       return renderPictogram(content, x, y, w, h, theme);
     case 'arrow':
@@ -225,7 +247,7 @@ export function renderFace(
   face: ResolvedFace,
   options: RenderFaceOptions,
 ): string {
-  const { width_mm, height_mm, theme, font_family } = options;
+  const { width_mm, height_mm, theme, font_family, lang } = options;
   const parts: string[] = [];
 
   parts.push(
@@ -249,7 +271,7 @@ export function renderFace(
     const bw = (block.region.w_pct / 100) * width_mm;
     const bh = (block.region.h_pct / 100) * height_mm;
 
-    parts.push(renderBlock(block, bx, by, bw, bh, theme, font_family));
+    parts.push(renderBlock(block, bx, by, bw, bh, theme, font_family, lang));
   }
 
   parts.push('</svg>');

@@ -253,3 +253,26 @@ describe('Visual regression — face renders', () => {
     expect(svg).toMatchSnapshot();
   });
 });
+
+describe('Visual regression — face renders per active language (D12.2)', () => {
+  // A snapshot per active language of the site, not a single one in the
+  // default language. The active-language list is site data (D12.1), derived
+  // here from the destination denominations present.
+  const activeLangs = [
+    ...new Set(refMultilevel.destination_names.map((dn) => dn.lang)),
+  ].sort();
+
+  for (const lang of activeLangs) {
+    it(`directional face snapshot [${lang}]`, () => {
+      const template = getTemplate('ftpl-dir-front');
+      const profile = getProfile('standard');
+      const resolved = resolveFaceContent(
+        refMultilevel, template, 'n-ml-hall', profile,
+      );
+      expect(resolved.ok).toBe(true);
+      if (!resolved.ok) return;
+      const svg = renderFace(resolved.value, { ...faceOpts, lang });
+      expect(svg).toMatchSnapshot();
+    });
+  }
+});
