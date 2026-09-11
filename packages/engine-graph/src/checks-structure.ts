@@ -143,6 +143,54 @@ export function multiLevelWithoutAccessibleVlFindings(
   return findings;
 }
 
+/**
+ * GRAPH.BUILDING_ISOLATED — a building that has neither a link to the rest
+ * of the site (an edge whose two endpoints resolve to two different
+ * buildings) nor its own independent access. Warning per D2.2.
+ */
+export function buildingIsolatedFindings(
+  site: SiteData,
+): Finding[] {
+  const levelBuilding = new Map<string, string>();
+  for (const level of site.levels) {
+    levelBuilding.set(level.id, level.building_id);
+  }
+
+  const nodeBuilding = new Map<string, string>();
+  for (const n of site.graph.nodes) {
+    const b = levelBuilding.get(n.level_id);
+    if (b !== undefined) nodeBuilding.set(n.id, b);
+  }
+
+  // Buildings tied to the rest of the site by at least one inter-building edge.
+  const linkedBuildings = new Set<string>();
+  for (const e of site.graph.edges) {
+    const fromB = nodeBuilding.get(e.from_node_id);
+    const toB = nodeBuilding.get(e.to_node_id);
+    if (fromB !== undefined && toB !== undefined && fromB !== toB) {
+      linkedBuildings.add(fromB);
+      linkedBuildings.add(toB);
+    }
+  }
+
+  const findings: Finding[] = [];
+  const sortedBuildings = [...site.buildings].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  for (const building of sortedBuildings) {
+    if (building.independent_access) continue;
+    if (linkedBuildings.has(building.id)) continue;
+    findings.push({
+      code: 'GRAPH.BUILDING_ISOLATED',
+      severity: 'warning',
+      entity: { kind: 'building', id: building.id },
+      params: { name: building.name },
+      ruleRef: null,
+    });
+  }
+  return findings;
+}
+
 export function missingDestinationNameFindings(
   site: SiteData,
 ): Finding[] {

@@ -19,6 +19,7 @@ export const ERROR_CATALOG = {
   'GRAPH.DISCONNECTED':                     { severity: 'blocking', description: 'Graphe non connexe' },
   'GRAPH.DEAD_END_UNJUSTIFIED':             { severity: 'warning',  description: 'Impasse sans destination ni justification' },
   'GRAPH.VERTICAL_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre niveaux sans liaison verticale' },
+  'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
   'GRAPH.PROFILE_NOT_ACCESSIBLE':           { severity: 'blocking', description: 'Profil non accessible pour audit d’accessibilité' },

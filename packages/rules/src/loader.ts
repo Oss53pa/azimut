@@ -22,10 +22,19 @@ function computeChecksum(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
+/**
+ * D3.5 — Scope specificity as a lexicographic priority, from strongest to
+ * weakest: supportRegistry, then context, then sectorKey, then no scope.
+ * Encoded as distinct bit weights so supportRegistry outranks any combination
+ * of the lower dimensions (4 > 2 + 1). Because the weights are distinct powers
+ * of two, two scopes share a specificity value only when they carry the exact
+ * same set of dimensions — which is the "égalité stricte de spécificité" that
+ * makes a load ambiguous.
+ */
 export function scopeSpecificity(scope: RuleScope): number {
   let n = 0;
-  if (scope.supportRegistry !== undefined) n += 1;
-  if (scope.context !== undefined) n += 1;
+  if (scope.supportRegistry !== undefined) n += 4;
+  if (scope.context !== undefined) n += 2;
   if (scope.sectorKey !== undefined) n += 1;
   return n;
 }

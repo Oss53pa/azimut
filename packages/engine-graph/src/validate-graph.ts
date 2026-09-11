@@ -10,6 +10,7 @@ import {
   crossLevelWithoutVlFindings,
   multiLevelWithoutAnyVlFindings,
   multiLevelWithoutAccessibleVlFindings,
+  buildingIsolatedFindings,
   missingDestinationNameFindings,
 } from './checks-structure.js';
 
@@ -221,6 +222,7 @@ export function validateGraph(
     ...deadEndFindings(nodes, edges),
     ...multiLevelWithoutAnyVlFindings(site),
     ...multiLevelWithoutAccessibleVlFindings(site),
+    ...buildingIsolatedFindings(site),
     ...missingDestinationNameFindings(site),
   ];
 
