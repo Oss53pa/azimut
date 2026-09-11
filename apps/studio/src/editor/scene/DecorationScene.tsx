@@ -15,6 +15,7 @@ import { formatSvg } from '@azimut/core-model';
 import type { Point } from '@azimut/core-model';
 import type { DecorationGeometry, DecorationShape } from '../scene-objects.js';
 import { decorationLabel } from '../decoration-label.js';
+import { useI18n } from '../../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -105,6 +106,7 @@ export function DecorationScene({
   activeId = null,
   onSelect,
 }: DecorationSceneProps): JSX.Element {
+  const { t } = useI18n();
   const selectedSet = new Set(selectedIds);
 
   return (
@@ -129,7 +131,7 @@ export function DecorationScene({
             data-active={isActive ? 'true' : undefined}
             opacity={shape.style.opacity}
             role="graphics-symbol"
-            aria-label={decorationLabel(shape)}
+            aria-label={decorationLabel(shape, t)}
             style={{ cursor: 'pointer' }}
             onClick={e => onSelect?.(shape.id, e.ctrlKey || e.metaKey)}
           >

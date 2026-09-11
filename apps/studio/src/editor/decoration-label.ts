@@ -8,12 +8,14 @@
  */
 
 import type { DecorationShape } from './scene-objects.js';
+import type { Translate } from '../i18n/i18n-context.js';
+import type { UiMessageKey } from '../i18n/messages.js';
 
-const KIND_LABELS: Readonly<Record<string, string>> = {
-  area: 'Zone d’habillage',
-  path: 'Tracé d’habillage',
-  symbol: 'Symbole d’habillage',
-  group: 'Groupe d’habillage',
+const KIND_KEYS: Readonly<Record<string, UiMessageKey>> = {
+  area: 'editor.decoration.area',
+  path: 'editor.decoration.path',
+  symbol: 'editor.decoration.symbol',
+  group: 'editor.decoration.group',
 };
 
 /**
@@ -21,7 +23,8 @@ const KIND_LABELS: Readonly<Record<string, string>> = {
  * back to its kind and identifier, so the name stays stable and never
  * describes the geometry.
  */
-export function decorationLabel(shape: DecorationShape): string {
-  const kindLabel = KIND_LABELS[shape.kind] ?? 'Objet d’habillage';
+export function decorationLabel(shape: DecorationShape, t: Translate): string {
+  const key = KIND_KEYS[shape.kind];
+  const kindLabel = key ? t(key) : t('editor.decoration.fallback');
   return shape.label === '' ? `${kindLabel} ${shape.id}` : `${kindLabel} ${shape.label}`;
 }

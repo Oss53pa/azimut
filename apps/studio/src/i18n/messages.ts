@@ -214,6 +214,23 @@ export const MESSAGES_FR = {
   'scene.footprint.aria': 'Empreinte {kind} {id}',
   'scene.edge.aria': 'Arête {id}',
   'scene.node.aria': 'Nœud {kind} {label}',
+
+  // Editor — operation announcements (E6.3)
+  'editor.announce.created': 'Objet créé.',
+  'editor.announce.deleted': '{count} objet(s) supprimé(s).',
+  'editor.announce.aligned': 'Alignement appliqué.',
+  'editor.announce.distributed': 'Répartition appliquée.',
+  'editor.announce.reordered': 'Ordre de superposition modifié.',
+  'editor.announce.pasted': '{count} objet(s) collé(s).',
+  'editor.announce.cut': '{count} objet(s) coupé(s).',
+  'editor.paste.refused': 'Collage refusé : {code}.',
+
+  // Editor — decoration (habillage) accessible names
+  'editor.decoration.area': "Zone d'habillage",
+  'editor.decoration.path': "Tracé d'habillage",
+  'editor.decoration.symbol': "Symbole d'habillage",
+  'editor.decoration.group': "Groupe d'habillage",
+  'editor.decoration.fallback': "Objet d'habillage",
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -404,6 +421,21 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   'scene.footprint.aria': 'Footprint {kind} {id}',
   'scene.edge.aria': 'Edge {id}',
   'scene.node.aria': 'Node {kind} {label}',
+
+  'editor.announce.created': 'Object created.',
+  'editor.announce.deleted': '{count} object(s) deleted.',
+  'editor.announce.aligned': 'Alignment applied.',
+  'editor.announce.distributed': 'Distribution applied.',
+  'editor.announce.reordered': 'Draw order changed.',
+  'editor.announce.pasted': '{count} object(s) pasted.',
+  'editor.announce.cut': '{count} object(s) cut.',
+  'editor.paste.refused': 'Paste refused: {code}.',
+
+  'editor.decoration.area': 'Habillage area',
+  'editor.decoration.path': 'Habillage path',
+  'editor.decoration.symbol': 'Habillage symbol',
+  'editor.decoration.group': 'Habillage group',
+  'editor.decoration.fallback': 'Habillage object',
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

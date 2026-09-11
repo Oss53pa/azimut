@@ -177,9 +177,9 @@ export function EditorView(): JSX.Element {
   const handlePaste = useCallback(() => {
     const result = clipboardActions.paste();
     if (result !== null && !result.ok) {
-      setAnnouncement(`Collage refusé : ${result.finding.code}.`);
+      setAnnouncement(t('editor.paste.refused', { code: result.finding.code }));
     }
-  }, [clipboardActions]);
+  }, [clipboardActions, t]);
 
   // ---- Selection (E6) ----
   const handleSelect = useCallback((id: string, additive: boolean) => {

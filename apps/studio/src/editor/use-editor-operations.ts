@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useI18n } from '../i18n/useI18n.js';
 import type { AlignAxis, DistributeAxis, ZOrderOp } from './alignment.js';
 import { computeAlignment, computeDistribution, computeZOrder } from './alignment.js';
 import type { ClipboardPayload, PasteResult } from './clipboard.js';
@@ -101,6 +102,7 @@ export function useEditorOperations(
     now = defaultNow, onAnnounce,
   } = options;
   const { document, execute } = documentApi;
+  const { t } = useI18n();
 
   const layer = useMemo(
     () => defaultLayer(orgId, siteId, levelId),
@@ -132,8 +134,8 @@ export function useEditorOperations(
     const command = createShapesCommand(document, [shape], layer, now());
     if (command === null) return;
     execute(command);
-    announce('Objet créé.');
-  }, [document, execute, orgId, layer, now, announce]);
+    announce(t('editor.announce.created'));
+  }, [document, execute, orgId, layer, now, announce, t]);
 
   // ---- Deletion ----
 
@@ -141,8 +143,8 @@ export function useEditorOperations(
     const command = deleteShapesCommand(document, selectedIds, now());
     if (command === null) return;
     execute(command);
-    announce(`${String(command.before.slots.length)} objet(s) supprimé(s).`);
-  }, [document, execute, selectedIds, now, announce]);
+    announce(t('editor.announce.deleted', { count: command.before.slots.length }));
+  }, [document, execute, selectedIds, now, announce, t]);
 
   // ---- Alignment and distribution ----
 
@@ -151,16 +153,16 @@ export function useEditorOperations(
     const command = moveShapesCommand(document, deltas, now());
     if (command === null) return;
     execute(command);
-    announce('Alignement appliqué.');
-  }, [document, execute, selectedIds, now, announce]);
+    announce(t('editor.announce.aligned'));
+  }, [document, execute, selectedIds, now, announce, t]);
 
   const distribute = useCallback((axis: DistributeAxis) => {
     const deltas = computeDistribution(definedBounds(document, selectedIds), axis);
     const command = moveShapesCommand(document, deltas, now());
     if (command === null) return;
     execute(command);
-    announce('Répartition appliquée.');
-  }, [document, execute, selectedIds, now, announce]);
+    announce(t('editor.announce.distributed'));
+  }, [document, execute, selectedIds, now, announce, t]);
 
   // ---- Draw order ----
 
@@ -169,8 +171,8 @@ export function useEditorOperations(
     const command = reorderShapesCommand(document, order, now());
     if (command === null) return;
     execute(command);
-    announce('Ordre de superposition modifié.');
-  }, [document, execute, selectedIds, now, announce]);
+    announce(t('editor.announce.reordered'));
+  }, [document, execute, selectedIds, now, announce, t]);
 
   // ---- Clipboard ----
 
@@ -189,15 +191,15 @@ export function useEditorOperations(
     );
     if (command === null) return;
     execute(command);
-    announce(`${String(shapes.length)} objet(s) collé(s).`);
-  }, [document, execute, orgId, layer, now, announce]);
+    announce(t('editor.announce.pasted', { count: shapes.length }));
+  }, [document, execute, orgId, layer, now, announce, t]);
 
   const cut = useCallback((ids: readonly string[]) => {
     const command = deleteShapesCommand(document, ids, now());
     if (command === null) return;
     execute(command);
-    announce(`${String(command.before.slots.length)} objet(s) coupé(s).`);
-  }, [document, execute, now, announce]);
+    announce(t('editor.announce.cut', { count: command.before.slots.length }));
+  }, [document, execute, now, announce, t]);
 
   return {
     commitShape,
