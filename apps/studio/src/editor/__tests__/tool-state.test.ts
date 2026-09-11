@@ -272,4 +272,47 @@ describe('E7.1 — tool state machine', () => {
       expect(new Set(ids).size).toBe(ids.length);
     });
   });
+
+  describe("action 'reset_gesture'", () => {
+    it('returns to idle and clears the preview', () => {
+      const reducer = createToolReducer();
+      let state = reducer(DEFAULT_TOOL_STATE, { type: 'set_tool', tool: 'rectangle' });
+      state = reducer(state, {
+        type: 'gesture',
+        event: { type: 'pointer_down', data: ptr(0, 0) },
+      });
+      state = reducer(state, {
+        type: 'gesture',
+        event: { type: 'pointer_move', data: ptr(2, 2) },
+      });
+      expect(state.preview.kind).toBe('rect');
+
+      const reset = reducer(state, { type: 'reset_gesture' });
+      expect(reset.phase).toBe('idle');
+      expect(reset.preview).toEqual({ kind: 'none' });
+      expect(reset.accumulatedPoints).toEqual([]);
+    });
+
+    it('keeps the current tool selected, so drawing can continue', () => {
+      const reducer = createToolReducer();
+      const state = reducer(DEFAULT_TOOL_STATE, { type: 'set_tool', tool: 'ellipse' });
+      expect(reducer(state, { type: 'reset_gesture' }).currentTool).toBe('ellipse');
+    });
+
+    it('clears the gesture origin, so the next gesture starts fresh', () => {
+      const reducer = createToolReducer();
+      let state = reducer(DEFAULT_TOOL_STATE, { type: 'set_tool', tool: 'rectangle' });
+      state = reducer(state, {
+        type: 'gesture',
+        event: { type: 'pointer_down', data: ptr(5, 5) },
+      });
+      state = reducer(state, { type: 'reset_gesture' });
+      // A move with no preceding pointer_down must not resurrect the old origin.
+      const moved = reducer(state, {
+        type: 'gesture',
+        event: { type: 'pointer_move', data: ptr(9, 9) },
+      });
+      expect(moved.preview).toEqual({ kind: 'none' });
+    });
+  });
 });

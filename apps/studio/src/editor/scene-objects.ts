@@ -24,6 +24,17 @@ export type DecorationStyle = {
   readonly opacity: number;
 };
 
+/**
+ * Style of a shape created by the editor. Roles only — a style never
+ * names a colour directly, it names a role of the charte (E10).
+ */
+export const DEFAULT_DECORATION_STYLE: DecorationStyle = {
+  fillRole: 'decoration.fill',
+  strokeRole: 'decoration.stroke',
+  strokeWidth_m: 0.02,
+  opacity: 1,
+};
+
 export type DecorationShape = {
   readonly id: string;
   readonly orgId: string;

@@ -122,8 +122,11 @@ export function previewToCommand(
 /**
  * Extract quantized shape data from a tool preview.
  * Returns null for empty or degenerate shapes.
+ *
+ * Exported so the canvas can turn a completed gesture into document
+ * data without first building a command it would have to unwrap.
  */
-function previewToData(preview: ToolPreview): ShapeCommandData | null {
+export function previewToData(preview: ToolPreview): ShapeCommandData | null {
   switch (preview.kind) {
     case 'none':
       return null;

@@ -114,7 +114,9 @@ export const DEFAULT_TOOL_STATE: ToolState = {
 export type ToolAction =
   | { readonly type: 'set_tool'; readonly tool: ToolId }
   | { readonly type: 'set_polygon_sides'; readonly sides: number }
-  | { readonly type: 'gesture'; readonly event: GestureEvent };
+  | { readonly type: 'gesture'; readonly event: GestureEvent }
+  /** Return to idle after a completed gesture has been turned into a command. */
+  | { readonly type: 'reset_gesture' };
 
 // ---------------------------------------------------------------------------
 // Shape-building helpers
@@ -319,6 +321,16 @@ export function createToolReducer(): (
       case 'set_polygon_sides': {
         const sides = Math.max(3, Math.min(64, Math.round(action.sides)));
         return { ...state, polygonSides: sides };
+      }
+      case 'reset_gesture': {
+        // The tool stays selected; only the finished gesture is cleared.
+        originRef.origin = null;
+        return {
+          ...state,
+          phase: 'idle',
+          preview: { kind: 'none' },
+          accumulatedPoints: [],
+        };
       }
       case 'gesture': {
         switch (state.currentTool) {
