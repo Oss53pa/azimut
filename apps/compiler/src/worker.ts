@@ -1,5 +1,5 @@
 import type { Job } from './job.js';
-import type { JobQueue } from './queue.js';
+import { STALL_TIMEOUT_MS, type JobQueue } from './queue.js';
 
 export type JobHandler = (
   job: Job,
@@ -11,12 +11,24 @@ export type WorkerOptions = {
   now: () => Date;
 };
 
+/**
+ * D9.2 — reap jobs whose progress has stalled past the 30-minute timeout,
+ * failing them (and re-queuing with backoff while attempts remain). Returns the
+ * ids reaped. A worker loop calls this before dequeuing.
+ */
+export async function reapStalledJobs(
+  options: WorkerOptions,
+  timeoutMs: number = STALL_TIMEOUT_MS,
+): Promise<readonly string[]> {
+  return options.queue.reapStalled(options.now(), timeoutMs);
+}
+
 export async function processNextJob(
   options: WorkerOptions,
 ): Promise<boolean> {
   const { queue, handlers, now } = options;
 
-  const job = await queue.dequeue();
+  const job = await queue.dequeue(now());
   if (job === null) return false;
 
   await queue.markRunning(job.id, now());

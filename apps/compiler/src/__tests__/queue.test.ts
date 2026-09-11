@@ -199,15 +199,18 @@ describe('MemoryQueue', () => {
     expect(job?.started_at).toBeNull();
   });
 
-  it('re-queued job maintains original FIFO position', async () => {
+  it('re-queued job maintains original FIFO position (after backoff)', async () => {
     const q = new MemoryQueue();
+    const failAt = new Date('2025-01-01T00:00:00Z');
     await q.enqueue(makeJob({ id: 'j1' }));
-    await q.markRunning('j1', new Date());
+    await q.markRunning('j1', failAt);
     await q.enqueue(makeJob({ id: 'j2' }));
-    await q.markFailed('j1', 'err', new Date());
-    // j1 was inserted before j2, so it should dequeue first
-    const next = await q.dequeue();
-    expect(next?.id).toBe('j1');
+    await q.markFailed('j1', 'err', failAt);
+    // Before the 5s backoff elapses, j1 is not eligible; j2 is returned.
+    expect((await q.dequeue(failAt))?.id).toBe('j2');
+    // After the backoff, j1 (inserted first) dequeues first.
+    const after = new Date('2025-01-01T00:00:06Z');
+    expect((await q.dequeue(after))?.id).toBe('j1');
   });
 
   it('markSucceeded without markRunning uses now as started_at fallback', async () => {
@@ -285,6 +288,58 @@ describe('MemoryQueue', () => {
     await q.markFailed('f1', 'fatal', new Date('2025-01-01T00:02:00Z'));
     const next = await q.dequeue();
     expect(next?.id).toBe('q1');
+  });
+
+  it('D9.2 — applies exponential backoff of 5s then 30s before retries', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 3 }));
+    const t0 = new Date('2025-01-01T00:00:00Z');
+
+    // Attempt 1 fails → 5s backoff.
+    await q.markRunning('j1', t0);
+    await q.markFailed('j1', 'e1', t0);
+    expect(await q.dequeue(new Date('2025-01-01T00:00:04Z'))).toBeNull();
+    expect((await q.dequeue(new Date('2025-01-01T00:00:05Z')))?.id).toBe('j1');
+
+    // Attempt 2 fails → 30s backoff.
+    const t1 = new Date('2025-01-01T00:00:05Z');
+    await q.markRunning('j1', t1);
+    await q.markFailed('j1', 'e2', t1);
+    expect(await q.dequeue(new Date('2025-01-01T00:00:34Z'))).toBeNull();
+    expect((await q.dequeue(new Date('2025-01-01T00:00:35Z')))?.id).toBe('j1');
+  });
+
+  it('D9.2 — reapStalled fails a job with no progress for 30 minutes', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 1 }));
+    const start = new Date('2025-01-01T00:00:00Z');
+    await q.markRunning('j1', start);
+
+    // 29 minutes: still running.
+    const reaped29 = await q.reapStalled(new Date('2025-01-01T00:29:00Z'));
+    expect(reaped29).toEqual([]);
+    expect((await q.getJob('j1'))?.state).toBe('running');
+
+    // 30 minutes: reaped → failed (attempts exhausted).
+    const reaped30 = await q.reapStalled(new Date('2025-01-01T00:30:00Z'));
+    expect(reaped30).toEqual(['j1']);
+    const job = await q.getJob('j1');
+    expect(job?.state).toBe('failed');
+    expect(job?.error).toContain('stalled');
+  });
+
+  it('D9.2 — a reaped job with attempts remaining is re-queued with backoff', async () => {
+    const q = new MemoryQueue();
+    await q.enqueue(makeJob({ max_attempts: 3 }));
+    const start = new Date('2025-01-01T00:00:00Z');
+    await q.markRunning('j1', start);
+    const stallAt = new Date('2025-01-01T00:30:00Z');
+    await q.reapStalled(stallAt);
+    const job = await q.getJob('j1');
+    expect(job?.state).toBe('queued');
+    // Not eligible immediately (5s backoff from the reap time).
+    expect(await q.dequeue(stallAt)).toBeNull();
+    expect((await q.dequeue(new Date('2025-01-01T00:30:05Z')))?.id).toBe('j1');
   });
 
   it('markFailed at max_attempts is terminal and not dequeueable', async () => {

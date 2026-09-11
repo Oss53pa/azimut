@@ -26,6 +26,11 @@ export type Job = {
   started_at: Date | null;
   finished_at: Date | null;
   error: string | null;
+  /**
+   * D9.2 — earliest time a re-queued job may be dequeued again (exponential
+   * backoff). Null/absent means immediately eligible.
+   */
+  next_attempt_at?: Date | null;
 };
 
 export type JobTrace = {

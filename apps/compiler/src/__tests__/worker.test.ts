@@ -22,10 +22,17 @@ function makeJob(overrides?: Partial<Job>): Job {
   };
 }
 
-function fixedClock(start: Date): () => Date {
+type AdvanceableClock = (() => Date) & { advance: (ms: number) => void };
+
+function fixedClock(start: Date): AdvanceableClock {
   let tick = start.getTime();
-  return () => new Date(tick++);
+  const fn = (): Date => new Date(tick++);
+  (fn as AdvanceableClock).advance = (ms: number): void => { tick += ms; };
+  return fn as AdvanceableClock;
 }
+
+/** Past the longest D9.2 backoff (120s), so the next retry is eligible. */
+const PAST_BACKOFF_MS = 130_000;
 
 describe('processNextJob', () => {
   it('returns false when queue is empty', async () => {
@@ -82,12 +89,14 @@ describe('processNextJob', () => {
     expect(afterFirst?.state).toBe('queued');
     expect(afterFirst?.attempts).toBe(1);
 
+    clock.advance(PAST_BACKOFF_MS);
     await processNextJob({ queue, handlers, now: clock });
 
     const afterSecond = await queue.getJob('job-001');
     expect(afterSecond?.state).toBe('queued');
     expect(afterSecond?.attempts).toBe(2);
 
+    clock.advance(PAST_BACKOFF_MS);
     await processNextJob({ queue, handlers, now: clock });
 
     const afterThird = await queue.getJob('job-001');
@@ -122,6 +131,7 @@ describe('processNextJob', () => {
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
     await processNextJob({ queue, handlers, now: clock });
+    clock.advance(PAST_BACKOFF_MS);
     await processNextJob({ queue, handlers, now: clock });
 
     const job = await queue.getJob('job-001');
@@ -233,7 +243,9 @@ describe('processNextJob', () => {
     expect(after1?.state).toBe('queued');
     expect(after1?.attempts).toBe(1);
 
+    clock.advance(PAST_BACKOFF_MS);
     expect(await processNextJob(opts)).toBe(true);
+    clock.advance(PAST_BACKOFF_MS);
     expect(await processNextJob(opts)).toBe(true);
 
     const final = await queue.getJob('job-001');
