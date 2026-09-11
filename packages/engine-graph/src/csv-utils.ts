@@ -10,6 +10,35 @@ export function parseNumber(raw: string): number | null {
   return n;
 }
 
+/** D4.1 — the decimal separator is declared in the import header. */
+export type DecimalSeparator = 'point' | 'comma';
+
+/**
+ * Parse a number using the declared decimal separator. With 'comma', a comma is
+ * the decimal mark; with 'point', the value is read as-is (a stray comma then
+ * makes it invalid rather than silently reinterpreted).
+ */
+export function parseNumberDecl(
+  raw: string,
+  decimal: DecimalSeparator,
+): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === '') return null;
+  const cleaned = decimal === 'comma' ? trimmed.replace(',', '.') : trimmed;
+  if (cleaned.includes(',')) return null;
+  const n = Number(cleaned);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+/** D4.1 — installed_at must be an ISO 8601 date (YYYY-MM-DD). */
+export function isIsoDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(d.getTime())
+    && value === d.toISOString().slice(0, 10);
+}
+
 export function parseCsvLine(line: string, separator: string): string[] {
   const fields: string[] = [];
   let current = '';

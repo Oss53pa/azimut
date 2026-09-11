@@ -34,6 +34,15 @@ export {
   guardSafetyDeletion,
 } from './validate-library.js';
 export { importSupports } from './import-supports.js';
+export { qualifyCad } from './qualify-cad.js';
+export type {
+  CadEntity,
+  CadLayer,
+  CadEntitySet,
+  CadUnit,
+  CadQualificationOptions,
+  CadQualificationReport,
+} from './qualify-cad.js';
 export { validateSupports } from './validate-supports.js';
 export type { SupportValidationResult } from './validate-supports.js';
 export { resolveFaceContent } from './resolve-face.js';
@@ -46,10 +55,12 @@ export type {
   ResolvedFace,
 } from './resolve-face.js';
 export type {
-  ImportColumnMap,
   ImportedSupport,
   ImportLineResult,
   ImportReport,
+  ImportSupportsOptions,
+  SupportCondition,
+  DimensionsSource,
 } from './import-supports.js';
 export type {
   LibraryValidationResult,

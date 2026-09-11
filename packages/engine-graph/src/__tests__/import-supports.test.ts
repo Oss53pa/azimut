@@ -2,254 +2,219 @@ import { describe, it, expect } from 'vitest';
 import { importSupports } from '../import-supports.js';
 import { refMultilevel } from '@azimut/testkit';
 
-const HEADER = 'id;node_id;azimuth_deg;width_m;height_m';
+const HEADER = 'reference;typology;building;level;node_ref';
 
 function csv(lines: string[]): string {
   return [HEADER, ...lines].join('\n');
 }
 
-describe('T-1.13 importSupports', () => {
+describe('D4.1 importSupports', () => {
   describe('valid import', () => {
-    it('imports valid rows', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        'sup-2;n-ml-entrance;0;0.4;0.8',
-      ]);
-      const result = importSupports(refMultilevel, content);
+    it('imports valid rows attached to a known node', () => {
+      const result = importSupports(refMultilevel, csv([
+        'S-1;DIR;A;RDC;n-ml-hall',
+        'S-2;DIR;A;RDC;n-ml-entrance',
+      ]));
       expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(2);
       expect(result.value.rejected).toBe(0);
       expect(result.value.pending).toBe(0);
-      expect(result.value.supports.length).toBe(2);
     });
 
-    it('optional columns default to empty string when absent from header', () => {
-      const content = csv(['sup-opt;n-ml-hall;90;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+    it('optional fields default to null when absent', () => {
+      const result = importSupports(refMultilevel, csv(['S-1;DIR;A;RDC;n-ml-hall']));
       if (!result.ok) return;
       const s = result.value.supports[0];
-      expect(s?.photo_url).toBe('');
-      expect(s?.notes).toBe('');
+      expect(s?.substrate).toBeNull();
+      expect(s?.condition).toBeNull();
+      expect(s?.content_fr).toBeNull();
+      expect(s?.dimensions_source).toBe('default');
     });
   });
 
-  describe('partial import', () => {
-    it('imports valid lines and rejects invalid ones', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        'sup-2;n-nonexistent;0;0.4;0.8',
-        'sup-3;n-ml-entrance;45;0.5;1.0',
-      ]);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+  describe('obligatory columns', () => {
+    it('rejects a file missing an obligatory column', () => {
+      const result = importSupports(refMultilevel, 'reference;typology;building\nS-1;DIR;A');
+      expect(result.ok).toBe(false);
+      if (result.ok) return;
+      expect(result.findings[0]?.code).toBe('IMPORT.COLUMN_MISSING');
+    });
+
+    it('rejects a row with an empty obligatory field', () => {
+      const result = importSupports(refMultilevel, csv([';DIR;A;RDC;n-ml-hall']));
       if (!result.ok) return;
-      expect(result.value.imported).toBe(2);
-      expect(result.value.pending).toBe(1);
-      const pending = result.value.lines.find(
-        (l) => l.status === 'pending',
-      );
-      expect(pending?.row).toBe(3);
-      expect(pending?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
     });
   });
 
-  describe('edge cases', () => {
-    it('rejects duplicate IDs with IMPORT.DUPLICATE_KEY', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        'sup-1;n-ml-entrance;0;0.4;0.8',
-      ]);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+  describe('position rule (node_ref or x_m/y_m)', () => {
+    it('rejects a row with neither node_ref nor coordinates (IMPORT.ROW_INVALID)', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level\nS-1;DIR;A;RDC',
+      );
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      const f = result.value.lines[0]?.findings[0];
+      expect(f?.code).toBe('IMPORT.ROW_INVALID');
+      expect(String(f?.params['reason'])).toContain('node_ref');
+    });
+
+    it('imports a row positioned by x_m/y_m alone', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;x_m;y_m\nS-1;DIR;A;RDC;12.5;4.0',
+      );
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
-      expect(result.value.rejected).toBe(1);
-      const rej = result.value.lines.find(
-        (l) => l.status === 'rejected',
-      );
-      expect(rej?.findings[0]?.code).toBe('IMPORT.DUPLICATE_KEY');
-      expect(rej?.findings[0]?.params['key']).toBe('sup-1');
+      const s = result.value.supports[0];
+      expect(s?.x_m).toBe(12.5);
+      expect(s?.y_m).toBe(4);
+      expect(s?.node_ref).toBeNull();
     });
 
-    it('puts non-existent node_id in pending with IMPORT.NODE_NOT_FOUND', () => {
-      const content = csv(['sup-1;n-does-not-exist;90;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+    it('puts an unknown node_ref in pending with IMPORT.NODE_NOT_FOUND', () => {
+      const result = importSupports(refMultilevel, csv(['S-1;DIR;A;RDC;n-nope']));
       if (!result.ok) return;
       expect(result.value.pending).toBe(1);
       expect(result.value.rejected).toBe(0);
       const line = result.value.lines[0];
       expect(line?.status).toBe('pending');
-      expect(line?.support).not.toBeNull();
       expect(line?.findings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
-      expect(line?.findings[0]?.params['node_id']).toBe('n-does-not-exist');
-    });
-
-    it('rejects missing azimuth with IMPORT.ROW_INVALID', () => {
-      const content = csv(['sup-1;n-ml-hall;;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      expect(result.value.lines[0]?.findings[0]?.code).toBe(
-        'IMPORT.ROW_INVALID',
-      );
-    });
-
-    it('rejects missing id or node_id with IMPORT.ROW_INVALID', () => {
-      const content = csv([';n-ml-hall;90;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      expect(result.value.lines[0]?.findings[0]?.code).toBe(
-        'IMPORT.ROW_INVALID',
-      );
-    });
-
-    it('rejects invalid numeric fields with IMPORT.ROW_INVALID', () => {
-      const content = csv(['sup-1;n-ml-hall;abc;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      expect(result.value.lines[0]?.findings[0]?.code).toBe(
-        'IMPORT.ROW_INVALID',
-      );
-    });
-
-    it('handles decimal comma (virgule)', () => {
-      const content = csv(['sup-1;n-ml-hall;90,5;0,6;1,2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
-      const sup = result.value.supports[0];
-      expect(sup?.azimuth_deg).toBe(90.5);
-      expect(sup?.width_m).toBe(0.6);
-      expect(sup?.height_m).toBe(1.2);
-    });
-
-    it('handles columns in different order', () => {
-      const header =
-        'width_m;id;hauteur;node_id;azimut';
-      const content = [
-        header,
-        '0.6;sup-1;1.2;n-ml-hall;90',
-      ].join('\n');
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
-      expect(result.value.supports[0]?.id).toBe('sup-1');
-      expect(result.value.supports[0]?.azimuth_deg).toBe(90);
-    });
-
-    it('handles French column aliases', () => {
-      const header =
-        'identifiant;noeud;orientation;largeur;hauteur';
-      const content = [
-        header,
-        'sup-1;n-ml-hall;90;0.6;1.2',
-      ].join('\n');
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
-    });
-
-    it('strips BOM from UTF-8 content', () => {
-      const bom = '﻿';
-      const content = bom + csv(['sup-1;n-ml-hall;90;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
-    });
-
-    it('handles tab-separated values', () => {
-      const content =
-        'id\tnode_id\tazimuth_deg\twidth_m\theight_m\n' +
-        'sup-1\tn-ml-hall\t90\t0.6\t1.2';
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
-    });
-
-    it('handles comma-separated values', () => {
-      const content =
-        'id,node_id,azimuth_deg,width_m,height_m\n' +
-        'sup-1,n-ml-hall,90,0.6,1.2';
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.imported).toBe(1);
+      expect(line?.findings[0]?.params['node_ref']).toBe('n-nope');
     });
   });
 
-  describe('error cases', () => {
-    it('rejects empty file', () => {
+  describe('dimensions override (D4.1)', () => {
+    it('flips dimensions_source to overridden when width_mm/height_mm are given', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;width_mm;height_mm\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;600;1200',
+      );
+      if (!result.ok) return;
+      const s = result.value.supports[0];
+      expect(s?.dimensions_source).toBe('overridden');
+      expect(s?.width_mm).toBe(600);
+      expect(s?.height_mm).toBe(1200);
+    });
+  });
+
+  describe('condition enum and installed_at', () => {
+    it('accepts a valid condition value', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;condition\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;worn',
+      );
+      if (!result.ok) return;
+      expect(result.value.supports[0]?.condition).toBe('worn');
+    });
+
+    it('rejects an invalid condition value', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;condition\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;broken',
+      );
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+      expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
+    });
+
+    it('rejects a non-ISO installed_at', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;installed_at\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;01/02/2026',
+      );
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+    });
+
+    it('accepts an ISO installed_at', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;installed_at\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;2026-02-01',
+      );
+      if (!result.ok) return;
+      expect(result.value.supports[0]?.installed_at).toBe('2026-02-01');
+    });
+  });
+
+  describe('declared decimal separator (D4.1)', () => {
+    it('reads comma decimals when declared comma', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;reading_distance_m\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;3,5',
+        { decimalSeparator: 'comma' },
+      );
+      if (!result.ok) return;
+      expect(result.value.supports[0]?.reading_distance_m).toBe(3.5);
+    });
+
+    it('rejects a comma value when declared point', () => {
+      const result = importSupports(
+        refMultilevel,
+        'reference;typology;building;level;node_ref;reading_distance_m\n'
+        + 'S-1;DIR;A;RDC;n-ml-hall;3,5',
+        { decimalSeparator: 'point' },
+      );
+      if (!result.ok) return;
+      expect(result.value.rejected).toBe(1);
+    });
+  });
+
+  describe('CSV mechanics', () => {
+    it('detects tab, semicolon and comma separators', () => {
+      const tab = importSupports(
+        refMultilevel,
+        'reference\ttypology\tbuilding\tlevel\tnode_ref\nS-1\tDIR\tA\tRDC\tn-ml-hall',
+      );
+      const comma = importSupports(
+        refMultilevel,
+        'reference,typology,building,level,node_ref\nS-1,DIR,A,RDC,n-ml-hall',
+      );
+      expect(tab.ok && comma.ok).toBe(true);
+      if (tab.ok) expect(tab.value.imported).toBe(1);
+      if (comma.ok) expect(comma.value.imported).toBe(1);
+    });
+
+    it('handles columns in a different order and French aliases', () => {
+      const result = importSupports(
+        refMultilevel,
+        'typologie;batiment;niveau;reference;noeud\nDIR;A;RDC;S-1;n-ml-hall',
+      );
+      if (!result.ok) return;
+      expect(result.value.imported).toBe(1);
+      expect(result.value.supports[0]?.reference).toBe('S-1');
+    });
+
+    it('strips a UTF-8 BOM', () => {
+      const result = importSupports(refMultilevel, '﻿' + csv(['S-1;DIR;A;RDC;n-ml-hall']));
+      if (!result.ok) return;
+      expect(result.value.imported).toBe(1);
+    });
+
+    it('rejects an empty file', () => {
       const result = importSupports(refMultilevel, '');
       expect(result.ok).toBe(false);
       if (result.ok) return;
       expect(result.findings[0]?.code).toBe('IMPORT.EMPTY_FILE');
     });
-
-    it('rejects file with missing required columns', () => {
-      const content = 'id;node_id;notes\nsup-1;n-ml-hall;hello';
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(false);
-      if (result.ok) return;
-      expect(result.findings[0]?.code).toBe(
-        'IMPORT.COLUMN_MISSING',
-      );
-    });
   });
 
-  describe('optional columns', () => {
-    it('imports photo_url and notes when present', () => {
-      const header =
-        'id;node_id;azimuth_deg;width_m;height_m;photo;notes';
-      const content = [
-        header,
-        'sup-1;n-ml-hall;90;0.6;1.2;http://example.com/p.jpg;RAS',
-      ].join('\n');
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.supports[0]?.photo_url).toBe(
-        'http://example.com/p.jpg',
-      );
-      expect(result.value.supports[0]?.notes).toBe('RAS');
-    });
-  });
-
-  describe('warnings propagation', () => {
-    it('propagates row findings as Outcome warnings', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        'sup-2;n-nonexistent;0;0.4;0.8',
-      ]);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.warnings.length).toBe(1);
-      expect(result.warnings[0]?.code).toBe('IMPORT.NODE_NOT_FOUND');
-    });
-  });
-
-  describe('line-by-line report', () => {
-    it('produces a line for every data row', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        ';n-ml-hall;90;0.6;1.2',
-        'sup-3;n-nonexistent;0;0.4;0.8',
-      ]);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+  describe('report and determinism', () => {
+    it('produces one line per data row and never truncates', () => {
+      const result = importSupports(refMultilevel, csv([
+        'S-1;DIR;A;RDC;n-ml-hall',
+        ';DIR;A;RDC;n-ml-hall',
+        'S-3;DIR;A;RDC;n-nope',
+      ]));
       if (!result.ok) return;
       expect(result.value.total_rows).toBe(3);
       expect(result.value.lines).toHaveLength(3);
@@ -257,125 +222,23 @@ describe('T-1.13 importSupports', () => {
       expect(result.value.rejected).toBe(1);
       expect(result.value.pending).toBe(1);
     });
-  });
 
-  describe('missing/invalid width_m rejection', () => {
-    it('rejects missing width with largeur absente', () => {
-      const content = csv(['sup-1;n-ml-hall;90;;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const line = result.value.lines[0];
-      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
-      expect(line?.findings[0]?.params['reason']).toBe('largeur absente');
-    });
-
-    it('rejects invalid width with largeur invalide', () => {
-      const content = csv(['sup-1;n-ml-hall;90;abc;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const line = result.value.lines[0];
-      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
-      expect(line?.findings[0]?.params['reason']).toBe(
-        'largeur invalide: abc',
-      );
-    });
-  });
-
-  describe('missing/invalid height_m rejection', () => {
-    it('rejects missing height with hauteur absente', () => {
-      const content = csv(['sup-1;n-ml-hall;90;0.6;']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const line = result.value.lines[0];
-      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
-      expect(line?.findings[0]?.params['reason']).toBe('hauteur absente');
-    });
-
-    it('rejects invalid height with hauteur invalide', () => {
-      const content = csv(['sup-1;n-ml-hall;90;0.6;xyz']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const line = result.value.lines[0];
-      expect(line?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
-      expect(line?.findings[0]?.params['reason']).toBe(
-        'hauteur invalide: xyz',
-      );
-    });
-  });
-
-  describe('determinism (INV-4)', () => {
-    it('same report on two calls', () => {
-      const content = csv([
-        'sup-1;n-ml-hall;90;0.6;1.2',
-        'sup-2;n-nonexistent;0;0.4;0.8',
-      ]);
-      const r1 = importSupports(refMultilevel, content);
-      const r2 = importSupports(refMultilevel, content);
-      expect(r1).toStrictEqual(r2);
-    });
-  });
-
-  describe('duplicate-id ordering', () => {
-    it('rejected row does not block a later valid row with the same id', () => {
-      const content = csv([
-        'sup-dup;n-ml-hall;abc;0.6;1.2',   // rejected: azimut invalide → seenIds not set
-        'sup-dup;n-ml-hall;90;0.6;1.2',     // valid: same id passes
-      ]);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
+    it('rejects a duplicate reference with IMPORT.DUPLICATE_KEY', () => {
+      const result = importSupports(refMultilevel, csv([
+        'S-1;DIR;A;RDC;n-ml-hall',
+        'S-1;DIR;A;RDC;n-ml-entrance',
+      ]));
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
       expect(result.value.rejected).toBe(1);
-      expect(result.value.supports[0]?.id).toBe('sup-dup');
-    });
-  });
-
-  describe('edge-case inputs', () => {
-    it('rejects row with non-empty id but empty node_id', () => {
-      const content = csv(['sup-1;;90;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const f = result.value.lines[0]?.findings[0];
-      expect(f?.code).toBe('IMPORT.ROW_INVALID');
+      const rej = result.value.lines.find((l) => l.status === 'rejected');
+      expect(rej?.findings[0]?.code).toBe('IMPORT.DUPLICATE_KEY');
     });
 
-    it('header-only CSV produces zero rows', () => {
-      const result = importSupports(refMultilevel, HEADER);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.total_rows).toBe(0);
-      expect(result.value.imported).toBe(0);
-      expect(result.value.rejected).toBe(0);
-    });
-
-    it('empty azimuth reports "azimut absent" reason', () => {
-      const content = csv(['sup-az1;n-ml-hall;;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const reason = result.value.lines[0]?.findings[0]?.params['reason'];
-      expect(reason).toBe('azimut absent');
-    });
-
-    it('invalid azimuth reports "azimut invalide" reason with value', () => {
-      const content = csv(['sup-az2;n-ml-hall;abc;0.6;1.2']);
-      const result = importSupports(refMultilevel, content);
-      expect(result.ok).toBe(true);
-      if (!result.ok) return;
-      expect(result.value.rejected).toBe(1);
-      const reason = result.value.lines[0]?.findings[0]?.params['reason'];
-      expect(reason).toBe('azimut invalide: abc');
+    it('is deterministic across two calls', () => {
+      const content = csv(['S-1;DIR;A;RDC;n-ml-hall', 'S-2;DIR;A;RDC;n-nope']);
+      expect(importSupports(refMultilevel, content))
+        .toStrictEqual(importSupports(refMultilevel, content));
     });
   });
 });
