@@ -5,13 +5,38 @@ export type VolumeEntry = {
   readonly footprint: Footprint;
 };
 
-function minXplusY(vertices: readonly Point[]): number {
-  let min = Infinity;
+/**
+ * D5.2 criterion 2 — `min(x) + min(y)` of the footprint, computed over the
+ * vertices. The two minima are taken independently (they may come from
+ * different vertices), which is not the same as `min(x + y)`.
+ */
+function footprintDepth(vertices: readonly Point[]): number {
+  let minX = Infinity;
+  let minY = Infinity;
   for (const v of vertices) {
-    const sum = v.x_m + v.y_m;
-    if (sum < min) min = sum;
+    if (v.x_m < minX) minX = v.x_m;
+    if (v.y_m < minY) minY = v.y_m;
   }
-  return min;
+  return minX + minY;
+}
+
+const utf8Encoder = new TextEncoder();
+
+/**
+ * D5.2 criterion 3 — byte-wise lexicographic comparison of volume ids, so the
+ * tiebreaker is deterministic across implementations regardless of the
+ * runtime's native string ordering (which is UTF-16 code-unit based).
+ */
+function compareUtf8Bytes(a: string, b: string): number {
+  const ba = utf8Encoder.encode(a);
+  const bb = utf8Encoder.encode(b);
+  const len = ba.length < bb.length ? ba.length : bb.length;
+  for (let i = 0; i < len; i++) {
+    const d = (ba[i] as number) - (bb[i] as number);
+    if (d !== 0) return d < 0 ? -1 : 1;
+  }
+  if (ba.length === bb.length) return 0;
+  return ba.length < bb.length ? -1 : 1;
 }
 
 export function sortVolumesPainter(
@@ -21,14 +46,12 @@ export function sortVolumesPainter(
     const elev = a.volume.base_elevation_m - b.volume.base_elevation_m;
     if (elev !== 0) return elev;
 
-    const depthA = minXplusY(a.footprint.geometry.vertices);
-    const depthB = minXplusY(b.footprint.geometry.vertices);
+    const depthA = footprintDepth(a.footprint.geometry.vertices);
+    const depthB = footprintDepth(b.footprint.geometry.vertices);
     const depth = depthA - depthB;
     if (depth !== 0) return depth;
 
-    return a.volume.id < b.volume.id ? -1
-      : a.volume.id > b.volume.id ? 1
-        : 0;
+    return compareUtf8Bytes(a.volume.id, b.volume.id);
   });
 }
 

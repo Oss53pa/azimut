@@ -138,16 +138,41 @@ describe('D5.2 — detectOverlaps', () => {
   });
 });
 
-describe('sortVolumesPainter — multi-vertex minXplusY', () => {
-  it('uses minimum sum across all vertices, not just the first', () => {
+describe('sortVolumesPainter — footprint depth min(x)+min(y)', () => {
+  it('uses minimum x and minimum y across all vertices', () => {
     const entries: VolumeEntry[] = [
-      // second vertex has smaller sum
       { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 10, y_m: 10 }, { x_m: 1, y_m: 1 }]) },
       { volume: vol('v2', 'f2', 0, 1), footprint: fp('f2', [{ x_m: 5, y_m: 5 }]) },
     ];
     const sorted = sortVolumesPainter(entries);
-    // v1 min sum = 2, v2 min sum = 10 → v1 first
+    // v1 depth = minX(1)+minY(1) = 2, v2 depth = 10 → v1 first
     expect(sorted[0]?.volume.id).toBe('v1');
+  });
+
+  it('takes minX and minY from different vertices (not min of x+y)', () => {
+    // f1 vertices (0,10) and (10,0): min(x)+min(y) = 0, but min(x+y) = 10.
+    // f2 single vertex (4,4): depth 8. With the correct min(x)+min(y)=0,
+    // f1 sorts first; with the wrong min(x+y)=10 it would sort last.
+    const entries: VolumeEntry[] = [
+      { volume: vol('v2', 'f2', 0, 1), footprint: fp('f2', [{ x_m: 4, y_m: 4 }]) },
+      { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 0, y_m: 10 }, { x_m: 10, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted[0]?.volume.id).toBe('v1');
+    expect(sorted[1]?.volume.id).toBe('v2');
+  });
+
+  it('breaks ties by UTF-8 byte order, not UTF-16 code units', () => {
+    // '！' (U+FF01) UTF-8 = EF BC 81; '\u{1F600}' (U+1F600) UTF-8 = F0 9F 98 80.
+    // By bytes, EF < F0 so '！' sorts first. Native UTF-16 `<` would put the
+    // emoji (lead unit 0xD83D) before '！' (0xFF01) — the opposite order.
+    const same = (id: string): VolumeEntry => ({
+      volume: vol(id, 'f', 0, 1),
+      footprint: fp('f', [{ x_m: 0, y_m: 0 }]),
+    });
+    const sorted = sortVolumesPainter([same('\u{1F600}'), same('！')]);
+    expect(sorted[0]?.volume.id).toBe('！');
+    expect(sorted[1]?.volume.id).toBe('\u{1F600}');
   });
 
   it('identical entries yield comparator 0 (same id, elevation, minXplusY)', () => {
