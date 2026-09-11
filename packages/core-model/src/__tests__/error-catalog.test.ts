@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ERROR_CATALOG } from '../error-catalog.js';
+import { ERROR_CATALOG, ANOMALY_DOMAINS } from '../error-catalog.js';
 
 describe('ERROR_CATALOG', () => {
   const entries = Object.entries(ERROR_CATALOG);
@@ -44,6 +44,26 @@ describe('ERROR_CATALOG', () => {
     for (const d of expected) {
       expect(domains.has(d)).toBe(true);
     }
+  });
+
+  it('every code domain is in the D2.1 allowlist, and them alone (strict)', () => {
+    const allowed = new Set<string>(ANOMALY_DOMAINS);
+    for (const code of codes) {
+      const domain = code.split('.')[0] as string;
+      expect(allowed.has(domain)).toBe(true);
+      if (!allowed.has(domain)) {
+        throw new Error(`${code} uses unauthorized anomaly domain "${domain}"`);
+      }
+    }
+  });
+
+  it('the D2.1 allowlist contains the nine base domains plus the E17 four', () => {
+    expect([...ANOMALY_DOMAINS].sort()).toEqual(
+      [
+        'ASSET', 'CHARTER', 'COLOR', 'DATA', 'EDIT', 'GEOM', 'GRAPH',
+        'IMPORT', 'LAYOUT', 'PACKAGE', 'RULES', 'SECURITY', 'TYPO',
+      ],
+    );
   });
 
   it('no duplicate codes (type-level guarantee, runtime check)', () => {
