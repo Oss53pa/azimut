@@ -36,6 +36,7 @@ import { ToolPreviewRenderer } from './scene/ToolPreviewRenderer.js';
 import { SnapIndicator } from './scene/SnapIndicator.js';
 import { useToolGesture } from './use-tool-gesture.js';
 import type { SceneObject } from './snap-integration.js';
+import { useI18n } from '../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
 // Public API — exposed via onReady callback
@@ -99,8 +100,10 @@ export function EditorCanvas({
   onViewChange,
   onToolChange,
   onReady,
-  ariaLabel = 'Éditeur de plan',
+  ariaLabel,
 }: EditorCanvasProps): JSX.Element {
+  const { t } = useI18n();
+  const svgLabel = ariaLabel ?? t('editor.canvas.default');
   // ---- View state ----
   const [view, dispatchView] = useReducer(viewReducer, initialView ?? DEFAULT_VIEW);
   const viewRef = useRef(view);
@@ -292,7 +295,7 @@ export function EditorCanvas({
             cursor,
             background: 'var(--surface-page)',
           }}
-          aria-label={ariaLabel}
+          aria-label={svgLabel}
           role="img"
           tabIndex={0}
           onWheel={handleWheel}

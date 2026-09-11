@@ -14,6 +14,8 @@
 
 import type { JSX } from 'react';
 import type { AlignAxis, DistributeAxis, ZOrderOp } from './alignment.js';
+import { useI18n } from '../i18n/useI18n.js';
+import type { UiMessageKey } from '../i18n/messages.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -77,28 +79,28 @@ const LABEL_STYLE: React.CSSProperties = {
 
 type BtnConfig = {
   readonly label: string;
-  readonly title: string;
+  readonly titleKey: UiMessageKey;
 };
 
 const ALIGN_BUTTONS: readonly (BtnConfig & { axis: AlignAxis })[] = [
-  { axis: 'left', label: '⫷', title: 'Aligner à gauche' },
-  { axis: 'center_h', label: '⫿', title: 'Centrer horizontalement' },
-  { axis: 'right', label: '⫸', title: 'Aligner à droite' },
-  { axis: 'top', label: '⊤', title: 'Aligner en haut' },
-  { axis: 'center_v', label: '⊖', title: 'Centrer verticalement' },
-  { axis: 'bottom', label: '⊥', title: 'Aligner en bas' },
+  { axis: 'left', label: '⫷', titleKey: 'editor.align.title.left' },
+  { axis: 'center_h', label: '⫿', titleKey: 'editor.align.title.center_h' },
+  { axis: 'right', label: '⫸', titleKey: 'editor.align.title.right' },
+  { axis: 'top', label: '⊤', titleKey: 'editor.align.title.top' },
+  { axis: 'center_v', label: '⊖', titleKey: 'editor.align.title.center_v' },
+  { axis: 'bottom', label: '⊥', titleKey: 'editor.align.title.bottom' },
 ];
 
 const DISTRIBUTE_BUTTONS: readonly (BtnConfig & { axis: DistributeAxis })[] = [
-  { axis: 'horizontal', label: '⇔', title: 'Distribuer horizontalement' },
-  { axis: 'vertical', label: '⇕', title: 'Distribuer verticalement' },
+  { axis: 'horizontal', label: '⇔', titleKey: 'editor.align.title.dist_h' },
+  { axis: 'vertical', label: '⇕', titleKey: 'editor.align.title.dist_v' },
 ];
 
 const ZORDER_BUTTONS: readonly (BtnConfig & { op: ZOrderOp })[] = [
-  { op: 'bring_front', label: '⤒', title: 'Mettre au premier plan' },
-  { op: 'bring_forward', label: '↑', title: 'Avancer' },
-  { op: 'send_backward', label: '↓', title: 'Reculer' },
-  { op: 'send_back', label: '⤓', title: 'Mettre à l\'arrière-plan' },
+  { op: 'bring_front', label: '⤒', titleKey: 'editor.align.title.front' },
+  { op: 'bring_forward', label: '↑', titleKey: 'editor.align.title.forward' },
+  { op: 'send_backward', label: '↓', titleKey: 'editor.align.title.backward' },
+  { op: 'send_back', label: '⤓', titleKey: 'editor.align.title.back' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -111,21 +113,22 @@ export function AlignmentPanel({
   onDistribute,
   onZOrder,
 }: AlignmentPanelProps): JSX.Element | null {
+  const { t } = useI18n();
   if (selectedCount < 2) return null;
 
   const canDistribute = selectedCount >= 3;
 
   return (
-    <div style={PANEL_STYLE} role="toolbar" aria-label="Alignement et distribution">
+    <div style={PANEL_STYLE} role="toolbar" aria-label={t('editor.align.aria')}>
       {/* Alignment */}
-      <span style={LABEL_STYLE}>Aligner</span>
+      <span style={LABEL_STYLE}>{t('editor.align.section.align')}</span>
       {ALIGN_BUTTONS.map(btn => (
         <button
           key={btn.axis}
           type="button"
           style={BUTTON_STYLE}
-          title={btn.title}
-          aria-label={btn.title}
+          title={t(btn.titleKey)}
+          aria-label={t(btn.titleKey)}
           onClick={() => onAlign(btn.axis)}
         >
           {btn.label}
@@ -135,7 +138,7 @@ export function AlignmentPanel({
       <div style={SEPARATOR_STYLE} />
 
       {/* Distribution */}
-      <span style={LABEL_STYLE}>Distribuer</span>
+      <span style={LABEL_STYLE}>{t('editor.align.section.distribute')}</span>
       {DISTRIBUTE_BUTTONS.map(btn => (
         <button
           key={btn.axis}
@@ -145,8 +148,8 @@ export function AlignmentPanel({
             opacity: canDistribute ? 1 : 0.4,
             cursor: canDistribute ? 'pointer' : 'default',
           }}
-          title={btn.title}
-          aria-label={btn.title}
+          title={t(btn.titleKey)}
+          aria-label={t(btn.titleKey)}
           disabled={!canDistribute}
           onClick={() => onDistribute(btn.axis)}
         >
@@ -157,14 +160,14 @@ export function AlignmentPanel({
       <div style={SEPARATOR_STYLE} />
 
       {/* Z-order */}
-      <span style={LABEL_STYLE}>Ordre</span>
+      <span style={LABEL_STYLE}>{t('editor.align.section.order')}</span>
       {ZORDER_BUTTONS.map(btn => (
         <button
           key={btn.op}
           type="button"
           style={BUTTON_STYLE}
-          title={btn.title}
-          aria-label={btn.title}
+          title={t(btn.titleKey)}
+          aria-label={t(btn.titleKey)}
           onClick={() => onZOrder(btn.op)}
         >
           {btn.label}

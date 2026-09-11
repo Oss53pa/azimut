@@ -26,7 +26,9 @@ describe('D12.1 — UI message catalogue', () => {
   });
 
   it('keys follow the domain.screen.element convention (lowercase dotted)', () => {
-    const pattern = /^[a-z]+(\.[a-z]+)+$/;
+    // Lowercase, dot-separated segments; underscores and digits allowed inside
+    // a segment so keys can mirror action/tool identifiers (e.g. select_all).
+    const pattern = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/;
     for (const key of keys) {
       expect(pattern.test(key)).toBe(true);
     }

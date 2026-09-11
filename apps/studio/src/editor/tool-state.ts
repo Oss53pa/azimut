@@ -14,6 +14,7 @@
  */
 
 import type { Point } from '@azimut/core-model';
+import type { UiMessageKey } from '../i18n/messages.js';
 
 // ---------------------------------------------------------------------------
 // Tool identifiers (E7.1)
@@ -349,22 +350,23 @@ export function createToolReducer(): (
  */
 export type ToolMeta = {
   readonly id: ToolId;
-  readonly label: string;
+  /** i18n key for the tool's display label (D12.1). */
+  readonly labelKey: UiMessageKey;
   readonly shortcutKey: string | null;
   readonly group: 'navigation' | 'selection' | 'shape' | 'path' | 'annotation';
 };
 
 export const TOOL_REGISTRY: readonly ToolMeta[] = [
-  { id: 'select',          label: 'Sélection',           shortcutKey: 'v', group: 'selection' },
-  { id: 'direct_select',   label: 'Sélection directe',   shortcutKey: 'a', group: 'selection' },
-  { id: 'hand',            label: 'Main',                 shortcutKey: 'h', group: 'navigation' },
-  { id: 'zoom_tool',       label: 'Zoom',                 shortcutKey: 'z', group: 'navigation' },
-  { id: 'rectangle',       label: 'Rectangle',            shortcutKey: 'r', group: 'shape' },
-  { id: 'ellipse',         label: 'Ellipse',              shortcutKey: 'e', group: 'shape' },
-  { id: 'regular_polygon', label: 'Polygone régulier',    shortcutKey: null, group: 'shape' },
-  { id: 'polyline',        label: 'Polyligne',            shortcutKey: 'p', group: 'path' },
-  { id: 'bezier',          label: 'Courbe de Bézier',     shortcutKey: null, group: 'path' },
-  { id: 'text',            label: 'Texte',                shortcutKey: 't', group: 'annotation' },
-  { id: 'dimension',       label: 'Cotation',             shortcutKey: null, group: 'annotation' },
-  { id: 'measure',         label: 'Mesure',               shortcutKey: null, group: 'annotation' },
+  { id: 'select',          labelKey: 'editor.tool.select',          shortcutKey: 'v', group: 'selection' },
+  { id: 'direct_select',   labelKey: 'editor.tool.direct_select',   shortcutKey: 'a', group: 'selection' },
+  { id: 'hand',            labelKey: 'editor.tool.hand',            shortcutKey: 'h', group: 'navigation' },
+  { id: 'zoom_tool',       labelKey: 'editor.tool.zoom_tool',       shortcutKey: 'z', group: 'navigation' },
+  { id: 'rectangle',       labelKey: 'editor.tool.rectangle',       shortcutKey: 'r', group: 'shape' },
+  { id: 'ellipse',         labelKey: 'editor.tool.ellipse',         shortcutKey: 'e', group: 'shape' },
+  { id: 'regular_polygon', labelKey: 'editor.tool.regular_polygon', shortcutKey: null, group: 'shape' },
+  { id: 'polyline',        labelKey: 'editor.tool.polyline',        shortcutKey: 'p', group: 'path' },
+  { id: 'bezier',          labelKey: 'editor.tool.bezier',          shortcutKey: null, group: 'path' },
+  { id: 'text',            labelKey: 'editor.tool.text',            shortcutKey: 't', group: 'annotation' },
+  { id: 'dimension',       labelKey: 'editor.tool.dimension',       shortcutKey: null, group: 'annotation' },
+  { id: 'measure',         labelKey: 'editor.tool.measure',         shortcutKey: null, group: 'annotation' },
 ];

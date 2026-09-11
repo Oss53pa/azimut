@@ -11,6 +11,9 @@
 import { type JSX, useMemo } from 'react';
 import { DEFAULT_SHORTCUTS } from './shortcuts.js';
 import type { ShortcutDef } from './shortcuts.js';
+import { useI18n } from '../i18n/useI18n.js';
+import type { Translate } from '../i18n/i18n-context.js';
+import type { UiMessageKey } from '../i18n/messages.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -111,34 +114,34 @@ const KEY_STYLE: React.CSSProperties = {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const CATEGORY_LABELS: Record<string, string> = {
-  edit: 'Édition',
-  view: 'Vue',
-  tool: 'Outils',
-  selection: 'Sélection',
-  file: 'Fichier',
+const CATEGORY_KEYS: Record<string, UiMessageKey> = {
+  edit: 'editor.shortcuts.cat.edit',
+  view: 'editor.shortcuts.cat.view',
+  tool: 'editor.shortcuts.cat.tool',
+  selection: 'editor.shortcuts.cat.selection',
+  file: 'editor.shortcuts.cat.file',
 };
 
 const CATEGORY_ORDER: readonly string[] = ['edit', 'selection', 'view', 'tool', 'file'];
 
-function formatKey(def: ShortcutDef): string {
+function formatKey(def: ShortcutDef, t: Translate): string {
   // ? is typed as Shift+/ but displayed as just "?"
   if (def.key === '?') return '?';
 
   const parts: string[] = [];
-  if (def.modifiers.ctrl) parts.push('Ctrl');
-  if (def.modifiers.shift) parts.push('Maj');
-  if (def.modifiers.alt) parts.push('Alt');
-  if (def.modifiers.meta) parts.push('⌘');
-  parts.push(formatKeyName(def.key));
+  if (def.modifiers.ctrl) parts.push(t('editor.key.ctrl'));
+  if (def.modifiers.shift) parts.push(t('editor.key.shift'));
+  if (def.modifiers.alt) parts.push(t('editor.key.alt'));
+  if (def.modifiers.meta) parts.push(t('editor.key.meta'));
+  parts.push(formatKeyName(def.key, t));
   return parts.join('+');
 }
 
-function formatKeyName(key: string): string {
+function formatKeyName(key: string, t: Translate): string {
   switch (key) {
-    case 'Escape': return 'Échap';
-    case 'Delete': return 'Suppr';
-    case 'Tab': return 'Tab';
+    case 'Escape': return t('editor.key.escape');
+    case 'Delete': return t('editor.key.delete');
+    case 'Tab': return t('editor.key.tab');
     case '=': return '+';
     case '-': return '−';
     default: return key.toUpperCase();
@@ -153,6 +156,7 @@ export function ShortcutHelpPanel({
   visible,
   onClose,
 }: ShortcutHelpPanelProps): JSX.Element | null {
+  const { t } = useI18n();
   const grouped = useMemo(() => {
     const groups = new Map<string, ShortcutDef[]>();
     for (const def of DEFAULT_SHORTCUTS) {
@@ -170,19 +174,19 @@ export function ShortcutHelpPanel({
       style={OVERLAY_STYLE}
       onClick={onClose}
       role="dialog"
-      aria-label="Raccourcis clavier"
+      aria-label={t('editor.shortcuts.title')}
       aria-modal="true"
     >
       {/* Stop click propagation on the panel itself */}
       <div style={PANEL_STYLE} onClick={e => e.stopPropagation()}>
         <div style={HEADER_STYLE}>
-          <h2 style={TITLE_STYLE}>Raccourcis clavier</h2>
+          <h2 style={TITLE_STYLE}>{t('editor.shortcuts.title')}</h2>
           <button
             type="button"
             style={CLOSE_BUTTON_STYLE}
             onClick={onClose}
-            aria-label="Fermer"
-            title="Fermer (Échap)"
+            aria-label={t('editor.shortcuts.close')}
+            title={t('editor.shortcuts.close.title')}
           >
             ✕
           </button>
@@ -191,15 +195,16 @@ export function ShortcutHelpPanel({
         {CATEGORY_ORDER.map(cat => {
           const defs = grouped.get(cat);
           if (defs === undefined || defs.length === 0) return null;
+          const catKey = CATEGORY_KEYS[cat];
           return (
             <div key={cat}>
               <div style={CATEGORY_STYLE}>
-                {CATEGORY_LABELS[cat] ?? cat}
+                {catKey ? t(catKey) : cat}
               </div>
               {defs.map(def => (
                 <div key={def.action} style={ROW_STYLE}>
-                  <span style={LABEL_STYLE}>{def.label}</span>
-                  <kbd style={KEY_STYLE}>{formatKey(def)}</kbd>
+                  <span style={LABEL_STYLE}>{t(def.labelKey)}</span>
+                  <kbd style={KEY_STYLE}>{formatKey(def, t)}</kbd>
                 </div>
               ))}
             </div>

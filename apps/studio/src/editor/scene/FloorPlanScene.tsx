@@ -12,6 +12,7 @@
 import { type JSX, useMemo } from 'react';
 import type { SiteData, Footprint, GraphNode, Edge, Destination } from '@azimut/core-model';
 import { formatSvg } from '@azimut/core-model';
+import { useI18n } from '../../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -87,6 +88,7 @@ export function FloorPlanScene({
   showEdges = true,
   showDestinations = true,
 }: FloorPlanSceneProps): JSX.Element {
+  const { t } = useI18n();
   const data = useMemo(() => extractLevelData(site, levelId), [site, levelId]);
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
@@ -115,7 +117,7 @@ export function FloorPlanScene({
               strokeWidth={isSelected ? 0.15 : 0.05}
               style={{ cursor: 'pointer' }}
               role="graphics-symbol"
-              aria-label={`Empreinte ${fp.kind} ${fp.id}`}
+              aria-label={t('scene.footprint.aria', { kind: fp.kind, id: fp.id })}
               onClick={(e) => handleClick(fp.id, e)}
             />
           );
@@ -144,7 +146,7 @@ export function FloorPlanScene({
                 strokeDasharray={edge.evacuation_route ? '0.3 0.15' : undefined}
                 style={{ cursor: 'pointer' }}
                 role="graphics-symbol"
-                aria-label={`Arête ${edge.id}`}
+                aria-label={t('scene.edge.aria', { id: edge.id })}
                 onClick={(e) => handleClick(edge.id, e)}
               />
             );
@@ -174,7 +176,7 @@ export function FloorPlanScene({
               strokeWidth={isSelected ? 0.1 : 0.03}
               style={{ cursor: 'pointer' }}
               role="graphics-symbol"
-              aria-label={`Nœud ${node.kind} ${node.label ?? node.id}`}
+              aria-label={t('scene.node.aria', { kind: node.kind, label: node.label ?? node.id })}
               tabIndex={0}
               onClick={(e) => handleClick(node.id, e)}
             />

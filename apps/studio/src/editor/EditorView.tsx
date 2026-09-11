@@ -20,6 +20,7 @@ import {
 } from 'react';
 import type { Point, ViewState, Footprint } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { EditorCanvas } from './EditorCanvas.js';
 import type { EditorCanvasApi } from './EditorCanvas.js';
 import type { SceneObject } from './snap-integration.js';
@@ -59,6 +60,7 @@ function footprintsToSceneObjects(
 
 export function EditorView(): JSX.Element {
   const site = useSiteData();
+  const { t } = useI18n();
   const sortedLevels = useMemo(
     () => [...site.levels].sort((a, b) => a.ordinal - b.ordinal),
     [site],
@@ -279,7 +281,9 @@ export function EditorView(): JSX.Element {
             requestedTool={requestedTool}
             onToolChange={handleToolChange}
             onReady={handleCanvasReady}
-            ariaLabel={`Éditeur: ${sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel}`}
+            ariaLabel={t('editor.canvas.aria', {
+              level: sortedLevels.find(l => l.id === selectedLevel)?.name ?? selectedLevel,
+            })}
           >
             <FloorPlanScene
               site={site}
@@ -297,7 +301,7 @@ export function EditorView(): JSX.Element {
             color: 'var(--text-secondary)',
             fontSize: 14,
           }}>
-            Sélectionnez un niveau.
+            {t('floorplans.empty')}
           </div>
         )}
       </div>

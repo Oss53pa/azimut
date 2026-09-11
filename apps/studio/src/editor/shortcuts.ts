@@ -6,6 +6,8 @@
  * No single-key destructive shortcut without confirmation.
  */
 
+import type { UiMessageKey } from '../i18n/messages.js';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -20,8 +22,8 @@ export type ShortcutModifiers = {
 export type ShortcutDef = {
   /** Unique action identifier. */
   readonly action: string;
-  /** Human-readable label (FR). */
-  readonly label: string;
+  /** i18n key for the human-readable label (D12.1). */
+  readonly labelKey: UiMessageKey;
   /** Primary key (e.g. 'z', 'Delete', 'Escape'). Case-insensitive. */
   readonly key: string;
   /** Required modifiers. */
@@ -52,38 +54,38 @@ const SHIFT: ShortcutModifiers = { ctrl: false, shift: true, alt: false, meta: f
 
 export const DEFAULT_SHORTCUTS: readonly ShortcutDef[] = [
   // Edit
-  { action: 'undo',        label: 'Annuler',                 key: 'z',      modifiers: CTRL,       category: 'edit',      destructive: false },
-  { action: 'redo',        label: 'Rétablir',                key: 'z',      modifiers: CTRL_SHIFT, category: 'edit',      destructive: false },
-  { action: 'delete',      label: 'Supprimer',               key: 'Delete', modifiers: NO_MOD,     category: 'edit',      destructive: true },
-  { action: 'copy',        label: 'Copier',                  key: 'c',      modifiers: CTRL,       category: 'edit',      destructive: false },
-  { action: 'paste',       label: 'Coller',                  key: 'v',      modifiers: CTRL,       category: 'edit',      destructive: false },
-  { action: 'cut',         label: 'Couper',                  key: 'x',      modifiers: CTRL,       category: 'edit',      destructive: true },
+  { action: 'undo',        labelKey: 'editor.shortcut.undo',        key: 'z',      modifiers: CTRL,       category: 'edit',      destructive: false },
+  { action: 'redo',        labelKey: 'editor.shortcut.redo',        key: 'z',      modifiers: CTRL_SHIFT, category: 'edit',      destructive: false },
+  { action: 'delete',      labelKey: 'editor.shortcut.delete',      key: 'Delete', modifiers: NO_MOD,     category: 'edit',      destructive: true },
+  { action: 'copy',        labelKey: 'editor.shortcut.copy',        key: 'c',      modifiers: CTRL,       category: 'edit',      destructive: false },
+  { action: 'paste',       labelKey: 'editor.shortcut.paste',       key: 'v',      modifiers: CTRL,       category: 'edit',      destructive: false },
+  { action: 'cut',         labelKey: 'editor.shortcut.cut',         key: 'x',      modifiers: CTRL,       category: 'edit',      destructive: true },
 
   // Selection
-  { action: 'select_all',  label: 'Tout sélectionner',       key: 'a',      modifiers: CTRL,       category: 'selection', destructive: false },
-  { action: 'deselect',    label: 'Désélectionner',          key: 'Escape', modifiers: NO_MOD,     category: 'selection', destructive: false },
-  { action: 'nav_next',    label: 'Objet suivant',           key: 'Tab',    modifiers: NO_MOD,     category: 'selection', destructive: false },
-  { action: 'nav_prev',    label: 'Objet précédent',         key: 'Tab',    modifiers: SHIFT,      category: 'selection', destructive: false },
+  { action: 'select_all',  labelKey: 'editor.shortcut.select_all',  key: 'a',      modifiers: CTRL,       category: 'selection', destructive: false },
+  { action: 'deselect',    labelKey: 'editor.shortcut.deselect',    key: 'Escape', modifiers: NO_MOD,     category: 'selection', destructive: false },
+  { action: 'nav_next',    labelKey: 'editor.shortcut.nav_next',    key: 'Tab',    modifiers: NO_MOD,     category: 'selection', destructive: false },
+  { action: 'nav_prev',    labelKey: 'editor.shortcut.nav_prev',    key: 'Tab',    modifiers: SHIFT,      category: 'selection', destructive: false },
 
   // View
-  { action: 'zoom_in',     label: 'Zoom avant',              key: '=',      modifiers: NO_MOD,     category: 'view',      destructive: false },
-  { action: 'zoom_out',    label: 'Zoom arrière',            key: '-',      modifiers: NO_MOD,     category: 'view',      destructive: false },
-  { action: 'zoom_fit',    label: 'Ajuster à la vue',        key: '0',      modifiers: CTRL,       category: 'view',      destructive: false },
+  { action: 'zoom_in',     labelKey: 'editor.shortcut.zoom_in',     key: '=',      modifiers: NO_MOD,     category: 'view',      destructive: false },
+  { action: 'zoom_out',    labelKey: 'editor.shortcut.zoom_out',    key: '-',      modifiers: NO_MOD,     category: 'view',      destructive: false },
+  { action: 'zoom_fit',    labelKey: 'editor.shortcut.zoom_fit',    key: '0',      modifiers: CTRL,       category: 'view',      destructive: false },
 
   // Tool
-  { action: 'tool_select', label: 'Outil sélection',         key: 'v',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_hand',   label: 'Outil main',              key: 'h',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_rect',   label: 'Outil rectangle',         key: 'r',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_ellipse',label: 'Outil ellipse',           key: 'e',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_poly',   label: 'Outil polygone',          key: 'p',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_line',   label: 'Outil ligne',             key: 'l',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_pen',    label: 'Outil plume',             key: 'b',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_text',   label: 'Outil texte',             key: 't',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_node',   label: 'Outil placement de nœud', key: 'n',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
-  { action: 'tool_measure',label: 'Outil mesure',            key: 'm',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_select', labelKey: 'editor.shortcut.tool_select', key: 'v',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_hand',   labelKey: 'editor.shortcut.tool_hand',   key: 'h',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_rect',   labelKey: 'editor.shortcut.tool_rect',   key: 'r',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_ellipse',labelKey: 'editor.shortcut.tool_ellipse',key: 'e',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_poly',   labelKey: 'editor.shortcut.tool_poly',   key: 'p',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_line',   labelKey: 'editor.shortcut.tool_line',   key: 'l',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_pen',    labelKey: 'editor.shortcut.tool_pen',    key: 'b',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_text',   labelKey: 'editor.shortcut.tool_text',   key: 't',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_node',   labelKey: 'editor.shortcut.tool_node',   key: 'n',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
+  { action: 'tool_measure',labelKey: 'editor.shortcut.tool_measure',key: 'm',      modifiers: NO_MOD,     category: 'tool',      destructive: false },
 
   // File / help
-  { action: 'show_help',  label: 'Raccourcis clavier',       key: '?',      modifiers: SHIFT,      category: 'file',      destructive: false },
+  { action: 'show_help',  labelKey: 'editor.shortcut.show_help',    key: '?',      modifiers: SHIFT,      category: 'file',      destructive: false },
 ];
 
 // ---------------------------------------------------------------------------

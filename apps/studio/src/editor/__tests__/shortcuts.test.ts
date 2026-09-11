@@ -30,8 +30,8 @@ describe('E16 — keyboard shortcuts', () => {
     it('detects duplicate key bindings', () => {
       const mod = { ctrl: false, shift: false, alt: false, meta: false };
       const dups: ShortcutDef[] = [
-        { action: 'foo', label: 'Foo', key: 'a', modifiers: mod, category: 'tool', destructive: false },
-        { action: 'bar', label: 'Bar', key: 'a', modifiers: mod, category: 'tool', destructive: false },
+        { action: 'foo', labelKey: 'editor.shortcut.undo', key: 'a', modifiers: mod, category: 'tool', destructive: false },
+        { action: 'bar', labelKey: 'editor.shortcut.undo', key: 'a', modifiers: mod, category: 'tool', destructive: false },
       ];
       const conflicts = detectConflicts(dups);
       expect(conflicts).toHaveLength(1);
@@ -41,8 +41,8 @@ describe('E16 — keyboard shortcuts', () => {
 
     it('same key with different modifiers is not a conflict', () => {
       const defs: ShortcutDef[] = [
-        { action: 'foo', label: 'Foo', key: 'z', modifiers: { ctrl: true, shift: false, alt: false, meta: false }, category: 'edit', destructive: false },
-        { action: 'bar', label: 'Bar', key: 'z', modifiers: { ctrl: true, shift: true, alt: false, meta: false }, category: 'edit', destructive: false },
+        { action: 'foo', labelKey: 'editor.shortcut.undo', key: 'z', modifiers: { ctrl: true, shift: false, alt: false, meta: false }, category: 'edit', destructive: false },
+        { action: 'bar', labelKey: 'editor.shortcut.undo', key: 'z', modifiers: { ctrl: true, shift: true, alt: false, meta: false }, category: 'edit', destructive: false },
       ];
       expect(detectConflicts(defs)).toStrictEqual([]);
     });
@@ -52,7 +52,7 @@ describe('E16 — keyboard shortcuts', () => {
     it('flags ctrl+t as browser-reserved', () => {
       const mod = { ctrl: true, shift: false, alt: false, meta: false };
       const defs: ShortcutDef[] = [
-        { action: 'test', label: 'Test', key: 't', modifiers: mod, category: 'tool', destructive: false },
+        { action: 'test', labelKey: 'editor.shortcut.undo', key: 't', modifiers: mod, category: 'tool', destructive: false },
       ];
       const conflicts = detectBrowserConflicts(defs);
       expect(conflicts).toHaveLength(1);
@@ -63,7 +63,7 @@ describe('E16 — keyboard shortcuts', () => {
     it('flags single-key destructive shortcuts', () => {
       const mod = { ctrl: false, shift: false, alt: false, meta: false };
       const defs: ShortcutDef[] = [
-        { action: 'nuke', label: 'Nuke', key: 'x', modifiers: mod, category: 'edit', destructive: true },
+        { action: 'nuke', labelKey: 'editor.shortcut.undo', key: 'x', modifiers: mod, category: 'edit', destructive: true },
       ];
       expect(detectDestructiveWithoutModifier(defs)).toHaveLength(1);
     });
@@ -71,7 +71,7 @@ describe('E16 — keyboard shortcuts', () => {
     it('exempts Delete key (universally expected)', () => {
       const mod = { ctrl: false, shift: false, alt: false, meta: false };
       const defs: ShortcutDef[] = [
-        { action: 'delete', label: 'Delete', key: 'Delete', modifiers: mod, category: 'edit', destructive: true },
+        { action: 'delete', labelKey: 'editor.shortcut.undo', key: 'Delete', modifiers: mod, category: 'edit', destructive: true },
       ];
       expect(detectDestructiveWithoutModifier(defs)).toStrictEqual([]);
     });
@@ -79,7 +79,7 @@ describe('E16 — keyboard shortcuts', () => {
     it('accepts destructive with modifier', () => {
       const mod = { ctrl: true, shift: false, alt: false, meta: false };
       const defs: ShortcutDef[] = [
-        { action: 'cut', label: 'Cut', key: 'x', modifiers: mod, category: 'edit', destructive: true },
+        { action: 'cut', labelKey: 'editor.shortcut.undo', key: 'x', modifiers: mod, category: 'edit', destructive: true },
       ];
       expect(detectDestructiveWithoutModifier(defs)).toStrictEqual([]);
     });
@@ -124,9 +124,9 @@ describe('E16 — keyboard shortcuts', () => {
       }
     });
 
-    it('every shortcut has a non-empty label', () => {
+    it('every shortcut has a non-empty label key', () => {
       for (const def of DEFAULT_SHORTCUTS) {
-        expect(def.label.length).toBeGreaterThan(0);
+        expect(def.labelKey.length).toBeGreaterThan(0);
       }
     });
 

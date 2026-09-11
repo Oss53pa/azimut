@@ -14,6 +14,7 @@
 import { type JSX, useCallback, useEffect } from 'react';
 import type { ToolId, ToolAction } from './tool-state.js';
 import { TOOL_REGISTRY } from './tool-state.js';
+import { useI18n } from '../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -85,6 +86,7 @@ const TOOL_ABBR: Record<ToolId, string> = {
 // ---------------------------------------------------------------------------
 
 export function Toolbar({ currentTool, dispatchTool }: ToolbarProps): JSX.Element {
+  const { t } = useI18n();
   const setTool = useCallback((tool: ToolId) => {
     dispatchTool({ type: 'set_tool', tool });
   }, [dispatchTool]);
@@ -122,14 +124,15 @@ export function Toolbar({ currentTool, dispatchTool }: ToolbarProps): JSX.Elemen
     }
 
     for (const tool of tools) {
+      const label = t(tool.labelKey);
       const shortcut = tool.shortcutKey !== null ? ` (${tool.shortcutKey.toUpperCase()})` : '';
       elements.push(
         <button
           key={tool.id}
           type="button"
           style={buttonStyle(currentTool === tool.id)}
-          title={`${tool.label}${shortcut}`}
-          aria-label={tool.label}
+          title={`${label}${shortcut}`}
+          aria-label={label}
           aria-pressed={currentTool === tool.id}
           onClick={() => setTool(tool.id)}
         >
@@ -140,7 +143,7 @@ export function Toolbar({ currentTool, dispatchTool }: ToolbarProps): JSX.Elemen
   }
 
   return (
-    <div style={TOOLBAR_STYLE} role="toolbar" aria-label="Outils">
+    <div style={TOOLBAR_STYLE} role="toolbar" aria-label={t('editor.toolbar.aria')}>
       {elements}
     </div>
   );

@@ -17,6 +17,7 @@ import type { Point } from '@azimut/core-model';
 import type { ToolId } from './tool-state.js';
 import { TOOL_REGISTRY } from './tool-state.js';
 import type { SnapResult } from './snap.js';
+import { useI18n } from '../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -69,11 +70,6 @@ const DISABLED_BUTTON: React.CSSProperties = {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function toolLabel(toolId: ToolId): string {
-  const meta = TOOL_REGISTRY.find(t => t.id === toolId);
-  return meta?.label ?? toolId;
-}
-
 function formatCoord(v: number): string {
   return v.toFixed(3);
 }
@@ -91,11 +87,14 @@ export function StatusBar({
   onUndo,
   onRedo,
 }: StatusBarProps): JSX.Element {
+  const { t } = useI18n();
+  const toolMeta = TOOL_REGISTRY.find((m) => m.id === currentTool);
+  const toolName = toolMeta ? t(toolMeta.labelKey) : currentTool;
   return (
-    <div style={BAR_STYLE} role="status" aria-label="Barre de statut">
+    <div style={BAR_STYLE} role="status" aria-label={t('editor.status.aria')}>
       {/* Tool name */}
       <span style={{ fontWeight: 500 }}>
-        {toolLabel(currentTool)}
+        {toolName}
       </span>
 
       {/* Separator */}
@@ -130,20 +129,20 @@ export function StatusBar({
         style={canUndo ? BUTTON_STYLE : DISABLED_BUTTON}
         disabled={!canUndo}
         onClick={onUndo}
-        title="Annuler (Ctrl+Z)"
-        aria-label="Annuler"
+        title={t('editor.status.undo.title')}
+        aria-label={t('editor.shortcut.undo')}
       >
-        ↩ Annuler
+        ↩ {t('editor.shortcut.undo')}
       </button>
       <button
         type="button"
         style={canRedo ? BUTTON_STYLE : DISABLED_BUTTON}
         disabled={!canRedo}
         onClick={onRedo}
-        title="Rétablir (Ctrl+Maj+Z)"
-        aria-label="Rétablir"
+        title={t('editor.status.redo.title')}
+        aria-label={t('editor.shortcut.redo')}
       >
-        ↪ Rétablir
+        ↪ {t('editor.shortcut.redo')}
       </button>
     </div>
   );
