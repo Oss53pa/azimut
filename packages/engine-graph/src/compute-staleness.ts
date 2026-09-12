@@ -21,7 +21,9 @@ export type FaceHashDescriptor = {
   readonly node_id: string;
   readonly template: FaceTemplate;
   readonly profile: TravelProfile;
+  readonly charter_id: string | null;
   readonly charter_version: string | null;
+  readonly rules_pack_id: string | null;
   readonly rules_pack_version: string | null;
   readonly active_langs: readonly string[];
   readonly dimensions: { readonly width_mm: number; readonly height_mm: number };
@@ -64,7 +66,9 @@ export function computeStaleFaces(
       current = computeContentHash({
         resolved: resolved.value,
         template: face.template,
+        charter_id: face.charter_id,
         charter_version: face.charter_version,
+        rules_pack_id: face.rules_pack_id,
         rules_pack_version: face.rules_pack_version,
         active_langs: face.active_langs,
         dimensions: face.dimensions,

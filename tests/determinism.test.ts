@@ -277,7 +277,9 @@ describe('INV-4 — deterministic rendering', () => {
       computeContentHash({
         resolved: resolved.value,
         template,
+        charter_id: null,
         charter_version: null,
+        rules_pack_id: null,
         rules_pack_version: null,
         active_langs: ['fr', 'en'],
         dimensions: { width_mm: 600, height_mm: 400 },

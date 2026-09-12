@@ -82,7 +82,11 @@ export function computeInputsHash(
 export type ContentHashInput = {
   readonly resolved: ResolvedFace;
   readonly template: FaceTemplate;
+  /** Charter identity — the charter itself, per D7.1 "charte et sa version". */
+  readonly charter_id: string | null;
   readonly charter_version: string | null;
+  /** Rules pack identity, per D7.1 "paquet de règles et sa version". */
+  readonly rules_pack_id: string | null;
   readonly rules_pack_version: string | null;
   readonly active_langs: readonly string[];
   readonly dimensions: {
@@ -98,7 +102,9 @@ export function computeContentHash(
     resolved: input.resolved,
     template_id: input.template.id,
     template_blocks: input.template.blocks,
+    charter_id: input.charter_id,
     charter_version: input.charter_version,
+    rules_pack_id: input.rules_pack_id,
     rules_pack_version: input.rules_pack_version,
     active_langs: [...input.active_langs].sort(),
     dimensions: input.dimensions,

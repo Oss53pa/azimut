@@ -24,7 +24,9 @@ function resolveAtNode(
   return {
     resolved: result.value,
     template: tpl,
+    charter_id: null,
     charter_version: null,
+    rules_pack_id: null,
     rules_pack_version: null,
     active_langs: ['fr', 'en'],
     dimensions: { width_mm: 600, height_mm: 400 },
@@ -141,6 +143,20 @@ describe('D7.1 — content_hash', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
     const a = computeContentHash(input);
     const b = computeContentHash({ ...input, charter_version: 'v2' });
+    expect(a).not.toBe(b);
+  });
+
+  it('changes when charter identity changes (D7.1 "charte et sa version")', () => {
+    const input = resolveAtNode(refMinimal, template, 'n-junction');
+    const a = computeContentHash({ ...input, charter_id: 'charter-a', charter_version: 'v1' });
+    const b = computeContentHash({ ...input, charter_id: 'charter-b', charter_version: 'v1' });
+    expect(a).not.toBe(b);
+  });
+
+  it('changes when rules pack identity changes (D7.1)', () => {
+    const input = resolveAtNode(refMinimal, template, 'n-junction');
+    const a = computeContentHash({ ...input, rules_pack_id: 'pack-fr', rules_pack_version: '1.0.0' });
+    const b = computeContentHash({ ...input, rules_pack_id: 'pack-be', rules_pack_version: '1.0.0' });
     expect(a).not.toBe(b);
   });
 
