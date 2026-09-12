@@ -57,12 +57,12 @@ describe('ERROR_CATALOG', () => {
     }
   });
 
-  it('the D2.1 allowlist contains the nine base domains, the E17 four, and WAYFIND (H12)', () => {
+  it('the allowlist holds the base/E17/H domains plus the partie I five (I6)', () => {
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
-        'ASSET', 'CHARTER', 'COLOR', 'DATA', 'EDIT', 'GEOM', 'GRAPH',
-        'IMPORT', 'LAYOUT', 'PACKAGE', 'RULES', 'SECURITY', 'TYPO',
-        'WAYFIND',
+        'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'DATA', 'EDIT', 'FLOW',
+        'GEOM', 'GRAPH', 'IMPORT', 'LAYOUT', 'MODULE', 'PACKAGE', 'RULES',
+        'SECURITY', 'SURVEY', 'TYPO', 'WAYFIND',
       ],
     );
   });

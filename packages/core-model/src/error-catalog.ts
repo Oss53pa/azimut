@@ -153,6 +153,14 @@ export const ERROR_CATALOG = {
 
   // ── COLOR (E17) ───────────────────────────────────────────
   'COLOR.PROFILE_MISSING':                   { severity: 'warning',  description: 'Profil de sortie absent pour ce substrat' },
+
+  // ── ASSIST / MODULE / FLOW / AD / SURVEY (partie I, I6) ────
+  'ASSIST.PROPOSAL_REJECTED':                { severity: 'info',     description: 'Proposition d’assistance refusée, non redemandée' },
+  'ASSIST.EXTRACTION_BELOW_THRESHOLD':       { severity: 'warning',  description: 'Taux d’extraction insuffisant, calage manuel recommandé' },
+  'MODULE.NOT_ENTITLED':                     { severity: 'blocking', description: 'Module non souscrit' },
+  'FLOW.WEIGHTS_UNDECLARED':                 { severity: 'blocking', description: 'Calcul d’exposition sans pondérations déclarées' },
+  'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
+  'SURVEY.SYNC_PENDING':                     { severity: 'info',     description: 'Relevé de tournée non synchronisé' },
 } as const satisfies Record<string, { severity: 'blocking' | 'warning' | 'info'; description: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CATALOG;
@@ -172,6 +180,8 @@ export const ANOMALY_DOMAINS = [
   'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
   'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
   'WAYFIND',
+  // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
+  'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
 ] as const;
 
 export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
