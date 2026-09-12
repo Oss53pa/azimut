@@ -15,7 +15,8 @@
     "@azimut/engine-artwork": "workspace:*",
     "@azimut/engine-layout": "workspace:*",
     "@azimut/engine-package": "workspace:*",
-    "@azimut/design-tokens": "workspace:*"
+    "@azimut/design-tokens": "workspace:*",
+    "@azimut/db": "workspace:*"
   },
   "devDependencies": {
     "@azimut/testkit": "workspace:*"

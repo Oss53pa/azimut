@@ -54,3 +54,5 @@ export type {
 } from './asset-store.js';
 export { persistKioskPackage } from './persist-kiosk-package.js';
 export type { KioskPackageRecord } from './persist-kiosk-package.js';
+export { dbKioskPackageRecorder } from './db-package-recorder.js';
+export type { PackageRecorder } from './db-package-recorder.js';

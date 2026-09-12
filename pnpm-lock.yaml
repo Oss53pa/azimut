@@ -38,6 +38,9 @@ importers:
       '@azimut/core-model':
         specifier: workspace:*
         version: link:../../packages/core-model
+      '@azimut/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@azimut/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens

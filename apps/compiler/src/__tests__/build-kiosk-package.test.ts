@@ -265,4 +265,40 @@ describe('createBuildKioskPackageHandler — persistence (D10)', () => {
       createBuildKioskPackageHandler(context)(makeJob()),
     ).rejects.toThrow('storagePathFor');
   });
+
+  it('records the kiosk_package row with the job org after storing', async () => {
+    const calls: Array<{ record: unknown; orgId: string }> = [];
+    const context: BuildKioskPackageContext = {
+      ...kioskContextFromAssets(refMultilevel, appAssets, meta),
+      packageSink: memoryAssetStore(),
+      storagePathFor: (siteId, version) => `sites/${siteId}/v${version}`,
+      recordPackage: async (record, orgId) => {
+        calls.push({ record, orgId });
+      },
+    };
+    const result = await createBuildKioskPackageHandler(context)(
+      makeJob({ built_at: '2026-09-01T00:00:00Z' }),
+    );
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.orgId).toBe('org-test-001');
+    expect(calls[0]?.record).toMatchObject({
+      site_id: refMultilevel.site.id,
+      version: 5,
+      storage_path: `sites/${refMultilevel.site.id}/v5`,
+      content_hash: result['content_hash'],
+      checksum: result['checksum'],
+      built_at: '2026-09-01T00:00:00Z',
+    });
+  });
+
+  it('does not record a DB row when nothing was persisted to storage', async () => {
+    const calls: unknown[] = [];
+    const context: BuildKioskPackageContext = {
+      ...kioskContextFromAssets(refMultilevel, appAssets, meta),
+      recordPackage: async () => { calls.push(1); },
+    };
+    await createBuildKioskPackageHandler(context)(makeJob());
+    expect(calls).toHaveLength(0);
+  });
 });

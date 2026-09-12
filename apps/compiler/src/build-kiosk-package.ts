@@ -4,6 +4,7 @@ import { buildKioskTree, buildKioskTreeFromStore } from './build-kiosk-tree.js';
 import type { KioskAppAssets } from './build-kiosk-tree.js';
 import type { AssetStore, AssetWriter } from './asset-store.js';
 import { persistKioskPackage } from './persist-kiosk-package.js';
+import type { PackageRecorder } from './db-package-recorder.js';
 import type { Job } from './job.js';
 
 /**
@@ -37,6 +38,13 @@ export type BuildKioskPackageContext = {
   readonly packageSink?: AssetWriter;
   /** Storage path prefix for a given site/version. Required with a sink. */
   readonly storagePathFor?: (siteId: string, version: number) => string;
+  /**
+   * Optional recorder for the `kiosk_package` DB row, called after the tree is
+   * persisted to storage (so a row never points at absent bytes). Requires a
+   * {@link packageSink}. Use {@link dbKioskPackageRecorder} to back it with a
+   * live database; omit it to leave DB persistence to the caller.
+   */
+  readonly recordPackage?: PackageRecorder;
 };
 
 export type BuildKioskPackageResult = {
@@ -103,6 +111,7 @@ export function createBuildKioskPackageHandler(
     minRuntime,
     packageSink,
     storagePathFor,
+    recordPackage,
   } = context;
 
   return async (job: Job): Promise<Record<string, unknown>> => {
@@ -146,6 +155,9 @@ export function createBuildKioskPackageHandler(
       );
       storagePath = record.storage_path;
       checksum = record.checksum;
+      if (recordPackage) {
+        await recordPackage(record, job.org_id);
+      }
     }
 
     const summary: BuildKioskPackageResult = {
