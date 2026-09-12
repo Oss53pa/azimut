@@ -124,6 +124,40 @@ describe('D11 — createBuildDeliveryArchiveHandler', () => {
     ).rejects.toThrow('version');
   });
 
+  it('records the delivery_package row with the job org after storing', async () => {
+    const sink = memoryAssetStore();
+    const calls: Array<{ record: Record<string, unknown>; orgId: string }> = [];
+    const ctx: BuildDeliveryArchiveContext = {
+      ...context(sink),
+      recordDelivery: async (record, orgId) => {
+        calls.push({ record: record as unknown as Record<string, unknown>, orgId });
+      },
+    };
+    const result = await createBuildDeliveryArchiveHandler(ctx)(makeJob(basePayload));
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.orgId).toBe('org-test-001');
+    expect(calls[0]?.record).toMatchObject({
+      site_id: refMultilevel.site.id,
+      site_code: 'CPL',
+      building: 'A',
+      level: 'R1',
+      version: 3,
+      archive_name: 'CPL_A_R1_V3.ZIP',
+      storage_path: 'deliveries/CPL_A_R1_V3.ZIP',
+      checksum: result['checksum'],
+      total_supports: 2,
+      cross_check_ok: true,
+    });
+  });
+
+  it('does not record a row when no recorder is configured', async () => {
+    const sink = memoryAssetStore();
+    const result = await createBuildDeliveryArchiveHandler(context(sink))(makeJob(basePayload));
+    expect(typeof result['checksum']).toBe('string');
+    expect(result['storage_path']).toBe('deliveries/CPL_A_R1_V3.ZIP');
+  });
+
   it('surfaces a name collision as an assembly failure', async () => {
     const sink = memoryAssetStore();
     const collide = {

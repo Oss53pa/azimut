@@ -32,6 +32,8 @@ export type {
   BuildDeliveryArchiveContext,
   BuildDeliveryArchiveResult,
 } from './build-delivery-archive.js';
+export { dbDeliveryRecorder } from './db-delivery-recorder.js';
+export type { DeliveryRecorder, DeliveryRecord } from './db-delivery-recorder.js';
 export { createExportQuantitiesHandler } from './export-quantities.js';
 export type {
   ExportQuantitiesContext,

@@ -18,4 +18,5 @@ export {
   lexiconTerm, rulesPack, rulesPackRule, siteRulesBinding,
 } from './charters.js';
 export { kiosk, kioskPackage, kioskTelemetry } from './kiosks.js';
+export { deliveryPackage } from './deliveries.js';
 export { job, auditLog } from './jobs.js';
