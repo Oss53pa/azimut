@@ -34,6 +34,16 @@ export type {
 } from './build-delivery-archive.js';
 export { dbDeliveryRecorder } from './db-delivery-recorder.js';
 export type { DeliveryRecorder, DeliveryRecord } from './db-delivery-recorder.js';
+export {
+  buildWallPlanFamily,
+  createBuildWallPlansHandler,
+} from './build-wall-plans.js';
+export type {
+  WallPlanPlacement,
+  WallPlanFamilyOptions,
+  BuildWallPlansContext,
+  BuildWallPlansResult,
+} from './build-wall-plans.js';
 export { createExportQuantitiesHandler } from './export-quantities.js';
 export type {
   ExportQuantitiesContext,

@@ -28,9 +28,9 @@ CREATE POLICY delivery_package_org_policy ON azimut.delivery_package
   USING (org_id IN (SELECT azimut.user_org_ids()))
   WITH CHECK (org_id IN (SELECT azimut.user_org_ids()));
 
--- Le job build_delivery_archive devient un type de job admis.
+-- Les jobs build_delivery_archive et build_wall_plans deviennent admis.
 ALTER TABLE azimut.job DROP CONSTRAINT job_kind_check;
 ALTER TABLE azimut.job ADD CONSTRAINT job_kind_check CHECK (kind IN (
   'import_plan','import_roster','compile_artworks','build_delivery_archive',
-  'build_kiosk_package','export_quantities','audit_site'
+  'build_wall_plans','build_kiosk_package','export_quantities','audit_site'
 ));
