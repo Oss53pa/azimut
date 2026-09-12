@@ -149,6 +149,7 @@ export const ERROR_CATALOG = {
 
   // ── TYPO (E17) ────────────────────────────────────────────
   'TYPO.TEXT_OVERFLOW':                      { severity: 'blocking', description: 'Débordement de texte calculé' },
+  'TYPO.FONT_NOT_EMBEDDABLE':                { severity: 'blocking', description: 'Police non incorporable dans un livrable distribué (G5.2)' },
 
   // ── COLOR (E17) ───────────────────────────────────────────
   'COLOR.PROFILE_MISSING':                   { severity: 'warning',  description: 'Profil de sortie absent pour ce substrat' },
