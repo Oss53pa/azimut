@@ -1,7 +1,8 @@
 import type { SiteData } from '@azimut/core-model';
 import { assembleKioskPackage } from '@azimut/engine-package';
-import { buildKioskTree } from './build-kiosk-tree.js';
+import { buildKioskTree, buildKioskTreeFromStore } from './build-kiosk-tree.js';
 import type { KioskAppAssets } from './build-kiosk-tree.js';
+import type { AssetStore } from './asset-store.js';
 import type { Job } from './job.js';
 
 /**
@@ -51,6 +52,26 @@ export function kioskContextFromAssets(
   return {
     site,
     resolveKioskFiles: async () => buildKioskTree(site, appAssets),
+    version: meta.version,
+    langs: meta.langs,
+    minRuntime: meta.minRuntime,
+  };
+}
+
+/**
+ * Compose a {@link BuildKioskPackageContext} that reads the runtime app bundle
+ * from a storage port ({@link AssetStore}) and generates the per-site data and
+ * maps in-process. This is the production wiring: the static bundle lives in
+ * storage, the site-derived files are computed at build time.
+ */
+export function kioskContextFromStore(
+  site: SiteData,
+  store: AssetStore,
+  meta: { version: number; langs: readonly string[]; minRuntime: string },
+): BuildKioskPackageContext {
+  return {
+    site,
+    resolveKioskFiles: () => buildKioskTreeFromStore(site, store),
     version: meta.version,
     langs: meta.langs,
     minRuntime: meta.minRuntime,

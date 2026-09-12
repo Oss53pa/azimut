@@ -2,9 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
   createBuildKioskPackageHandler,
   kioskContextFromAssets,
+  kioskContextFromStore,
 } from '../build-kiosk-package.js';
 import type { BuildKioskPackageContext } from '../build-kiosk-package.js';
 import type { KioskAppAssets } from '../build-kiosk-tree.js';
+import { memoryAssetStore } from '../asset-store.js';
 import type { Job } from '../job.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 
@@ -154,5 +156,65 @@ describe('kioskContextFromAssets (D10 — end to end)', () => {
       kioskContextFromAssets(refMultilevel, appAssets, meta),
     )(makeJob({ built_at: '2030-12-31T23:59:59Z' }));
     expect(a['content_hash']).toBe(b['content_hash']);
+  });
+});
+
+describe('kioskContextFromStore (D10 — bundle read from storage)', () => {
+  const meta = { version: 7, langs: ['fr', 'en'], minRuntime: '1.0.0' };
+
+  function bundleStore() {
+    return memoryAssetStore(
+      new Map<string, Uint8Array>([
+        ['index.html', enc.encode('<!doctype html><title>Borne</title><div id="app"></div>')],
+        ['assets/app.js', enc.encode('export const boot = () => {};')],
+        ['assets/app.css', enc.encode('body{margin:0;font-family:system-ui}')],
+        ['assets/fonts/inter.woff2', enc.encode('FONT-BYTES')],
+      ]),
+    );
+  }
+
+  it('reads the bundle from storage and generates data + maps', async () => {
+    const context = kioskContextFromStore(refMultilevel, bundleStore(), meta);
+    const result = await createBuildKioskPackageHandler(context)(
+      makeJob({ built_at: '2026-09-01T00:00:00Z' }),
+    );
+
+    expect(result['site_id']).toBe(refMultilevel.site.id);
+    // index.html + app.js + app.css + font + 4 data files + one map per level (2).
+    expect(result['file_count']).toBe(10);
+    expect(result['content_hash']).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(result['network_clean']).toBe(true);
+  });
+
+  it('the storage bundle yields the same package as inline assets (same bytes)', async () => {
+    const inline = kioskContextFromAssets(refMultilevel, {
+      indexHtml: enc.encode('<!doctype html><title>Borne</title><div id="app"></div>'),
+      appJs: enc.encode('export const boot = () => {};'),
+      appCss: enc.encode('body{margin:0;font-family:system-ui}'),
+      extra: new Map([['assets/fonts/inter.woff2', enc.encode('FONT-BYTES')]]),
+    }, meta);
+    const stored = kioskContextFromStore(refMultilevel, bundleStore(), meta);
+
+    const fromInline = await createBuildKioskPackageHandler(inline)(
+      makeJob({ built_at: '2026-09-01T00:00:00Z' }),
+    );
+    const fromStore = await createBuildKioskPackageHandler(stored)(
+      makeJob({ built_at: '2026-09-01T00:00:00Z' }),
+    );
+    expect(fromStore['content_hash']).toBe(fromInline['content_hash']);
+    expect(fromStore['file_count']).toBe(fromInline['file_count']);
+  });
+
+  it('fails assembly when the bundle omits index.html', async () => {
+    const store = memoryAssetStore(
+      new Map<string, Uint8Array>([
+        ['assets/app.js', enc.encode('export const boot = () => {};')],
+        ['assets/app.css', enc.encode('body{margin:0}')],
+      ]),
+    );
+    const context = kioskContextFromStore(refMultilevel, store, meta);
+    await expect(
+      createBuildKioskPackageHandler(context)(makeJob()),
+    ).rejects.toThrow('Asset not found: index.html');
   });
 });

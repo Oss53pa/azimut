@@ -33,6 +33,7 @@ export type {
 export {
   createBuildKioskPackageHandler,
   kioskContextFromAssets,
+  kioskContextFromStore,
 } from './build-kiosk-package.js';
 export type {
   BuildKioskPackageContext,
@@ -40,7 +41,10 @@ export type {
 } from './build-kiosk-package.js';
 export {
   buildKioskTree,
+  buildKioskTreeFromStore,
   buildKioskDataFiles,
   buildKioskMapFiles,
 } from './build-kiosk-tree.js';
 export type { KioskAppAssets } from './build-kiosk-tree.js';
+export { memoryAssetStore, fileSystemAssetStore } from './asset-store.js';
+export type { AssetStore } from './asset-store.js';

@@ -3,6 +3,7 @@ import { canonicalSerialize } from '@azimut/core-model';
 import { renderFloorPlan } from '@azimut/engine-layout';
 import type { FloorPlanOptions, FloorPlanTheme } from '@azimut/engine-layout';
 import { themePapier, stateColorsPapier } from '@azimut/design-tokens';
+import type { AssetStore } from './asset-store.js';
 
 /**
  * D10.1 — Build the kiosk deployment tree files from the site.
@@ -113,6 +114,12 @@ export function buildKioskMapFiles(site: SiteData): Map<string, Uint8Array> {
   return files;
 }
 
+/** Add the generated data and map files for the site to a tree in place. */
+function addGeneratedFiles(tree: Map<string, Uint8Array>, site: SiteData): void {
+  for (const [path, bytes] of buildKioskDataFiles(site)) tree.set(path, bytes);
+  for (const [path, bytes] of buildKioskMapFiles(site)) tree.set(path, bytes);
+}
+
 /** Assemble the full kiosk tree: app assets + generated data + maps. */
 export function buildKioskTree(
   site: SiteData,
@@ -125,7 +132,25 @@ export function buildKioskTree(
   for (const [path, bytes] of appAssets.extra ?? new Map()) {
     tree.set(path, bytes);
   }
-  for (const [path, bytes] of buildKioskDataFiles(site)) tree.set(path, bytes);
-  for (const [path, bytes] of buildKioskMapFiles(site)) tree.set(path, bytes);
+  addGeneratedFiles(tree, site);
+  return tree;
+}
+
+/**
+ * Assemble the kiosk tree by reading the runtime app bundle from a storage
+ * port (index.html plus everything under `assets/`) and generating the
+ * per-site data and map files in-process. This is the production path: the
+ * static bundle lives in storage, the site-derived files are computed here.
+ */
+export async function buildKioskTreeFromStore(
+  site: SiteData,
+  store: AssetStore,
+): Promise<ReadonlyMap<string, Uint8Array>> {
+  const tree = new Map<string, Uint8Array>();
+  const bundlePaths = ['index.html', ...(await store.list('assets/'))];
+  for (const path of bundlePaths) {
+    tree.set(path, await store.read(path));
+  }
+  addGeneratedFiles(tree, site);
   return tree;
 }
