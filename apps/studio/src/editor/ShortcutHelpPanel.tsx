@@ -81,7 +81,7 @@ const CATEGORY_STYLE: React.CSSProperties = {
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
   color: 'var(--text-secondary)',
-  marginTop: 14,
+  marginTop: 16,
   marginBottom: 6,
 };
 

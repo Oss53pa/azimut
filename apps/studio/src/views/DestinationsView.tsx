@@ -55,7 +55,7 @@ export function DestinationsView(): JSX.Element {
           color: 'var(--accent)',
           fontSize: 12,
           fontWeight: 500,
-          padding: '2px 10px',
+          padding: '2px 12px',
           borderRadius: 12,
         }}>
           {rows.length}
@@ -110,7 +110,7 @@ function Th({ children, align }: { readonly children: string; readonly align?: s
   return (
     <th style={{
       textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
-      padding: '10px 14px',
+      padding: '12px 16px',
       fontWeight: 500,
       color: 'var(--text-secondary)',
       fontSize: 11,
@@ -157,7 +157,7 @@ type TdProps = {
 function Td({ children, bold, secondary, align }: TdProps): JSX.Element {
   return (
     <td style={{
-      padding: '10px 14px',
+      padding: '12px 16px',
       color: secondary ? 'var(--text-secondary)' : 'var(--text-primary)',
       fontWeight: bold ? 500 : 400,
       textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
@@ -171,7 +171,7 @@ function LevelBadge({ children }: { readonly children: string }): JSX.Element {
   return (
     <span style={{
       display: 'inline-block',
-      padding: '2px 10px',
+      padding: '2px 12px',
       borderRadius: 6,
       fontSize: 12,
       fontWeight: 500,
@@ -213,8 +213,8 @@ function StatusBadge(
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
-      gap: 5,
-      padding: '3px 10px',
+      gap: 6,
+      padding: '4px 12px',
       borderRadius: 20,
       fontSize: 11.5,
       fontWeight: 500,

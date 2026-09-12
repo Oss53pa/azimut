@@ -10,6 +10,9 @@ export {
   kioskTokensHighContrast,
   radii,
   durations,
+  SPACING_SCALE,
+  spacing,
+  isAllowedSpacing,
 } from './tokens.js';
 export type {
   TokenKey,
@@ -17,6 +20,7 @@ export type {
   StateTokenKey,
   IsoTokenKey,
   KioskTokenKey,
+  SpacingKey,
 } from './tokens.js';
 export {
   contrastRatio,

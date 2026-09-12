@@ -99,7 +99,26 @@ export const kioskTokensHighContrast = {
 export type KioskTokenKey = keyof typeof kioskTokens;
 
 /**
- * Border radii (F2.2).
+ * Spacing scale (F4.1). Base 4 px; only these values are allowed, plus 0.
+ * Any spacing value off this scale is a non-conformity (F16 static analysis).
+ */
+export const SPACING_SCALE = [2, 4, 6, 8, 12, 16, 20, 24, 32, 48] as const;
+
+/** Spacing tokens, keyed by pixel value for direct lookup. */
+export const spacing = {
+  '2': 2, '4': 4, '6': 6, '8': 8, '12': 12,
+  '16': 16, '20': 20, '24': 24, '32': 32, '48': 48,
+} as const;
+
+export type SpacingKey = keyof typeof spacing;
+
+/** True when a numeric spacing value is on the scale (0 always allowed). */
+export function isAllowedSpacing(value: number): boolean {
+  return value === 0 || (SPACING_SCALE as readonly number[]).includes(value);
+}
+
+/**
+ * Border radii (F4.3).
  * Three values only — no fourth without stop-and-ask.
  */
 export const radii = {

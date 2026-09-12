@@ -52,7 +52,7 @@ const BUTTON_STYLE: React.CSSProperties = {
   background: 'var(--surface-panel)',
   cursor: 'pointer',
   fontSize: 11,
-  padding: '3px 6px',
+  padding: '4px 6px',
   borderRadius: 3,
   color: 'var(--text-secondary)',
   lineHeight: 1,

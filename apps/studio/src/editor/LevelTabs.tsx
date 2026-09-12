@@ -23,7 +23,7 @@ const BAR_STYLE: React.CSSProperties = {
 
 function tabStyle(active: boolean): React.CSSProperties {
   return {
-    padding: '6px 14px',
+    padding: '6px 16px',
     border: '1px solid var(--border-hairline)',
     borderRadius: 'var(--radius-floating)',
     background: active ? 'var(--surface-sunken)' : 'var(--surface-panel)',

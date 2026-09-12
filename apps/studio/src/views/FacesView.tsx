@@ -116,7 +116,7 @@ export function FacesView(): JSX.Element {
             key={tpl.id}
             onClick={() => setSelectedId(tpl.id)}
             style={{
-              padding: '6px 14px',
+              padding: '6px 16px',
               border: '1px solid var(--border-hairline)',
               borderRadius: 6,
               background: selectedId === tpl.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',

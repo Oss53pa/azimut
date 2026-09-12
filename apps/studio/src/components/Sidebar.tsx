@@ -51,7 +51,7 @@ function itemStyle(active: boolean, hovered: boolean): React.CSSProperties {
     alignItems: 'center',
     width: 'calc(100% - 12px)',
     textAlign: 'left',
-    padding: '5px 10px',
+    padding: '6px 12px',
     border: 'none',
     background: active
       ? 'var(--surface-sunken)'
@@ -66,7 +66,7 @@ function itemStyle(active: boolean, hovered: boolean): React.CSSProperties {
     fontSize: 13,
     cursor: 'pointer',
     borderRadius: 4,
-    margin: '1px 6px',
+    margin: '2px 6px',
     boxSizing: 'border-box',
     transition: 'background 120ms',
   };

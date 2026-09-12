@@ -80,7 +80,7 @@ export function FloorPlansView(): JSX.Element {
             key={l.id}
             onClick={() => handleLevelChange(l.id)}
             style={{
-              padding: '6px 14px',
+              padding: '6px 16px',
               border: '1px solid var(--border-hairline)',
               borderRadius: 6,
               background: selectedLevel === l.id ? 'var(--surface-sunken)' : 'var(--surface-panel)',
