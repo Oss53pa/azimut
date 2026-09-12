@@ -77,6 +77,12 @@ export { validateProofs } from './validate-proofs.js';
 export type { ProofValidationResult } from './validate-proofs.js';
 export { computeInputsHash, computeContentHash } from './compute-hashes.js';
 export type { ContentHashInput } from './compute-hashes.js';
+export { computeStaleFaces } from './compute-staleness.js';
+export type {
+  FaceHashDescriptor,
+  FaceStaleness,
+  StalenessReport,
+} from './compute-staleness.js';
 export type {
   CsvLang,
   PlacedSupport,
