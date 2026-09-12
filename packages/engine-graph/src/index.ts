@@ -161,3 +161,9 @@ export type {
 } from './audit-pictograms.js';
 export { guardLibraryImport } from './guard-library-import.js';
 export type { LibrarySymbol } from './guard-library-import.js';
+export { guardFamilyConsistency } from './guard-family-consistency.js';
+export type {
+  FamilyMember,
+  PictogramFamily,
+  FamilyStyle,
+} from './guard-family-consistency.js';
