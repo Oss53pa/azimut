@@ -126,6 +126,13 @@ export const ERROR_CATALOG = {
   'DATA.SUPPORT_BLOCK_REGION_INVALID':      { severity: 'blocking', description: 'Région de bloc hors limites' },
   'DATA.KIOSK_CONFIG_INVALID':              { severity: 'blocking', description: 'Configuration locale de borne invalide' },
 
+  // ── WAYFIND (H12) ─────────────────────────────────────────
+  'WAYFIND.NO_INFORMATION_LEVEL':           { severity: 'blocking', description: 'Support rattaché à aucun niveau d’information' },
+  'WAYFIND.TOO_MANY_DESTINATIONS':          { severity: 'blocking', description: 'Nombre de destinations par face dépassé' },
+  'WAYFIND.SCHEDULE_STALE':                 { severity: 'warning',  description: 'Tableau des messages périmé' },
+  'WAYFIND.SUPPORT_TYPE_UNKNOWN':           { severity: 'blocking', description: 'Support rattaché à une typologie inconnue' },
+  'WAYFIND.FACE_TEMPLATE_MISSING':          { severity: 'blocking', description: 'Aucun gabarit pour cette face de typologie' },
+
   // ── EDIT (E17) ────────────────────────────────────────────
   'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },
   'EDIT.BOOLEAN_RESULT_INVALID':            { severity: 'blocking', description: 'Opération booléenne produisant une géométrie invalide' },
@@ -151,13 +158,17 @@ export type ErrorCode = keyof typeof ERROR_CATALOG;
  * D2.1 — the only anomaly domains allowed, and them alone. The nine domains
  * authorized by the complement (partie D, §D2.1): GRAPH, GEOM, LAYOUT, RULES,
  * CHARTER, IMPORT, PACKAGE, SECURITY, DATA — plus the four introduced by the
- * vector-editing addendum (partie E, E17): EDIT, ASSET, TYPO, COLOR. This
- * extension is a deliberate amendment reconciling parties D and E; any code
- * whose domain is not in this list is rejected by the catalog test.
+ * vector-editing addendum (partie E, E17): EDIT, ASSET, TYPO, COLOR — plus
+ * WAYFIND, introduced by the missing-modules addendum (partie H, H12) for the
+ * message schedule. These extensions are deliberate amendments reconciling
+ * parties D, E and H; any code whose domain is not in this list is rejected by
+ * the catalog test. A domain is added here in the same commit as the first code
+ * that uses it, never in advance.
  */
 export const ANOMALY_DOMAINS = [
   'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
   'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
+  'WAYFIND',
 ] as const;
 
 export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];

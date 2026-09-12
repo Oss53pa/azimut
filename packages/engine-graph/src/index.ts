@@ -91,3 +91,28 @@ export type {
   OccupancyLineResult,
   OccupancyImportReport,
 } from './import-occupancy.js';
+
+// H2.5 — Tableau des messages
+export {
+  INFORMATION_LEVELS,
+  NO_WAYFINDING_RULES,
+  computeScheduleInputsHash,
+  isInformationLevel,
+  messageLineId,
+  reduceInformationLevel,
+} from './message-schedule.js';
+export type {
+  InformationLevel,
+  MessageEntry,
+  MessageLine,
+  MessageSchedule,
+  ScheduleInputs,
+  TypologyInformationLevels,
+  WayfindingRules,
+} from './message-schedule.js';
+export { generateMessageSchedule } from './message-schedule-generate.js';
+export type { GenerateScheduleOptions } from './message-schedule-generate.js';
+export { checkMessageSchedule, refreshStaleFlags } from './message-schedule-checks.js';
+export type { StaleDiff } from './message-schedule-checks.js';
+export { messageScheduleToCsv, messageScheduleToMarkdown } from './message-schedule-export.js';
+export type { ScheduleLang } from './message-schedule-export.js';

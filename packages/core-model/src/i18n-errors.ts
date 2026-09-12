@@ -116,6 +116,11 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'ASSET.FONT_MISSING_GLYPHS': 'Police sans les caractères requis',
   'TYPO.TEXT_OVERFLOW': 'Débordement de texte calculé',
   'COLOR.PROFILE_MISSING': 'Profil de sortie absent pour ce substrat',
+  'WAYFIND.NO_INFORMATION_LEVEL': 'Support rattaché à aucun niveau d\'information',
+  'WAYFIND.TOO_MANY_DESTINATIONS': 'Nombre de destinations par face dépassé',
+  'WAYFIND.SCHEDULE_STALE': 'Tableau des messages périmé',
+  'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support rattaché à une typologie inconnue',
+  'WAYFIND.FACE_TEMPLATE_MISSING': 'Aucun gabarit pour cette face de typologie',
 };
 
 export const ERROR_MESSAGES_EN: ErrorMessages = {
@@ -232,6 +237,11 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'ASSET.FONT_MISSING_GLYPHS': 'Font missing required glyphs',
   'TYPO.TEXT_OVERFLOW': 'Computed text overflow',
   'COLOR.PROFILE_MISSING': 'Output profile missing for this substrate',
+  'WAYFIND.NO_INFORMATION_LEVEL': 'Support attached to no information level',
+  'WAYFIND.TOO_MANY_DESTINATIONS': 'Destination count per face exceeded',
+  'WAYFIND.SCHEDULE_STALE': 'Message schedule out of date',
+  'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support attached to an unknown typology',
+  'WAYFIND.FACE_TEMPLATE_MISSING': 'No template for this typology face',
 };
 
 const ERROR_DICTIONARIES: Readonly<Record<string, ErrorMessages>> = {
