@@ -5,7 +5,12 @@ import {
   WCAG_AA_NORMAL,
   WCAG_AA_LARGE,
 } from '../contrast.js';
-import { themePapier, stateColorsPapier } from '../tokens.js';
+import {
+  themePapier,
+  stateColorsPapier,
+  themeInstrument,
+  stateColorsInstrument,
+} from '../tokens.js';
 
 /**
  * Partie F specifies five surfaces that can carry text.
@@ -144,6 +149,49 @@ describe('border-interactive meets 3.0 threshold (F2.4)', () => {
   for (const bg of surfaces) {
     it(`border-interactive on ${bg.key} meets ${WCAG_AA_LARGE}:1`, () => {
       const ratio = contrastRatio(themePapier['border-interactive'], bg.hex);
+      expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
+    });
+  }
+});
+
+// Theme Instrument (dark) — F2.5: a complete second set of reserved colours,
+// because the light values are illegible on a dark ground. The interface text
+// tokens sit on the DARK surfaces; surface-canvas stays light (the work area,
+// F0) and never carries interface text, so it is excluded here.
+const instrumentSurfaces = [
+  { key: 'surface-page', hex: themeInstrument['surface-page'] },
+  { key: 'surface-panel', hex: themeInstrument['surface-panel'] },
+  { key: 'surface-sunken', hex: themeInstrument['surface-sunken'] },
+  { key: 'accent-soft', hex: themeInstrument['accent-soft'] },
+] as const;
+
+const instrumentForegrounds = [
+  { key: 'text-primary', hex: themeInstrument['text-primary'] },
+  { key: 'text-secondary', hex: themeInstrument['text-secondary'] },
+  { key: 'text-muted', hex: themeInstrument['text-muted'] },
+  { key: 'accent', hex: themeInstrument['accent'] },
+  { key: 'accent-secondary', hex: themeInstrument['accent-secondary'] },
+  { key: 'state-blocking', hex: stateColorsInstrument['state-blocking'] },
+  { key: 'state-warning', hex: stateColorsInstrument['state-warning'] },
+  { key: 'state-valid', hex: stateColorsInstrument['state-valid'] },
+  { key: 'state-info', hex: stateColorsInstrument['state-info'] },
+] as const;
+
+describe('WCAG AA contrast — Instrument dark theme (F2.5)', () => {
+  for (const fg of instrumentForegrounds) {
+    for (const bg of instrumentSurfaces) {
+      it(`${fg.key} on ${bg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
+        const ratio = contrastRatio(fg.hex, bg.hex);
+        expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
+      });
+    }
+  }
+});
+
+describe('Instrument border-interactive meets 3.0 threshold (F2.4)', () => {
+  for (const bg of instrumentSurfaces) {
+    it(`border-interactive on ${bg.key} meets ${WCAG_AA_LARGE}:1`, () => {
+      const ratio = contrastRatio(themeInstrument['border-interactive'], bg.hex);
       expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
     });
   }

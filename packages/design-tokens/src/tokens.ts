@@ -32,7 +32,7 @@ export const themeInstrument = {
   'border-interactive': '#8A9099',
   'text-primary': '#E9E7E3',
   'text-secondary': '#A6ADB7',
-  'text-muted': '#7C838D',
+  'text-muted': '#9198A2',
   'accent': '#8FB4E0',
   'accent-soft': '#20303F',
   'accent-secondary': '#77C4B2',
