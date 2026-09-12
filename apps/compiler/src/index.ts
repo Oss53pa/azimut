@@ -56,3 +56,9 @@ export { persistKioskPackage } from './persist-kiosk-package.js';
 export type { KioskPackageRecord } from './persist-kiosk-package.js';
 export { dbKioskPackageRecorder } from './db-package-recorder.js';
 export type { PackageRecorder } from './db-package-recorder.js';
+export {
+  createKioskPackageJobHandler,
+  siteActiveLangs,
+  dbLoadSite,
+} from './kiosk-package-job.js';
+export type { KioskPackageJobDeps } from './kiosk-package-job.js';
