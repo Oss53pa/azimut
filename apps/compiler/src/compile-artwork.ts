@@ -51,6 +51,7 @@ export function createArtworkHandler(
       pdfTarget: pdf_target,
       creationDate: creation_date,
       nodeId,
+      supportId,
       templateId,
       profileKey,
       title: `${supportId} — ${template.side}`,

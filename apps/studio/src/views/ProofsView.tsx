@@ -1,8 +1,12 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { resolveFaceContent } from '@azimut/engine-graph';
-import type { FaceTemplate, TravelProfile, GraphNode } from '@azimut/core-model';
+import { composeFace } from '@azimut/engine-graph';
+import type { FaceTemplate, SiteData, TravelProfile, GraphNode } from '@azimut/core-model';
+
+/** Voir FacesView : valeurs fixes pour un état d'écran reproductible. */
+const REVIEW_SUPPORT_ID = 'review';
+const REVIEW_GENERATED_AT = '1970-01-01T00:00:00.000Z';
 
 type FaceStatus = {
   readonly template: FaceTemplate;
@@ -12,7 +16,7 @@ type FaceStatus = {
 };
 
 function evaluateFaces(
-  site: Parameters<typeof resolveFaceContent>[0],
+  site: SiteData,
   templates: readonly FaceTemplate[],
   profile: TravelProfile | null,
   nodes: readonly GraphNode[],
@@ -29,7 +33,14 @@ function evaluateFaces(
     if (!node) {
       return { template, node: null, resolved: false, warningCount: 0 };
     }
-    const result = resolveFaceContent(site, template, node.id, profile);
+    const result = composeFace({
+      site,
+      template,
+      profile,
+      supportId: REVIEW_SUPPORT_ID,
+      nodeId: node.id,
+      generated_at: REVIEW_GENERATED_AT,
+    });
     return {
       template,
       node,

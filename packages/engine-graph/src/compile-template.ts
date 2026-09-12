@@ -14,7 +14,8 @@ import { validateTemplate } from '@azimut/core-model';
  *
  * The D8 `Template` (grid + declarative blocks) is the authoritative authoring
  * format. This compiler turns a Template into the engine's `FaceTemplate`,
- * which the existing `resolveFaceContent` → `renderFace` pipeline consumes.
+ * which the `composeFace` → `renderFace` pipeline consumes; since H2.5 the
+ * content itself comes from the message schedule, not straight from the graph.
  * Adding a template is therefore pure data (D8.1): author a Template as JSON,
  * compile it, and it renders — no engine code changes (proven by the D8.4 test).
  *

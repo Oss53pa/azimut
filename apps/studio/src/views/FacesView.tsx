@@ -1,9 +1,20 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { resolveFaceContent, renderFace } from '@azimut/engine-graph';
+import { composeFace, renderFace } from '@azimut/engine-graph';
 import type { FaceTheme } from '@azimut/engine-graph';
-import type { FaceTemplate, TravelProfile, GraphNode } from '@azimut/core-model';
+import type { FaceTemplate, SiteData, TravelProfile, GraphNode } from '@azimut/core-model';
+
+/**
+ * Support et horodatage de l'aperçu.
+ *
+ * L'aperçu compose une face par le tableau des messages (H2.5) comme le
+ * fait le compilateur. Il lui faut donc un support et un horodatage :
+ * deux valeurs fixes, pour que deux aperçus du même état de données
+ * soient identiques.
+ */
+const PREVIEW_SUPPORT_ID = 'preview';
+const PREVIEW_GENERATED_AT = '1970-01-01T00:00:00.000Z';
 
 const FACE_THEME: FaceTheme = {
   background: 'var(--surface-panel)',
@@ -29,7 +40,7 @@ type RenderedPreview = {
 };
 
 function renderPreview(
-  site: Parameters<typeof resolveFaceContent>[0],
+  site: SiteData,
   template: FaceTemplate,
   nodes: readonly GraphNode[],
   profile: TravelProfile,
@@ -40,7 +51,14 @@ function renderPreview(
   const node = findPreviewNode(nodes);
   if (!node) return null;
 
-  const resolved = resolveFaceContent(site, template, node.id, profile);
+  const resolved = composeFace({
+    site,
+    template,
+    profile,
+    supportId: PREVIEW_SUPPORT_ID,
+    nodeId: node.id,
+    generated_at: PREVIEW_GENERATED_AT,
+  });
   if (!resolved.ok) return null;
 
   const svg = renderFace(resolved.value, {

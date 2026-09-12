@@ -119,6 +119,8 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'WAYFIND.NO_INFORMATION_LEVEL': 'Support rattaché à aucun niveau d\'information',
   'WAYFIND.TOO_MANY_DESTINATIONS': 'Nombre de destinations par face dépassé',
   'WAYFIND.SCHEDULE_STALE': 'Tableau des messages périmé',
+  'WAYFIND.LINE_MISSING': 'Ligne de message absente pour ce bloc de face',
+  'WAYFIND.LINE_MALFORMED': 'Ligne de message inexploitable à la composition',
   'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support rattaché à une typologie inconnue',
   'WAYFIND.FACE_TEMPLATE_MISSING': 'Aucun gabarit pour cette face de typologie',
 };
@@ -240,6 +242,8 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'WAYFIND.NO_INFORMATION_LEVEL': 'Support attached to no information level',
   'WAYFIND.TOO_MANY_DESTINATIONS': 'Destination count per face exceeded',
   'WAYFIND.SCHEDULE_STALE': 'Message schedule out of date',
+  'WAYFIND.LINE_MISSING': 'Message line missing for this face block',
+  'WAYFIND.LINE_MALFORMED': 'Message line unusable at composition time',
   'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support attached to an unknown typology',
   'WAYFIND.FACE_TEMPLATE_MISSING': 'No template for this typology face',
 };

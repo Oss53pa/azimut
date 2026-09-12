@@ -122,3 +122,12 @@ export { checkMessageSchedule, refreshStaleFlags } from './message-schedule-chec
 export type { StaleDiff } from './message-schedule-checks.js';
 export { messageScheduleToCsv, messageScheduleToMarkdown } from './message-schedule-export.js';
 export type { ScheduleLang } from './message-schedule-export.js';
+export {
+  composeFace,
+  faceIndexForSide,
+  resolveFaceFromSchedule,
+} from './compose-face.js';
+export type {
+  ComposeFaceOptions,
+  ResolveFromScheduleOptions,
+} from './compose-face.js';
