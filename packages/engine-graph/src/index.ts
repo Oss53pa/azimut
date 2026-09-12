@@ -151,3 +151,11 @@ export type {
   ReviewAnnotationState,
   ReviewAnchor,
 } from './guard-review-closure.js';
+export {
+  auditPictogramComprehension,
+  COMPREHENSION_STATES,
+} from './audit-pictograms.js';
+export type {
+  PictogramComprehension,
+  ComprehensionState,
+} from './audit-pictograms.js';
