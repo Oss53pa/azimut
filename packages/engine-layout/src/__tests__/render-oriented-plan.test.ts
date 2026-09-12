@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { renderOrientedPlan } from '../render-oriented-plan.js';
+import { renderOrientedPlan, orientationDegForAzimuth } from '../render-oriented-plan.js';
 import type { OrientedPlanOptions, OrientedPlanTheme } from '../render-oriented-plan.js';
 import { refMultilevel } from '@azimut/testkit';
 import type { GraphNode, Destination } from '@azimut/core-model';
@@ -163,6 +163,15 @@ describe('T-2.9 renderOrientedPlan', () => {
   });
 });
 
+describe('D6.2 — orientationDegForAzimuth', () => {
+  it('negates the azimuth, normalized to [0,360)', () => {
+    expect(orientationDegForAzimuth(0)).toBe(0);
+    expect(orientationDegForAzimuth(90)).toBe(270);
+    expect(orientationDegForAzimuth(270)).toBe(90);
+    expect(orientationDegForAzimuth(360)).toBe(0);
+  });
+});
+
 describe('D6.4 — decisive test: front destination in upper half', () => {
   it('north-facing support: destination to the north appears in upper half', () => {
     const viewerPos = { x_m: 20, y_m: 10 };
@@ -189,26 +198,42 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
     expect(destY).toBeLessThan(midY);
   });
 
-  it('east-facing support: destination to the east appears in upper half', () => {
-    const viewerPos = { x_m: 20, y_m: 10 };
+  // Viewer at (0,15); the destination "Bureau RDC" (node at (5,15)) is due
+  // east of the viewer. Facing east must put it above the viewer; facing the
+  // opposite way must put it below. A sign inversion flips both — this is the
+  // assertion the old test lacked.
+  function labelY(svg: string): number {
+    const m = svg.match(/<text[^>]* y="([^"]+)"[^>]*>Bureau RDC<\/text>/);
+    return parseFloat(m?.[1] ?? 'NaN');
+  }
+  function viewerMarkerY(svg: string): number {
+    const m = svg.match(/<circle[^>]*cy="([^"]+)"[^>]*r="8"[^>]*fill="tok-marker"/);
+    return parseFloat(m?.[1] ?? 'NaN');
+  }
+
+  it('east-facing support: destination to the east appears above the viewer', () => {
     const opts: OrientedPlanOptions = {
       ...defaultOptions,
-      orientation_deg: -90,
-      viewer_position: viewerPos,
+      orientation_deg: orientationDegForAzimuth(90), // support faces east
+      viewer_position: { x_m: 0, y_m: 15 },
     };
     const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    // Smaller y = higher on screen.
+    expect(labelY(result.value)).toBeLessThan(viewerMarkerY(result.value));
+  });
 
-    const stairNode = refMultilevel.graph.nodes.find(
-      (n) => n.id === 'n-ml-stair-rdc',
-    );
-    expect(stairNode).toBeDefined();
-
-    const yMatch = result.value.match(
-      /<circle[^>]*cx="[^"]*"[^>]*cy="([^"]+)"[^>]*fill="tok-node"/,
-    );
-    expect(yMatch).not.toBeNull();
+  it('the same destination sits below the viewer when facing the opposite way', () => {
+    const opts: OrientedPlanOptions = {
+      ...defaultOptions,
+      orientation_deg: orientationDegForAzimuth(270), // support faces west
+      viewer_position: { x_m: 0, y_m: 15 },
+    };
+    const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', opts);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(labelY(result.value)).toBeGreaterThan(viewerMarkerY(result.value));
   });
 
   it('level with no destinations omits destination labels', () => {

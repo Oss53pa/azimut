@@ -29,10 +29,26 @@ export type OrientedPlanOptions = {
   readonly show_destinations: boolean;
   readonly show_edges: boolean;
   readonly padding_px: number;
+  /**
+   * Display orientation in degrees. Per D6.2 the plan is oriented so what the
+   * viewer faces is at the top; the value to pass is
+   * {@link orientationDegForAzimuth}(support.azimuth_deg), NOT the raw azimuth —
+   * the sign difference is exactly the inversion D6.4 guards against.
+   */
   readonly orientation_deg: number;
   readonly viewer_position: Point;
   readonly show_north_arrow: boolean;
 };
+
+/**
+ * D6.2 — map a support's compass azimuth (D1.3, 0°=north, clockwise) to the
+ * {@link OrientedPlanOptions.orientation_deg} that puts the support's facing
+ * direction at the top of the plan. A support of azimuth 90° (facing east)
+ * yields a plan where east is up. Normalized to [0, 360).
+ */
+export function orientationDegForAzimuth(azimuthDeg: number): number {
+  return ((-azimuthDeg % 360) + 360) % 360;
+}
 
 function esc(s: string): string {
   return s
