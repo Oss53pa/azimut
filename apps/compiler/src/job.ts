@@ -2,6 +2,7 @@ export type JobKind =
   | 'import_plan'
   | 'import_roster'
   | 'compile_artworks'
+  | 'build_delivery_archive'
   | 'build_kiosk_package'
   | 'export_quantities'
   | 'audit_site';

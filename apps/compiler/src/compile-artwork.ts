@@ -1,11 +1,7 @@
 import type { SiteData } from '@azimut/core-model';
-import {
-  resolveFaceContent,
-  renderFace,
-} from '@azimut/engine-graph';
 import type { FaceTheme } from '@azimut/engine-graph';
-import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
+import { renderArtwork } from './artwork.js';
 import type { Job } from './job.js';
 
 export type CompileArtworkResult = {
@@ -43,59 +39,26 @@ export function createArtworkHandler(
       ? payload['support_id']
       : job.id;
 
-    const template = site.face_templates.find(
-      (t) => t.id === templateId,
-    );
+    const template = site.face_templates.find((t) => t.id === templateId);
     if (!template) {
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    const profile = site.travel_profiles.find(
-      (p) => p.key === profileKey,
-    );
-    if (!profile) {
-      throw new Error(`Profile not found: ${profileKey}`);
-    }
-
-    const supportType = site.support_types.find(
-      (st) => st.key === template.support_type_key,
-    );
-    const face = supportType?.faces.find(
-      (f) => f.side === template.side,
-    );
-    const widthMm = face?.default_width_mm ?? 600;
-    const heightMm = face?.default_height_mm ?? 400;
-
-    const resolveResult = resolveFaceContent(
+    const { svg, pdf, side } = await renderArtwork({
       site,
-      template,
-      nodeId,
-      profile,
-    );
-    if (!resolveResult.ok) {
-      const codes = resolveResult.findings.map((f) => f.code).join(', ');
-      throw new Error(`Resolve failed: ${codes}`);
-    }
-
-    const svg = renderFace(resolveResult.value, {
-      width_mm: widthMm,
-      height_mm: heightMm,
       theme,
-      font_family,
-    });
-
-    const pdf = await exportArtworkPdf({
-      svg,
-      target: pdf_target,
+      fontFamily: font_family,
+      pdfTarget: pdf_target,
+      creationDate: creation_date,
+      nodeId,
+      templateId,
+      profileKey,
       title: `${supportId} — ${template.side}`,
-      width_mm: widthMm,
-      height_mm: heightMm,
-      creation_date,
     });
 
     return {
       support_id: supportId,
-      face_side: template.side,
+      face_side: side,
       svg_length: svg.length,
       pdf_length: pdf.length,
     };

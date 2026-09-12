@@ -25,6 +25,13 @@ export type {
   CompileArtworkResult,
   CompileContext,
 } from './compile-artwork.js';
+export { renderArtwork } from './artwork.js';
+export type { ArtworkRenderParams, ArtworkRender } from './artwork.js';
+export { createBuildDeliveryArchiveHandler } from './build-delivery-archive.js';
+export type {
+  BuildDeliveryArchiveContext,
+  BuildDeliveryArchiveResult,
+} from './build-delivery-archive.js';
 export { createExportQuantitiesHandler } from './export-quantities.js';
 export type {
   ExportQuantitiesContext,
