@@ -142,3 +142,12 @@ export type {
 } from './exposure.js';
 export { guardPictogramsVector } from './detect-raster.js';
 export type { PictogramSvg } from './detect-raster.js';
+export {
+  guardReviewClosure,
+  REVIEW_ANNOTATION_STATES,
+} from './guard-review-closure.js';
+export type {
+  ReviewAnnotation,
+  ReviewAnnotationState,
+  ReviewAnchor,
+} from './guard-review-closure.js';
