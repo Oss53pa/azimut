@@ -1,4 +1,4 @@
-import { type JSX, useMemo, useState } from 'react';
+import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
@@ -78,19 +78,14 @@ type StatCardProps = {
 };
 
 function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
-  const [hovered, setHovered] = useState(false);
+  // Flat, calm (F1.2 principe 2 / F1.3): no shadow, no hover elevation.
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         padding: 20,
         borderRadius: 6,
         border: `1px solid ${warn ? 'var(--state-blocking)' : 'var(--border-hairline)'}`,
         background: warn ? 'var(--accent-soft)' : 'var(--surface-panel)',
-        boxShadow: hovered ? 'var(--shadow-dialog)' : 'var(--shadow-float)',
-        transition: 'box-shadow 0.2s, transform 0.2s',
-        transform: hovered ? 'translateY(-2px)' : 'none',
         cursor: 'default',
       }}
     >

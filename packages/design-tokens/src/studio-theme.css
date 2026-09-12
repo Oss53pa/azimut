@@ -41,6 +41,9 @@
   --shadow-float: 0 1px 3px rgba(28, 31, 36, 0.10);
   --shadow-dialog: 0 2px 6px rgba(28, 31, 36, 0.12);
 
+  /* Overlay scrim behind modal dialogs (F2.5 — no hardcoded colour) */
+  --overlay-scrim: rgba(28, 31, 36, 0.40);
+
   /* Typography (F2.1) */
   --font-sans: "IBM Plex Sans", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", monospace;

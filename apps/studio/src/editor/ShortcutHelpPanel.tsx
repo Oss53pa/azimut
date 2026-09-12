@@ -33,7 +33,7 @@ type ShortcutHelpPanelProps = {
 const OVERLAY_STYLE: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(0, 0, 0, 0.4)',
+  background: 'var(--overlay-scrim)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -48,7 +48,7 @@ const PANEL_STYLE: React.CSSProperties = {
   maxWidth: 520,
   maxHeight: '80vh',
   overflowY: 'auto',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+  boxShadow: 'var(--shadow-dialog)',
 };
 
 const HEADER_STYLE: React.CSSProperties = {

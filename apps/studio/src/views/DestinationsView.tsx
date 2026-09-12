@@ -68,7 +68,6 @@ export function DestinationsView(): JSX.Element {
         overflowX: 'auto',
         borderRadius: 6,
         border: '1px solid var(--border-hairline)',
-        boxShadow: 'var(--shadow-float)',
       }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
