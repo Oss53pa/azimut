@@ -16,11 +16,14 @@ const surfaces = [
   { key: 'surface-panel', hex: themePapier['surface-panel'] },
   { key: 'surface-canvas', hex: themePapier['surface-canvas'] },
   { key: 'surface-sunken', hex: themePapier['surface-sunken'] },
+  // The fifth text-bearing surface (F2.3): a soft accent ground.
+  { key: 'accent-soft', hex: themePapier['accent-soft'] },
 ] as const;
 
 const foregrounds = [
   { key: 'text-primary', hex: themePapier['text-primary'] },
   { key: 'text-secondary', hex: themePapier['text-secondary'] },
+  { key: 'text-muted', hex: themePapier['text-muted'] },
   { key: 'accent', hex: themePapier['accent'] },
   { key: 'accent-secondary', hex: themePapier['accent-secondary'] },
   { key: 'state-blocking', hex: stateColorsPapier['state-blocking'] },
@@ -28,6 +31,9 @@ const foregrounds = [
   { key: 'state-valid', hex: stateColorsPapier['state-valid'] },
   { key: 'state-info', hex: stateColorsPapier['state-info'] },
 ] as const;
+
+// White text is placed on state/accent grounds (filled pastilles, F8).
+const WHITE = themePapier['surface-panel']; // #FFFFFF
 
 describe('relativeLuminance', () => {
   it('returns 0 for pure black', () => {
@@ -122,6 +128,15 @@ describe('WCAG AA contrast — Papier theme (F2.3)', () => {
         expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
       });
     }
+  }
+});
+
+describe('white on each token — "Blanc posé dessus" (F2.3)', () => {
+  for (const fg of foregrounds) {
+    it(`white on ${fg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
+      const ratio = contrastRatio(WHITE, fg.hex);
+      expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
+    });
   }
 });
 
