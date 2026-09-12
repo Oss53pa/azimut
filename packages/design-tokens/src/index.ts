@@ -24,3 +24,5 @@ export {
   WCAG_AA_NORMAL,
   WCAG_AA_LARGE,
 } from './contrast.js';
+export { isoFaceShading, deriveIsoFaceTints } from './iso-shading.js';
+export type { IsoShadeKey, IsoFaceTints } from './iso-shading.js';
