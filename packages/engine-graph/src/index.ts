@@ -140,3 +140,5 @@ export type {
   AttractionWeight,
   VisibilityCone,
 } from './exposure.js';
+export { guardPictogramsVector } from './detect-raster.js';
+export type { PictogramSvg } from './detect-raster.js';
