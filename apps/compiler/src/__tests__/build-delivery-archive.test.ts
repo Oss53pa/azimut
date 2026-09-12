@@ -73,15 +73,39 @@ describe('D11 — createBuildDeliveryArchiveHandler', () => {
     await expect(sink.read(`${prefix}/CPL_A_R1_V3_INDEX.json`)).resolves.toBeDefined();
   });
 
-  it('the index echoes the quantitative', async () => {
+  it('the index quantitative descends from the quantity engine (INV-1)', async () => {
     const sink = memoryAssetStore();
-    await createBuildDeliveryArchiveHandler(context(sink))(makeJob(basePayload));
+    const result = await createBuildDeliveryArchiveHandler(context(sink))(makeJob(basePayload));
     const index = JSON.parse(
       new TextDecoder().decode(await sink.read('deliveries/CPL_A_R1_V3.ZIP/CPL_A_R1_V3_INDEX.json')),
     );
-    expect(index.file_count).toBe(2);
-    expect(index.by_type).toEqual({ DIR: 2 });
+    // Two distinct supports (references D-042, D-043), each a directional face.
     expect(index.entries).toHaveLength(2);
+    expect(index.quantities.total_supports).toBe(2);
+    expect(index.quantities.by_type).toEqual([
+      { support_type_key: 'directional', support_type_name: expect.any(String), count: 2, face_count: 2 },
+    ]);
+    // The engine's counts are surfaced on the job result.
+    expect(result['total_supports']).toBe(2);
+    expect(result['total_faces']).toBe(index.quantities.total_faces);
+    expect(result['cross_check_ok']).toBe(true);
+  });
+
+  it('dedups faces of one physical support (same node + reference)', async () => {
+    // Two items sharing (node, reference) are one support for the quantitative,
+    // even though they are two archive files — here distinguished by type_code
+    // so the D11 names do not collide.
+    const sink = memoryAssetStore();
+    const payload = {
+      ...basePayload,
+      items: [
+        { node_id: 'n-ml-hall', template_id: 'ftpl-dir-front', profile_key: 'standard', type_code: 'DIR', reference: 'D-042' },
+        { node_id: 'n-ml-hall', template_id: 'ftpl-dir-front', profile_key: 'standard', type_code: 'EVAC', reference: 'D-042' },
+      ],
+    };
+    const result = await createBuildDeliveryArchiveHandler(context(sink))(makeJob(payload));
+    expect(result['file_count']).toBe(2);
+    expect(result['total_supports']).toBe(1);
   });
 
   it('rejects an empty delivery', async () => {

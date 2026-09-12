@@ -40,4 +40,8 @@ export type {
   DeliveryIndexEntry,
   DeliveryIndex,
   DeliveryArchive,
+  DeliveryQuantities,
+  DeliveryTypeQuantity,
+  DeliveryBuildingQuantity,
+  DeliveryLevelQuantity,
 } from './assemble-delivery-archive.js';

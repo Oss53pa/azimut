@@ -15,12 +15,51 @@ import type { FileNameParts, Outcome, Finding } from '@azimut/core-model';
  * canonically serialized. A name collision (two produced files resolving to the
  * same D11 name, e.g. after middle-truncation) is reported as
  * PACKAGE.DUPLICATE_PATH and fails the assembly.
+ *
+ * The index's quantitative comes from the single quantity engine
+ * (`computeQuantities`), supplied by the caller as {@link DeliveryQuantities} —
+ * it is never recomputed here (INV-1: no data duplicated for a rendering).
  */
 
 /** One produced file to place in the delivery. */
 export type DeliveryItem = {
   readonly parts: FileNameParts;
   readonly bytes: Uint8Array;
+};
+
+/** Per-support-type quantity (mirrors the quantity engine's TypeQuantity). */
+export type DeliveryTypeQuantity = {
+  readonly support_type_key: string;
+  readonly support_type_name: string;
+  readonly count: number;
+  readonly face_count: number;
+};
+
+export type DeliveryBuildingQuantity = {
+  readonly building_id: string;
+  readonly building_name: string;
+  readonly count: number;
+};
+
+export type DeliveryLevelQuantity = {
+  readonly level_id: string;
+  readonly level_name: string;
+  readonly building_id: string;
+  readonly count: number;
+};
+
+/**
+ * The authoritative quantitative for a delivery, produced by the quantity
+ * engine and passed in verbatim — structurally the serializable form of the
+ * engine's QuantityReport.
+ */
+export type DeliveryQuantities = {
+  readonly total_supports: number;
+  readonly total_faces: number;
+  readonly by_type: readonly DeliveryTypeQuantity[];
+  readonly by_building: readonly DeliveryBuildingQuantity[];
+  readonly by_level: readonly DeliveryLevelQuantity[];
+  readonly cross_check_ok: boolean;
 };
 
 export type DeliveryArchiveInput = {
@@ -31,6 +70,8 @@ export type DeliveryArchiveInput = {
   /** Archive container extension, e.g. `zip`. */
   readonly extension: string;
   readonly items: readonly DeliveryItem[];
+  /** Authoritative quantitative from the quantity engine (INV-1). */
+  readonly quantities: DeliveryQuantities;
 };
 
 /** One line of the delivery index — a produced file and its identity. */
@@ -43,7 +84,11 @@ export type DeliveryIndexEntry = {
   readonly byte_size: number;
 };
 
-/** The quantitative the index echoes: totals plus a per-type count. */
+/**
+ * The index a manufacturer reads: the archive's own file manifest (entries,
+ * file_count, total_bytes) plus the authoritative quantitative from the quantity
+ * engine (`quantities`) — echoed, not recomputed.
+ */
 export type DeliveryIndex = {
   readonly archive: string;
   readonly site_code: string;
@@ -52,7 +97,7 @@ export type DeliveryIndex = {
   readonly version: number;
   readonly file_count: number;
   readonly total_bytes: number;
-  readonly by_type: Record<string, number>;
+  readonly quantities: DeliveryQuantities;
   readonly entries: readonly DeliveryIndexEntry[];
 };
 
@@ -110,18 +155,15 @@ export function assembleDeliveryArchive(
   const sorted = [...named].sort((a, b) => a.name.localeCompare(b.name));
 
   const entries: DeliveryIndexEntry[] = [];
-  const byType: Record<string, number> = {};
   let totalBytes = 0;
   const files = new Map<string, Uint8Array>();
 
   for (const { name, item } of sorted) {
     files.set(name, item.bytes);
     totalBytes += item.bytes.length;
-    const typeCode = item.parts.type_code;
-    byType[typeCode] = (byType[typeCode] ?? 0) + 1;
     entries.push({
       file_name: name,
-      type_code: typeCode,
+      type_code: item.parts.type_code,
       reference: item.parts.reference,
       face: item.parts.face,
       version: item.parts.version,
@@ -137,7 +179,7 @@ export function assembleDeliveryArchive(
     version: input.version,
     file_count: sorted.length,
     total_bytes: totalBytes,
-    by_type: byType,
+    quantities: input.quantities,
     entries,
   };
 

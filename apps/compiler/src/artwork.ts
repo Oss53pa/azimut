@@ -28,6 +28,7 @@ export type ArtworkRender = {
   readonly svg: string;
   readonly pdf: Uint8Array;
   readonly side: string;
+  readonly supportTypeKey: string;
   readonly widthMm: number;
   readonly heightMm: number;
 };
@@ -76,5 +77,12 @@ export async function renderArtwork(
     creation_date: params.creationDate,
   });
 
-  return { svg, pdf, side: template.side, widthMm, heightMm };
+  return {
+    svg,
+    pdf,
+    side: template.side,
+    supportTypeKey: template.support_type_key,
+    widthMm,
+    heightMm,
+  };
 }
