@@ -54,7 +54,7 @@ export function DashboardView(): JSX.Element {
       }}>
         {t('dashboard.title')}
       </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13.5, marginBottom: 24 }}>
+      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 24 }}>
         {site.site.name} — {site.organization.name}
       </p>
       <div style={{
@@ -85,7 +85,7 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
       onMouseLeave={() => setHovered(false)}
       style={{
         padding: 20,
-        borderRadius: 12,
+        borderRadius: 6,
         border: `1px solid ${warn ? 'var(--state-blocking)' : 'var(--border-hairline)'}`,
         background: warn ? 'var(--accent-soft)' : 'var(--surface-panel)',
         boxShadow: hovered ? 'var(--shadow-dialog)' : 'var(--shadow-float)',

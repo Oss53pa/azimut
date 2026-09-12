@@ -43,7 +43,7 @@ const OVERLAY_STYLE: React.CSSProperties = {
 const PANEL_STYLE: React.CSSProperties = {
   background: 'var(--surface-panel)',
   border: '1px solid var(--border-hairline)',
-  borderRadius: 10,
+  borderRadius: 6,
   padding: '20px 24px',
   maxWidth: 520,
   maxHeight: '80vh',

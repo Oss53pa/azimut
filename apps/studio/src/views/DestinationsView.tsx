@@ -56,7 +56,7 @@ export function DestinationsView(): JSX.Element {
           fontSize: 12,
           fontWeight: 500,
           padding: '2px 12px',
-          borderRadius: 12,
+          borderRadius: 6,
         }}>
           {rows.length}
         </span>
@@ -66,11 +66,11 @@ export function DestinationsView(): JSX.Element {
       </p>
       <div style={{
         overflowX: 'auto',
-        borderRadius: 12,
+        borderRadius: 6,
         border: '1px solid var(--border-hairline)',
         boxShadow: 'var(--shadow-float)',
       }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13.5 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: 'var(--surface-panel)' }}>
               <Th>{t('destinations.col.namefr')}</Th>
@@ -215,8 +215,8 @@ function StatusBadge(
       alignItems: 'center',
       gap: 6,
       padding: '4px 12px',
-      borderRadius: 20,
-      fontSize: 11.5,
+      borderRadius: 6,
+      fontSize: 11,
       fontWeight: 500,
       background: config.bgVar,
       color: config.colorVar,

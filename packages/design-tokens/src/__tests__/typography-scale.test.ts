@@ -27,12 +27,12 @@ function walk(dir: string): string[] {
 
 function scan(line: string): string[] {
   const bad: string[] = [];
-  for (const m of line.matchAll(/fontSize:\s*(\d+)/g)) {
-    const v = Number.parseInt(m[1] ?? '', 10);
+  for (const m of line.matchAll(/fontSize:\s*(\d+(?:\.\d+)?)/g)) {
+    const v = Number.parseFloat(m[1] ?? '');
     if (!isAllowedFontSize(v)) bad.push(`fontSize ${v}`);
   }
-  for (const m of line.matchAll(/font-size:\s*(\d+)px/g)) {
-    const v = Number.parseInt(m[1] ?? '', 10);
+  for (const m of line.matchAll(/font-size:\s*(\d+(?:\.\d+)?)px/g)) {
+    const v = Number.parseFloat(m[1] ?? '');
     if (!isAllowedFontSize(v)) bad.push(`font-size ${v}px`);
   }
   for (const m of line.matchAll(/fontWeight:\s*(\d+)/g)) {

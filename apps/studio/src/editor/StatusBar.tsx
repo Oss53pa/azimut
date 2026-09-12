@@ -56,7 +56,7 @@ const BUTTON_STYLE: React.CSSProperties = {
   cursor: 'pointer',
   fontSize: 11,
   padding: '2px 6px',
-  borderRadius: 3,
+  borderRadius: 4,
   color: 'var(--text-secondary)',
 };
 

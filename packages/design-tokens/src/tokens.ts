@@ -146,14 +146,21 @@ export function isAllowedSpacing(value: number): boolean {
 }
 
 /**
- * Border radii (F4.3).
- * Three values only — no fourth without stop-and-ask.
+ * Border radii (F4.3). Three values encode element nature: 0 for panels/bars/
+ * rows, 4 for fields/buttons/pastilles, 6 for floating elements. No fourth
+ * value; any other radius is a non-conformity (F16 static analysis).
  */
 export const radii = {
   none: 0,
   small: 4,
   floating: 6,
 } as const;
+
+export const RADIUS_SCALE = [0, 4, 6] as const;
+
+export function isAllowedRadius(value: number): boolean {
+  return (RADIUS_SCALE as readonly number[]).includes(value);
+}
 
 /**
  * Motion durations in ms (F11).

@@ -9,6 +9,8 @@ export {
   kioskTokens,
   kioskTokensHighContrast,
   radii,
+  RADIUS_SCALE,
+  isAllowedRadius,
   durations,
   SPACING_SCALE,
   spacing,
