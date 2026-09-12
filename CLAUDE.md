@@ -58,4 +58,16 @@ Non vérifié : <liste ou "rien">
 
 ## Référence complète
 
-Voir `docs/cahier-des-charges.md` pour le modèle de données, les contrats des moteurs, les tâches et toutes les autres spécifications.
+Le cahier des charges principal et ses parties A à D ne sont pas dans ce dépôt. Le modèle de données, les contrats des moteurs et les tâches y sont définis, et il faut les demander plutôt que les reconstituer.
+
+Les compléments présents dans `docs/` :
+
+| Document | Objet |
+| --- | --- |
+| `docs/partie-e-edition-vectorielle.md` | Édition, capacités vectorielles, couche d'habillage. Contextes d'édition, quantification, modèle de commande, magnétisme, sélection accessible. |
+| `docs/partie-g-resolution-points-ouverts.md` | Méthode de chiffrage sans durées, budget de rendu adaptatif, saisie tactile et stylet, présence simultanée, métriques de police, chaîne colorimétrique. |
+| `docs/partie-h-modules-manquants.md` | Carte complète des modules et tableau des messages, qui s'intercale entre le graphe et la composition. |
+| `docs/partie-i-atelier-dessin.md` | Atelier de dessin, chaîne de transformation d'un plan en document fini, assistances, droits par module. |
+| `docs/partie-j-stylet-pictogrammes.md` | Saisie à l'encre, couche d'esquisse, annotation de révision, éditeur de pictogrammes, bibliothèques à trois étages. |
+
+Chacun de ces documents déclare prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G — et sinon la procédure d'arrêt de A2.2 s'applique.
