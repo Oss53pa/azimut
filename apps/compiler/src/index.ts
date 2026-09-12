@@ -47,4 +47,10 @@ export {
 } from './build-kiosk-tree.js';
 export type { KioskAppAssets } from './build-kiosk-tree.js';
 export { memoryAssetStore, fileSystemAssetStore } from './asset-store.js';
-export type { AssetStore } from './asset-store.js';
+export type {
+  AssetStore,
+  AssetWriter,
+  MutableAssetStore,
+} from './asset-store.js';
+export { persistKioskPackage } from './persist-kiosk-package.js';
+export type { KioskPackageRecord } from './persist-kiosk-package.js';

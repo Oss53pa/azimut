@@ -218,3 +218,51 @@ describe('kioskContextFromStore (D10 — bundle read from storage)', () => {
     ).rejects.toThrow('Asset not found: index.html');
   });
 });
+
+describe('createBuildKioskPackageHandler — persistence (D10)', () => {
+  const appAssets: KioskAppAssets = {
+    indexHtml: enc.encode('<!doctype html><title>Borne</title>'),
+    appJs: enc.encode('export const boot = () => {};'),
+    appCss: enc.encode('body{margin:0}'),
+  };
+  const meta = { version: 5, langs: ['fr', 'en'], minRuntime: '1.0.0' };
+
+  it('persists the assembled tree and returns the kiosk_package record', async () => {
+    const sink = memoryAssetStore();
+    const context: BuildKioskPackageContext = {
+      ...kioskContextFromAssets(refMultilevel, appAssets, meta),
+      packageSink: sink,
+      storagePathFor: (siteId, version) => `sites/${siteId}/v${version}`,
+    };
+    const result = await createBuildKioskPackageHandler(context)(
+      makeJob({ built_at: '2026-09-01T00:00:00Z' }),
+    );
+
+    const prefix = `sites/${refMultilevel.site.id}/v5`;
+    expect(result['storage_path']).toBe(prefix);
+    expect(result['checksum']).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(result['content_hash']).toMatch(/^sha256:/);
+
+    // The manifest and a data file landed in storage under the prefix.
+    await expect(sink.read(`${prefix}/manifest.json`)).resolves.toBeDefined();
+    await expect(sink.read(`${prefix}/data/graph.json`)).resolves.toBeDefined();
+  });
+
+  it('omits storage fields when no sink is configured', async () => {
+    const result = await createBuildKioskPackageHandler(
+      kioskContextFromAssets(refMultilevel, appAssets, meta),
+    )(makeJob({ built_at: '2026-09-01T00:00:00Z' }));
+    expect('storage_path' in result).toBe(false);
+    expect('checksum' in result).toBe(false);
+  });
+
+  it('throws when a sink is given without storagePathFor', async () => {
+    const context: BuildKioskPackageContext = {
+      ...kioskContextFromAssets(refMultilevel, appAssets, meta),
+      packageSink: memoryAssetStore(),
+    };
+    await expect(
+      createBuildKioskPackageHandler(context)(makeJob()),
+    ).rejects.toThrow('storagePathFor');
+  });
+});

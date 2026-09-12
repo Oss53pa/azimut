@@ -1,5 +1,5 @@
-import { readFile, readdir } from 'node:fs/promises';
-import { join, relative, sep, posix } from 'node:path';
+import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
+import { join, relative, dirname, sep, posix } from 'node:path';
 
 /**
  * D10 — Storage port for kiosk runtime bundle assets.
@@ -24,6 +24,15 @@ export interface AssetStore {
   list(prefix: string): Promise<readonly string[]>;
 }
 
+/** Write side of the storage port: persist package files. */
+export interface AssetWriter {
+  /** Write one file at its tree-relative path, creating parents as needed. */
+  write(path: string, bytes: Uint8Array): Promise<void>;
+}
+
+/** A store that can both be read and written. */
+export type MutableAssetStore = AssetStore & AssetWriter;
+
 /** A path is tree-relative and safe: no leading slash, backslash, scheme or "..". */
 function isRelativeSafe(path: string): boolean {
   if (path.length === 0) return false;
@@ -44,12 +53,13 @@ function assertSafe(path: string): void {
  * for callers that already hold the bundle in memory.
  */
 export function memoryAssetStore(
-  files: ReadonlyMap<string, Uint8Array>,
-): AssetStore {
+  files?: ReadonlyMap<string, Uint8Array>,
+): MutableAssetStore {
+  const store = new Map<string, Uint8Array>(files);
   return {
     async read(path: string): Promise<Uint8Array> {
       assertSafe(path);
-      const bytes = files.get(path);
+      const bytes = store.get(path);
       if (bytes === undefined) {
         throw new Error(`Asset not found: ${path}`);
       }
@@ -57,11 +67,15 @@ export function memoryAssetStore(
     },
     async list(prefix: string): Promise<readonly string[]> {
       const out: string[] = [];
-      for (const key of files.keys()) {
+      for (const key of store.keys()) {
         if (key.startsWith(prefix)) out.push(key);
       }
       out.sort();
       return out;
+    },
+    async write(path: string, bytes: Uint8Array): Promise<void> {
+      assertSafe(path);
+      store.set(path, bytes);
     },
   };
 }
@@ -76,7 +90,7 @@ function toPosix(relPath: string): string {
  * to the root: a resolved path escaping the root is rejected. Suitable for an
  * autonomous, on-premises install.
  */
-export function fileSystemAssetStore(rootDir: string): AssetStore {
+export function fileSystemAssetStore(rootDir: string): MutableAssetStore {
   async function walk(dir: string): Promise<string[]> {
     const entries = await readdir(dir, { withFileTypes: true });
     const paths: string[] = [];
@@ -107,6 +121,12 @@ export function fileSystemAssetStore(rootDir: string): AssetStore {
       const matched = all.filter((p) => p.startsWith(prefix));
       matched.sort();
       return matched;
+    },
+    async write(path: string, bytes: Uint8Array): Promise<void> {
+      assertSafe(path);
+      const abs = join(rootDir, path);
+      await mkdir(dirname(abs), { recursive: true });
+      await writeFile(abs, bytes);
     },
   };
 }

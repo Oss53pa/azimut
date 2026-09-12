@@ -2,7 +2,8 @@ import type { SiteData } from '@azimut/core-model';
 import { assembleKioskPackage } from '@azimut/engine-package';
 import { buildKioskTree, buildKioskTreeFromStore } from './build-kiosk-tree.js';
 import type { KioskAppAssets } from './build-kiosk-tree.js';
-import type { AssetStore } from './asset-store.js';
+import type { AssetStore, AssetWriter } from './asset-store.js';
+import { persistKioskPackage } from './persist-kiosk-package.js';
 import type { Job } from './job.js';
 
 /**
@@ -27,6 +28,15 @@ export type BuildKioskPackageContext = {
   readonly langs: readonly string[];
   /** Minimum kiosk runtime version required. */
   readonly minRuntime: string;
+  /**
+   * Optional storage sink. When present, the assembled tree is written under
+   * {@link storagePathFor} and the result carries the `kiosk_package` record
+   * (storage_path, checksum). When absent, the handler only assembles and
+   * summarizes, leaving persistence to the caller.
+   */
+  readonly packageSink?: AssetWriter;
+  /** Storage path prefix for a given site/version. Required with a sink. */
+  readonly storagePathFor?: (siteId: string, version: number) => string;
 };
 
 export type BuildKioskPackageResult = {
@@ -37,6 +47,10 @@ export type BuildKioskPackageResult = {
   readonly total_size_bytes: number;
   readonly built_at: string;
   readonly network_clean: boolean;
+  /** Present only when a storage sink persisted the package. */
+  readonly storage_path?: string;
+  /** Present only when a storage sink persisted the package. */
+  readonly checksum?: string;
 };
 
 /**
@@ -81,7 +95,15 @@ export function kioskContextFromStore(
 export function createBuildKioskPackageHandler(
   context: BuildKioskPackageContext,
 ): (job: Job) => Promise<Record<string, unknown>> {
-  const { site, resolveKioskFiles, version, langs, minRuntime } = context;
+  const {
+    site,
+    resolveKioskFiles,
+    version,
+    langs,
+    minRuntime,
+    packageSink,
+    storagePathFor,
+  } = context;
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const payload = job.payload;
@@ -110,6 +132,22 @@ export function createBuildKioskPackageHandler(
     let totalSize = 0;
     for (const bytes of tree.values()) totalSize += bytes.length;
 
+    let storagePath: string | undefined;
+    let checksum: string | undefined;
+    if (packageSink) {
+      if (!storagePathFor) {
+        throw new Error('packageSink requires storagePathFor');
+      }
+      const record = await persistKioskPackage(
+        packageSink,
+        storagePathFor(manifest.siteId, manifest.version),
+        manifest,
+        tree,
+      );
+      storagePath = record.storage_path;
+      checksum = record.checksum;
+    }
+
     const summary: BuildKioskPackageResult = {
       site_id: manifest.siteId,
       version: manifest.version,
@@ -118,6 +156,8 @@ export function createBuildKioskPackageHandler(
       total_size_bytes: totalSize,
       built_at: manifest.builtAt,
       network_clean: true,
+      ...(storagePath !== undefined ? { storage_path: storagePath } : {}),
+      ...(checksum !== undefined ? { checksum } : {}),
     };
     return { ...summary };
   };
