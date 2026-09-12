@@ -92,6 +92,11 @@ export type {
 export { longestVariant, textExpansionFindings } from './text-expansion.js';
 export type { LongestVariantResult } from './text-expansion.js';
 export {
+  guardExportExcludesSketch,
+  isSketchCollection,
+  SKETCH_COLLECTIONS,
+} from './sketch-export.js';
+export {
   meterToPixel,
   pixelToMeter,
   clampScale,
