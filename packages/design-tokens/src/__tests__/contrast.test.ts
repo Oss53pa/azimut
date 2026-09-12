@@ -10,6 +10,8 @@ import {
   stateColorsPapier,
   themeInstrument,
   stateColorsInstrument,
+  kioskTokens,
+  kioskTokensHighContrast,
 } from '../tokens.js';
 
 /**
@@ -193,6 +195,27 @@ describe('Instrument border-interactive meets 3.0 threshold (F2.4)', () => {
     it(`border-interactive on ${bg.key} meets ${WCAG_AA_LARGE}:1`, () => {
       const ratio = contrastRatio(themeInstrument['border-interactive'], bg.hex);
       expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_LARGE);
+    });
+  }
+});
+
+// Kiosk (F13/F14) — public-facing display, read standing at a distance.
+// Calculated, never estimated: text over both grounds, in both modes. `k-line`
+// is a structural separator (like border-hairline) and is exempt.
+const AAA = 7;
+describe('WCAG contrast — kiosk (F13/F14)', () => {
+  for (const [mode, tk] of [
+    ['base', kioskTokens],
+    ['high-contrast', kioskTokensHighContrast],
+  ] as const) {
+    for (const ground of ['k-bg', 'k-sunken'] as const) {
+      it(`${mode}: k-fg on ${ground} meets AA`, () => {
+        expect(contrastRatio(tk['k-fg'], tk[ground])).toBeGreaterThanOrEqual(WCAG_AA_NORMAL);
+      });
+    }
+    // A distance-read public display should also clear the AAA bar; the tokens do.
+    it(`${mode}: k-fg on k-bg also clears AAA (${AAA}:1)`, () => {
+      expect(contrastRatio(tk['k-fg'], tk['k-bg'])).toBeGreaterThanOrEqual(AAA);
     });
   }
 });
