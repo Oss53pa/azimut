@@ -6,8 +6,13 @@ export {
   retryBackoffMs,
   STALL_TIMEOUT_MS,
 } from './queue.js';
-export type { JobHandler, WorkerOptions } from './worker.js';
-export { processNextJob, reapStalledJobs } from './worker.js';
+export type {
+  JobHandler,
+  WorkerOptions,
+  WorkerLoopOptions,
+  WorkerLoopSummary,
+} from './worker.js';
+export { processNextJob, reapStalledJobs, runWorkerLoop } from './worker.js';
 export { runBatch } from './batch.js';
 export type {
   BatchItem,

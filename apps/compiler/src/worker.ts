@@ -54,3 +54,59 @@ export async function processNextJob(
 
   return true;
 }
+
+export type WorkerLoopOptions = WorkerOptions & {
+  /** Idle poll interval (ms) when no job is ready. */
+  readonly sleepMs: number;
+  /** How often (ms) to reap stalled jobs. */
+  readonly reapEveryMs: number;
+  /** Stall timeout passed to the reaper. Defaults to {@link STALL_TIMEOUT_MS}. */
+  readonly stallTimeoutMs?: number;
+  /** Sleep for `ms`. Injected so the loop is deterministic under test. */
+  readonly sleep: (ms: number) => Promise<void>;
+  /** The loop exits once this returns true (checked each iteration). */
+  readonly shouldStop: () => boolean;
+};
+
+export type WorkerLoopSummary = {
+  readonly processed: number;
+  readonly reaped: number;
+};
+
+/**
+ * D9.2 — run the worker until {@link WorkerLoopOptions.shouldStop} is true.
+ *
+ * Each iteration reaps stalled jobs on the configured cadence, then processes
+ * one ready job. When a job runs, the loop continues immediately (draining a
+ * backlog without idling); when the queue is empty it sleeps `sleepMs` before
+ * polling again. The loop owns no timers of its own — `now`, `sleep` and
+ * `shouldStop` are injected, so it is fully deterministic in tests and free of
+ * hidden non-determinism (INV-4).
+ */
+export async function runWorkerLoop(
+  options: WorkerLoopOptions,
+): Promise<WorkerLoopSummary> {
+  const { sleepMs, reapEveryMs, stallTimeoutMs, sleep, shouldStop, now } =
+    options;
+
+  let processed = 0;
+  let reaped = 0;
+  let lastReapMs = Number.NEGATIVE_INFINITY;
+
+  while (!shouldStop()) {
+    const nowMs = now().getTime();
+    if (nowMs - lastReapMs >= reapEveryMs) {
+      reaped += (await reapStalledJobs(options, stallTimeoutMs)).length;
+      lastReapMs = nowMs;
+    }
+
+    const didWork = await processNextJob(options);
+    if (didWork) {
+      processed += 1;
+      continue;
+    }
+    await sleep(sleepMs);
+  }
+
+  return { processed, reaped };
+}
