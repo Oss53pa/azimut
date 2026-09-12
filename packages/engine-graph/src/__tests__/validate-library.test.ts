@@ -3,6 +3,7 @@ import {
   validateLibrary,
   guardSafetyRegistry,
   guardSafetyDeletion,
+  guardSafetyCreation,
 } from '../validate-library.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 import type { SiteData } from '@azimut/core-model';
@@ -393,5 +394,40 @@ describe('DATA.CATEGORY_CYCLE', () => {
       (f) => f.code === 'DATA.CATEGORY_CYCLE',
     );
     expect(cycles.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe('J5.1 INV-3 guardSafetyCreation', () => {
+  it('denies creating a pictogram into the safety registry', () => {
+    const result = guardSafetyCreation([
+      { id: 'picto-new-exit', registry: 'safety' },
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('SECURITY.REGISTRY_WRITE_DENIED');
+    expect(result.findings[0]?.params['operation']).toBe('create');
+    expect(result.findings[0]?.ruleRef).toBe('INV-3');
+  });
+
+  it('allows creating a wayfinding pictogram', () => {
+    const result = guardSafetyCreation([
+      { id: 'picto-new-arrow', registry: 'wayfinding' },
+    ]);
+    expect(result.ok).toBe(true);
+  });
+
+  it('reports one finding per safety creation, deterministically sorted', () => {
+    const result = guardSafetyCreation([
+      { id: 'picto-b', registry: 'safety' },
+      { id: 'picto-a', registry: 'safety' },
+      { id: 'picto-c', registry: 'wayfinding' },
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings.map((f) => f.entity?.id)).toEqual(['picto-a', 'picto-b']);
+  });
+
+  it('is a no-op for an empty list', () => {
+    expect(guardSafetyCreation([]).ok).toBe(true);
   });
 });

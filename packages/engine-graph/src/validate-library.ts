@@ -2,6 +2,7 @@ import type {
   SiteData,
   Category,
   Pictogram,
+  PictogramRegistry,
   Finding,
   Outcome,
 } from '@azimut/core-model';
@@ -209,6 +210,42 @@ export function guardSafetyRegistry(
           field: mut.field,
           attempted_value: mut.new_value,
         },
+        ruleRef: 'INV-3',
+      });
+    }
+  }
+
+  if (findings.length > 0) {
+    return { ok: false, findings };
+  }
+  return { ok: true, value: null, warnings: [] };
+}
+
+/** A pictogram proposed for creation (J5.1 — the id need not exist yet). */
+export type PictogramCreation = {
+  readonly id: string;
+  readonly registry: PictogramRegistry;
+};
+
+/**
+ * J5.1 / INV-3 — the safety registry is read-only: its pictograms come only
+ * from the rules pack. Creating a new pictogram INTO the safety registry is
+ * refused (mutation and deletion are guarded elsewhere; creation was the one
+ * operation that slipped through, since a new id matches no existing picto).
+ */
+export function guardSafetyCreation(
+  creations: readonly PictogramCreation[],
+): Outcome<null> {
+  const findings: Finding[] = [];
+  const sorted = [...creations].sort((a, b) => a.id.localeCompare(b.id));
+
+  for (const c of sorted) {
+    if (c.registry === 'safety') {
+      findings.push({
+        code: 'SECURITY.REGISTRY_WRITE_DENIED',
+        severity: 'blocking',
+        entity: { kind: 'pictogram', id: c.id },
+        params: { operation: 'create' },
         ruleRef: 'INV-3',
       });
     }

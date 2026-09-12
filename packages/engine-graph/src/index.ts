@@ -32,6 +32,7 @@ export {
   validateLibrary,
   guardSafetyRegistry,
   guardSafetyDeletion,
+  guardSafetyCreation,
 } from './validate-library.js';
 export { importSupports } from './import-supports.js';
 export { qualifyCad } from './qualify-cad.js';
@@ -65,6 +66,7 @@ export type {
 export type {
   LibraryValidationResult,
   PictogramMutation,
+  PictogramCreation,
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
 export { runChecks } from './run-checks.js';
