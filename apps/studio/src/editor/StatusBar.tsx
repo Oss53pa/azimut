@@ -132,7 +132,7 @@ export function StatusBar({
         title={t('editor.status.undo.title')}
         aria-label={t('editor.shortcut.undo')}
       >
-        ↩ {t('editor.shortcut.undo')}
+        {t('editor.shortcut.undo')}
       </button>
       <button
         type="button"
@@ -142,7 +142,7 @@ export function StatusBar({
         title={t('editor.status.redo.title')}
         aria-label={t('editor.shortcut.redo')}
       >
-        ↪ {t('editor.shortcut.redo')}
+        {t('editor.shortcut.redo')}
       </button>
     </div>
   );

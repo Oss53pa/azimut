@@ -34,14 +34,14 @@ export function DashboardView(): JSX.Element {
     };
   }, [site]);
 
-  const cards: readonly { label: string; value: string; icon: string; warn?: boolean }[] = [
-    { label: t('dashboard.stat.levels'), value: String(stats.levels), icon: '🏢' },
-    { label: t('dashboard.stat.nodes'), value: String(stats.nodes), icon: '⬡' },
-    { label: t('dashboard.stat.edges'), value: String(stats.edges), icon: '↔️' },
-    { label: t('dashboard.stat.destinations'), value: String(stats.destinations), icon: '📍' },
-    { label: t('dashboard.stat.supporttypes'), value: String(stats.supportTypes), icon: '🪧' },
-    { label: t('dashboard.stat.templates'), value: String(stats.templates), icon: '📐' },
-    { label: t('dashboard.stat.findings'), value: String(stats.findings), icon: '⚠️', warn: stats.findings > 0 },
+  const cards: readonly { label: string; value: string; warn?: boolean }[] = [
+    { label: t('dashboard.stat.levels'), value: String(stats.levels) },
+    { label: t('dashboard.stat.nodes'), value: String(stats.nodes) },
+    { label: t('dashboard.stat.edges'), value: String(stats.edges) },
+    { label: t('dashboard.stat.destinations'), value: String(stats.destinations) },
+    { label: t('dashboard.stat.supporttypes'), value: String(stats.supportTypes) },
+    { label: t('dashboard.stat.templates'), value: String(stats.templates) },
+    { label: t('dashboard.stat.findings'), value: String(stats.findings), warn: stats.findings > 0 },
   ];
 
   return (
@@ -73,11 +73,10 @@ export function DashboardView(): JSX.Element {
 type StatCardProps = {
   readonly label: string;
   readonly value: string;
-  readonly icon: string;
   readonly warn?: boolean;
 };
 
-function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
+function StatCard({ label, value, warn }: StatCardProps): JSX.Element {
   // Flat, calm (F1.2 principe 2 / F1.3): no shadow, no hover elevation.
   return (
     <div
@@ -89,16 +88,10 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
         cursor: 'default',
       }}
     >
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-      }}>
+      <div style={{ marginBottom: 8 }}>
         <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text-secondary)' }}>
           {label}
         </span>
-        <span style={{ fontSize: 18 }}>{icon}</span>
       </div>
       <div style={{
         fontSize: 22,
