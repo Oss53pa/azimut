@@ -161,6 +161,16 @@ export const ERROR_CATALOG = {
   'FLOW.WEIGHTS_UNDECLARED':                 { severity: 'blocking', description: 'Calcul d’exposition sans pondérations déclarées' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
   'SURVEY.SYNC_PENDING':                     { severity: 'info',     description: 'Relevé de tournée non synchronisé' },
+
+  // ── INK / SKETCH / REVIEW / PICTO / LIBRARY (partie J) ─────
+  'INK.SHAPE_NOT_RECOGNIZED':                { severity: 'info',     description: 'Aucune forme candidate, tracé conservé en esquisse' },
+  'SKETCH.IN_DELIVERABLE':                   { severity: 'blocking', description: 'Couche d’esquisse présente dans un export destiné à un tiers' },
+  'REVIEW.ANNOTATION_OPEN':                  { severity: 'blocking', description: 'Annotation de révision non traitée à la clôture' },
+  'PICTO.SAFETY_EDIT_DENIED':                { severity: 'blocking', description: 'Modification d’un pictogramme du registre de sécurité' },
+  'PICTO.UNTESTED':                          { severity: 'info',     description: 'Pictogramme d’orientation non soumis à essai de compréhension' },
+  'PICTO.RASTER_CONTENT':                    { severity: 'blocking', description: 'Image en mode point dans un pictogramme' },
+  'PICTO.FAMILY_INCONSISTENT':               { severity: 'warning',  description: 'Épaisseur ou grille incohérente avec la famille' },
+  'LIBRARY.DUPLICATE_ON_IMPORT':             { severity: 'warning',  description: 'Symbole déjà présent dans la bibliothèque' },
 } as const satisfies Record<string, { severity: 'blocking' | 'warning' | 'info'; description: string }>;
 
 export type ErrorCode = keyof typeof ERROR_CATALOG;
@@ -182,6 +192,8 @@ export const ANOMALY_DOMAINS = [
   'WAYFIND',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
+  // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
+  'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;
 
 export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
