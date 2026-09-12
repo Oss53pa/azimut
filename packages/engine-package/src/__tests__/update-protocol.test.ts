@@ -19,6 +19,7 @@ function files(marker: string): Map<string, Uint8Array> {
     ['data/graph.json', enc.encode(`{"marker":"${marker}"}`)],
     ['data/directory.json', enc.encode('{"destinations":[]}')],
     ['data/scene.json', enc.encode('{"volumes":[]}')],
+    ['data/site.json', enc.encode(`{"marker":"${marker}"}`)],
     ['maps/level-0.svg', enc.encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')],
   ]);
 }

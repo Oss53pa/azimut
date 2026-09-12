@@ -52,7 +52,15 @@ const FLOOR_OPTS: Omit<FloorPlanOptions, 'theme'> = {
   padding_px: 40,
 };
 
-/** Deterministic `data/*.json` files derived from the site. */
+/**
+ * Deterministic `data/*.json` files derived from the site. Together they carry
+ * everything the kiosk runtime consumes offline: the routing graph, the
+ * searchable directory (with pictograms), the scene geometry, and the site
+ * identity plus travel profiles. Panel-authoring collections (support types,
+ * face templates) are intentionally not shipped — a kiosk renders maps and
+ * wayfinding, not supports. `loadKioskSite` in @azimut/kiosk-runtime rehydrates
+ * a SiteData from exactly these files.
+ */
 export function buildKioskDataFiles(site: SiteData): Map<string, Uint8Array> {
   const graph = canonicalSerialize({
     nodes: site.graph.nodes,
@@ -63,6 +71,7 @@ export function buildKioskDataFiles(site: SiteData): Map<string, Uint8Array> {
     destinations: site.destinations,
     destination_names: site.destination_names,
     categories: site.categories,
+    pictograms: site.pictograms,
   });
   const scene = canonicalSerialize({
     buildings: site.buildings,
@@ -70,10 +79,16 @@ export function buildKioskDataFiles(site: SiteData): Map<string, Uint8Array> {
     footprints: site.footprints,
     volumes: site.volumes,
   });
+  const identity = canonicalSerialize({
+    organization: site.organization,
+    site: site.site,
+    travel_profiles: site.travel_profiles,
+  });
   return new Map<string, Uint8Array>([
     ['data/graph.json', utf8(graph)],
     ['data/directory.json', utf8(directory)],
     ['data/scene.json', utf8(scene)],
+    ['data/site.json', utf8(identity)],
   ]);
 }
 

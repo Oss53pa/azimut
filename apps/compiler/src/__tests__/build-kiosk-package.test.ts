@@ -18,6 +18,7 @@ function kioskFiles(): Map<string, Uint8Array> {
     ['data/graph.json', enc.encode('{"nodes":[]}')],
     ['data/directory.json', enc.encode('{"destinations":[]}')],
     ['data/scene.json', enc.encode('{"volumes":[]}')],
+    ['data/site.json', enc.encode('{"site":{}}')],
     ['maps/level-0.svg', enc.encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')],
   ]);
 }
@@ -59,7 +60,7 @@ describe('createBuildKioskPackageHandler (D10)', () => {
     expect(result['site_id']).toBe(refMinimal.site.id);
     expect(result['version']).toBe(42);
     expect(result['content_hash']).toMatch(/^sha256:[0-9a-f]{64}$/);
-    expect(result['file_count']).toBe(7);
+    expect(result['file_count']).toBe(8);
     expect(result['total_size_bytes']).toBeGreaterThan(0);
     expect(result['built_at']).toBe('2026-09-01T00:00:00Z');
     expect(result['network_clean']).toBe(true);
@@ -139,8 +140,8 @@ describe('kioskContextFromAssets (D10 — end to end)', () => {
     expect(result['site_id']).toBe(refMultilevel.site.id);
     expect(result['version']).toBe(7);
     expect(result['content_hash']).toMatch(/^sha256:[0-9a-f]{64}$/);
-    // index.html + app.js + app.css + 3 data files + one map per level (2).
-    expect(result['file_count']).toBe(8);
+    // index.html + app.js + app.css + 4 data files + one map per level (2).
+    expect(result['file_count']).toBe(9);
     expect(result['network_clean']).toBe(true);
   });
 

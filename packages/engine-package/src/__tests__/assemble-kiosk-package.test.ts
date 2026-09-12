@@ -16,6 +16,7 @@ function baseFiles(): Map<string, Uint8Array> {
     ['data/graph.json', enc.encode('{"nodes":[]}')],
     ['data/directory.json', enc.encode('{"destinations":[]}')],
     ['data/scene.json', enc.encode('{"volumes":[]}')],
+    ['data/site.json', enc.encode('{"site":{}}')],
     ['maps/level-0.svg', enc.encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>')],
   ]);
 }

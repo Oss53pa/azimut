@@ -24,6 +24,7 @@ describe('D10.1 — buildKioskDataFiles', () => {
       'data/directory.json',
       'data/graph.json',
       'data/scene.json',
+      'data/site.json',
     ]);
     // Valid, parseable JSON.
     const graph = JSON.parse(dec.decode(data.get('data/graph.json')));

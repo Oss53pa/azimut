@@ -11,7 +11,7 @@ import { scanForNetworkDependency } from './scan-network.js';
  *     manifest.json
  *     index.html
  *     assets/app.js, assets/app.css
- *     data/graph.json, data/directory.json, data/scene.json
+ *     data/graph.json, data/directory.json, data/scene.json, data/site.json
  *     maps/level-<ordinal>.svg
  *
  * The runtime app assets (index.html, app.js, app.css, embedded fonts) and the
@@ -62,6 +62,7 @@ const REQUIRED_PATHS: readonly string[] = [
   'data/graph.json',
   'data/directory.json',
   'data/scene.json',
+  'data/site.json',
 ];
 
 const LEVEL_MAP_PATTERN = /^maps\/level-\d+\.svg$/;
