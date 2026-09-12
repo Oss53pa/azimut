@@ -7,6 +7,7 @@
 
 import type { JSX } from 'react';
 import type { Level } from '@azimut/core-model';
+import { useI18n } from '../i18n/useI18n.js';
 
 type LevelTabsProps = {
   readonly levels: readonly Level[];
@@ -40,8 +41,9 @@ export function LevelTabs({
   selectedId,
   onSelect,
 }: LevelTabsProps): JSX.Element {
+  const { t } = useI18n();
   return (
-    <div style={BAR_STYLE} role="tablist" aria-label="Niveaux">
+    <div style={BAR_STYLE} role="tablist" aria-label={t('editor.levels.aria')}>
       {levels.map(level => {
         const active = level.id === selectedId;
         return (

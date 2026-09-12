@@ -140,6 +140,7 @@ export const MESSAGES_FR = {
   'editor.tool.text': 'Texte',
   'editor.tool.dimension': 'Cotation',
   'editor.tool.measure': 'Mesure',
+  'editor.levels.aria': 'Niveaux',
 
   // Editor — shortcut action labels
   'editor.shortcut.undo': 'Annuler',
@@ -352,6 +353,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   'editor.tool.text': 'Text',
   'editor.tool.dimension': 'Dimension',
   'editor.tool.measure': 'Measure',
+  'editor.levels.aria': 'Levels',
 
   'editor.shortcut.undo': 'Undo',
   'editor.shortcut.redo': 'Redo',
