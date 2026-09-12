@@ -159,3 +159,5 @@ export type {
   PictogramComprehension,
   ComprehensionState,
 } from './audit-pictograms.js';
+export { guardLibraryImport } from './guard-library-import.js';
+export type { LibrarySymbol } from './guard-library-import.js';
