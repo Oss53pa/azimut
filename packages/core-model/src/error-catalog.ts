@@ -130,6 +130,8 @@ export const ERROR_CATALOG = {
   'WAYFIND.NO_INFORMATION_LEVEL':           { severity: 'blocking', description: 'Support rattaché à aucun niveau d’information' },
   'WAYFIND.TOO_MANY_DESTINATIONS':          { severity: 'blocking', description: 'Nombre de destinations par face dépassé' },
   'WAYFIND.SCHEDULE_STALE':                 { severity: 'warning',  description: 'Tableau des messages périmé' },
+  'WAYFIND.LINE_MISSING':                   { severity: 'blocking', description: 'Ligne de message absente pour ce bloc de face' },
+  'WAYFIND.LINE_MALFORMED':                 { severity: 'blocking', description: 'Ligne de message inexploitable à la composition' },
   'WAYFIND.SUPPORT_TYPE_UNKNOWN':           { severity: 'blocking', description: 'Support rattaché à une typologie inconnue' },
   'WAYFIND.FACE_TEMPLATE_MISSING':          { severity: 'blocking', description: 'Aucun gabarit pour cette face de typologie' },
 

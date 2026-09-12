@@ -1,5 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
-import { resolveFaceContent, renderFace } from '@azimut/engine-graph';
+import { composeFace, renderFace } from '@azimut/engine-graph';
 import type { FaceTheme } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
@@ -7,8 +7,9 @@ import type { PdfTarget } from '@azimut/engine-artwork';
 /**
  * Shared artwork rendering for the compiler handlers.
  *
- * Resolves a face's content from the graph and directory, renders it to SVG,
- * and exports the print PDF. Both `compile_artworks` (single face) and
+ * The face content comes from the message schedule (H2.5), never straight
+ * from the graph: `composeFace` reads message lines and the template supplies
+ * the layout. Both `compile_artworks` (single face) and
  * `build_delivery_archive` (a batch) go through here, so a face is rendered
  * exactly one way.
  */
@@ -19,6 +20,8 @@ export type ArtworkRenderParams = {
   readonly pdfTarget: PdfTarget;
   readonly creationDate: Date;
   readonly nodeId: string;
+  /** Support composed on that node — identifies its lines in the schedule. */
+  readonly supportId: string;
   readonly templateId: string;
   readonly profileKey: string;
   readonly title: string;
@@ -55,10 +58,18 @@ export async function renderArtwork(
   const widthMm = face?.default_width_mm ?? 600;
   const heightMm = face?.default_height_mm ?? 400;
 
-  const resolved = resolveFaceContent(site, template, params.nodeId, profile);
+  const resolved = composeFace({
+    site,
+    template,
+    profile,
+    supportId: params.supportId,
+    nodeId: params.nodeId,
+    // Fourni par l'appelant, jamais lu ici (H2.5, E5.1).
+    generated_at: params.creationDate.toISOString(),
+  });
   if (!resolved.ok) {
     const codes = resolved.findings.map((f) => f.code).join(', ');
-    throw new Error(`Resolve failed: ${codes}`);
+    throw new Error(`Compose failed: ${codes}`);
   }
 
   const svg = renderFace(resolved.value, {

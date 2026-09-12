@@ -87,7 +87,7 @@ describe('T-2.12 createArtworkHandler', () => {
       profile_key: 'standard',
     });
 
-    await expect(handler(job)).rejects.toThrow('Resolve failed');
+    await expect(handler(job)).rejects.toThrow('Compose failed: GRAPH.RESOLVE_NODE_NOT_FOUND');
   });
 
   it('falls back to job.id when support_id is missing', async () => {
@@ -141,7 +141,7 @@ describe('T-2.12 createArtworkHandler', () => {
       template_id: 'ftpl-dir-front',
       profile_key: 'standard',
     });
-    await expect(handler(job)).rejects.toThrow('Resolve failed');
+    await expect(handler(job)).rejects.toThrow('Compose failed: GRAPH.RESOLVE_NODE_NOT_FOUND');
   });
 
   it('non-string template_id defaults to empty and fails', async () => {
