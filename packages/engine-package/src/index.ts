@@ -33,3 +33,11 @@ export type {
 } from './update-protocol.js';
 export { parseKioskConfig } from './kiosk-config.js';
 export type { KioskLocalConfig } from './kiosk-config.js';
+export { assembleDeliveryArchive } from './assemble-delivery-archive.js';
+export type {
+  DeliveryItem,
+  DeliveryArchiveInput,
+  DeliveryIndexEntry,
+  DeliveryIndex,
+  DeliveryArchive,
+} from './assemble-delivery-archive.js';
