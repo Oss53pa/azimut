@@ -99,6 +99,34 @@ export const kioskTokensHighContrast = {
 export type KioskTokenKey = keyof typeof kioskTokens;
 
 /**
+ * Typographic scale (F3.4). Base 13 px. Seven roles; two weights only (400,
+ * 500). Any font size off {11,12,13,15,18,22} or weight off {400,500} is a
+ * non-conformity (F16 static analysis).
+ */
+export const typeScale = {
+  micro: { size: 11, weight: 400, lineHeight: 1.4 },
+  fieldLabel: { size: 12, weight: 400, lineHeight: 1.4 },
+  body: { size: 13, weight: 400, lineHeight: 1.5 },
+  value: { size: 13, weight: 500, lineHeight: 1.4 },
+  panelTitle: { size: 15, weight: 500, lineHeight: 1.3 },
+  screenTitle: { size: 18, weight: 500, lineHeight: 1.25 },
+  docTitle: { size: 22, weight: 500, lineHeight: 1.2 },
+} as const;
+
+export type TypeRole = keyof typeof typeScale;
+
+export const TYPE_SIZES = [11, 12, 13, 15, 18, 22] as const;
+export const TYPE_WEIGHTS = [400, 500] as const;
+
+export function isAllowedFontSize(value: number): boolean {
+  return (TYPE_SIZES as readonly number[]).includes(value);
+}
+
+export function isAllowedFontWeight(value: number): boolean {
+  return (TYPE_WEIGHTS as readonly number[]).includes(value);
+}
+
+/**
  * Spacing scale (F4.1). Base 4 px; only these values are allowed, plus 0.
  * Any spacing value off this scale is a non-conformity (F16 static analysis).
  */

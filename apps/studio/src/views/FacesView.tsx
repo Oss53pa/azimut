@@ -93,7 +93,7 @@ export function FacesView(): JSX.Element {
           border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
           color: 'var(--text-secondary)',
-          fontSize: 14,
+          fontSize: 13,
         }}>
           {t('faces.empty.notemplate')}
         </div>
@@ -175,7 +175,7 @@ export function FacesView(): JSX.Element {
           border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
           color: 'var(--text-secondary)',
-          fontSize: 14,
+          fontSize: 13,
         }}>
           {!profile
             ? t('faces.noprofile')

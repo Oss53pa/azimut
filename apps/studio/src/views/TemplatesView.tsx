@@ -24,7 +24,7 @@ export function TemplatesView(): JSX.Element {
             border: '1px solid var(--border-hairline)',
             background: 'var(--surface-panel)',
           }}>
-            <div style={{ fontWeight: 500, fontSize: 14, color: 'var(--text-primary)', marginBottom: 4 }}>
+            <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text-primary)', marginBottom: 4 }}>
               {tpl.name}
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 8 }}>

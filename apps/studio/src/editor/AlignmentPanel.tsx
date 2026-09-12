@@ -68,7 +68,7 @@ const SEPARATOR_STYLE: React.CSSProperties = {
 
 const LABEL_STYLE: React.CSSProperties = {
   color: 'var(--text-secondary)',
-  fontSize: 10,
+  fontSize: 11,
   marginRight: 2,
   flexShrink: 0,
 };

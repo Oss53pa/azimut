@@ -48,7 +48,7 @@ export function DashboardView(): JSX.Element {
     <div>
       <h1 style={{
         margin: '0 0 4px',
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: 500,
         color: 'var(--text-primary)',
       }}>
@@ -106,8 +106,8 @@ function StatCard({ label, value, icon, warn }: StatCardProps): JSX.Element {
         <span style={{ fontSize: 18 }}>{icon}</span>
       </div>
       <div style={{
-        fontSize: 28,
-        fontWeight: 700,
+        fontSize: 22,
+        fontWeight: 500,
         color: warn ? 'var(--state-blocking)' : 'var(--text-primary)',
       }}>
         {value}

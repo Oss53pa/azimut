@@ -59,8 +59,8 @@ const HEADER_STYLE: React.CSSProperties = {
 };
 
 const TITLE_STYLE: React.CSSProperties = {
-  fontSize: 16,
-  fontWeight: 600,
+  fontSize: 15,
+  fontWeight: 500,
   color: 'var(--text-primary)',
   margin: 0,
 };
@@ -77,7 +77,7 @@ const CLOSE_BUTTON_STYLE: React.CSSProperties = {
 
 const CATEGORY_STYLE: React.CSSProperties = {
   fontSize: 11,
-  fontWeight: 600,
+  fontWeight: 500,
   textTransform: 'uppercase',
   letterSpacing: '0.05em',
   color: 'var(--text-secondary)',

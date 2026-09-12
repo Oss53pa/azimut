@@ -47,7 +47,7 @@ export function DestinationsView(): JSX.Element {
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 500, color: 'var(--text-primary)' }}>
+        <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--text-primary)' }}>
           {t('destinations.title')}
         </h1>
         <span style={{

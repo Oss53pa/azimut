@@ -59,7 +59,7 @@ const EMPTY_STYLE: React.CSSProperties = {
   justifyContent: 'center',
   height: '100%',
   color: 'var(--text-secondary)',
-  fontSize: 14,
+  fontSize: 13,
 };
 
 /** Live region announcing operation results (E6.3). */

@@ -66,7 +66,7 @@ export function ChecksView(): JSX.Element {
           border: '2px dashed var(--border-hairline)',
           textAlign: 'center',
           color: 'var(--text-secondary)',
-          fontSize: 14,
+          fontSize: 13,
         }}>
           {t('checks.empty')}
         </div>

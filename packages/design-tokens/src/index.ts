@@ -13,6 +13,11 @@ export {
   SPACING_SCALE,
   spacing,
   isAllowedSpacing,
+  typeScale,
+  TYPE_SIZES,
+  TYPE_WEIGHTS,
+  isAllowedFontSize,
+  isAllowedFontWeight,
 } from './tokens.js';
 export type {
   TokenKey,
@@ -21,6 +26,7 @@ export type {
   IsoTokenKey,
   KioskTokenKey,
   SpacingKey,
+  TypeRole,
 } from './tokens.js';
 export {
   contrastRatio,

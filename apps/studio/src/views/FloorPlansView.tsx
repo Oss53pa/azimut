@@ -124,7 +124,7 @@ export function FloorPlansView(): JSX.Element {
             justifyContent: 'center',
             height: '100%',
             color: 'var(--text-secondary)',
-            fontSize: 14,
+            fontSize: 13,
           }}>
             {t('floorplans.empty')}
           </div>
