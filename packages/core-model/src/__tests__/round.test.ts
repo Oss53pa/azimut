@@ -57,6 +57,21 @@ describe('formatSvg', () => {
   });
 });
 
+describe('D1.4 mandatory geometry serialization', () => {
+  it('serialises a polygon whose vertices are 0.0005, -0.0005, -0', () => {
+    // The spec's decisive case: exact half-millimetre coordinates and a
+    // negative zero, through the same SVG serialization the engines use.
+    const vertices = [
+      { x_m: 0.0005, y_m: -0.0005 },
+      { x_m: -0, y_m: -0 },
+    ];
+    const points = vertices
+      .map((v) => `${formatSvg(v.x_m)},${formatSvg(v.y_m)}`)
+      .join(' ');
+    expect(points).toBe('0.001,-0.001 0,0');
+  });
+});
+
 describe('roundMm', () => {
   it('rounds 4.5 to 5', () => {
     expect(roundMm(4.5)).toBe(5);
@@ -75,6 +90,11 @@ describe('roundMm', () => {
   it('rounds negative values correctly', () => {
     expect(roundMm(-3.6)).toBe(-4);
     expect(roundMm(-3.4)).toBe(-3);
+  });
+  it('resolves a negative half away from zero (D1.4 single tie rule)', () => {
+    // Plain Math.round(-4.5) is -4 (toward +∞); D1.4 requires -5.
+    expect(roundMm(-4.5)).toBe(-5);
+    expect(roundMm(4.5)).toBe(5);
   });
 });
 
@@ -161,10 +181,11 @@ describe('roundSvg — negative-to-zero boundary', () => {
 });
 
 describe('roundMm — exact half-point boundaries', () => {
-  it('roundMm(-0.5) yields positive zero (JS half-to-positive-infinity)', () => {
-    const result = roundMm(-0.5);
-    expect(result).toBe(0);
-    expect(Object.is(result, 0)).toBe(true);
+  it('roundMm(-0.5) resolves away from zero to -1 (D1.4), not JS +∞ rounding', () => {
+    expect(roundMm(-0.5)).toBe(-1);
+  });
+  it('roundMm(0.5) resolves away from zero to 1', () => {
+    expect(roundMm(0.5)).toBe(1);
   });
 });
 
