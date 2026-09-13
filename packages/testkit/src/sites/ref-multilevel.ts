@@ -403,6 +403,9 @@ export const refMultilevel: SiteData = {
       azimuth_deg: 0,
     },
   ],
+  support_faces: [],
+  content_blocks: [],
+  support_versions: [],
   face_templates: [
     {
       id: 'ftpl-dir-front',

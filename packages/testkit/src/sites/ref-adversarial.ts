@@ -211,5 +211,8 @@ export const refAdversarial: SiteData = {
     },
   ],
   supports: [],
+  support_faces: [],
+  content_blocks: [],
+  support_versions: [],
   face_templates: [],
 };

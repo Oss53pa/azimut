@@ -94,6 +94,9 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
   describe('DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND', () => {
     it('flags template referencing unknown support type', () => {
       const site = patchSite(refMinimal, {
+        support_faces: [],
+        content_blocks: [],
+        support_versions: [],
         face_templates: [
           {
             id: 'ftpl-orphan',

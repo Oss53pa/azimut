@@ -140,6 +140,9 @@ export function loadKioskSite(
     // on a wayfinding terminal.
     support_types: [],
     supports: [],
+    support_faces: [],
+    content_blocks: [],
+    support_versions: [],
     face_templates: [],
   };
 }

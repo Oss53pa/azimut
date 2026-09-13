@@ -214,6 +214,59 @@ export type Support = {
   readonly dimensions_source?: DimensionsSource;
 };
 
+/**
+ * A5.6 `support_face` — one face of a support instance. Binds to a face
+ * template for its layout (`template_key`) and declares the active languages.
+ * Loaded for A5.6 completeness; composition still runs off the type-level
+ * FaceTemplate + message schedule, so nothing consumes this yet.
+ */
+export type SupportFace = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly support_id: string;
+  readonly face_index: number;
+  readonly template_key?: string;
+  readonly langs?: readonly string[];
+};
+
+/**
+ * A5.6 `content_block` — one block of a support face. `kind` is the block
+ * category ('resolved' | 'free' | 'pictogram' | 'map' | 'legend'); it is kept
+ * as a raw string because the pre-A5.6 column may still hold a render kind and
+ * nothing consumes it yet. `binding` describes how a resolved block resolves;
+ * `free_text` carries a free block's text. Both are opaque JSON here.
+ */
+export type ContentBlockInstance = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly face_id: string;
+  readonly block_index: number;
+  readonly kind: string;
+  readonly binding?: Record<string, unknown>;
+  readonly free_text?: Record<string, unknown>;
+};
+
+/** A5.6 `support_version` state — the approval lifecycle of a support. */
+export type SupportVersionState =
+  | 'draft' | 'in_review' | 'approved' | 'superseded';
+
+/**
+ * A5.6 `support_version` — a versioned state of a support (its proof/approval
+ * spine), with the content hash and the produced artwork path. Loaded for
+ * completeness; the compile/approval flow does not read it yet.
+ */
+export type SupportVersion = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly support_id: string;
+  readonly version: number;
+  readonly state: SupportVersionState;
+  readonly artwork_path?: string;
+  readonly content_hash?: string;
+  readonly created_at: string;
+  readonly created_by?: string;
+};
+
 export type ContentBlockKind =
   | 'header'
   | 'destination_list'
@@ -308,5 +361,8 @@ export type SiteData = {
   readonly travel_profiles: readonly TravelProfile[];
   readonly support_types: readonly SupportType[];
   readonly supports: readonly Support[];
+  readonly support_faces: readonly SupportFace[];
+  readonly content_blocks: readonly ContentBlockInstance[];
+  readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
 };

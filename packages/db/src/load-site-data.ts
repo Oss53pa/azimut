@@ -23,6 +23,10 @@ import type {
   PictogramRegistry,
   Support as SupportModel,
   SupportType as SupportTypeModel,
+  SupportFace as SupportFaceModel,
+  ContentBlockInstance as ContentBlockModel,
+  SupportVersion as SupportVersionModel,
+  SupportVersionState,
   DimensionsSource,
 } from '@azimut/core-model';
 
@@ -33,7 +37,9 @@ import {
   category, pictogram, destination, destinationName,
   travelProfile,
 } from './schema/directory.js';
-import { support, supportTypology } from './schema/signage.js';
+import {
+  support, supportTypology, supportFace, supportContentBlock, supportVersion,
+} from './schema/signage.js';
 
 function num(v: string): number {
   return Number(v);
@@ -99,21 +105,33 @@ export async function loadSiteData(
 
   const edgeIds = edgeRows.map((e) => e.id);
   const destIds = destRows.map((d) => d.id);
+  const supportIds = supportRows.map((s) => s.id);
 
-  const [vlinkRows, dnameRows] = await Promise.all([
+  const [vlinkRows, dnameRows, faceRows, versionRows] = await Promise.all([
     edgeIds.length > 0
       ? db.select().from(verticalLink).where(inArray(verticalLink.edge_id, edgeIds))
       : Promise.resolve([]),
     destIds.length > 0
       ? db.select().from(destinationName).where(inArray(destinationName.destination_id, destIds))
       : Promise.resolve([]),
+    supportIds.length > 0
+      ? db.select().from(supportFace).where(inArray(supportFace.support_id, supportIds))
+      : Promise.resolve([]),
+    supportIds.length > 0
+      ? db.select().from(supportVersion).where(inArray(supportVersion.support_id, supportIds))
+      : Promise.resolve([]),
   ]);
+
+  const faceIds = faceRows.map((f) => f.id);
+  const blockRows = faceIds.length > 0
+    ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
+    : [];
 
   return assembleSiteData(
     orgRow, siteRow, buildingRows, levelRows,
     footprintRows, volumeRows, nodeRows, edgeRows,
     vlinkRows, catRows, pictoRows, destRows, dnameRows, tpRows,
-    supportRows, typologyRows,
+    supportRows, typologyRows, faceRows, blockRows, versionRows,
   );
 }
 
@@ -134,6 +152,72 @@ export function mapSupportTypologyRow(
     face_count: row.face_count,
     ...(row.template_key !== null ? { template_key: row.template_key } : {}),
     faces: [],
+  };
+}
+
+const VERSION_STATES: readonly SupportVersionState[] = [
+  'draft', 'in_review', 'approved', 'superseded',
+];
+function versionState(v: string): SupportVersionState {
+  return (VERSION_STATES as readonly string[]).includes(v)
+    ? (v as SupportVersionState)
+    : 'draft';
+}
+function asRecord(v: unknown): Record<string, unknown> | undefined {
+  return v !== null && typeof v === 'object' && !Array.isArray(v)
+    ? (v as Record<string, unknown>)
+    : undefined;
+}
+function asStringArray(v: unknown): readonly string[] | undefined {
+  return Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === 'string')
+    : undefined;
+}
+
+/** Map a `support_face` row (A5.6). `face_index` defaults to 0 when the (additive) column is null. */
+export function mapSupportFaceRow(row: typeof supportFace.$inferSelect): SupportFaceModel {
+  const langs = asStringArray(row.langs);
+  return {
+    id: row.id,
+    org_id: row.org_id,
+    support_id: row.support_id,
+    face_index: row.face_index ?? 0,
+    ...(row.template_key !== null ? { template_key: row.template_key } : {}),
+    ...(langs !== undefined ? { langs } : {}),
+  };
+}
+
+/** Map a `support_content_block` row (A5.6). `block_index` falls back to the pre-existing `ordinal`. */
+export function mapContentBlockRow(
+  row: typeof supportContentBlock.$inferSelect,
+): ContentBlockModel {
+  const binding = asRecord(row.binding);
+  const freeText = asRecord(row.free_text);
+  return {
+    id: row.id,
+    org_id: row.org_id,
+    face_id: row.face_id,
+    block_index: row.block_index ?? row.ordinal,
+    kind: row.kind,
+    ...(binding !== undefined ? { binding } : {}),
+    ...(freeText !== undefined ? { free_text: freeText } : {}),
+  };
+}
+
+/** Map a `support_version` row (A5.6). Its state is guaranteed by the db CHECK. */
+export function mapSupportVersionRow(
+  row: typeof supportVersion.$inferSelect,
+): SupportVersionModel {
+  return {
+    id: row.id,
+    org_id: row.org_id,
+    support_id: row.support_id,
+    version: row.version,
+    state: versionState(row.state),
+    ...(row.artwork_path !== null ? { artwork_path: row.artwork_path } : {}),
+    ...(row.content_hash !== null ? { content_hash: row.content_hash } : {}),
+    created_at: row.created_at.toISOString(),
+    ...(row.created_by !== null ? { created_by: row.created_by } : {}),
   };
 }
 
@@ -182,6 +266,9 @@ function assembleSiteData(
   tpRows: (typeof travelProfile.$inferSelect)[],
   supportRows: (typeof support.$inferSelect)[],
   typologyRows: (typeof supportTypology.$inferSelect)[],
+  faceRows: (typeof supportFace.$inferSelect)[],
+  blockRows: (typeof supportContentBlock.$inferSelect)[],
+  versionRows: (typeof supportVersion.$inferSelect)[],
 ): SiteData {
   const org: OrgModel = {
     id: orgRow.id,
@@ -326,6 +413,9 @@ function assembleSiteData(
     travel_profiles: tprofiles,
     support_types: typologyRows.map(mapSupportTypologyRow),
     supports: supportRows.map(mapSupportRow),
+    support_faces: faceRows.map(mapSupportFaceRow),
+    content_blocks: blockRows.map(mapContentBlockRow),
+    support_versions: versionRows.map(mapSupportVersionRow),
     face_templates: [],
   };
 }

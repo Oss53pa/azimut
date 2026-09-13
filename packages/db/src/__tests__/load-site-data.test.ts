@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { loadSiteData, mapSupportRow, mapSupportTypologyRow } from '../load-site-data.js';
-import { support, supportTypology } from '../schema/signage.js';
+import {
+  loadSiteData, mapSupportRow, mapSupportTypologyRow,
+  mapSupportFaceRow, mapContentBlockRow, mapSupportVersionRow,
+} from '../load-site-data.js';
+import {
+  support, supportTypology, supportFace, supportContentBlock, supportVersion,
+} from '../schema/signage.js';
 import { organization } from '../schema/org.js';
 import { site, building, level } from '../schema/site.js';
 import { node } from '../schema/graph.js';
@@ -128,6 +133,81 @@ describe('mapSupportTypologyRow (A5.6)', () => {
   });
 });
 
+describe('mapSupportFaceRow (A5.6)', () => {
+  const faceRow = (o: Partial<typeof supportFace.$inferSelect> = {}) => ({
+    id: 'sf-1', org_id: 'org-1', support_id: 'sup-1', side: 'front',
+    width_mm: null, height_mm: null,
+    face_index: 0, template_key: 'ftpl-dir', langs: ['fr', 'en'],
+    created_at: new Date(), updated_at: new Date(), ...o,
+  } as typeof supportFace.$inferSelect);
+
+  it('maps a face row with template_key and langs', () => {
+    const f = mapSupportFaceRow(faceRow());
+    expect(f).toStrictEqual({
+      id: 'sf-1', org_id: 'org-1', support_id: 'sup-1', face_index: 0,
+      template_key: 'ftpl-dir', langs: ['fr', 'en'],
+    });
+  });
+
+  it('defaults face_index to 0 and omits optionals when null', () => {
+    const f = mapSupportFaceRow(faceRow({ face_index: null, template_key: null, langs: null }));
+    expect(f.face_index).toBe(0);
+    expect(f.template_key).toBeUndefined();
+    expect(f.langs).toBeUndefined();
+  });
+
+  it('keeps only string entries in langs', () => {
+    const f = mapSupportFaceRow(faceRow({ langs: ['fr', 2, null] as unknown }));
+    expect(f.langs).toEqual(['fr']);
+  });
+});
+
+describe('mapContentBlockRow (A5.6)', () => {
+  const blockRow = (o: Partial<typeof supportContentBlock.$inferSelect> = {}) => ({
+    id: 'cb-1', org_id: 'org-1', face_id: 'sf-1', kind: 'resolved', ordinal: 2,
+    config: {}, block_index: 5, binding: { ref: 'x' }, free_text: { fr: 'Libre' }, ...o,
+  } as typeof supportContentBlock.$inferSelect);
+
+  it('maps a block row with binding and free_text', () => {
+    expect(mapContentBlockRow(blockRow())).toStrictEqual({
+      id: 'cb-1', org_id: 'org-1', face_id: 'sf-1', block_index: 5, kind: 'resolved',
+      binding: { ref: 'x' }, free_text: { fr: 'Libre' },
+    });
+  });
+
+  it('falls back to ordinal when block_index is null and omits null json', () => {
+    const b = mapContentBlockRow(blockRow({ block_index: null, binding: null, free_text: null }));
+    expect(b.block_index).toBe(2);
+    expect(b.binding).toBeUndefined();
+    expect(b.free_text).toBeUndefined();
+  });
+});
+
+describe('mapSupportVersionRow (A5.6)', () => {
+  const verRow = (o: Partial<typeof supportVersion.$inferSelect> = {}) => ({
+    id: 'sv-1', org_id: 'org-1', support_id: 'sup-1', version: 3, state: 'approved',
+    artwork_path: 'a/b.pdf', content_hash: 'sha256:aa',
+    created_at: new Date('2026-01-02T00:00:00Z'), created_by: 'u-1', ...o,
+  } as typeof supportVersion.$inferSelect);
+
+  it('maps a version row', () => {
+    expect(mapSupportVersionRow(verRow())).toStrictEqual({
+      id: 'sv-1', org_id: 'org-1', support_id: 'sup-1', version: 3, state: 'approved',
+      artwork_path: 'a/b.pdf', content_hash: 'sha256:aa',
+      created_at: '2026-01-02T00:00:00.000Z', created_by: 'u-1',
+    });
+  });
+
+  it('falls back to draft for an unexpected state and omits null optionals', () => {
+    const v = mapSupportVersionRow(verRow({
+      state: 'weird', artwork_path: null, content_hash: null, created_by: null,
+    }));
+    expect(v.state).toBe('draft');
+    expect(v.artwork_path).toBeUndefined();
+    expect(v.created_by).toBeUndefined();
+  });
+});
+
 describe('loadSiteData (full path, stubbed db)', () => {
   it('assembles a site and loads its supports from the support table', async () => {
     const byTable = new Map<object, unknown[]>([
@@ -156,6 +236,19 @@ describe('loadSiteData (full path, stubbed db)', () => {
         id: 'typ-1', org_id: 'org-1', key: 'directional', name: 'Dir',
         face_count: 1, template_key: 'ftpl-dir',
       }]],
+      [supportFace, [{
+        id: 'sf-1', org_id: 'org-1', support_id: 'sup-1', side: 'front',
+        width_mm: null, height_mm: null, face_index: 0, template_key: 'ftpl-dir',
+        langs: ['fr'], created_at: new Date(), updated_at: new Date(),
+      }]],
+      [supportContentBlock, [{
+        id: 'cb-1', org_id: 'org-1', face_id: 'sf-1', kind: 'resolved', ordinal: 0,
+        config: {}, block_index: 0, binding: { ref: 'header' }, free_text: null,
+      }]],
+      [supportVersion, [{
+        id: 'sv-1', org_id: 'org-1', support_id: 'sup-1', version: 1, state: 'draft',
+        artwork_path: null, content_hash: null, created_at: new Date(), created_by: null,
+      }]],
     ]);
 
     const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
@@ -165,6 +258,12 @@ describe('loadSiteData (full path, stubbed db)', () => {
     expect(result.support_types).toHaveLength(1);
     expect(result.support_types[0]?.key).toBe('directional');
     expect(result.support_types[0]?.template_key).toBe('ftpl-dir');
+    expect(result.support_faces).toHaveLength(1);
+    expect(result.support_faces[0]?.template_key).toBe('ftpl-dir');
+    expect(result.content_blocks).toHaveLength(1);
+    expect(result.content_blocks[0]?.binding).toEqual({ ref: 'header' });
+    expect(result.support_versions).toHaveLength(1);
+    expect(result.support_versions[0]?.state).toBe('draft');
     expect(result.supports).toHaveLength(1);
     const s = result.supports[0];
     expect(s?.id).toBe('sup-1');

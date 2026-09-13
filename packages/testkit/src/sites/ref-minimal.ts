@@ -295,6 +295,9 @@ export const refMinimal: SiteData = {
     },
   ],
   supports: [],
+  support_faces: [],
+  content_blocks: [],
+  support_versions: [],
   face_templates: [
     {
       id: 'ftpl-dir-front',

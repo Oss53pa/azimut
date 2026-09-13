@@ -172,6 +172,9 @@ describe('computeWayfinding', () => {
       }],
       support_types: [],
       supports: [],
+      support_faces: [],
+      content_blocks: [],
+      support_versions: [],
       face_templates: [],
     };
 
