@@ -3,6 +3,7 @@ import {
   renderFace,
   renderFaceWithMeasures,
   destinationListFontSizeMm,
+  faceUsesAccent,
 } from '../render-face.js';
 import type { FaceTheme, RenderFaceOptions } from '../render-face.js';
 import { resolveFaceContent } from '../resolve-face.js';
@@ -78,5 +79,47 @@ describe('renderFaceWithMeasures', () => {
     expect(renderFaceWithMeasures(face, opts)).toStrictEqual(
       renderFaceWithMeasures(face, opts),
     );
+  });
+});
+
+describe('faceUsesAccent', () => {
+  it('is true for a face with a header (accent bar)', () => {
+    const face: ResolvedFace = {
+      template_id: 't', support_type_key: 'directional', side: 'front',
+      blocks: [{
+        kind: 'header', ordinal: 0,
+        region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 20 },
+        content: { type: 'header', site_name: 'X' },
+      }],
+    };
+    expect(faceUsesAccent(face)).toBe(true);
+  });
+
+  it('is false for a text-only face (no accent-drawn content)', () => {
+    const face: ResolvedFace = {
+      template_id: 't', support_type_key: 'directional', side: 'front',
+      blocks: [{
+        kind: 'free_text', ordinal: 0,
+        region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+        content: { type: 'free_text', text: 'Hello' },
+      }],
+    };
+    expect(faceUsesAccent(face)).toBe(false);
+  });
+
+  it('is true only when a destination list actually draws direction arrows', () => {
+    const listFace = (direction: string | null): ResolvedFace => ({
+      template_id: 't', support_type_key: 'directional', side: 'front',
+      blocks: [{
+        kind: 'destination_list', ordinal: 0,
+        region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+        content: {
+          type: 'destination_list',
+          entries: [{ destination_id: 'd1', names: { fr: 'A' }, distance_m: null, direction }],
+        },
+      }],
+    });
+    expect(faceUsesAccent(listFace('N'))).toBe(true);
+    expect(faceUsesAccent(listFace(null))).toBe(false);
   });
 });

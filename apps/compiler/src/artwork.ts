@@ -1,6 +1,6 @@
 import type { SiteData, Finding } from '@azimut/core-model';
 import {
-  composeFace, renderFaceWithMeasures, checkFaceContrast, checkCharHeight,
+  composeFace, renderFaceWithMeasures, checkFaceContrast, checkCharHeight, faceUsesAccent,
 } from '@azimut/engine-graph';
 import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
@@ -130,6 +130,7 @@ export async function renderArtwork(
       supportRegistry: params.supportRegistry ?? 'wayfinding',
       ...(params.supportContext !== undefined ? { context: params.supportContext } : {}),
       theme: params.theme,
+      hasAccentContent: faceUsesAccent(resolved.value),
     });
     if (!contrast.ok) contrastFindings = contrast.findings;
   }

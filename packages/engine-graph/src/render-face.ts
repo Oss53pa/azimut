@@ -419,6 +419,30 @@ function renderFaceParts(
   return { svg: parts.join('\n'), min_text_font_size_mm: minTextFontSizeMm };
 }
 
+/**
+ * Whether the face renders any mark in the accent colour. Single source with
+ * the renderer: the header bar, arrow blocks, legend swatches, and the
+ * direction arrows of a destination list are drawn in `theme.accent`; every
+ * other block uses text or background colours. The accent (pictogram) contrast
+ * check is meaningful only when this holds — a face with none of these draws no
+ * accent, so checking its accent colour would raise a spurious anomaly.
+ */
+export function faceUsesAccent(face: ResolvedFace): boolean {
+  return face.blocks.some((block) => {
+    const content = block.content;
+    switch (content.type) {
+      case 'header':
+      case 'arrow':
+      case 'legend':
+        return true;
+      case 'destination_list':
+        return content.entries.some((e) => e.direction !== null);
+      default:
+        return false;
+    }
+  });
+}
+
 export function renderFace(
   face: ResolvedFace,
   options: RenderFaceOptions,

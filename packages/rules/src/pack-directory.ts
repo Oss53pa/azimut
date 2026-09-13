@@ -3,11 +3,18 @@ import type { Outcome, Finding } from '@azimut/core-model';
 import {
   manifestSchema,
   ruleFileSchema,
+  type Manifest,
   type RulesPackRule,
 } from './schema.js';
 import type { LoadedRulesPack } from './loader.js';
 import { groupAndCheckAmbiguity } from './loader.js';
 
+/**
+ * Load a pack from its manifest JSON string and rule-file contents. Parses and
+ * validates the manifest, then delegates to {@link loadPackDirectoryParsed}.
+ * Callers that already hold a parsed, validated manifest (the directory loader)
+ * call that variant directly, so the manifest is never parsed twice.
+ */
 export function loadPackDirectory(
   manifestJson: string,
   ruleFileContents: Readonly<Record<string, string>>,
@@ -42,8 +49,18 @@ export function loadPackDirectory(
     };
   }
 
-  const manifest = manifestResult.data;
+  return loadPackDirectoryParsed(manifestResult.data, ruleFileContents);
+}
 
+/**
+ * Load a pack from an already-parsed, schema-validated manifest and the rule
+ * files. Verifies the checksum and the file list, parses and validates each
+ * rule file, and groups the rules (checking scope ambiguity).
+ */
+export function loadPackDirectoryParsed(
+  manifest: Manifest,
+  ruleFileContents: Readonly<Record<string, string>>,
+): Outcome<LoadedRulesPack> {
   const contentForChecksum = manifest.files
     .map((f) => ruleFileContents[f] ?? '')
     .join('');

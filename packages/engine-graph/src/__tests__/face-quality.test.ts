@@ -33,6 +33,7 @@ describe('G6.2 — checkFaceContrast (wired to FaceTheme)', () => {
       face_id: 'f-1',
       supportRegistry: 'wayfinding',
       theme: theme(BLACK, BLACK, WHITE),
+      hasAccentContent: true,
     });
     expect(r.ok).toBe(true);
   });
@@ -42,6 +43,7 @@ describe('G6.2 — checkFaceContrast (wired to FaceTheme)', () => {
       face_id: 'f-1',
       supportRegistry: 'wayfinding',
       theme: theme(GREY_LOW, BLACK, WHITE), // text 3.03 < 4.7
+      hasAccentContent: true,
     });
     expect(r.ok).toBe(false);
     if (r.ok) return;
@@ -55,12 +57,14 @@ describe('G6.2 — checkFaceContrast (wired to FaceTheme)', () => {
       face_id: 'f-1',
       supportRegistry: 'wayfinding',
       theme: theme(GREY_MID, BLACK, WHITE),
+      hasAccentContent: true,
     });
     expect(wayfinding.ok).toBe(true);
     const safety = checkFaceContrast(pack(), {
       face_id: 'f-1',
       supportRegistry: 'safety',
       theme: theme(GREY_MID, BLACK, WHITE),
+      hasAccentContent: true,
     });
     expect(safety.ok).toBe(false);
   });
@@ -70,9 +74,29 @@ describe('G6.2 — checkFaceContrast (wired to FaceTheme)', () => {
       face_id: 'f-1',
       supportRegistry: 'unknown_registry',
       theme: theme(BLACK, BLACK, WHITE),
+      hasAccentContent: true,
     });
     expect(r.ok).toBe(false);
     if (r.ok) return;
     expect(r.findings.some((f) => f.code === 'RULES.RULE_NOT_FOUND')).toBe(true);
+  });
+
+  it('checks the accent colour only when the face draws accent content', () => {
+    // Good text (21), low-contrast accent (3.03 < pictogram min 3.3).
+    const withAccent = checkFaceContrast(pack(), {
+      face_id: 'f-1', supportRegistry: 'wayfinding',
+      theme: theme(BLACK, GREY_LOW, WHITE), hasAccentContent: true,
+    });
+    expect(withAccent.ok).toBe(false);
+    if (!withAccent.ok) {
+      expect(withAccent.findings.some((f) => f.ruleRef === 'CONTRAST.MIN_PICTOGRAM_ON_BACKGROUND'))
+        .toBe(true);
+    }
+
+    const noAccent = checkFaceContrast(pack(), {
+      face_id: 'f-1', supportRegistry: 'wayfinding',
+      theme: theme(BLACK, GREY_LOW, WHITE), hasAccentContent: false,
+    });
+    expect(noAccent.ok).toBe(true);
   });
 });

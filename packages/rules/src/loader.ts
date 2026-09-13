@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Outcome, Finding } from '@azimut/core-model';
 import { rulesPackSchema, manifestSchema, type RulesPackRule, type RuleScope } from './schema.js';
-import { loadPackDirectory } from './pack-directory.js';
+import { loadPackDirectoryParsed } from './pack-directory.js';
 
 export type LoadedRulesPack = {
   key: string;
@@ -302,7 +302,9 @@ function loadRulesPackFromDirectory(
   const sourceRefCheck = checkSourceRefs(manifest.files, ruleFileContents);
   if (!sourceRefCheck.ok) return sourceRefCheck;
 
-  return loadPackDirectory(manifestJson, ruleFileContents);
+  // The manifest is already parsed and validated above — hand it over parsed so
+  // it is not parsed and validated a second time.
+  return loadPackDirectoryParsed(manifest, ruleFileContents);
 }
 
 export function resolveRule(

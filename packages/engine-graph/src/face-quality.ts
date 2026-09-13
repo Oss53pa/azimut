@@ -15,6 +15,13 @@ export type FaceContrastInput = {
   /** Reading context (interior/exterior); scopes the rule when supplied. */
   readonly context?: string;
   readonly theme: FaceTheme;
+  /**
+   * Whether the face renders accent-coloured content (a pictogram, arrow,
+   * legend, or header bar). When false, the accent contrast check is skipped:
+   * a face that draws no accent would otherwise raise a spurious anomaly on a
+   * colour it never shows. Use `faceUsesAccent` to compute it from the face.
+   */
+  readonly hasAccentContent: boolean;
 };
 
 export function checkFaceContrast(
@@ -35,14 +42,16 @@ export function checkFaceContrast(
   });
   if (!text.ok) findings.push(...text.findings);
 
-  const pictogram = checkContrast(pack, {
-    ...scope,
-    code: 'CONTRAST.MIN_PICTOGRAM_ON_BACKGROUND',
-    foreground_hex: input.theme.accent,
-    background_hex: input.theme.background,
-    entity_id: input.face_id,
-  });
-  if (!pictogram.ok) findings.push(...pictogram.findings);
+  if (input.hasAccentContent) {
+    const pictogram = checkContrast(pack, {
+      ...scope,
+      code: 'CONTRAST.MIN_PICTOGRAM_ON_BACKGROUND',
+      foreground_hex: input.theme.accent,
+      background_hex: input.theme.background,
+      entity_id: input.face_id,
+    });
+    if (!pictogram.ok) findings.push(...pictogram.findings);
+  }
 
   if (findings.length > 0) return { ok: false, findings };
   return { ok: true, value: null, warnings: [] };
