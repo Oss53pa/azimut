@@ -47,6 +47,24 @@ function formatNumber(value: number): string {
   return s;
 }
 
+function isPlainObject(value: object): boolean {
+  const proto = Object.getPrototypeOf(value) as unknown;
+  return proto === Object.prototype || proto === null;
+}
+
+/** Compare two strings by Unicode code point (§4.2), not UTF-16 code unit. */
+function codePointCompare(a: string, b: string): number {
+  const ca = Array.from(a);
+  const cb = Array.from(b);
+  const n = Math.min(ca.length, cb.length);
+  for (let i = 0; i < n; i++) {
+    const pa = ca[i]?.codePointAt(0) ?? 0;
+    const pb = cb[i]?.codePointAt(0) ?? 0;
+    if (pa !== pb) return pa - pb;
+  }
+  return ca.length - cb.length;
+}
+
 function canon(value: unknown): string {
   if (value === null || value === undefined) {
     // §4.3 — null/undefined never appear as a value: objects omit such keys,
@@ -64,11 +82,21 @@ function canon(value: unknown): string {
       if (Array.isArray(value)) {
         return '[' + value.map(canon).join(',') + ']';
       }
+      if (!isPlainObject(value)) {
+        // A Date, Map, Set or class instance would collapse to '{}' and hide a
+        // real content difference — refuse it instead (§4 determinism).
+        throw new Error('empreinte: only plain objects are serializable');
+      }
       const obj = value as Record<string, unknown>;
-      const keys = Object.keys(obj)
+      // §4.2/§4.7 — keys normalized to NFC then sorted by code point; a key
+      // whose value is null/undefined is omitted (§4.3).
+      const entries = Object.keys(obj)
         .filter((k) => obj[k] !== null && obj[k] !== undefined)
-        .sort();
-      const pairs = keys.map((k) => JSON.stringify(k) + ':' + canon(obj[k]));
+        .map((k) => ({ key: k.normalize('NFC'), original: k }))
+        .sort((x, y) => codePointCompare(x.key, y.key));
+      const pairs = entries.map(
+        (e) => JSON.stringify(e.key) + ':' + canon(obj[e.original]),
+      );
       return '{' + pairs.join(',') + '}';
     }
     default:

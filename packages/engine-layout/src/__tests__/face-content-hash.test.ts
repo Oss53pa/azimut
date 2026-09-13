@@ -11,9 +11,9 @@ function base(over: Partial<FaceContentHashInput> = {}): FaceContentHashInput {
         entries: [{ destination_id: 'd1', names: { fr: 'Bureau', en: 'Office' }, direction: null, distance_m: 12.5 }],
       },
     ],
-    template_key: 'ftpl-dir', template_version: '1',
-    charter_id: 'ch-1', charter_version: '2',
-    rules_pack_key: 'intl', rules_pack_version: '2026.1',
+    template: { key: 'ftpl-dir', version: '1' },
+    charter: { id: 'ch-1', version: '2' },
+    rules_pack: { key: 'intl', version: '2026.1' },
     active_langs: ['fr', 'en'],
     width_mm: 600, height_mm: 400,
     pictogram_ids: ['p2', 'p1'],
@@ -26,15 +26,15 @@ function hash(over: Partial<FaceContentHashInput> = {}): string {
   return r.value;
 }
 
-// Inputs that OMIT an optional field (exactOptionalPropertyTypes forbids
+// Inputs that OMIT an optional pair (exactOptionalPropertyTypes forbids
 // setting it to undefined explicitly), built from the base fields.
 function baseWithout(omit: 'charter' | 'rules_pack'): FaceContentHashInput {
   const b = base();
   return {
     blocks: b.blocks,
-    template_key: b.template_key, template_version: b.template_version,
-    ...(omit === 'charter' ? {} : { charter_id: b.charter_id, charter_version: b.charter_version }),
-    ...(omit === 'rules_pack' ? {} : { rules_pack_key: b.rules_pack_key, rules_pack_version: b.rules_pack_version }),
+    template: b.template,
+    ...(omit === 'charter' ? {} : { charter: b.charter }),
+    ...(omit === 'rules_pack' ? {} : { rules_pack: b.rules_pack }),
     active_langs: b.active_langs, width_mm: b.width_mm, height_mm: b.height_mm,
     pictogram_ids: b.pictogram_ids,
   };
@@ -60,9 +60,9 @@ describe('computeFaceContentHash — sensitivity (§6.4)', () => {
   it('block content', () => {
     expect(hash({ blocks: [{ type: 'header', site_name: 'Autre' }] })).not.toBe(b);
   });
-  it('template version', () => expect(hash({ template_version: '2' })).not.toBe(b));
-  it('charter version', () => expect(hash({ charter_version: '3' })).not.toBe(b));
-  it('rules pack version', () => expect(hash({ rules_pack_version: '2026.2' })).not.toBe(b));
+  it('template version', () => expect(hash({ template: { key: 'ftpl-dir', version: '2' } })).not.toBe(b));
+  it('charter version', () => expect(hash({ charter: { id: 'ch-1', version: '3' } })).not.toBe(b));
+  it('rules pack version', () => expect(hash({ rules_pack: { key: 'intl', version: '2026.2' } })).not.toBe(b));
   it('active language added', () => expect(hash({ active_langs: ['fr', 'en', 'de'] })).not.toBe(b));
   it('computed dimension', () => expect(hash({ width_mm: 601 })).not.toBe(b));
   it('a referenced pictogram', () => expect(hash({ pictogram_ids: ['p1', 'p3'] })).not.toBe(b));
@@ -117,6 +117,29 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
     }
   });
 
+  it('rounds a non-integer dimension through D1.4 instead of refusing (§3.1.6)', () => {
+    // A computed dimension of 600.4 mm rounds to 600 mm and hashes identically
+    // to an already-integer 600 mm; 600.6 rounds up to 601 and differs.
+    expect(hash({ width_mm: 600.4 })).toBe(hash({ width_mm: 600 }));
+    expect(hash({ width_mm: 600.6 })).toBe(hash({ width_mm: 601 }));
+    expect(hash({ width_mm: 600.4 })).not.toBe(hash({ width_mm: 601 }));
+  });
+
+  it('refuses (blocking) when a dimension is non-finite', () => {
+    const r = computeFaceContentHash(base({ width_mm: Number.NaN }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.findings[0]?.code).toBe('DATA.FACE_DIMENSIONS_INVALID');
+  });
+
+  it('refuses (blocking) rather than throwing when block content is not serializable', () => {
+    // A Date is type-valid inside `unknown` blocks but collapses to {} under §4,
+    // hiding a real difference; the serializer refuses it and we surface a
+    // blocking Outcome instead of letting the exception escape.
+    const r = computeFaceContentHash(base({ blocks: [{ type: 'header', at: new Date(0) }] }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.findings[0]?.code).toBe('DATA.FACE_CONTENT_UNSERIALIZABLE');
+  });
+
   it('refuses (blocking RULES.PACK_NOT_BOUND) when the rules pack is absent', () => {
     const r = computeFaceContentHash(baseWithout('rules_pack'));
     expect(r.ok).toBe(false);
@@ -124,7 +147,8 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
   });
 
   it('two faces of one support, identical content, different templates → different empreintes', () => {
-    expect(hash({ template_key: 'ftpl-a' })).not.toBe(hash({ template_key: 'ftpl-b' }));
+    expect(hash({ template: { key: 'ftpl-a', version: '1' } }))
+      .not.toBe(hash({ template: { key: 'ftpl-b', version: '1' } }));
   });
 
   it('everything identical hashes the same (support id is not an input, so excluded §3.2)', () => {

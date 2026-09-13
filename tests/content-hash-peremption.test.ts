@@ -24,8 +24,8 @@ const headerOnly: FaceTemplate = {
 function inputOf(template: FaceTemplate, face: ResolvedFace): FaceContentHashInput {
   return {
     blocks: face.blocks.map((b) => b.content),
-    template_key: template.id, template_version: '1',
-    rules_pack_key: 'intl', rules_pack_version: '2026.1',
+    template: { key: template.id, version: '1' },
+    rules_pack: { key: 'intl', version: '2026.1' },
     active_langs: ['fr', 'en'], width_mm: 600, height_mm: 400,
     pictogram_ids: [],
   };

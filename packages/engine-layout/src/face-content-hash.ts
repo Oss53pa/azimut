@@ -1,4 +1,4 @@
-import { empreinte } from '@azimut/core-model';
+import { empreinte, roundMm } from '@azimut/core-model';
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
@@ -22,18 +22,15 @@ import type { Finding, Outcome } from '@azimut/core-model';
 export type FaceContentHashInput = {
   /** Resolved content of each block, in block order (§3.1.1). */
   readonly blocks: readonly unknown[];
-  /** Template key and version (§3.1.2). */
-  readonly template_key: string;
-  readonly template_version: string;
-  /** Charter id and version (§3.1.3); omitted from the hash when absent. */
-  readonly charter_id?: string;
-  readonly charter_version?: string;
+  /** Template key and version (§3.1.2) — both, or neither is representable. */
+  readonly template: { readonly key: string; readonly version: string };
+  /** Charter id and version (§3.1.3); the whole pair omitted from the hash when absent. */
+  readonly charter?: { readonly id: string; readonly version: string };
   /** Rules-pack key and version (§3.1.4); absence is a blocking anomaly (§8). */
-  readonly rules_pack_key?: string;
-  readonly rules_pack_version?: string;
+  readonly rules_pack?: { readonly key: string; readonly version: string };
   /** Active languages of the face (§3.1.5); sorted here. */
   readonly active_langs: readonly string[];
-  /** Computed dimensions in whole millimetres (§3.1.6); null/≤0 is an error (§8). */
+  /** Computed dimensions in millimetres (§3.1.6); rounded here, null/≤0 is an error (§8). */
   readonly width_mm: number | null;
   readonly height_mm: number | null;
   /** Referenced pictogram ids (§3.1.7); sorted here. */
@@ -44,24 +41,34 @@ function blocking(code: string, params: Record<string, string | number>): Findin
   return { code, severity: 'blocking', entity: null, params, ruleRef: null };
 }
 
-function validDimension(value: number | null): boolean {
-  return value !== null && Number.isFinite(value) && Number.isInteger(value) && value > 0;
+/**
+ * D1.4 — round a computed dimension to whole millimetres through the single
+ * rounding module, or `null` when it is absent, non-finite, zero or negative.
+ * The dimension enters the hash rounded, not rejected for being non-integer:
+ * §3.1.6 hashes "les dimensions calculées en millimètres entiers".
+ */
+function normDim(value: number | null): number | null {
+  if (value === null || !Number.isFinite(value)) return null;
+  const mm = roundMm(value);
+  return mm > 0 ? mm : null;
 }
 
 /**
  * Compute the content empreinte of a face, or a blocking finding when it cannot
- * be computed. Refuses (no hash) when the rules pack is absent (§8) or when a
- * computed dimension is null, non-integer, zero or negative (§8) — refusing is
- * the correct behaviour, an empreinte on incomplete data would be worse than
- * none.
+ * be computed. Refuses (no hash) when the rules pack is absent (§8), when a
+ * computed dimension is null, zero or negative after rounding (§8), or when the
+ * resolved content cannot be canonically serialized (§4) — refusing is the
+ * correct behaviour, an empreinte on incomplete data would be worse than none.
  */
 export function computeFaceContentHash(
   input: FaceContentHashInput,
 ): Outcome<string> {
-  if (input.rules_pack_key === undefined || input.rules_pack_key === '') {
+  if (input.rules_pack === undefined || input.rules_pack.key === '') {
     return { ok: false, findings: [blocking('RULES.PACK_NOT_BOUND', {})] };
   }
-  if (!validDimension(input.width_mm) || !validDimension(input.height_mm)) {
+  const width_mm = normDim(input.width_mm);
+  const height_mm = normDim(input.height_mm);
+  if (width_mm === null || height_mm === null) {
     return {
       ok: false,
       findings: [blocking('DATA.FACE_DIMENSIONS_INVALID', {
@@ -73,19 +80,31 @@ export function computeFaceContentHash(
 
   // The object carries only the seven §3.1 elements. `empreinte` omits any
   // absent field (charter), so a face with no charter and a face whose charter
-  // fields are absent hash identically (§4.3 / §5). Unordered sets are sorted;
+  // pair is absent hash identically (§4.3 / §5). Unordered sets are sorted;
   // block order is preserved.
   const value = {
     blocks: input.blocks,
-    template: { key: input.template_key, version: input.template_version },
-    charter: input.charter_id !== undefined
-      ? { id: input.charter_id, version: input.charter_version }
+    template: { key: input.template.key, version: input.template.version },
+    charter: input.charter !== undefined
+      ? { id: input.charter.id, version: input.charter.version }
       : undefined,
-    rules_pack: { key: input.rules_pack_key, version: input.rules_pack_version },
+    rules_pack: { key: input.rules_pack.key, version: input.rules_pack.version },
     langs: [...input.active_langs].sort(),
-    dimensions: { width_mm: input.width_mm, height_mm: input.height_mm },
+    dimensions: { width_mm, height_mm },
     pictograms: [...input.pictogram_ids].sort(),
   };
 
-  return { ok: true, value: empreinte(value), warnings: [] };
+  // §4 canonical serialization throws on non-plain / non-finite / null-valued
+  // content the type system cannot exclude (blocks are `unknown`). Turn that
+  // into a blocking Outcome rather than letting it escape as an exception.
+  try {
+    return { ok: true, value: empreinte(value), warnings: [] };
+  } catch (err) {
+    return {
+      ok: false,
+      findings: [blocking('DATA.FACE_CONTENT_UNSERIALIZABLE', {
+        detail: err instanceof Error ? err.message : String(err),
+      })],
+    };
+  }
 }

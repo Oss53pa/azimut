@@ -132,6 +132,7 @@ export const ERROR_CATALOG = {
   'DATA.FACE_DIMENSIONS_INVALID':           { severity: 'blocking', description: 'Dimensions de face nulles ou négatives' },
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': { severity: 'blocking', description: 'Transition d’état de version de support interdite' },
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet de version de support sans motif' },
+  'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable pour l’empreinte' },
 
   // ── WAYFIND (H12) ─────────────────────────────────────────
   'WAYFIND.NAMING_COLLISION':               { severity: 'blocking', description: 'Deux entités portent le même nom d’orientation' },
