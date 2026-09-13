@@ -1,0 +1,22 @@
+[
+  {
+    "code": "SAFETY.REGISTRY_LOCKED",
+    "scope": { "supportRegistry": "safety" },
+    "kind": "flag",
+    "params": { "locked": true },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": "Presente uniquement pour eprouver le refus de modification. Ne contient aucun pictogramme."
+  },
+  {
+    "code": "SAFETY.MIN_PICTOGRAM_SIZE",
+    "scope": { "supportRegistry": "safety" },
+    "kind": "formula",
+    "params": {
+      "expression": "viewingDistance_m / divisor",
+      "divisor": 23,
+      "unit": "mm"
+    },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": ""
+  }
+]

@@ -85,6 +85,7 @@ export const ERROR_CATALOG = {
   'RULES.OVERLAY_NOT_COMPARABLE':          { severity: 'warning',  description: 'Surcouche pays non comparable au socle, règle du socle conservée' },
   'RULES.FILE_NOT_LISTED':                 { severity: 'blocking', description: 'Fichier de règles non listé dans le manifeste' },
   'RULES.FILE_MISSING':                    { severity: 'blocking', description: 'Fichier listé dans le manifeste introuvable' },
+  'RULES.TEST_PACK_OUTSIDE_TEST_ENV':      { severity: 'blocking', description: 'Paquet de juridiction TEST chargé hors environnement de test' },
 
   // ── SECURITY ──────────────────────────────────────────────
   'SECURITY.REGISTRY_WRITE_DENIED':         { severity: 'blocking', description: 'Tentative de modification du registre de sécurité' },

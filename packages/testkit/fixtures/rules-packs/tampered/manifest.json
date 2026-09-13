@@ -1,0 +1,11 @@
+{
+  "key": "tampered",
+  "version": "0.0.1",
+  "jurisdiction": "TEST",
+  "effective_from": "1970-01-01",
+  "supersedes": null,
+  "files": ["legibility.json"],
+  "checksum": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "testOnly": true,
+  "warning": "Paquet de test : empreinte volontairement fausse, pour eprouver le refus RULES.PACK_CHECKSUM_MISMATCH."
+}

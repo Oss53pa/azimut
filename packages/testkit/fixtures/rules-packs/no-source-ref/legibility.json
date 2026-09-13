@@ -1,0 +1,9 @@
+[
+  {
+    "code": "LEGIBILITY.MIN_CHAR_HEIGHT",
+    "scope": { "supportRegistry": "wayfinding" },
+    "kind": "formula",
+    "params": { "expression": "readingDistance_m * factor", "factor": 7, "unit": "mm" },
+    "notes": "Regle volontairement privee de source_ref pour eprouver le garde-fou."
+  }
+]

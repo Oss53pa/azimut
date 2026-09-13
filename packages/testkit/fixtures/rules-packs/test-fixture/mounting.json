@@ -1,0 +1,18 @@
+[
+  {
+    "code": "MOUNTING.HEIGHT_RANGE",
+    "scope": { "supportRegistry": "wayfinding", "context": "interior" },
+    "kind": "range",
+    "params": { "min_mm": 1130, "max_mm": 1670 },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": "Bornes volontairement non rondes."
+  },
+  {
+    "code": "MOUNTING.MIN_CLEARANCE_UNDER_SUSPENDED",
+    "scope": { "supportRegistry": "wayfinding" },
+    "kind": "limit",
+    "params": { "min_mm": 2130 },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": ""
+  }
+]

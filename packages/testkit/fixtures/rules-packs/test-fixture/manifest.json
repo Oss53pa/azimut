@@ -1,0 +1,16 @@
+{
+  "key": "test-fixture",
+  "version": "0.0.1",
+  "jurisdiction": "TEST",
+  "effective_from": "1970-01-01",
+  "supersedes": null,
+  "files": [
+    "contrast.json",
+    "legibility.json",
+    "mounting.json",
+    "safety-registry.json"
+  ],
+  "checksum": "sha256:3c6ddc356916055fb5cdbaa0b10cad2928b98a4a8d6dc70ced8e8f1d925d3e34",
+  "testOnly": true,
+  "warning": "Paquet de test. Valeurs fictives, sans portee normative. Le chargeur doit refuser ce paquet hors environnement de test."
+}

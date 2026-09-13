@@ -1,0 +1,26 @@
+[
+  {
+    "code": "CONTRAST.MIN_TEXT_ON_BACKGROUND",
+    "scope": { "supportRegistry": "wayfinding" },
+    "kind": "ratio",
+    "params": { "min": 4.7, "method": "relative_luminance" },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": "4.7 est volontairement decale des seuils usuels."
+  },
+  {
+    "code": "CONTRAST.MIN_PICTOGRAM_ON_BACKGROUND",
+    "scope": { "supportRegistry": "wayfinding" },
+    "kind": "ratio",
+    "params": { "min": 3.3, "method": "relative_luminance" },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": ""
+  },
+  {
+    "code": "CONTRAST.MIN_TEXT_ON_BACKGROUND",
+    "scope": { "supportRegistry": "safety" },
+    "kind": "ratio",
+    "params": { "min": 6.1, "method": "relative_luminance" },
+    "source_ref": "FIXTURE DE TEST. Valeur fictive, sans portee normative. Ne jamais reprendre.",
+    "notes": "Portee safety plus contraignante, pour eprouver la regle de durcissement."
+  }
+]

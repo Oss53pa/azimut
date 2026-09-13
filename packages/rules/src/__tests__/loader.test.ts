@@ -104,10 +104,10 @@ describe('groupAndCheckAmbiguity', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('rejects same code at same specificity (same scope dimension)', () => {
+  it('rejects same code with an identical scope', () => {
     const result = groupAndCheckAmbiguity([
       makeRule('R1', { context: 'interior' }),
-      makeRule('R1', { context: 'exterior' }),
+      makeRule('R1', { context: 'interior' }),
     ]);
     expect(result.ok).toBe(false);
     if (result.ok) return;
@@ -115,6 +115,16 @@ describe('groupAndCheckAmbiguity', () => {
     expect(result.findings[0]?.params['rule_code']).toBe('R1');
     // Both scopes carry only `context` → specificity 2 (D3.5 bit weights).
     expect(result.findings[0]?.params['specificity']).toBe(2);
+  });
+
+  it('accepts same code, same dimension, different values (scope partition)', () => {
+    // interior vs exterior share the dimension set but never match one context,
+    // so they partition the scope space and are not ambiguous.
+    const result = groupAndCheckAmbiguity([
+      makeRule('R1', { context: 'interior' }),
+      makeRule('R1', { context: 'exterior' }),
+    ]);
+    expect(result.ok).toBe(true);
   });
 
   it('does not flag supportRegistry vs context as ambiguous (D3.5 order)', () => {
@@ -137,7 +147,7 @@ describe('groupAndCheckAmbiguity', () => {
   it('reports only ambiguous codes, not others', () => {
     const result = groupAndCheckAmbiguity([
       makeRule('R1', { context: 'interior' }),
-      makeRule('R1', { context: 'exterior' }),
+      makeRule('R1', { context: 'interior' }),
       makeRule('R2', {}),
     ]);
     expect(result.ok).toBe(false);
@@ -227,7 +237,7 @@ describe('loadRulesPack', () => {
     expect(result.ok).toBe(true);
   });
 
-  it('rejects same code at same specificity (D3.5)', () => {
+  it('rejects same code with an identical scope (D3.5)', () => {
     const pack = JSON.stringify({
       key: 'test', version: '1.0', jurisdiction: 'FR',
       effective_from: '2024-01-01', source_ref: 'Ref',
@@ -240,7 +250,7 @@ describe('loadRulesPack', () => {
         },
         {
           code: 'R1',
-          scope: { context: 'exterior' },
+          scope: { context: 'interior' },
           params: {},
           source_ref: 'B',
         },
