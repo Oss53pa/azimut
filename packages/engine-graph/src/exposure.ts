@@ -65,3 +65,29 @@ export function guardExposureHypotheses(
   }
   return { ok: true, value: null, warnings: [] };
 }
+
+/**
+ * H12 / I5.3 — a flow result can never be exported without its hypotheses. This
+ * export guard raises a blocking FLOW.HYPOTHESIS_MISSING when the export bundle
+ * carries no hypotheses at all, and otherwise defers to guardExposureHypotheses
+ * so an attached-but-incomplete set of hypotheses still blocks the export.
+ */
+export function guardFlowResultExport(
+  hypotheses: ExposureHypotheses | null,
+): Outcome<null> {
+  if (hypotheses === null) {
+    return {
+      ok: false,
+      findings: [
+        {
+          code: 'FLOW.HYPOTHESIS_MISSING',
+          severity: 'blocking',
+          entity: null,
+          params: {},
+          ruleRef: 'H12',
+        },
+      ],
+    };
+  }
+  return guardExposureHypotheses(hypotheses);
+}

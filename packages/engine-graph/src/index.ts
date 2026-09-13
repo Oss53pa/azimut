@@ -133,7 +133,7 @@ export type {
   ComposeFaceOptions,
   ResolveFromScheduleOptions,
 } from './compose-face.js';
-export { guardExposureHypotheses } from './exposure.js';
+export { guardExposureHypotheses, guardFlowResultExport } from './exposure.js';
 export type {
   ExposureHypotheses,
   EntryWeight,

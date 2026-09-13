@@ -161,6 +161,7 @@ export const ERROR_CATALOG = {
   'ASSIST.EXTRACTION_BELOW_THRESHOLD':       { severity: 'warning',  description: 'Taux d’extraction insuffisant, calage manuel recommandé' },
   'MODULE.NOT_ENTITLED':                     { severity: 'blocking', description: 'Module non souscrit' },
   'FLOW.WEIGHTS_UNDECLARED':                 { severity: 'blocking', description: 'Calcul d’exposition sans pondérations déclarées' },
+  'FLOW.HYPOTHESIS_MISSING':                 { severity: 'blocking', description: 'Export d’un résultat de flux sans ses hypothèses' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
   'SURVEY.SYNC_PENDING':                     { severity: 'info',     description: 'Relevé de tournée non synchronisé' },
 

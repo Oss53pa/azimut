@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { guardExposureHypotheses } from '../exposure.js';
+import { guardExposureHypotheses, guardFlowResultExport } from '../exposure.js';
 import type { ExposureHypotheses } from '../exposure.js';
 
 const complete: ExposureHypotheses = {
@@ -43,5 +43,29 @@ describe('I5.3 — guardExposureHypotheses', () => {
     if (r.ok) return;
     expect(r.findings).toHaveLength(1);
     expect(r.findings[0]?.params['factor']).toBe('visibility_cones');
+  });
+});
+
+describe('H12 — guardFlowResultExport', () => {
+  it('exports a flow result carrying complete hypotheses', () => {
+    expect(guardFlowResultExport(complete).ok).toBe(true);
+  });
+
+  it('blocks FLOW.HYPOTHESIS_MISSING when no hypotheses are attached', () => {
+    const r = guardFlowResultExport(null);
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings).toHaveLength(1);
+    expect(r.findings[0]?.code).toBe('FLOW.HYPOTHESIS_MISSING');
+    expect(r.findings[0]?.severity).toBe('blocking');
+    expect(r.findings[0]?.ruleRef).toBe('H12');
+  });
+
+  it('blocks with FLOW.WEIGHTS_UNDECLARED when attached hypotheses are incomplete', () => {
+    const r = guardFlowResultExport({ ...complete, attraction_weights: [] });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings[0]?.code).toBe('FLOW.WEIGHTS_UNDECLARED');
+    expect(r.findings[0]?.params['factor']).toBe('attraction_weights');
   });
 });
