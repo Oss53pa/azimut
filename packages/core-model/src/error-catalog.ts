@@ -143,6 +143,8 @@ export const ERROR_CATALOG = {
   'EDIT.CROSS_ORG_PASTE_DENIED':            { severity: 'blocking', description: 'Collage entre organisations refusé' },
   'EDIT.UNDO_AFTER_SYNC':                   { severity: 'warning',  description: "Annulation demandée sur une modification déjà synchronisée" },
   'EDIT.TEMPLATE_BLOCK_OVERFLOW':           { severity: 'blocking', description: 'Bloc débordant de la grille du gabarit' },
+  'EDIT.OBJECT_LOCKED':                     { severity: 'warning',  description: 'Objet verrouillé par un autre utilisateur' },
+  'EDIT.LOCK_OVERRIDDEN':                   { severity: 'info',     description: 'Verrou forcé, journalisé' },
 
   // ── ASSET (E17) ───────────────────────────────────────────
   'ASSET.SANITIZATION_FAILED':              { severity: 'blocking', description: 'Actif importé non assainissable' },
