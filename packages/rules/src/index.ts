@@ -25,3 +25,5 @@ export { loadPackDirectory } from './pack-directory.js';
 export { mergeCountryOverlay } from './overlay.js';
 export { guardAdRulesPack } from './ad-rules.js';
 export type { AdRulesPack } from './ad-rules.js';
+export { checkCharHeight, checkContrast } from './rule-checks.js';
+export type { CharHeightInput, ContrastInput } from './rule-checks.js';
