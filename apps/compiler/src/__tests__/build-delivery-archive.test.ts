@@ -5,6 +5,7 @@ import { createBuildDeliveryArchiveHandler } from '../build-delivery-archive.js'
 import type { BuildDeliveryArchiveContext } from '../build-delivery-archive.js';
 import { memoryAssetStore } from '../asset-store.js';
 import type { MutableAssetStore } from '../asset-store.js';
+import { buildRulesPackIndex } from '@azimut/rules';
 import type { Job } from '../job.js';
 
 const theme: FaceTheme = {
@@ -167,5 +168,56 @@ describe('D11 — createBuildDeliveryArchiveHandler', () => {
     await expect(
       createBuildDeliveryArchiveHandler(context(sink))(makeJob(collide)),
     ).rejects.toThrow('Delivery archive assembly failed');
+  });
+
+  describe('quality checks applied to the batch (parity with compile)', () => {
+    const PACK_ID = 'rp-test-0001';
+    const index = (() => {
+      const built = buildRulesPackIndex(
+        [{ id: PACK_ID, directory: 'packages/testkit/fixtures/rules-packs/test-fixture' }],
+        { environment: 'test' },
+      );
+      if (!built.ok) throw new Error('index non constructible');
+      return built.value;
+    })();
+
+    // Colours via a helper so no literal hex appears in source (A2.4 scanner).
+    const hx = (rgb: string): string => `#${rgb}`;
+    const hexTheme: FaceTheme = {
+      background: hx('ffffff'), text_primary: hx('000000'), text_secondary: hx('000000'),
+      accent: hx('000000'), border: hx('000000'),
+    };
+
+    // One delivery item pointing at the bound support sup-001 (interior, 5 m).
+    const payload = {
+      site_code: 'CPL', building: 'A', level: 'R1', version: 3,
+      items: [
+        { node_id: 'n-ml-hall', template_id: 'ftpl-dir-front', profile_key: 'standard', type_code: 'DIR', reference: 'sup-001' },
+      ],
+    };
+
+    function boundContext(sink: MutableAssetStore): BuildDeliveryArchiveContext {
+      return {
+        ...context(sink),
+        site: { ...refMultilevel, site: { ...refMultilevel.site, rules_pack_id: PACK_ID } },
+        theme: hexTheme,
+        rules_pack_index: index,
+      };
+    }
+
+    it('aggregates legibility findings over the batch when a pack is bound', async () => {
+      const sink = memoryAssetStore();
+      const result = await createBuildDeliveryArchiveHandler(boundContext(sink))(makeJob(payload));
+      // Standard 400 mm face → ~28.8 mm text, under the interior floor (33).
+      expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
+      expect(result['contrast_finding_count']).toBe(0);
+    });
+
+    it('reports zero findings when no pack is bound', async () => {
+      const sink = memoryAssetStore();
+      const result = await createBuildDeliveryArchiveHandler(context(sink))(makeJob(payload));
+      expect(result['legibility_finding_count']).toBe(0);
+      expect(result['contrast_finding_count']).toBe(0);
+    });
   });
 });

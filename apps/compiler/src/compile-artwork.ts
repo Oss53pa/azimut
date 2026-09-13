@@ -1,8 +1,8 @@
-import type { SiteData, Finding } from '@azimut/core-model';
+import type { SiteData } from '@azimut/core-model';
 import type { FaceTheme, LoadedRulesPack, RulesPackIndex } from '@azimut/engine-graph';
-import { resolveSiteRulesPack } from '@azimut/engine-graph';
 import type { PdfTarget } from '@azimut/engine-artwork';
 import { renderArtwork } from './artwork.js';
+import { resolveEffectivePack, supportRenderParams } from './rules-binding.js';
 import type { Job } from './job.js';
 
 export type CompileArtworkResult = {
@@ -42,17 +42,9 @@ export function createArtworkHandler(
     rules_pack, rules_pack_index,
   } = context;
 
-  // Effective pack: an explicit pack wins; otherwise resolve the site's binding
-  // through the supplied corpus. Resolution findings (PACK_NOT_BOUND) are
-  // surfaced, never thrown — a missing pack skips the check, it does not stop
-  // the artwork.
-  let effectivePack = rules_pack;
-  let packFindings: readonly Finding[] = [];
-  if (effectivePack === undefined && rules_pack_index !== undefined) {
-    const resolved = resolveSiteRulesPack(site.site.rules_pack_id, rules_pack_index);
-    if (resolved.ok) effectivePack = resolved.value;
-    else packFindings = resolved.findings;
-  }
+  const { pack: effectivePack, findings: packFindings } = resolveEffectivePack(
+    site, rules_pack, rules_pack_index,
+  );
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const payload = job.payload;
@@ -74,9 +66,8 @@ export function createArtworkHandler(
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    // A5.6 — the support instance carries the registry that scopes the rules
-    // (safety hardening). When the support is unknown, fall back to the
-    // wayfinding registry (renderArtwork's own default).
+    // A5.6 — the support instance carries the registry and reading context that
+    // scope the rules; unknown supports fall back to the render's own defaults.
     const support = site.supports.find((s) => s.id === supportId);
 
     const {
@@ -93,13 +84,7 @@ export function createArtworkHandler(
       profileKey,
       title: `${supportId} — ${template.side}`,
       ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
-      ...(support !== undefined
-        ? {
-          supportRegistry: support.registry,
-          supportContext: support.context,
-          readingDistanceM: support.reading_distance_m,
-        }
-        : {}),
+      ...supportRenderParams(site, supportId),
     });
 
     return {
