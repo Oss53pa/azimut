@@ -134,3 +134,86 @@ export function checkContrast(
   }
   return OK;
 }
+
+export type StrokeToHeightInput = {
+  readonly supportRegistry: string;
+  readonly ratio: number;
+  readonly entity_id: string;
+};
+
+/**
+ * Legibility double bound — LEGIBILITY.MIN_STROKE_TO_HEIGHT. The stroke-to-height
+ * ratio must sit within [min, max]; outside either bound raises
+ * LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS.
+ */
+export function checkStrokeToHeight(
+  pack: LoadedRulesPack,
+  input: StrokeToHeightInput,
+): Outcome<null> {
+  const resolved = resolveRule(pack, 'LEGIBILITY.MIN_STROKE_TO_HEIGHT', {
+    supportRegistry: input.supportRegistry,
+  });
+  if (!resolved.ok) return resolved;
+
+  const rule = resolved.value;
+  const min = numParam(rule, 'min');
+  const max = numParam(rule, 'max');
+  if (min === null) return { ok: false, findings: [paramInvalid(rule, 'min')] };
+  if (max === null) return { ok: false, findings: [paramInvalid(rule, 'max')] };
+
+  if (input.ratio < min || input.ratio > max) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS',
+        severity: 'blocking',
+        entity: { kind: 'support_face', id: input.entity_id },
+        params: { ratio: input.ratio, min, max },
+        ruleRef: rule.code,
+      }],
+    };
+  }
+  return OK;
+}
+
+export type MountingHeightInput = {
+  readonly supportRegistry: string;
+  readonly context?: string;
+  readonly height_mm: number;
+  readonly entity_id: string;
+};
+
+/**
+ * Mounting range — MOUNTING.HEIGHT_RANGE. The mounting height must sit within
+ * [min_mm, max_mm]; outside either bound raises LAYOUT.MOUNTING_OUT_OF_RANGE.
+ */
+export function checkMountingHeight(
+  pack: LoadedRulesPack,
+  input: MountingHeightInput,
+): Outcome<null> {
+  const scope: RuleScopeContext = input.context !== undefined
+    ? { supportRegistry: input.supportRegistry, context: input.context }
+    : { supportRegistry: input.supportRegistry };
+  const resolved = resolveRule(pack, 'MOUNTING.HEIGHT_RANGE', scope);
+  if (!resolved.ok) return resolved;
+
+  const rule = resolved.value;
+  const minMm = numParam(rule, 'min_mm');
+  const maxMm = numParam(rule, 'max_mm');
+  if (minMm === null) return { ok: false, findings: [paramInvalid(rule, 'min_mm')] };
+  if (maxMm === null) return { ok: false, findings: [paramInvalid(rule, 'max_mm')] };
+
+  if (input.height_mm < minMm || input.height_mm > maxMm) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'LAYOUT.MOUNTING_OUT_OF_RANGE',
+        severity: 'blocking',
+        entity: { kind: 'support', id: input.entity_id },
+        params: { height_mm: input.height_mm, min_mm: minMm, max_mm: maxMm },
+        ruleRef: rule.code,
+      }],
+    };
+  }
+  return OK;
+}

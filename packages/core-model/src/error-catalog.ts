@@ -50,6 +50,8 @@ export const ERROR_CATALOG = {
   // ── LAYOUT ────────────────────────────────────────────────
   'LAYOUT.CHAR_HEIGHT_BELOW_MIN':           { severity: 'blocking', description: 'Hauteur de caractère sous le minimum normatif' },
   'LAYOUT.CONTRAST_BELOW_MIN':             { severity: 'blocking', description: 'Contraste de luminance insuffisant' },
+  'LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS':     { severity: 'blocking', description: 'Rapport épaisseur/hauteur hors des bornes' },
+  'LAYOUT.MOUNTING_OUT_OF_RANGE':          { severity: 'blocking', description: 'Hauteur d’implantation hors de la plage' },
   'LAYOUT.CONTENT_OVERFLOW':               { severity: 'blocking', description: 'Contenu ne tenant pas dans le format' },
   'LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM': { severity: 'blocking', description: 'Format saisi manuellement et non conforme' },
   'LAYOUT.TEMPLATE_INVALID':                { severity: 'blocking', description: 'Gabarit non conforme au chargement (grille, liaison ou rôle)' },

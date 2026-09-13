@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import { loadRulesPack } from '../index';
-import { checkCharHeight, checkContrast } from '../rule-checks.js';
+import {
+  checkCharHeight,
+  checkContrast,
+  checkStrokeToHeight,
+  checkMountingHeight,
+} from '../rule-checks.js';
 import type { LoadedRulesPack } from '../loader.js';
 
 const FIXTURE = 'packages/testkit/fixtures/rules-packs/test-fixture';
@@ -127,6 +132,58 @@ describe('controle qualite — consomme les regles chargees', () => {
       if (safety.ok) return;
       expect(safety.findings[0]?.code).toBe('LAYOUT.CONTRAST_BELOW_MIN');
       expect(safety.findings[0]?.params['minimum']).toBe(6.1);
+    });
+  });
+
+  describe('double borne — LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS', () => {
+    // fixture: MIN_STROKE_TO_HEIGHT min 0.13, max 0.23
+    it('passe dans les bornes', () => {
+      const r = checkStrokeToHeight(pack(), {
+        supportRegistry: 'wayfinding', ratio: 0.18, entity_id: 'f-1',
+      });
+      expect(r.ok).toBe(true);
+    });
+
+    it('bloque sous la borne basse', () => {
+      const r = checkStrokeToHeight(pack(), {
+        supportRegistry: 'wayfinding', ratio: 0.10, entity_id: 'f-1',
+      });
+      expect(r.ok).toBe(false);
+      if (r.ok) return;
+      expect(r.findings[0]?.code).toBe('LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS');
+      expect(r.findings[0]?.params['min']).toBe(0.13);
+    });
+
+    it('bloque au-dessus de la borne haute', () => {
+      const r = checkStrokeToHeight(pack(), {
+        supportRegistry: 'wayfinding', ratio: 0.30, entity_id: 'f-1',
+      });
+      expect(r.ok).toBe(false);
+      if (r.ok) return;
+      expect(r.findings[0]?.params['max']).toBe(0.23);
+    });
+  });
+
+  describe('plage — LAYOUT.MOUNTING_OUT_OF_RANGE', () => {
+    // fixture: MOUNTING.HEIGHT_RANGE interior min_mm 1130, max_mm 1670
+    it('passe dans la plage', () => {
+      const r = checkMountingHeight(pack(), {
+        supportRegistry: 'wayfinding', context: 'interior',
+        height_mm: 1400, entity_id: 's-1',
+      });
+      expect(r.ok).toBe(true);
+    });
+
+    it('bloque hors plage (trop bas)', () => {
+      const r = checkMountingHeight(pack(), {
+        supportRegistry: 'wayfinding', context: 'interior',
+        height_mm: 1000, entity_id: 's-1',
+      });
+      expect(r.ok).toBe(false);
+      if (r.ok) return;
+      expect(r.findings[0]?.code).toBe('LAYOUT.MOUNTING_OUT_OF_RANGE');
+      expect(r.findings[0]?.params['min_mm']).toBe(1130);
+      expect(r.findings[0]?.params['max_mm']).toBe(1670);
     });
   });
 });
