@@ -172,6 +172,7 @@ function assembleSiteData(
     base_elevation_m: num(v.base_elevation_m),
     height_m: num(v.height_m),
     material_key: v.material_key,
+    render_order: v.render_order,
   }));
 
   const nodes: GraphNode[] = nodeRows.map((n) => ({

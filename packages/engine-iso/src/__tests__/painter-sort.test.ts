@@ -67,6 +67,59 @@ describe('D5.2 — sortVolumesPainter', () => {
   });
 });
 
+describe('K2.1 — sortVolumesPainter with manual render_order', () => {
+  const withOrder = (v: Volume, render_order: number | null): Volume => ({
+    ...v,
+    render_order,
+  });
+
+  it('leaves the computed order unchanged when no render_order is set', () => {
+    const entries: VolumeEntry[] = [
+      { volume: vol('v2', 'f2', 3, 1), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+      { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted.map((e) => e.volume.id)).toEqual(['v1', 'v2']);
+  });
+
+  it('draws an explicit volume after (on top of) auto volumes, overriding elevation', () => {
+    // v-high sits higher and would compute last; giving v-low a render_order
+    // promotes it above the auto volume regardless of elevation.
+    const entries: VolumeEntry[] = [
+      { volume: withOrder(vol('v-high', 'f1', 10, 1), null), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+      { volume: withOrder(vol('v-low', 'f2', 0, 1), 5), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted.map((e) => e.volume.id)).toEqual(['v-high', 'v-low']);
+  });
+
+  it('orders two explicit volumes by ascending render_order, ignoring elevation', () => {
+    const entries: VolumeEntry[] = [
+      { volume: withOrder(vol('v-a', 'f1', 9, 1), 2), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+      { volume: withOrder(vol('v-b', 'f2', 0, 1), 1), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted.map((e) => e.volume.id)).toEqual(['v-b', 'v-a']);
+  });
+
+  it('falls back to the computed sort when render_order ties', () => {
+    const entries: VolumeEntry[] = [
+      { volume: withOrder(vol('v-beta', 'f1', 0, 1), 7), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) },
+      { volume: withOrder(vol('v-alpha', 'f2', 0, 1), 7), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
+    ];
+    const sorted = sortVolumesPainter(entries);
+    expect(sorted.map((e) => e.volume.id)).toEqual(['v-alpha', 'v-beta']);
+  });
+
+  it('is deterministic regardless of input order', () => {
+    const a = { volume: withOrder(vol('v-a', 'f1', 0, 1), 3), footprint: fp('f1', [{ x_m: 0, y_m: 0 }]) };
+    const b = { volume: withOrder(vol('v-b', 'f2', 5, 1), null), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) };
+    const s1 = sortVolumesPainter([a, b]).map((e) => e.volume.id);
+    const s2 = sortVolumesPainter([b, a]).map((e) => e.volume.id);
+    expect(s1).toEqual(s2);
+  });
+});
+
 describe('D5.2 — detectOverlaps', () => {
   it('detects bounding-box overlap', () => {
     const footprints = [

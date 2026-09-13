@@ -48,6 +48,11 @@ export type Volume = {
   readonly base_elevation_m: number;
   readonly height_m: number;
   readonly material_key: string;
+  /**
+   * K2.1 — Optional manual painter order. Null/absent by default (the computed
+   * depth sort applies); when set, it takes precedence over the computed sort.
+   */
+  readonly render_order?: number | null;
 };
 
 export type NodeKind =

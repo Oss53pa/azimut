@@ -39,10 +39,27 @@ function compareUtf8Bytes(a: string, b: string): number {
   return ba.length < bb.length ? -1 : 1;
 }
 
+/**
+ * K2.1 — Manual painter order. A volume's `render_order`, when set, takes
+ * precedence over the computed depth sort. Volumes without one (null/absent,
+ * the default) keep the computed order and are drawn first (behind); volumes
+ * with a render_order are drawn after them, in ascending render_order, so a
+ * manual value promotes a volume above the auto-sorted ones. With no
+ * render_order set anywhere, every volume ties here and the computed sort below
+ * decides exactly as before.
+ */
+function manualOrderKey(volume: Volume): number {
+  return volume.render_order ?? Number.NEGATIVE_INFINITY;
+}
+
 export function sortVolumesPainter(
   entries: readonly VolumeEntry[],
 ): readonly VolumeEntry[] {
   return [...entries].sort((a, b) => {
+    const orderA = manualOrderKey(a.volume);
+    const orderB = manualOrderKey(b.volume);
+    if (orderA !== orderB) return orderA - orderB;
+
     const elev = a.volume.base_elevation_m - b.volume.base_elevation_m;
     if (elev !== 0) return elev;
 
@@ -95,7 +112,8 @@ export function detectOverlaps(
           code: 'GEOM.FOOTPRINTS_OVERLAP',
           severity: 'warning',
           entity: { kind: 'footprint', id: fpA.id },
-          params: { footprint_a: fpA.id, footprint_b: fpB.id },
+          // K2.1 — propose manual painter order (volume.render_order).
+          params: { footprint_a: fpA.id, footprint_b: fpB.id, remedy: 'render_order' },
           ruleRef: null,
         });
       }

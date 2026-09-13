@@ -312,7 +312,8 @@ function footprintsOverlapFindings(
               code: 'GEOM.FOOTPRINTS_OVERLAP',
               severity: 'warning',
               entity: { kind: 'footprint', id: fpA.id },
-              params: { other_footprint_id: fpB.id },
+              // K2.1 — propose manual painter order (volume.render_order).
+              params: { other_footprint_id: fpB.id, remedy: 'render_order' },
               ruleRef: null,
             });
           }

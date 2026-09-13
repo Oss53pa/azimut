@@ -62,6 +62,8 @@ export const volume = azimut.table('volume', {
   base_elevation_m: numeric('base_elevation_m').notNull(),
   height_m: numeric('height_m').notNull(),
   material_key: text('material_key').notNull(),
+  // K2.1 — manual painter order; null by default, overrides the computed sort.
+  render_order: integer('render_order'),
 }, (t) => [
   index('idx_volume_org').on(t.org_id),
 ]);

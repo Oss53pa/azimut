@@ -65,9 +65,11 @@ Les compléments présents dans `docs/` :
 | Document | Objet |
 | --- | --- |
 | `docs/partie-e-edition-vectorielle.md` | Édition, capacités vectorielles, couche d'habillage. Contextes d'édition, quantification, modèle de commande, magnétisme, sélection accessible. |
+| `docs/partie-f-interface-design.md` | Interface et système de design. Jetons de thème, échelles d'espacement et typographiques, contraste, ombrage isométrique, chrome de la borne. |
 | `docs/partie-g-resolution-points-ouverts.md` | Méthode de chiffrage sans durées, budget de rendu adaptatif, saisie tactile et stylet, présence simultanée, métriques de police, chaîne colorimétrique. |
 | `docs/partie-h-modules-manquants.md` | Carte complète des modules et tableau des messages, qui s'intercale entre le graphe et la composition. |
 | `docs/partie-i-atelier-dessin.md` | Atelier de dessin, chaîne de transformation d'un plan en document fini, assistances, droits par module. |
 | `docs/partie-j-stylet-pictogrammes.md` | Saisie à l'encre, couche d'esquisse, annotation de révision, éditeur de pictogrammes, bibliothèques à trois étages. |
+| `docs/partie-k-registre-points-ouverts.md` | Registre consolidé des points ouverts. Remplace et fait seul foi contre les huit listes antérieures (C5, D18, E19, F19, G10, H14, I7, J10). |
 
-Chacun de ces documents déclare prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G — et sinon la procédure d'arrêt de A2.2 s'applique.
+Chacun de ces documents déclare prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts — et sinon la procédure d'arrêt de A2.2 s'applique.
