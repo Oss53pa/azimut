@@ -20,7 +20,9 @@ export {
   groupAndCheckAmbiguity,
   scopeSpecificity,
 } from './loader.js';
-export type { LoadedRulesPack, RuleScopeContext } from './loader.js';
+export type { LoadedRulesPack, RuleScopeContext, LoadRulesPackOptions } from './loader.js';
+export { resolveSiteRulesPack, buildRulesPackIndex } from './resolve-site-pack.js';
+export type { RulesPackIndex, RulesPackSource } from './resolve-site-pack.js';
 export { loadPackDirectory } from './pack-directory.js';
 export { mergeCountryOverlay } from './overlay.js';
 export { guardAdRulesPack } from './ad-rules.js';
