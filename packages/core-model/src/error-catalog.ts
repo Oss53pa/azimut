@@ -163,6 +163,9 @@ export const ERROR_CATALOG = {
   'FLOW.WEIGHTS_UNDECLARED':                 { severity: 'blocking', description: 'Calcul d’exposition sans pondérations déclarées' },
   'FLOW.HYPOTHESIS_MISSING':                 { severity: 'blocking', description: 'Export d’un résultat de flux sans ses hypothèses' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
+  'AD.PLACEMENT_DOUBLE_BOOKED':              { severity: 'blocking', description: 'Conflit de réservation' },
+  'AD.CREATIVE_SPEC_MISMATCH':               { severity: 'blocking', description: 'Visuel non conforme à la fiche technique' },
+  'AD.OPTION_EXPIRED':                       { severity: 'info',     description: 'Option arrivée à échéance' },
   'SURVEY.SYNC_PENDING':                     { severity: 'info',     description: 'Relevé de tournée non synchronisé' },
 
   // ── INK / SKETCH / REVIEW / PICTO / LIBRARY (partie J) ─────
