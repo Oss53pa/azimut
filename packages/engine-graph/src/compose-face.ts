@@ -33,6 +33,12 @@ import type {
   TravelProfile,
 } from '@azimut/core-model';
 import type { ResolvedBlock, ResolvedContent, ResolvedDestinationEntry, ResolvedFace } from './resolve-face.js';
+import {
+  resolveMapContent,
+  resolveLegendContent,
+  resolveLogoContent,
+  resolveEmergencyContent,
+} from './resolve-face.js';
 import type {
   MessageLine,
   MessageSchedule,
@@ -107,6 +113,7 @@ function contentOfLine(
   line: MessageLine,
   pictograms: readonly Pictogram[],
   findings: Finding[],
+  orgName: string,
 ): ResolvedContent {
   switch (blockDef.kind) {
     case 'header':
@@ -128,13 +135,13 @@ function contentOfLine(
     case 'free_text':
       return { type: 'free_text', text: firstText(line) };
     case 'map':
-      return { type: 'map' };
+      return resolveMapContent(blockDef.config);
     case 'legend':
-      return { type: 'legend' };
+      return resolveLegendContent(blockDef.config);
     case 'logo':
-      return { type: 'logo' };
+      return resolveLogoContent(blockDef.config, orgName);
     case 'emergency_info':
-      return { type: 'emergency_info' };
+      return resolveEmergencyContent(blockDef.config, pictograms);
   }
 }
 
@@ -148,6 +155,8 @@ export type ResolveFromScheduleOptions = {
   readonly supportId: string;
   readonly faceIndex: number;
   readonly pictograms: readonly Pictogram[];
+  /** Default label for a logo block with no configured one (K-Tier-A). */
+  readonly org_name?: string;
 };
 
 /**
@@ -162,6 +171,7 @@ export function resolveFaceFromSchedule(
   options: ResolveFromScheduleOptions,
 ): Outcome<ResolvedFace> {
   const { schedule, template, supportId, faceIndex, pictograms } = options;
+  const orgName = options.org_name ?? '';
 
   const linesByBlock = new Map<number, MessageLine>();
   for (const line of schedule.lines) {
@@ -201,7 +211,7 @@ export function resolveFaceFromSchedule(
       kind: blockDef.kind,
       ordinal: blockDef.ordinal,
       region: blockDef.region,
-      content: contentOfLine(blockDef, line, pictograms, findings),
+      content: contentOfLine(blockDef, line, pictograms, findings, orgName),
     });
   });
 
@@ -285,6 +295,7 @@ export function composeFace(options: ComposeFaceOptions): Outcome<ResolvedFace> 
       supportId,
       faceIndex,
       pictograms: site.pictograms,
+      org_name: site.organization.name,
     });
   }
 
@@ -334,6 +345,7 @@ export function composeFace(options: ComposeFaceOptions): Outcome<ResolvedFace> 
     supportId,
     faceIndex: 0,
     pictograms: site.pictograms,
+    org_name: site.organization.name,
   });
   if (!face.ok) return face;
 

@@ -203,7 +203,8 @@ describe('D8.4 — a template added purely by file renders (no code change)', ()
     // Header resolved from site.name, destinations resolved from the graph.
     expect(svg).toContain('Site multi-niveaux');
     expect(svg).toContain('Bureau RDC');
-    // Legend block renders its placeholder.
-    expect(svg).toContain('[Légende]');
+    // K-Tier-A: a legend block with no configured entries renders nothing —
+    // no more placeholder token.
+    expect(svg).not.toContain('[Légende]');
   });
 });
