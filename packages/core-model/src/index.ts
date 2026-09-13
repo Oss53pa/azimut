@@ -29,6 +29,7 @@ export {
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
+export { canonicalContentJson, empreinte } from './empreinte.js';
 export {
   transliterate,
   sanitizeSegment,
