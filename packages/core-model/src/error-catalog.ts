@@ -157,8 +157,10 @@ export const ERROR_CATALOG = {
   'FONT.METRICS_MISSING':                    { severity: 'blocking', description: 'Table de métriques absente ou altérée' },
   'FONT.LICENCE_UNKNOWN':                    { severity: 'warning',  description: 'Licence non déclarée' },
 
-  // ── COLOR (E17) ───────────────────────────────────────────
+  // ── COLOR (E17, G8) ───────────────────────────────────────
   'COLOR.PROFILE_MISSING':                   { severity: 'warning',  description: 'Profil de sortie absent pour ce substrat' },
+  'COLOR.DELTA_NOT_COMPUTABLE':              { severity: 'info',     description: 'Écart non calculable, valeurs mesurées absentes' },
+  'COLOR.REFERENCE_UNVERIFIABLE':            { severity: 'info',     description: 'Référence de nuancier sans valeurs fournies' },
 
   // ── ASSIST / MODULE / FLOW / AD / SURVEY (partie I, I6) ────
   'ASSIST.PROPOSAL_REJECTED':                { severity: 'info',     description: 'Proposition d’assistance refusée, non redemandée' },

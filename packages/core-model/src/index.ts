@@ -8,6 +8,8 @@ export type {
 } from './font-embedding.js';
 export { guardFontMetrics, auditFontLicences } from './font-registry.js';
 export type { FontMetricsRecord } from './font-registry.js';
+export { colorDelta, auditColorReferences } from './color-chain.js';
+export type { CharterColor, LabValue, ReferenceSystem } from './color-chain.js';
 export {
   roundHalfAwayFromZero,
   roundSvg,
