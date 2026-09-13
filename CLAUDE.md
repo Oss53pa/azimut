@@ -58,12 +58,14 @@ Non vérifié : <liste ou "rien">
 
 ## Référence complète
 
-Le cahier des charges principal et ses parties A à D ne sont pas dans ce dépôt. Le modèle de données, les contrats des moteurs et les tâches y sont définis, et il faut les demander plutôt que les reconstituer.
+Le cahier des charges principal (parties A, B, C) et son complément (partie D) sont désormais dans le dépôt, sous `docs/`. Ils font foi sur le modèle de données, les contrats des moteurs, les tâches et les conventions ; on ne les reconstitue pas, on les lit. Toute divergence du code existant avec ces documents relève de la procédure d'arrêt A2.2 (contradiction) et doit être signalée, pas résolue en silence.
 
-Les compléments présents dans `docs/` :
+Documents de référence présents dans `docs/` :
 
 | Document | Objet |
 | --- | --- |
+| `docs/cahier-des-charges.md` | Cahier des charges principal, parties A, B, C. Invariants, modèle de données (A5), contrats des moteurs (A7), tâches (B), annexes (C). Fait foi. |
+| `docs/partie-d-conventions-formats-algorithmes.md` | Complément, partie D. Conventions, formats et algorithmes : repère et arrondis (D1), catalogue d'anomalies (D2), format des paquets de règles et résolution de portée (D3), formats d'import (D4), projection isométrique (D5), empreintes (D7), langage de gabarit (D8), machines à états (D9), paquet de borne (D10), nommage (D11), i18n (D12), et points ouverts (D18). |
 | `docs/partie-e-edition-vectorielle.md` | Édition, capacités vectorielles, couche d'habillage. Contextes d'édition, quantification, modèle de commande, magnétisme, sélection accessible. |
 | `docs/partie-f-interface-design.md` | Interface et système de design. Jetons de thème, échelles d'espacement et typographiques, contraste, ombrage isométrique, chrome de la borne. |
 | `docs/partie-g-resolution-points-ouverts.md` | Méthode de chiffrage sans durées, budget de rendu adaptatif, saisie tactile et stylet, présence simultanée, métriques de police, chaîne colorimétrique. |
@@ -72,4 +74,4 @@ Les compléments présents dans `docs/` :
 | `docs/partie-j-stylet-pictogrammes.md` | Saisie à l'encre, couche d'esquisse, annotation de révision, éditeur de pictogrammes, bibliothèques à trois étages. |
 | `docs/partie-k-registre-points-ouverts.md` | Registre consolidé des points ouverts. Remplace et fait seul foi contre les huit listes antérieures (C5, D18, E19, F19, G10, H14, I7, J10). |
 
-Chacun de ces documents déclare prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts — et sinon la procédure d'arrêt de A2.2 s'applique.
+`docs/cahier-des-charges.md` porte la partie A elle-même. Les compléments (partie D, puis parties E à K) déclarent chacun prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts — et sinon la procédure d'arrêt de A2.2 s'applique.
