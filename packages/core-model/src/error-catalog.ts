@@ -98,6 +98,7 @@ export const ERROR_CATALOG = {
   'IMPORT.UNIT_AMBIGUOUS':                  { severity: 'blocking', description: 'Unité du fichier source indéterminable' },
   'IMPORT.ENCODING_UNSUPPORTED':            { severity: 'blocking', description: 'Encodage non reconnu' },
   'IMPORT.EMPTY_FILE':                      { severity: 'blocking', description: 'Fichier d’import vide' },
+  'IMPORT.VECTOR_AS_REFERENCE_ONLY':        { severity: 'info',     description: 'Fichier importé en référence de fond, sans exploitation' },
 
   // ── PACKAGE ───────────────────────────────────────────────
   'PACKAGE.NETWORK_DEPENDENCY':             { severity: 'blocking', description: 'Le paquet de borne émet une requête sortante' },
@@ -145,6 +146,7 @@ export const ERROR_CATALOG = {
   'EDIT.TEMPLATE_BLOCK_OVERFLOW':           { severity: 'blocking', description: 'Bloc débordant de la grille du gabarit' },
   'EDIT.OBJECT_LOCKED':                     { severity: 'warning',  description: 'Objet verrouillé par un autre utilisateur' },
   'EDIT.LOCK_OVERRIDDEN':                   { severity: 'info',     description: 'Verrou forcé, journalisé' },
+  'EDIT.TOUCH_TOOL_UNAVAILABLE':            { severity: 'info',     description: 'Outil de tracé indisponible au doigt' },
 
   // ── ASSET (E17) ───────────────────────────────────────────
   'ASSET.SANITIZATION_FAILED':              { severity: 'blocking', description: 'Actif importé non assainissable' },
