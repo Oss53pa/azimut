@@ -3,12 +3,42 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
 
 export type CheckReport = {
   readonly checks_run: readonly string[];
   readonly checks_skipped: readonly string[];
   readonly findings: readonly Finding[];
 };
+
+/**
+ * H2.2 — Orientation nomenclature uniqueness. Building names must be unique
+ * within the site, and level names unique within their building (two levels
+ * named alike in one building is a naming collision). Node/zone labels are left
+ * out here to avoid flagging legitimately blank technical labels.
+ */
+function checkNamingCollisions(site: SiteData): Finding[] {
+  const entities: NamedEntity[] = [];
+  for (const building of site.buildings) {
+    entities.push({
+      id: building.id,
+      kind: 'building',
+      name: building.name,
+      scope: site.site.id,
+    });
+  }
+  for (const level of site.levels) {
+    entities.push({
+      id: level.id,
+      kind: 'level',
+      name: level.name,
+      scope: level.building_id,
+    });
+  }
+
+  const outcome = guardNamingCollisions(entities);
+  return outcome.ok ? [] : [...outcome.findings];
+}
 
 function checkDuplicateDisplayName(site: SiteData): Finding[] {
   const nameMap = new Map<string, string[]>();
@@ -133,6 +163,7 @@ export function runChecks(site: SiteData): Outcome<CheckReport> {
   findings.push(...checkDuplicateDisplayName(site));
   findings.push(...checkIncompleteLangCoverage(site));
   findings.push(...checkAllVacantCategory(site));
+  findings.push(...checkNamingCollisions(site));
 
   return {
     ok: true,
@@ -141,6 +172,7 @@ export function runChecks(site: SiteData): Outcome<CheckReport> {
         'all_vacant_category',
         'duplicate_display_name',
         'incomplete_lang_coverage',
+        'naming_collision',
       ],
       checks_skipped: [
         'adjacence_chromatique',

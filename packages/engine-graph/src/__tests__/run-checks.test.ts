@@ -291,4 +291,87 @@ describe('T-2.5 runChecks', () => {
       expect(dups.length).toBe(0);
     });
   });
+
+  describe('WAYFIND.NAMING_COLLISION (H2.2)', () => {
+    const orgId = refMinimal.organization.id;
+
+    const level = (id: string, buildingId: string, name: string) => ({
+      id,
+      org_id: orgId,
+      building_id: buildingId,
+      name,
+      ordinal: 1,
+      elevation_m: 0,
+    });
+
+    const building = (id: string, name: string) => ({
+      id,
+      org_id: orgId,
+      site_id: refMinimal.site.id,
+      name,
+      independent_access: false,
+    });
+
+    it('reports none for a well-formed site', () => {
+      const result = runChecks(refMinimal);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(
+        result.value.findings.filter((f) => f.code === 'WAYFIND.NAMING_COLLISION'),
+      ).toEqual([]);
+      expect(result.value.checks_run).toContain('naming_collision');
+    });
+
+    it('flags two levels sharing a name within one building', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        levels: [
+          ...refMinimal.levels,
+          level('lvl-dup', 'bldg-001', 'Rez-de-chaussée'),
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const collisions = result.value.findings.filter(
+        (f) => f.code === 'WAYFIND.NAMING_COLLISION',
+      );
+      expect(collisions.length).toBe(2);
+    });
+
+    it('does not flag the same level name across different buildings', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        buildings: [...refMinimal.buildings, building('bldg-002', 'Annexe')],
+        levels: [
+          ...refMinimal.levels,
+          level('lvl-002', 'bldg-002', 'Rez-de-chaussée'),
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      expect(
+        result.value.findings.filter((f) => f.code === 'WAYFIND.NAMING_COLLISION'),
+      ).toEqual([]);
+    });
+
+    it('flags two buildings sharing a name', () => {
+      const site: SiteData = {
+        ...refMinimal,
+        buildings: [
+          ...refMinimal.buildings,
+          building('bldg-002', 'Bâtiment principal'),
+        ],
+      };
+      const result = runChecks(site);
+      expect(result.ok).toBe(true);
+      if (!result.ok) return;
+      const collisions = result.value.findings.filter(
+        (f) => f.code === 'WAYFIND.NAMING_COLLISION',
+      );
+      expect(collisions.length).toBe(2);
+      expect(collisions.every((f) => f.entity?.kind === 'building')).toBe(true);
+    });
+  });
 });
