@@ -151,7 +151,11 @@ export const ERROR_CATALOG = {
 
   // ── TYPO (E17) ────────────────────────────────────────────
   'TYPO.TEXT_OVERFLOW':                      { severity: 'blocking', description: 'Débordement de texte calculé' },
-  'TYPO.FONT_NOT_EMBEDDABLE':                { severity: 'blocking', description: 'Police non incorporable dans un livrable distribué (G5.2)' },
+
+  // ── FONT (G8, registre des polices) ───────────────────────
+  'FONT.NOT_EMBEDDABLE':                     { severity: 'blocking', description: 'Police non incorporable dans un livrable distribué' },
+  'FONT.METRICS_MISSING':                    { severity: 'blocking', description: 'Table de métriques absente ou altérée' },
+  'FONT.LICENCE_UNKNOWN':                    { severity: 'warning',  description: 'Licence non déclarée' },
 
   // ── COLOR (E17) ───────────────────────────────────────────
   'COLOR.PROFILE_MISSING':                   { severity: 'warning',  description: 'Profil de sortie absent pour ce substrat' },
@@ -201,6 +205,8 @@ export const ANOMALY_DOMAINS = [
   'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
   'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
   'WAYFIND',
+  // Partie G (G8): font registry (metrics and licences).
+  'FONT',
   // Partie H (H12): tenant sign regulation, installation, and cost modules.
   'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.

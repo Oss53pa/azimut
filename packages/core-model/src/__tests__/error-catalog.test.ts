@@ -61,7 +61,7 @@ describe('ERROR_CATALOG', () => {
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
         'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'COST', 'DATA', 'EDIT',
-        'FLOW', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
+        'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
         'LIBRARY', 'MODULE', 'PACKAGE', 'PICTO', 'REVIEW', 'RULES', 'SECURITY',
         'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
       ],

@@ -6,6 +6,8 @@ export type {
   FontLicenceKind,
   EmbeddingTarget,
 } from './font-embedding.js';
+export { guardFontMetrics, auditFontLicences } from './font-registry.js';
+export type { FontMetricsRecord } from './font-registry.js';
 export {
   roundHalfAwayFromZero,
   roundSvg,

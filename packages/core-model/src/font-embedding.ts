@@ -7,7 +7,7 @@ import type { Finding, Outcome } from './outcome.js';
  * distributed deliverable is gated: the licence must be known, the asset must
  * be marked embeddable, and a kiosk package additionally requires a licence
  * reference. A deliverable produced with a non-embeddable font raises a
- * blocking anomaly (TYPO.FONT_NOT_EMBEDDABLE).
+ * blocking anomaly (FONT.NOT_EMBEDDABLE, G8).
  */
 export type FontLicenceKind =
   | 'open'
@@ -60,7 +60,7 @@ export function guardFontEmbedding(
     const reason = reasonFor(font, target);
     if (reason !== null) {
       findings.push({
-        code: 'TYPO.FONT_NOT_EMBEDDABLE',
+        code: 'FONT.NOT_EMBEDDABLE',
         severity: 'blocking',
         entity: { kind: 'font', id: font.id },
         params: { family: font.family, target, reason },

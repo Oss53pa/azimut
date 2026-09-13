@@ -32,7 +32,7 @@ describe('G5.2 — guardFontEmbedding', () => {
     const r = guardFontEmbedding([font({ licence_kind: 'unknown' })], 'distributed');
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(r.findings[0]?.code).toBe('TYPO.FONT_NOT_EMBEDDABLE');
+    expect(r.findings[0]?.code).toBe('FONT.NOT_EMBEDDABLE');
     expect(r.findings[0]?.params['reason']).toBe('licence_unknown');
     expect(r.findings[0]?.ruleRef).toBe('G5.2');
   });
