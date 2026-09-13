@@ -22,6 +22,7 @@ import type {
   OccupancyStatus,
   PictogramRegistry,
   Support as SupportModel,
+  SupportType as SupportTypeModel,
   DimensionsSource,
 } from '@azimut/core-model';
 
@@ -32,7 +33,7 @@ import {
   category, pictogram, destination, destinationName,
   travelProfile,
 } from './schema/directory.js';
-import { support } from './schema/signage.js';
+import { support, supportTypology } from './schema/signage.js';
 
 function num(v: string): number {
   return Number(v);
@@ -66,7 +67,7 @@ export async function loadSiteData(
     : [];
   const levelIds = levelRows.map((l) => l.id);
 
-  const [footprintRows, nodeRows, catRows, pictoRows, tpRows, supportRows] =
+  const [footprintRows, nodeRows, catRows, pictoRows, tpRows, supportRows, typologyRows] =
     await Promise.all([
       levelIds.length > 0
         ? db.select().from(footprint).where(inArray(footprint.level_id, levelIds))
@@ -78,6 +79,7 @@ export async function loadSiteData(
       db.select().from(pictogram).where(eq(pictogram.org_id, orgId)),
       db.select().from(travelProfile).where(eq(travelProfile.site_id, siteId)),
       db.select().from(support).where(eq(support.site_id, siteId)),
+      db.select().from(supportTypology).where(eq(supportTypology.org_id, orgId)),
     ]);
 
   const footprintIds = footprintRows.map((f) => f.id);
@@ -111,8 +113,28 @@ export async function loadSiteData(
     orgRow, siteRow, buildingRows, levelRows,
     footprintRows, volumeRows, nodeRows, edgeRows,
     vlinkRows, catRows, pictoRows, destRows, dnameRows, tpRows,
-    supportRows,
+    supportRows, typologyRows,
   );
+}
+
+/**
+ * Map a `support_typology` row (A5.6) to the in-memory model. The database
+ * stores no per-face default dimensions — those live on the support instance —
+ * so `faces` is empty; the compiler falls back to the instance dimensions and
+ * then a default face size.
+ */
+export function mapSupportTypologyRow(
+  row: typeof supportTypology.$inferSelect,
+): SupportTypeModel {
+  return {
+    id: row.id,
+    org_id: row.org_id,
+    key: row.key,
+    name: row.name,
+    face_count: row.face_count,
+    ...(row.template_key !== null ? { template_key: row.template_key } : {}),
+    faces: [],
+  };
 }
 
 /**
@@ -159,6 +181,7 @@ function assembleSiteData(
   dnameRows: (typeof destinationName.$inferSelect)[],
   tpRows: (typeof travelProfile.$inferSelect)[],
   supportRows: (typeof support.$inferSelect)[],
+  typologyRows: (typeof supportTypology.$inferSelect)[],
 ): SiteData {
   const org: OrgModel = {
     id: orgRow.id,
@@ -301,7 +324,7 @@ function assembleSiteData(
     destinations,
     destination_names: dnames,
     travel_profiles: tprofiles,
-    support_types: [],
+    support_types: typologyRows.map(mapSupportTypologyRow),
     supports: supportRows.map(mapSupportRow),
     face_templates: [],
   };

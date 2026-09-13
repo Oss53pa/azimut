@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import { loadSiteData, mapSupportRow } from '../load-site-data.js';
-import { support } from '../schema/signage.js';
+import { loadSiteData, mapSupportRow, mapSupportTypologyRow } from '../load-site-data.js';
+import { support, supportTypology } from '../schema/signage.js';
 import { organization } from '../schema/org.js';
 import { site, building, level } from '../schema/site.js';
 import { node } from '../schema/graph.js';
@@ -109,6 +109,25 @@ describe('mapSupportRow (A5.6)', () => {
   });
 });
 
+describe('mapSupportTypologyRow (A5.6)', () => {
+  const typRow = (overrides: Partial<typeof supportTypology.$inferSelect> = {}) => ({
+    id: 'typ-1', org_id: 'org-1', key: 'directional', name: 'Directionnel',
+    face_count: 1, template_key: 'ftpl-dir', ...overrides,
+  } as typeof supportTypology.$inferSelect);
+
+  it('maps a typology row, template_key included, with no default faces', () => {
+    const t = mapSupportTypologyRow(typRow());
+    expect(t).toStrictEqual({
+      id: 'typ-1', org_id: 'org-1', key: 'directional', name: 'Directionnel',
+      face_count: 1, template_key: 'ftpl-dir', faces: [],
+    });
+  });
+
+  it('omits template_key when the column is null', () => {
+    expect(mapSupportTypologyRow(typRow({ template_key: null })).template_key).toBeUndefined();
+  });
+});
+
 describe('loadSiteData (full path, stubbed db)', () => {
   it('assembles a site and loads its supports from the support table', async () => {
     const byTable = new Map<object, unknown[]>([
@@ -133,12 +152,19 @@ describe('loadSiteData (full path, stubbed db)', () => {
         registry: 'safety', context: 'exterior', reading_distance_m: '8',
         width_mm: 500, height_mm: 700, dimensions_source: 'overridden',
       })]],
+      [supportTypology, [{
+        id: 'typ-1', org_id: 'org-1', key: 'directional', name: 'Dir',
+        face_count: 1, template_key: 'ftpl-dir',
+      }]],
     ]);
 
     const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
 
     expect(result.site.id).toBe('site-1');
     expect(result.site.rules_pack_id).toBe('rp-1');
+    expect(result.support_types).toHaveLength(1);
+    expect(result.support_types[0]?.key).toBe('directional');
+    expect(result.support_types[0]?.template_key).toBe('ftpl-dir');
     expect(result.supports).toHaveLength(1);
     const s = result.supports[0];
     expect(s?.id).toBe('sup-1');

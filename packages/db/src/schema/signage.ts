@@ -54,6 +54,11 @@ export const supportFace = azimut.table('support_face', {
   side: text('side').notNull(),
   width_mm: numeric('width_mm'),
   height_mm: numeric('height_mm'),
+  // A5.6 : identité de face par index, gabarit et langues. Additifs — cf.
+  // migration 0016. `side` préexistant est laissé en place.
+  face_index: integer('face_index'),
+  template_key: text('template_key'),
+  langs: jsonb('langs'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -67,6 +72,11 @@ export const supportContentBlock = azimut.table('support_content_block', {
   kind: text('kind').notNull(),
   ordinal: integer('ordinal').notNull(),
   config: jsonb('config').notNull().default({}),
+  // A5.6 : index de bloc, liaison (contenu résolu) et texte libre. Additifs —
+  // cf. migration 0016. `ordinal`/`config` préexistants sont laissés en place.
+  block_index: integer('block_index'),
+  binding: jsonb('binding'),
+  free_text: jsonb('free_text'),
 }, (t) => [
   index('idx_content_block_org').on(t.org_id),
 ]);
