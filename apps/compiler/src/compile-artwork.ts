@@ -1,5 +1,6 @@
-import type { SiteData } from '@azimut/core-model';
-import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
+import type { SiteData, Finding } from '@azimut/core-model';
+import type { FaceTheme, LoadedRulesPack, RulesPackIndex } from '@azimut/engine-graph';
+import { resolveSiteRulesPack } from '@azimut/engine-graph';
 import type { PdfTarget } from '@azimut/engine-artwork';
 import { renderArtwork } from './artwork.js';
 import type { Job } from './job.js';
@@ -18,18 +19,40 @@ export type CompileContext = {
   readonly pdf_target: PdfTarget;
   readonly creation_date: Date;
   /**
-   * Optional rules pack; when supplied, the face theme's contrast is checked.
-   * The site→pack binding exists in the model (A5.8 `site_rules_binding` /
-   * `Site.rules_pack_id`); a resolver from that id to a loaded pack is still
-   * to come, so for now the pack is passed in explicitly.
+   * Optional explicit rules pack. When supplied it takes precedence and the
+   * face theme's contrast is checked against it.
    */
   readonly rules_pack?: LoadedRulesPack;
+  /**
+   * Optional pack corpus. When no explicit `rules_pack` is given, the pack the
+   * site is bound to (A5.8 `site_rules_binding` / `Site.rules_pack_id`) is
+   * resolved from this index. A site with no binding — or a binding absent from
+   * the corpus — surfaces `RULES.PACK_NOT_BOUND` and skips the check; it does
+   * not abort artwork production. The index's source (database vs file corpus)
+   * is the composition root's choice, not fixed here.
+   */
+  readonly rules_pack_index?: RulesPackIndex;
 };
 
 export function createArtworkHandler(
   context: CompileContext,
 ): (job: Job) => Promise<Record<string, unknown>> {
-  const { site, theme, font_family, pdf_target, creation_date, rules_pack } = context;
+  const {
+    site, theme, font_family, pdf_target, creation_date,
+    rules_pack, rules_pack_index,
+  } = context;
+
+  // Effective pack: an explicit pack wins; otherwise resolve the site's binding
+  // through the supplied corpus. Resolution findings (PACK_NOT_BOUND) are
+  // surfaced, never thrown — a missing pack skips the check, it does not stop
+  // the artwork.
+  let effectivePack = rules_pack;
+  let packFindings: readonly Finding[] = [];
+  if (effectivePack === undefined && rules_pack_index !== undefined) {
+    const resolved = resolveSiteRulesPack(site.site.rules_pack_id, rules_pack_index);
+    if (resolved.ok) effectivePack = resolved.value;
+    else packFindings = resolved.findings;
+  }
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const payload = job.payload;
@@ -62,7 +85,7 @@ export function createArtworkHandler(
       templateId,
       profileKey,
       title: `${supportId} — ${template.side}`,
-      ...(rules_pack !== undefined ? { rulesPack: rules_pack } : {}),
+      ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
     });
 
     return {
@@ -70,6 +93,8 @@ export function createArtworkHandler(
       face_side: side,
       svg_length: svg.length,
       pdf_length: pdf.length,
+      pack_bound: effectivePack !== undefined,
+      pack_finding_count: packFindings.length,
       contrast_finding_count: contrastFindings.length,
     };
   };
