@@ -1,8 +1,33 @@
 import { describe, it, expect } from 'vitest';
-import { mapSupportRow } from '../load-site-data.js';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { loadSiteData, mapSupportRow } from '../load-site-data.js';
 import { support } from '../schema/signage.js';
+import { organization } from '../schema/org.js';
+import { site, building, level } from '../schema/site.js';
+import { node } from '../schema/graph.js';
 
 type SupportRow = typeof support.$inferSelect;
+
+/**
+ * A drizzle stub that dispatches `db.select().from(table).where(...)` to the
+ * rows registered for that table, so the full loadSiteData path (queries →
+ * assemble → map) runs without a live Postgres. Tables with no entry return [].
+ */
+function stubDb(byTable: Map<object, unknown[]>): PostgresJsDatabase {
+  const db = {
+    select() {
+      return {
+        from(table: object) {
+          const rows = byTable.get(table) ?? [];
+          const result = { where: () => Promise.resolve(rows) };
+          // Some queries await `.from(t)` with a `.where`; all go through where.
+          return result;
+        },
+      };
+    },
+  };
+  return db as unknown as PostgresJsDatabase;
+}
 
 function row(overrides: Partial<SupportRow>): SupportRow {
   return {
@@ -81,5 +106,58 @@ describe('mapSupportRow (A5.6)', () => {
 
   it('ignores an unexpected dimensions_source value', () => {
     expect(mapSupportRow(row({ dimensions_source: 'guessed' })).dimensions_source).toBeUndefined();
+  });
+});
+
+describe('loadSiteData (full path, stubbed db)', () => {
+  it('assembles a site and loads its supports from the support table', async () => {
+    const byTable = new Map<object, unknown[]>([
+      [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
+      [site, [{
+        id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
+        rules_pack_id: 'rp-1',
+      }]],
+      [building, [{
+        id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B', independent_access: true,
+      }]],
+      [level, [{
+        id: 'l-1', org_id: 'org-1', building_id: 'b-1', name: 'RDC', ordinal: 0,
+        elevation_m: '0',
+      }]],
+      [node, [{
+        id: 'n-1', org_id: 'org-1', level_id: 'l-1', kind: 'decision',
+        position: { x: 0, y: 0, z: 0 }, label: 'hall',
+      }]],
+      [support, [row({
+        id: 'sup-1', site_id: 'site-1', node_id: 'n-1',
+        registry: 'safety', context: 'exterior', reading_distance_m: '8',
+        width_mm: 500, height_mm: 700, dimensions_source: 'overridden',
+      })]],
+    ]);
+
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+
+    expect(result.site.id).toBe('site-1');
+    expect(result.site.rules_pack_id).toBe('rp-1');
+    expect(result.supports).toHaveLength(1);
+    const s = result.supports[0];
+    expect(s?.id).toBe('sup-1');
+    expect(s?.registry).toBe('safety');
+    expect(s?.context).toBe('exterior');
+    expect(s?.reading_distance_m).toBe(8);
+    expect(s?.width_mm).toBe(500);
+    expect(s?.dimensions_source).toBe('overridden');
+  });
+
+  it('returns an empty supports list when the site has no supports', async () => {
+    const byTable = new Map<object, unknown[]>([
+      [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
+      [site, [{
+        id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR', rules_pack_id: null,
+      }]],
+    ]);
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.supports).toEqual([]);
+    expect(result.buildings).toEqual([]);
   });
 });

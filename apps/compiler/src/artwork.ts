@@ -51,6 +51,11 @@ export type ArtworkRenderParams = {
    */
   readonly overrideWidthMm?: number;
   readonly overrideHeightMm?: number;
+  /**
+   * A5.6 — origin of the dimensions. When 'overridden' and the resulting format
+   * is non-conform, LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM is raised.
+   */
+  readonly dimensionsSource?: string;
 };
 
 export type ArtworkRender = {
@@ -76,6 +81,12 @@ export type ArtworkRender = {
    * the scoping and integration are complete.
    */
   readonly legibilityFindings: readonly Finding[];
+  /**
+   * A5.6 — raised (LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM) when the support's
+   * dimensions were hand-set ('overridden') and the resulting format fails the
+   * format-conformance (legibility) check. Empty otherwise.
+   */
+  readonly dimensionsFindings: readonly Finding[];
 };
 
 export async function renderArtwork(
@@ -159,6 +170,20 @@ export async function renderArtwork(
     if (!legibility.ok) legibilityFindings = legibility.findings;
   }
 
+  // A5.6 — a hand-set format that comes out non-conform is a blocking anomaly
+  // distinct from the underlying failure: it tells the operator to fix the
+  // dimensions, not the content. Triggered by the legibility (format) check.
+  let dimensionsFindings: readonly Finding[] = [];
+  if (params.dimensionsSource === 'overridden' && legibilityFindings.length > 0) {
+    dimensionsFindings = [{
+      code: 'LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM',
+      severity: 'blocking',
+      entity: { kind: 'support', id: params.supportId },
+      params: { width_mm: widthMm, height_mm: heightMm },
+      ruleRef: null,
+    }];
+  }
+
   const pdf = await exportArtworkPdf({
     svg,
     target: params.pdfTarget,
@@ -178,5 +203,6 @@ export async function renderArtwork(
     contrastFindings,
     minTextFontSizeMm: min_text_font_size_mm,
     legibilityFindings,
+    dimensionsFindings,
   };
 }

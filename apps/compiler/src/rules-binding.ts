@@ -38,6 +38,7 @@ export function supportRenderParams(
   readonly readingDistanceM?: number;
   readonly overrideWidthMm?: number;
   readonly overrideHeightMm?: number;
+  readonly dimensionsSource?: string;
 } {
   if (support === undefined) return {};
   return {
@@ -46,5 +47,8 @@ export function supportRenderParams(
     readingDistanceM: support.reading_distance_m,
     ...(support.width_mm !== undefined ? { overrideWidthMm: support.width_mm } : {}),
     ...(support.height_mm !== undefined ? { overrideHeightMm: support.height_mm } : {}),
+    ...(support.dimensions_source !== undefined
+      ? { dimensionsSource: support.dimensions_source }
+      : {}),
   };
 }

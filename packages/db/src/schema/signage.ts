@@ -4,11 +4,26 @@ import { organization } from './org.js';
 import { site } from './site.js';
 import { node } from './graph.js';
 
+// A5.6 : typologie de support (gabarit d'un modèle physique). Le support
+// instancie une typologie ; les dimensions restent portées par l'instance.
+export const supportTypology = azimut.table('support_typology', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(),
+  name: text('name').notNull(),
+  face_count: integer('face_count').notNull(),
+  template_key: text('template_key'),
+}, (t) => [
+  index('idx_support_typology_org').on(t.org_id),
+]);
+
 export const support = azimut.table('support', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
+  // A5.6 : typologie de l'instance. Additif, nullable — cf. migration 0015.
+  typology_id: uuid('typology_id').references(() => supportTypology.id, { onDelete: 'set null' }),
   kind: text('kind').notNull(),
   azimuth_deg: numeric('azimuth_deg').notNull().default('0'),
   height_m: numeric('height_m'),
@@ -54,6 +69,23 @@ export const supportContentBlock = azimut.table('support_content_block', {
   config: jsonb('config').notNull().default({}),
 }, (t) => [
   index('idx_content_block_org').on(t.org_id),
+]);
+
+// A5.6 : versions d'un support (brouillon → relu → approuvé → remplacé), avec
+// l'empreinte du contenu et le chemin de l'artwork produit.
+export const supportVersion = azimut.table('support_version', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
+  version: integer('version').notNull(),
+  state: text('state').notNull().default('draft'),
+  artwork_path: text('artwork_path'),
+  content_hash: text('content_hash'),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  created_by: uuid('created_by'),
+}, (t) => [
+  index('idx_support_version_org').on(t.org_id),
+  index('idx_support_version_support').on(t.support_id),
 ]);
 
 export const proof = azimut.table('proof', {

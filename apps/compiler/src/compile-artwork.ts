@@ -72,6 +72,7 @@ export function createArtworkHandler(
 
     const {
       svg, pdf, side, contrastFindings, minTextFontSizeMm, legibilityFindings,
+      dimensionsFindings,
     } = await renderArtwork({
       site,
       theme,
@@ -99,6 +100,7 @@ export function createArtworkHandler(
       min_text_font_size_mm: minTextFontSizeMm,
       contrast_finding_count: contrastFindings.length,
       legibility_finding_count: legibilityFindings.length,
+      dimensions_finding_count: dimensionsFindings.length,
     };
   };
 }

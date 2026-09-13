@@ -10,7 +10,7 @@ export {
   travelProfile, routeCache, decisionPoint,
 } from './directory.js';
 export {
-  support, supportFace, supportContentBlock,
+  supportTypology, support, supportFace, supportContentBlock, supportVersion,
   proof, approval, installedSupport, divergence, workOrder,
 } from './signage.js';
 export {

@@ -529,5 +529,47 @@ describe('T-2.12 createArtworkHandler', () => {
       const result = await createArtworkHandler(ctx)(job);
       expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
     });
+
+    function siteWithDims(
+      source: 'computed' | 'overridden', heightMm: number,
+    ): typeof refMultilevel {
+      return {
+        ...refMultilevel,
+        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        supports: refMultilevel.supports.map((s) =>
+          s.id === 'sup-001'
+            ? { ...s, width_mm: 600, height_mm: heightMm, dimensions_source: source }
+            : s,
+        ),
+      };
+    }
+
+    it('flags a hand-set format that comes out non-conform (A5.6)', async () => {
+      // Overridden to a short 400 mm face → text under the floor → non-conform.
+      const ctx: CompileContext = {
+        ...context, site: siteWithDims('overridden', 400), rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
+      expect((result['dimensions_finding_count'] as number)).toBeGreaterThan(0);
+    });
+
+    it('does not flag dimensions when the same non-conform format is computed', async () => {
+      const ctx: CompileContext = {
+        ...context, site: siteWithDims('computed', 400), rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
+      expect(result['dimensions_finding_count']).toBe(0);
+    });
+
+    it('does not flag an overridden format that stays conform', async () => {
+      const ctx: CompileContext = {
+        ...context, site: siteWithDims('overridden', 560), rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect(result['legibility_finding_count']).toBe(0);
+      expect(result['dimensions_finding_count']).toBe(0);
+    });
   });
 });
