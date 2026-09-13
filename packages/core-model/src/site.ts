@@ -184,6 +184,9 @@ export type SupportContext = 'interior' | 'exterior';
  * A5.6 subset: the remaining columns (typology link, dimensions_source,
  * substrate, mounting) are additive and not yet modelled in memory.
  */
+/** A5.6 — whether a support's dimensions are engine-computed or hand-set. */
+export type DimensionsSource = 'computed' | 'overridden';
+
 export type Support = {
   readonly id: string;
   readonly org_id: string;
@@ -193,6 +196,13 @@ export type Support = {
   readonly context: SupportContext;
   readonly reading_distance_m: number;
   readonly azimuth_deg: number;
+  /**
+   * A5.6 — dimensions carried by the instance (mm). When set they override the
+   * typology's default face size; when absent the typology default is used.
+   */
+  readonly width_mm?: number;
+  readonly height_mm?: number;
+  readonly dimensions_source?: DimensionsSource;
 };
 
 export type ContentBlockKind =

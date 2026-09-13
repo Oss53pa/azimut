@@ -257,6 +257,33 @@ describe('T-2.12 createArtworkHandler', () => {
     expect(r1).toStrictEqual(r2);
   });
 
+  describe('support instance dimensions override the typology default (A5.6)', () => {
+    const job = makeJob({
+      support_id: 'sup-001',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+
+    it('renders larger text when the support overrides the face height', async () => {
+      const baseline = await createArtworkHandler(context)(job);
+
+      const taller = {
+        ...refMultilevel,
+        supports: refMultilevel.supports.map((s) =>
+          s.id === 'sup-001'
+            ? { ...s, width_mm: 600, height_mm: 560, dimensions_source: 'overridden' as const }
+            : s,
+        ),
+      };
+      const result = await createArtworkHandler({ ...context, site: taller })(job);
+
+      // A taller instance face lifts the rendered denomination text.
+      expect((result['min_text_font_size_mm'] as number))
+        .toBeGreaterThan(baseline['min_text_font_size_mm'] as number);
+    });
+  });
+
   describe('contrast check wired to a bound rules pack', () => {
     // Colours built from a helper so no literal hex appears in source.
     const hx = (rgb: string): string => `#${rgb}`;

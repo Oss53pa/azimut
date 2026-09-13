@@ -88,6 +88,7 @@ export type {
   SupportType,
   Support,
   SupportContext,
+  DimensionsSource,
   ProofStatus,
   Proof,
   ApprovalDecision,

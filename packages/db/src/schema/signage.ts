@@ -20,6 +20,11 @@ export const support = azimut.table('support', {
   // A5.6 / D3.5 : contexte de lecture (interieur/exterieur), portée de la
   // lisibilité. Additif, nullable — cf. migration 0013.
   context: text('context'),
+  // A5.6 : dimensions portées par l'instance (mm) et leur origine. Priment sur
+  // le défaut de la typologie quand renseignées. Additifs — cf. migration 0014.
+  width_mm: integer('width_mm'),
+  height_mm: integer('height_mm'),
+  dimensions_source: text('dimensions_source'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deleted_at: timestamp('deleted_at', { withTimezone: true }),

@@ -45,6 +45,12 @@ export type ArtworkRenderParams = {
   readonly supportContext?: string;
   /** Reading distance of the support (m) — feeds the legibility formula. */
   readonly readingDistanceM?: number;
+  /**
+   * A5.6 — dimensions carried by the support instance (mm). When set they
+   * override the typology's default face size.
+   */
+  readonly overrideWidthMm?: number;
+  readonly overrideHeightMm?: number;
 };
 
 export type ArtworkRender = {
@@ -91,8 +97,10 @@ export async function renderArtwork(
     (st) => st.key === template.support_type_key,
   );
   const face = supportType?.faces.find((f) => f.side === template.side);
-  const widthMm = face?.default_width_mm ?? 600;
-  const heightMm = face?.default_height_mm ?? 400;
+  // A5.6 — the support instance's dimensions win when set (dimensions_source
+  // 'overridden'); otherwise the typology's default face size, then a fallback.
+  const widthMm = params.overrideWidthMm ?? face?.default_width_mm ?? 600;
+  const heightMm = params.overrideHeightMm ?? face?.default_height_mm ?? 400;
 
   const resolved = composeFace({
     site,

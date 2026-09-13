@@ -22,6 +22,7 @@ import type {
   OccupancyStatus,
   PictogramRegistry,
   Support as SupportModel,
+  DimensionsSource,
 } from '@azimut/core-model';
 
 import { organization } from './schema/org.js';
@@ -123,6 +124,10 @@ export async function loadSiteData(
  * supports. Real values come from the survey.
  */
 export function mapSupportRow(row: typeof support.$inferSelect): SupportModel {
+  const dimSource: DimensionsSource | undefined =
+    row.dimensions_source === 'overridden' ? 'overridden'
+      : row.dimensions_source === 'computed' ? 'computed'
+        : undefined;
   return {
     id: row.id,
     org_id: row.org_id,
@@ -132,6 +137,9 @@ export function mapSupportRow(row: typeof support.$inferSelect): SupportModel {
     context: row.context === 'exterior' ? 'exterior' : 'interior',
     reading_distance_m: row.reading_distance_m !== null ? num(row.reading_distance_m) : 0,
     azimuth_deg: num(row.azimuth_deg),
+    ...(row.width_mm !== null ? { width_mm: row.width_mm } : {}),
+    ...(row.height_mm !== null ? { height_mm: row.height_mm } : {}),
+    ...(dimSource !== undefined ? { dimensions_source: dimSource } : {}),
   };
 }
 

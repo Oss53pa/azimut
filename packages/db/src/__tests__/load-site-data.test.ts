@@ -17,6 +17,9 @@ function row(overrides: Partial<SupportRow>): SupportRow {
     reading_distance_m: '4.5',
     registry: 'wayfinding',
     context: 'interior',
+    width_mm: null,
+    height_mm: null,
+    dimensions_source: null,
     created_at: new Date('2026-01-01T00:00:00Z'),
     updated_at: new Date('2026-01-01T00:00:00Z'),
     deleted_at: null,
@@ -58,5 +61,25 @@ describe('mapSupportRow (A5.6)', () => {
     // Any value other than the exact literals resolves to the permissive default.
     expect(mapSupportRow(row({ registry: 'other' })).registry).toBe('wayfinding');
     expect(mapSupportRow(row({ context: 'other' })).context).toBe('interior');
+  });
+
+  it('maps instance dimensions and their source when present (A5.6)', () => {
+    const s = mapSupportRow(row({
+      width_mm: 800, height_mm: 560, dimensions_source: 'overridden',
+    }));
+    expect(s.width_mm).toBe(800);
+    expect(s.height_mm).toBe(560);
+    expect(s.dimensions_source).toBe('overridden');
+  });
+
+  it('omits instance dimensions when the columns are null', () => {
+    const s = mapSupportRow(row({ width_mm: null, height_mm: null, dimensions_source: null }));
+    expect(s.width_mm).toBeUndefined();
+    expect(s.height_mm).toBeUndefined();
+    expect(s.dimensions_source).toBeUndefined();
+  });
+
+  it('ignores an unexpected dimensions_source value', () => {
+    expect(mapSupportRow(row({ dimensions_source: 'guessed' })).dimensions_source).toBeUndefined();
   });
 });

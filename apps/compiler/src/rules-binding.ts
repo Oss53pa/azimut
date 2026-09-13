@@ -36,11 +36,15 @@ export function supportRenderParams(
   readonly supportRegistry?: string;
   readonly supportContext?: string;
   readonly readingDistanceM?: number;
+  readonly overrideWidthMm?: number;
+  readonly overrideHeightMm?: number;
 } {
   if (support === undefined) return {};
   return {
     supportRegistry: support.registry,
     supportContext: support.context,
     readingDistanceM: support.reading_distance_m,
+    ...(support.width_mm !== undefined ? { overrideWidthMm: support.width_mm } : {}),
+    ...(support.height_mm !== undefined ? { overrideHeightMm: support.height_mm } : {}),
   };
 }
