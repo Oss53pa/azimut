@@ -398,6 +398,7 @@ export const refMultilevel: SiteData = {
       site_id: 'site-multilevel-001',
       node_id: 'n-ml-hall',
       registry: 'wayfinding',
+      context: 'interior',
       reading_distance_m: 5,
       azimuth_deg: 0,
     },

@@ -87,6 +87,7 @@ export type {
   SupportTypeFace,
   SupportType,
   Support,
+  SupportContext,
   ProofStatus,
   Proof,
   ApprovalDecision,

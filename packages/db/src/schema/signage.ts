@@ -17,6 +17,9 @@ export const support = azimut.table('support', {
   // règles, durcissement safety). Additifs, nullables — cf. migration 0012.
   reading_distance_m: numeric('reading_distance_m'),
   registry: text('registry'),
+  // A5.6 / D3.5 : contexte de lecture (interieur/exterieur), portée de la
+  // lisibilité. Additif, nullable — cf. migration 0013.
+  context: text('context'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deleted_at: timestamp('deleted_at', { withTimezone: true }),

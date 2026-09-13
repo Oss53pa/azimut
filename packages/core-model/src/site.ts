@@ -168,12 +168,21 @@ export type SupportType = {
 };
 
 /**
+ * Reading context of a support — indoors or outdoors. It scopes the rules
+ * (D3.3/D3.5 `context` dimension: interior thresholds differ from exterior).
+ * The spec does not derive it from geometry: whether a panel is indoors is a
+ * placement fact a surveyor records, like the azimuth and mounting, so it is
+ * carried explicitly on the support rather than inferred from footprints.
+ */
+export type SupportContext = 'interior' | 'exterior';
+
+/**
  * A support instance (A5.6 `support`) — a physical panel placed on a node.
  * Carries the per-instance normative inputs the typology cannot hold: the
- * reading distance that feeds the legibility formula and the registry that
- * scopes the rules (and drives the safety hardening). Minimal A5.6 subset:
- * the remaining columns (typology link, dimensions_source, substrate, mounting)
- * are additive and not yet modelled in memory.
+ * reading distance that feeds the legibility formula, the registry that scopes
+ * the rules (and drives the safety hardening), and the reading context. Minimal
+ * A5.6 subset: the remaining columns (typology link, dimensions_source,
+ * substrate, mounting) are additive and not yet modelled in memory.
  */
 export type Support = {
   readonly id: string;
@@ -181,6 +190,7 @@ export type Support = {
   readonly site_id: string;
   readonly node_id: string;
   readonly registry: PictogramRegistry;
+  readonly context: SupportContext;
   readonly reading_distance_m: number;
   readonly azimuth_deg: number;
 };

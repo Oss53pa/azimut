@@ -433,4 +433,74 @@ describe('T-2.12 createArtworkHandler', () => {
       expect((result['contrast_finding_count'] as number)).toBeGreaterThan(0);
     });
   });
+
+  describe('legibility scoped by support context (A5.6 / D3.5)', () => {
+    const PACK_ID = 'rp-test-0001';
+    const index = (() => {
+      const built = buildRulesPackIndex(
+        [{ id: PACK_ID, directory: 'packages/testkit/fixtures/rules-packs/test-fixture' }],
+        { environment: 'test' },
+      );
+      if (!built.ok) throw new Error('index non constructible');
+      return built.value;
+    })();
+
+    const job = makeJob({
+      support_id: 'sup-001',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+
+    // A taller face lifts the rendered text to ~40 mm — above the interior
+    // requirement (35) but below the exterior one (47), so the reading context
+    // alone decides the verdict.
+    function tallFaceSite(ctx: 'interior' | 'exterior'): typeof refMultilevel {
+      return {
+        ...refMultilevel,
+        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        support_types: refMultilevel.support_types.map((st) => ({
+          ...st,
+          faces: st.faces.map((f) => ({ ...f, default_height_mm: 560 })),
+        })),
+        supports: refMultilevel.supports.map((s) =>
+          s.id === 'sup-001' ? { ...s, context: ctx } : s,
+        ),
+      };
+    }
+
+    it('runs no legibility check when no pack is bound', async () => {
+      const result = await createArtworkHandler(context)(job);
+      expect(result['legibility_finding_count']).toBe(0);
+    });
+
+    it('flags text below the interior minimum on the standard face', async () => {
+      // The 400 mm face renders ~28.8 mm text, under the interior floor (33).
+      const boundSite = {
+        ...refMultilevel,
+        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+      };
+      const ctx: CompileContext = {
+        ...context, site: boundSite, rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
+    });
+
+    it('passes the tall face under the interior context', async () => {
+      const ctx: CompileContext = {
+        ...context, site: tallFaceSite('interior'), rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect(result['legibility_finding_count']).toBe(0);
+    });
+
+    it('fails the same tall face under the harder exterior context', async () => {
+      const ctx: CompileContext = {
+        ...context, site: tallFaceSite('exterior'), rules_pack_index: index,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['legibility_finding_count'] as number)).toBeGreaterThan(0);
+    });
+  });
 });

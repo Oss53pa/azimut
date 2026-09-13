@@ -75,6 +75,8 @@ export { renderFace, renderFaceWithMeasures, destinationListFontSizeMm } from '.
 export type { FaceRender } from './render-face.js';
 export { checkFaceContrast } from './face-quality.js';
 export type { FaceContrastInput } from './face-quality.js';
+export { checkCharHeight } from '@azimut/rules';
+export type { CharHeightInput } from '@azimut/rules';
 export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/rules';
 export { resolveSiteRulesPack, buildRulesPackIndex } from '@azimut/rules';
 export { compileTemplate } from './compile-template.js';

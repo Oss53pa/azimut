@@ -1,5 +1,7 @@
 import type { SiteData, Finding } from '@azimut/core-model';
-import { composeFace, renderFaceWithMeasures, checkFaceContrast } from '@azimut/engine-graph';
+import {
+  composeFace, renderFaceWithMeasures, checkFaceContrast, checkCharHeight,
+} from '@azimut/engine-graph';
 import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
@@ -35,6 +37,14 @@ export type ArtworkRenderParams = {
   readonly rulesPack?: LoadedRulesPack;
   /** Orientation registry of the support; defaults to 'wayfinding'. */
   readonly supportRegistry?: string;
+  /**
+   * Reading context of the support (interior/exterior) — scopes the legibility
+   * rule (D3.5). Legibility is checked only when this, `readingDistanceM`, a
+   * bound pack, and a measured text size are all present.
+   */
+  readonly supportContext?: string;
+  /** Reading distance of the support (m) — feeds the legibility formula. */
+  readonly readingDistanceM?: number;
 };
 
 export type ArtworkRender = {
@@ -48,10 +58,18 @@ export type ArtworkRender = {
   readonly contrastFindings: readonly Finding[];
   /**
    * Smallest denomination-text font size rendered (em, mm), or null when the
-   * face has no such text. The measured input a legibility check would read
-   * against the pack's LEGIBILITY.MIN_CHAR_HEIGHT; not yet enforced.
+   * face has no such text. The measured input the legibility check reads
+   * against the pack's LEGIBILITY.MIN_CHAR_HEIGHT.
    */
   readonly minTextFontSizeMm: number | null;
+  /**
+   * Legibility anomalies (LAYOUT.CHAR_HEIGHT_BELOW_MIN). Empty unless a pack is
+   * bound and the support carries a reading context and distance. The height
+   * fed in is the em size (partie-G cap-height metrics not yet applied) and the
+   * fixture factor is provisional (D18), so the numeric verdict is provisional;
+   * the scoping and integration are complete.
+   */
+  readonly legibilityFindings: readonly Finding[];
 };
 
 export async function renderArtwork(
@@ -107,6 +125,27 @@ export async function renderArtwork(
     if (!contrast.ok) contrastFindings = contrast.findings;
   }
 
+  // Legibility (LEGIBILITY.MIN_CHAR_HEIGHT). Scoped by the support's reading
+  // context (D3.5); needs a bound pack, a context, a reading distance, and a
+  // measured text height. The height is the rendered em size — cap-height
+  // conversion (partie G) is deferred, so the verdict is provisional.
+  let legibilityFindings: readonly Finding[] = [];
+  if (
+    params.rulesPack !== undefined
+    && params.supportContext !== undefined
+    && params.readingDistanceM !== undefined
+    && min_text_font_size_mm !== null
+  ) {
+    const legibility = checkCharHeight(params.rulesPack, {
+      supportRegistry: params.supportRegistry ?? 'wayfinding',
+      context: params.supportContext,
+      reading_distance_m: params.readingDistanceM,
+      char_height_mm: min_text_font_size_mm,
+      entity_id: params.supportId,
+    });
+    if (!legibility.ok) legibilityFindings = legibility.findings;
+  }
+
   const pdf = await exportArtworkPdf({
     svg,
     target: params.pdfTarget,
@@ -125,5 +164,6 @@ export async function renderArtwork(
     heightMm,
     contrastFindings,
     minTextFontSizeMm: min_text_font_size_mm,
+    legibilityFindings,
   };
 }
