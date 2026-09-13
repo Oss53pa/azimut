@@ -1,3 +1,4 @@
+import type { Finding } from '@azimut/core-model';
 import type { ResolvedFace, ResolvedBlock, ResolvedContent } from './resolve-face.js';
 
 export type FaceTheme = {
@@ -44,6 +45,15 @@ function esc(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * Header font size (em, mm). Single source with the fit check: capped by the
+ * block height (h·0.5) and width (w·0.06) so the renderer and the overflow
+ * measurement agree on the size drawn.
+ */
+export function headerFontSizeMm(w: number, h: number): number {
+  return Math.min(h * 0.5, w * 0.06);
+}
+
 function renderHeader(
   content: Extract<ResolvedContent, { type: 'header' }>,
   x: number,
@@ -53,7 +63,7 @@ function renderHeader(
   theme: FaceTheme,
   fontFamily: string,
 ): string {
-  const fontSize = Math.min(h * 0.5, w * 0.06);
+  const fontSize = headerFontSizeMm(w, h);
   const cx = x + w / 2;
   const cy = y + h / 2 + fontSize * 0.35;
   return (
@@ -441,6 +451,61 @@ export function faceUsesAccent(face: ResolvedFace): boolean {
         return false;
     }
   });
+}
+
+/**
+ * Deterministic text measurement (G5.1): the width in millimetres of `text`
+ * drawn at `fontSizeMm`, computed from a versioned font-metrics table, never the
+ * browser. Supplied by the caller — no metrics table ships in the repository
+ * yet, so the content-fit check below stays dormant until one is provided.
+ */
+export type TextMeasure = (text: string, fontSizeMm: number) => number;
+
+/**
+ * Content-fit control (A7.2, LAYOUT.CONTENT_OVERFLOW): the composition-level
+ * check that a face's text fits the format it is drawn in. Each primary text —
+ * the header's site name and each destination name — is measured at the exact
+ * size the renderer draws it (shared font-size helpers) against the width of its
+ * block; a piece wider than its block raises a blocking anomaly. Text overflow
+ * is thus detected by calculation, never visually (E12/D14). Returns [] when no
+ * text overflows; runs only when a `measure` is supplied.
+ */
+export function checkFaceContentFit(
+  face: ResolvedFace,
+  options: RenderFaceOptions,
+  measure: TextMeasure,
+): readonly Finding[] {
+  const { width_mm, height_mm, lang } = options;
+  const findings: Finding[] = [];
+
+  const flag = (blockKind: string, text: string, fontSizeMm: number, availableMm: number): void => {
+    if (text.length === 0) return;
+    const measured = measure(text, fontSizeMm);
+    if (measured > availableMm) {
+      findings.push({
+        code: 'LAYOUT.CONTENT_OVERFLOW',
+        severity: 'blocking',
+        entity: { kind: 'face_block', id: blockKind },
+        params: { measured_mm: measured, available_mm: availableMm },
+        ruleRef: null,
+      });
+    }
+  };
+
+  for (const block of face.blocks) {
+    const bw = (block.region.w_pct / 100) * width_mm;
+    const bh = (block.region.h_pct / 100) * height_mm;
+    const content = block.content;
+    if (content.type === 'header') {
+      flag(block.kind, content.site_name, headerFontSizeMm(bw, bh), bw);
+    } else if (content.type === 'destination_list' && content.entries.length > 0) {
+      const fontSize = destinationListFontSizeMm(bh, content.entries.length);
+      for (const entry of content.entries) {
+        flag(block.kind, pickName(entry.names, lang), fontSize, bw);
+      }
+    }
+  }
+  return findings;
 }
 
 export function renderFace(

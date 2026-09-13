@@ -4,6 +4,9 @@ import {
   renderFaceWithMeasures,
   destinationListFontSizeMm,
   faceUsesAccent,
+  checkFaceContentFit,
+  headerFontSizeMm,
+  type TextMeasure,
 } from '../render-face.js';
 import type { FaceTheme, RenderFaceOptions } from '../render-face.js';
 import { resolveFaceContent } from '../resolve-face.js';
@@ -121,5 +124,55 @@ describe('faceUsesAccent', () => {
     });
     expect(faceUsesAccent(listFace('N'))).toBe(true);
     expect(faceUsesAccent(listFace(null))).toBe(false);
+  });
+});
+
+describe('checkFaceContentFit (LAYOUT.CONTENT_OVERFLOW)', () => {
+  // Stub metrics: width ≈ characters × em size. No real table ships (G5.1).
+  const measure: TextMeasure = (text, fontSizeMm) => text.length * fontSizeMm;
+  const narrow = { ...opts, width_mm: 100, height_mm: 100 };
+
+  const headerFace = (name: string): ResolvedFace => ({
+    template_id: 't', support_type_key: 'directional', side: 'front',
+    blocks: [{
+      kind: 'header', ordinal: 0,
+      region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+      content: { type: 'header', site_name: name },
+    }],
+  });
+
+  it('flags a header name wider than its block', () => {
+    // block width 100 mm, font 6 mm → 40 chars ≈ 240 mm > 100.
+    const findings = checkFaceContentFit(headerFace('A'.repeat(40)), narrow, measure);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.code).toBe('LAYOUT.CONTENT_OVERFLOW');
+  });
+
+  it('passes a short name that fits', () => {
+    expect(checkFaceContentFit(headerFace('Hall'), narrow, measure)).toEqual([]);
+  });
+
+  it('measures the header at the same size the renderer draws', () => {
+    // headerFontSizeMm is the shared source: 6 mm here (min(100*0.5, 100*0.06)).
+    expect(headerFontSizeMm(100, 100)).toBe(6);
+  });
+
+  it('flags an overlong destination name', () => {
+    const face: ResolvedFace = {
+      template_id: 't', support_type_key: 'directional', side: 'front',
+      blocks: [{
+        kind: 'destination_list', ordinal: 0,
+        region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 100 },
+        content: {
+          type: 'destination_list',
+          entries: [{
+            destination_id: 'd1', names: { fr: 'X'.repeat(60) },
+            distance_m: null, direction: null,
+          }],
+        },
+      }],
+    };
+    const findings = checkFaceContentFit(face, narrow, measure);
+    expect(findings.some((f) => f.code === 'LAYOUT.CONTENT_OVERFLOW')).toBe(true);
   });
 });

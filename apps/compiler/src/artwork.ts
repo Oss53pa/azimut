@@ -1,8 +1,9 @@
 import type { SiteData, Finding } from '@azimut/core-model';
 import {
   composeFace, renderFaceWithMeasures, checkFaceContrast, checkCharHeight, faceUsesAccent,
+  checkFaceContentFit,
 } from '@azimut/engine-graph';
-import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
+import type { FaceTheme, LoadedRulesPack, TextMeasure } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
 
@@ -56,6 +57,12 @@ export type ArtworkRenderParams = {
    * is non-conform, LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM is raised.
    */
   readonly dimensionsSource?: string;
+  /**
+   * Deterministic text measurement (G5.1). When supplied, the content-fit check
+   * (LAYOUT.CONTENT_OVERFLOW) runs; dormant otherwise, since no metrics table
+   * ships yet.
+   */
+  readonly measureText?: TextMeasure;
 };
 
 export type ArtworkRender = {
@@ -87,6 +94,11 @@ export type ArtworkRender = {
    * format-conformance (legibility) check. Empty otherwise.
    */
   readonly dimensionsFindings: readonly Finding[];
+  /**
+   * Content-fit anomalies (LAYOUT.CONTENT_OVERFLOW). Empty unless a text measure
+   * is supplied; a piece of text wider than its block raises one.
+   */
+  readonly contentOverflowFindings: readonly Finding[];
 };
 
 export async function renderArtwork(
@@ -127,12 +139,22 @@ export async function renderArtwork(
     throw new Error(`Compose failed: ${codes}`);
   }
 
-  const { svg, min_text_font_size_mm } = renderFaceWithMeasures(resolved.value, {
+  const renderOptions = {
     width_mm: widthMm,
     height_mm: heightMm,
     theme: params.theme,
     font_family: params.fontFamily,
-  });
+  };
+  const { svg, min_text_font_size_mm } = renderFaceWithMeasures(resolved.value, renderOptions);
+
+  // Content fit (LAYOUT.CONTENT_OVERFLOW). Runs only when a text measure is
+  // supplied — no font-metrics table ships yet (G5.1), so it is dormant.
+  let contentOverflowFindings: readonly Finding[] = [];
+  if (params.measureText !== undefined) {
+    contentOverflowFindings = checkFaceContentFit(
+      resolved.value, renderOptions, params.measureText,
+    );
+  }
 
   let contrastFindings: readonly Finding[] = [];
   if (params.rulesPack !== undefined) {
@@ -172,9 +194,12 @@ export async function renderArtwork(
 
   // A5.6 — a hand-set format that comes out non-conform is a blocking anomaly
   // distinct from the underlying failure: it tells the operator to fix the
-  // dimensions, not the content. Triggered by the legibility (format) check.
+  // dimensions, not the content. Triggered by any format check — the text too
+  // small for the reading distance (legibility) or text wider than its block
+  // (content overflow).
   let dimensionsFindings: readonly Finding[] = [];
-  if (params.dimensionsSource === 'overridden' && legibilityFindings.length > 0) {
+  const formatNonConform = legibilityFindings.length > 0 || contentOverflowFindings.length > 0;
+  if (params.dimensionsSource === 'overridden' && formatNonConform) {
     dimensionsFindings = [{
       code: 'LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM',
       severity: 'blocking',
@@ -204,5 +229,6 @@ export async function renderArtwork(
     minTextFontSizeMm: min_text_font_size_mm,
     legibilityFindings,
     dimensionsFindings,
+    contentOverflowFindings,
   };
 }

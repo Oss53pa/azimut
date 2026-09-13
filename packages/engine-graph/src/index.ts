@@ -73,8 +73,9 @@ export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
 export {
   renderFace, renderFaceWithMeasures, destinationListFontSizeMm, faceUsesAccent,
+  headerFontSizeMm, checkFaceContentFit,
 } from './render-face.js';
-export type { FaceRender } from './render-face.js';
+export type { FaceRender, TextMeasure } from './render-face.js';
 export { checkFaceContrast } from './face-quality.js';
 export type { FaceContrastInput } from './face-quality.js';
 export { checkCharHeight } from '@azimut/rules';

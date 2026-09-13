@@ -572,4 +572,40 @@ describe('T-2.12 createArtworkHandler', () => {
       expect(result['dimensions_finding_count']).toBe(0);
     });
   });
+
+  describe('content overflow (LAYOUT.CONTENT_OVERFLOW)', () => {
+    // Stub metrics: width ≈ characters × em. The 600 mm header at ~36 mm holds
+    // the site name 'Site multi-niveaux' (18 chars ≈ 648 mm) → overflow.
+    const measure = (text: string, fontSizeMm: number): number => text.length * fontSizeMm;
+    const job = makeJob({
+      support_id: 'sup-001', node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front', profile_key: 'standard',
+    });
+
+    it('runs no content-fit check when no measure is supplied', async () => {
+      const result = await createArtworkHandler(context)(job);
+      expect(result['content_overflow_finding_count']).toBe(0);
+    });
+
+    it('flags overflow when a measure reports text wider than its block', async () => {
+      const ctx: CompileContext = { ...context, measure_text: measure };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['content_overflow_finding_count'] as number)).toBeGreaterThan(0);
+    });
+
+    it('makes an overridden format that overflows non-conform (A5.6)', async () => {
+      const site = {
+        ...refMultilevel,
+        supports: refMultilevel.supports.map((s) =>
+          s.id === 'sup-001'
+            ? { ...s, width_mm: 600, height_mm: 400, dimensions_source: 'overridden' as const }
+            : s,
+        ),
+      };
+      const ctx: CompileContext = { ...context, site, measure_text: measure };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['content_overflow_finding_count'] as number)).toBeGreaterThan(0);
+      expect((result['dimensions_finding_count'] as number)).toBeGreaterThan(0);
+    });
+  });
 });

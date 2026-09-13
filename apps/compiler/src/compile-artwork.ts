@@ -1,5 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
-import type { FaceTheme, LoadedRulesPack, RulesPackIndex } from '@azimut/engine-graph';
+import type { FaceTheme, LoadedRulesPack, RulesPackIndex, TextMeasure } from '@azimut/engine-graph';
 import type { PdfTarget } from '@azimut/engine-artwork';
 import { renderArtwork } from './artwork.js';
 import { resolveEffectivePack, supportRenderParams } from './rules-binding.js';
@@ -32,6 +32,11 @@ export type CompileContext = {
    * is the composition root's choice, not fixed here.
    */
   readonly rules_pack_index?: RulesPackIndex;
+  /**
+   * Deterministic text measure (G5.1). When supplied, the content-fit check
+   * (LAYOUT.CONTENT_OVERFLOW) runs; dormant otherwise.
+   */
+  readonly measure_text?: TextMeasure;
 };
 
 export function createArtworkHandler(
@@ -39,7 +44,7 @@ export function createArtworkHandler(
 ): (job: Job) => Promise<Record<string, unknown>> {
   const {
     site, theme, font_family, pdf_target, creation_date,
-    rules_pack, rules_pack_index,
+    rules_pack, rules_pack_index, measure_text,
   } = context;
 
   const { pack: effectivePack, findings: packFindings } = resolveEffectivePack(
@@ -72,7 +77,7 @@ export function createArtworkHandler(
 
     const {
       svg, pdf, side, contrastFindings, minTextFontSizeMm, legibilityFindings,
-      dimensionsFindings,
+      dimensionsFindings, contentOverflowFindings,
     } = await renderArtwork({
       site,
       theme,
@@ -85,6 +90,7 @@ export function createArtworkHandler(
       profileKey,
       title: `${supportId} — ${template.side}`,
       ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
+      ...(measure_text !== undefined ? { measureText: measure_text } : {}),
       ...supportRenderParams(support),
     });
 
@@ -101,6 +107,7 @@ export function createArtworkHandler(
       contrast_finding_count: contrastFindings.length,
       legibility_finding_count: legibilityFindings.length,
       dimensions_finding_count: dimensionsFindings.length,
+      content_overflow_finding_count: contentOverflowFindings.length,
     };
   };
 }
