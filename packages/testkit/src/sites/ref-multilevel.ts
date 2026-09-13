@@ -391,6 +391,17 @@ export const refMultilevel: SiteData = {
       faces: [{ side: 'front', default_width_mm: 600, default_height_mm: 400 }],
     },
   ],
+  supports: [
+    {
+      id: 'sup-001',
+      org_id: 'org-test-001',
+      site_id: 'site-multilevel-001',
+      node_id: 'n-ml-hall',
+      registry: 'wayfinding',
+      reading_distance_m: 5,
+      azimuth_deg: 0,
+    },
+  ],
   face_templates: [
     {
       id: 'ftpl-dir-front',

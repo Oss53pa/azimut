@@ -167,6 +167,24 @@ export type SupportType = {
   readonly faces: readonly SupportTypeFace[];
 };
 
+/**
+ * A support instance (A5.6 `support`) — a physical panel placed on a node.
+ * Carries the per-instance normative inputs the typology cannot hold: the
+ * reading distance that feeds the legibility formula and the registry that
+ * scopes the rules (and drives the safety hardening). Minimal A5.6 subset:
+ * the remaining columns (typology link, dimensions_source, substrate, mounting)
+ * are additive and not yet modelled in memory.
+ */
+export type Support = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly site_id: string;
+  readonly node_id: string;
+  readonly registry: PictogramRegistry;
+  readonly reading_distance_m: number;
+  readonly azimuth_deg: number;
+};
+
 export type ContentBlockKind =
   | 'header'
   | 'destination_list'
@@ -260,5 +278,6 @@ export type SiteData = {
   readonly destination_names: readonly DestinationName[];
   readonly travel_profiles: readonly TravelProfile[];
   readonly support_types: readonly SupportType[];
+  readonly supports: readonly Support[];
   readonly face_templates: readonly FaceTemplate[];
 };

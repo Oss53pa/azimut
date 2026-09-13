@@ -171,6 +171,7 @@ describe('computeWayfinding', () => {
         excluded_edge_kinds: [], require_accessible: false, honor_hours: false,
       }],
       support_types: [],
+      supports: [],
       face_templates: [],
     };
 

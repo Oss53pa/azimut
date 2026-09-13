@@ -139,6 +139,7 @@ export function loadKioskSite(
     // Not shipped to a kiosk: supports and panels are authored, not displayed
     // on a wayfinding terminal.
     support_types: [],
+    supports: [],
     face_templates: [],
   };
 }

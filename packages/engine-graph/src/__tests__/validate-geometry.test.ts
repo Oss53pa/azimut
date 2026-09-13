@@ -22,6 +22,7 @@ function siteWith(
     destination_names: [],
     travel_profiles: [],
     support_types: [],
+    supports: [],
     face_templates: [],
   };
 }

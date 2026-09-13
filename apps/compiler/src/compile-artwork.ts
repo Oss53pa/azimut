@@ -74,6 +74,11 @@ export function createArtworkHandler(
       throw new Error(`Template not found: ${templateId}`);
     }
 
+    // A5.6 — the support instance carries the registry that scopes the rules
+    // (safety hardening). When the support is unknown, fall back to the
+    // wayfinding registry (renderArtwork's own default).
+    const support = site.supports.find((s) => s.id === supportId);
+
     const { svg, pdf, side, contrastFindings } = await renderArtwork({
       site,
       theme,
@@ -86,6 +91,7 @@ export function createArtworkHandler(
       profileKey,
       title: `${supportId} — ${template.side}`,
       ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
+      ...(support !== undefined ? { supportRegistry: support.registry } : {}),
     });
 
     return {
@@ -95,6 +101,7 @@ export function createArtworkHandler(
       pdf_length: pdf.length,
       pack_bound: effectivePack !== undefined,
       pack_finding_count: packFindings.length,
+      support_registry: support?.registry ?? 'wayfinding',
       contrast_finding_count: contrastFindings.length,
     };
   };

@@ -268,6 +268,7 @@ function assembleSiteData(
     destination_names: dnames,
     travel_profiles: tprofiles,
     support_types: [],
+    supports: [],
     face_templates: [],
   };
 }

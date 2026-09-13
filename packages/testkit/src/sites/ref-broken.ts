@@ -203,5 +203,6 @@ export const refBroken: SiteData = {
       faces: [{ side: 'front', default_width_mm: 600, default_height_mm: 400 }],
     },
   ],
+  supports: [],
   face_templates: [],
 };
