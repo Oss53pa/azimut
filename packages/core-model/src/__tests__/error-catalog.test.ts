@@ -60,10 +60,10 @@ describe('ERROR_CATALOG', () => {
   it('the allowlist holds the base/E17/H domains plus partie I (I6) and partie J', () => {
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
-        'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'DATA', 'EDIT', 'FLOW',
-        'GEOM', 'GRAPH', 'IMPORT', 'INK', 'LAYOUT', 'LIBRARY', 'MODULE',
-        'PACKAGE', 'PICTO', 'REVIEW', 'RULES', 'SECURITY', 'SKETCH', 'SURVEY',
-        'TYPO', 'WAYFIND',
+        'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'COST', 'DATA', 'EDIT',
+        'FLOW', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
+        'LIBRARY', 'MODULE', 'PACKAGE', 'PICTO', 'REVIEW', 'RULES', 'SECURITY',
+        'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
       ],
     );
   });

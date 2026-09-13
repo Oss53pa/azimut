@@ -168,6 +168,11 @@ export const ERROR_CATALOG = {
   'AD.OPTION_EXPIRED':                       { severity: 'info',     description: 'Option arrivée à échéance' },
   'SURVEY.SYNC_PENDING':                     { severity: 'info',     description: 'Relevé de tournée non synchronisé' },
 
+  // ── TENANT / INSTALL / COST (H12, modules 6/7/9) ──────────
+  'TENANT.RULE_VIOLATION':                   { severity: 'blocking', description: 'Projet d’enseigne non conforme au règlement' },
+  'INSTALL.RESERVATION_OPEN':                { severity: 'warning',  description: 'Réserve de pose non levée' },
+  'COST.REFERENCE_MISSING':                  { severity: 'warning',  description: 'Aucun coût de référence pour cette typologie' },
+
   // ── INK / SKETCH / REVIEW / PICTO / LIBRARY (partie J) ─────
   'INK.SHAPE_NOT_RECOGNIZED':                { severity: 'info',     description: 'Aucune forme candidate, tracé conservé en esquisse' },
   'SKETCH.IN_DELIVERABLE':                   { severity: 'blocking', description: 'Couche d’esquisse présente dans un export destiné à un tiers' },
@@ -196,6 +201,8 @@ export const ANOMALY_DOMAINS = [
   'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
   'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
   'WAYFIND',
+  // Partie H (H12): tenant sign regulation, installation, and cost modules.
+  'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
