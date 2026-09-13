@@ -62,8 +62,8 @@ describe('ERROR_CATALOG', () => {
       [
         'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'COST', 'DATA', 'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
-        'LIBRARY', 'MODULE', 'PACKAGE', 'PICTO', 'REVIEW', 'RULES', 'SECURITY',
-        'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
+        'LIBRARY', 'MODULE', 'PACKAGE', 'PICTO', 'RENDER', 'REVIEW', 'RULES',
+        'SECURITY', 'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
       ],
     );
   });

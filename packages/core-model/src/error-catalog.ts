@@ -154,6 +154,9 @@ export const ERROR_CATALOG = {
   // ── TYPO (E17) ────────────────────────────────────────────
   'TYPO.TEXT_OVERFLOW':                      { severity: 'blocking', description: 'Débordement de texte calculé' },
 
+  // ── RENDER (G8, budget de rendu adaptatif) ────────────────
+  'RENDER.BUDGET_EXCEEDED':                  { severity: 'info',     description: 'Bascule en mode de rendu allégé' },
+
   // ── FONT (G8, registre des polices) ───────────────────────
   'FONT.NOT_EMBEDDABLE':                     { severity: 'blocking', description: 'Police non incorporable dans un livrable distribué' },
   'FONT.METRICS_MISSING':                    { severity: 'blocking', description: 'Table de métriques absente ou altérée' },
@@ -209,8 +212,8 @@ export const ANOMALY_DOMAINS = [
   'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT',
   'PACKAGE', 'SECURITY', 'DATA', 'EDIT', 'ASSET', 'TYPO', 'COLOR',
   'WAYFIND',
-  // Partie G (G8): font registry (metrics and licences).
-  'FONT',
+  // Partie G (G8): adaptive render budget, font registry (metrics and licences).
+  'RENDER', 'FONT',
   // Partie H (H12): tenant sign regulation, installation, and cost modules.
   'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
