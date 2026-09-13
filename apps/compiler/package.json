@@ -19,6 +19,7 @@
     "@azimut/db": "workspace:*"
   },
   "devDependencies": {
+    "@azimut/rules": "workspace:*",
     "@azimut/testkit": "workspace:*"
   },
   "scripts": {

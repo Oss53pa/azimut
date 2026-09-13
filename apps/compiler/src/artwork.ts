@@ -1,6 +1,6 @@
-import type { SiteData } from '@azimut/core-model';
-import { composeFace, renderFace } from '@azimut/engine-graph';
-import type { FaceTheme } from '@azimut/engine-graph';
+import type { SiteData, Finding } from '@azimut/core-model';
+import { composeFace, renderFace, checkFaceContrast } from '@azimut/engine-graph';
+import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
 
@@ -25,6 +25,14 @@ export type ArtworkRenderParams = {
   readonly templateId: string;
   readonly profileKey: string;
   readonly title: string;
+  /**
+   * When a rules pack is bound to the site, the face's theme contrast is
+   * checked against it (G6.2). Dormant until a caller supplies a pack — the
+   * site→pack binding is not yet in the data model (parties A–D).
+   */
+  readonly rulesPack?: LoadedRulesPack;
+  /** Orientation registry of the support; defaults to 'wayfinding'. */
+  readonly supportRegistry?: string;
 };
 
 export type ArtworkRender = {
@@ -34,6 +42,8 @@ export type ArtworkRender = {
   readonly supportTypeKey: string;
   readonly widthMm: number;
   readonly heightMm: number;
+  /** Contrast anomalies from the rules check; empty when no pack is bound. */
+  readonly contrastFindings: readonly Finding[];
 };
 
 export async function renderArtwork(
@@ -79,6 +89,16 @@ export async function renderArtwork(
     font_family: params.fontFamily,
   });
 
+  let contrastFindings: readonly Finding[] = [];
+  if (params.rulesPack !== undefined) {
+    const contrast = checkFaceContrast(params.rulesPack, {
+      face_id: params.supportId,
+      supportRegistry: params.supportRegistry ?? 'wayfinding',
+      theme: params.theme,
+    });
+    if (!contrast.ok) contrastFindings = contrast.findings;
+  }
+
   const pdf = await exportArtworkPdf({
     svg,
     target: params.pdfTarget,
@@ -95,5 +115,6 @@ export async function renderArtwork(
     supportTypeKey: template.support_type_key,
     widthMm,
     heightMm,
+    contrastFindings,
   };
 }

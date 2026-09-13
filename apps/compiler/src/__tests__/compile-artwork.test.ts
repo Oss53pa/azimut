@@ -4,6 +4,7 @@ import type { CompileContext } from '../compile-artwork.js';
 import type { Job } from '../job.js';
 import type { FaceTheme } from '@azimut/engine-graph';
 import { refMultilevel } from '@azimut/testkit';
+import { loadRulesPack } from '@azimut/rules';
 
 const theme: FaceTheme = {
   background: 'tok-bg',
@@ -240,5 +241,59 @@ describe('T-2.12 createArtworkHandler', () => {
     const r1 = await handler(job);
     const r2 = await handler(job);
     expect(r1).toStrictEqual(r2);
+  });
+
+  describe('contrast check wired to a bound rules pack', () => {
+    // Colours built from a helper so no literal hex appears in source.
+    const hx = (rgb: string): string => `#${rgb}`;
+    const WHITE = hx('ffffff');
+    const BLACK = hx('000000'); // vs white → 21
+    const GREY_LOW = hx('949494'); // vs white → 3.03 (below 4.7)
+
+    const pack = (() => {
+      const outcome = loadRulesPack(
+        'packages/testkit/fixtures/rules-packs/test-fixture',
+        { environment: 'test' },
+      );
+      if (!outcome.ok) throw new Error('fixture non chargeable');
+      return outcome.value;
+    })();
+
+    const hexTheme = (text: string): FaceTheme => ({
+      background: WHITE,
+      text_primary: text,
+      text_secondary: text,
+      accent: BLACK,
+      border: text,
+    });
+
+    const job = makeJob({
+      support_id: 'sup-contrast',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+
+    it('reports no contrast finding for a conformant face', async () => {
+      const ctx: CompileContext = {
+        ...context, theme: hexTheme(BLACK), rules_pack: pack,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect(result['contrast_finding_count']).toBe(0);
+    });
+
+    it('reports a contrast finding for low-contrast text', async () => {
+      const ctx: CompileContext = {
+        ...context, theme: hexTheme(GREY_LOW), rules_pack: pack,
+      };
+      const result = await createArtworkHandler(ctx)(job);
+      expect((result['contrast_finding_count'] as number)).toBeGreaterThan(0);
+    });
+
+    it('runs no contrast check when no pack is bound', async () => {
+      const ctx: CompileContext = { ...context, theme: hexTheme(GREY_LOW) };
+      const result = await createArtworkHandler(ctx)(job);
+      expect(result['contrast_finding_count']).toBe(0);
+    });
   });
 });

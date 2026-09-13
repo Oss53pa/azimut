@@ -57,6 +57,9 @@ importers:
         specifier: workspace:*
         version: link:../../packages/engine-package
     devDependencies:
+      '@azimut/rules':
+        specifier: workspace:*
+        version: link:../../packages/rules
       '@azimut/testkit':
         specifier: workspace:*
         version: link:../../packages/testkit

@@ -1,5 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
-import type { FaceTheme } from '@azimut/engine-graph';
+import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
 import type { PdfTarget } from '@azimut/engine-artwork';
 import { renderArtwork } from './artwork.js';
 import type { Job } from './job.js';
@@ -17,12 +17,14 @@ export type CompileContext = {
   readonly font_family: string;
   readonly pdf_target: PdfTarget;
   readonly creation_date: Date;
+  /** Optional rules pack; when bound, the face theme's contrast is checked. */
+  readonly rules_pack?: LoadedRulesPack;
 };
 
 export function createArtworkHandler(
   context: CompileContext,
 ): (job: Job) => Promise<Record<string, unknown>> {
-  const { site, theme, font_family, pdf_target, creation_date } = context;
+  const { site, theme, font_family, pdf_target, creation_date, rules_pack } = context;
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const payload = job.payload;
@@ -44,7 +46,7 @@ export function createArtworkHandler(
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    const { svg, pdf, side } = await renderArtwork({
+    const { svg, pdf, side, contrastFindings } = await renderArtwork({
       site,
       theme,
       fontFamily: font_family,
@@ -55,6 +57,7 @@ export function createArtworkHandler(
       templateId,
       profileKey,
       title: `${supportId} — ${template.side}`,
+      ...(rules_pack !== undefined ? { rulesPack: rules_pack } : {}),
     });
 
     return {
@@ -62,6 +65,7 @@ export function createArtworkHandler(
       face_side: side,
       svg_length: svg.length,
       pdf_length: pdf.length,
+      contrast_finding_count: contrastFindings.length,
     };
   };
 }
