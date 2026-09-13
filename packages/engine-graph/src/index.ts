@@ -72,6 +72,8 @@ export { computeQuantities, quantityReportToCsv } from './compute-quantities.js'
 export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
 export { renderFace } from './render-face.js';
+export { checkFaceContrast } from './face-quality.js';
+export type { FaceContrastInput } from './face-quality.js';
 export { compileTemplate } from './compile-template.js';
 export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
