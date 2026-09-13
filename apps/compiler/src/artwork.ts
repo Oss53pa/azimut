@@ -120,20 +120,24 @@ export async function renderArtwork(
     const contrast = checkFaceContrast(params.rulesPack, {
       face_id: params.supportId,
       supportRegistry: params.supportRegistry ?? 'wayfinding',
+      ...(params.supportContext !== undefined ? { context: params.supportContext } : {}),
       theme: params.theme,
     });
     if (!contrast.ok) contrastFindings = contrast.findings;
   }
 
   // Legibility (LEGIBILITY.MIN_CHAR_HEIGHT). Scoped by the support's reading
-  // context (D3.5); needs a bound pack, a context, a reading distance, and a
-  // measured text height. The height is the rendered em size — cap-height
-  // conversion (partie G) is deferred, so the verdict is provisional.
+  // context (D3.5); needs a bound pack, a context, a positive reading distance,
+  // and a measured text height. A support with no surveyed distance (0) is not
+  // checked — the floor would flag it on data it does not have. The height is
+  // the rendered em size — cap-height conversion (partie G) is deferred, so the
+  // verdict is provisional.
   let legibilityFindings: readonly Finding[] = [];
   if (
     params.rulesPack !== undefined
     && params.supportContext !== undefined
     && params.readingDistanceM !== undefined
+    && params.readingDistanceM > 0
     && min_text_font_size_mm !== null
   ) {
     const legibility = checkCharHeight(params.rulesPack, {

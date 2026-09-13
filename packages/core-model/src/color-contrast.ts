@@ -1,5 +1,3 @@
-import { roundHalfAwayFromZero } from './round.js';
-
 /**
  * G6.2 / E13 — Luminance-contrast, an accessibility measure computed from
  * display (sRGB) values with the WCAG relative-luminance formula, never a
@@ -40,8 +38,11 @@ export function relativeLuminance(hex: string): number | null {
 }
 
 /**
- * WCAG contrast ratio between two colours, in [1, 21], rounded deterministically
- * to two decimals. Returns null when either colour cannot be parsed.
+ * WCAG contrast ratio between two colours, in [1, 21], at full precision.
+ * Returns null when either colour cannot be parsed. The value is NOT rounded:
+ * a pass/fail comparison against a normative threshold must use full precision
+ * (a true 4.497 rounded to 4.50 would wrongly clear a 4.5 minimum). Round only
+ * for display, at the call site.
  */
 export function contrastRatio(a: string, b: string): number | null {
   const la = relativeLuminance(a);
@@ -49,6 +50,5 @@ export function contrastRatio(a: string, b: string): number | null {
   if (la === null || lb === null) return null;
   const hi = Math.max(la, lb);
   const lo = Math.min(la, lb);
-  const ratio = (hi + 0.05) / (lo + 0.05);
-  return roundHalfAwayFromZero(ratio * 100) / 100;
+  return (hi + 0.05) / (lo + 0.05);
 }

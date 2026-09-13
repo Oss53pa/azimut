@@ -1,4 +1,6 @@
-import { contrastRatio, type Finding, type Outcome } from '@azimut/core-model';
+import {
+  contrastRatio, roundHalfAwayFromZero, type Finding, type Outcome,
+} from '@azimut/core-model';
 import type { LoadedRulesPack, RuleScopeContext } from './loader.js';
 import { resolveRule } from './loader.js';
 import type { RulesPackRule } from './schema.js';
@@ -82,6 +84,8 @@ export function checkCharHeight(
 
 export type ContrastInput = {
   readonly supportRegistry: string;
+  /** Reading context (interior/exterior); scopes the rule like legibility. */
+  readonly context?: string;
   /** Defaults to CONTRAST.MIN_TEXT_ON_BACKGROUND. */
   readonly code?: string;
   readonly foreground_hex: string;
@@ -92,14 +96,20 @@ export type ContrastInput = {
 /**
  * Contrast — CONTRAST.MIN_TEXT_ON_BACKGROUND (or the given code). Computes the
  * WCAG luminance-contrast ratio of the two display colours and, when it falls
- * below the resolved minimum, raises LAYOUT.CONTRAST_BELOW_MIN.
+ * below the resolved minimum, raises LAYOUT.CONTRAST_BELOW_MIN. Scoped by
+ * support registry and, when supplied, reading context — the same scope
+ * dimensions as the legibility check, so a context-scoped contrast rule
+ * resolves consistently.
  */
 export function checkContrast(
   pack: LoadedRulesPack,
   input: ContrastInput,
 ): Outcome<null> {
   const code = input.code ?? 'CONTRAST.MIN_TEXT_ON_BACKGROUND';
-  const resolved = resolveRule(pack, code, { supportRegistry: input.supportRegistry });
+  const scope: RuleScopeContext = input.context !== undefined
+    ? { supportRegistry: input.supportRegistry, context: input.context }
+    : { supportRegistry: input.supportRegistry };
+  const resolved = resolveRule(pack, code, scope);
   if (!resolved.ok) return resolved;
 
   const rule = resolved.value;
@@ -127,7 +137,8 @@ export function checkContrast(
         code: 'LAYOUT.CONTRAST_BELOW_MIN',
         severity: 'blocking',
         entity: { kind: 'support_face', id: input.entity_id },
-        params: { ratio, minimum: min },
+        // Full precision decides the verdict; the displayed ratio is rounded.
+        params: { ratio: roundHalfAwayFromZero(ratio * 100) / 100, minimum: min },
         ruleRef: rule.code,
       }],
     };

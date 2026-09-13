@@ -12,6 +12,8 @@ import type { FaceTheme } from './render-face.js';
 export type FaceContrastInput = {
   readonly face_id: string;
   readonly supportRegistry: string;
+  /** Reading context (interior/exterior); scopes the rule when supplied. */
+  readonly context?: string;
   readonly theme: FaceTheme;
 };
 
@@ -20,9 +22,12 @@ export function checkFaceContrast(
   input: FaceContrastInput,
 ): Outcome<null> {
   const findings: Finding[] = [];
+  const scope = input.context !== undefined
+    ? { supportRegistry: input.supportRegistry, context: input.context }
+    : { supportRegistry: input.supportRegistry };
 
   const text = checkContrast(pack, {
-    supportRegistry: input.supportRegistry,
+    ...scope,
     code: 'CONTRAST.MIN_TEXT_ON_BACKGROUND',
     foreground_hex: input.theme.text_primary,
     background_hex: input.theme.background,
@@ -31,7 +36,7 @@ export function checkFaceContrast(
   if (!text.ok) findings.push(...text.findings);
 
   const pictogram = checkContrast(pack, {
-    supportRegistry: input.supportRegistry,
+    ...scope,
     code: 'CONTRAST.MIN_PICTOGRAM_ON_BACKGROUND',
     foreground_hex: input.theme.accent,
     background_hex: input.theme.background,

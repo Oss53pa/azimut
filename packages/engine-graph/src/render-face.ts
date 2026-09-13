@@ -106,8 +106,11 @@ function renderDestinationList(
   const entries = content.entries;
   if (entries.length === 0) return '';
 
+  // lineHeight keeps its original expression (byte-identical positioning); the
+  // font size comes from the shared helper — the same `lineHeight * 0.6` value,
+  // so no float round-trip drift and one source for the measured height.
+  const lineHeight = Math.min(h / (entries.length + 0.5), h * 0.15);
   const fontSize = destinationListFontSizeMm(h, entries.length);
-  const lineHeight = fontSize / 0.6;
   const parts: string[] = [];
 
   for (let i = 0; i < entries.length; i++) {

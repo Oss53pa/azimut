@@ -84,7 +84,7 @@ export function createArtworkHandler(
       profileKey,
       title: `${supportId} — ${template.side}`,
       ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
-      ...supportRenderParams(site, supportId),
+      ...supportRenderParams(support),
     });
 
     return {

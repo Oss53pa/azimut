@@ -1,4 +1,4 @@
-import type { SiteData, Finding } from '@azimut/core-model';
+import type { SiteData, Support, Finding } from '@azimut/core-model';
 import type { LoadedRulesPack, RulesPackIndex } from '@azimut/engine-graph';
 import { resolveSiteRulesPack } from '@azimut/engine-graph';
 
@@ -25,19 +25,18 @@ export function resolveEffectivePack(
 
 /**
  * The support-instance attributes (A5.6) that scope the quality checks, as a
- * partial to spread into an artwork render call. Empty when the support id is
- * unknown, so the render falls back to its own defaults (wayfinding, no
- * legibility check).
+ * partial to spread into an artwork render call. Empty when the support is
+ * undefined, so the render falls back to its own defaults (wayfinding, no
+ * legibility check). Takes the already-resolved support so the caller scans the
+ * support list once.
  */
 export function supportRenderParams(
-  site: SiteData,
-  supportId: string,
+  support: Support | undefined,
 ): {
   readonly supportRegistry?: string;
   readonly supportContext?: string;
   readonly readingDistanceM?: number;
 } {
-  const support = site.supports.find((s) => s.id === supportId);
   if (support === undefined) return {};
   return {
     supportRegistry: support.registry,
