@@ -10,6 +10,9 @@ export { guardFontMetrics, auditFontLicences } from './font-registry.js';
 export type { FontMetricsRecord } from './font-registry.js';
 export { colorDelta, auditColorReferences } from './color-chain.js';
 export type { CharterColor, LabValue, ReferenceSystem } from './color-chain.js';
+export { guardFontGlyphCoverage, REQUIRED_LATIN_COVERAGE } from './font-glyphs.js';
+export { guardTextFit } from './typography-fit.js';
+export type { TextFitBox } from './typography-fit.js';
 export {
   roundHalfAwayFromZero,
   roundSvg,
