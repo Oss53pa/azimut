@@ -21,6 +21,7 @@ import type {
   VerticalLinkKind,
   OccupancyStatus,
   PictogramRegistry,
+  Support as SupportModel,
 } from '@azimut/core-model';
 
 import { organization } from './schema/org.js';
@@ -30,6 +31,7 @@ import {
   category, pictogram, destination, destinationName,
   travelProfile,
 } from './schema/directory.js';
+import { support } from './schema/signage.js';
 
 function num(v: string): number {
   return Number(v);
@@ -63,7 +65,7 @@ export async function loadSiteData(
     : [];
   const levelIds = levelRows.map((l) => l.id);
 
-  const [footprintRows, nodeRows, catRows, pictoRows, tpRows] =
+  const [footprintRows, nodeRows, catRows, pictoRows, tpRows, supportRows] =
     await Promise.all([
       levelIds.length > 0
         ? db.select().from(footprint).where(inArray(footprint.level_id, levelIds))
@@ -74,6 +76,7 @@ export async function loadSiteData(
       db.select().from(category).where(eq(category.org_id, orgId)),
       db.select().from(pictogram).where(eq(pictogram.org_id, orgId)),
       db.select().from(travelProfile).where(eq(travelProfile.site_id, siteId)),
+      db.select().from(support).where(eq(support.site_id, siteId)),
     ]);
 
   const footprintIds = footprintRows.map((f) => f.id);
@@ -107,7 +110,29 @@ export async function loadSiteData(
     orgRow, siteRow, buildingRows, levelRows,
     footprintRows, volumeRows, nodeRows, edgeRows,
     vlinkRows, catRows, pictoRows, destRows, dnameRows, tpRows,
+    supportRows,
   );
+}
+
+/**
+ * Map a `support` row (A5.6) to the in-memory model. The registry, context and
+ * reading-distance columns are additive (migrations 0012/0013) and nullable: a
+ * row that predates them falls back to the permissive defaults — the wayfinding
+ * registry, the interior context (lowest floor), and a zero reading distance —
+ * so an unsurveyed support never silently borrows a stricter rule than its data
+ * supports. Real values come from the survey.
+ */
+export function mapSupportRow(row: typeof support.$inferSelect): SupportModel {
+  return {
+    id: row.id,
+    org_id: row.org_id,
+    site_id: row.site_id,
+    node_id: row.node_id,
+    registry: row.registry === 'safety' ? 'safety' : 'wayfinding',
+    context: row.context === 'exterior' ? 'exterior' : 'interior',
+    reading_distance_m: row.reading_distance_m !== null ? num(row.reading_distance_m) : 0,
+    azimuth_deg: num(row.azimuth_deg),
+  };
 }
 
 function assembleSiteData(
@@ -125,6 +150,7 @@ function assembleSiteData(
   destRows: (typeof destination.$inferSelect)[],
   dnameRows: (typeof destinationName.$inferSelect)[],
   tpRows: (typeof travelProfile.$inferSelect)[],
+  supportRows: (typeof support.$inferSelect)[],
 ): SiteData {
   const org: OrgModel = {
     id: orgRow.id,
@@ -268,7 +294,7 @@ function assembleSiteData(
     destination_names: dnames,
     travel_profiles: tprofiles,
     support_types: [],
-    supports: [],
+    supports: supportRows.map(mapSupportRow),
     face_templates: [],
   };
 }
