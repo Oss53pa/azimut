@@ -17,7 +17,12 @@ export type CompileContext = {
   readonly font_family: string;
   readonly pdf_target: PdfTarget;
   readonly creation_date: Date;
-  /** Optional rules pack; when bound, the face theme's contrast is checked. */
+  /**
+   * Optional rules pack; when supplied, the face theme's contrast is checked.
+   * The site→pack binding exists in the model (A5.8 `site_rules_binding` /
+   * `Site.rules_pack_id`); a resolver from that id to a loaded pack is still
+   * to come, so for now the pack is passed in explicitly.
+   */
   readonly rules_pack?: LoadedRulesPack;
 };
 

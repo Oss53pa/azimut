@@ -27,8 +27,10 @@ export type ArtworkRenderParams = {
   readonly title: string;
   /**
    * When a rules pack is bound to the site, the face's theme contrast is
-   * checked against it (G6.2). Dormant until a caller supplies a pack — the
-   * site→pack binding is not yet in the data model (parties A–D).
+   * checked against it (G6.2). The binding itself is in the data model
+   * (A5.8: `site_rules_binding`, folded onto `Site.rules_pack_id`), but no
+   * resolver yet maps that id to a `LoadedRulesPack`; until one exists the
+   * caller supplies the pack directly. Dormant when none is supplied.
    */
   readonly rulesPack?: LoadedRulesPack;
   /** Orientation registry of the support; defaults to 'wayfinding'. */
