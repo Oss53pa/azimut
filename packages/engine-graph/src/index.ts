@@ -167,3 +167,10 @@ export type {
   PictogramFamily,
   FamilyStyle,
 } from './guard-family-consistency.js';
+export { guardNamingCollisions } from './guard-naming.js';
+export type { NamedEntity } from './guard-naming.js';
+export { guardWayfindingContinuity } from './guard-continuity.js';
+export type {
+  JalonnementSequence,
+  JalonnementStep,
+} from './guard-continuity.js';

@@ -127,6 +127,8 @@ export const ERROR_CATALOG = {
   'DATA.KIOSK_CONFIG_INVALID':              { severity: 'blocking', description: 'Configuration locale de borne invalide' },
 
   // ── WAYFIND (H12) ─────────────────────────────────────────
+  'WAYFIND.NAMING_COLLISION':               { severity: 'blocking', description: 'Deux entités portent le même nom d’orientation' },
+  'WAYFIND.CONTINUITY_BROKEN':              { severity: 'blocking', description: 'Destination annoncée puis abandonnée avant d’être atteinte' },
   'WAYFIND.NO_INFORMATION_LEVEL':           { severity: 'blocking', description: 'Support rattaché à aucun niveau d’information' },
   'WAYFIND.TOO_MANY_DESTINATIONS':          { severity: 'blocking', description: 'Nombre de destinations par face dépassé' },
   'WAYFIND.SCHEDULE_STALE':                 { severity: 'warning',  description: 'Tableau des messages périmé' },
