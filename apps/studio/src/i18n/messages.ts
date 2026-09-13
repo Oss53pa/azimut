@@ -173,6 +173,9 @@ export const MESSAGES_FR = {
   'editor.status.aria': 'Barre de statut',
   'editor.status.undo.title': 'Annuler (Ctrl+Z)',
   'editor.status.redo.title': 'Rétablir (Ctrl+Maj+Z)',
+  'editor.render.aria': 'Mode de rendu',
+  'editor.render.full': 'Rendu complet',
+  'editor.render.lightweight': 'Rendu allégé',
   'editor.canvas.default': 'Éditeur de plan',
   'editor.canvas.aria': 'Éditeur : {level}',
 
@@ -384,6 +387,9 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   'editor.status.aria': 'Status bar',
   'editor.status.undo.title': 'Undo (Ctrl+Z)',
   'editor.status.redo.title': 'Redo (Ctrl+Shift+Z)',
+  'editor.render.aria': 'Render mode',
+  'editor.render.full': 'Full render',
+  'editor.render.lightweight': 'Lightweight render',
   'editor.canvas.default': 'Plan editor',
   'editor.canvas.aria': 'Editor: {level}',
 

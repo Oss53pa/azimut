@@ -36,6 +36,7 @@ import { AlignmentPanel } from './AlignmentPanel.js';
 import { ShortcutHelpPanel } from './ShortcutHelpPanel.js';
 import { useShortcuts } from './use-shortcuts.js';
 import { StatusBar } from './StatusBar.js';
+import { useRenderBudget } from './use-render-budget.js';
 import { LevelTabs } from './LevelTabs.js';
 import type { ToolId, ToolState } from './tool-state.js';
 import { useEditorDocument } from './use-editor-document.js';
@@ -96,6 +97,7 @@ export function EditorView(): JSX.Element {
   const [selection, dispatchSelection] = useReducer(selectionReducer, EMPTY_SELECTION);
   const [toolState, setToolState] = useState<ToolState | null>(null);
   const [snap, setSnap] = useState<SnapResult>(NO_SNAP);
+  const renderMode = useRenderBudget();
   const [clipboard, setClipboard] = useState(EMPTY_CLIPBOARD);
   const [announcement, setAnnouncement] = useState('');
   const [requestedTool, setRequestedTool] = useState<ToolId | undefined>(undefined);
@@ -286,6 +288,7 @@ export function EditorView(): JSX.Element {
         canRedo={canRedo}
         onUndo={undo}
         onRedo={redo}
+        renderMode={renderMode}
       />
 
       <ShortcutHelpPanel

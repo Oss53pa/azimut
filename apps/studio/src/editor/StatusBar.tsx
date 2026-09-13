@@ -17,6 +17,7 @@ import type { Point } from '@azimut/core-model';
 import type { ToolId } from './tool-state.js';
 import { TOOL_REGISTRY } from './tool-state.js';
 import type { SnapResult } from './snap.js';
+import type { RenderMode } from './render-budget.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
@@ -31,6 +32,8 @@ type StatusBarProps = {
   readonly canRedo: boolean;
   readonly onUndo: () => void;
   readonly onRedo: () => void;
+  /** G2.2 — current adaptive render mode; shown here, never silent. */
+  readonly renderMode: RenderMode;
 };
 
 // ---------------------------------------------------------------------------
@@ -86,10 +89,14 @@ export function StatusBar({
   canRedo,
   onUndo,
   onRedo,
+  renderMode,
 }: StatusBarProps): JSX.Element {
   const { t } = useI18n();
   const toolMeta = TOOL_REGISTRY.find((m) => m.id === currentTool);
   const toolName = toolMeta ? t(toolMeta.labelKey) : currentTool;
+  const renderModeLabel = t(
+    renderMode === 'lightweight' ? 'editor.render.lightweight' : 'editor.render.full',
+  );
   return (
     <div style={BAR_STYLE} role="status" aria-label={t('editor.status.aria')}>
       {/* Tool name */}
@@ -122,6 +129,17 @@ export function StatusBar({
 
       {/* Spacer */}
       <span style={{ flex: 1 }} />
+
+      {/* Render mode (G2.2) — always shown, never silent */}
+      <span
+        aria-label={t('editor.render.aria')}
+        style={{
+          color: renderMode === 'lightweight' ? 'var(--accent)' : 'var(--text-secondary)',
+        }}
+      >
+        {renderModeLabel}
+      </span>
+      <span style={{ color: 'var(--border-hairline)' }}>|</span>
 
       {/* Undo/Redo */}
       <button
