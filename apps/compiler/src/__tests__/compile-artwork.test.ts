@@ -58,6 +58,20 @@ describe('T-2.12 createArtworkHandler', () => {
     expect((result['pdf_length'] as number)).toBeGreaterThan(0);
   });
 
+  it('surfaces the rendered denomination-text size and support reading distance', async () => {
+    const handler = createArtworkHandler(context);
+    const job = makeJob({
+      support_id: 'sup-001',
+      node_id: 'n-ml-hall',
+      template_id: 'ftpl-dir-front',
+      profile_key: 'standard',
+    });
+    const result = await handler(job);
+    expect((result['min_text_font_size_mm'] as number)).toBeGreaterThan(0);
+    // sup-001 in the fixture carries a reading distance (A5.6).
+    expect(result['reading_distance_m']).toBe(5);
+  });
+
   it('throws on unknown template', async () => {
     const handler = createArtworkHandler(context);
     const job = makeJob({

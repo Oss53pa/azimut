@@ -1,5 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
-import { composeFace, renderFace, checkFaceContrast } from '@azimut/engine-graph';
+import { composeFace, renderFaceWithMeasures, checkFaceContrast } from '@azimut/engine-graph';
 import type { FaceTheme, LoadedRulesPack } from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
@@ -46,6 +46,12 @@ export type ArtworkRender = {
   readonly heightMm: number;
   /** Contrast anomalies from the rules check; empty when no pack is bound. */
   readonly contrastFindings: readonly Finding[];
+  /**
+   * Smallest denomination-text font size rendered (em, mm), or null when the
+   * face has no such text. The measured input a legibility check would read
+   * against the pack's LEGIBILITY.MIN_CHAR_HEIGHT; not yet enforced.
+   */
+  readonly minTextFontSizeMm: number | null;
 };
 
 export async function renderArtwork(
@@ -84,7 +90,7 @@ export async function renderArtwork(
     throw new Error(`Compose failed: ${codes}`);
   }
 
-  const svg = renderFace(resolved.value, {
+  const { svg, min_text_font_size_mm } = renderFaceWithMeasures(resolved.value, {
     width_mm: widthMm,
     height_mm: heightMm,
     theme: params.theme,
@@ -118,5 +124,6 @@ export async function renderArtwork(
     widthMm,
     heightMm,
     contrastFindings,
+    minTextFontSizeMm: min_text_font_size_mm,
   };
 }

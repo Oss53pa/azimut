@@ -79,7 +79,7 @@ export function createArtworkHandler(
     // wayfinding registry (renderArtwork's own default).
     const support = site.supports.find((s) => s.id === supportId);
 
-    const { svg, pdf, side, contrastFindings } = await renderArtwork({
+    const { svg, pdf, side, contrastFindings, minTextFontSizeMm } = await renderArtwork({
       site,
       theme,
       fontFamily: font_family,
@@ -102,6 +102,8 @@ export function createArtworkHandler(
       pack_bound: effectivePack !== undefined,
       pack_finding_count: packFindings.length,
       support_registry: support?.registry ?? 'wayfinding',
+      reading_distance_m: support?.reading_distance_m ?? null,
+      min_text_font_size_mm: minTextFontSizeMm,
       contrast_finding_count: contrastFindings.length,
     };
   };

@@ -73,6 +73,26 @@ function cardinalToAngle(direction: string): number {
   return CARDINAL_ANGLES[direction] ?? 0;
 }
 
+/**
+ * The rendered font size (em), in millimetres, of the destination-list block —
+ * the primary denomination text of a wayfinding face. Single source: the
+ * renderer draws text at exactly this size and the legibility measurement reads
+ * it back, so the two never drift (INV-4). The em size is not the cap height;
+ * converting to cap/x-height needs the font's own metrics (partie G) and is
+ * deliberately left to whoever consumes this against a normative factor.
+ */
+export function destinationListFontSizeMm(
+  blockHeightMm: number,
+  entryCount: number,
+): number {
+  if (entryCount <= 0) return 0;
+  const lineHeight = Math.min(
+    blockHeightMm / (entryCount + 0.5),
+    blockHeightMm * 0.15,
+  );
+  return lineHeight * 0.6;
+}
+
 function renderDestinationList(
   content: Extract<ResolvedContent, { type: 'destination_list' }>,
   x: number,
@@ -86,11 +106,8 @@ function renderDestinationList(
   const entries = content.entries;
   if (entries.length === 0) return '';
 
-  const lineHeight = Math.min(
-    h / (entries.length + 0.5),
-    h * 0.15,
-  );
-  const fontSize = lineHeight * 0.6;
+  const fontSize = destinationListFontSizeMm(h, entries.length);
+  const lineHeight = fontSize / 0.6;
   const parts: string[] = [];
 
   for (let i = 0; i < entries.length; i++) {
@@ -341,10 +358,22 @@ function renderBlock(
   }
 }
 
-export function renderFace(
+/** A rendered face plus the measurements a normative check reads back. */
+export type FaceRender = {
+  readonly svg: string;
+  /**
+   * Smallest destination-list font size (em, mm) drawn on the face, or null
+   * when the face carries no denomination text. The legibility check compares
+   * this against the minimum height a rules pack requires for the reading
+   * distance (LEGIBILITY.MIN_CHAR_HEIGHT).
+   */
+  readonly min_text_font_size_mm: number | null;
+};
+
+function renderFaceParts(
   face: ResolvedFace,
   options: RenderFaceOptions,
-): string {
+): FaceRender {
   const { width_mm, height_mm, theme, font_family, lang } = options;
   const parts: string[] = [];
 
@@ -363,15 +392,45 @@ export function renderFace(
     (a, b) => a.ordinal - b.ordinal || a.kind.localeCompare(b.kind),
   );
 
+  let minTextFontSizeMm: number | null = null;
   for (const block of sorted) {
     const bx = (block.region.x_pct / 100) * width_mm;
     const by = (block.region.y_pct / 100) * height_mm;
     const bw = (block.region.w_pct / 100) * width_mm;
     const bh = (block.region.h_pct / 100) * height_mm;
 
+    if (block.content.type === 'destination_list') {
+      const count = block.content.entries.length;
+      if (count > 0) {
+        const fs = destinationListFontSizeMm(bh, count);
+        minTextFontSizeMm = minTextFontSizeMm === null
+          ? fs
+          : Math.min(minTextFontSizeMm, fs);
+      }
+    }
+
     parts.push(renderBlock(block, bx, by, bw, bh, theme, font_family, lang));
   }
 
   parts.push('</svg>');
-  return parts.join('\n');
+  return { svg: parts.join('\n'), min_text_font_size_mm: minTextFontSizeMm };
+}
+
+export function renderFace(
+  face: ResolvedFace,
+  options: RenderFaceOptions,
+): string {
+  return renderFaceParts(face, options).svg;
+}
+
+/**
+ * Render a face and return, alongside the SVG, the measurements a normative
+ * check reads back. The SVG is byte-for-byte identical to {@link renderFace}'s
+ * (same layout pass) — the measures are recorded, never re-derived.
+ */
+export function renderFaceWithMeasures(
+  face: ResolvedFace,
+  options: RenderFaceOptions,
+): FaceRender {
+  return renderFaceParts(face, options);
 }
