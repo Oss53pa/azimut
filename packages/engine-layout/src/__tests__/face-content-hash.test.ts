@@ -84,9 +84,11 @@ describe('computeFaceContentHash — absence vs null & NFC (§6.5, §6.6)', () =
     expect(absent).toBe(withNull);
   });
 
-  it('two Unicode-equivalent accented labels hash identically', () => {
-    const composed = hash({ blocks: [{ type: 'header', site_name: 'Créche' }] });
-    const decomposed = hash({ blocks: [{ type: 'header', site_name: 'Créche' }] });
+  it('two Unicode-equivalent accented labels (values) hash identically', () => {
+    // Values ARE NFC-normalized (§4.7): precomposed 'é' (\u00E9) and decomposed
+    // 'e'+combining accent (\u0301) in a label produce one empreinte.
+    const composed = hash({ blocks: [{ type: 'header', site_name: 'Cr\u00E9che' }] });
+    const decomposed = hash({ blocks: [{ type: 'header', site_name: 'Cre\u0301che' }] });
     expect(composed).toBe(decomposed);
   });
 });
@@ -125,10 +127,15 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
     expect(hash({ width_mm: 600.4 })).not.toBe(hash({ width_mm: 601 }));
   });
 
-  it('refuses (blocking) when a dimension is non-finite', () => {
+  it('refuses (blocking) when a dimension is non-finite, reporting it as text', () => {
     const r = computeFaceContentHash(base({ width_mm: Number.NaN }));
     expect(r.ok).toBe(false);
-    if (!r.ok) expect(r.findings[0]?.code).toBe('DATA.FACE_DIMENSIONS_INVALID');
+    if (!r.ok) {
+      expect(r.findings[0]?.code).toBe('DATA.FACE_DIMENSIONS_INVALID');
+      // A raw NaN would JSON-serialize to null and lose the reason; it is
+      // rendered as the text 'NaN' instead.
+      expect(r.findings[0]?.params.width_mm).toBe('NaN');
+    }
   });
 
   it('refuses (blocking) rather than throwing when block content is not serializable', () => {
@@ -138,6 +145,16 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
     const r = computeFaceContentHash(base({ blocks: [{ type: 'header', at: new Date(0) }] }));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.findings[0]?.code).toBe('DATA.FACE_CONTENT_UNSERIALIZABLE');
+  });
+
+  it('keeps two byte-distinct object keys distinct (keys are not NFC-folded)', () => {
+    // Keys are structural identifiers, serialized verbatim (§4.2 / D7.2): a
+    // precomposed-'é' key and a decomposed-'é' key stay two keys, so they hash
+    // differently rather than colliding into one. NFC folding applies to string
+    // VALUES (labels, §4.7), never to keys.
+    const composedKey = hash({ blocks: [{ ['café']: 1 }] });
+    const decomposedKey = hash({ blocks: [{ ['café']: 1 }] });
+    expect(composedKey).not.toBe(decomposedKey);
   });
 
   it('refuses (blocking RULES.PACK_NOT_BOUND) when the rules pack is absent', () => {

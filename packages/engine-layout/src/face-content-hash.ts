@@ -53,6 +53,14 @@ function normDim(value: number | null): number | null {
   return mm > 0 ? mm : null;
 }
 
+/** Render a rejected dimension for a finding param: the finite number itself, or
+ * the literal text 'NaN'/'Infinity'/'-Infinity'/'null' (a non-finite number
+ * would JSON-serialize to null and lose the reason). */
+function dimParam(value: number | null): string | number {
+  if (value === null) return 'null';
+  return Number.isFinite(value) ? value : String(value);
+}
+
 /**
  * Compute the content empreinte of a face, or a blocking finding when it cannot
  * be computed. Refuses (no hash) when the rules pack is absent (§8), when a
@@ -69,11 +77,13 @@ export function computeFaceContentHash(
   const width_mm = normDim(input.width_mm);
   const height_mm = normDim(input.height_mm);
   if (width_mm === null || height_mm === null) {
+    // Report the raw value; a non-finite one (NaN/±Infinity) is not caught by
+    // `?? 'null'` and JSON-serializes to null downstream, so render it as text.
     return {
       ok: false,
       findings: [blocking('DATA.FACE_DIMENSIONS_INVALID', {
-        width_mm: input.width_mm ?? 'null',
-        height_mm: input.height_mm ?? 'null',
+        width_mm: dimParam(input.width_mm),
+        height_mm: dimParam(input.height_mm),
       })],
     };
   }

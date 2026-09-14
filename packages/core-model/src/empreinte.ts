@@ -88,15 +88,17 @@ function canon(value: unknown): string {
         throw new Error('empreinte: only plain objects are serializable');
       }
       const obj = value as Record<string, unknown>;
-      // §4.2/§4.7 — keys normalized to NFC then sorted by code point; a key
-      // whose value is null/undefined is omitted (§4.3).
-      const entries = Object.keys(obj)
+      // §4.2 / D7.2 ("clés triées") — object keys are sorted by code point and
+      // serialized verbatim. They are structural identifiers (field names,
+      // language codes), never free text, so they are NOT NFC-normalized: the
+      // §4.7 NFC rule is justified by accented *labels*, which reach `canon` as
+      // string VALUES and are normalized there. Leaving keys verbatim also keeps
+      // the mapping injective — two byte-distinct keys can never merge into one
+      // duplicate key. A key whose value is null/undefined is omitted (§4.3).
+      const keys = Object.keys(obj)
         .filter((k) => obj[k] !== null && obj[k] !== undefined)
-        .map((k) => ({ key: k.normalize('NFC'), original: k }))
-        .sort((x, y) => codePointCompare(x.key, y.key));
-      const pairs = entries.map(
-        (e) => JSON.stringify(e.key) + ':' + canon(obj[e.original]),
-      );
+        .sort(codePointCompare);
+      const pairs = keys.map((k) => JSON.stringify(k) + ':' + canon(obj[k]));
       return '{' + pairs.join(',') + '}';
     }
     default:
