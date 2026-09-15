@@ -55,6 +55,6 @@ describe('D12.1 — translator', () => {
 
   it('interpolates through the translator', () => {
     const t = makeTranslate('en');
-    expect(t('checks.skipped', { list: 'A, B' })).toBe('Skipped: A, B');
+    expect(t('validation.skipped.message', { list: 'A, B' })).toBe('Checks skipped: A, B');
   });
 });

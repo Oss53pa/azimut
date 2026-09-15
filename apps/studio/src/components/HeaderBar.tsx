@@ -1,6 +1,14 @@
-import { type JSX } from 'react';
+import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
+import type { Finding } from '@azimut/core-model';
+import type { ViewId } from '../views.js';
+import { SPACE, TEXT, BUTTON_STYLE, PRIMARY_BUTTON_STYLE, severityColor } from './ui/index.js';
+
+type HeaderBarProps = {
+  readonly onNavigate: (view: ViewId) => void;
+};
 
 const HEADER_STYLE: React.CSSProperties = {
   display: 'flex',
@@ -9,7 +17,7 @@ const HEADER_STYLE: React.CSSProperties = {
   borderBottom: '1px solid var(--border-hairline)',
   background: 'var(--surface-panel)',
   padding: '0 12px',
-  gap: 16,
+  gap: SPACE.lg,
   flexShrink: 0,
 };
 
@@ -20,73 +28,91 @@ const SEPARATOR_STYLE: React.CSSProperties = {
   flexShrink: 0,
 };
 
-const BUTTON_STYLE: React.CSSProperties = {
-  border: '1px solid var(--border-interactive)',
-  background: 'var(--surface-panel)',
-  color: 'var(--text-primary)',
-  fontFamily: 'inherit',
-  fontSize: 12,
-  padding: '6px 12px',
-  borderRadius: 4,
-  cursor: 'pointer',
-  transition: 'background 120ms',
-};
+function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
+  return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
+}
 
-const PRIMARY_BUTTON_STYLE: React.CSSProperties = {
-  border: '1px solid var(--text-primary)',
-  background: 'var(--text-primary)',
-  color: 'var(--surface-panel)',
-  fontFamily: 'inherit',
-  fontSize: 12,
-  fontWeight: 500,
-  padding: '6px 16px',
-  borderRadius: 4,
-  cursor: 'pointer',
-  transition: 'opacity 120ms',
-};
+/**
+ * Barre d'en-tête.
+ *
+ * « Publier » n'est pas un bouton décoratif : il est refusé tant qu'une
+ * anomalie bloquante est ouverte, et il dit laquelle. Il n'y a pas de bouton
+ * « Enregistrer » — l'application n'a pas de dépôt persistant, et un bouton
+ * qui n'enregistre rien est pire que son absence.
+ */
+export function HeaderBar({ onNavigate }: HeaderBarProps): JSX.Element {
+  const site = useSiteData();
+  const { t, lang, setLang } = useI18n();
 
-export function HeaderBar(): JSX.Element {
-  const siteData = useSiteData();
-  const { t } = useI18n();
-  const buildingName = siteData.buildings[0]?.name ?? t('header.building.fallback');
-  const siteName = siteData.site.name;
+  const blocking = useMemo(() => {
+    const checks = runChecks(site);
+    return [
+      ...(checks.ok ? checks.value.findings : checks.findings),
+      ...findingsOf(validateGraph(site)),
+      ...findingsOf(validateGeometry(site)),
+      ...findingsOf(validateDirectory(site)),
+    ].filter(f => f.severity === 'blocking');
+  }, [site]);
+
+  const publishable = blocking.length === 0;
+  const buildingName = site.buildings[0]?.name ?? t('header.building.fallback');
 
   return (
     <header style={HEADER_STYLE}>
-      <div style={{
-        fontSize: 15,
-        fontWeight: 500,
-        letterSpacing: '0.01em',
-      }}>
-        Azimut
+      <div style={{ fontSize: TEXT.lead, fontWeight: 500, letterSpacing: '0.01em' }}>
+        {t('header.product')}
       </div>
       <div style={SEPARATOR_STYLE} />
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-      }}>
-        <span style={{ fontSize: 13 }}>{siteName}</span>
-        <span style={{
-          fontSize: 12,
-          color: 'var(--text-secondary)',
-        }}>
-          {buildingName}
+      <div style={{ display: 'flex', alignItems: 'center', gap: SPACE.sm, minWidth: 0 }}>
+        <span style={{ fontSize: TEXT.body }}>{site.site.name}</span>
+        <span style={{ fontSize: TEXT.small, color: 'var(--text-secondary)' }}>{buildingName}</span>
+        <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+          {site.organization.slug}
         </span>
       </div>
       <div style={{ flex: 1 }} />
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 8,
-      }}>
-        <button type="button" style={BUTTON_STYLE}>
-          {t('header.action.save')}
-        </button>
-        <button type="button" style={BUTTON_STYLE}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: SPACE.sm }}>
+        <div style={{ display: 'flex', gap: 2 }}>
+          {(['fr', 'en'] as const).map(code => (
+            <button
+              key={code}
+              type="button"
+              onClick={() => { setLang(code); }}
+              aria-pressed={lang === code}
+              style={{
+                ...BUTTON_STYLE,
+                padding: '4px 8px',
+                fontSize: TEXT.micro,
+                textTransform: 'uppercase',
+                color: lang === code ? 'var(--accent)' : 'var(--text-secondary)',
+                borderColor: lang === code ? 'var(--accent)' : 'var(--border-interactive)',
+              }}
+            >
+              {code}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => { onNavigate('checks'); }}
+          style={BUTTON_STYLE}
+        >
           {t('header.action.openaudit')}
         </button>
-        <button type="button" style={PRIMARY_BUTTON_STYLE}>
+        <button
+          type="button"
+          disabled={!publishable}
+          onClick={() => { onNavigate('proofs'); }}
+          title={publishable
+            ? t('header.publish.ready')
+            : t('header.publish.blocked', { count: blocking.length })}
+          style={{
+            ...PRIMARY_BUTTON_STYLE,
+            opacity: publishable ? 1 : 0.45,
+            cursor: publishable ? 'pointer' : 'not-allowed',
+            borderColor: publishable ? 'var(--text-primary)' : severityColor('blocking'),
+          }}
+        >
           {t('header.action.publish')}
         </button>
       </div>

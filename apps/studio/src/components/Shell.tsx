@@ -26,7 +26,7 @@ export function Shell(): JSX.Element {
     <SiteDataProvider site={site}>
       <I18nProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-          <HeaderBar />
+          <HeaderBar onNavigate={setCurrentView} />
           <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
             <Sidebar currentView={currentView} onNavigate={setCurrentView} />
             <main style={{

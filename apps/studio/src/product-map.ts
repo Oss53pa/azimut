@@ -79,9 +79,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     family: 'design',
     nameKey: 'module.04.name',
     summaryKey: 'module.04.summary',
-    entry: 'faces',
+    entry: 'signage',
     screens: [
       { view: 'templates', labelKey: 'nav.item.templates' },
+      { view: 'faces', labelKey: 'nav.item.faces' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
     engine: 'complete',

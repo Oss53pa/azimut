@@ -16,29 +16,6 @@ export const VIEWS_FR = {
   'dashboard.stat.templates': 'Gabarits',
   'dashboard.stat.findings': 'Alertes',
 
-  // Checks
-  'checks.title': 'Contrôles qualité',
-  'checks.summary': 'Contrôles exécutés : {run} · ignorés : {skipped} (valeurs normatives manquantes)',
-  'checks.skipped': 'Ignorés : {list}',
-  'checks.empty': 'Aucune alerte détectée.',
-  'checks.col.severity': 'Sévérité',
-  'checks.col.code': 'Code',
-  'checks.col.entity': 'Entité',
-  'checks.col.message': 'Message',
-  'checks.col.details': 'Détails',
-
-  // Graph
-  'graph.title': 'Graphe de circulation',
-  'graph.summary': '{nodes} nœuds · {edges} arêtes · {vlinks} liens verticaux',
-  'graph.section.nodesbykind': 'Nœuds par type',
-  'graph.section.nodesbylevel': 'Nœuds par niveau',
-  'graph.section.edges': 'Arêtes',
-  'graph.section.verticallinks': 'Liens verticaux',
-  'graph.row.total': 'Total',
-  'graph.row.accessible': 'Accessibles',
-  'graph.row.evacuation': 'Évacuation',
-  'graph.vlink.capacity': 'capacité {capacity}',
-
   // Supports
   'supports.title': 'Carnet de supports',
   'supports.count': 'Types de support : {count}',
@@ -103,27 +80,6 @@ export const VIEWS_EN: Readonly<Record<keyof typeof VIEWS_FR, string>> = {
   'dashboard.stat.supporttypes': 'Support types',
   'dashboard.stat.templates': 'Templates',
   'dashboard.stat.findings': 'Alerts',
-
-  'checks.title': 'Quality checks',
-  'checks.summary': 'Checks run: {run} · skipped: {skipped} (missing normative values)',
-  'checks.skipped': 'Skipped: {list}',
-  'checks.empty': 'No alert detected.',
-  'checks.col.severity': 'Severity',
-  'checks.col.code': 'Code',
-  'checks.col.entity': 'Entity',
-  'checks.col.message': 'Message',
-  'checks.col.details': 'Details',
-
-  'graph.title': 'Circulation graph',
-  'graph.summary': '{nodes} nodes · {edges} edges · {vlinks} vertical links',
-  'graph.section.nodesbykind': 'Nodes by type',
-  'graph.section.nodesbylevel': 'Nodes by level',
-  'graph.section.edges': 'Edges',
-  'graph.section.verticallinks': 'Vertical links',
-  'graph.row.total': 'Total',
-  'graph.row.accessible': 'Accessible',
-  'graph.row.evacuation': 'Evacuation',
-  'graph.vlink.capacity': 'capacity {capacity}',
 
   'supports.title': 'Support inventory',
   'supports.count': 'Support types: {count}',

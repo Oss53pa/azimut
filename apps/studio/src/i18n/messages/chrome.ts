@@ -25,8 +25,10 @@ export const CHROME_FR = {
   'nav.item.proofs': 'BAT',
 
   // Header bar
+  'header.product': 'Azimut',
   'header.building.fallback': 'Site',
-  'header.action.save': 'Enregistrer',
+  'header.publish.ready': 'Aucune anomalie bloquante ouverte.',
+  'header.publish.blocked': 'Publication refusée : {count} anomalie(s) bloquante(s) ouverte(s).',
   'header.action.openaudit': "Ouvrir l'audit",
   'header.action.publish': 'Publier',
 
@@ -54,8 +56,10 @@ export const CHROME_EN: Readonly<Record<keyof typeof CHROME_FR, string>> = {
   'nav.item.checks': 'Checks',
   'nav.item.proofs': 'Proofs',
 
+  'header.product': 'Azimut',
   'header.building.fallback': 'Site',
-  'header.action.save': 'Save',
+  'header.publish.ready': 'No open blocking anomaly.',
+  'header.publish.blocked': 'Publishing refused: {count} open blocking anomaly(ies).',
   'header.action.openaudit': 'Open audit',
   'header.action.publish': 'Publish',
 

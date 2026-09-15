@@ -20,6 +20,7 @@ import { FOUNDATION_FR, FOUNDATION_EN } from './messages/foundation.js';
 import { COMMERCE_FR, COMMERCE_EN } from './messages/commerce.js';
 import { PRODUCTION_FR, PRODUCTION_EN } from './messages/production.js';
 import { DIRECTION_FR, DIRECTION_EN } from './messages/direction.js';
+import { SIGNAGE_FR, SIGNAGE_EN } from './messages/signage.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -31,6 +32,7 @@ export const MESSAGES_FR = {
   ...COMMERCE_FR,
   ...PRODUCTION_FR,
   ...DIRECTION_FR,
+  ...SIGNAGE_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -45,6 +47,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...COMMERCE_EN,
   ...PRODUCTION_EN,
   ...DIRECTION_EN,
+  ...SIGNAGE_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

@@ -1,172 +1,190 @@
-import { type JSX, useMemo } from 'react';
+import { type JSX, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { runChecks, validateGraph, validateDirectory, validateGeometry } from '@azimut/engine-graph';
-import { getErrorMessage } from '@azimut/core-model';
-import type { Finding, ErrorCode } from '@azimut/core-model';
+import { runChecks, validateGraph, validateGeometry, validateDirectory, validateSupports } from '@azimut/engine-graph';
+import type { Finding, SiteData } from '@azimut/core-model';
+import { downloadText } from '../components/download.js';
+import {
+  ScreenHeader, MetricRow, Panel, StateBanner, Note,
+  SPACE, TEXT, type Metric, type ScreenAction,
+} from '../components/ui/index.js';
+import { FindingList } from './message-schedule/FindingList.js';
 
-function collectFindings(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): Finding[] {
-  if (result.ok && 'warnings' in result) return result.warnings as Finding[];
-  if (!result.ok && 'findings' in result) return result.findings as Finding[];
-  return [];
+type ValidationRun = {
+  readonly findings: readonly Finding[];
+  readonly checksRun: readonly string[];
+  readonly checksSkipped: readonly string[];
+  /** Horodatage du calcul, fourni par l'écran — jamais lu dans un moteur. */
+  readonly ranAt: string;
+};
+
+function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
+  return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
 }
 
+function validate(site: SiteData, ranAt: string): ValidationRun {
+  const checks = runChecks(site);
+  return {
+    findings: [
+      ...(checks.ok ? checks.value.findings : checks.findings),
+      ...findingsOf(validateGraph(site)),
+      ...findingsOf(validateGeometry(site)),
+      ...findingsOf(validateDirectory(site)),
+      ...findingsOf(validateSupports(site)),
+    ],
+    checksRun: checks.ok ? checks.value.checks_run : [],
+    checksSkipped: checks.ok ? checks.value.checks_skipped : [],
+    ranAt,
+  };
+}
+
+/** Une ligne d'export : code, sévérité, entité. Le reste se relit au catalogue. */
+function toCsv(run: ValidationRun, site: SiteData): string {
+  const rows = [
+    ['site', 'ran_at', 'severity', 'code', 'entity_kind', 'entity_id', 'rule_ref'].join(';'),
+    ...run.findings.map(f => [
+      site.site.id,
+      run.ranAt,
+      f.severity,
+      f.code,
+      f.entity?.kind ?? '',
+      f.entity?.id ?? '',
+      f.ruleRef ?? '',
+    ].join(';')),
+  ];
+  return rows.join('\n');
+}
+
+/**
+ * Tranche M · écran M5 — la validation.
+ *
+ * Elle ne se lance pas toute seule : un écran vide qui ressemble à une réussite
+ * alors que rien n'a été calculé serait le pire des états. Tant que la
+ * validation n'a pas tourné, l'écran le dit et n'affiche aucun compteur.
+ */
 export function ChecksView(): JSX.Element {
   const site = useSiteData();
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
+  const [run, setRun] = useState<ValidationRun | null>(null);
 
-  const report = useMemo(() => {
-    const checkResult = runChecks(site);
-    const graphResult = validateGraph(site);
-    const dirResult = validateDirectory(site);
-    const geomResult = validateGeometry(site);
+  function launch(): void {
+    setRun(validate(site, new Date().toISOString()));
+  }
 
-    const allFindings: Finding[] = [];
-    if (checkResult.ok) allFindings.push(...checkResult.value.findings);
-    allFindings.push(...collectFindings(graphResult));
-    allFindings.push(...collectFindings(dirResult));
-    allFindings.push(...collectFindings(geomResult));
+  const actions: readonly ScreenAction[] = [
+    {
+      id: 'export',
+      label: t('validation.action.export'),
+      disabled: run === null,
+      onSelect: () => {
+        if (run === null) return;
+        downloadText(`validation-${site.site.id}.csv`, 'text/csv', toCsv(run, site));
+      },
+    },
+    {
+      id: 'run',
+      label: run === null ? t('validation.action.run') : t('validation.action.rerun'),
+      primary: true,
+      onSelect: launch,
+    },
+  ];
 
-    const checksRun = checkResult.ok ? checkResult.value.checks_run : [];
-    const checksSkipped = checkResult.ok ? checkResult.value.checks_skipped : [];
+  if (run === null) {
+    return (
+      <div>
+        <ScreenHeader
+          eyebrow={t('validation.eyebrow')}
+          title={t('validation.title')}
+          subtitle={t('validation.subtitle')}
+          actions={actions}
+        />
+        <StateBanner
+          severity="info"
+          message={t('validation.neverrun.message')}
+          hint={t('validation.neverrun.hint')}
+        />
+        <Note>{t('validation.note')}</Note>
+      </div>
+    );
+  }
 
-    return { findings: allFindings, checksRun, checksSkipped };
-  }, [site]);
+  const blocking = run.findings.filter(f => f.severity === 'blocking');
+  const warnings = run.findings.filter(f => f.severity === 'warning');
+  const info = run.findings.filter(f => f.severity === 'info');
+
+  const metrics: readonly Metric[] = [
+    {
+      id: 'blocking',
+      label: t('severity.blocking'),
+      value: String(blocking.length),
+      severity: blocking.length > 0 ? 'blocking' : 'valid',
+    },
+    { id: 'warnings', label: t('severity.warning'), value: String(warnings.length), severity: 'warning' },
+    { id: 'info', label: t('severity.info'), value: String(info.length), severity: 'info' },
+    { id: 'run', label: t('validation.metric.run'), value: String(run.checksRun.length) },
+    {
+      id: 'skipped',
+      label: t('validation.metric.skipped'),
+      value: String(run.checksSkipped.length),
+      note: t('validation.metric.skipped.note'),
+      severity: run.checksSkipped.length > 0 ? 'warning' : 'valid',
+    },
+  ];
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        {t('checks.title')}
-      </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        {t('checks.summary', {
-          run: report.checksRun.length,
-          skipped: report.checksSkipped.length,
-        })}
-      </p>
+      <ScreenHeader
+        eyebrow={t('validation.eyebrow')}
+        title={t('validation.title')}
+        subtitle={t('validation.subtitle')}
+        actions={actions}
+      >
+        <span style={{ fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
+          {t('validation.ranat', {
+            site: site.site.name,
+            pack: site.site.rules_pack_id ?? t('validation.nopack'),
+          })}
+        </span>
+      </ScreenHeader>
 
-      {report.checksSkipped.length > 0 && (
-        <div style={{
-          marginBottom: 16,
-          padding: '8px 12px',
-          borderRadius: 6,
-          border: '1px solid var(--border-hairline)',
-          background: 'var(--surface-panel)',
-          fontSize: 12,
-          color: 'var(--text-secondary)',
-        }}>
-          {t('checks.skipped', { list: report.checksSkipped.join(', ') })}
+      <MetricRow metrics={metrics} />
+
+      {run.findings.length === 0 && (
+        <div style={{ marginTop: SPACE.lg }}>
+          <StateBanner
+            severity="valid"
+            message={t('validation.clean.message', { count: run.checksRun.length })}
+            hint={t('validation.clean.hint')}
+          />
         </div>
       )}
 
-      {report.findings.length === 0 ? (
-        <div style={{
-          padding: 32,
-          borderRadius: 4,
-          border: '2px dashed var(--border-hairline)',
-          textAlign: 'center',
-          color: 'var(--text-secondary)',
-          fontSize: 13,
-        }}>
-          {t('checks.empty')}
-        </div>
-      ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ borderBottom: '2px solid var(--border-hairline)' }}>
-                <Th>{t('checks.col.severity')}</Th>
-                <Th>{t('checks.col.code')}</Th>
-                <Th>{t('checks.col.entity')}</Th>
-                <Th>{t('checks.col.message')}</Th>
-                <Th>{t('checks.col.details')}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {report.findings.map((f, i) => (
-                <tr key={`${f.code}-${i}`} style={{ borderBottom: '1px solid var(--border-hairline)' }}>
-                  <td style={{ padding: '8px 12px' }}>
-                    <SeverityBadge severity={f.severity} label={t(severityKey(f.severity))} />
-                  </td>
-                  <td style={{
-                    padding: '8px 12px',
-                    fontFamily: 'monospace',
-                    fontSize: 12,
-                    color: 'var(--text-primary)',
-                  }}>
-                    {f.code}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
-                    {f.entity ? `${f.entity.kind}:${f.entity.id}` : '—'}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontSize: 12 }}>
-                    {getErrorMessage(f.code as ErrorCode, lang) ?? f.code}
-                  </td>
-                  <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
-                    {formatParams(f.params)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {run.checksSkipped.length > 0 && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="warning"
+            code="RULES.PACK_NOT_BOUND"
+            message={t('validation.skipped.message', { list: run.checksSkipped.join(', ') })}
+            hint={t('validation.skipped.hint')}
+          />
         </div>
       )}
+
+      <div style={{ display: 'grid', gap: SPACE.lg, marginTop: SPACE.lg }}>
+        {([
+          ['blocking', blocking, 'validation.panel.blocking'],
+          ['warning', warnings, 'validation.panel.warnings'],
+          ['info', info, 'validation.panel.info'],
+        ] as const).map(([id, list, titleKey]) => (
+          list.length === 0 ? null : (
+            <Panel key={id} title={t(titleKey)} note={String(list.length)}>
+              <FindingList findings={list} empty={t('validation.group.empty')} />
+            </Panel>
+          )
+        ))}
+      </div>
+
+      <Note>{t('validation.note')}</Note>
     </div>
   );
-}
-
-function Th({ children }: { readonly children: string }): JSX.Element {
-  return (
-    <th style={{
-      textAlign: 'left',
-      padding: '8px 12px',
-      fontWeight: 500,
-      color: 'var(--text-secondary)',
-      fontSize: 11,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    }}>
-      {children}
-    </th>
-  );
-}
-
-type SeverityKey =
-  | 'severity.blocking'
-  | 'severity.warning'
-  | 'severity.info';
-
-function severityKey(severity: string): SeverityKey {
-  switch (severity) {
-    case 'blocking': return 'severity.blocking';
-    case 'warning': return 'severity.warning';
-    default: return 'severity.info';
-  }
-}
-
-function SeverityBadge(
-  { severity, label }: { readonly severity: string; readonly label: string },
-): JSX.Element {
-  return (
-    <span
-      title={severity}
-      style={{
-        display: 'inline-block',
-        padding: '2px 8px',
-        borderRadius: 4,
-        fontSize: 11,
-        fontWeight: 500,
-        background: 'var(--surface-sunken)',
-        color: 'var(--accent)',
-      }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function formatParams(params: Record<string, unknown>): string {
-  return Object.entries(params)
-    .map(([k, v]) => `${k}=${String(v)}`)
-    .join(', ');
 }

@@ -23,6 +23,7 @@ export type ViewId =
   // 03 — Parcours clients
   | 'customer-flows'
   // 04 — Signalétique
+  | 'signage'
   | 'templates'
   | 'faces'
   | 'proofs'

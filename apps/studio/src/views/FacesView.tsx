@@ -1,75 +1,7 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { composeFace, renderFace } from '@azimut/engine-graph';
-import type { FaceTheme } from '@azimut/engine-graph';
-import type { FaceTemplate, SiteData, TravelProfile, GraphNode } from '@azimut/core-model';
-
-/**
- * Support et horodatage de l'aperçu.
- *
- * L'aperçu compose une face par le tableau des messages (H2.5) comme le
- * fait le compilateur. Il lui faut donc un support et un horodatage :
- * deux valeurs fixes, pour que deux aperçus du même état de données
- * soient identiques.
- */
-const PREVIEW_SUPPORT_ID = 'preview';
-const PREVIEW_GENERATED_AT = '1970-01-01T00:00:00.000Z';
-
-const FACE_THEME: FaceTheme = {
-  background: 'var(--surface-panel)',
-  text_primary: 'var(--text-primary)',
-  text_secondary: 'var(--text-secondary)',
-  accent: 'var(--surface-sunken)',
-  border: 'var(--border-hairline)',
-};
-
-function findPreviewNode(
-  nodes: readonly GraphNode[],
-): GraphNode | undefined {
-  return (
-    nodes.find((n) => n.kind === 'junction')
-    ?? nodes.find((n) => n.kind === 'entrance')
-    ?? nodes[0]
-  );
-}
-
-type RenderedPreview = {
-  readonly svg: string;
-  readonly node: GraphNode;
-};
-
-function renderPreview(
-  site: SiteData,
-  template: FaceTemplate,
-  nodes: readonly GraphNode[],
-  profile: TravelProfile,
-  typeWidth: number,
-  typeHeight: number,
-  lang: string,
-): RenderedPreview | null {
-  const node = findPreviewNode(nodes);
-  if (!node) return null;
-
-  const resolved = composeFace({
-    site,
-    template,
-    profile,
-    supportId: PREVIEW_SUPPORT_ID,
-    nodeId: node.id,
-    generated_at: PREVIEW_GENERATED_AT,
-  });
-  if (!resolved.ok) return null;
-
-  const svg = renderFace(resolved.value, {
-    width_mm: typeWidth,
-    height_mm: typeHeight,
-    theme: FACE_THEME,
-    font_family: 'system-ui, sans-serif',
-    lang,
-  });
-  return { svg, node };
-}
+import { renderPreview } from './signage/face-preview.js';
 
 export function FacesView(): JSX.Element {
   const site = useSiteData();
@@ -87,15 +19,7 @@ export function FacesView(): JSX.Element {
 
   const preview = useMemo(() => {
     if (!selected || !profile) return null;
-    const st = site.support_types.find(
-      (s) => s.key === selected.support_type_key,
-    );
-    const face = st?.faces.find((f) => f.side === selected.side);
-    const width = face?.default_width_mm ?? 600;
-    const height = face?.default_height_mm ?? 400;
-    return renderPreview(
-      site, selected, site.graph.nodes, profile, width, height, lang,
-    );
+    return renderPreview(site, selected, profile, lang);
   }, [site, selected, profile, lang]);
 
   if (templates.length === 0) {
