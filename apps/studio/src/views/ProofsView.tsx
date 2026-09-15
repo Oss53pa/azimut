@@ -2,154 +2,260 @@ import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { composeFace } from '@azimut/engine-graph';
-import type { FaceTemplate, SiteData, TravelProfile, GraphNode } from '@azimut/core-model';
+import { assertProofTransition } from '@azimut/core-model';
+import type { FaceTemplate, SupportVersionState, SupportVersion } from '@azimut/core-model';
+import type { ViewId } from '../views.js';
+import { findPreviewNode } from './signage/face-preview.js';
+import {
+  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner,
+  SPACE, TEXT, type Metric, type Column,
+} from '../components/ui/index.js';
+import { FindingList } from './message-schedule/FindingList.js';
 
-/** Voir FacesView : valeurs fixes pour un état d'écran reproductible. */
+type ProofsViewProps = {
+  readonly onNavigate: (view: ViewId) => void;
+};
+
+/** Valeurs fixes de l'épreuve : deux passages sur les mêmes données coïncident. */
 const REVIEW_SUPPORT_ID = 'review';
 const REVIEW_GENERATED_AT = '1970-01-01T00:00:00.000Z';
 
+const VERSION_STATES: readonly SupportVersionState[] = [
+  'draft', 'in_review', 'approved', 'superseded',
+];
+
 type FaceStatus = {
   readonly template: FaceTemplate;
-  readonly node: GraphNode | null;
-  readonly resolved: boolean;
-  readonly warningCount: number;
+  readonly composable: boolean;
+  readonly warnings: number;
+  readonly blockers: number;
 };
 
-function evaluateFaces(
-  site: SiteData,
-  templates: readonly FaceTemplate[],
-  profile: TravelProfile | null,
-  nodes: readonly GraphNode[],
-): readonly FaceStatus[] {
-  if (!profile) return templates.map((t) => ({
-    template: t, node: null, resolved: false, warningCount: 0,
-  }));
-
-  return templates.map((template) => {
-    const node = nodes.find((n) => n.kind === 'junction')
-      ?? nodes.find((n) => n.kind === 'entrance')
-      ?? nodes[0]
-      ?? null;
-    if (!node) {
-      return { template, node: null, resolved: false, warningCount: 0 };
+/**
+ * Transitions admises depuis un état, lues dans la machine à états de D9 en
+ * l'interrogeant plutôt qu'en recopiant sa table (invariant 1).
+ */
+function allowedFrom(state: SupportVersionState): readonly SupportVersionState[] {
+  return VERSION_STATES.filter(target => {
+    try {
+      assertProofTransition(state, target);
+      return true;
+    } catch {
+      return false;
     }
-    const result = composeFace({
-      site,
-      template,
-      profile,
-      supportId: REVIEW_SUPPORT_ID,
-      nodeId: node.id,
-      generated_at: REVIEW_GENERATED_AT,
-    });
-    return {
-      template,
-      node,
-      resolved: result.ok,
-      warningCount: result.ok ? result.warnings.length : 0,
-    };
   });
 }
 
-export function ProofsView(): JSX.Element {
+/**
+ * Module 04 — les épreuves et le bon à tirer.
+ *
+ * Une face ne part en épreuve que si elle se compose. L'écran mesure donc
+ * d'abord cela, face par face, puis montre la colonne vertébrale des versions
+ * — brouillon, en revue, approuvé, remplacé — et les transitions que la machine
+ * à états autorise depuis chacune.
+ */
+export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
   const site = useSiteData();
   const { t } = useI18n();
-  const profile = site.travel_profiles[0] ?? null;
+  const profile = site.travel_profiles[0];
 
-  const statuses = useMemo(
-    () => evaluateFaces(
-      site,
-      [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id)),
-      profile,
-      site.graph.nodes,
-    ),
-    [site, profile],
-  );
+  const statuses = useMemo<readonly FaceStatus[]>(() => {
+    const node = findPreviewNode(site.graph.nodes);
+    if (profile === undefined || node === undefined) {
+      return [...site.face_templates].map((template): FaceStatus => ({
+        template, composable: false, warnings: 0, blockers: 0,
+      }));
+    }
+    return [...site.face_templates]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((template): FaceStatus => {
+        const result = composeFace({
+          site,
+          template,
+          profile,
+          supportId: REVIEW_SUPPORT_ID,
+          nodeId: node.id,
+          generated_at: REVIEW_GENERATED_AT,
+        });
+        return {
+          template,
+          composable: result.ok,
+          warnings: result.ok ? result.warnings.length : 0,
+          blockers: result.ok ? 0 : result.findings.length,
+        };
+      });
+  }, [site, profile]);
 
-  const resolvedCount = statuses.filter((s) => s.resolved).length;
-  const totalWarnings = statuses.reduce((sum, s) => sum + s.warningCount, 0);
+  const blockingFindings = useMemo(() => {
+    const node = findPreviewNode(site.graph.nodes);
+    if (profile === undefined || node === undefined) return [];
+    return statuses.flatMap(status => {
+      if (status.composable) return [];
+      const result = composeFace({
+        site,
+        template: status.template,
+        profile,
+        supportId: REVIEW_SUPPORT_ID,
+        nodeId: node.id,
+        generated_at: REVIEW_GENERATED_AT,
+      });
+      return result.ok ? [] : result.findings;
+    });
+  }, [site, profile, statuses]);
+
+  const composable = statuses.filter(s => s.composable).length;
+  const versions = site.support_versions;
+
+  const metrics: readonly Metric[] = [
+    { id: 'faces', label: t('proofs.metric.faces'), value: String(statuses.length) },
+    {
+      id: 'composable',
+      label: t('proofs.metric.composable'),
+      value: `${String(composable)} / ${String(statuses.length)}`,
+      severity: composable === statuses.length ? 'valid' : 'blocking',
+    },
+    (() => {
+      const total = statuses.reduce((n, s) => n + s.warnings, 0);
+      return {
+        id: 'warnings',
+        label: t('proofs.metric.warnings'),
+        value: String(total),
+        ...(total > 0 ? { severity: 'warning' as const } : {}),
+      };
+    })(),
+    { id: 'versions', label: t('proofs.metric.versions'), value: String(versions.length) },
+    {
+      id: 'approved',
+      label: t('proofs.metric.approved'),
+      value: String(versions.filter(v => v.state === 'approved').length),
+      // Pas de vert quand il n'y a rien à approuver : zéro sur zéro n'est
+      // pas une réussite.
+      ...(versions.length > 0 ? { severity: 'valid' as const } : {}),
+    },
+  ];
+
+  const faceColumns: readonly Column<FaceStatus>[] = [
+    { id: 'name', header: t('proofs.col.template'), cell: s => s.template.name },
+    { id: 'type', header: t('proofs.col.typology'), cell: s => s.template.support_type_key },
+    { id: 'side', header: t('proofs.col.side'), cell: s => s.template.side },
+    {
+      id: 'state',
+      header: t('proofs.col.composition'),
+      cell: s => (
+        <Tag
+          label={s.composable ? t('proofs.composition.ok') : t('proofs.composition.failed')}
+          severity={s.composable ? 'valid' : 'blocking'}
+        />
+      ),
+    },
+    {
+      id: 'warnings',
+      header: t('proofs.col.warnings'),
+      numeric: true,
+      cell: s => String(s.warnings),
+    },
+  ];
+
+  const versionColumns: readonly Column<SupportVersion>[] = [
+    { id: 'support', header: t('proofs.col.support'), cell: v => v.support_id },
+    { id: 'version', header: t('proofs.col.version'), numeric: true, cell: v => String(v.version) },
+    {
+      id: 'state',
+      header: t('proofs.col.state'),
+      cell: v => (
+        <Tag
+          label={t(STATE_KEYS[v.state])}
+          severity={v.state === 'approved' ? 'valid' : v.state === 'superseded' ? undefined : 'warning'}
+          muted={v.state === 'superseded'}
+        />
+      ),
+    },
+    { id: 'hash', header: t('proofs.col.hash'), cell: v => v.content_hash?.slice(0, 12) ?? '—' },
+    { id: 'created', header: t('proofs.col.created'), cell: v => v.created_at },
+  ];
 
   return (
     <div>
-      <h1 style={{ margin: '0 0 8px', fontSize: 22, color: 'var(--text-primary)' }}>
-        {t('proofs.title')}
-      </h1>
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 16 }}>
-        {t('proofs.summary', {
-          templates: statuses.length,
-          resolved: resolvedCount,
-          warnings: totalWarnings,
-        })}
-      </p>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '2px solid var(--border-hairline)' }}>
-              <Th>{t('proofs.col.template')}</Th>
-              <Th>{t('proofs.col.typeface')}</Th>
-              <Th>{t('proofs.col.testnode')}</Th>
-              <Th>{t('proofs.col.status')}</Th>
-              <Th>{t('proofs.col.warnings')}</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {statuses.length === 0 ? (
-              <tr>
-                <td colSpan={5} style={{
-                  padding: 24,
-                  textAlign: 'center',
-                  color: 'var(--text-secondary)',
-                }}>
-                  {t('proofs.empty')}
-                </td>
-              </tr>
-            ) : statuses.map((s) => (
-              <tr key={s.template.id} style={{ borderBottom: '1px solid var(--border-hairline)' }}>
-                <td style={{ padding: '8px 12px', color: 'var(--text-primary)', fontWeight: 500 }}>
-                  {s.template.name}
-                </td>
-                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
-                  {s.template.support_type_key} / {s.template.side}
-                </td>
-                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12 }}>
-                  {s.node?.label ?? '—'}
-                </td>
-                <td style={{ padding: '8px 12px' }}>
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '2px 8px',
-                    borderRadius: 4,
-                    fontSize: 11,
-                    fontWeight: 500,
-                    background: s.resolved ? 'var(--surface-sunken)' : 'var(--border-hairline)',
-                    color: s.resolved ? 'var(--accent)' : 'var(--text-secondary)',
-                  }}>
-                    {s.resolved ? t('proofs.status.resolved') : t('proofs.status.failed')}
-                  </span>
-                </td>
-                <td style={{ padding: '8px 12px', color: 'var(--text-secondary)', fontSize: 12, textAlign: 'center' }}>
-                  {s.warningCount > 0 ? s.warningCount : '—'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <ScreenHeader
+        eyebrow={t('proofs.eyebrow')}
+        title={t('proofs.title')}
+        subtitle={t('proofs.subtitle')}
+        actions={[
+          { id: 'signage', label: t('proofs.action.signage'), onSelect: () => { onNavigate('signage'); } },
+        ]}
+      />
+
+      <MetricRow metrics={metrics} />
+
+      {profile === undefined && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="blocking"
+            code="GRAPH.PROFILE_NOT_ACCESSIBLE"
+            message={t('proofs.noprofile.message')}
+          />
+        </div>
+      )}
+
+      <div style={{ marginTop: SPACE.lg }}>
+        <Panel title={t('proofs.panel.faces')} note={t('proofs.panel.faces.note')} padded={false}>
+          <DataTable
+            columns={faceColumns}
+            rows={statuses}
+            rowKey={s => s.template.id}
+            empty={t('proofs.faces.empty')}
+          />
+        </Panel>
       </div>
+
+      <div style={{ marginTop: SPACE.lg }}>
+        <Panel title={t('proofs.panel.versions')} note={t('proofs.panel.versions.note')} padded={false}>
+          <DataTable
+            columns={versionColumns}
+            rows={[...versions].sort((a, b) => a.support_id.localeCompare(b.support_id) || a.version - b.version)}
+            rowKey={v => v.id}
+            empty={t('proofs.versions.empty')}
+          />
+        </Panel>
+      </div>
+
+      <div style={{ marginTop: SPACE.lg }}>
+        <PanelGrid min={300}>
+          <Panel title={t('proofs.panel.machine')} note={t('proofs.panel.machine.note')}>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: SPACE.sm }}>
+              {VERSION_STATES.map(state => {
+                const targets = allowedFrom(state).filter(target => target !== state);
+                return (
+                  <li key={state} style={{ display: 'grid', gap: 2 }}>
+                    <span style={{ fontSize: TEXT.small, color: 'var(--text-primary)' }}>
+                      {t(STATE_KEYS[state])}
+                    </span>
+                    <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      {targets.length === 0
+                        ? t('proofs.machine.terminal')
+                        : targets.map(target => t(STATE_KEYS[target])).join(' · ')}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+            <Note>{t('proofs.machine.note')}</Note>
+          </Panel>
+
+          <Panel title={t('proofs.panel.blockers')} note={String(blockingFindings.length)}>
+            <FindingList findings={blockingFindings} empty={t('proofs.blockers.empty')} limit={10} />
+          </Panel>
+        </PanelGrid>
+      </div>
+
+      <Note>{t('proofs.note')}</Note>
     </div>
   );
 }
 
-function Th({ children }: { readonly children: string }): JSX.Element {
-  return (
-    <th style={{
-      textAlign: 'left',
-      padding: '8px 12px',
-      fontWeight: 500,
-      color: 'var(--text-secondary)',
-      fontSize: 11,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    }}>
-      {children}
-    </th>
-  );
-}
+const STATE_KEYS = {
+  draft: 'proofs.state.draft',
+  in_review: 'proofs.state.inreview',
+  approved: 'proofs.state.approved',
+  superseded: 'proofs.state.superseded',
+} as const;

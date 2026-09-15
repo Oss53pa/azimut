@@ -1,232 +1,194 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import type { UiMessageKey } from '../i18n/messages.js';
+import { validateDirectory, guardNamingCollisions } from '@azimut/engine-graph';
+import type { Finding } from '@azimut/core-model';
+import type { ViewId } from '../views.js';
+import { orientationNames } from '../domain/wayfinding-checks.js';
+import {
+  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note,
+  SPACE, TEXT, LABEL_STYLE, type Metric, type Column,
+} from '../components/ui/index.js';
+import { FindingList } from './message-schedule/FindingList.js';
 
-export function DestinationsView(): JSX.Element {
+type DestinationsViewProps = {
+  readonly onNavigate: (view: ViewId) => void;
+};
+
+type DirectoryRow = {
+  readonly id: string;
+  readonly nameFr: string | null;
+  readonly nameEn: string | null;
+  readonly occupant: string;
+  readonly level: string;
+  readonly node: string;
+  readonly status: string;
+  readonly priority: number;
+};
+
+const ACTIVE_LANGS = ['fr', 'en'] as const;
+const EMPTY = '—';
+
+function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
+  return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
+}
+
+/**
+ * Module 01 — l'annuaire des destinations.
+ *
+ * Une destination porte un nom par langue active ; une face n'affiche jamais
+ * autre chose que ce nom. Les deux contrôles qui comptent ici sont donc la
+ * couverture linguistique et l'unicité des noms d'orientation entre bâtiments
+ * (H2.2) — un lecteur de panneau ne distingue pas deux « Porte A ».
+ */
+export function DestinationsView({ onNavigate }: DestinationsViewProps): JSX.Element {
   const site = useSiteData();
   const { t } = useI18n();
+  const [missingOnly, setMissingOnly] = useState(false);
 
-  const rows = useMemo(() => {
-    const nameMap = new Map<string, Map<string, string>>();
-    for (const dn of site.destination_names) {
-      let langs = nameMap.get(dn.destination_id);
-      if (!langs) {
-        langs = new Map<string, string>();
-        nameMap.set(dn.destination_id, langs);
-      }
-      langs.set(dn.lang, dn.value);
+  const directoryFindings = useMemo(() => findingsOf(validateDirectory(site)), [site]);
+  const collisionFindings = useMemo(
+    () => findingsOf(guardNamingCollisions(orientationNames(site, 'fr'))),
+    [site],
+  );
+
+  const rows = useMemo<readonly DirectoryRow[]>(() => {
+    const names = new Map<string, Map<string, string>>();
+    for (const entry of site.destination_names) {
+      const byLang = names.get(entry.destination_id) ?? new Map<string, string>();
+      byLang.set(entry.lang, entry.value);
+      names.set(entry.destination_id, byLang);
     }
-
-    const nodeMap = new Map<string, string>();
-    for (const n of site.graph.nodes) nodeMap.set(n.id, n.label);
-
-    const levelMap = new Map<string, string>();
-    for (const l of site.levels) levelMap.set(l.id, l.name);
-
-    const nodeLevelMap = new Map<string, string>();
-    for (const n of site.graph.nodes) nodeLevelMap.set(n.id, n.level_id);
+    const nodeLabels = new Map(site.graph.nodes.map(n => [n.id, n.label]));
+    const nodeLevels = new Map(site.graph.nodes.map(n => [n.id, n.level_id]));
+    const levelNames = new Map(site.levels.map(l => [l.id, l.name]));
 
     return [...site.destinations]
       .sort((a, b) => a.display_priority - b.display_priority || a.id.localeCompare(b.id))
-      .map((d) => {
-        const langs = nameMap.get(d.id);
-        const levelId = nodeLevelMap.get(d.node_id);
+      .map((destination): DirectoryRow => {
+        const byLang = names.get(destination.id);
+        const levelId = nodeLevels.get(destination.node_id);
         return {
-          id: d.id,
-          nameFr: langs?.get('fr') ?? '—',
-          nameEn: langs?.get('en') ?? '—',
-          level: levelId ? (levelMap.get(levelId) ?? '—') : '—',
-          node: nodeMap.get(d.node_id) ?? '—',
-          status: d.occupancy_status,
-          priority: d.display_priority,
+          id: destination.id,
+          nameFr: byLang?.get('fr') ?? null,
+          nameEn: byLang?.get('en') ?? null,
+          occupant: destination.occupant_name,
+          level: levelId === undefined ? EMPTY : (levelNames.get(levelId) ?? levelId),
+          node: nodeLabels.get(destination.node_id) ?? destination.node_id,
+          status: destination.occupancy_status,
+          priority: destination.display_priority,
         };
       });
   }, [site]);
 
+  const incomplete = rows.filter(r => r.nameFr === null || r.nameEn === null);
+  const visible = missingOnly ? incomplete : rows;
+  const coverage = rows.length === 0
+    ? 100
+    : Math.round(((rows.length - incomplete.length) / rows.length) * 100);
+
+  const metrics: readonly Metric[] = [
+    { id: 'destinations', label: t('destinations.metric.destinations'), value: String(rows.length) },
+    { id: 'names', label: t('destinations.metric.names'), value: String(site.destination_names.length) },
+    {
+      id: 'coverage',
+      label: t('destinations.metric.coverage'),
+      value: `${String(coverage)} %`,
+      note: ACTIVE_LANGS.join(' · '),
+      severity: coverage === 100 ? 'valid' : 'warning',
+    },
+    {
+      id: 'incomplete',
+      label: t('destinations.metric.incomplete'),
+      value: String(incomplete.length),
+      severity: incomplete.length > 0 ? 'warning' : 'valid',
+    },
+    {
+      id: 'collisions',
+      label: t('destinations.metric.collisions'),
+      value: String(collisionFindings.length),
+      severity: collisionFindings.length > 0 ? 'blocking' : 'valid',
+    },
+  ];
+
+  const columns: readonly Column<DirectoryRow>[] = [
+    {
+      id: 'fr',
+      header: t('destinations.col.namefr'),
+      cell: r => (
+        r.nameFr
+          ?? <Tag label={t('destinations.name.missing')} severity="warning" />
+      ),
+    },
+    {
+      id: 'en',
+      header: t('destinations.col.nameen'),
+      cell: r => (
+        r.nameEn
+          ?? <Tag label={t('destinations.name.missing')} severity="warning" />
+      ),
+    },
+    { id: 'occupant', header: t('destinations.col.occupant'), cell: r => r.occupant },
+    { id: 'level', header: t('destinations.col.level'), cell: r => r.level },
+    { id: 'node', header: t('destinations.col.node'), cell: r => r.node },
+    {
+      id: 'status',
+      header: t('destinations.col.status'),
+      cell: r => <Tag label={r.status} severity={r.status === 'vacant' ? 'warning' : 'valid'} />,
+    },
+    { id: 'priority', header: t('destinations.col.priority'), numeric: true, cell: r => String(r.priority) },
+  ];
+
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 4 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500, color: 'var(--text-primary)' }}>
-          {t('destinations.title')}
-        </h1>
-        <span style={{
-          background: 'var(--accent-soft)',
-          color: 'var(--accent)',
-          fontSize: 12,
-          fontWeight: 500,
-          padding: '2px 12px',
-          borderRadius: 6,
-        }}>
-          {rows.length}
+      <ScreenHeader
+        eyebrow={t('destinations.eyebrow')}
+        title={t('destinations.title')}
+        subtitle={t('destinations.subtitle')}
+        actions={[
+          { id: 'schedule', label: t('destinations.action.schedule'), onSelect: () => { onNavigate('message-schedule'); } },
+        ]}
+      />
+
+      <MetricRow metrics={metrics} />
+
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: SPACE.md,
+        margin: `${String(SPACE.lg)}px 0 ${String(SPACE.sm)}px`,
+      }}>
+        <label style={{ ...LABEL_STYLE, display: 'flex', alignItems: 'center', gap: SPACE.sm }}>
+          <input
+            type="checkbox"
+            checked={missingOnly}
+            onChange={(e) => { setMissingOnly(e.target.checked); }}
+          />
+          {t('destinations.filter.missingonly')}
+        </label>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
+          {t('destinations.filter.shown', { shown: visible.length, total: rows.length })}
         </span>
       </div>
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 20 }}>
-        {t('destinations.subtitle')}
-      </p>
-      <div style={{
-        overflowX: 'auto',
-        borderRadius: 6,
-        border: '1px solid var(--border-hairline)',
-      }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-panel)' }}>
-              <Th>{t('destinations.col.namefr')}</Th>
-              <Th>{t('destinations.col.nameen')}</Th>
-              <Th>{t('destinations.col.level')}</Th>
-              <Th>{t('destinations.col.node')}</Th>
-              <Th>{t('destinations.col.status')}</Th>
-              <Th align="center">{t('destinations.col.priority')}</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <TRow key={r.id} even={i % 2 === 0}>
-                <Td bold>{r.nameFr}</Td>
-                <Td>{r.nameEn}</Td>
-                <Td>
-                  <LevelBadge>{r.level}</LevelBadge>
-                </Td>
-                <Td secondary>{r.node}</Td>
-                <Td>
-                  <StatusBadge
-                    status={r.status}
-                    label={statusKey(r.status) ? t(statusKey(r.status) as UiMessageKey) : r.status}
-                  />
-                </Td>
-                <Td align="center">{String(r.priority)}</Td>
-              </TRow>
-            ))}
-          </tbody>
-        </table>
+
+      <Panel title={t('destinations.panel.directory')} note={t('destinations.panel.directory.note')} padded={false}>
+        <DataTable columns={columns} rows={visible} rowKey={r => r.id} empty={t('destinations.empty')} />
+      </Panel>
+
+      <div style={{ marginTop: SPACE.lg }}>
+        <PanelGrid min={300}>
+          <Panel title={t('destinations.panel.directoryfindings')} note={String(directoryFindings.length)}>
+            <FindingList findings={directoryFindings} empty={t('destinations.findings.empty')} limit={10} />
+          </Panel>
+          <Panel title={t('destinations.panel.collisions')} note={String(collisionFindings.length)}>
+            <FindingList findings={collisionFindings} empty={t('destinations.collisions.empty')} limit={10} />
+            <Note>{t('destinations.collisions.note')}</Note>
+          </Panel>
+        </PanelGrid>
       </div>
+
+      <Note>{t('destinations.note')}</Note>
     </div>
-  );
-}
-
-function Th({ children, align }: { readonly children: string; readonly align?: string }): JSX.Element {
-  return (
-    <th style={{
-      textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
-      padding: '12px 16px',
-      fontWeight: 500,
-      color: 'var(--text-secondary)',
-      fontSize: 11,
-      textTransform: 'uppercase',
-      letterSpacing: '0.06em',
-      borderBottom: '2px solid var(--border-hairline)',
-    }}>
-      {children}
-    </th>
-  );
-}
-
-function TRow({ children, even }: {
-  readonly children: JSX.Element | readonly JSX.Element[];
-  readonly even: boolean;
-}): JSX.Element {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <tr
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        borderBottom: '1px solid var(--border-hairline)',
-        background: hovered
-          ? 'var(--surface-sunken)'
-          : even
-            ? 'var(--surface-panel)'
-            : 'var(--surface-page)',
-        transition: 'background 0.12s',
-      }}
-    >
-      {children}
-    </tr>
-  );
-}
-
-type TdProps = {
-  readonly children: string | JSX.Element;
-  readonly bold?: boolean;
-  readonly secondary?: boolean;
-  readonly align?: string;
-};
-
-function Td({ children, bold, secondary, align }: TdProps): JSX.Element {
-  return (
-    <td style={{
-      padding: '12px 16px',
-      color: secondary ? 'var(--text-secondary)' : 'var(--text-primary)',
-      fontWeight: bold ? 500 : 400,
-      textAlign: (align ?? 'left') as 'left' | 'center' | 'right',
-    }}>
-      {children}
-    </td>
-  );
-}
-
-function LevelBadge({ children }: { readonly children: string }): JSX.Element {
-  return (
-    <span style={{
-      display: 'inline-block',
-      padding: '2px 12px',
-      borderRadius: 6,
-      fontSize: 12,
-      fontWeight: 500,
-      background: 'var(--accent-soft)',
-      color: 'var(--accent)',
-    }}>
-      {children}
-    </span>
-  );
-}
-
-const STATUS_LABEL_KEYS: Record<string, UiMessageKey> = {
-  occupied: 'status.occupied',
-  vacant: 'status.vacant',
-  reserved: 'status.reserved',
-  under_fit_out: 'status.underfitout',
-};
-
-/** The message key for an occupancy status, or null when unknown. */
-function statusKey(status: string): UiMessageKey | null {
-  return STATUS_LABEL_KEYS[status] ?? null;
-}
-
-const STATUS_COLORS: Record<string, { colorVar: string; bgVar: string }> = {
-  occupied: { colorVar: 'var(--state-valid)', bgVar: 'var(--accent-soft)' },
-  vacant: { colorVar: 'var(--state-warning)', bgVar: 'var(--accent-soft)' },
-  reserved: { colorVar: 'var(--state-info)', bgVar: 'var(--accent-soft)' },
-  under_fit_out: { colorVar: 'var(--accent)', bgVar: 'var(--accent-soft)' },
-};
-
-function StatusBadge(
-  { status, label }: { readonly status: string; readonly label: string },
-): JSX.Element {
-  const config = STATUS_COLORS[status] ?? {
-    colorVar: 'var(--text-secondary)',
-    bgVar: 'var(--surface-sunken)',
-  };
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      padding: '4px 12px',
-      borderRadius: 6,
-      fontSize: 11,
-      fontWeight: 500,
-      background: config.bgVar,
-      color: config.colorVar,
-    }}>
-      <span style={{
-        width: 6,
-        height: 6,
-        borderRadius: '50%',
-        background: config.colorVar,
-      }} />
-      {label}
-    </span>
   );
 }

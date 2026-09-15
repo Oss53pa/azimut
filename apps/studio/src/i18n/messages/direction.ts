@@ -151,6 +151,7 @@ export const DIRECTION_FR = {
 
   // Tableau de bord H10
   'dashboard.eyebrow': 'Tableau de bord · H10',
+  'dashboard.title': 'Tableau de bord',
   'dashboard.subtitle': 'Your queue',
   'dashboard.metric.blocking': 'Bloquantes',
   'dashboard.metric.blocking.note': 'rien ne se publie tant que c’est ouvert',
@@ -320,6 +321,7 @@ export const DIRECTION_EN: Readonly<Record<keyof typeof DIRECTION_FR, string>> =
   'crosscutting.note': 'Engines never consult rights: commercial partitioning lives in the application so it contaminates no computation.',
 
   'dashboard.eyebrow': 'Dashboard · H10',
+  'dashboard.title': 'Dashboard',
   'dashboard.subtitle': 'Ce qui vous attend',
   'dashboard.metric.blocking': 'Blocking',
   'dashboard.metric.blocking.note': 'nothing publishes while one is open',
