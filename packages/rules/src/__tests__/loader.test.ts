@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
+import { loadRulesPack } from '../loader.js';
 import {
-  loadRulesPack,
   resolveRule,
   scopeSpecificity,
   groupAndCheckAmbiguity,
-} from '../loader.js';
+} from '../rule-resolution.js';
 import type { RulesPackRule } from '../schema.js';
 
 function validPack(overrides?: Record<string, unknown>) {

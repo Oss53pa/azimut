@@ -81,7 +81,9 @@ export type { FaceContrastInput } from './face-quality.js';
 export { checkCharHeight } from '@azimut/rules';
 export type { CharHeightInput } from '@azimut/rules';
 export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/rules';
-export { resolveSiteRulesPack, buildRulesPackIndex } from '@azimut/rules';
+// buildRulesPackIndex lit le disque : il reste sur @azimut/rules/loader,
+// sinon le studio l'embarquerait et son build casserait.
+export { resolveSiteRulesPack } from '@azimut/rules';
 export { compileTemplate } from './compile-template.js';
 export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';

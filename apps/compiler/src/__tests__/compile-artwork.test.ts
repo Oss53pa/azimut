@@ -4,7 +4,7 @@ import type { CompileContext } from '../compile-artwork.js';
 import type { Job } from '../job.js';
 import type { FaceTheme } from '@azimut/engine-graph';
 import { refMultilevel } from '@azimut/testkit';
-import { loadRulesPack, buildRulesPackIndex } from '@azimut/rules';
+import { loadRulesPack, buildRulesPackIndex } from '@azimut/rules/loader';
 
 const theme: FaceTheme = {
   background: 'tok-bg',

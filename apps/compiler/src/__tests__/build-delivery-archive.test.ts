@@ -5,7 +5,7 @@ import { createBuildDeliveryArchiveHandler } from '../build-delivery-archive.js'
 import type { BuildDeliveryArchiveContext } from '../build-delivery-archive.js';
 import { memoryAssetStore } from '../asset-store.js';
 import type { MutableAssetStore } from '../asset-store.js';
-import { buildRulesPackIndex } from '@azimut/rules';
+import { buildRulesPackIndex } from '@azimut/rules/loader';
 import type { Job } from '../job.js';
 
 const theme: FaceTheme = {

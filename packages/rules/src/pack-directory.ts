@@ -6,8 +6,8 @@ import {
   type Manifest,
   type RulesPackRule,
 } from './schema.js';
-import type { LoadedRulesPack } from './loader.js';
-import { groupAndCheckAmbiguity } from './loader.js';
+import type { LoadedRulesPack } from './rule-resolution.js';
+import { groupAndCheckAmbiguity } from './rule-resolution.js';
 
 /**
  * Load a pack from its manifest JSON string and rule-file contents. Parses and

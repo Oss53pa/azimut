@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import {
   resolveSiteRulesPack,
-  buildRulesPackIndex,
   type RulesPackIndex,
 } from '../resolve-site-pack.js';
 import { loadRulesPack } from '../loader.js';
+import { buildRulesPackIndex } from '../pack-index.js';
 
 const FIXTURE = 'packages/testkit/fixtures/rules-packs/test-fixture';
 const PACK_ID = 'rp-test-0001';

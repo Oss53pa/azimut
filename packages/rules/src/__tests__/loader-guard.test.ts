@@ -3,7 +3,8 @@
 // et que l'obligation de reference documentaire n'est pas contournee.
 
 import { describe, it, expect } from 'vitest';
-import { loadRulesPack, resolveRule } from '../index';
+import { loadRulesPack } from '../loader-entry.js';
+import { resolveRule } from '../index';
 
 const FIXTURE = 'packages/testkit/fixtures/rules-packs/test-fixture';
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { loadRulesPack, type LoadedRulesPack } from '@azimut/rules';
+import { loadRulesPack } from '@azimut/rules/loader';
+import type { LoadedRulesPack } from '@azimut/rules';
 import { checkFaceContrast } from '../face-quality.js';
 import type { FaceTheme } from '../render-face.js';
 

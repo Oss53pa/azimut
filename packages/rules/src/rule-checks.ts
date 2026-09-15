@@ -1,8 +1,8 @@
 import {
   contrastRatio, roundHalfAwayFromZero, type Finding, type Outcome,
 } from '@azimut/core-model';
-import type { LoadedRulesPack, RuleScopeContext } from './loader.js';
-import { resolveRule } from './loader.js';
+import type { LoadedRulesPack, RuleScopeContext } from './rule-resolution.js';
+import { resolveRule } from './rule-resolution.js';
 import type { RulesPackRule } from './schema.js';
 
 /**

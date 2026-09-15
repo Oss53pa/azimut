@@ -1,3 +1,12 @@
+/**
+ * Entrée du paquet, utilisable dans un navigateur.
+ *
+ * Rien ici ne doit, même transitivement, importer `node:` : le studio
+ * embarque ce paquet par l'intermédiaire d'engine-graph. Le chargement
+ * d'un paquet de règles, qui lit le disque, est exposé séparément sous
+ * `@azimut/rules/loader`. Un test garde-fou vérifie cette séparation.
+ */
+
 export {
   rulesPackSchema,
   rulesPackRuleSchema,
@@ -15,13 +24,12 @@ export type {
   RuleFileContent,
 } from './schema.js';
 export {
-  loadRulesPack,
   resolveRule,
   groupAndCheckAmbiguity,
   scopeSpecificity,
-} from './loader.js';
-export type { LoadedRulesPack, RuleScopeContext, LoadRulesPackOptions } from './loader.js';
-export { resolveSiteRulesPack, buildRulesPackIndex } from './resolve-site-pack.js';
+} from './rule-resolution.js';
+export type { LoadedRulesPack, RuleScopeContext } from './rule-resolution.js';
+export { resolveSiteRulesPack } from './resolve-site-pack.js';
 export type { RulesPackIndex, RulesPackSource } from './resolve-site-pack.js';
 export { loadPackDirectory } from './pack-directory.js';
 export { mergeCountryOverlay } from './overlay.js';

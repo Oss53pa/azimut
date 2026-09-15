@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { loadRulesPack } from '../index';
+import { loadRulesPack } from '../loader-entry.js';
 import {
   checkCharHeight,
   checkContrast,
   checkStrokeToHeight,
   checkMountingHeight,
 } from '../rule-checks.js';
-import type { LoadedRulesPack } from '../loader.js';
+import type { LoadedRulesPack } from '../rule-resolution.js';
 
 const FIXTURE = 'packages/testkit/fixtures/rules-packs/test-fixture';
 

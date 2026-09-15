@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { loadRulesPack, resolveRule, type LoadedRulesPack } from '../loader.js';
+import { loadRulesPack } from '../loader.js';
+import { resolveRule, type LoadedRulesPack } from '../rule-resolution.js';
 import { mergeCountryOverlay } from '../overlay.js';
 
 type RuleInput = {

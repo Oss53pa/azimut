@@ -1,6 +1,5 @@
 import type { Outcome, Finding } from '@azimut/core-model';
-import type { LoadedRulesPack, LoadRulesPackOptions } from './loader.js';
-import { loadRulesPack } from './loader.js';
+import type { LoadedRulesPack } from './rule-resolution.js';
 
 /**
  * The rules-pack corpus, keyed by the identifier a site binds to
@@ -53,28 +52,4 @@ export function resolveSiteRulesPack(
     return { ok: false, findings: [packNotBound(rulesPackId)] };
   }
   return { ok: true, value: pack, warnings: [] };
-}
-
-/**
- * Build a pack index from the file corpus. Each source binds an id to a
- * directory, loaded via {@link loadRulesPack} (checksum, source-ref and
- * TEST-environment guards all applied). The first source that fails to load
- * aborts the build with its findings — a corpus with one broken pack is never
- * returned as a silently partial index.
- *
- * This is the file-backed way to populate the index; a database-backed builder
- * (reading `rules_pack_rule` rows) can produce the same `RulesPackIndex`
- * without touching {@link resolveSiteRulesPack}.
- */
-export function buildRulesPackIndex(
-  sources: readonly RulesPackSource[],
-  options: LoadRulesPackOptions,
-): Outcome<RulesPackIndex> {
-  const index = new Map<string, LoadedRulesPack>();
-  for (const source of sources) {
-    const loaded = loadRulesPack(source.directory, options);
-    if (!loaded.ok) return loaded;
-    index.set(source.id, loaded.value);
-  }
-  return { ok: true, value: index, warnings: [] };
 }
