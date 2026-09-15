@@ -163,6 +163,11 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'WAYFIND.LINE_MALFORMED': 'Ligne de message inexploitable à la composition',
   'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support rattaché à une typologie inconnue',
   'WAYFIND.FACE_TEMPLATE_MISSING': 'Aucun gabarit pour cette face de typologie',
+
+  'CALIB.DISTANCE_INVALID': 'Distance réelle nulle ou négative entre les deux points de calage',
+  'CALIB.POINTS_TOO_CLOSE': 'Points de calage trop proches pour une échelle fiable',
+  'CALIB.SCALE_IMPLAUSIBLE': 'Résolution du fond de plan hors de la plage de vraisemblance',
+  'CALIB.NORTH_MISSING': 'Orientation du fond de plan non saisie',
 };
 
 export const ERROR_MESSAGES_EN: ErrorMessages = {
@@ -326,6 +331,11 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'WAYFIND.LINE_MALFORMED': 'Message line unusable at composition time',
   'WAYFIND.SUPPORT_TYPE_UNKNOWN': 'Support attached to an unknown typology',
   'WAYFIND.FACE_TEMPLATE_MISSING': 'No template for this typology face',
+
+  'CALIB.DISTANCE_INVALID': 'Real distance between the two calibration points is zero or negative',
+  'CALIB.POINTS_TOO_CLOSE': 'Calibration points too close together for a reliable scale',
+  'CALIB.SCALE_IMPLAUSIBLE': 'Plan resolution outside the plausibility range',
+  'CALIB.NORTH_MISSING': 'Plan orientation not entered',
 };
 
 const ERROR_DICTIONARIES: Readonly<Record<string, ErrorMessages>> = {

@@ -145,6 +145,12 @@ export const ERROR_CATALOG = {
   'WAYFIND.SUPPORT_TYPE_UNKNOWN':           { severity: 'blocking', description: 'Support rattaché à une typologie inconnue' },
   'WAYFIND.FACE_TEMPLATE_MISSING':          { severity: 'blocking', description: 'Aucun gabarit pour cette face de typologie' },
 
+  // ── CALIB (D4 / tranche M) ────────────────────────────────
+  'CALIB.DISTANCE_INVALID':                 { severity: 'blocking', description: 'Distance réelle nulle ou négative entre les deux points de calage' },
+  'CALIB.POINTS_TOO_CLOSE':                 { severity: 'blocking', description: 'Points de calage trop proches pour une échelle fiable' },
+  'CALIB.SCALE_IMPLAUSIBLE':                { severity: 'warning',  description: 'Résolution du fond de plan hors de la plage de vraisemblance' },
+  'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
+
   // ── EDIT (E17) ────────────────────────────────────────────
   'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },
   'EDIT.BOOLEAN_RESULT_INVALID':            { severity: 'blocking', description: 'Opération booléenne produisant une géométrie invalide' },
@@ -227,6 +233,8 @@ export const ANOMALY_DOMAINS = [
   'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
+  // Tranche M : calage d'un fond de plan (échelle et orientation).
+  'CALIB',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
   'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;

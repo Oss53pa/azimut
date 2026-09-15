@@ -1,5 +1,6 @@
 export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
+export { signedArea, polygonArea } from './geometry.js';
 export { guardFontEmbedding } from './font-embedding.js';
 export type {
   FontAsset,

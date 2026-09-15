@@ -6,7 +6,7 @@ import type {
   Outcome,
   Point,
 } from '@azimut/core-model';
-import { POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2 } from '@azimut/core-model';
+import { POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2, signedArea } from '@azimut/core-model';
 
 export type GeometryValidationResult = {
   readonly total_footprints: number;
@@ -21,21 +21,6 @@ function distance(a: Point, b: Point): number {
   const dx = a.x_m - b.x_m;
   const dy = a.y_m - b.y_m;
   return Math.sqrt(dx * dx + dy * dy);
-}
-
-/**
- * Shoelace formula — returns the signed area of a simple polygon.
- * Positive = counter-clockwise, negative = clockwise.
- */
-function signedArea(vertices: readonly Point[]): number {
-  let area = 0;
-  const n = vertices.length;
-  for (let i = 0; i < n; i++) {
-    const cur = vertices[i] as Point;
-    const next = vertices[(i + 1) % n] as Point;
-    area += cur.x_m * next.y_m - next.x_m * cur.y_m;
-  }
-  return area / 2;
 }
 
 /**

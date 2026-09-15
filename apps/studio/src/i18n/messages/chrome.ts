@@ -1,0 +1,65 @@
+/**
+ * D12.1 — Chrome de l'application : navigation, barre d'en-tête, libellés de sévérité.
+ *
+ * Fragment du catalogue. La table française porte le jeu de clés ;
+ * la table anglaise est typée contre elle, une traduction manquante
+ * ne compile pas.
+ */
+export const CHROME_FR = {
+  // Navigation chrome
+  'nav.title': 'Navigation',
+  'nav.aria.main': 'Navigation principale',
+  'nav.section.general': 'Général',
+  'nav.section.data': 'Données',
+  'nav.section.renders': 'Rendus',
+  'nav.section.quality': 'Qualité',
+  'nav.item.dashboard': 'Tableau de bord',
+  'nav.item.editor': 'Tracé',
+  'nav.item.graph': 'Graphe',
+  'nav.item.destinations': 'Destinations',
+  'nav.item.supports': 'Supports',
+  'nav.item.templates': 'Gabarits',
+  'nav.item.floorplans': 'Plans de niveaux',
+  'nav.item.faces': 'Faces',
+  'nav.item.checks': 'Contrôles',
+  'nav.item.proofs': 'BAT',
+
+  // Header bar
+  'header.building.fallback': 'Site',
+  'header.action.save': 'Enregistrer',
+  'header.action.openaudit': "Ouvrir l'audit",
+  'header.action.publish': 'Publier',
+
+  // Severity labels (shared)
+  'severity.blocking': 'Bloquant',
+  'severity.warning': 'Avertissement',
+  'severity.info': 'Information',
+} as const;
+
+export const CHROME_EN: Readonly<Record<keyof typeof CHROME_FR, string>> = {
+  'nav.title': 'Navigation',
+  'nav.aria.main': 'Main navigation',
+  'nav.section.general': 'General',
+  'nav.section.data': 'Data',
+  'nav.section.renders': 'Renders',
+  'nav.section.quality': 'Quality',
+  'nav.item.dashboard': 'Dashboard',
+  'nav.item.editor': 'Drawing',
+  'nav.item.graph': 'Graph',
+  'nav.item.destinations': 'Destinations',
+  'nav.item.supports': 'Supports',
+  'nav.item.templates': 'Templates',
+  'nav.item.floorplans': 'Floor plans',
+  'nav.item.faces': 'Faces',
+  'nav.item.checks': 'Checks',
+  'nav.item.proofs': 'Proofs',
+
+  'header.building.fallback': 'Site',
+  'header.action.save': 'Save',
+  'header.action.openaudit': 'Open audit',
+  'header.action.publish': 'Publish',
+
+  'severity.blocking': 'Blocking',
+  'severity.warning': 'Warning',
+  'severity.info': 'Info',
+};

@@ -2,33 +2,22 @@ import { type JSX, useState } from 'react';
 import type { ViewId } from '../views.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
+import {
+  MODULE_FAMILIES,
+  FAMILY_LABEL_KEYS,
+  modulesOfFamily,
+  moduleOfView,
+  type ProductModule,
+} from '../product-map.js';
+import { SPACE, TEXT, LABEL_STYLE } from './ui/index.js';
 
 type SidebarProps = {
   readonly currentView: ViewId;
   readonly onNavigate: (view: ViewId) => void;
 };
 
-type NavItem = {
-  readonly id: ViewId;
-  readonly labelKey: UiMessageKey;
-  readonly sectionKey: UiMessageKey;
-};
-
-const NAV_ITEMS: readonly NavItem[] = [
-  { id: 'dashboard', labelKey: 'nav.item.dashboard', sectionKey: 'nav.section.general' },
-  { id: 'editor', labelKey: 'nav.item.editor', sectionKey: 'nav.section.general' },
-  { id: 'graph', labelKey: 'nav.item.graph', sectionKey: 'nav.section.data' },
-  { id: 'destinations', labelKey: 'nav.item.destinations', sectionKey: 'nav.section.data' },
-  { id: 'supports', labelKey: 'nav.item.supports', sectionKey: 'nav.section.data' },
-  { id: 'templates', labelKey: 'nav.item.templates', sectionKey: 'nav.section.data' },
-  { id: 'floor-plans', labelKey: 'nav.item.floorplans', sectionKey: 'nav.section.renders' },
-  { id: 'faces', labelKey: 'nav.item.faces', sectionKey: 'nav.section.renders' },
-  { id: 'checks', labelKey: 'nav.item.checks', sectionKey: 'nav.section.quality' },
-  { id: 'proofs', labelKey: 'nav.item.proofs', sectionKey: 'nav.section.quality' },
-];
-
 const NAV_STYLE: React.CSSProperties = {
-  width: 200,
+  width: 216,
   borderRight: '1px solid var(--border-hairline)',
   background: 'var(--surface-panel)',
   display: 'flex',
@@ -36,87 +25,93 @@ const NAV_STYLE: React.CSSProperties = {
   flexShrink: 0,
 };
 
-const SECTION_STYLE: React.CSSProperties = {
-  padding: '12px 12px 4px',
-  fontSize: 11,
-  fontWeight: 500,
-  textTransform: 'uppercase',
-  letterSpacing: '0.06em',
-  color: 'var(--text-secondary)',
-};
-
-function itemStyle(active: boolean, hovered: boolean): React.CSSProperties {
+function itemStyle(active: boolean, hovered: boolean, depth: number): React.CSSProperties {
   return {
     display: 'flex',
     alignItems: 'center',
+    gap: SPACE.sm,
     width: 'calc(100% - 12px)',
     textAlign: 'left',
-    padding: '6px 12px',
+    padding: `4px 12px 4px ${String(12 + depth * 16)}px`,
     border: 'none',
-    background: active
-      ? 'var(--surface-sunken)'
-      : hovered
-        ? 'var(--surface-sunken)'
-        : 'transparent',
-    color: active
-      ? 'var(--accent)'
-      : 'var(--text-primary)',
+    background: active || hovered ? 'var(--surface-sunken)' : 'transparent',
+    color: active ? 'var(--accent)' : 'var(--text-primary)',
     fontFamily: 'inherit',
     fontWeight: active ? 500 : 400,
-    fontSize: 13,
+    fontSize: depth === 0 ? TEXT.body : TEXT.small,
     cursor: 'pointer',
     borderRadius: 4,
     margin: '2px 6px',
     boxSizing: 'border-box',
-    transition: 'background 120ms',
   };
 }
 
+const NUMBER_STYLE: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)',
+  fontSize: TEXT.micro,
+  color: 'var(--text-muted)',
+  flexShrink: 0,
+};
+
+/**
+ * Partie H — la navigation EST la carte du produit : quatre familles, douze
+ * modules numérotés. Les écrans d'un module ne se déplient que lorsqu'il est
+ * actif, pour qu'une liste de vingt-quatre entrées ne remplace pas une carte.
+ */
 export function Sidebar({ currentView, onNavigate }: SidebarProps): JSX.Element {
   const { t } = useI18n();
-  const [hoveredItem, setHoveredItem] = useState<ViewId | null>(null);
-  let lastSection = '';
+  const [hovered, setHovered] = useState<ViewId | null>(null);
+  const activeModule = moduleOfView(currentView);
+
+  function entry(view: ViewId, labelKey: UiMessageKey, depth: number, number?: string): JSX.Element {
+    const active = currentView === view;
+    return (
+      <button
+        key={view}
+        type="button"
+        onMouseEnter={() => { setHovered(view); }}
+        onMouseLeave={() => { setHovered(null); }}
+        onClick={() => { onNavigate(view); }}
+        style={itemStyle(active, hovered === view, depth)}
+        aria-current={active ? 'page' : undefined}
+      >
+        {number !== undefined && <span style={NUMBER_STYLE}>{number}</span>}
+        <span>{t(labelKey)}</span>
+      </button>
+    );
+  }
+
+  function moduleEntry(module: ProductModule): JSX.Element {
+    const isActive = activeModule?.number === module.number;
+    return (
+      <div key={module.number}>
+        {entry(module.entry, module.nameKey, 0, module.number)}
+        {isActive && module.screens.map(s => entry(s.view, s.labelKey, 1))}
+      </div>
+    );
+  }
 
   return (
     <nav style={NAV_STYLE} aria-label={t('nav.aria.main')}>
       <div style={{
-        padding: '6px 12px',
+        padding: '8px 12px',
         borderBottom: '1px solid var(--border-hairline)',
-        fontSize: 15,
+        fontSize: TEXT.lead,
         fontWeight: 500,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        minHeight: 36,
       }}>
-        <span>{t('nav.title')}</span>
+        {t('nav.title')}
       </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: '4px 0' }}>
-        {NAV_ITEMS.map((item) => {
-          const showSection = item.sectionKey !== lastSection;
-          lastSection = item.sectionKey;
-          const isActive = currentView === item.id;
-          const isHovered = hoveredItem === item.id;
-          return (
-            <div key={item.id}>
-              {showSection && (
-                <div style={SECTION_STYLE}>
-                  {t(item.sectionKey)}
-                </div>
-              )}
-              <button
-                type="button"
-                onMouseEnter={() => setHoveredItem(item.id)}
-                onMouseLeave={() => setHoveredItem(null)}
-                onClick={() => onNavigate(item.id)}
-                style={itemStyle(isActive, isHovered)}
-                aria-current={isActive ? 'page' : undefined}
-              >
-                {t(item.labelKey)}
-              </button>
+      <div style={{ flex: 1, overflow: 'auto', padding: `${String(SPACE.xs)}px 0 ${String(SPACE.md)}px` }}>
+        {entry('dashboard', 'nav.item.dashboard', 0)}
+        {entry('product-map', 'nav.item.productmap', 0)}
+        {MODULE_FAMILIES.map(family => (
+          <div key={family}>
+            <div style={{ ...LABEL_STYLE, padding: '12px 12px 4px' }}>
+              {t(FAMILY_LABEL_KEYS[family])}
             </div>
-          );
-        })}
+            {modulesOfFamily(family).map(moduleEntry)}
+          </div>
+        ))}
       </div>
     </nav>
   );

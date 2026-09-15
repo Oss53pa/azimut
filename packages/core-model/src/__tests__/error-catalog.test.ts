@@ -57,10 +57,11 @@ describe('ERROR_CATALOG', () => {
     }
   });
 
-  it('the allowlist holds the base/E17/H domains plus partie I (I6) and partie J', () => {
+  it('the allowlist holds the base/E17/H domains plus partie I (I6), partie J and tranche M', () => {
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
-        'AD', 'ASSET', 'ASSIST', 'CHARTER', 'COLOR', 'COST', 'DATA', 'EDIT',
+        'AD', 'ASSET', 'ASSIST', 'CALIB', 'CHARTER', 'COLOR', 'COST', 'DATA',
+        'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
         'LIBRARY', 'MODULE', 'PACKAGE', 'PICTO', 'RENDER', 'REVIEW', 'RULES',
         'SECURITY', 'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
