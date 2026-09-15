@@ -146,7 +146,9 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     entry: 'portfolio',
     screens: [],
     engine: 'absent',
-    source: 'studio/domain/portfolio',
+    // Aucun fichier ne porte ce module : la case reste vide plutôt que de
+    // nommer un chemin qui n'existe pas.
+    source: '\u2014',
   },
   {
     number: '11',
