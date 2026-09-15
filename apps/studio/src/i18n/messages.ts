@@ -17,6 +17,9 @@ import { EDITOR_FR, EDITOR_EN } from './messages/editor.js';
 import { MODULES_FR, MODULES_EN } from './messages/modules.js';
 import { WAYFINDING_FR, WAYFINDING_EN } from './messages/wayfinding.js';
 import { FOUNDATION_FR, FOUNDATION_EN } from './messages/foundation.js';
+import { COMMERCE_FR, COMMERCE_EN } from './messages/commerce.js';
+import { PRODUCTION_FR, PRODUCTION_EN } from './messages/production.js';
+import { DIRECTION_FR, DIRECTION_EN } from './messages/direction.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -25,6 +28,9 @@ export const MESSAGES_FR = {
   ...MODULES_FR,
   ...WAYFINDING_FR,
   ...FOUNDATION_FR,
+  ...COMMERCE_FR,
+  ...PRODUCTION_FR,
+  ...DIRECTION_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -36,6 +42,9 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...MODULES_EN,
   ...WAYFINDING_EN,
   ...FOUNDATION_EN,
+  ...COMMERCE_EN,
+  ...PRODUCTION_EN,
+  ...DIRECTION_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

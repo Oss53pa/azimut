@@ -2,7 +2,7 @@ import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { messageScheduleToCsv, messageScheduleToMarkdown } from '@azimut/engine-graph';
-import type { InformationLevel, TypologyInformationLevels } from '@azimut/engine-graph';
+import type { TypologyInformationLevels } from '@azimut/engine-graph';
 import { downloadText } from '../components/download.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, StateBanner, Note, Tag,
@@ -251,5 +251,3 @@ const SELECT_STYLE: React.CSSProperties = {
   textTransform: 'none',
   letterSpacing: 0,
 };
-
-export type { InformationLevel };
