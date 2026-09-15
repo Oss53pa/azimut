@@ -7,6 +7,10 @@
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./mapping": {
+      "types": "./src/mapping/index.ts",
+      "import": "./src/mapping/index.ts"
     }
   },
   "dependencies": {

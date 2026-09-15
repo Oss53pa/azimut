@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@azimut/core-model": "workspace:*",
+    "@azimut/db": "workspace:*",
     "@azimut/design-tokens": "workspace:*",
     "@azimut/engine-graph": "workspace:*",
     "@azimut/engine-layout": "workspace:*",

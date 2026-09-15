@@ -151,6 +151,13 @@ export const ERROR_CATALOG = {
   'CALIB.SCALE_IMPLAUSIBLE':                { severity: 'warning',  description: 'Résolution du fond de plan hors de la plage de vraisemblance' },
   'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
 
+  // ── NET (tranche M) ───────────────────────────────────────
+  'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },
+  'NET.UNAUTHORIZED':                       { severity: 'blocking', description: 'Session absente ou expirée' },
+  'NET.FORBIDDEN':                          { severity: 'blocking', description: 'Droit refusé sur cette ressource' },
+  'NET.NOT_FOUND':                          { severity: 'blocking', description: 'Ressource introuvable au dépôt' },
+  'NET.OFFLINE':                            { severity: 'warning',  description: 'Poste hors ligne' },
+
   // ── EDIT (E17) ────────────────────────────────────────────
   'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },
   'EDIT.BOOLEAN_RESULT_INVALID':            { severity: 'blocking', description: 'Opération booléenne produisant une géométrie invalide' },
@@ -233,8 +240,8 @@ export const ANOMALY_DOMAINS = [
   'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
-  // Tranche M : calage d'un fond de plan (échelle et orientation).
-  'CALIB',
+  // Tranche M : calage d'un fond de plan, et accès au dépôt de données.
+  'CALIB', 'NET',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
   'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;

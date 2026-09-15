@@ -1,0 +1,62 @@
+/**
+ * D12.1 — accès au dépôt de données : écran d'attente, états de chargement,
+ * origine de la donnée.
+ */
+export const DATA_SOURCE_FR = {
+  'gate.eyebrow': 'Azimut',
+  'gate.title': 'Ouvrir un site',
+  'gate.loading': 'Chargement depuis le dépôt…',
+  'gate.source.reference': 'Sites de référence',
+  'gate.source.repository': 'Dépôt de données',
+  'gate.panel.sites': 'Sites disponibles',
+  'gate.col.name': 'Nom',
+  'gate.col.country': 'Pays',
+  'gate.col.rulespack': 'Paquet de règles',
+  'gate.col.action': 'Ouvrir',
+  'gate.nopack': 'aucun',
+  'gate.action.open': 'Ouvrir',
+  'gate.action.retry': 'Réessayer',
+  'gate.empty.message': 'Le dépôt ne contient aucun site.',
+  'gate.empty.hint': "Ce n'est pas une erreur : le dépôt a répondu, et il est vide. Un site créé y apparaîtra.",
+  'gate.note': "Tant qu'aucune URL de dépôt n'est configurée, l'application sert les sites de référence et le dit. Elle ne prétend jamais lire un dépôt qu'elle n'a pas.",
+
+  // Origine de la donnée, affichée dans l'écran Sites
+  'sites.source.title': 'Origine de la donnée',
+  'sites.source.reference': 'Sites de référence du dépôt de code',
+  'sites.source.repository': 'Dépôt de données',
+  'sites.source.reference.hint': "Aucune URL de dépôt n'est configurée : l'application sert les quatre sites de référence, en mémoire. Rien n'est enregistré.",
+  'sites.source.repository.hint': "Les sites viennent du dépôt. Le cloisonnement par organisation est appliqué par la base, ligne à ligne.",
+  'sites.source.origin': 'Origine',
+  'sites.state.loading': 'Chargement de la liste…',
+  'sites.state.failed': 'La liste des sites n’a pas pu être chargée.',
+  'sites.action.reload': 'Recharger',
+} as const;
+
+export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string>> = {
+  'gate.eyebrow': 'Azimut',
+  'gate.title': 'Open a site',
+  'gate.loading': 'Loading from the store…',
+  'gate.source.reference': 'Reference sites',
+  'gate.source.repository': 'Data store',
+  'gate.panel.sites': 'Available sites',
+  'gate.col.name': 'Name',
+  'gate.col.country': 'Country',
+  'gate.col.rulespack': 'Rules pack',
+  'gate.col.action': 'Open',
+  'gate.nopack': 'none',
+  'gate.action.open': 'Open',
+  'gate.action.retry': 'Try again',
+  'gate.empty.message': 'The store contains no site.',
+  'gate.empty.hint': 'This is not an error: the store answered, and it is empty. A site created there will appear here.',
+  'gate.note': 'With no store URL configured, the application serves the reference sites and says so. It never pretends to read a store it does not have.',
+
+  'sites.source.title': 'Data origin',
+  'sites.source.reference': 'Reference sites from the code repository',
+  'sites.source.repository': 'Data store',
+  'sites.source.reference.hint': 'No store URL is configured: the application serves the four reference sites, in memory. Nothing is saved.',
+  'sites.source.repository.hint': 'Sites come from the store. Organisation partitioning is enforced by the database, row by row.',
+  'sites.source.origin': 'Origin',
+  'sites.state.loading': 'Loading the list…',
+  'sites.state.failed': 'The site list could not be loaded.',
+  'sites.action.reload': 'Reload',
+};

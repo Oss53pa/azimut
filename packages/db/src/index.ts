@@ -1,6 +1,7 @@
 export { createConnection, createDb } from './connection.js';
 export * from './schema/index.js';
 export { loadSiteData } from './load-site-data.js';
+export * from './mapping/index.js';
 export { transitionSupportVersion } from './support-version-state.js';
 export type {
   SupportVersionEvent, SupportVersionEffect, SupportVersionTransition,

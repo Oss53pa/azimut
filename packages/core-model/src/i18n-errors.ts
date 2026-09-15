@@ -168,6 +168,12 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.POINTS_TOO_CLOSE': 'Points de calage trop proches pour une échelle fiable',
   'CALIB.SCALE_IMPLAUSIBLE': 'Résolution du fond de plan hors de la plage de vraisemblance',
   'CALIB.NORTH_MISSING': 'Orientation du fond de plan non saisie',
+
+  'NET.REQUEST_FAILED': 'Le service de données n\u2019a pas répondu',
+  'NET.UNAUTHORIZED': 'Session absente ou expirée',
+  'NET.FORBIDDEN': 'Droit refusé sur cette ressource',
+  'NET.NOT_FOUND': 'Ressource introuvable au dépôt',
+  'NET.OFFLINE': 'Poste hors ligne',
 };
 
 export const ERROR_MESSAGES_EN: ErrorMessages = {
@@ -336,6 +342,12 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.POINTS_TOO_CLOSE': 'Calibration points too close together for a reliable scale',
   'CALIB.SCALE_IMPLAUSIBLE': 'Plan resolution outside the plausibility range',
   'CALIB.NORTH_MISSING': 'Plan orientation not entered',
+
+  'NET.REQUEST_FAILED': 'The data service did not respond',
+  'NET.UNAUTHORIZED': 'Session missing or expired',
+  'NET.FORBIDDEN': 'Access denied on this resource',
+  'NET.NOT_FOUND': 'Resource not found in the store',
+  'NET.OFFLINE': 'Workstation offline',
 };
 
 const ERROR_DICTIONARIES: Readonly<Record<string, ErrorMessages>> = {

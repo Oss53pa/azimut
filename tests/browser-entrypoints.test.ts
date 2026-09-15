@@ -120,4 +120,15 @@ describe('aucun module Node atteignable depuis le navigateur', () => {
     expect(visited).not.toContain('packages/rules/src/loader.ts');
     expect(visited).not.toContain('packages/rules/src/pack-index.ts');
   });
+
+  it('atteint le passage ligne → modèle, sans atteindre l’accès base', () => {
+    const visited = [...result.visited].map(f => relative(ROOT, f));
+    // Le navigateur lit la base par l'API REST : il lui faut le passage
+    // ligne → modèle, jamais l'ORM ni le pilote PostgreSQL qui vont avec.
+    expect(visited).toContain('packages/db/src/mapping/index.ts');
+    expect(visited).toContain('packages/db/src/mapping/assemble-site-data.ts');
+    expect(visited).not.toContain('packages/db/src/load-site-data.ts');
+    expect(visited).not.toContain('packages/db/src/connection.ts');
+    expect(visited).not.toContain('packages/db/src/index.ts');
+  });
 });

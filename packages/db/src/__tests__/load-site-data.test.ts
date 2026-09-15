@@ -1,9 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { loadSiteData } from '../load-site-data.js';
 import {
-  loadSiteData, mapSupportRow, mapSupportTypologyRow,
+  mapSupportRow, mapSupportTypologyRow,
   mapSupportFaceRow, mapContentBlockRow, mapSupportVersionRow,
-} from '../load-site-data.js';
+} from '../mapping/index.js';
 import {
   support, supportTypology, supportFace, supportContentBlock, supportVersion,
 } from '../schema/signage.js';

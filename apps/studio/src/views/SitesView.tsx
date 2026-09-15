@@ -1,11 +1,11 @@
 import { type JSX, useMemo, useState } from 'react';
-import { allReferenceSites } from '@azimut/testkit/sites';
-import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
-import type { SiteData, Finding } from '@azimut/core-model';
+import { getErrorMessage } from '@azimut/core-model';
+import type { ErrorCode } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import { appRepository, useSiteList, type SiteSummary } from '../data/index.js';
 import {
-  ScreenHeader, Panel, DataTable, Tag, Note, StateBanner,
-  SPACE, TEXT, type Column,
+  ScreenHeader, MetricRow, Panel, DataTable, Tag, Note, StateBanner,
+  SPACE, TEXT, type Metric, type Column, type ScreenAction,
 } from '../components/ui/index.js';
 
 type SitesViewProps = {
@@ -13,106 +13,69 @@ type SitesViewProps = {
   readonly onOpenSite: (key: string) => void;
 };
 
-type SiteRow = {
-  readonly key: string;
-  readonly site: SiteData;
-  readonly levels: number;
-  readonly cells: number;
-  readonly blocking: number;
-  readonly warnings: number;
-};
-
-function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
-  if (result.ok) return result.warnings ?? [];
-  return result.findings ?? [];
-}
-
-/** Toutes les anomalies d'un site, tous contrôles confondus. */
-function auditSite(site: SiteData): readonly Finding[] {
-  const checks = runChecks(site);
-  return [
-    ...(checks.ok ? checks.value.findings : checks.findings),
-    ...findingsOf(validateGraph(site)),
-    ...findingsOf(validateGeometry(site)),
-    ...findingsOf(validateDirectory(site)),
-  ];
-}
-
 /**
  * Module 01 · écran M1 — la liste des sites.
  *
- * Un site contient les plans de niveaux, les empreintes et le graphe de
- * circulation ; tout le reste en est dérivé. Les compteurs affichés sont donc
- * calculés, jamais stockés.
+ * Elle vient du dépôt, quel qu'il soit : les sites de référence quand aucune
+ * URL n'est configurée, le dépôt réel sinon. L'écran dit toujours laquelle des
+ * deux, parce qu'une liste de sites ne se lit pas de la même façon selon qu'on
+ * regarde des cas d'essai ou des sites réels.
  */
 export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const repository = useMemo(() => appRepository(), []);
+  const { state, reload } = useSiteList(repository);
   const [query, setQuery] = useState('');
 
-  const rows = useMemo<readonly SiteRow[]>(() => {
-    const out: SiteRow[] = [];
-    for (const [key, site] of allReferenceSites) {
-      const findings = auditSite(site);
-      out.push({
-        key,
-        site,
-        levels: site.levels.length,
-        cells: site.footprints.length,
-        blocking: findings.filter(f => f.severity === 'blocking').length,
-        warnings: findings.filter(f => f.severity === 'warning').length,
-      });
-    }
-    return out.sort((a, b) => a.site.site.name.localeCompare(b.site.site.name));
-  }, []);
-
-  const filtered = rows.filter(row =>
-    query.length === 0
-    || row.site.site.name.toLowerCase().includes(query.toLowerCase()),
+  const sites = state.status === 'ready' ? state.value : [];
+  const filtered = sites.filter(site =>
+    query.length === 0 || site.name.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const columns: readonly Column<SiteRow>[] = [
+  const bound = sites.filter(site => site.rules_pack_id !== null).length;
+  const countries = new Set(sites.map(site => site.country_code));
+
+  const metrics: readonly Metric[] = [
+    { id: 'sites', label: t('sites.metric.sites'), value: String(sites.length) },
+    { id: 'countries', label: t('sites.metric.countries'), value: String(countries.size) },
+    {
+      id: 'bound',
+      label: t('sites.metric.bound'),
+      value: `${String(bound)} / ${String(sites.length)}`,
+      severity: bound === sites.length && sites.length > 0 ? 'valid' : 'warning',
+    },
+  ];
+
+  const actions: readonly ScreenAction[] = [
+    { id: 'reload', label: t('sites.action.reload'), onSelect: reload },
+  ];
+
+  const columns: readonly Column<SiteSummary>[] = [
     {
       id: 'name',
       header: t('sites.col.name'),
-      cell: row => (
-        <span style={{ fontWeight: row.key === currentKey ? 500 : 400 }}>
-          {row.site.site.name}
-        </span>
+      cell: site => (
+        <span style={{ fontWeight: site.id === currentKey ? 500 : 400 }}>{site.name}</span>
       ),
     },
-    { id: 'org', header: t('sites.col.organization'), cell: row => row.site.organization.name },
-    { id: 'country', header: t('sites.col.country'), cell: row => row.site.site.country_code },
-    { id: 'levels', header: t('sites.col.levels'), numeric: true, cell: row => String(row.levels) },
-    { id: 'cells', header: t('sites.col.cells'), numeric: true, cell: row => String(row.cells) },
-    {
-      id: 'blocking',
-      header: t('sites.col.blocking'),
-      numeric: true,
-      cell: row => (
-        <Tag
-          label={String(row.blocking)}
-          severity={row.blocking > 0 ? 'blocking' : 'valid'}
-        />
-      ),
-    },
-    {
-      id: 'warnings',
-      header: t('sites.col.warnings'),
-      numeric: true,
-      cell: row => String(row.warnings),
-    },
+    { id: 'country', header: t('sites.col.country'), cell: site => site.country_code },
     {
       id: 'pack',
       header: t('sites.col.rulespack'),
-      cell: row => row.site.site.rules_pack_id ?? t('sites.pack.none'),
+      cell: site => (
+        site.rules_pack_id === null
+          ? <Tag label={t('sites.pack.none')} severity="warning" />
+          : site.rules_pack_id
+      ),
     },
+    { id: 'org', header: t('sites.col.organization'), cell: site => site.org_id },
     {
       id: 'open',
       header: t('sites.col.action'),
-      cell: row => (
+      cell: site => (
         <button
           type="button"
-          onClick={() => { onOpenSite(row.key); }}
+          onClick={() => { onOpenSite(site.id); }}
           style={{
             border: '1px solid var(--border-interactive)',
             background: 'var(--surface-panel)',
@@ -124,11 +87,13 @@ export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Eleme
             cursor: 'pointer',
           }}
         >
-          {row.key === currentKey ? t('sites.action.current') : t('sites.action.open')}
+          {site.id === currentKey ? t('sites.action.current') : t('sites.action.open')}
         </button>
       ),
     },
   ];
+
+  const isReference = repository.kind === 'reference';
 
   return (
     <div>
@@ -136,18 +101,31 @@ export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Eleme
         eyebrow={t('sites.eyebrow')}
         title={t('sites.title')}
         subtitle={t('sites.subtitle')}
+        actions={actions}
       />
 
-      <div style={{ marginBottom: SPACE.md }}>
+      <div style={{ display: 'grid', gap: SPACE.sm, marginBottom: SPACE.md }}>
         <StateBanner
-          severity="info"
-          code="RULES.PACK_NOT_BOUND"
-          message={t('sites.nopack.message')}
-          hint={t('sites.nopack.hint')}
+          severity={isReference ? 'warning' : 'info'}
+          message={t(isReference ? 'sites.source.reference' : 'sites.source.repository')}
+          hint={t(isReference ? 'sites.source.reference.hint' : 'sites.source.repository.hint')}
         />
+        {state.status === 'loading' && (
+          <StateBanner severity="info" message={t('sites.state.loading')} />
+        )}
+        {state.status === 'failed' && (
+          <StateBanner
+            severity={state.error.code === 'NET.OFFLINE' ? 'warning' : 'blocking'}
+            code={state.error.code}
+            message={getErrorMessage(state.error.code as ErrorCode, lang) ?? t('sites.state.failed')}
+            hint={state.error.detail}
+          />
+        )}
       </div>
 
-      <div style={{ marginBottom: SPACE.sm }}>
+      <MetricRow metrics={metrics} />
+
+      <div style={{ margin: `${String(SPACE.lg)}px 0 ${String(SPACE.sm)}px` }}>
         <input
           type="search"
           value={query}
@@ -167,15 +145,39 @@ export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Eleme
         />
       </div>
 
-      <Panel title={t('sites.panel.list')} note={t('sites.panel.note', { count: filtered.length })} padded={false}>
+      <Panel
+        title={t('sites.panel.list')}
+        note={t('sites.panel.note', { count: filtered.length })}
+        padded={false}
+      >
         <DataTable
           columns={columns}
           rows={filtered}
-          rowKey={row => row.key}
+          rowKey={site => site.id}
           selectedKey={currentKey}
-          empty={t('sites.empty')}
+          empty={state.status === 'ready' ? t('sites.empty') : t('sites.state.loading')}
         />
       </Panel>
+
+      <div style={{
+        marginTop: SPACE.md,
+        display: 'flex',
+        gap: SPACE.sm,
+        alignItems: 'baseline',
+        flexWrap: 'wrap',
+      }}>
+        <span style={{ fontSize: TEXT.micro, color: 'var(--text-secondary)' }}>
+          {t('sites.source.origin')}
+        </span>
+        <span style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: TEXT.micro,
+          color: 'var(--text-muted)',
+          overflowWrap: 'anywhere',
+        }}>
+          {repository.origin}
+        </span>
+      </div>
 
       <Note>{t('sites.note')}</Note>
     </div>

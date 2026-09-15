@@ -1,8 +1,9 @@
 import { type JSX, useMemo } from 'react';
-import { allReferenceSites } from '@azimut/testkit/sites';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
-import type { SiteData, Finding } from '@azimut/core-model';
+import { getErrorMessage } from '@azimut/core-model';
+import type { SiteData, Finding, ErrorCode } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import { appRepository, useAllSites } from '../data/index.js';
 import {
   ScreenHeader, MetricRow, Panel, DataTable, Tag, Note, StateBanner,
   SPACE, type Metric, type Column,
@@ -51,11 +52,14 @@ function auditSite(site: SiteData): readonly Finding[] {
  * faire semblant.
  */
 export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const repository = useMemo(() => appRepository(), []);
+  const { state, loaded, total } = useAllSites(repository);
 
   const lines = useMemo<readonly SiteLine[]>(() => {
+    if (state.status !== 'ready') return [];
     const out: SiteLine[] = [];
-    for (const [key, site] of allReferenceSites) {
+    for (const { id: key, data: site } of state.value) {
       const findings = auditSite(site);
       const blocking = findings.filter(f => f.severity === 'blocking').length;
       const checkedEntities = site.graph.nodes.length + site.footprints.length + site.destinations.length;
@@ -76,7 +80,7 @@ export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): J
       });
     }
     return out.sort((a, b) => a.name.localeCompare(b.name));
-  }, []);
+  }, [state]);
 
   const totals = lines.reduce(
     (acc, line) => ({
@@ -156,12 +160,26 @@ export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): J
         subtitle={t('portfolio.subtitle')}
       />
 
-      <div style={{ marginBottom: SPACE.md }}>
+      <div style={{ display: 'grid', gap: SPACE.sm, marginBottom: SPACE.md }}>
         <StateBanner
           severity="warning"
           message={t('portfolio.noengine.message')}
           hint={t('portfolio.noengine.hint')}
         />
+        {state.status === 'loading' && (
+          <StateBanner
+            severity="info"
+            message={t('portfolio.loading', { loaded, total })}
+          />
+        )}
+        {state.status === 'failed' && (
+          <StateBanner
+            severity="blocking"
+            code={state.error.code}
+            message={getErrorMessage(state.error.code as ErrorCode, lang) ?? state.error.code}
+            hint={state.error.detail}
+          />
+        )}
       </div>
 
       <MetricRow metrics={metrics} />
