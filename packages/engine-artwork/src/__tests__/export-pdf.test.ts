@@ -46,6 +46,46 @@ describe('exportArtworkPdf', () => {
     expect(bytes1).toEqual(bytes2);
   });
 
+  // T-0.9 / INV-4 — "Deux compilations d'un même état de données produisent des
+  // fichiers strictement identiques, octet pour octet." The self-consistency
+  // check above (pdf1 === pdf2 in one call pair) passes even if some ambient
+  // factor shifted BOTH outputs together. These three close that gap: the
+  // export must be a pure function of its input VALUES, invariant to object
+  // identity, to call order, and stable across repeated compilation.
+  it('is a pure function of input values, not object identity (INV-4)', async () => {
+    // Two independently constructed, value-equal option objects.
+    const a = await exportArtworkPdf(makeOptions());
+    const b = await exportArtworkPdf(makeOptions());
+    expect(Array.from(a)).toEqual(Array.from(b));
+  });
+
+  it('repeated compilation is byte-stable over many runs (INV-4)', async () => {
+    const opts = makeOptions();
+    const reference = Array.from(await exportArtworkPdf(opts));
+    for (let i = 0; i < 5; i++) {
+      const again = Array.from(await exportArtworkPdf(makeOptions()));
+      expect(again).toEqual(reference);
+    }
+  });
+
+  it('an unrelated export in between does not perturb the output (no leaked state)', async () => {
+    const before = Array.from(await exportArtworkPdf(makeOptions()));
+    // A different export (different title, target, dimensions) between two
+    // identical ones must not change the identical ones — no module-level state.
+    await exportArtworkPdf(
+      makeOptions({ title: 'Autre', target: 'pdf-a', width_mm: 300, height_mm: 150 }),
+    );
+    const after = Array.from(await exportArtworkPdf(makeOptions()));
+    expect(after).toEqual(before);
+  });
+
+  it('pdf-a output is also byte-deterministic (INV-4)', async () => {
+    const opts = makeOptions({ target: 'pdf-a' });
+    const first = Array.from(await exportArtworkPdf(opts));
+    const second = Array.from(await exportArtworkPdf(makeOptions({ target: 'pdf-a' })));
+    expect(second).toEqual(first);
+  });
+
   it('produces different output for different inputs', async () => {
     const pdfA = await exportArtworkPdf(makeOptions({ title: 'Face A' }));
     const pdfB = await exportArtworkPdf(makeOptions({ title: 'Face B' }));
