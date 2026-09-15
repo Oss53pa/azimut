@@ -73,5 +73,19 @@ Documents de référence présents dans `docs/` :
 | `docs/partie-i-atelier-dessin.md` | Atelier de dessin, chaîne de transformation d'un plan en document fini, assistances, droits par module. |
 | `docs/partie-j-stylet-pictogrammes.md` | Saisie à l'encre, couche d'esquisse, annotation de révision, éditeur de pictogrammes, bibliothèques à trois étages. |
 | `docs/partie-k-registre-points-ouverts.md` | Registre consolidé des points ouverts. Remplace et fait seul foi contre les huit listes antérieures (C5, D18, E19, F19, G10, H14, I7, J10). |
+| `docs/partie-l-fiches-modules-integration.md` | Fiches de modules et modèle d'intégration. Propriété des données module par module, quatre règles d'intégration (L1), couches (L2), chaînes de propagation (L4), événements (L5), dégradation par module non souscrit (L6). **Modifie A5.6** : la scission de propriété de `support` entre wayfinding et signalétique (L0) est prioritaire sur elle. |
+| `docs/partie-n-cahier-detaille-modules.md` | Cahier des charges détaillé des douze modules. Champs, règles métier numérotées et opposables (S, W, P, G, R, T, C, E, B, F, X, A), contrôles, écrans, critères d'acceptation. S'appuie sur L pour la propriété et sur M pour les écrans. |
 
-`docs/cahier-des-charges.md` porte la partie A elle-même. Les compléments (partie D, puis parties E à K) déclarent chacun prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts — et sinon la procédure d'arrêt de A2.2 s'applique.
+`docs/cahier-des-charges.md` porte la partie A elle-même. Les compléments (partie D, puis parties E à N) déclarent chacun prendre le même rang que la partie A dans l'ordre de préséance. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts, la partie L modifie A5.6 sur la propriété de `support` — et sinon la procédure d'arrêt de A2.2 s'applique.
+
+**Une règle numérotée de la partie N est opposable** (N0) : elle se cite dans une revue de code et dans un test. Écrire `W4` ou `G5` dans un commentaire ou un nom de test désigne la règle, pas une intention.
+
+### Partie M : absente du dépôt
+
+Les parties L et N s'appuient sur une **partie M** — règles d'écran (M7), tranche d'écrans du socle, contrôles géométriques — qui n'a pas été versée dans `docs/`. Tant qu'elle manque :
+
+- les renvois à M dans L et N ne sont pas vérifiables ;
+- les onze règles de M7, citées comme la norme à laquelle tout nouvel écran se conforme, ne sont pas lisibles ;
+- les écrans déjà construits l'ont été d'après deux maquettes (« Tranche M — Cinq écrans » et « Les Douze Modules ») et non d'après le texte de M.
+
+Réclamer la partie M avant de spécifier un nouvel écran relève de A2.2.
