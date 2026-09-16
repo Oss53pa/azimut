@@ -56,6 +56,9 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
     findings.push(...findingsOf(validateDirectory(site)));
 
     const coverage = profile === undefined ? null : auditCoverage(site, profile, site.supports);
+    // N2.4 — les anomalies de couverture sont nommées par leur code comme les
+    // autres : elles rejoignent la liste au lieu de rester dans un compteur.
+    if (coverage !== null && coverage.ok) findings.push(...coverage.value.findings);
     const access = profile === undefined ? null : auditAccessibility(site, profile);
     const evac = auditEvacuation(site);
     const quantities = computeQuantities(site, placedSupports(site, site.support_types[0]?.key ?? ''));

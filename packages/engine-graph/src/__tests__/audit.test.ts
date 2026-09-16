@@ -104,6 +104,116 @@ describe('auditCoverage', () => {
 
 });
 
+describe('auditCoverage — anomalies nommées (N2.4)', () => {
+  it('lève GRAPH.DECISION_POINT_UNCOVERED, bloquant, par point non couvert', () => {
+    const result = auditCoverage(refMinimal, stdProfile, []);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const uncovered = result.value.findings.filter(
+      f => f.code === 'GRAPH.DECISION_POINT_UNCOVERED',
+    );
+    expect(uncovered).toHaveLength(result.value.uncovered_points.length);
+    expect(uncovered.map(f => f.entity?.id)).toEqual([...result.value.uncovered_points]);
+    for (const finding of uncovered) {
+      expect(finding.severity).toBe('blocking');
+      expect(finding.entity?.kind).toBe('node');
+      expect(finding.ruleRef).toBe('N2.4');
+      expect(finding.params['profile_id']).toBe(stdProfile.id);
+    }
+  });
+
+  it('lève GRAPH.SUPPORT_UNUSED, avertissement, par support hors parcours', () => {
+    const supports: Support[] = [
+      { id: 'sup-1', node_id: 'n-junction' },
+      { id: 'sup-orphan', node_id: 'n-entrance' },
+    ];
+    const result = auditCoverage(refMinimal, stdProfile, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const unused = result.value.findings.filter(f => f.code === 'GRAPH.SUPPORT_UNUSED');
+    expect(unused).toHaveLength(1);
+    expect(unused[0]?.severity).toBe('warning');
+    expect(unused[0]?.entity).toEqual({ kind: 'support', id: 'sup-orphan' });
+    expect(unused[0]?.ruleRef).toBe('N2.4');
+  });
+
+  it('ne lève rien quand chaque point est couvert et chaque support sert', () => {
+    const supports: Support[] = [{ id: 'sup-1', node_id: 'n-junction' }];
+    const result = auditCoverage(refMinimal, stdProfile, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.findings).toEqual([]);
+  });
+
+  it('compte exactement, ni plus ni moins, sur un site partiellement couvert', () => {
+    const profile = refMultilevel.travel_profiles[0];
+    if (profile === undefined) throw new Error('No profile in refMultilevel');
+    const supports: Support[] = [
+      { id: 'sup-hall', node_id: 'n-ml-hall' },
+      { id: 'sup-ailleurs', node_id: 'n-ml-entrance' },
+    ];
+    const result = auditCoverage(refMultilevel, profile, supports);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const byCode = (code: string): number =>
+      result.value.findings.filter(f => f.code === code).length;
+
+    expect(byCode('GRAPH.DECISION_POINT_UNCOVERED'))
+      .toBe(result.value.uncovered_points.length);
+    expect(byCode('GRAPH.SUPPORT_UNUSED'))
+      .toBe(result.value.unused_supports.length);
+    expect(result.value.findings).toHaveLength(
+      result.value.uncovered_points.length + result.value.unused_supports.length,
+    );
+
+    // Comptes figés : sans eux, deux zéros feraient passer le test à vide.
+    expect(byCode('GRAPH.DECISION_POINT_UNCOVERED')).toBe(5);
+    expect(byCode('GRAPH.SUPPORT_UNUSED')).toBe(1);
+
+    // Les points non couverts précèdent les supports inutilisés.
+    expect(result.value.findings.map(f => f.code)).toEqual([
+      'GRAPH.DECISION_POINT_UNCOVERED',
+      'GRAPH.DECISION_POINT_UNCOVERED',
+      'GRAPH.DECISION_POINT_UNCOVERED',
+      'GRAPH.DECISION_POINT_UNCOVERED',
+      'GRAPH.DECISION_POINT_UNCOVERED',
+      'GRAPH.SUPPORT_UNUSED',
+    ]);
+  });
+
+  it('rend les anomalies dans un ordre stable (INV-4)', () => {
+    const supports: Support[] = [
+      { id: 'sup-z', node_id: 'n-entrance' },
+      { id: 'sup-a', node_id: 'n-entrance' },
+    ];
+    const first = auditCoverage(refMinimal, stdProfile, supports);
+    const second = auditCoverage(refMinimal, stdProfile, supports);
+    expect(first).toStrictEqual(second);
+    if (!first.ok) return;
+    const ids = first.value.findings
+      .filter(f => f.code === 'GRAPH.SUPPORT_UNUSED')
+      .map(f => f.entity?.id);
+    expect(ids).toEqual(['sup-a', 'sup-z']);
+  });
+
+  it('W10 — aucun rapport, donc aucun taux, tant que le graphe ne valide pas', () => {
+    const profile = refBroken.travel_profiles[0];
+    if (profile === undefined) throw new Error('No profile in refBroken');
+    const result = auditCoverage(refBroken, profile, [
+      { id: 'sup-1', node_id: 'n-broken-a' },
+    ]);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('GRAPH.NOT_VALIDATED');
+    // Le refus ne laisse passer ni taux ni anomalie de couverture : le rapport
+    // n'existe pas, il n'est pas rendu partiellement.
+    expect(result.findings.map(f => f.code)).not.toContain('GRAPH.DECISION_POINT_UNCOVERED');
+  });
+});
+
 describe('auditAccessibility', () => {
   it('rejects non-accessible profile', () => {
     const result = auditAccessibility(refMinimal, stdProfile);

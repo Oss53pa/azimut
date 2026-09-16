@@ -2,6 +2,7 @@ import type {
   SiteData,
   TravelProfile,
   Outcome,
+  Finding,
 } from '@azimut/core-model';
 import { validateGraph } from './validate-graph.js';
 import { deriveDecisionPoints } from './decision-points.js';
@@ -18,6 +19,18 @@ export type CoverageReport = {
   readonly coverage_ratio: number;
   readonly uncovered_points: readonly string[];
   readonly unused_supports: readonly string[];
+  /**
+   * N2.4 — les deux anomalies de l'audit, nommées par leur code : une
+   * `GRAPH.DECISION_POINT_UNCOVERED` par point de décision qu'aucun support ne
+   * couvre, une `GRAPH.SUPPORT_UNUSED` par support ne servant aucun parcours.
+   *
+   * Elles vivent dans le rapport et non dans les avertissements de l'`Outcome`,
+   * comme le fait déjà `CheckReport` : la première est bloquante, et un
+   * `Outcome` en succès ne porte que des avertissements. Un point non couvert
+   * n'empêche pas de rendre le rapport — c'est précisément ce que l'audit sert
+   * à montrer.
+   */
+  readonly findings: readonly Finding[];
 };
 
 export type AccessibilityReport = {
@@ -32,6 +45,14 @@ export type EvacuationReport = {
   readonly uncovered_nodes: readonly string[];
 };
 
+/**
+ * Audit de couverture (N2.6).
+ *
+ * W10 — aucun taux de couverture n'est publié tant que la validation de
+ * complétude du graphe échoue : le refus ci-dessous est cette règle. Il ne rend
+ * aucun rapport, pas même partiel, parce qu'un taux calculé sur un graphe faux
+ * serait lu comme un taux.
+ */
 export function auditCoverage(
   site: SiteData,
   profile: TravelProfile,
@@ -88,6 +109,25 @@ export function auditCoverage(
     }
   }
 
+  // Ordre déterministe : les points non couverts, déjà triés par
+  // identifiant de nœud, puis les supports inutilisés, triés par identifiant.
+  const findings: Finding[] = [
+    ...uncovered.map((nodeId): Finding => ({
+      code: 'GRAPH.DECISION_POINT_UNCOVERED',
+      severity: 'blocking',
+      entity: { kind: 'node', id: nodeId },
+      params: { profile_id: profile.id },
+      ruleRef: 'N2.4',
+    })),
+    ...unused.map((supportId): Finding => ({
+      code: 'GRAPH.SUPPORT_UNUSED',
+      severity: 'warning',
+      entity: { kind: 'support', id: supportId },
+      params: { profile_id: profile.id },
+      ruleRef: 'N2.4',
+    })),
+  ];
+
   const total = decisionPointNodeIds.size;
   return {
     ok: true,
@@ -97,6 +137,7 @@ export function auditCoverage(
       coverage_ratio: total === 0 ? 1 : covered.length / total,
       uncovered_points: uncovered,
       unused_supports: unused,
+      findings,
     },
     warnings: validation.warnings,
   };
