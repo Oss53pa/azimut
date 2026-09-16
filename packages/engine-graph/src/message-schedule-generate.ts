@@ -133,6 +133,8 @@ export function generateMessageSchedule(
     informationLevels.map(l => [l.support_type_key, l.levels]),
   );
 
+  const nodeIds = new Set(site.graph.nodes.map(n => n.id));
+
   const decisionPoints = deriveDecisionPoints(site, profile, site.destinations);
   const decisionNodeIds = new Set(
     decisionPoints.ok ? decisionPoints.value.map(p => p.node_id) : [],
@@ -160,7 +162,29 @@ export function generateMessageSchedule(
     const level = reduceInformationLevel(
       levelsByKey.get(support.support_type_key) ?? [],
     );
-    const decisionPointId = decisionNodeIds.has(support.node_id) ? support.node_id : null;
+
+    // W4 / N2.7-4 — une ligne sans point de décision ne peut pas être créée.
+    // Un support posé ailleurs qu'à un point de décision ne produit donc
+    // aucune ligne : il est signalé, comme l'est une typologie inconnue ou
+    // une face sans gabarit. Mieux vaut une ligne manquante et nommée qu'une
+    // ligne que rien ne motive.
+    //
+    // Le refus ne vaut que pour un nœud qui existe. Un support posé sur un
+    // nœud absent du graphe relève d'une faute plus profonde, que la
+    // résolution de contenu nomme elle-même ; la masquer derrière « ligne
+    // non justifiée » ferait chercher au mauvais endroit.
+    const nodeExists = nodeIds.has(support.node_id);
+    if (nodeExists && !decisionNodeIds.has(support.node_id)) {
+      warnings.push({
+        code: 'WAYFIND.LINE_UNJUSTIFIED',
+        severity: 'blocking',
+        entity: { kind: 'support', id: support.id },
+        params: { node_id: support.node_id },
+        ruleRef: 'N2.4',
+      });
+      continue;
+    }
+    const decisionPointId = support.node_id;
 
     const faces = [...supportType.faces].sort((a, b) => a.side.localeCompare(b.side));
 

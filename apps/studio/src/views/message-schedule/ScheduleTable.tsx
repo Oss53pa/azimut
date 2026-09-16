@@ -48,7 +48,7 @@ export function ScheduleTable({ lines }: ScheduleTableProps): JSX.Element {
     {
       id: 'point',
       header: t('schedule.col.decisionpoint'),
-      cell: l => orEmpty(l.decision_point_id),
+      cell: l => l.decision_point_id,
     },
     {
       id: 'state',

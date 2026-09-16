@@ -102,7 +102,7 @@ describe('H2.5 — export en tableur', () => {
         pictogram_id: 'picto-1',
         direction: null,
         information_level: 2,
-        decision_point_id: null,
+        decision_point_id: 'dp-1',
         stale: false,
       }],
     };

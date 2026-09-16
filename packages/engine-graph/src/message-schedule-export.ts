@@ -112,7 +112,7 @@ function rowsOfLine(line: MessageLine, labels: ExportLabels): readonly ExportRow
     String(line.block_index),
     line.block_kind,
     line.information_level === null ? '' : String(line.information_level),
-    line.decision_point_id ?? '',
+    line.decision_point_id,
   ];
   const staleCell = line.stale ? labels.yes : labels.no;
 

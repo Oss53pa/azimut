@@ -154,11 +154,62 @@ describe('H2.5 — génération du tableau des messages', () => {
     expect(schedule.lines[0]?.decision_point_id).toBe('n-ml-hall');
   });
 
-  it('ne rattache aucun point de décision sur un nœud qui n’en est pas un', () => {
-    const schedule = scheduleOrThrow({
+  it('W4 — ne crée aucune ligne pour un support hors point de décision', () => {
+    const outcome = generate({
       supports: [{ id: 'sup-x', node_id: 'n-ml-entrance', support_type_key: 'directional' }],
     });
-    expect(schedule.lines[0]?.decision_point_id).toBeNull();
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    // N2.7-4 : une ligne sans point de décision ne peut pas être créée.
+    expect(outcome.value.lines).toHaveLength(0);
+
+    const unjustified = outcome.warnings.filter(w => w.code === 'WAYFIND.LINE_UNJUSTIFIED');
+    expect(unjustified).toHaveLength(1);
+    expect(unjustified[0]?.severity).toBe('blocking');
+    expect(unjustified[0]?.entity).toEqual({ kind: 'support', id: 'sup-x' });
+    expect(unjustified[0]?.params['node_id']).toBe('n-ml-entrance');
+    expect(unjustified[0]?.ruleRef).toBe('N2.4');
+  });
+
+  it('W4 — un nœud absent du graphe garde sa cause propre, pas « ligne non justifiée »', () => {
+    // Un nœud inconnu n'est pas un point de décision, mais le dire ainsi
+    // ferait chercher au mauvais endroit : la résolution de contenu nomme la
+    // vraie faute, et c'est elle qui doit remonter.
+    const outcome = generate({
+      supports: [{ id: 'sup-x', node_id: 'n-inexistant', support_type_key: 'directional' }],
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    expect(outcome.value.lines).toHaveLength(0);
+    const codes = outcome.warnings.map(w => w.code);
+    expect(codes).toContain('GRAPH.RESOLVE_NODE_NOT_FOUND');
+    expect(codes).not.toContain('WAYFIND.LINE_UNJUSTIFIED');
+  });
+
+  it('W4 — toute ligne produite porte son point de décision', () => {
+    const schedule = scheduleOrThrow();
+    expect(schedule.lines.length).toBeGreaterThan(0);
+    for (const line of schedule.lines) {
+      expect(line.decision_point_id.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('W4 — le support justifié produit ses lignes, celui qui ne l\u2019est pas non', () => {
+    const outcome = generate({
+      supports: [
+        { id: 'sup-ok', node_id: 'n-ml-hall', support_type_key: 'directional' },
+        { id: 'sup-ko', node_id: 'n-ml-entrance', support_type_key: 'directional' },
+      ],
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+
+    // Ni plus, ni moins : seul le support hors point de décision est écarté.
+    expect(new Set(outcome.value.lines.map(l => l.support_id))).toEqual(new Set(['sup-ok']));
+    expect(outcome.warnings.filter(w => w.code === 'WAYFIND.LINE_UNJUSTIFIED'))
+      .toHaveLength(1);
   });
 
   it('n’invente aucune ligne pour une typologie inconnue', () => {
