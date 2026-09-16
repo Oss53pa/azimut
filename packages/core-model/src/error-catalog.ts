@@ -38,6 +38,9 @@ export const ERROR_CATALOG = {
   'GRAPH.ROUTE_UNREACHABLE':                { severity: 'blocking', description: 'Destination non joignable depuis le nœud de départ' },
   'GRAPH.QUANTITY_NODE_NOT_FOUND':          { severity: 'warning',  description: 'Support positionné sur un nœud introuvable' },
   'GRAPH.QUANTITY_CROSS_CHECK_FAILED':      { severity: 'blocking', description: 'Recoupement des quantités incohérent' },
+  // Partie N, module 02 (N2.4) : audit de couverture.
+  'GRAPH.DECISION_POINT_UNCOVERED':         { severity: 'blocking', description: 'Point de décision qu’aucun support ne couvre' },
+  'GRAPH.SUPPORT_UNUSED':                   { severity: 'warning',  description: 'Support ne servant aucun parcours' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },
@@ -134,6 +137,10 @@ export const ERROR_CATALOG = {
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet de version de support sans motif' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable pour l’empreinte' },
 
+  // Partie N, module 01 (N1.4) : code de cellule (règle S3).
+  'DATA.UNIT_CODE_REQUIRED':                { severity: 'blocking', description: 'Empreinte de nature cellule sans code d’unité' },
+  'DATA.CODE_DUPLICATE':                    { severity: 'blocking', description: 'Deux cellules portent le même code sur un niveau' },
+
   // ── WAYFIND (H12) ─────────────────────────────────────────
   'WAYFIND.NAMING_COLLISION':               { severity: 'blocking', description: 'Deux entités portent le même nom d’orientation' },
   'WAYFIND.CONTINUITY_BROKEN':              { severity: 'blocking', description: 'Destination annoncée puis abandonnée avant d’être atteinte' },
@@ -144,12 +151,16 @@ export const ERROR_CATALOG = {
   'WAYFIND.LINE_MALFORMED':                 { severity: 'blocking', description: 'Ligne de message inexploitable à la composition' },
   'WAYFIND.SUPPORT_TYPE_UNKNOWN':           { severity: 'blocking', description: 'Support rattaché à une typologie inconnue' },
   'WAYFIND.FACE_TEMPLATE_MISSING':          { severity: 'blocking', description: 'Aucun gabarit pour cette face de typologie' },
+  // Partie N, module 02 (N2.4) : justification d'une ligne (règle W4).
+  'WAYFIND.LINE_UNJUSTIFIED':               { severity: 'blocking', description: 'Ligne de message sans point de décision qui la justifie' },
 
   // ── CALIB (D4 / tranche M) ────────────────────────────────
   'CALIB.DISTANCE_INVALID':                 { severity: 'blocking', description: 'Distance réelle nulle ou négative entre les deux points de calage' },
   'CALIB.POINTS_TOO_CLOSE':                 { severity: 'blocking', description: 'Points de calage trop proches pour une échelle fiable' },
   'CALIB.SCALE_IMPLAUSIBLE':                { severity: 'warning',  description: 'Résolution du fond de plan hors de la plage de vraisemblance' },
   'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
+  // Partie N, module 01 (N1.4) : niveau sans plan calé.
+  'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
 
   // ── NET (tranche M) ───────────────────────────────────────
   'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },
@@ -195,6 +206,9 @@ export const ERROR_CATALOG = {
   'MODULE.NOT_ENTITLED':                     { severity: 'blocking', description: 'Module non souscrit' },
   'FLOW.WEIGHTS_UNDECLARED':                 { severity: 'blocking', description: 'Calcul d’exposition sans pondérations déclarées' },
   'FLOW.HYPOTHESIS_MISSING':                 { severity: 'blocking', description: 'Export d’un résultat de flux sans ses hypothèses' },
+  // Partie N, module 03 (N3.3) : normalisation et corrélation.
+  'FLOW.WEIGHTS_NOT_NORMALIZED':             { severity: 'blocking', description: 'Somme des parts de fréquentation différente de 100 %' },
+  'FLOW.CORRELATION_TOO_LOW':                { severity: 'blocking', description: 'Corrélation sous le seuil déclaré pour produire un montant' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
   'AD.PLACEMENT_DOUBLE_BOOKED':              { severity: 'blocking', description: 'Conflit de réservation' },
   'AD.CREATIVE_SPEC_MISMATCH':               { severity: 'blocking', description: 'Visuel non conforme à la fiche technique' },
