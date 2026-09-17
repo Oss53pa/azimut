@@ -73,6 +73,7 @@ export const refAdversarial: SiteData = {
       origin_x: 0,
       origin_y: 0,
       rotation_deg: 0,
+      calibrated_at: '2026-01-05T10:20:00.000Z',
     },
   ],
   footprints: [

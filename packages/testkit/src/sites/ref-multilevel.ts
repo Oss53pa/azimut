@@ -89,6 +89,8 @@ export const refMultilevel: SiteData = {
       origin_x: -12.5,
       origin_y: -8,
       rotation_deg: 0,
+      // Le plus ancien des deux : c'est lui que `firstCalibration` désigne.
+      calibrated_at: '2026-01-05T10:30:00.000Z',
     },
     {
       id: 'cal-ml-r1',
@@ -99,6 +101,8 @@ export const refMultilevel: SiteData = {
       origin_x: -12.5,
       origin_y: -9.25,
       rotation_deg: 0,
+      // Calé plus tard : il ne fixe rien.
+      calibrated_at: '2026-01-05T11:45:00.000Z',
     },
   ],
   footprints: [

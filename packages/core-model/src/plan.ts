@@ -41,6 +41,12 @@ export type PlanSource = {
  * mètres. Ce sont ces deux nombres que le premier calage d'un site recopie sur
  * la ligne `site`, où ils deviennent le repère du site et ne bougent plus (S1,
  * D1.1) — voir `guardSiteOrigin`.
+ *
+ * `calibrated_at` date l'opération de calage, et non l'import du fond que date
+ * `plan_source.uploaded_at`. C'est lui qui rend « le premier calage » de S1
+ * identifiable : sans lui, la règle est écrite mais invérifiable. Facultatif
+ * parce qu'une ligne enregistrée avant qu'il existe n'a pas de date, et qu'en
+ * inventer une ferait passer une inconnue pour un fait.
  */
 export type PlanCalibration = {
   readonly id: string;
@@ -50,7 +56,43 @@ export type PlanCalibration = {
   readonly origin_x: number;
   readonly origin_y: number;
   readonly rotation_deg: number;
+  /** Horodatage ISO 8601 du calage. */
+  readonly calibrated_at?: string;
 };
+
+/**
+ * Premier calage d'un site, ou `null` quand il n'est pas déterminable.
+ *
+ * Déterminable veut dire : il y a au moins un calage, et tous portent une date
+ * lisible. Un seul calage sans date suffit à rendre la réponse inconnue — il
+ * pourrait être le plus ancien, et rien ne permet de l'écarter. Répondre quand
+ * même, en ne classant que les datés, désignerait un premier calage qui n'en
+ * est peut-être pas un, et c'est sur lui que S1 est vérifiée.
+ *
+ * À dates égales, l'identifiant tranche : deux exécutions rendent le même
+ * calage (invariant 4).
+ */
+export function firstCalibration(
+  calibrations: readonly PlanCalibration[],
+): PlanCalibration | null {
+  if (calibrations.length === 0) return null;
+
+  const dated: { readonly calibration: PlanCalibration; readonly at: number }[] = [];
+  for (const calibration of calibrations) {
+    const at = calibration.calibrated_at === undefined
+      ? Number.NaN
+      : Date.parse(calibration.calibrated_at);
+    if (Number.isNaN(at)) return null;
+    dated.push({ calibration, at });
+  }
+
+  dated.sort((a, b) => (
+    a.at === b.at
+      ? a.calibration.id.localeCompare(b.calibration.id)
+      : a.at - b.at
+  ));
+  return dated[0]?.calibration ?? null;
+}
 
 /**
  * Vrai quand l'échelle stockée permet réellement une conversion.

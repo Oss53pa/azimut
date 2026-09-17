@@ -6,6 +6,7 @@ export {
 export { signedArea, polygonArea } from './geometry.js';
 export {
   isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
+  firstCalibration,
 } from './plan.js';
 export type { PlanSource, PlanCalibration, SiteOriginBearer } from './plan.js';
 export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';

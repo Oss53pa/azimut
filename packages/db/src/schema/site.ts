@@ -121,6 +121,12 @@ export const planCalibration = azimut.table('plan_calibration', {
   origin_x: numeric('origin_x').notNull(),
   origin_y: numeric('origin_y').notNull(),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
+  // S1 — date de l'opération de calage, distincte de l'import du fond que date
+  // `plan_source.uploaded_at`. C'est elle qui rend « le premier calage »
+  // identifiable. Nullable et sans valeur par défaut : une ligne enregistrée
+  // avant cette colonne n'a pas de date, et `now()` ferait passer la date de
+  // la migration pour celle du calage.
+  calibrated_at: timestamp('calibrated_at', { withTimezone: true }),
 }, (t) => [
   index('idx_plan_calibration_org').on(t.org_id),
 ]);

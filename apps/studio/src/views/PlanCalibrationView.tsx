@@ -1,6 +1,8 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
-import { calibratedLevelIds, siteOrigin, guardSiteOrigin } from '@azimut/core-model';
+import {
+  calibratedLevelIds, siteOrigin, guardSiteOrigin, firstCalibration,
+} from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import type { Translate } from '../i18n/index.js';
 import {
@@ -55,11 +57,11 @@ export function PlanCalibrationView(): JSX.Element {
    * ce qu'il dirait d'une tentative de déplacement.
    */
   const origin = siteOrigin(site.site);
+  const first = useMemo(() => firstCalibration(site.plan_calibrations), [site]);
   const originGuard = useMemo(() => {
-    const first = site.plan_calibrations[0];
-    if (first === undefined) return null;
+    if (first === null) return null;
     return guardSiteOrigin(site.site, { x_m: first.origin_x, y_m: first.origin_y });
-  }, [site]);
+  }, [site, first]);
 
   const [levelId, setLevelId] = useState(levels[0]?.id ?? '');
   const [pointA, setPointA] = useState<PlanPoint | null>(null);
@@ -235,6 +237,14 @@ export function PlanCalibrationView(): JSX.Element {
                   {origin === null
                     ? t('calibration.frame.unposed')
                     : `${origin.x_m.toFixed(3)} · ${origin.y_m.toFixed(3)} m`}
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: SPACE.md }}>
+                <span style={LABEL_STYLE}>{t('calibration.frame.first')}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: TEXT.small }}>
+                  {first === null
+                    ? t('calibration.frame.first.unknown')
+                    : (first.calibrated_at ?? t('calibration.frame.first.unknown'))}
                 </span>
               </div>
               <StateBanner

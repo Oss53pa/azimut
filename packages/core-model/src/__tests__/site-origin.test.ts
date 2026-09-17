@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { siteOrigin, guardSiteOrigin } from '../plan.js';
-import type { SiteOriginBearer } from '../plan.js';
+import { siteOrigin, guardSiteOrigin, firstCalibration } from '../plan.js';
+import type { PlanCalibration, SiteOriginBearer } from '../plan.js';
 
 const POSED: SiteOriginBearer = { origin_x: -12.5, origin_y: -8 };
 const UNPOSED: SiteOriginBearer = {};
@@ -78,5 +78,68 @@ describe('guardSiteOrigin — S1', () => {
   it('pose le repère sur un site dont une seule coordonnée traînait', () => {
     // La lecture tient la paire pour absente : c'est donc un premier calage.
     expect(guardSiteOrigin({ origin_x: 3 }, { x_m: 0, y_m: 0 }).ok).toBe(true);
+  });
+});
+
+const CAL = {
+  org_id: 'org-1',
+  plan_source_id: 'ps-1',
+  scale_m_per_px: 0.05,
+  origin_x: 0,
+  origin_y: 0,
+  rotation_deg: 0,
+} as const;
+
+function cal(id: string, at?: string): PlanCalibration {
+  return { ...CAL, id, ...(at !== undefined ? { calibrated_at: at } : {}) };
+}
+
+/**
+ * S1 — `calibrated_at` rend « le premier calage » identifiable. Sans lui, la
+ * règle était opposable et invérifiable.
+ */
+describe('firstCalibration', () => {
+  it('désigne le calage le plus ancien', () => {
+    const first = firstCalibration([
+      cal('c-late', '2026-03-02T09:00:00.000Z'),
+      cal('c-early', '2026-03-01T09:00:00.000Z'),
+      cal('c-mid', '2026-03-01T18:00:00.000Z'),
+    ]);
+    expect(first?.id).toBe('c-early');
+  });
+
+  it('ne dépend pas de l’ordre d’entrée (invariant 4)', () => {
+    const list = [
+      cal('c-a', '2026-03-01T09:00:00.000Z'),
+      cal('c-b', '2026-03-02T09:00:00.000Z'),
+    ];
+    expect(firstCalibration(list)?.id).toBe(firstCalibration([...list].reverse())?.id);
+  });
+
+  it('tranche une égalité de dates par l’identifiant', () => {
+    const same = '2026-03-01T09:00:00.000Z';
+    expect(firstCalibration([cal('c-b', same), cal('c-a', same)])?.id).toBe('c-a');
+  });
+
+  it('rend null quand il n’y a aucun calage', () => {
+    expect(firstCalibration([])).toBeNull();
+  });
+
+  it('rend null quand un seul calage n’a pas de date', () => {
+    // Le non daté pourrait être le plus ancien : rien ne permet de l'écarter,
+    // donc la réponse est inconnue et non « le plus ancien des datés ».
+    const first = firstCalibration([
+      cal('c-dated', '2026-03-01T09:00:00.000Z'),
+      cal('c-undated'),
+    ]);
+    expect(first).toBeNull();
+  });
+
+  it('rend null sur une date illisible', () => {
+    expect(firstCalibration([cal('c-bad', 'hier matin')])).toBeNull();
+  });
+
+  it('accepte un calage unique et daté', () => {
+    expect(firstCalibration([cal('c-only', '2026-03-01T09:00:00.000Z')])?.id).toBe('c-only');
   });
 });

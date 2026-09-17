@@ -163,6 +163,7 @@ export const ERROR_CATALOG = {
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
   // N1.3 — règle S1 : le repère site est fixé au premier calage.
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
+  'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Repère site différent de celui du premier calage' },
 
   // ── NET (tranche M) ───────────────────────────────────────
   'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },

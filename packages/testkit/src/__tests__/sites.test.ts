@@ -7,7 +7,7 @@ import {
   refMultilevel,
   siteChecksum,
 } from '../index.js';
-import { siteOrigin } from '@azimut/core-model';
+import { siteOrigin, firstCalibration } from '@azimut/core-model';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
@@ -154,27 +154,25 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
 });
 
 /**
- * S1 — le repère site d'un site de référence est celui d'un de ses calages.
+ * S1 — le repère site d'un site de référence est celui de son premier calage.
  *
- * L'arbitrage est que `origin_x` / `origin_y` sont ceux du **premier** calage ;
- * rien dans les données ne dit lequel est le premier — `plan_calibration` ne
- * porte pas d'horodatage — donc le test vérifie ce que les données permettent :
- * l'origine du site vient bien de l'un des calages, et un site sans calage n'a
- * pas de repère.
+ * `calibrated_at` rend « le premier » identifiable : le test porte donc sur le
+ * premier calage et non sur un calage quelconque.
  */
-describe('S1 — repère site et calages', () => {
+describe('S1 — repère site et premier calage', () => {
   for (const [key, site] of allReferenceSites) {
-    it(`${key} n'a de repère que s'il a un calage qui le porte`, () => {
+    it(`${key} porte le repère de son premier calage, ou aucun`, () => {
       const origin = siteOrigin(site.site);
-      if (site.plan_calibrations.length === 0) {
+      const first = firstCalibration(site.plan_calibrations);
+      if (first === null) {
         expect(origin).toBeNull();
         return;
       }
-      expect(origin).not.toBeNull();
-      const carried = site.plan_calibrations.some(c =>
-        c.origin_x === origin?.x_m && c.origin_y === origin?.y_m,
-      );
-      expect(carried).toBe(true);
+      expect(origin).toEqual({ x_m: first.origin_x, y_m: first.origin_y });
     });
   }
+
+  it('désigne le calage du RDC sur ref-multilevel, pas celui du R+1', () => {
+    expect(firstCalibration(refMultilevel.plan_calibrations)?.id).toBe('cal-ml-rdc');
+  });
 });

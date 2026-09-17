@@ -222,6 +222,9 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     origin_x: num(c.origin_x),
     origin_y: num(c.origin_y),
     rotation_deg: num(c.rotation_deg),
+    ...(c.calibrated_at !== null
+      ? { calibrated_at: isoString(c.calibrated_at) }
+      : {}),
   }));
 
   const footprints: Footprint[] = rows.footprints.map(f => ({

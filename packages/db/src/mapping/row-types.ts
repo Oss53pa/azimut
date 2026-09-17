@@ -73,6 +73,8 @@ export type PlanCalibrationRow = {
   readonly origin_x: string;
   readonly origin_y: string;
   readonly rotation_deg: string;
+  /** S1 — NULL sur une ligne antérieure à la migration 0022. */
+  readonly calibrated_at: TimestampValue | null;
 };
 
 export type FootprintRow = {

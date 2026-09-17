@@ -13,6 +13,20 @@ const DOWN = readFileSync(
   resolve(MIGRATION_DIR, '0020_n1_2_missing_fields.down.sql'), 'utf8',
 );
 
+
+/**
+ * Corps SQL sans les commentaires : les assertions portent sur les
+ * instructions, pas sur le texte qui explique pourquoi telle instruction est
+ * absente — un commentaire qui cite `now()` pour dire qu'il n'est pas employé
+ * ne doit pas faire échouer le contrôle.
+ */
+function statementsOf(sql: string): string {
+  return sql
+    .split('\n')
+    .filter(line => !line.trimStart().startsWith('--'))
+    .join('\n');
+}
+
 /**
  * N1.2 — les cinq champs que la partie N spécifie et que le schéma n'avait pas.
  *
@@ -38,7 +52,7 @@ describe('migration 0020', () => {
     // plus : pas d'UPDATE, pas de DELETE, pas de DROP, pas de NOT NULL qui
     // aurait exigé une valeur par défaut affirmant quelque chose de faux.
     for (const forbidden of ['UPDATE ', 'DELETE ', 'DROP ', 'NOT NULL', 'DEFAULT']) {
-      expect(UP).not.toContain(forbidden);
+      expect(statementsOf(UP)).not.toContain(forbidden);
     }
   });
 
