@@ -161,6 +161,11 @@ export const ERROR_CATALOG = {
   'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
   // Partie N, module 01 (N1.4) : niveau sans plan calé.
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
+  // Complément atelier, M1.4 : calage mesuré sur points homologues.
+  'CALIB.CONTROL_POINTS_INSUFFICIENT':      { severity: 'blocking', description: 'Moins de trois paires de points homologues pour un calage mesuré' },
+  'CALIB.CONTROL_POINTS_COLLINEAR':         { severity: 'blocking', description: 'Points homologues alignés, la transformation affine est indéterminée' },
+  'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus de la tolérance' },
+  'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point homologue au-dessus de la tolérance' },
 
   // ── NET (tranche M) ───────────────────────────────────────
   'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },

@@ -176,6 +176,10 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.SCALE_IMPLAUSIBLE': 'Résolution du fond de plan hors de la plage de vraisemblance',
   'CALIB.NORTH_MISSING': 'Orientation du fond de plan non saisie',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Niveau sans plan de fond calé',
+  'CALIB.CONTROL_POINTS_INSUFFICIENT': 'Moins de trois paires de points homologues pour un calage mesuré',
+  'CALIB.CONTROL_POINTS_COLLINEAR': 'Points homologues alignés, la transformation affine est indéterminée',
+  'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Résidu moyen de calage au-dessus de la tolérance',
+  'CALIB.RESIDUAL_POINT_EXCEEDED': 'Résidu d’un point homologue au-dessus de la tolérance',
 
   'NET.REQUEST_FAILED': 'Le service de données n\u2019a pas répondu',
   'NET.UNAUTHORIZED': 'Session absente ou expirée',
@@ -358,6 +362,10 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.SCALE_IMPLAUSIBLE': 'Plan resolution outside the plausibility range',
   'CALIB.NORTH_MISSING': 'Plan orientation not entered',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Level with no calibrated background plan',
+  'CALIB.CONTROL_POINTS_INSUFFICIENT': 'Fewer than three homologous point pairs for a measured calibration',
+  'CALIB.CONTROL_POINTS_COLLINEAR': 'Homologous points are collinear, the affine transform is indeterminate',
+  'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Mean calibration residual above tolerance',
+  'CALIB.RESIDUAL_POINT_EXCEEDED': 'Homologous point residual above tolerance',
 
   'NET.REQUEST_FAILED': 'The data service did not respond',
   'NET.UNAUTHORIZED': 'Session missing or expired',

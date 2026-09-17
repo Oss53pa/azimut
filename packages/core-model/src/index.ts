@@ -1,6 +1,20 @@
 export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
 export { signedArea, polygonArea } from './geometry.js';
+export {
+  fitMeasuredCalibration,
+  auditCalibrationResiduals,
+  applyAffine,
+  MIN_CONTROL_POINTS,
+} from './affine-calibration.js';
+export type {
+  PlanPixelPoint,
+  ControlPointPair,
+  AffineTransform,
+  ControlPointResidual,
+  MeasuredCalibration,
+  ResidualTolerance,
+} from './affine-calibration.js';
 export { guardFontEmbedding } from './font-embedding.js';
 export type {
   FontAsset,

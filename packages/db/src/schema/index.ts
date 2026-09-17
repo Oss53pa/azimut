@@ -2,7 +2,7 @@ export { azimut } from './azimut.js';
 export { organization, membership } from './org.js';
 export {
   site, building, level, footprint, volume, zone,
-  planSource, planCalibration, opening,
+  planSource, planCalibration, controlPoint, opening,
 } from './site.js';
 export { node, edge, verticalLink, buildingLink } from './graph.js';
 export {

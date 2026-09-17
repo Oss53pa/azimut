@@ -99,8 +99,38 @@ export const planCalibration = azimut.table('plan_calibration', {
   origin_x: numeric('origin_x').notNull(),
   origin_y: numeric('origin_y').notNull(),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
+  // Complément atelier M1.4 : transformation affine ajustée par moindres
+  // carrés. Nulles tant que le plan n'est calé qu'à deux points.
+  affine_a: numeric('affine_a'),
+  affine_b: numeric('affine_b'),
+  affine_c: numeric('affine_c'),
+  affine_d: numeric('affine_d'),
+  affine_e: numeric('affine_e'),
+  affine_f: numeric('affine_f'),
+  mean_residual_m: numeric('mean_residual_m'),
+  max_residual_m: numeric('max_residual_m'),
 }, (t) => [
   index('idx_plan_calibration_org').on(t.org_id),
+]);
+
+/**
+ * Complément atelier M1.4 : les points homologues qui fondent le calage
+ * mesuré. `residual_m` est calculé par l'ajustement, jamais saisi.
+ */
+export const controlPoint = azimut.table('control_point', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  calibration_id: uuid('calibration_id').notNull().references(() => planCalibration.id, { onDelete: 'cascade' }),
+  source_x_px: numeric('source_x_px').notNull(),
+  source_y_px: numeric('source_y_px').notNull(),
+  target_x_m: numeric('target_x_m').notNull(),
+  target_y_m: numeric('target_y_m').notNull(),
+  residual_m: numeric('residual_m'),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_control_point_org').on(t.org_id),
+  index('idx_control_point_calibration').on(t.calibration_id),
 ]);
 
 export const opening = azimut.table('opening', {
