@@ -17,6 +17,8 @@ export type {
   AccessibilityReport,
   EvacuationReport,
 } from './audit.js';
+export { auditLexicon } from './audit-lexicon.js';
+export type { LexiconReport } from './audit-lexicon.js';
 export { reconcile } from './reconciliation.js';
 export type {
   SurveyedSupport,

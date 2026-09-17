@@ -44,6 +44,8 @@ export {
   POLYGON_MIN_AREA_M2,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
+export { findLexiconMatches } from './lexicon.js';
+export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
 export { canonicalContentJson, empreinte } from './empreinte.js';
 export {
