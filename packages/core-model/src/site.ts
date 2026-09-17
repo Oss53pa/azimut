@@ -1,5 +1,7 @@
 import type { Polygon, Point } from './geometry.js';
 import type { PlanSource, PlanCalibration } from './plan.js';
+import type { ActiveLang } from './lang.js';
+import type { OpeningHours } from './opening-hours.js';
 
 export type Organization = {
   readonly id: string;
@@ -13,6 +15,17 @@ export type Site = {
   readonly name: string;
   readonly country_code: string;
   readonly rules_pack_id: string | null;
+  /**
+   * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que
+   * rien n'est déclaré, et non que le français s'applique. Voir `lang.ts`.
+   */
+  readonly active_langs: readonly ActiveLang[];
+  /**
+   * D1.1 / N1.2 — altitude du niveau de référence, à laquelle Z vaut 0.
+   * Absente quand l'altitude absolue du site n'est pas relevée : les
+   * `level.elevation_m` restent justes, ils sont relatifs à ce niveau.
+   */
+  readonly reference_elevation_m?: number;
 };
 
 export type Building = {
@@ -21,6 +34,16 @@ export type Building = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
+  /** N1.2 — horaires d'ouverture. Absents quand rien n'est déclaré. Voir `opening-hours.ts`. */
+  readonly opening_hours?: OpeningHours;
+  /**
+   * N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+   *
+   * Une valeur de saisie, pas une valeur de calcul : `edge.width_m` reste la
+   * seule largeur qu'un moteur lit (S6 pour la longueur, même principe). Une
+   * arête déjà tracée ne change pas de largeur parce que celle-ci change.
+   */
+  readonly default_edge_width_m?: number;
 };
 
 export type Level = {
@@ -190,13 +213,24 @@ export type Destination = {
   readonly occupant_name: string;
   readonly occupancy_status: OccupancyStatus;
   readonly display_priority: number;
+  /**
+   * N1.2 / S5 — période d'occupation, dates ISO 8601 `AAAA-MM-JJ`.
+   *
+   * L'historique est conservé : une cellule peut porter plusieurs occupants
+   * successifs, chacun avec sa période. `valid_to` absent désigne l'occupant
+   * en cours, dont la sortie n'est pas connue ; `valid_from` absent, une
+   * occupation dont l'entrée n'a pas été relevée.
+   */
+  readonly valid_from?: string;
+  readonly valid_to?: string;
 };
 
 export type DestinationName = {
   readonly id: string;
   readonly org_id: string;
   readonly destination_id: string;
-  readonly lang: 'fr' | 'en';
+  /** Même énuméré que `site.active_langs` : voir `lang.ts`. */
+  readonly lang: ActiveLang;
   readonly value: string;
 };
 

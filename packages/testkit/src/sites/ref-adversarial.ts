@@ -15,6 +15,11 @@ export const refAdversarial: SiteData = {
     name: 'Site adversarial',
     country_code: 'FR',
     rules_pack_id: null,
+    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // dit ce qu'ils portent, elle ne le décide pas.
+    active_langs: ['fr', 'en'],
+    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    reference_elevation_m: 42.5,
   },
   buildings: [
     {
@@ -23,6 +28,15 @@ export const refAdversarial: SiteData = {
       site_id: 'site-adversarial-001',
       name: 'Bâtiment',
       independent_access: true,
+      // N1.2 — deux plages dans la même journée : fermeture de midi.
+      opening_hours: {
+        monday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        tuesday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        wednesday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        thursday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        friday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+      },
+      default_edge_width_m: 1.2,
     },
   ],
   levels: [
@@ -205,6 +219,9 @@ export const refAdversarial: SiteData = {
       occupant_name: LONG_NAME_FR,
       occupancy_status: 'occupied',
       display_priority: 1,
+      // N1.2 / S5 — période close et période ouverte se déclarent pareil.
+      valid_from: '2025-09-01',
+      valid_to: '2027-08-31',
     },
   ],
   destination_names: [

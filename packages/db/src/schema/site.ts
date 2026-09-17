@@ -1,4 +1,6 @@
-import { uuid, text, timestamp, integer, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import {
+  uuid, text, timestamp, integer, numeric, boolean, jsonb, index,
+} from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 
@@ -8,6 +10,14 @@ export const site = azimut.table('site', {
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
   rules_pack_id: uuid('rules_pack_id'),
+  // N1.2 — langues actives. Nullable : une ligne antérieure à la migration
+  // n'en déclare aucune, et la migration ne va pas en déclarer à sa place.
+  // Le CHECK interdit en revanche le tableau vide, qui ne dirait rien de plus
+  // que NULL tout en ayant l'air d'une déclaration.
+  active_langs: text('active_langs').array(),
+  // D1.1 / N1.2 — altitude du niveau de référence, Z = 0. Nullable : une
+  // altitude absolue non relevée n'invalide pas les altitudes relatives.
+  reference_elevation_m: numeric('reference_elevation_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deleted_at: timestamp('deleted_at', { withTimezone: true }),
@@ -22,6 +32,8 @@ export const building = azimut.table('building', {
   name: text('name').notNull(),
   independent_access: boolean('independent_access').notNull().default(false),
   opening_hours: jsonb('opening_hours'),
+  // N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+  default_edge_width_m: numeric('default_edge_width_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

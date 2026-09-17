@@ -1,4 +1,7 @@
-import { uuid, text, timestamp, integer, jsonb, boolean, numeric, uniqueIndex, index } from 'drizzle-orm/pg-core';
+import {
+  uuid, text, timestamp, integer, jsonb, boolean, numeric, date,
+  uniqueIndex, index,
+} from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 import { site } from './site.js';
@@ -36,6 +39,11 @@ export const destination = azimut.table('destination', {
   occupant_name: text('occupant_name').notNull().default(''),
   occupancy_status: text('occupancy_status').notNull().default('vacant'),
   display_priority: integer('display_priority').notNull().default(0),
+  // N1.2 / S5 — période d'occupation. Les deux bornes sont nullables :
+  // `valid_to` NULL désigne l'occupant en cours, `valid_from` NULL une entrée
+  // non relevée. L'historique se lit par la succession des lignes.
+  valid_from: date('valid_from'),
+  valid_to: date('valid_to'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

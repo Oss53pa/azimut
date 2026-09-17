@@ -8,6 +8,7 @@
  *
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
+import { readActiveLangs, readOpeningHours } from '@azimut/core-model';
 import type {
   FootprintKind,
   SiteData,
@@ -164,15 +165,31 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     name: rows.site.name,
     country_code: rows.site.country_code,
     rules_pack_id: rows.site.rules_pack_id,
+    // N1.2 — les valeurs inconnues sont écartées à la frontière ; le CHECK de
+    // la migration 0020 les interdit déjà en base, cette lecture tient pour
+    // les données arrivées avant lui.
+    active_langs: readActiveLangs(rows.site.active_langs),
+    ...(rows.site.reference_elevation_m !== null
+      ? { reference_elevation_m: num(rows.site.reference_elevation_m) }
+      : {}),
   };
 
-  const buildings: Building[] = rows.buildings.map(b => ({
-    id: b.id,
-    org_id: b.org_id,
-    site_id: b.site_id,
-    name: b.name,
-    independent_access: b.independent_access,
-  }));
+  const buildings: Building[] = rows.buildings.map(b => {
+    // N1.2 — la colonne est du `jsonb` : la base n'en garantit pas la forme,
+    // et `readOpeningHours` écarte ce qui n'est pas lisible.
+    const hours = readOpeningHours(b.opening_hours);
+    return {
+      id: b.id,
+      org_id: b.org_id,
+      site_id: b.site_id,
+      name: b.name,
+      independent_access: b.independent_access,
+      ...(hours !== undefined ? { opening_hours: hours } : {}),
+      ...(b.default_edge_width_m !== null
+        ? { default_edge_width_m: num(b.default_edge_width_m) }
+        : {}),
+    };
+  });
 
   const levels: Level[] = rows.levels.map(l => ({
     id: l.id,
@@ -284,6 +301,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     occupant_name: d.occupant_name,
     occupancy_status: d.occupancy_status as OccupancyStatus,
     display_priority: d.display_priority,
+    ...(d.valid_from !== null ? { valid_from: d.valid_from } : {}),
+    ...(d.valid_to !== null ? { valid_to: d.valid_to } : {}),
   }));
 
   const destinationNames: DestinationName[] = rows.destination_names.map(n => ({

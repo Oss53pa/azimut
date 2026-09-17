@@ -181,6 +181,45 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
             <Note>{t('foundation.completeness.note')}</Note>
           </Panel>
 
+          <Panel title={t('foundation.panel.declarations')}>
+            <dl style={{ margin: 0, display: 'grid', gap: SPACE.sm }}>
+              <CompletenessRow
+                label={t('foundation.declarations.langs')}
+                value={site.site.active_langs.length === 0
+                  ? t('foundation.declarations.undeclared')
+                  : site.site.active_langs.join(' · ')}
+              />
+              <CompletenessRow
+                label={t('foundation.declarations.elevation')}
+                value={site.site.reference_elevation_m === undefined
+                  ? t('foundation.declarations.unsurveyed')
+                  : `${site.site.reference_elevation_m.toFixed(2)} m`}
+              />
+              <CompletenessRow
+                label={t('foundation.declarations.hours')}
+                value={ratio(
+                  site.buildings.filter(b => b.opening_hours !== undefined).length,
+                  site.buildings.length,
+                )}
+              />
+              <CompletenessRow
+                label={t('foundation.declarations.edgewidth')}
+                value={ratio(
+                  site.buildings.filter(b => b.default_edge_width_m !== undefined).length,
+                  site.buildings.length,
+                )}
+              />
+              <CompletenessRow
+                label={t('foundation.declarations.validity')}
+                value={ratio(
+                  site.destinations.filter(d => d.valid_from !== undefined).length,
+                  site.destinations.length,
+                )}
+              />
+            </dl>
+            <Note>{t('foundation.declarations.note')}</Note>
+          </Panel>
+
           <Panel title={t('foundation.panel.anomalies')} note={String(report.findings.length)}>
             <FindingList
               findings={report.findings}

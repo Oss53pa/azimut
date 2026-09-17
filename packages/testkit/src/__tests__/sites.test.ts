@@ -134,3 +134,20 @@ describe('ref-broken specifics', () => {
     expect(crossWithoutVl.length).toBeGreaterThan(0);
   });
 });
+
+/**
+ * N1.2 — la déclaration de langues d'un site de référence dit ce que le site
+ * porte réellement. Un écart dans un sens laisserait une dénomination hors
+ * de toute langue active ; dans l'autre, il déclarerait une langue que rien
+ * ne remplit.
+ */
+describe('N1.2 — langues déclarées et langues présentes', () => {
+  for (const [key, site] of allReferenceSites) {
+    it(`${key} déclare exactement les langues de ses dénominations`, () => {
+      const declared = [...site.site.active_langs].sort();
+      const present = [...new Set(site.destination_names.map(n => n.lang))].sort();
+      expect(declared).toEqual(present);
+      expect(declared.length).toBeGreaterThan(0);
+    });
+  }
+});

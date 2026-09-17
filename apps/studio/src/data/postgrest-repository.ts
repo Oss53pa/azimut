@@ -23,6 +23,11 @@ import {
   type SiteRepository, type SiteSummary,
 } from './site-repository.js';
 
+type SiteListRow = Pick<
+  SiteRow,
+  'id' | 'org_id' | 'name' | 'country_code' | 'rules_pack_id'
+>;
+
 export type PostgrestConfig = {
   /** Racine de l'API REST, sans barre oblique finale. */
   readonly url: string;
@@ -101,7 +106,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     origin: `${config.url} · ${config.schema}`,
 
     async listSites(): Promise<readonly SiteSummary[]> {
-      const rows = await query<SiteRow>(
+      // La projection est plus étroite que `SiteRow` : la liste n'a besoin que
+      // de quoi nommer un site. Le type dit exactement les colonnes demandées,
+      // sinon il promettrait des champs que la réponse ne porte pas.
+      const rows = await query<SiteListRow>(
         config,
         'site',
         'select=id,org_id,name,country_code,rules_pack_id&order=name.asc',

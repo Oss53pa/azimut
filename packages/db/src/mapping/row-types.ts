@@ -28,6 +28,9 @@ export type SiteRow = {
   readonly name: string;
   readonly country_code: string;
   readonly rules_pack_id: string | null;
+  /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
+  readonly active_langs: readonly string[] | null;
+  readonly reference_elevation_m: string | null;
 };
 
 export type BuildingRow = {
@@ -36,6 +39,9 @@ export type BuildingRow = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
+  /** N1.2 — `jsonb`, forme libre du point de vue de la base. */
+  readonly opening_hours: unknown;
+  readonly default_edge_width_m: string | null;
 };
 
 export type LevelRow = {
@@ -143,6 +149,9 @@ export type DestinationRow = {
   readonly occupant_name: string;
   readonly occupancy_status: string;
   readonly display_priority: number;
+  /** N1.2 / S5 — `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
+  readonly valid_from: string | null;
+  readonly valid_to: string | null;
 };
 
 export type DestinationNameRow = {

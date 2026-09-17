@@ -6,6 +6,13 @@ export {
 export { signedArea, polygonArea } from './geometry.js';
 export { isUsableScale, calibratedLevelIds } from './plan.js';
 export type { PlanSource, PlanCalibration } from './plan.js';
+export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';
+export type { ActiveLang } from './lang.js';
+export {
+  WEEKDAYS, isWeekday, isOpeningRange, minutesOfDay, readOpeningHours,
+  rangesForDay,
+} from './opening-hours.js';
+export type { Weekday, OpeningRange, OpeningHours } from './opening-hours.js';
 export { guardFontEmbedding } from './font-embedding.js';
 export type {
   FontAsset,

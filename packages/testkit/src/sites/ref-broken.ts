@@ -12,6 +12,9 @@ export const refBroken: SiteData = {
     name: 'Site cassé',
     country_code: 'FR',
     rules_pack_id: null,
+    // N1.2 — site bilingue. L'altitude du niveau de référence n'est pas
+    // relevée : les altitudes de niveau restent justes, elles sont relatives.
+    active_langs: ['fr', 'en'],
   },
   buildings: [
     {
