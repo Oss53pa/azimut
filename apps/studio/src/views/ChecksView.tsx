@@ -5,6 +5,7 @@ import { useI18n } from '../i18n/useI18n.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory, validateSupports } from '@azimut/engine-graph';
 import type { Finding, SiteData, SiteVocabulary } from '@azimut/core-model';
 import { downloadText } from '../components/download.js';
+import { toChecksCsv } from './checks-export.js';
 import {
   ScreenHeader, MetricRow, Panel, StateBanner, Note,
   SPACE, TEXT, type Metric, type ScreenAction,
@@ -41,23 +42,6 @@ function validate(site: SiteData, vocabulary: SiteVocabulary, ranAt: string): Va
   };
 }
 
-/** Une ligne d'export : code, sévérité, entité. Le reste se relit au catalogue. */
-function toCsv(run: ValidationRun, site: SiteData): string {
-  const rows = [
-    ['site', 'ran_at', 'severity', 'code', 'entity_kind', 'entity_id', 'rule_ref'].join(';'),
-    ...run.findings.map(f => [
-      site.site.id,
-      run.ranAt,
-      f.severity,
-      f.code,
-      f.entity?.kind ?? '',
-      f.entity?.id ?? '',
-      f.ruleRef ?? '',
-    ].join(';')),
-  ];
-  return rows.join('\n');
-}
-
 /**
  * Tranche M · écran M5 — la validation.
  *
@@ -82,7 +66,16 @@ export function ChecksView(): JSX.Element {
       disabled: run === null,
       onSelect: () => {
         if (run === null) return;
-        downloadText(`validation-${site.site.id}.csv`, 'text/csv', toCsv(run, site));
+        downloadText(`validation-${site.site.id}.csv`, 'text/csv', toChecksCsv({
+          siteId: site.site.id,
+          ranAt: run.ranAt,
+          findings: run.findings,
+          roster: {
+            run: run.checksRun,
+            skipped: run.checksSkipped,
+            undeclared: run.checksUndeclared,
+          },
+        }));
       },
     },
     {
