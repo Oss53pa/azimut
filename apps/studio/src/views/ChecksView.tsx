@@ -72,7 +72,7 @@ export function ChecksView(): JSX.Element {
   const [run, setRun] = useState<ValidationRun | null>(null);
 
   function launch(): void {
-    setRun(validate(site, vocabulary, new Date().toISOString()));
+    setRun(validate(site, vocabulary.vocabulary, new Date().toISOString()));
   }
 
   const actions: readonly ScreenAction[] = [
@@ -174,6 +174,17 @@ export function ChecksView(): JSX.Element {
             code="RULES.PACK_NOT_BOUND"
             message={t('validation.skipped.message', { list: run.checksSkipped.join(', ') })}
             hint={t('validation.skipped.hint')}
+          />
+        </div>
+      )}
+
+      {vocabulary.status === 'failed' && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="blocking"
+            code={vocabulary.errorCode ?? undefined}
+            message={t('validation.vocabfailed.message')}
+            hint={t('validation.vocabfailed.hint')}
           />
         </div>
       )}

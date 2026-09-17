@@ -1,7 +1,6 @@
 import { useContext } from 'react';
-import type { SiteVocabulary } from '@azimut/core-model';
-import { SiteVocabularyContext } from './site-vocabulary.js';
+import { SiteVocabularyContext, type VocabularyState } from './site-vocabulary.js';
 
-export function useSiteVocabulary(): SiteVocabulary {
+export function useSiteVocabulary(): VocabularyState {
   return useContext(SiteVocabularyContext);
 }

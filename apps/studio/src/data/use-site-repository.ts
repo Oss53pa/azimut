@@ -7,8 +7,11 @@
  * états (M5).
  */
 import { useCallback, useEffect, useState } from 'react';
-import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import type { SiteData } from '@azimut/core-model';
 import { EMPTY_VOCABULARY } from '@azimut/core-model';
+import {
+  EMPTY_VOCABULARY_STATE, type VocabularyState,
+} from '../context/site-vocabulary.js';
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -127,28 +130,41 @@ export function useAllSites(repository: SiteRepository): {
 /**
  * Vocabulaire du site courant : lexique de charte, faits, affirmations.
  *
- * Il ne partage pas l'état du site : un échec de chargement du vocabulaire ne
- * doit pas empêcher d'ouvrir une carte. Le registre retombe alors sur vide, et
- * les contrôles qui en dépendent se déclarent non exercés — ce qu'ils sont.
+ * Il ne partage pas l'état du site : un échec de lecture du vocabulaire ne doit
+ * pas empêcher d'ouvrir une carte. Mais il ne se tait pas non plus. Un registre
+ * vide et un registre illisible portent la même valeur et ne disent pas la
+ * même chose : sans `status`, une panne de lecture passerait pour « ce site ne
+ * déclare rien », et les contrôles se rangeraient parmi les non exercés sans
+ * que personne ne sache qu'ils auraient dû l'être.
  */
 export function useSiteVocabularyLoad(
   repository: SiteRepository,
   siteId: string,
-): SiteVocabulary {
-  const [vocabulary, setVocabulary] = useState<SiteVocabulary>(EMPTY_VOCABULARY);
+): VocabularyState {
+  const [state, setState] = useState<VocabularyState>(EMPTY_VOCABULARY_STATE);
 
   useEffect(() => {
     if (siteId === '') {
-      setVocabulary(EMPTY_VOCABULARY);
+      setState(EMPTY_VOCABULARY_STATE);
       return;
     }
     let cancelled = false;
+    setState({ vocabulary: EMPTY_VOCABULARY, status: 'loading', errorCode: null });
     repository.loadVocabulary(siteId).then(
-      value => { if (!cancelled) setVocabulary(value); },
-      () => { if (!cancelled) setVocabulary(EMPTY_VOCABULARY); },
+      value => {
+        if (!cancelled) setState({ vocabulary: value, status: 'ready', errorCode: null });
+      },
+      cause => {
+        if (cancelled) return;
+        setState({
+          vocabulary: EMPTY_VOCABULARY,
+          status: 'failed',
+          errorCode: toRepositoryError(cause).code,
+        });
+      },
     );
     return () => { cancelled = true; };
   }, [repository, siteId]);
 
-  return vocabulary;
+  return state;
 }

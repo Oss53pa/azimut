@@ -39,6 +39,8 @@ export type PostgrestConfig = {
  * ce sont des lectures simples, sans assemblage, et les décrire ici évite une
  * table de transposition qui n'aurait qu'un seul appelant.
  */
+type CharterRow = { readonly id: string };
+
 type LexiconTermRow = {
   readonly lang: string;
   readonly term: string;
@@ -243,12 +245,14 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
-      const [lexiconRows, factRows, claimRows, decisionRows] = await Promise.all([
-        // Le lexique pend à la charte, elle-même au site : PostgREST joint par
-        // la clé étrangère nommée, sans que l'écran ait à charger la charte.
-        query<LexiconTermRow>(
-          config, 'lexicon_term', `select=lang,term,severity&charter.site_id=eq.${siteId}`,
-        ),
+      const [charters, factRows, claimRows, decisionRows] = await Promise.all([
+        // Le lexique pend à la charte, elle-même au site. On passe par les
+        // identifiants de charte plutôt que par un filtre sur ressource
+        // imbriquée : la forme imbriquée de PostgREST exige que la ressource
+        // soit aussi dans le `select`, et la dépendre d'une syntaxe de jointure
+        // non éprouvée ferait échouer la requête entière. Le filtre par clé
+        // étrangère est déjà le mode employé partout ailleurs dans ce fichier.
+        query<CharterRow>(config, 'charter', `select=id&site_id=eq.${siteId}`),
         query<SiteFactRow>(
           config, 'site_fact', `select=id,key,value,source,recorded_on&site_id=eq.${siteId}`,
         ),
@@ -262,9 +266,14 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         ),
       ]);
 
-      const wordRows = await queryIn<ForbiddenWordRow>(
-        config, 'site_fact_forbidden_word', 'site_fact_id', factRows.map(f => f.id),
-      );
+      const [lexiconRows, wordRows] = await Promise.all([
+        queryIn<LexiconTermRow>(
+          config, 'lexicon_term', 'charter_id', charters.map(c => c.id),
+        ),
+        queryIn<ForbiddenWordRow>(
+          config, 'site_fact_forbidden_word', 'site_fact_id', factRows.map(f => f.id),
+        ),
+      ]);
 
       const wordsByFact = new Map<string, { lang: string; term: string }[]>();
       for (const row of wordRows) {
