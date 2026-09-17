@@ -46,6 +46,8 @@ export {
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
 export type { SiteFact, ForbiddenWord } from './site-facts.js';
+export { detectDiscrepancies, markIfOpen } from './source-claims.js';
+export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
 export { canonicalContentJson, empreinte } from './empreinte.js';

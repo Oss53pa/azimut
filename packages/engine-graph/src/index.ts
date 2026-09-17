@@ -23,6 +23,8 @@ export { auditSiteFacts } from './audit-site-facts.js';
 export type { SiteFactReport } from './audit-site-facts.js';
 export { checkableTexts } from './site-texts.js';
 export type { CheckableText } from './site-texts.js';
+export { auditSourceClaims } from './audit-source-claims.js';
+export type { SourceDiscrepancyReport } from './audit-source-claims.js';
 export { reconcile } from './reconciliation.js';
 export type {
   SurveyedSupport,

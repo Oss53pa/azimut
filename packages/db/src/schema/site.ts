@@ -173,3 +173,39 @@ export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
   index('idx_site_fact_word_org').on(t.org_id),
   index('idx_site_fact_word_fact').on(t.site_fact_id),
 ]);
+
+/**
+ * Complément atelier M16 — ce qu'une source affirme d'un objet, à une date.
+ * Deux affirmations divergentes sur la même clé font un écart, pas un fait.
+ */
+export const sourceClaim = azimut.table('source_claim', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(),
+  source: text('source').notNull(),
+  value: text('value').notNull(),
+  recorded_on: text('recorded_on').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_source_claim_org').on(t.org_id),
+  index('idx_source_claim_key').on(t.site_id, t.key),
+]);
+
+/**
+ * La décision qui clôt un écart. Elle nomme la source retenue et non la valeur :
+ * si la source se corrige, la décision suit au lieu de figer un chiffre.
+ */
+export const discrepancyDecision = azimut.table('discrepancy_decision', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(),
+  decided_source: text('decided_source').notNull(),
+  decided_by: text('decided_by').notNull(),
+  decided_on: text('decided_on').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_discrepancy_decision_org').on(t.org_id),
+]);

@@ -4,6 +4,7 @@ export {
   site, building, level, footprint, volume, zone,
   planSource, planCalibration, controlPoint, opening,
   siteFact, siteFactForbiddenWord,
+  sourceClaim, discrepancyDecision,
 } from './site.js';
 export { node, edge, verticalLink, buildingLink } from './graph.js';
 export {

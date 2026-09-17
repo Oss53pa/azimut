@@ -67,6 +67,8 @@ export const ERROR_CATALOG = {
   'LAYOUT.LEXICON_DISCOURAGED_TERM':        { severity: 'warning',  description: 'Terme déconseillé par la charte' },
   // Complément atelier, M3 et QC-05 : un texte qui contredit un fait du site.
   'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte contraire à un fait du site' },
+  // Complément atelier, M16 : deux sources donnent des valeurs différentes.
+  'LAYOUT.SOURCE_DISCREPANCY_OPEN':         { severity: 'warning',  description: 'Écart entre sources non arbitré, valeur retenue à confirmer' },
   'LAYOUT.CHROMATIC_ADJACENCY':             { severity: 'blocking', description: 'Adjacence chromatique interdite' },
   'LAYOUT.LOGO_BELOW_MIN_WIDTH':            { severity: 'blocking', description: 'Logo sous la largeur minimale' },
   'LAYOUT.ISO_LEVEL_NOT_FOUND':             { severity: 'blocking', description: 'Niveau introuvable pour vue isométrique' },
