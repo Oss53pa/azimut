@@ -2,9 +2,9 @@ import { type JSX, useMemo } from 'react';
 import type { SiteData } from '@azimut/core-model';
 import { useI18n } from '../../i18n/useI18n.js';
 import type { PlanPoint } from '../../domain/plan-calibration.js';
+import { projectLevel, SURFACE_HEIGHT, SURFACE_WIDTH } from './surface-projection.js';
 
-export const SURFACE_WIDTH = 640;
-export const SURFACE_HEIGHT = 380;
+export { SURFACE_WIDTH, SURFACE_HEIGHT };
 
 type CalibrationSurfaceProps = {
   readonly site: SiteData;
@@ -12,11 +12,6 @@ type CalibrationSurfaceProps = {
   readonly pointA: PlanPoint | null;
   readonly pointB: PlanPoint | null;
   readonly onPlace: (point: PlanPoint) => void;
-};
-
-type Outline = {
-  readonly id: string;
-  readonly points: string;
 };
 
 /**
@@ -30,30 +25,7 @@ export function CalibrationSurface(
 ): JSX.Element {
   const { t } = useI18n();
 
-  const outlines = useMemo<readonly Outline[]>(() => {
-    const footprints = site.footprints.filter(f => f.level_id === levelId);
-    if (footprints.length === 0) return [];
-
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const footprint of footprints) {
-      for (const vertex of footprint.geometry.vertices) {
-        minX = Math.min(minX, vertex.x_m);
-        minY = Math.min(minY, vertex.y_m);
-        maxX = Math.max(maxX, vertex.x_m);
-        maxY = Math.max(maxY, vertex.y_m);
-      }
-    }
-    const spanX = Math.max(maxX - minX, 0.001);
-    const spanY = Math.max(maxY - minY, 0.001);
-    const scale = Math.min((SURFACE_WIDTH - 40) / spanX, (SURFACE_HEIGHT - 40) / spanY);
-
-    return footprints.map((footprint): Outline => ({
-      id: footprint.id,
-      points: footprint.geometry.vertices
-        .map(v => `${String(20 + (v.x_m - minX) * scale)},${String(20 + (v.y_m - minY) * scale)}`)
-        .join(' '),
-    }));
-  }, [site, levelId]);
+  const outlines = useMemo(() => projectLevel(site, levelId).outlines, [site, levelId]);
 
   function handleClick(event: React.MouseEvent<SVGSVGElement>): void {
     const rect = event.currentTarget.getBoundingClientRect();

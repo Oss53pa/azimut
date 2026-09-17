@@ -164,6 +164,7 @@ export const ERROR_CATALOG = {
   // Complément atelier, M1.4 : calage mesuré sur points homologues.
   'CALIB.CONTROL_POINTS_INSUFFICIENT':      { severity: 'blocking', description: 'Moins de trois paires de points homologues pour un calage mesuré' },
   'CALIB.CONTROL_POINTS_COLLINEAR':         { severity: 'blocking', description: 'Points homologues alignés, la transformation affine est indéterminée' },
+  'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien' },
   'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus de la tolérance' },
   'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point homologue au-dessus de la tolérance' },
 

@@ -13,6 +13,9 @@ import {
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { CalibrationSurface, SURFACE_HEIGHT, SURFACE_WIDTH } from './calibration/CalibrationSurface.js';
+import { Field } from './calibration/Field.js';
+import { FIELD_STYLE } from './calibration/field-style.js';
+import { MeasuredCalibrationPanel } from './calibration/MeasuredCalibrationPanel.js';
 
 /**
  * Tranche M · écran M2 — calage du fond de plan.
@@ -183,43 +186,12 @@ export function PlanCalibrationView(): JSX.Element {
       </div>
 
       <Note>{t('calibration.note')}</Note>
+
+      <h2 style={{ ...LABEL_STYLE, margin: `${String(SPACE.xl)}px 0 0` }}>
+        {t('measured.section')}
+      </h2>
+      <MeasuredCalibrationPanel key={levelId} site={site} levelId={levelId} />
     </div>
-  );
-}
-
-const FIELD_STYLE: React.CSSProperties = {
-  border: '1px solid var(--border-interactive)',
-  background: 'var(--surface-panel)',
-  color: 'var(--text-primary)',
-  borderRadius: 4,
-  padding: '4px 8px',
-  fontSize: TEXT.small,
-  fontFamily: 'inherit',
-  textTransform: 'none',
-  letterSpacing: 0,
-};
-
-type FieldProps = {
-  readonly label: string;
-  readonly hint: string;
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-  readonly inputMode?: 'decimal';
-};
-
-function Field({ label, hint, value, onChange, inputMode }: FieldProps): JSX.Element {
-  return (
-    <label style={{ display: 'grid', gap: SPACE.xs }}>
-      <span style={LABEL_STYLE}>{label}</span>
-      <input
-        type="text"
-        inputMode={inputMode}
-        value={value}
-        onChange={(e) => { onChange(e.target.value); }}
-        style={{ ...FIELD_STYLE, fontFamily: 'var(--font-mono)' }}
-      />
-      <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>{hint}</span>
-    </label>
   );
 }
 

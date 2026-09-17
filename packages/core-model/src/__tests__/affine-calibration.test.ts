@@ -4,6 +4,7 @@ import {
   auditCalibrationResiduals,
   applyAffine,
   MIN_CONTROL_POINTS,
+  MEASURING_CONTROL_POINTS,
 } from '../affine-calibration.js';
 import type { ControlPointPair, AffineTransform } from '../affine-calibration.js';
 
@@ -114,6 +115,33 @@ describe('fitMeasuredCalibration', () => {
     for (const residual of result.value.residuals) {
       expect(residual.residual_m).toBeLessThan(1);
     }
+  });
+
+  it('à trois paires, le résidu est nul quoi qu’on pose, et le dit', () => {
+    // Trois paires donnent six équations pour six inconnues : le système est
+    // exactement déterminé. L'ajustement passe par les trois points même posés
+    // n'importe comment, et le résidu ne mesure donc rien. Sans l'avertissement,
+    // un opérateur lirait « résidu nul » et croirait son calage parfait.
+    const sloppy = [
+      { id: 'a', source: { x_px: 0, y_px: 0 }, target: { x_m: 0, y_m: 0 } },
+      { id: 'b', source: { x_px: 4000, y_px: 0 }, target: { x_m: 7, y_m: 91 } },
+      { id: 'c', source: { x_px: 0, y_px: 2800 }, target: { x_m: -53, y_m: 4 } },
+    ];
+
+    const result = fitMeasuredCalibration(sloppy);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.max_residual_m).toBeLessThan(1e-9);
+    expect(result.warnings.map((w) => w.code)).toContain('CALIB.RESIDUAL_NOT_MEASURED');
+    expect(result.warnings[0]?.params['measuring_minimum']).toBe(MEASURING_CONTROL_POINTS);
+  });
+
+  it('à quatre paires, le résidu redevient une mesure', () => {
+    const result = fitMeasuredCalibration(pairsFrom(SIMILARITY, SOURCES.slice(0, 4)));
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.warnings).toEqual([]);
   });
 
   it('refuse moins de trois paires', () => {

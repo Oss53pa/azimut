@@ -94,12 +94,26 @@ export type ResidualTolerance = {
 };
 
 /**
- * Trois paires au minimum. Deux suffisent à poser une similitude, pas une
- * affine : à deux points, six inconnues pour quatre équations, l'ajustement
- * passerait exactement par les points et le résidu serait nul par construction,
- * donc muet.
+ * Trois paires au minimum, comme M1.4 le demande : en deçà, l'affine n'est pas
+ * déterminée.
+ *
+ * Mais trois paires ne suffisent pas à *mesurer*. Chaque paire donne deux
+ * équations et l'affine compte six inconnues : à trois points, le système est
+ * exactement déterminé, l'ajustement passe par les trois points, et le résidu
+ * vaut zéro quelle que soit la qualité de la saisie. Un opérateur qui pose trois
+ * points de travers lit un résidu nul et croit son calage parfait.
+ *
+ * Le résidu ne devient une mesure qu'à partir de la quatrième paire, où deux
+ * degrés de liberté restent pour le porter. `fitMeasuredCalibration` le
+ * signale.
  */
 export const MIN_CONTROL_POINTS = 3;
+
+/**
+ * Nombre de paires à partir duquel le résidu mesure quelque chose. Ce n'est pas
+ * un seuil de recette, c'est le rang à partir duquel le système est surdéterminé.
+ */
+export const MEASURING_CONTROL_POINTS = MIN_CONTROL_POINTS + 1;
 
 /**
  * Garde d'alignement. Après centrage, `det / (Suu · Svv)` vaut le sinus carré
@@ -237,6 +251,17 @@ export function fitMeasuredCalibration(
     if (residual > max) max = residual;
   }
 
+  const warnings: Finding[] = [];
+  if (pairs.length < MEASURING_CONTROL_POINTS) {
+    warnings.push({
+      code: 'CALIB.RESIDUAL_NOT_MEASURED',
+      severity: 'warning',
+      entity: null,
+      params: { count: pairs.length, measuring_minimum: MEASURING_CONTROL_POINTS },
+      ruleRef: 'atelier-M1.4',
+    });
+  }
+
   return {
     ok: true,
     value: {
@@ -246,7 +271,7 @@ export function fitMeasuredCalibration(
       max_residual_m: max,
       control_point_count: pairs.length,
     },
-    warnings: [],
+    warnings,
   };
 }
 

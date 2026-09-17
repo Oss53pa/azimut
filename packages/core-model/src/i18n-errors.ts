@@ -178,6 +178,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.LEVEL_NOT_CALIBRATED': 'Niveau sans plan de fond calé',
   'CALIB.CONTROL_POINTS_INSUFFICIENT': 'Moins de trois paires de points homologues pour un calage mesuré',
   'CALIB.CONTROL_POINTS_COLLINEAR': 'Points homologues alignés, la transformation affine est indéterminée',
+  'CALIB.RESIDUAL_NOT_MEASURED': 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien',
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Résidu moyen de calage au-dessus de la tolérance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Résidu d’un point homologue au-dessus de la tolérance',
 
@@ -364,6 +365,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.LEVEL_NOT_CALIBRATED': 'Level with no calibrated background plan',
   'CALIB.CONTROL_POINTS_INSUFFICIENT': 'Fewer than three homologous point pairs for a measured calibration',
   'CALIB.CONTROL_POINTS_COLLINEAR': 'Homologous points are collinear, the affine transform is indeterminate',
+  'CALIB.RESIDUAL_NOT_MEASURED': 'Three homologous points: the fit is exact by construction, the residual measures nothing',
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Mean calibration residual above tolerance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Homologous point residual above tolerance',
 

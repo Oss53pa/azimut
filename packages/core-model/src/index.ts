@@ -6,6 +6,7 @@ export {
   auditCalibrationResiduals,
   applyAffine,
   MIN_CONTROL_POINTS,
+  MEASURING_CONTROL_POINTS,
 } from './affine-calibration.js';
 export type {
   PlanPixelPoint,
