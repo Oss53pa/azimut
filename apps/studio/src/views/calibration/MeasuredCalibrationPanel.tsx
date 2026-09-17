@@ -9,9 +9,10 @@ import {
 } from '../../domain/measured-calibration.js';
 import {
   Panel, PanelGrid, DataTable, Note, MetricRow,
-  SPACE, TEXT, LABEL_STYLE, BUTTON_STYLE, type Column, type Metric,
+  SPACE, BUTTON_STYLE, type Column, type Metric,
 } from '../../components/ui/index.js';
 import { FindingList } from '../message-schedule/FindingList.js';
+import { Field } from './Field.js';
 import { MeasuredSurface } from './MeasuredSurface.js';
 import { SURFACE_HEIGHT, SURFACE_WIDTH } from './surface-projection.js';
 
@@ -184,26 +185,22 @@ export function MeasuredCalibrationPanel(
 
       <PanelGrid>
         <Panel title={t('measured.panel.tolerance')}>
-          <label style={LABEL_STYLE} htmlFor="measured-mean">
-            {t('measured.field.mean')}
-          </label>
-          <input
-            id="measured-mean"
-            value={meanTolerance}
-            onChange={(e) => { setMeanTolerance(e.target.value); }}
-            inputMode="decimal"
-            style={{ width: '100%', fontSize: TEXT.small }}
-          />
-          <label style={LABEL_STYLE} htmlFor="measured-point">
-            {t('measured.field.point')}
-          </label>
-          <input
-            id="measured-point"
-            value={pointTolerance}
-            onChange={(e) => { setPointTolerance(e.target.value); }}
-            inputMode="decimal"
-            style={{ width: '100%', fontSize: TEXT.small }}
-          />
+          <div style={{ display: 'grid', gap: SPACE.md }}>
+            <Field
+              label={t('measured.field.mean')}
+              hint={t('measured.field.unit')}
+              value={meanTolerance}
+              onChange={setMeanTolerance}
+              inputMode="decimal"
+            />
+            <Field
+              label={t('measured.field.point')}
+              hint={t('measured.field.unit')}
+              value={pointTolerance}
+              onChange={setPointTolerance}
+              inputMode="decimal"
+            />
+          </div>
           <Note>{t('measured.tolerance.note')}</Note>
           {state.unjudged && <Note>{t('measured.tolerance.unjudged')}</Note>}
         </Panel>
