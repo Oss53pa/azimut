@@ -7,6 +7,7 @@ import {
   refMultilevel,
   siteChecksum,
 } from '../index.js';
+import { siteOrigin } from '@azimut/core-model';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
@@ -148,6 +149,32 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
       const present = [...new Set(site.destination_names.map(n => n.lang))].sort();
       expect(declared).toEqual(present);
       expect(declared.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+/**
+ * S1 — le repère site d'un site de référence est celui d'un de ses calages.
+ *
+ * L'arbitrage est que `origin_x` / `origin_y` sont ceux du **premier** calage ;
+ * rien dans les données ne dit lequel est le premier — `plan_calibration` ne
+ * porte pas d'horodatage — donc le test vérifie ce que les données permettent :
+ * l'origine du site vient bien de l'un des calages, et un site sans calage n'a
+ * pas de repère.
+ */
+describe('S1 — repère site et calages', () => {
+  for (const [key, site] of allReferenceSites) {
+    it(`${key} n'a de repère que s'il a un calage qui le porte`, () => {
+      const origin = siteOrigin(site.site);
+      if (site.plan_calibrations.length === 0) {
+        expect(origin).toBeNull();
+        return;
+      }
+      expect(origin).not.toBeNull();
+      const carried = site.plan_calibrations.some(c =>
+        c.origin_x === origin?.x_m && c.origin_y === origin?.y_m,
+      );
+      expect(carried).toBe(true);
     });
   }
 });

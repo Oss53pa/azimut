@@ -21,6 +21,17 @@ export type Site = {
    */
   readonly active_langs: readonly ActiveLang[];
   /**
+   * S1 / D1.1 / N1.2 — origine du repère site, en mètres.
+   *
+   * Les deux nombres sont ceux du premier calage du site, recopiés ici, et
+   * jamais modifiés ensuite. Absents tant qu'aucun calage n'a eu lieu : un
+   * repère non posé ne se lit pas comme un repère à l'origine (0, 0). Les deux
+   * colonnes s'apparient par `siteOrigin` et se protègent par
+   * `guardSiteOrigin` — voir `plan.ts`.
+   */
+  readonly origin_x?: number;
+  readonly origin_y?: number;
+  /**
    * D1.1 / N1.2 — altitude du niveau de référence, à laquelle Z vaut 0.
    * Absente quand l'altitude absolue du site n'est pas relevée : les
    * `level.elevation_m` restent justes, ils sont relatifs à ce niveau.

@@ -1,6 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
-import { calibratedLevelIds } from '@azimut/core-model';
+import { calibratedLevelIds, siteOrigin, guardSiteOrigin } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import type { Translate } from '../i18n/index.js';
 import {
@@ -47,6 +47,19 @@ export function PlanCalibrationView(): JSX.Element {
   }, [site, levels]);
 
   const uncalibratedCount = levelStates.filter(l => !l.calibrated).length;
+
+  /**
+   * S1 — le repère site. Posé au premier calage, jamais modifié ensuite. Le
+   * garde-fou est interrogé avec l'origine qu'un nouveau calage voudrait
+   * poser, celle du premier calage enregistré : sur un site déjà calé, il dit
+   * ce qu'il dirait d'une tentative de déplacement.
+   */
+  const origin = siteOrigin(site.site);
+  const originGuard = useMemo(() => {
+    const first = site.plan_calibrations[0];
+    if (first === undefined) return null;
+    return guardSiteOrigin(site.site, { x_m: first.origin_x, y_m: first.origin_y });
+  }, [site]);
 
   const [levelId, setLevelId] = useState(levels[0]?.id ?? '');
   const [pointA, setPointA] = useState<PlanPoint | null>(null);
@@ -212,6 +225,32 @@ export function PlanCalibrationView(): JSX.Element {
             <div style={{ padding: `0 ${String(SPACE.md)}px` }}>
               <Note>{t('calibration.levels.note')}</Note>
             </div>
+          </Panel>
+
+          <Panel title={t('calibration.panel.frame')}>
+            <div style={{ display: 'grid', gap: SPACE.sm }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: SPACE.md }}>
+                <span style={LABEL_STYLE}>{t('calibration.frame.origin')}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: TEXT.small }}>
+                  {origin === null
+                    ? t('calibration.frame.unposed')
+                    : `${origin.x_m.toFixed(3)} · ${origin.y_m.toFixed(3)} m`}
+                </span>
+              </div>
+              <StateBanner
+                severity={origin === null ? 'info' : 'valid'}
+                message={origin === null
+                  ? t('calibration.frame.message.unposed')
+                  : t('calibration.frame.message.locked')}
+              />
+              {originGuard !== null && !originGuard.ok && (
+                <FindingList
+                  findings={originGuard.findings}
+                  empty={t('calibration.findings.empty')}
+                />
+              )}
+            </div>
+            <Note>{t('calibration.frame.note')}</Note>
           </Panel>
 
           <Panel title={t('calibration.panel.findings')}>

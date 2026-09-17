@@ -161,6 +161,8 @@ export const ERROR_CATALOG = {
   'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
   // Partie N, module 01 (N1.4) : niveau sans plan calé.
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
+  // N1.3 — règle S1 : le repère site est fixé au premier calage.
+  'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
 
   // ── NET (tranche M) ───────────────────────────────────────
   'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },

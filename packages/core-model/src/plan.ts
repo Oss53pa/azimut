@@ -1,3 +1,6 @@
+import type { Point } from './geometry.js';
+import type { Outcome } from './outcome.js';
+
 /**
  * A5.2 — fond de plan et calage.
  *
@@ -8,9 +11,12 @@
  * relevée dessus est fausse sans que rien ne le signale. D'où la règle N1.4 :
  * un niveau sans plan calé est une anomalie bloquante.
  *
- * S2 tient toujours : aucune coordonnée en pixels n'est stockée ailleurs
- * qu'ici. Le calage est la frontière, et il est la seule chose du modèle qui
- * parle en pixels.
+ * S2 et D1.1 tiennent sans exception : aucune coordonnée en pixels n'est
+ * stockée, ici pas davantage qu'ailleurs. Un calage porte une échelle — un
+ * rapport, pas une coordonnée —, un angle, et l'origine du fond exprimée en
+ * mètres du repère site. La conversion s'écrit
+ * `site = origine + rotation · (pixel × échelle)` : chaque terme stocké y est
+ * métrique ou sans dimension, et le pixel n'entre que par l'entrée.
  */
 
 /** Fond de plan importé pour un niveau. Un fichier, pas une géométrie. */
@@ -30,6 +36,11 @@ export type PlanSource = {
  * `scale_m_per_px` est l'échelle du fond, en mètres réels par pixel — l'inverse
  * de la résolution manipulée à la saisie (M2, `resolution_px_per_m`). Les deux
  * représentent la même mesure ; A5.2 fixe celle qui est stockée.
+ *
+ * `origin_x` / `origin_y` situent l'origine du fond dans le repère site, en
+ * mètres. Ce sont ces deux nombres que le premier calage d'un site recopie sur
+ * la ligne `site`, où ils deviennent le repère du site et ne bougent plus (S1,
+ * D1.1) — voir `guardSiteOrigin`.
  */
 export type PlanCalibration = {
   readonly id: string;
@@ -76,4 +87,86 @@ export function calibratedLevelIds(
     levelIds.add(source.level_id);
   }
   return levelIds;
+}
+
+/**
+ * S1 / D1.1 — le repère site.
+ *
+ * Son origine est celle du premier calage du site : les deux nombres que porte
+ * ce calage sont recopiés sur la ligne `site`, en mètres, et n'y sont plus
+ * jamais modifiés. Les modifier déplacerait le repère sous toute la géométrie
+ * déjà saisie — chaque empreinte, chaque nœud, chaque support garderait ses
+ * coordonnées en désignant un autre endroit du monde. Aucune migration ne
+ * rattraperait cela, puisque rien n'enregistre de quel repère chaque valeur
+ * provenait.
+ *
+ * Tant qu'aucun calage n'a eu lieu, l'origine est absente. C'est l'état d'un
+ * site dont le repère n'est pas encore posé, et non un repère à l'origine (0, 0)
+ * — les deux se lisent autrement et le premier interdit de tracer.
+ */
+export type SiteOriginBearer = {
+  readonly origin_x?: number;
+  readonly origin_y?: number;
+};
+
+/**
+ * Origine du repère site, ou `null` si elle n'est pas posée.
+ *
+ * Un seul endroit apparie les deux colonnes, et une origine à moitié saisie
+ * n'est pas une origine : elle se lit comme absente, jamais comme un point
+ * dont une coordonnée vaudrait zéro par défaut.
+ */
+export function siteOrigin(site: SiteOriginBearer): Point | null {
+  const { origin_x, origin_y } = site;
+  if (origin_x === undefined || origin_y === undefined) return null;
+  if (!Number.isFinite(origin_x) || !Number.isFinite(origin_y)) return null;
+  return { x_m: origin_x, y_m: origin_y };
+}
+
+/**
+ * S1 — garde-fou du repère site.
+ *
+ * Accepte de poser l'origine quand le site n'en a pas : c'est le premier
+ * calage, et c'est lui qui fixe le repère. Refuse toute valeur différente
+ * ensuite, par `CALIB.ORIGIN_LOCKED`. Repasser la même valeur n'est pas une
+ * modification et ne refuse rien — un second calage du même fond, ou le calage
+ * d'un autre niveau sur le même repère, doit pouvoir aboutir.
+ *
+ * La comparaison est exacte, sans tolérance : l'origine n'est pas mesurée à
+ * nouveau à chaque calage, elle est recopiée. Deux valeurs qui diffèrent d'un
+ * millième de millimètre viennent de deux mesures différentes, donc de deux
+ * repères différents.
+ *
+ * Un seul objet ici, la règle S1. Le point reçu est celui d'un calage que
+ * `computeCalibration` a déjà accepté ; valider la mesure une seconde fois
+ * demanderait un code que le catalogue n'a pas et dédoublerait un contrôle qui
+ * a son écran. Une valeur stockée illisible est de toute façon neutralisée à
+ * la lecture : `siteOrigin` la rend absente.
+ */
+export function guardSiteOrigin(
+  site: SiteOriginBearer,
+  requested: Point,
+): Outcome<Point> {
+  const current = siteOrigin(site);
+
+  if (current !== null
+    && (current.x_m !== requested.x_m || current.y_m !== requested.y_m)) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'CALIB.ORIGIN_LOCKED',
+        severity: 'blocking',
+        entity: null,
+        params: {
+          current_x: current.x_m,
+          current_y: current.y_m,
+          requested_x: requested.x_m,
+          requested_y: requested.y_m,
+        },
+        ruleRef: 'N1.3',
+      }],
+    };
+  }
+
+  return { ok: true, value: requested, warnings: [] };
 }

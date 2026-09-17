@@ -12,6 +12,11 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     rules_pack_id: null,
+    // S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
+    // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
+    // de l'image du premier fond.
+    origin_x: -12.5,
+    origin_y: -8,
     // N1.2 — les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],
@@ -80,8 +85,9 @@ export const refMultilevel: SiteData = {
       org_id: 'org-test-001',
       plan_source_id: 'ps-ml-rdc',
       scale_m_per_px: 0.05,
-      origin_x: 0,
-      origin_y: 0,
+      // Premier calage du site : c'est cette origine que `site` porte.
+      origin_x: -12.5,
+      origin_y: -8,
       rotation_deg: 0,
     },
     {
@@ -89,8 +95,9 @@ export const refMultilevel: SiteData = {
       org_id: 'org-test-001',
       plan_source_id: 'ps-ml-r1',
       scale_m_per_px: 0.05,
-      origin_x: 0,
-      origin_y: 0,
+      // Autre fond, autre décalage : le repère site, lui, ne change pas.
+      origin_x: -12.5,
+      origin_y: -9.25,
       rotation_deg: 0,
     },
   ],

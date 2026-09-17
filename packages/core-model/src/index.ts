@@ -4,8 +4,10 @@ export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
 } from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
-export { isUsableScale, calibratedLevelIds } from './plan.js';
-export type { PlanSource, PlanCalibration } from './plan.js';
+export {
+  isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
+} from './plan.js';
+export type { PlanSource, PlanCalibration, SiteOriginBearer } from './plan.js';
 export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';
 export type { ActiveLang } from './lang.js';
 export {

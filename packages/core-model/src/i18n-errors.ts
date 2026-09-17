@@ -176,6 +176,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.SCALE_IMPLAUSIBLE': 'Résolution du fond de plan hors de la plage de vraisemblance',
   'CALIB.NORTH_MISSING': 'Orientation du fond de plan non saisie',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Niveau sans plan de fond calé',
+  'CALIB.ORIGIN_LOCKED': 'Repère site déjà fixé par le premier calage',
 
   'NET.REQUEST_FAILED': 'Le service de données n\u2019a pas répondu',
   'NET.UNAUTHORIZED': 'Session absente ou expirée',
@@ -358,6 +359,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.SCALE_IMPLAUSIBLE': 'Plan resolution outside the plausibility range',
   'CALIB.NORTH_MISSING': 'Plan orientation not entered',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Level with no calibrated background plan',
+  'CALIB.ORIGIN_LOCKED': 'Site frame already fixed by the first calibration',
 
   'NET.REQUEST_FAILED': 'The data service did not respond',
   'NET.UNAUTHORIZED': 'Session missing or expired',

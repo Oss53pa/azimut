@@ -10,6 +10,11 @@ export const site = azimut.table('site', {
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
   rules_pack_id: uuid('rules_pack_id'),
+  // S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
+  // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
+  // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
+  origin_x: numeric('origin_x'),
+  origin_y: numeric('origin_y'),
   // N1.2 — langues actives. Nullable : une ligne antérieure à la migration
   // n'en déclare aucune, et la migration ne va pas en déclarer à sa place.
   // Le CHECK interdit en revanche le tableau vide, qui ne dirait rien de plus

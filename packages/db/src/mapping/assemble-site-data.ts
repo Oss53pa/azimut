@@ -165,6 +165,11 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     name: rows.site.name,
     country_code: rows.site.country_code,
     rules_pack_id: rows.site.rules_pack_id,
+    // S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
+    // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
+    ...(rows.site.origin_x !== null && rows.site.origin_y !== null
+      ? { origin_x: num(rows.site.origin_x), origin_y: num(rows.site.origin_y) }
+      : {}),
     // N1.2 — les valeurs inconnues sont écartées à la frontière ; le CHECK de
     // la migration 0020 les interdit déjà en base, cette lecture tient pour
     // les données arrivées avant lui.
