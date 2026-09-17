@@ -143,3 +143,33 @@ export const opening = azimut.table('opening', {
 }, (t) => [
   index('idx_opening_org').on(t.org_id),
 ]);
+
+/**
+ * Complément atelier M3 — un fait vérifié du site. `source` et `recorded_on`
+ * sont obligatoires : une affirmation sans provenance ne se conteste pas.
+ */
+export const siteFact = azimut.table('site_fact', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  key: text('key').notNull(),
+  value: text('value').notNull(),
+  source: text('source').notNull(),
+  recorded_on: text('recorded_on').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_site_fact_org').on(t.org_id),
+]);
+
+/** Les mots qu'un fait bannit, chacun dans la langue où il est interdit. */
+export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  site_fact_id: uuid('site_fact_id').notNull().references(() => siteFact.id, { onDelete: 'cascade' }),
+  lang: text('lang').notNull(),
+  term: text('term').notNull(),
+}, (t) => [
+  index('idx_site_fact_word_org').on(t.org_id),
+  index('idx_site_fact_word_fact').on(t.site_fact_id),
+]);

@@ -3,6 +3,7 @@ export { organization, membership } from './org.js';
 export {
   site, building, level, footprint, volume, zone,
   planSource, planCalibration, controlPoint, opening,
+  siteFact, siteFactForbiddenWord,
 } from './site.js';
 export { node, edge, verticalLink, buildingLink } from './graph.js';
 export {

@@ -19,6 +19,10 @@ export type {
 } from './audit.js';
 export { auditLexicon } from './audit-lexicon.js';
 export type { LexiconReport } from './audit-lexicon.js';
+export { auditSiteFacts } from './audit-site-facts.js';
+export type { SiteFactReport } from './audit-site-facts.js';
+export { checkableTexts } from './site-texts.js';
+export type { CheckableText } from './site-texts.js';
 export { reconcile } from './reconciliation.js';
 export type {
   SurveyedSupport,

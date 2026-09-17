@@ -1,5 +1,6 @@
 import type { Finding, LexiconTerm, SiteData } from '@azimut/core-model';
 import { findLexiconMatches } from '@azimut/core-model';
+import { checkableTexts } from './site-texts.js';
 
 /**
  * Contrôle du vocabulaire de la charte sur les textes du site (A5.8).
@@ -13,6 +14,11 @@ import { findLexiconMatches } from '@azimut/core-model';
  * cite : la signaler une fois sur la destination dit quoi corriger, alors que la
  * signaler sur douze panneaux dit seulement où le mal s'est répandu. C'est aussi
  * pourquoi l'entité rapportée est `destination_name` et non le support.
+ *
+ * L'ensemble des textes jugés est celui de `checkableTexts`, partagé avec le
+ * contrôle des faits du site : les deux doivent porter sur le même corpus, sans
+ * quoi « charte propre » et « fait respecté » ne parleraient plus du même
+ * livrable.
  */
 export type LexiconReport = {
   readonly checked_texts: number;
@@ -35,16 +41,14 @@ export function auditLexicon(
   site: SiteData,
   terms: readonly LexiconTerm[],
 ): LexiconReport {
-  const names = [...site.destination_names].sort((left, right) =>
-    left.id.localeCompare(right.id),
-  );
+  const texts = checkableTexts(site);
 
   const findings: Finding[] = [];
   let forbidden = 0;
   let discouraged = 0;
 
-  for (const name of names) {
-    for (const match of findLexiconMatches(name.value, terms, name.lang)) {
+  for (const text of texts) {
+    for (const match of findLexiconMatches(text.value, terms, text.lang)) {
       const isForbidden = match.severity === 'forbidden';
       if (isForbidden) forbidden += 1;
       else discouraged += 1;
@@ -54,11 +58,11 @@ export function auditLexicon(
           ? 'LAYOUT.LEXICON_FORBIDDEN_TERM'
           : 'LAYOUT.LEXICON_DISCOURAGED_TERM',
         severity: isForbidden ? 'blocking' : 'warning',
-        entity: { kind: 'destination_name', id: name.id },
+        entity: { kind: text.kind, id: text.id },
         params: {
           term: match.term,
-          lang: name.lang,
-          // Bornes dans la dénomination, pour surligner sans redécouper.
+          lang: text.lang,
+          // Bornes dans le texte, pour surligner sans redécouper.
           start: match.start,
           end: match.end,
         },
@@ -68,7 +72,7 @@ export function auditLexicon(
   }
 
   return {
-    checked_texts: names.length,
+    checked_texts: texts.length,
     forbidden_count: forbidden,
     discouraged_count: discouraged,
     findings,
