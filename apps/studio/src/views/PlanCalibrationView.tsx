@@ -9,7 +9,7 @@ import {
 } from '../domain/plan-calibration.js';
 import {
   ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow,
-  SPACE, TEXT, LABEL_STYLE, type Metric,
+  SPACE, TEXT, LABEL_STYLE, BUTTON_STYLE, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { CalibrationSurface, SURFACE_HEIGHT, SURFACE_WIDTH } from './calibration/CalibrationSurface.js';
@@ -37,6 +37,17 @@ export function PlanCalibrationView(): JSX.Element {
   const [pointB, setPointB] = useState<PlanPoint | null>(null);
   const [distance, setDistance] = useState('42.500');
   const [azimuth, setAzimuth] = useState('');
+  // E6.2 — saisie numérique du point, équivalent clavier du clic sur la surface.
+  const [entryX, setEntryX] = useState('');
+  const [entryY, setEntryY] = useState('');
+  const [announcement, setAnnouncement] = useState('');
+
+  /**
+   * Le point que la prochaine pose vise. Le clic place A, puis B, puis
+   * recommence en A ; la saisie suit exactement le même cycle, pour que les
+   * deux voies ne divergent jamais.
+   */
+  const nextPoint: 'a' | 'b' = pointA === null || pointB !== null ? 'a' : 'b';
 
   function placePoint(point: PlanPoint): void {
     if (pointA === null) { setPointA(point); return; }
@@ -45,9 +56,37 @@ export function PlanCalibrationView(): JSX.Element {
     setPointB(null);
   }
 
+  function announcePlacement(point: PlanPoint): void {
+    setAnnouncement(t('calibration.announce.placed', {
+      point: t(`calibration.points.${nextPoint}`),
+      x: Math.round(point.x_px),
+      y: Math.round(point.y_px),
+    }));
+  }
+
+  function placeByPointer(point: PlanPoint): void {
+    placePoint(point);
+    announcePlacement(point);
+  }
+
+  /** Équivalent clavier du clic : le point saisi au chiffre près (E6.2). */
+  function placeFromEntry(): void {
+    const x = Number(entryX.replace(',', '.'));
+    const y = Number(entryY.replace(',', '.'));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const point: PlanPoint = { x_px: x, y_px: y };
+    placePoint(point);
+    announcePlacement(point);
+    setEntryX('');
+    setEntryY('');
+  }
+
   function reset(): void {
     setPointA(null);
     setPointB(null);
+    setEntryX('');
+    setEntryY('');
+    setAnnouncement(t('calibration.announce.reset'));
   }
 
   const parsedDistance = Number(distance.replace(',', '.'));
@@ -137,7 +176,7 @@ export function PlanCalibrationView(): JSX.Element {
               levelId={levelId}
               pointA={pointA}
               pointB={pointB}
-              onPlace={placePoint}
+              onPlace={placeByPointer}
             />
             <p style={{
               margin: 0,
@@ -170,6 +209,28 @@ export function PlanCalibrationView(): JSX.Element {
                 <PointReadout label={t('calibration.points.a')} point={pointA} empty={t('calibration.points.empty')} />
                 <PointReadout label={t('calibration.points.b')} point={pointB} empty={t('calibration.points.empty')} />
               </div>
+              <div style={{ display: 'grid', gap: SPACE.md }}>
+                <Field
+                  label={t('calibration.field.x')}
+                  hint={t('calibration.field.px')}
+                  value={entryX}
+                  onChange={setEntryX}
+                  inputMode="decimal"
+                />
+                <Field
+                  label={t('calibration.field.y')}
+                  hint={t('calibration.field.px')}
+                  value={entryY}
+                  onChange={setEntryY}
+                  inputMode="decimal"
+                />
+                <button type="button" style={BUTTON_STYLE} onClick={placeFromEntry}>
+                  {t('calibration.action.place', { point: t(`calibration.points.${nextPoint}`) })}
+                </button>
+                <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
+                  {t('calibration.entry.note')}
+                </span>
+              </div>
             </div>
             <Note>{t('calibration.plausible.note', {
               min: DEFAULT_PLAUSIBLE_RESOLUTION.min_px_per_m,
@@ -186,6 +247,14 @@ export function PlanCalibrationView(): JSX.Element {
       </div>
 
       <Note>{t('calibration.note')}</Note>
+
+      <p
+        role="status"
+        aria-live="polite"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}
+      >
+        {announcement}
+      </p>
 
       <h2 style={{ ...LABEL_STYLE, margin: `${String(SPACE.xl)}px 0 0` }}>
         {t('measured.section')}
