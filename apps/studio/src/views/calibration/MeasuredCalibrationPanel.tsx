@@ -47,6 +47,10 @@ export function MeasuredCalibrationPanel(
   const [armedId, setArmedId] = useState<string | null>(null);
   const [meanTolerance, setMeanTolerance] = useState('');
   const [pointTolerance, setPointTolerance] = useState('');
+  // E6.2 — saisie numérique du point, équivalent clavier du clic.
+  const [entryX, setEntryX] = useState('');
+  const [entryY, setEntryY] = useState('');
+  const [announcement, setAnnouncement] = useState('');
 
   const landmarks = useMemo(() => landmarkNodes(site, levelId), [site, levelId]);
   const armed: GraphNode | null = landmarks.find((n) => n.id === armedId) ?? null;
@@ -68,13 +72,41 @@ export function MeasuredCalibrationPanel(
   function place(point: PlanPixelPoint): void {
     if (armedId === null) return;
     const id = armedId;
+    const label = landmarks.find((n) => n.id === id)?.label ?? id;
     setDrafts((current) => [...current.filter((d) => d.node_id !== id), { node_id: id, source: point }]);
     setArmedId(null);
+    setEntryX('');
+    setEntryY('');
+    // E6.3 — le résultat de l'opération est annoncé, pas seulement dessiné.
+    setAnnouncement(t('measured.announce.placed', {
+      landmark: label,
+      x: Math.round(point.x_px),
+      y: Math.round(point.y_px),
+    }));
+  }
+
+  /** Équivalent clavier du clic : le point saisi au chiffre près (E6.2). */
+  function placeFromEntry(): void {
+    const x = Number(entryX.replace(',', '.'));
+    const y = Number(entryY.replace(',', '.'));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    place({ x_px: x, y_px: y });
+  }
+
+  function arm(nodeId: string): void {
+    const next = armedId === nodeId ? null : nodeId;
+    setArmedId(next);
+    const existing = next === null ? undefined : drafts.find((d) => d.node_id === next);
+    setEntryX(existing === undefined ? '' : String(Math.round(existing.source.x_px)));
+    setEntryY(existing === undefined ? '' : String(Math.round(existing.source.y_px)));
   }
 
   function reset(): void {
     setDrafts([]);
     setArmedId(null);
+    setEntryX('');
+    setEntryY('');
+    setAnnouncement(t('measured.announce.reset'));
   }
 
   const residualById = new Map(
@@ -169,7 +201,7 @@ export function MeasuredCalibrationPanel(
                       borderColor: armedId === node.id ? 'var(--accent)' : undefined,
                     }}
                     aria-pressed={armedId === node.id}
-                    onClick={() => { setArmedId(armedId === node.id ? null : node.id); }}
+                    onClick={() => { arm(node.id); }}
                   >
                     {done ? '• ' : '◦ '}{node.label}
                   </button>
@@ -179,6 +211,29 @@ export function MeasuredCalibrationPanel(
           </ul>
           {landmarks.length === 0 && (
             <Note>{t('measured.landmarks.empty')}</Note>
+          )}
+
+          {armed !== null && (
+            <div style={{ display: 'grid', gap: SPACE.md, marginTop: SPACE.md }}>
+              <Field
+                label={t('measured.field.x')}
+                hint={t('measured.field.px')}
+                value={entryX}
+                onChange={setEntryX}
+                inputMode="decimal"
+              />
+              <Field
+                label={t('measured.field.y')}
+                hint={t('measured.field.px')}
+                value={entryY}
+                onChange={setEntryY}
+                inputMode="decimal"
+              />
+              <button type="button" style={BUTTON_STYLE} onClick={placeFromEntry}>
+                {t('measured.action.place', { landmark: armed.label })}
+              </button>
+              <Note>{t('measured.entry.note')}</Note>
+            </div>
           )}
         </Panel>
       </PanelGrid>
@@ -219,6 +274,14 @@ export function MeasuredCalibrationPanel(
       <Panel title={t('measured.panel.findings')}>
         <FindingList findings={state.findings} empty={t('measured.findings.empty')} />
       </Panel>
+
+      <p
+        role="status"
+        aria-live="polite"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}
+      >
+        {announcement}
+      </p>
     </>
   );
 }
