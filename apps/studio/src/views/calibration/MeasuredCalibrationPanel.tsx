@@ -87,6 +87,10 @@ export function MeasuredCalibrationPanel(
 
   /** Équivalent clavier du clic : le point saisi au chiffre près (E6.2). */
   function placeFromEntry(): void {
+    // `Number('')` vaut 0, et passe donc le contrôle de finitude : sans le
+    // rejet du champ vide, un bouton pressé sans rien saisir poserait l'amer à
+    // l'origine du fond, et cet amer faux entrerait dans l'ajustement.
+    if (entryX.trim() === '' || entryY.trim() === '') return;
     const x = Number(entryX.replace(',', '.'));
     const y = Number(entryY.replace(',', '.'));
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;
@@ -97,8 +101,11 @@ export function MeasuredCalibrationPanel(
     const next = armedId === nodeId ? null : nodeId;
     setArmedId(next);
     const existing = next === null ? undefined : drafts.find((d) => d.node_id === next);
-    setEntryX(existing === undefined ? '' : String(Math.round(existing.source.x_px)));
-    setEntryY(existing === undefined ? '' : String(Math.round(existing.source.y_px)));
+    // Valeur exacte, non arrondie : un amer posé au clic tombe sur une abscisse
+    // fractionnaire, et le réarmer pour vérification le déplacerait d'un demi
+    // pixel à chaque fois, en changeant l'ajustement sans que rien ne le dise.
+    setEntryX(existing === undefined ? '' : String(existing.source.x_px));
+    setEntryY(existing === undefined ? '' : String(existing.source.y_px));
   }
 
   function reset(): void {
@@ -139,7 +146,9 @@ export function MeasuredCalibrationPanel(
       id: 'pairs',
       label: t('measured.metric.pairs'),
       value: String(drafts.length),
-      note: t('measured.metric.pairs.note', { minimum: MIN_CONTROL_POINTS }),
+      note: state.missing_pairs > 0
+        ? t('measured.metric.pairs.missing', { count: state.missing_pairs })
+        : t('measured.metric.pairs.note', { minimum: MIN_CONTROL_POINTS }),
     },
     {
       id: 'mean',

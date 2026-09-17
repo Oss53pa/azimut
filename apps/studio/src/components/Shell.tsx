@@ -42,6 +42,7 @@ export function Shell(): JSX.Element {
   function retry(): void {
     list.reload();
     site.reload();
+    vocabulary.reload();
   }
 
   if (site.state.status !== 'ready') {
@@ -59,7 +60,7 @@ export function Shell(): JSX.Element {
   }
 
   return (
-    <SiteDataProvider site={site.state.value} vocabulary={vocabulary}>
+    <SiteDataProvider site={site.state.value} vocabulary={vocabulary.state}>
       <I18nProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <HeaderBar onNavigate={setCurrentView} />

@@ -46,6 +46,9 @@ CREATE TABLE azimut.discrepancy_decision (
 );
 CREATE INDEX idx_discrepancy_decision_org ON azimut.discrepancy_decision(org_id);
 
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.source_claim
+  FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
+
 ALTER TABLE azimut.source_claim ENABLE ROW LEVEL SECURITY;
 ALTER TABLE azimut.discrepancy_decision ENABLE ROW LEVEL SECURITY;
 

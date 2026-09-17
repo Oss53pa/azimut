@@ -140,8 +140,9 @@ export function useAllSites(repository: SiteRepository): {
 export function useSiteVocabularyLoad(
   repository: SiteRepository,
   siteId: string,
-): VocabularyState {
+): { readonly state: VocabularyState; readonly reload: () => void } {
   const [state, setState] = useState<VocabularyState>(EMPTY_VOCABULARY_STATE);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (siteId === '') {
@@ -164,7 +165,10 @@ export function useSiteVocabularyLoad(
       },
     );
     return () => { cancelled = true; };
-  }, [repository, siteId]);
+  }, [repository, siteId, attempt]);
 
-  return state;
+  // Sans reprise, une lecture échouée le reste pour la session : l'écran
+  // dirait « non exercé » jusqu'au rechargement de la page.
+  const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
+  return { state, reload };
 }

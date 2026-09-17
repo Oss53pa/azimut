@@ -245,6 +245,16 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
+      // Le site est vérifié d'abord. Sans cela, un identifiant inconnu — ou un
+      // site que le cloisonnement par ligne masque — rendrait quatre listes
+      // vides, et l'écran lirait « ce site ne déclare rien » au lieu de
+      // « ce site ne vous est pas accessible ». L'adaptateur de référence
+      // refuse déjà dans ce cas ; les deux doivent se comporter pareil.
+      const siteRows = await query<SiteRow>(config, 'site', `select=id&id=eq.${siteId}`);
+      if (siteRows.length === 0) {
+        throw new RepositoryError('NET.NOT_FOUND', `site: ${siteId}`);
+      }
+
       const [charters, factRows, claimRows, decisionRows] = await Promise.all([
         // Le lexique pend à la charte, elle-même au site. On passe par les
         // identifiants de charte plutôt que par un filtre sur ressource

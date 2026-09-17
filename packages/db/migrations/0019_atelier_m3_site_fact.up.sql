@@ -43,6 +43,9 @@ CREATE TABLE azimut.site_fact_forbidden_word (
 CREATE INDEX idx_site_fact_word_org ON azimut.site_fact_forbidden_word(org_id);
 CREATE INDEX idx_site_fact_word_fact ON azimut.site_fact_forbidden_word(site_fact_id);
 
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.site_fact
+  FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
+
 ALTER TABLE azimut.site_fact ENABLE ROW LEVEL SECURITY;
 ALTER TABLE azimut.site_fact_forbidden_word ENABLE ROW LEVEL SECURITY;
 

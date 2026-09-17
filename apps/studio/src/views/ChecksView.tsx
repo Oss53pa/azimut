@@ -178,6 +178,16 @@ export function ChecksView(): JSX.Element {
         </div>
       )}
 
+      {vocabulary.status === 'loading' && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="info"
+            message={t('validation.vocabloading.message')}
+            hint={t('validation.vocabloading.hint')}
+          />
+        </div>
+      )}
+
       {vocabulary.status === 'failed' && (
         <div style={{ marginTop: SPACE.md }}>
           <StateBanner

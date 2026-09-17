@@ -27,10 +27,16 @@ ALTER TABLE azimut.plan_calibration
   );
 
 -- Un résidu est une distance : jamais négatif, et le maximum majore la moyenne.
+-- Les deux vont ensemble ou pas du tout, comme les six réels ci-dessus : la
+-- forme `(les deux NULL) OR (...)` laisserait passer un maximum seul, parce que
+-- la seconde branche vaudrait alors NULL et qu'une contrainte NULL est réputée
+-- satisfaite. `num_nulls` évite ce piège.
 ALTER TABLE azimut.plan_calibration
   ADD CONSTRAINT plan_calibration_residuals_ordered CHECK (
-    (mean_residual_m IS NULL AND max_residual_m IS NULL)
-    OR (mean_residual_m >= 0 AND max_residual_m >= mean_residual_m)
+    num_nulls(mean_residual_m, max_residual_m) = 2
+    OR (num_nulls(mean_residual_m, max_residual_m) = 0
+        AND mean_residual_m >= 0
+        AND max_residual_m >= mean_residual_m)
   );
 
 CREATE TABLE azimut.control_point (
@@ -51,6 +57,12 @@ CREATE TABLE azimut.control_point (
 );
 CREATE INDEX idx_control_point_org ON azimut.control_point(org_id);
 CREATE INDEX idx_control_point_calibration ON azimut.control_point(calibration_id);
+
+-- `updated_at` ne bouge pas tout seul : toutes les tables antérieures qui le
+-- portent ont ce déclencheur, et l'oublier laisserait une colonne qui paraît
+-- dire la fraîcheur de la ligne sans jamais changer.
+CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.control_point
+  FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
 
 ALTER TABLE azimut.control_point ENABLE ROW LEVEL SECURITY;
 

@@ -136,7 +136,9 @@ describe('Vocabulaire du site', () => {
     const calls: string[] = [];
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
       calls.push(url);
-      const body = url.includes('/charter?') ? '[{"id":"ch-1"}]' : '[]';
+      let body = '[]';
+      if (url.includes('/site?')) body = '[{"id":"site-1"}]';
+      else if (url.includes('/charter?')) body = '[{"id":"ch-1"}]';
       return Promise.resolve(new Response(body, { status: 200 }));
     }));
 
@@ -161,10 +163,36 @@ describe('Vocabulaire du site', () => {
     const calls: string[] = [];
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
       calls.push(url);
-      return Promise.resolve(new Response('[]', { status: 200 }));
+      const body = url.includes('/site?') ? '[{"id":"site-1"}]' : '[]';
+      return Promise.resolve(new Response(body, { status: 200 }));
     }));
 
     await createPostgrestRepository(config).loadVocabulary('site-1');
     expect(calls.some(u => u.includes('site_fact_forbidden_word'))).toBe(false);
+  });
+});
+
+describe('Vocabulaire : les pièges attrapés en revue', () => {
+  const config = { url: 'https://exemple.test/rest/v1', apiKey: 'clef', schema: 'azimut' };
+
+  it('refuse un site inconnu au lieu de rendre quatre listes vides', async () => {
+    // Un vide rendu ici se lirait « ce site ne déclare rien », alors qu'il
+    // faudrait lire « ce site ne vous est pas accessible ».
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('[]', { status: 200 })));
+    await expect(createPostgrestRepository(config).loadVocabulary('inconnu')).rejects.toSatisfy(
+      (e: unknown) => isRepositoryError(e) && e.code === 'NET.NOT_FOUND',
+    );
+  });
+
+  it('vérifie le site avant de lire les registres', async () => {
+    const calls: string[] = [];
+    vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
+      calls.push(url);
+      const body = url.includes('/site?') ? '[{"id":"site-1"}]' : '[]';
+      return Promise.resolve(new Response(body, { status: 200 }));
+    }));
+
+    await createPostgrestRepository(config).loadVocabulary('site-1');
+    expect(calls[0]).toContain('/site?select=id&id=eq.site-1');
   });
 });

@@ -71,6 +71,9 @@ export function PlanCalibrationView(): JSX.Element {
 
   /** Équivalent clavier du clic : le point saisi au chiffre près (E6.2). */
   function placeFromEntry(): void {
+    // `Number('')` vaut 0 : sans ce rejet, presser le bouton sans rien saisir
+    // poserait le point à l'origine du fond, ce qui fausserait l'échelle.
+    if (entryX.trim() === '' || entryY.trim() === '') return;
     const x = Number(entryX.replace(',', '.'));
     const y = Number(entryY.replace(',', '.'));
     if (!Number.isFinite(x) || !Number.isFinite(y)) return;

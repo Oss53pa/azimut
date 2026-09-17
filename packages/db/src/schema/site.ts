@@ -1,4 +1,4 @@
-import { uuid, text, timestamp, integer, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import { uuid, text, timestamp, date, integer, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 
@@ -155,7 +155,9 @@ export const siteFact = azimut.table('site_fact', {
   key: text('key').notNull(),
   value: text('value').notNull(),
   source: text('source').notNull(),
-  recorded_on: text('recorded_on').notNull(),
+  // Colonne `date` en base : la déclarer `text` rendrait un `Date` typé
+  // `string`, et les comparaisons de chaînes qui la trient échoueraient.
+  recorded_on: date('recorded_on').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -185,7 +187,9 @@ export const sourceClaim = azimut.table('source_claim', {
   key: text('key').notNull(),
   source: text('source').notNull(),
   value: text('value').notNull(),
-  recorded_on: text('recorded_on').notNull(),
+  // Colonne `date` en base : la déclarer `text` rendrait un `Date` typé
+  // `string`, et les comparaisons de chaînes qui la trient échoueraient.
+  recorded_on: date('recorded_on').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -204,7 +208,7 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
   key: text('key').notNull(),
   decided_source: text('decided_source').notNull(),
   decided_by: text('decided_by').notNull(),
-  decided_on: text('decided_on').notNull(),
+  decided_on: date('decided_on').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_discrepancy_decision_org').on(t.org_id),
