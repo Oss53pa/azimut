@@ -48,6 +48,10 @@ export { findLexiconMatches } from './lexicon.js';
 export type { SiteFact, ForbiddenWord } from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
+export { PUBLISHABLE_STATUSES } from './parking.js';
+export type {
+  ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
+} from './parking.js';
 export type { SiteVocabulary } from './site-vocabulary.js';
 export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';

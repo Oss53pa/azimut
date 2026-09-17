@@ -213,3 +213,64 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
 }, (t) => [
   index('idx_discrepancy_decision_org').on(t.org_id),
 ]);
+
+/** Complément atelier M2 — un parking, avec sa capacité annoncée et sa source. */
+export const parking = azimut.table('parking', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  free: boolean('free').notNull(),
+  declared_capacity: integer('declared_capacity').notNull(),
+  status: text('status').notNull(),
+  source: text('source').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_parking_org').on(t.org_id),
+]);
+
+export const parkingSpace = azimut.table('parking_space', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
+  kind: text('kind').notNull(),
+  row_label: text('row_label').notNull(),
+  geom: jsonb('geom').notNull(),
+  status: text('status').notNull(),
+  source: text('source').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_parking_space_org').on(t.org_id),
+  index('idx_parking_space_parking').on(t.parking_id),
+]);
+
+/** Là où le plan source s'arrête : sans elle, aucune extrapolation n'est visible. */
+export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
+  geom: jsonb('geom'),
+  reason: text('reason').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_parking_uncovered_org').on(t.org_id),
+  index('idx_parking_uncovered_parking').on(t.parking_id),
+]);
+
+export const vehicleGate = azimut.table('vehicle_gate', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
+  code: text('code').notNull(),
+  role: text('role').notNull(),
+  width_m: numeric('width_m').notNull(),
+  position: jsonb('position').notNull(),
+  status: text('status').notNull(),
+  source: text('source').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_vehicle_gate_org').on(t.org_id),
+]);

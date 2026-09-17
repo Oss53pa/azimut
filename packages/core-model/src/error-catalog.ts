@@ -69,6 +69,12 @@ export const ERROR_CATALOG = {
   'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte contraire à un fait du site' },
   // Complément atelier, M16 : deux sources donnent des valeurs différentes.
   'LAYOUT.SOURCE_DISCREPANCY_OPEN':         { severity: 'warning',  description: 'Écart entre sources non arbitré, valeur retenue à confirmer' },
+
+  // ── PARK (complément atelier, M2) ─────────────────────────
+  'PARK.CAPACITY_UNEXPLAINED':              { severity: 'blocking', description: 'Places numérisées en deçà de la capacité annoncée, sans zone non couverte déclarée' },
+  'PARK.CAPACITY_EXCEEDED':                 { severity: 'blocking', description: 'Places numérisées au-delà de la capacité annoncée' },
+  'PARK.SOURCE_MISSING':                    { severity: 'blocking', description: 'Objet de stationnement sans source' },
+  'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de stationnement non existant porté à un livrable' },
   'LAYOUT.CHROMATIC_ADJACENCY':             { severity: 'blocking', description: 'Adjacence chromatique interdite' },
   'LAYOUT.LOGO_BELOW_MIN_WIDTH':            { severity: 'blocking', description: 'Logo sous la largeur minimale' },
   'LAYOUT.ISO_LEVEL_NOT_FOUND':             { severity: 'blocking', description: 'Niveau introuvable pour vue isométrique' },
@@ -266,6 +272,8 @@ export const ANOMALY_DOMAINS = [
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
   // Tranche M : calage d'un fond de plan, et accès au dépôt de données.
   'CALIB', 'NET',
+  // Complément atelier (M2) : stationnement.
+  'PARK',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
   'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;
