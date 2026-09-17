@@ -1,5 +1,6 @@
 import {
-  uuid, text, timestamp, integer, numeric, boolean, jsonb, index,
+  uuid, text, timestamp, integer, numeric, boolean, jsonb,
+  uniqueIndex, index,
 } from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
@@ -129,6 +130,9 @@ export const planCalibration = azimut.table('plan_calibration', {
   calibrated_at: timestamp('calibrated_at', { withTimezone: true }),
 }, (t) => [
   index('idx_plan_calibration_org').on(t.org_id),
+  // « Chacun est calé au plus une fois » : un fond porte un calage, pas deux.
+  // Recaler (S9) met la ligne à jour, il n'en ajoute pas une seconde.
+  uniqueIndex('uq_plan_calibration_plan_source').on(t.plan_source_id),
 ]);
 
 export const opening = azimut.table('opening', {

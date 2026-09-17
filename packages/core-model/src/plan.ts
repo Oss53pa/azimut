@@ -47,6 +47,18 @@ export type PlanSource = {
  * identifiable : sans lui, la règle est écrite mais invérifiable. Facultatif
  * parce qu'une ligne enregistrée avant qu'il existe n'a pas de date, et qu'en
  * inventer une ferait passer une inconnue pour un fait.
+ *
+ * Un fond porte un calage et pas deux : la base le garantit par un index
+ * unique sur `plan_source_id` (migration 0023). Deux calages du même fond
+ * donneraient deux conversions pixel → mètre pour la même image, sans que rien
+ * ne dise laquelle s'applique.
+ *
+ * Conséquence sur `calibrated_at`, et c'est un contrat que l'écriture devra
+ * tenir : recaler un fond (S9) met cette ligne à jour et **ne touche pas** à
+ * `calibrated_at`, qui reste la date d'établissement du calage. Le faire suivre
+ * la mise à jour déplacerait « le premier calage » à chaque recalage, et
+ * `checkSiteOriginCoherent` finirait par comparer le repère du site à l'origine
+ * d'un autre fond — donc à lever une anomalie bloquante contre un site correct.
  */
 export type PlanCalibration = {
   readonly id: string;
@@ -70,7 +82,9 @@ export type PlanCalibration = {
  * est peut-être pas un, et c'est sur lui que S1 est vérifiée.
  *
  * À dates égales, l'identifiant tranche : deux exécutions rendent le même
- * calage (invariant 4).
+ * calage (invariant 4). Une égalité ne devrait pas se produire entre deux
+ * calages d'un même site, chacun étant une opération distincte ; elle n'est
+ * départagée que pour que la réponse ne dépende pas de l'ordre des lignes.
  */
 export function firstCalibration(
   calibrations: readonly PlanCalibration[],

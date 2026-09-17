@@ -78,3 +78,36 @@ describe('migration 0022', () => {
     expect(DOWN_0022).toContain('DROP COLUMN IF EXISTS calibrated_at');
   });
 });
+
+const UP_0023 = readFileSync(
+  resolve(DIR, '0023_a5_2_one_calibration_per_plan.up.sql'), 'utf8',
+);
+const DOWN_0023 = readFileSync(
+  resolve(DIR, '0023_a5_2_one_calibration_per_plan.down.sql'), 'utf8',
+);
+
+/**
+ * A5.2 — « chacun est calé au plus une fois ».
+ */
+describe('migration 0023', () => {
+  it('crée l’index unique sur le fond de plan', () => {
+    expect(statementsOf(UP_0023)).toContain(
+      'CREATE UNIQUE INDEX uq_plan_calibration_plan_source',
+    );
+    expect(statementsOf(UP_0023)).toContain('azimut.plan_calibration (plan_source_id)');
+  });
+
+  it('ne choisit pas à la place de l’utilisateur quel calage garder', () => {
+    // Si un fond porte déjà deux calages, la création échoue et le dit. Le
+    // SELECT de diagnostic est laissé en commentaire, pas exécuté.
+    for (const forbidden of ['UPDATE ', 'DELETE ', 'DROP ']) {
+      expect(statementsOf(UP_0023)).not.toContain(forbidden);
+    }
+    expect(statementsOf(UP_0023)).not.toContain('SELECT');
+    expect(UP_0023).toContain('HAVING count(*) > 1');
+  });
+
+  it('se défait sans condition préalable', () => {
+    expect(DOWN_0023).toContain('DROP INDEX IF EXISTS azimut.uq_plan_calibration_plan_source');
+  });
+});
