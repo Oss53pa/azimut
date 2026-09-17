@@ -145,7 +145,10 @@ export type {
   ComposeFaceOptions,
   ResolveFromScheduleOptions,
 } from './compose-face.js';
-export { guardExposureHypotheses, guardFlowResultExport } from './exposure.js';
+export {
+  guardExposureHypotheses, guardFlowResultExport,
+  entryWeightSum, ENTRY_WEIGHT_TOTAL,
+} from './exposure.js';
 export type {
   ExposureHypotheses,
   EntryWeight,

@@ -1,7 +1,10 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { guardExposureHypotheses, guardFlowResultExport } from '@azimut/engine-graph';
+import {
+  guardExposureHypotheses, guardFlowResultExport,
+  entryWeightSum, ENTRY_WEIGHT_TOTAL,
+} from '@azimut/engine-graph';
 import type { ExposureHypotheses } from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 import {
@@ -162,7 +165,15 @@ export function CustomerFlowsView(): JSX.Element {
 
       <div style={{ marginTop: SPACE.lg }}>
         <PanelGrid min={300}>
-          <Panel title={t('flows.panel.entries')} note={String(hypotheses.entry_weights.length)}>
+          <Panel
+            title={t('flows.panel.entries')}
+            note={hypotheses.entry_weights.length === 0
+              ? String(hypotheses.entry_weights.length)
+              : t('flows.entries.sum', {
+                sum: (entryWeightSum(hypotheses.entry_weights) * 100).toFixed(1),
+                expected: ENTRY_WEIGHT_TOTAL * 100,
+              })}
+          >
             <WeightList
               rows={hypotheses.entry_weights.map(w => ({
                 key: w.access_id,

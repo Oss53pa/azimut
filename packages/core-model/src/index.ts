@@ -27,6 +27,7 @@ export {
   ANGLE_EQUALITY_DEG,
   EDGE_MIN_LENGTH_M,
   POLYGON_MIN_AREA_M2,
+  WEIGHT_SUM_TOLERANCE,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';

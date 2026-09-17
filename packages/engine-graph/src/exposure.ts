@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { WEIGHT_SUM_TOLERANCE } from '@azimut/core-model';
 
 /**
  * I5.3 — Exposure hypotheses.
@@ -17,8 +18,18 @@ import type { Finding, Outcome } from '@azimut/core-model';
  */
 export type EntryWeight = {
   readonly access_id: string;
+  /** Part de la fréquentation totale, en fraction de l'unité. */
   readonly weight: number;
 };
+
+/**
+ * Total attendu des parts de fréquentation (N3.3).
+ *
+ * La fiche l'exprime en pour-cent — « somme des parts différente de 100 % » ;
+ * les parts étant portées en fraction, le total vaut l'unité. C'est la même
+ * règle, dans l'unité du modèle.
+ */
+export const ENTRY_WEIGHT_TOTAL = 1;
 
 export type AttractionWeight = {
   readonly destination_id: string;
@@ -47,10 +58,30 @@ function undeclared(factor: string): Finding {
   };
 }
 
+/** Somme des parts de fréquentation déclarées. */
+export function entryWeightSum(weights: readonly EntryWeight[]): number {
+  return weights.reduce((total, entry) => total + entry.weight, 0);
+}
+
 /**
- * Guard that the three exposure weightings are declared. Returns one blocking
- * finding per missing factor (empty declaration), in a stable order; ok when
- * all three are present.
+ * Contrôle les hypothèses d'exposition.
+ *
+ * Deux refus, dans cet ordre :
+ *
+ * 1. P1 — les trois pondérations sont déclarées. Une anomalie
+ *    `FLOW.WEIGHTS_UNDECLARED` par facteur manquant.
+ * 2. N3.3 — les parts de fréquentation somment à l'unité. Une anomalie
+ *    `FLOW.WEIGHTS_NOT_NORMALIZED` sinon.
+ *
+ * L'ordre n'est pas indifférent : un jeu vide somme à zéro, et le dire
+ * « non normalisé » ferait chercher une erreur de saisie là où la déclaration
+ * manque simplement. Le contrôle de normalisation ne s'exécute donc que sur
+ * des parts déclarées.
+ *
+ * Seules les parts de fréquentation sont normalisées. Le pouvoir d'attraction
+ * est une pondération relative, pas une part d'un tout, et un cône de
+ * visibilité porte un angle et une distance : ni l'un ni l'autre ne somme à
+ * quoi que ce soit. La fiche N3.3 ne l'exige pas davantage.
  */
 export function guardExposureHypotheses(
   hypotheses: ExposureHypotheses,
@@ -63,6 +94,26 @@ export function guardExposureHypotheses(
   if (findings.length > 0) {
     return { ok: false, findings };
   }
+
+  const sum = entryWeightSum(hypotheses.entry_weights);
+  if (Math.abs(sum - ENTRY_WEIGHT_TOTAL) > WEIGHT_SUM_TOLERANCE) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'FLOW.WEIGHTS_NOT_NORMALIZED',
+        severity: 'blocking',
+        entity: null,
+        params: {
+          factor: 'entry_weights',
+          sum,
+          expected: ENTRY_WEIGHT_TOTAL,
+          count: hypotheses.entry_weights.length,
+        },
+        ruleRef: 'N3.3',
+      }],
+    };
+  }
+
   return { ok: true, value: null, warnings: [] };
 }
 
