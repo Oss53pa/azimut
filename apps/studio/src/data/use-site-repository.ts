@@ -7,7 +7,8 @@
  * états (M5).
  */
 import { useCallback, useEffect, useState } from 'react';
-import type { SiteData } from '@azimut/core-model';
+import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import { EMPTY_VOCABULARY } from '@azimut/core-model';
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -121,4 +122,33 @@ export function useAllSites(repository: SiteRepository): {
   }, [repository]);
 
   return { state, loaded, total };
+}
+
+/**
+ * Vocabulaire du site courant : lexique de charte, faits, affirmations.
+ *
+ * Il ne partage pas l'état du site : un échec de chargement du vocabulaire ne
+ * doit pas empêcher d'ouvrir une carte. Le registre retombe alors sur vide, et
+ * les contrôles qui en dépendent se déclarent non exercés — ce qu'ils sont.
+ */
+export function useSiteVocabularyLoad(
+  repository: SiteRepository,
+  siteId: string,
+): SiteVocabulary {
+  const [vocabulary, setVocabulary] = useState<SiteVocabulary>(EMPTY_VOCABULARY);
+
+  useEffect(() => {
+    if (siteId === '') {
+      setVocabulary(EMPTY_VOCABULARY);
+      return;
+    }
+    let cancelled = false;
+    repository.loadVocabulary(siteId).then(
+      value => { if (!cancelled) setVocabulary(value); },
+      () => { if (!cancelled) setVocabulary(EMPTY_VOCABULARY); },
+    );
+    return () => { cancelled = true; };
+  }, [repository, siteId]);
+
+  return vocabulary;
 }

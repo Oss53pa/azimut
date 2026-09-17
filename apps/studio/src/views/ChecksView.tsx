@@ -1,8 +1,9 @@
 import { type JSX, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteVocabulary } from '../context/useSiteVocabulary.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory, validateSupports } from '@azimut/engine-graph';
-import type { Finding, SiteData } from '@azimut/core-model';
+import type { Finding, SiteData, SiteVocabulary } from '@azimut/core-model';
 import { downloadText } from '../components/download.js';
 import {
   ScreenHeader, MetricRow, Panel, StateBanner, Note,
@@ -23,8 +24,8 @@ function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Find
   return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
 }
 
-function validate(site: SiteData, ranAt: string): ValidationRun {
-  const checks = runChecks(site);
+function validate(site: SiteData, vocabulary: SiteVocabulary, ranAt: string): ValidationRun {
+  const checks = runChecks(site, vocabulary);
   return {
     findings: [
       ...(checks.ok ? checks.value.findings : checks.findings),
@@ -66,11 +67,12 @@ function toCsv(run: ValidationRun, site: SiteData): string {
  */
 export function ChecksView(): JSX.Element {
   const site = useSiteData();
+  const vocabulary = useSiteVocabulary();
   const { t } = useI18n();
   const [run, setRun] = useState<ValidationRun | null>(null);
 
   function launch(): void {
-    setRun(validate(site, new Date().toISOString()));
+    setRun(validate(site, vocabulary, new Date().toISOString()));
   }
 
   const actions: readonly ScreenAction[] = [

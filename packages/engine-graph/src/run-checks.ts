@@ -2,10 +2,7 @@ import type {
   SiteData,
   Finding,
   Outcome,
-  LexiconTerm,
-  SiteFact,
-  SourceClaim,
-  DiscrepancyDecision,
+  SiteVocabulary,
 } from '@azimut/core-model';
 import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
 import { auditLexicon } from './audit-lexicon.js';
@@ -37,16 +34,11 @@ export type CheckReport = {
 };
 
 /**
- * Ce que le site oppose à ses propres textes. Tout est facultatif : un site qui
- * n'en déclare rien voit les contrôles correspondants rangés en
- * `checks_undeclared`, jamais comptés comme réussis.
+ * Réexport : le vocabulaire est un registre du modèle, pas une notion de
+ * moteur. Il vit en `core-model` pour que le dépôt de données puisse le rendre
+ * sans dépendre d'un moteur.
  */
-export type SiteVocabulary = {
-  readonly lexicon?: readonly LexiconTerm[];
-  readonly facts?: readonly SiteFact[];
-  readonly claims?: readonly SourceClaim[];
-  readonly decisions?: Readonly<Record<string, DiscrepancyDecision>>;
-};
+export type { SiteVocabulary } from '@azimut/core-model';
 
 /**
  * H2.2 — Orientation nomenclature uniqueness. Building names must be unique

@@ -16,7 +16,10 @@ import type {
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
 } from '@azimut/db/mapping';
-import type { SiteData } from '@azimut/core-model';
+import type {
+  SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
+  SiteFact, SourceClaim, DiscrepancyDecision,
+} from '@azimut/core-model';
 import {
   RepositoryError, errorCodeForStatus,
   type SiteRepository, type SiteSummary,
@@ -30,6 +33,57 @@ export type PostgrestConfig = {
   /** Schéma interrogé. */
   readonly schema: string;
 };
+
+/**
+ * Lignes des registres de vocabulaire. Elles ne passent pas par `@azimut/db` :
+ * ce sont des lectures simples, sans assemblage, et les décrire ici évite une
+ * table de transposition qui n'aurait qu'un seul appelant.
+ */
+type LexiconTermRow = {
+  readonly lang: string;
+  readonly term: string;
+  readonly severity: string;
+};
+
+type SiteFactRow = {
+  readonly id: string;
+  readonly key: string;
+  readonly value: string;
+  readonly source: string;
+  readonly recorded_on: string;
+};
+
+type ForbiddenWordRow = {
+  readonly site_fact_id: string;
+  readonly lang: string;
+  readonly term: string;
+};
+
+type SourceClaimRow = {
+  readonly key: string;
+  readonly source: string;
+  readonly value: string;
+  readonly recorded_on: string;
+};
+
+type DecisionRow = {
+  readonly key: string;
+  readonly decided_source: string;
+  readonly decided_by: string;
+  readonly decided_on: string;
+};
+
+/**
+ * Une sévérité inconnue vaut « interdit ».
+ *
+ * C'est le sens le plus strict, et c'est délibéré : une valeur que le code ne
+ * comprend pas ne doit pas se traduire par un contrôle plus indulgent. Mieux
+ * vaut un signalement de trop, qu'un relecteur écarte, qu'un terme interdit qui
+ * passe parce que sa sévérité était mal orthographiée en base.
+ */
+function toSeverity(raw: string): LexiconSeverity {
+  return raw === 'discouraged' ? 'discouraged' : 'forbidden';
+}
 
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
 function transportError(detail: string): RepositoryError {
@@ -186,6 +240,71 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         content_blocks: contentBlocks,
         support_versions: supportVersions,
       });
+    },
+
+    async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
+      const [lexiconRows, factRows, claimRows, decisionRows] = await Promise.all([
+        // Le lexique pend à la charte, elle-même au site : PostgREST joint par
+        // la clé étrangère nommée, sans que l'écran ait à charger la charte.
+        query<LexiconTermRow>(
+          config, 'lexicon_term', `select=lang,term,severity&charter.site_id=eq.${siteId}`,
+        ),
+        query<SiteFactRow>(
+          config, 'site_fact', `select=id,key,value,source,recorded_on&site_id=eq.${siteId}`,
+        ),
+        query<SourceClaimRow>(
+          config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
+        ),
+        query<DecisionRow>(
+          config,
+          'discrepancy_decision',
+          `select=key,decided_source,decided_by,decided_on&site_id=eq.${siteId}`,
+        ),
+      ]);
+
+      const wordRows = await queryIn<ForbiddenWordRow>(
+        config, 'site_fact_forbidden_word', 'site_fact_id', factRows.map(f => f.id),
+      );
+
+      const wordsByFact = new Map<string, { lang: string; term: string }[]>();
+      for (const row of wordRows) {
+        const bucket = wordsByFact.get(row.site_fact_id);
+        const word = { lang: row.lang, term: row.term };
+        if (bucket === undefined) wordsByFact.set(row.site_fact_id, [word]);
+        else bucket.push(word);
+      }
+
+      const lexicon: LexiconTerm[] = lexiconRows.map(row => ({
+        lang: row.lang,
+        term: row.term,
+        severity: toSeverity(row.severity),
+      }));
+
+      const facts: SiteFact[] = factRows.map(row => ({
+        key: row.key,
+        value: row.value,
+        source: row.source,
+        recorded_on: row.recorded_on,
+        forbidden: wordsByFact.get(row.id) ?? [],
+      }));
+
+      const claims: SourceClaim[] = claimRows.map(row => ({
+        key: row.key,
+        source: row.source,
+        value: row.value,
+        recorded_on: row.recorded_on,
+      }));
+
+      const decisions: Record<string, DiscrepancyDecision> = {};
+      for (const row of decisionRows) {
+        decisions[row.key] = {
+          source: row.decided_source,
+          decided_by: row.decided_by,
+          decided_on: row.decided_on,
+        };
+      }
+
+      return { lexicon, facts, claims, decisions };
     },
   };
 }
