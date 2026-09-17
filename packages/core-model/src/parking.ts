@@ -1,3 +1,5 @@
+import type { Polygon } from './geometry.js';
+
 /**
  * Stationnement — complément atelier, M2.
  *
@@ -35,6 +37,7 @@ export type ParkingSpaceKind = 'standard' | 'pmr' | 'livraison';
 
 export type ParkingSpace = {
   readonly id: string;
+  readonly org_id: string;
   readonly parking_id: string;
   readonly kind: ParkingSpaceKind;
   /** Rangée ou travée, telle qu'elle est repérée sur le plan source. */
@@ -44,7 +47,10 @@ export type ParkingSpace = {
 
 export type Parking = {
   readonly id: string;
+  readonly org_id: string;
   readonly level_id: string;
+  /** Emprise du parking, en coordonnées métier (D1.1). */
+  readonly geometry: Polygon;
   readonly name: string;
   readonly free: boolean;
   /**
@@ -66,6 +72,7 @@ export type Parking = {
  */
 export type UncoveredArea = {
   readonly id: string;
+  readonly org_id: string;
   readonly parking_id: string;
   /** Pourquoi le plan s'arrête : bord de page, calque absent, zone illisible. */
   readonly reason: string;

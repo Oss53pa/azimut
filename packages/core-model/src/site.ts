@@ -1,4 +1,5 @@
 import type { Polygon, Point } from './geometry.js';
+import type { Parking, ParkingSpace, UncoveredArea, Provenance } from './parking.js';
 
 export type Organization = {
   readonly id: string;
@@ -346,6 +347,19 @@ export type SiteGraph = {
   readonly vertical_links: readonly VerticalLink[];
 };
 
+/** Complément atelier M2 — un portail ou un accès véhicule. */
+export type VehicleGate = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  /** Code du plan source : V1 à V5 sur Cosmos Angré. */
+  readonly code: string;
+  readonly role: string;
+  readonly width_m: number;
+  readonly position: Point;
+  readonly provenance: Provenance;
+};
+
 export type SiteData = {
   readonly organization: Organization;
   readonly site: Site;
@@ -365,4 +379,14 @@ export type SiteData = {
   readonly content_blocks: readonly ContentBlockInstance[];
   readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
+  /**
+   * Complément atelier M2 — le stationnement fait partie de la géométrie du
+   * site, au même titre que les empreintes : un parking se dessine sur un plan
+   * et se compte. Il entre donc ici, et non dans un registre à part comme le
+   * vocabulaire, qui lui n'est pas de la géométrie.
+   */
+  readonly parkings: readonly Parking[];
+  readonly parking_spaces: readonly ParkingSpace[];
+  readonly parking_uncovered: readonly UncoveredArea[];
+  readonly vehicle_gates: readonly VehicleGate[];
 };

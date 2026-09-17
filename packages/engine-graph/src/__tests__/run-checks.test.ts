@@ -439,3 +439,36 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
     expect([...r.value.checks_run]).toEqual([...r.value.checks_run].sort((a, b) => a.localeCompare(b)));
   });
 });
+
+describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y en a pas', () => {
+  it('n’annonce pas le contrôle sur un site sans parking', () => {
+    const r = runChecks(refMinimal);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    // Un site sans parking n'est pas un contrôle non exercé : il n'y a rien à
+    // contrôler. Le ranger en `checks_undeclared` inviterait à saisir un
+    // parking qui n'existe pas.
+    expect(r.value.checks_run).not.toContain('parking_coverage');
+    expect(r.value.checks_undeclared).not.toContain('parking_coverage');
+  });
+
+  it('exerce le contrôle sur le site qui en porte un', () => {
+    const r = runChecks(refMultilevel);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.checks_run).toContain('parking_coverage');
+    expect(r.value.findings.filter(f => f.code.startsWith('PARK.'))).toEqual([]);
+  });
+
+  it('remonte l’écart de capacité dans le rapport commun', () => {
+    const ampute = {
+      ...refMultilevel,
+      parking_spaces: refMultilevel.parking_spaces.slice(0, 2),
+    };
+    const r = runChecks(ampute);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const park = r.value.findings.find(f => f.code === 'PARK.CAPACITY_UNEXPLAINED');
+    expect(park?.params['missing']).toBe(2);
+  });
+});

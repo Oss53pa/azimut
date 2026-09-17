@@ -4,10 +4,18 @@ import { auditParking } from '../audit-parking.js';
 
 const EXISTANT: Provenance = { status: 'existant', source: 'Plan RDJ indice 20' };
 
+const CARRE: Parking['geometry'] = {
+  vertices: [
+    { x_m: 0, y_m: 0 }, { x_m: 20, y_m: 0 }, { x_m: 20, y_m: 20 }, { x_m: 0, y_m: 20 },
+  ],
+};
+
 function parking(id: string, capacity: number, provenance: Provenance = EXISTANT): Parking {
   return {
     id,
+    org_id: 'org-test-001',
     level_id: 'lvl-1',
+    geometry: CARRE,
     name: `Parking ${id}`,
     free: true,
     declared_capacity: capacity,
@@ -18,6 +26,7 @@ function parking(id: string, capacity: number, provenance: Provenance = EXISTANT
 function spaces(parkingId: string, count: number, provenance: Provenance = EXISTANT): ParkingSpace[] {
   return Array.from({ length: count }, (_, i) => ({
     id: `${parkingId}-p${String(i).padStart(3, '0')}`,
+    org_id: 'org-test-001',
     parking_id: parkingId,
     kind: 'standard' as const,
     row: 'A',
@@ -56,7 +65,7 @@ describe('auditParking (M2)', () => {
     const report = auditParking({
       parkings: [parking('souterrain', 89)],
       spaces: spaces('souterrain', 40),
-      uncovered: [{ id: 'z-1', parking_id: 'souterrain', reason: 'Plan coupé au bord de page' }],
+      uncovered: [{ id: 'z-1', org_id: 'org-test-001', parking_id: 'souterrain', reason: 'Plan coupé au bord de page' }],
     });
     expect(report.findings).toEqual([]);
   });
@@ -66,7 +75,7 @@ describe('auditParking (M2)', () => {
     const report = auditParking({
       parkings: [parking('surface', 30)],
       spaces: spaces('surface', 31),
-      uncovered: [{ id: 'z-1', parking_id: 'surface', reason: 'peu importe' }],
+      uncovered: [{ id: 'z-1', org_id: 'org-test-001', parking_id: 'surface', reason: 'peu importe' }],
     });
     expect(report.findings[0]?.code).toBe('PARK.CAPACITY_EXCEEDED');
     expect(report.findings[0]?.params['digitised']).toBe(31);

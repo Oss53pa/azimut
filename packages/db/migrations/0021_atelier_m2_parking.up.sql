@@ -14,6 +14,8 @@ CREATE TABLE azimut.parking (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id uuid NOT NULL REFERENCES azimut.organization(id) ON DELETE CASCADE,
   level_id uuid NOT NULL REFERENCES azimut.level(id) ON DELETE CASCADE,
+  -- Emprise du parking, en coordonnées métier (D1.1), comme `footprint`.
+  geometry jsonb NOT NULL,
   name text NOT NULL,
   free boolean NOT NULL,
   -- Capacité annoncée par la source, distincte du nombre de places numérisées :

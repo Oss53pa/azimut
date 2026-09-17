@@ -297,5 +297,13 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     content_blocks: rows.content_blocks.map(mapContentBlockRow),
     support_versions: rows.support_versions.map(mapSupportVersionRow),
     face_templates: [],
+    // Le stationnement n'est pas encore lu depuis la base : les quatre tables
+    // de la migration 0021 existent, rien ne les assemble. Les listes vides
+    // disent « pas chargé », et `auditParking` n'y voit alors aucun parking —
+    // il ne conclut donc rien, faute de capacité annoncée à confronter.
+    parkings: [],
+    parking_spaces: [],
+    parking_uncovered: [],
+    vehicle_gates: [],
   };
 }

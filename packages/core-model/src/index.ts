@@ -52,6 +52,7 @@ export { PUBLISHABLE_STATUSES } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
 } from './parking.js';
+export type { VehicleGate } from './site.js';
 export type { SiteVocabulary } from './site-vocabulary.js';
 export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';

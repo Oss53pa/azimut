@@ -8,6 +8,7 @@ import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
 import { auditLexicon } from './audit-lexicon.js';
 import { auditSiteFacts } from './audit-site-facts.js';
 import { auditSourceClaims } from './audit-source-claims.js';
+import { auditParking } from './audit-parking.js';
 
 export type CheckReport = {
   readonly checks_run: readonly string[];
@@ -219,6 +220,18 @@ export function runChecks(
   } else {
     findings.push(...auditSiteFacts(site, facts).findings);
     run.push('site_facts');
+  }
+
+  // Le stationnement est de la géométrie du site : il vient de `SiteData`, pas
+  // du vocabulaire, et un site sans parking n'a rien à contrôler — ce n'est pas
+  // un contrôle non exercé, c'est un site sans parking.
+  if (site.parkings.length > 0) {
+    findings.push(...auditParking({
+      parkings: site.parkings,
+      spaces: site.parking_spaces,
+      uncovered: site.parking_uncovered,
+    }).findings);
+    run.push('parking_coverage');
   }
 
   const claims = vocabulary.claims ?? [];

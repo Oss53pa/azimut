@@ -429,4 +429,77 @@ export const refMultilevel: SiteData = {
       ],
     },
   ],
+  // Complément atelier M2 — stationnement. Le seul site de référence qui en
+  // porte, comme il est le seul à porter un vocabulaire : les autres montrent
+  // le cas d'un site qui n'en déclare pas.
+  //
+  // Quatre places annoncées, quatre numérisées : cas conforme. Les cas fautifs
+  // sont couverts en test unitaire, pas en donnée de référence, pour qu'un site
+  // de référence reste un site valide.
+  parkings: [
+    {
+      id: 'park-ml-ouest',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: -30 },
+          { x_m: 40, y_m: -30 },
+          { x_m: 40, y_m: -5 },
+          { x_m: 0, y_m: -5 },
+        ],
+      },
+      name: 'Parking Ouest',
+      free: true,
+      declared_capacity: 4,
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+  ],
+  parking_spaces: [
+    {
+      id: 'space-ml-a1',
+      org_id: 'org-test-001',
+      parking_id: 'park-ml-ouest',
+      kind: 'standard',
+      row: 'A',
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+    {
+      id: 'space-ml-a2',
+      org_id: 'org-test-001',
+      parking_id: 'park-ml-ouest',
+      kind: 'standard',
+      row: 'A',
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+    {
+      id: 'space-ml-a3',
+      org_id: 'org-test-001',
+      parking_id: 'park-ml-ouest',
+      kind: 'pmr',
+      row: 'A',
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+    {
+      id: 'space-ml-b1',
+      org_id: 'org-test-001',
+      parking_id: 'park-ml-ouest',
+      kind: 'livraison',
+      row: 'B',
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+  ],
+  parking_uncovered: [],
+  vehicle_gates: [
+    {
+      id: 'gate-ml-v1',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      code: 'V1',
+      role: 'Entrée véhicules',
+      width_m: 6,
+      position: { x_m: 0, y_m: -18 },
+      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+    },
+  ],
 };

@@ -219,6 +219,7 @@ export const parking = azimut.table('parking', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
+  geometry: jsonb('geometry').notNull(),
   name: text('name').notNull(),
   free: boolean('free').notNull(),
   declared_capacity: integer('declared_capacity').notNull(),
