@@ -137,6 +137,10 @@ describe('computeWayfinding', () => {
         id: 'l1', org_id: 'org1', building_id: 'b1', name: 'RDC',
         ordinal: 0, elevation_m: 0,
       }],
+      // Un site de kiosque ne transporte ni fond de plan ni calage : le
+      // terminal trace depuis la géométrie métrique.
+      plan_sources: [],
+      plan_calibrations: [],
       footprints: [{
         id: 'fp1', org_id: 'org1', level_id: 'l1',
         geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 50, y_m: 0 }, { x_m: 50, y_m: 10 }, { x_m: 0, y_m: 10 }] },

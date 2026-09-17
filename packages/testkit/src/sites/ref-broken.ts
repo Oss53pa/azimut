@@ -41,6 +41,24 @@ export const refBroken: SiteData = {
     },
   ],
   /**
+   * N1.4 — les deux situations que `CALIB.LEVEL_NOT_CALIBRATED` recouvre :
+   *  - `lvl-brk-rdc` porte un fond de plan que personne n'a calé
+   *    (`plan_source_count` vaut 1, la conduite à tenir est de caler) ;
+   *  - `lvl-brk-r1` n'a aucun fond importé
+   *    (`plan_source_count` vaut 0, la conduite à tenir est d'importer).
+   */
+  plan_sources: [
+    {
+      id: 'ps-brk-rdc',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      storage_path: 'plans/site-broken-001/lvl-brk-rdc.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [],
+  /**
    * N1.4 — trois empreintes, chacune posée pour un cas :
    *  - `fp-brk-nocode` : cellule sans code, DATA.UNIT_CODE_REQUIRED ;
    *  - `fp-brk-dup-a` et `fp-brk-dup-b` : même code sur le même niveau,

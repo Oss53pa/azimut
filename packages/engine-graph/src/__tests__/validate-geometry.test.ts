@@ -13,6 +13,8 @@ function siteWith(
     site: { id: 's1', org_id: 'org1', name: 'S', country_code: 'FR', rules_pack_id: null },
     buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B', independent_access: true }],
     levels: [{ id: 'l1', org_id: 'org1', building_id: 'b1', name: 'RDC', ordinal: 0, elevation_m: 0 }],
+    plan_sources: [],
+    plan_calibrations: [],
     footprints,
     volumes,
     graph: { nodes: [], edges: [], vertical_links: [] },

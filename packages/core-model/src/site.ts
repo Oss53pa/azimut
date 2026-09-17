@@ -1,4 +1,5 @@
 import type { Polygon, Point } from './geometry.js';
+import type { PlanSource, PlanCalibration } from './plan.js';
 
 export type Organization = {
   readonly id: string;
@@ -398,6 +399,13 @@ export type SiteData = {
   readonly site: Site;
   readonly buildings: readonly Building[];
   readonly levels: readonly Level[];
+  /**
+   * A5.2 — fonds de plan importés et leurs calages. Séparés du reste de la
+   * scène parce qu'ils ne sont pas de la géométrie métier : ils disent
+   * seulement comment un fond se lit en mètres. Voir `plan.ts`.
+   */
+  readonly plan_sources: readonly PlanSource[];
+  readonly plan_calibrations: readonly PlanCalibration[];
   readonly footprints: readonly Footprint[];
   readonly volumes: readonly Volume[];
   readonly graph: SiteGraph;

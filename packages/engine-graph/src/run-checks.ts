@@ -3,7 +3,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
-import { isCellFootprint } from '@azimut/core-model';
+import { isCellFootprint, calibratedLevelIds } from '@azimut/core-model';
 import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
 
 export type CheckReport = {
@@ -229,6 +229,45 @@ function checkUnitCodeDuplicate(site: SiteData): Finding[] {
   return findings;
 }
 
+/**
+ * N1.4 — un niveau sans plan calé est une anomalie bloquante.
+ *
+ * Un niveau est calé quand il porte au moins un fond de plan lui-même calé
+ * (`calibratedLevelIds`). Deux situations distinctes tombent sous le même
+ * code, comme le veut la partie N, et `plan_source_count` les sépare dans le
+ * rapport : aucun fond importé du tout, ou un fond importé que personne n'a
+ * calé. La conduite à tenir n'est pas la même — importer, ou caler.
+ *
+ * Le contrôle porte sur le niveau et non sur l'empreinte : un niveau vide mais
+ * non calé est déjà en faute, parce que la première empreinte qu'on y tracera
+ * le sera sur un fond muet.
+ */
+function checkLevelCalibrated(site: SiteData): Finding[] {
+  const calibrated = calibratedLevelIds(site.plan_sources, site.plan_calibrations);
+
+  const sourceCount = new Map<string, number>();
+  for (const source of site.plan_sources) {
+    sourceCount.set(source.level_id, (sourceCount.get(source.level_id) ?? 0) + 1);
+  }
+
+  const findings: Finding[] = [];
+  const sorted = [...site.levels].sort((a, b) => a.id.localeCompare(b.id));
+  for (const level of sorted) {
+    if (calibrated.has(level.id)) continue;
+    findings.push({
+      code: 'CALIB.LEVEL_NOT_CALIBRATED',
+      severity: 'blocking',
+      entity: { kind: 'level', id: level.id },
+      params: {
+        building_id: level.building_id,
+        plan_source_count: sourceCount.get(level.id) ?? 0,
+      },
+      ruleRef: 'N1.4',
+    });
+  }
+  return findings;
+}
+
 export function runChecks(site: SiteData): Outcome<CheckReport> {
   const findings: Finding[] = [];
 
@@ -238,6 +277,7 @@ export function runChecks(site: SiteData): Outcome<CheckReport> {
   findings.push(...checkNamingCollisions(site));
   findings.push(...checkUnitCodeRequired(site));
   findings.push(...checkUnitCodeDuplicate(site));
+  findings.push(...checkLevelCalibrated(site));
 
   return {
     ok: true,
@@ -246,6 +286,7 @@ export function runChecks(site: SiteData): Outcome<CheckReport> {
         'all_vacant_category',
         'duplicate_display_name',
         'incomplete_lang_coverage',
+        'level_calibrated',
         'naming_collision',
         'unit_code_duplicate',
         'unit_code_required',

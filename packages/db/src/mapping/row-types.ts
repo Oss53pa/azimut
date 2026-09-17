@@ -47,6 +47,25 @@ export type LevelRow = {
   readonly elevation_m: string;
 };
 
+export type PlanSourceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  readonly storage_path: string;
+  readonly media_type: string;
+  readonly uploaded_at: TimestampValue;
+};
+
+export type PlanCalibrationRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_source_id: string;
+  readonly scale_m_per_px: string;
+  readonly origin_x: string;
+  readonly origin_y: string;
+  readonly rotation_deg: string;
+};
+
 export type FootprintRow = {
   readonly id: string;
   readonly org_id: string;
@@ -206,6 +225,8 @@ export type SiteRowSet = {
   readonly site: SiteRow;
   readonly buildings: readonly BuildingRow[];
   readonly levels: readonly LevelRow[];
+  readonly plan_sources: readonly PlanSourceRow[];
+  readonly plan_calibrations: readonly PlanCalibrationRow[];
   readonly footprints: readonly FootprintRow[];
   readonly volumes: readonly VolumeRow[];
   readonly nodes: readonly NodeRow[];

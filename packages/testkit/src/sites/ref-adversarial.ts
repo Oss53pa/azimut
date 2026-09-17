@@ -35,6 +35,28 @@ export const refAdversarial: SiteData = {
       elevation_m: 0,
     },
   ],
+  /** A5.2 / N1.4 — le niveau est calé : ce site éprouve le texte, pas le calage. */
+  plan_sources: [
+    {
+      id: 'ps-adv-001',
+      org_id: 'org-test-001',
+      level_id: 'lvl-adv-001',
+      storage_path: 'plans/site-adversarial-001/lvl-adv-001.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-adv-001',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-adv-001',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+    },
+  ],
   footprints: [
     {
       id: 'fp-adv-triangle',

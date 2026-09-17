@@ -32,6 +32,32 @@ export const refMinimal: SiteData = {
       elevation_m: 0,
     },
   ],
+  /**
+   * A5.2 / N1.4 — un fond de plan calé par niveau. Sans lui, le niveau serait
+   * signalé `CALIB.LEVEL_NOT_CALIBRATED` : le site de référence doit être
+   * propre, c'est `refBroken` qui porte les cas en faute.
+   */
+  plan_sources: [
+    {
+      id: 'ps-min-001',
+      org_id: 'org-test-001',
+      level_id: 'lvl-001',
+      storage_path: 'plans/site-minimal-001/lvl-001.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-min-001',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-min-001',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+    },
+  ],
   footprints: [
     {
       id: 'fp-001',

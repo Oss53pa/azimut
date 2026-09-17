@@ -1,6 +1,8 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { calibratedLevelIds } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import type { Translate } from '../i18n/index.js';
 import {
   computeCalibration,
   DEFAULT_PLAUSIBLE_RESOLUTION,
@@ -8,8 +10,8 @@ import {
   type PlanPoint,
 } from '../domain/plan-calibration.js';
 import {
-  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow,
-  SPACE, TEXT, LABEL_STYLE, type Metric,
+  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow, DataTable, Tag,
+  SPACE, TEXT, LABEL_STYLE, type Column, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { CalibrationSurface, SURFACE_HEIGHT, SURFACE_WIDTH } from './calibration/CalibrationSurface.js';
@@ -29,6 +31,23 @@ export function PlanCalibrationView(): JSX.Element {
     () => [...site.levels].sort((a, b) => a.ordinal - b.ordinal),
     [site],
   );
+  /**
+   * N1.4 — état de calage enregistré, niveau par niveau. Lu depuis le site,
+   * pas depuis la mesure en cours : rien n'écrit encore de calage, et un
+   * écran qui présenterait la mesure comme un calage mentirait.
+   */
+  const levelStates = useMemo<readonly LevelCalibrationState[]>(() => {
+    const calibrated = calibratedLevelIds(site.plan_sources, site.plan_calibrations);
+    return levels.map(level => ({
+      id: level.id,
+      name: level.name,
+      sourceCount: site.plan_sources.filter(p => p.level_id === level.id).length,
+      calibrated: calibrated.has(level.id),
+    }));
+  }, [site, levels]);
+
+  const uncalibratedCount = levelStates.filter(l => !l.calibrated).length;
+
   const [levelId, setLevelId] = useState(levels[0]?.id ?? '');
   const [pointA, setPointA] = useState<PlanPoint | null>(null);
   const [pointB, setPointB] = useState<PlanPoint | null>(null);
@@ -175,6 +194,26 @@ export function PlanCalibrationView(): JSX.Element {
             })}</Note>
           </Panel>
 
+          <Panel title={t('calibration.panel.levels')} padded={false}>
+            <div style={{ padding: SPACE.sm }}>
+              <StateBanner
+                severity={uncalibratedCount === 0 ? 'valid' : 'blocking'}
+                message={uncalibratedCount === 0
+                  ? t('calibration.levels.clean')
+                  : t('calibration.levels.blocking', { count: uncalibratedCount })}
+              />
+            </div>
+            <DataTable
+              columns={LEVEL_COLUMNS(t)}
+              rows={levelStates}
+              rowKey={(row) => row.id}
+              empty={t('calibration.levels.empty')}
+            />
+            <div style={{ padding: `0 ${String(SPACE.md)}px` }}>
+              <Note>{t('calibration.levels.note')}</Note>
+            </div>
+          </Panel>
+
           <Panel title={t('calibration.panel.findings')}>
             <FindingList findings={findings} empty={t('calibration.findings.empty')} />
             <Note>{t('calibration.findings.note')}</Note>
@@ -185,6 +224,47 @@ export function PlanCalibrationView(): JSX.Element {
       <Note>{t('calibration.note')}</Note>
     </div>
   );
+}
+
+type LevelCalibrationState = {
+  readonly id: string;
+  readonly name: string;
+  readonly sourceCount: number;
+  readonly calibrated: boolean;
+};
+
+/**
+ * Trois états et non deux : le libellé dit s'il reste à importer un fond ou à
+ * caler celui qui est là. Le code d'anomalie est le même, la conduite à tenir
+ * ne l'est pas.
+ */
+function LEVEL_COLUMNS(t: Translate): readonly Column<LevelCalibrationState>[] {
+  return [
+    { id: 'level', header: t('calibration.levels.col.level'), cell: (row) => row.name },
+    {
+      id: 'sources',
+      header: t('calibration.levels.col.sources'),
+      numeric: true,
+      cell: (row) => row.sourceCount,
+    },
+    {
+      id: 'state',
+      header: t('calibration.levels.col.state'),
+      cell: (row) => {
+        if (row.calibrated) {
+          return <Tag label={t('calibration.levels.state.calibrated')} severity="valid" />;
+        }
+        return (
+          <Tag
+            label={row.sourceCount === 0
+              ? t('calibration.levels.state.nosource')
+              : t('calibration.levels.state.uncalibrated')}
+            severity="blocking"
+          />
+        );
+      },
+    },
+  ];
 }
 
 const FIELD_STYLE: React.CSSProperties = {

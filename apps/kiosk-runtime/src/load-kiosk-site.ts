@@ -136,6 +136,12 @@ export function loadKioskSite(
       'travel_profiles',
       'data/site.json',
     ) as TravelProfile[],
+    // Not shipped to a kiosk: a terminal draws from metric geometry, never
+    // from a raster background, so the plan sources and their calibrations
+    // stay in the studio. A kiosk site is consequently not a site `runChecks`
+    // can judge — N1.4's calibration check would flag every level.
+    plan_sources: [],
+    plan_calibrations: [],
     // Not shipped to a kiosk: supports and panels are authored, not displayed
     // on a wayfinding terminal.
     support_types: [],

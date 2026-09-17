@@ -3,7 +3,9 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type { SiteData } from '@azimut/core-model';
 
 import { organization } from './schema/org.js';
-import { site, building, level, footprint, volume } from './schema/site.js';
+import {
+  site, building, level, footprint, volume, planSource, planCalibration,
+} from './schema/site.js';
 import { node, edge, verticalLink } from './schema/graph.js';
 import {
   category, pictogram, destination, destinationName,
@@ -42,10 +44,16 @@ export async function loadSiteData(
     : [];
   const levelIds = levelRows.map((l) => l.id);
 
-  const [footprintRows, nodeRows, catRows, pictoRows, tpRows, supportRows, typologyRows] =
+  const [
+    footprintRows, planSourceRows, nodeRows, catRows, pictoRows, tpRows,
+    supportRows, typologyRows,
+  ] =
     await Promise.all([
       levelIds.length > 0
         ? db.select().from(footprint).where(inArray(footprint.level_id, levelIds))
+        : Promise.resolve([]),
+      levelIds.length > 0
+        ? db.select().from(planSource).where(inArray(planSource.level_id, levelIds))
         : Promise.resolve([]),
       levelIds.length > 0
         ? db.select().from(node).where(inArray(node.level_id, levelIds))
@@ -59,8 +67,9 @@ export async function loadSiteData(
 
   const footprintIds = footprintRows.map((f) => f.id);
   const nodeIds = nodeRows.map((n) => n.id);
+  const planSourceIds = planSourceRows.map((p) => p.id);
 
-  const [volumeRows, edgeRows, destRows] = await Promise.all([
+  const [volumeRows, edgeRows, destRows, calibrationRows] = await Promise.all([
     footprintIds.length > 0
       ? db.select().from(volume).where(inArray(volume.footprint_id, footprintIds))
       : Promise.resolve([]),
@@ -69,6 +78,9 @@ export async function loadSiteData(
       : Promise.resolve([]),
     footprintIds.length > 0
       ? db.select().from(destination).where(inArray(destination.footprint_id, footprintIds))
+      : Promise.resolve([]),
+    planSourceIds.length > 0
+      ? db.select().from(planCalibration).where(inArray(planCalibration.plan_source_id, planSourceIds))
       : Promise.resolve([]),
   ]);
 
@@ -101,6 +113,8 @@ export async function loadSiteData(
     site: siteRow,
     buildings: buildingRows,
     levels: levelRows,
+    plan_sources: planSourceRows,
+    plan_calibrations: calibrationRows,
     footprints: footprintRows,
     volumes: volumeRows,
     nodes: nodeRows,

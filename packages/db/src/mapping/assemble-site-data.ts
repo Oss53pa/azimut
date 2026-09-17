@@ -14,6 +14,7 @@ import type {
   Organization, Site, Building, Level, Footprint, Volume,
   GraphNode, Edge, VerticalLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
+  PlanSource, PlanCalibration,
   Support, SupportType, SupportFace, ContentBlockInstance, SupportVersion,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
   PictogramRegistry, SupportVersionState, DimensionsSource,
@@ -182,6 +183,25 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     elevation_m: num(l.elevation_m),
   }));
 
+  const planSources: PlanSource[] = rows.plan_sources.map(p => ({
+    id: p.id,
+    org_id: p.org_id,
+    level_id: p.level_id,
+    storage_path: p.storage_path,
+    media_type: p.media_type,
+    uploaded_at: isoString(p.uploaded_at),
+  }));
+
+  const planCalibrations: PlanCalibration[] = rows.plan_calibrations.map(c => ({
+    id: c.id,
+    org_id: c.org_id,
+    plan_source_id: c.plan_source_id,
+    scale_m_per_px: num(c.scale_m_per_px),
+    origin_x: num(c.origin_x),
+    origin_y: num(c.origin_y),
+    rotation_deg: num(c.rotation_deg),
+  }));
+
   const footprints: Footprint[] = rows.footprints.map(f => ({
     id: f.id,
     org_id: f.org_id,
@@ -290,6 +310,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     site,
     buildings,
     levels,
+    plan_sources: planSources,
+    plan_calibrations: planCalibrations,
     footprints,
     volumes,
     graph: { nodes, edges, vertical_links: verticalLinks },

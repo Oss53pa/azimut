@@ -40,6 +40,45 @@ export const refMultilevel: SiteData = {
       elevation_m: 3,
     },
   ],
+  /** A5.2 / N1.4 — les deux niveaux sont calés. */
+  plan_sources: [
+    {
+      id: 'ps-ml-rdc',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      storage_path: 'plans/site-multilevel-001/lvl-ml-rdc.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+    {
+      id: 'ps-ml-r1',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-r1',
+      storage_path: 'plans/site-multilevel-001/lvl-ml-r1.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:05:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-ml-rdc',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-ml-rdc',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+    },
+    {
+      id: 'cal-ml-r1',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-ml-r1',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+    },
+  ],
   footprints: [
     {
       id: 'fp-ml-rdc',
