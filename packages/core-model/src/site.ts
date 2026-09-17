@@ -31,7 +31,31 @@ export type Level = {
   readonly elevation_m: number;
 };
 
+/**
+ * N1.2 — natures d'empreinte déclarées par le socle.
+ *
+ * Le type reste ouvert : un import de CAO peut rendre une nature qu'Azimut ne
+ * connaît pas, et refuser le chargement du site pour cela ferait perdre la
+ * géométrie. La liste sert à nommer les natures connues et à décider ce qu'est
+ * une cellule, elle ne restreint pas le champ.
+ */
+export const FOOTPRINT_KINDS = [
+  'cell',
+  'circulation',
+  'technical',
+  'vertical_core',
+  'outdoor',
+] as const;
+
 export type FootprintKind = string;
+
+/** Nature portant un code d'unité obligatoire (règle S3). */
+export const CELL_FOOTPRINT_KIND = 'cell';
+
+/** Vrai pour une empreinte de cellule, seule nature que S3 contraint. */
+export function isCellFootprint(kind: FootprintKind): boolean {
+  return kind === CELL_FOOTPRINT_KIND;
+}
 
 export type Footprint = {
   readonly id: string;
@@ -39,6 +63,16 @@ export type Footprint = {
   readonly level_id: string;
   readonly geometry: Polygon;
   readonly kind: FootprintKind;
+  /**
+   * N1.2 — code d'unité locative. Requis quand la nature est `cell`, unique
+   * par niveau ; absent pour les autres natures.
+   *
+   * Le champ est facultatif au modèle et la contrainte vit dans les contrôles
+   * (`DATA.UNIT_CODE_REQUIRED`, `DATA.CODE_DUPLICATE`) : une empreinte relevée
+   * avant que son code soit connu se charge et se signale, elle ne disparaît
+   * pas.
+   */
+  readonly unit_code?: string;
 };
 
 export type Volume = {

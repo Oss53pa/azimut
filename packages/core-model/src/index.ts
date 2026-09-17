@@ -1,5 +1,6 @@
 export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
+export { FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint } from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
 export { guardFontEmbedding } from './font-embedding.js';
 export type {

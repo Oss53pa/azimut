@@ -187,6 +187,9 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     level_id: f.level_id,
     geometry: f.geometry as Footprint['geometry'],
     kind: f.kind,
+    // Colonne additive : une ligne antérieure à la migration 0018 la rend
+    // nulle, et le champ reste alors absent du modèle plutôt que vide.
+    ...(f.unit_code !== null ? { unit_code: f.unit_code } : {}),
   }));
 
   const volumes: Volume[] = rows.volumes.map(v => ({

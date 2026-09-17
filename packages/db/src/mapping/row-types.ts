@@ -53,6 +53,7 @@ export type FootprintRow = {
   readonly level_id: string;
   readonly geometry: unknown;
   readonly kind: string;
+  readonly unit_code: string | null;
 };
 
 export type VolumeRow = {

@@ -1,8 +1,8 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { validateGeometry } from '@azimut/engine-graph';
-import { polygonArea } from '@azimut/core-model';
+import { validateGeometry, runChecks } from '@azimut/engine-graph';
+import { polygonArea, isCellFootprint } from '@azimut/core-model';
 import type { Finding, Footprint } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import {
@@ -44,9 +44,17 @@ export function FootprintsView({ onNavigate }: FootprintsViewProps): JSX.Element
   const [selected, setSelected] = useState<string | undefined>(undefined);
 
   const geometry = useMemo(() => validateGeometry(site), [site]);
-  const geometryFindings: readonly Finding[] = geometry.ok
-    ? geometry.warnings
-    : geometry.findings;
+  const geometryFindings: readonly Finding[] = useMemo(() => {
+    const fromGeometry = geometry.ok ? geometry.warnings : geometry.findings;
+    // N1.4 — le code d'unité est contrôlé par `runChecks`, pas par la
+    // géométrie. Les deux anomalies rejoignent la liste, sans quoi l'écran
+    // des empreintes montrerait une colonne Code sans jamais dire ce qui ne
+    // va pas avec elle.
+    const checks = runChecks(site);
+    const fromChecks = (checks.ok ? checks.value.findings : checks.findings)
+      .filter(f => f.code === 'DATA.UNIT_CODE_REQUIRED' || f.code === 'DATA.CODE_DUPLICATE');
+    return [...fromGeometry, ...fromChecks];
+  }, [site, geometry]);
 
   const rows = useMemo<readonly FootprintRow[]>(() => {
     const levelNames = new Map(site.levels.map(l => [l.id, l.name]));
@@ -92,6 +100,15 @@ export function FootprintsView({ onNavigate }: FootprintsViewProps): JSX.Element
   ];
 
   const columns: readonly Column<FootprintRow>[] = [
+    {
+      id: 'unit',
+      header: t('footprints.col.unitcode'),
+      cell: r => (
+        isCellFootprint(r.footprint.kind) && (r.footprint.unit_code ?? '').trim().length === 0
+          ? <Tag label={t('footprints.unitcode.missing')} severity="blocking" />
+          : (r.footprint.unit_code ?? t('footprints.unitcode.none'))
+      ),
+    },
     { id: 'id', header: t('footprints.col.code'), cell: r => r.footprint.id },
     { id: 'kind', header: t('footprints.col.kind'), cell: r => r.footprint.kind },
     { id: 'level', header: t('footprints.col.level'), cell: r => r.level },

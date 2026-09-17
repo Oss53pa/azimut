@@ -45,7 +45,8 @@ export const refMinimal: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-001',
     },
   ],
   volumes: [

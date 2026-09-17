@@ -49,6 +49,11 @@ export const footprint = azimut.table('footprint', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry').notNull(),
   kind: text('kind').notNull(),
+  // N1.2 — code d'unité locative, requis pour une cellule, unique par niveau.
+  // Nullable : une empreinte relevée avant que son code soit connu doit
+  // pouvoir être enregistrée ; c'est le contrôle qui la signale, pas la base
+  // qui la refuse.
+  unit_code: text('unit_code'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

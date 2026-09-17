@@ -53,7 +53,8 @@ export const refMultilevel: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-000',
     },
     {
       id: 'fp-ml-r1',
@@ -67,7 +68,8 @@ export const refMultilevel: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-100',
     },
   ],
   volumes: [

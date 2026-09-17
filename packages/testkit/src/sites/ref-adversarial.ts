@@ -47,7 +47,8 @@ export const refAdversarial: SiteData = {
           { x_m: 0, y_m: 0.001 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-A01',
     },
     {
       id: 'fp-adv-colinear',
@@ -61,7 +62,7 @@ export const refAdversarial: SiteData = {
           { x_m: 20, y_m: 10 },
         ],
       },
-      kind: 'corridor',
+      kind: 'circulation',
     },
   ],
   volumes: [],

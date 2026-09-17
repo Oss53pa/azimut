@@ -40,7 +40,76 @@ export const refBroken: SiteData = {
       elevation_m: 3,
     },
   ],
-  footprints: [],
+  /**
+   * N1.4 — trois empreintes, chacune posée pour un cas :
+   *  - `fp-brk-nocode` : cellule sans code, DATA.UNIT_CODE_REQUIRED ;
+   *  - `fp-brk-dup-a` et `fp-brk-dup-b` : même code sur le même niveau,
+   *    DATA.CODE_DUPLICATE ;
+   *  - `fp-brk-other-level` : même code, mais sur l'autre niveau — il ne
+   *    doit PAS être signalé, la portée de l'unicité étant le niveau.
+   */
+  footprints: [
+    {
+      id: 'fp-brk-nocode',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: 0 },
+          { x_m: 4, y_m: 0 },
+          { x_m: 4, y_m: 3 },
+          { x_m: 0, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-dup-a',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      unit_code: 'C-200',
+      geometry: {
+        vertices: [
+          { x_m: 10, y_m: 0 },
+          { x_m: 14, y_m: 0 },
+          { x_m: 14, y_m: 3 },
+          { x_m: 10, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-dup-b',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      // Même code, casse différente : un lecteur de panneau ne les distingue pas.
+      unit_code: 'c-200',
+      geometry: {
+        vertices: [
+          { x_m: 20, y_m: 0 },
+          { x_m: 24, y_m: 0 },
+          { x_m: 24, y_m: 3 },
+          { x_m: 20, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-other-level',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-r1',
+      kind: 'cell',
+      unit_code: 'C-200',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: 10 },
+          { x_m: 4, y_m: 10 },
+          { x_m: 4, y_m: 13 },
+          { x_m: 0, y_m: 13 },
+        ],
+      },
+    },
+  ],
   volumes: [],
   graph: {
     nodes: [
