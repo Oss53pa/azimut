@@ -155,6 +155,19 @@ export type {
   AttractionWeight,
   VisibilityCone,
 } from './exposure.js';
+export {
+  assessCorrelation, guardMonetaryEstimate,
+  isDeclaredThreshold, isSourcedObservation, MIN_CORRELATION_PAIRS,
+} from './correlation.js';
+export type {
+  CorrelationAssessment,
+  CorrelationMethod,
+  CorrelationStatus,
+  ExposureIndex,
+  MonetaryEstimateHypothesis,
+  PerformanceObservation,
+  PerformanceSourceKind,
+} from './correlation.js';
 export { guardPictogramsVector } from './detect-raster.js';
 export type { PictogramSvg } from './detect-raster.js';
 export {
