@@ -9,7 +9,7 @@ function fp(id: string, vertices: { x_m: number; y_m: number }[]): Footprint {
     org_id: 'org-1',
     level_id: 'lvl-1',
     geometry: { vertices },
-    kind: 'room',
+    kind: 'cell',
   };
 }
 

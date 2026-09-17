@@ -344,7 +344,7 @@ describe('T-2.8 renderFloorPlan', () => {
   it('handles horizontal collinear nodes (zero-extent y) without crashing', () => {
     const lvl = { id: 'lvl-hor', org_id: 'org-test-001', building_id: 'bld-ml', name: 'H', ordinal: 99, elevation_m: 99 };
     const fp = { id: 'fp-hor', org_id: 'org-test-001', level_id: 'lvl-hor',
-      geometry: { vertices: [{ x_m: 0, y_m: 5 }, { x_m: 20, y_m: 5 }, { x_m: 20, y_m: 5 }, { x_m: 0, y_m: 5 }] }, kind: 'room' as const };
+      geometry: { vertices: [{ x_m: 0, y_m: 5 }, { x_m: 20, y_m: 5 }, { x_m: 20, y_m: 5 }, { x_m: 0, y_m: 5 }] }, kind: 'cell' as const };
     const site = { ...refMultilevel, levels: [...refMultilevel.levels, lvl], footprints: [...refMultilevel.footprints, fp],
       graph: { ...refMultilevel.graph, nodes: [...refMultilevel.graph.nodes,
         { id: 'n-h-a', org_id: 'org-test-001', level_id: 'lvl-hor', kind: 'junction' as const, position: { x_m: 0, y_m: 5 }, label: 'A' },

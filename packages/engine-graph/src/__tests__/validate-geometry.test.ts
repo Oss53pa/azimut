@@ -34,7 +34,7 @@ function fp(id: string, verts: [number, number][], level = 'l1'): Footprint {
   return {
     id, org_id: 'org1', level_id: level,
     geometry: { vertices: verts.map(([x, y]) => ({ x_m: x, y_m: y })) },
-    kind: 'room',
+    kind: 'cell',
   };
 }
 const GOOD_FP = fp('fp-good', [[0, 0], [10, 0], [10, 10], [0, 10]]);

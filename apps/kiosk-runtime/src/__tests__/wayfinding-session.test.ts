@@ -140,7 +140,7 @@ describe('computeWayfinding', () => {
       footprints: [{
         id: 'fp1', org_id: 'org1', level_id: 'l1',
         geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 50, y_m: 0 }, { x_m: 50, y_m: 10 }, { x_m: 0, y_m: 10 }] },
-        kind: 'room',
+        kind: 'cell',
       }],
       volumes: [{
         id: 'vol1', org_id: 'org1', footprint_id: 'fp1',

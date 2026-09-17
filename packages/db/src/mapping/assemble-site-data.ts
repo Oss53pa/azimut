@@ -9,6 +9,7 @@
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
 import type {
+  FootprintKind,
   SiteData,
   Organization, Site, Building, Level, Footprint, Volume,
   GraphNode, Edge, VerticalLink, Category, Pictogram,
@@ -186,7 +187,10 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: f.org_id,
     level_id: f.level_id,
     geometry: f.geometry as Footprint['geometry'],
-    kind: f.kind,
+    // La colonne est du texte ; le CHECK de la migration 0019 la restreint aux
+    // cinq natures de N1.2. La restriction de type est donc adossée à une
+    // contrainte de la base, comme pour `node.kind` ou `occupancy_status`.
+    kind: f.kind as FootprintKind,
     // Colonne additive : une ligne antérieure à la migration 0018 la rend
     // nulle, et le champ reste alors absent du modèle plutôt que vide.
     ...(f.unit_code !== null ? { unit_code: f.unit_code } : {}),

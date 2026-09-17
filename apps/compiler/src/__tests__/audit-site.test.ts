@@ -198,7 +198,7 @@ describe('createAuditSiteHandler', () => {
       ...refMinimal,
       footprints: [{
         id: 'fp-degen', org_id: 'org-test-001', level_id: refMinimal.levels[0]?.id ?? 'l1',
-        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }] }, kind: 'room' as const,
+        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }] }, kind: 'cell' as const,
       }],
     };
     const handler = createAuditSiteHandler({ site });

@@ -32,12 +32,17 @@ export type Level = {
 };
 
 /**
- * N1.2 — natures d'empreinte déclarées par le socle.
+ * N1.2 — natures d'empreinte, énuméré fermé.
  *
- * Le type reste ouvert : un import de CAO peut rendre une nature qu'Azimut ne
- * connaît pas, et refuser le chargement du site pour cela ferait perdre la
- * géométrie. La liste sert à nommer les natures connues et à décider ce qu'est
- * une cellule, elle ne restreint pas le champ.
+ * La liste fait foi : une nature hors liste n'est pas représentable. La base
+ * porte la même contrainte par un CHECK (migration 0019), comme pour toute
+ * autre énumération du schéma — `node.kind`, `vertical_link.kind`,
+ * `destination.occupancy_status`. Un test structurel vérifie que les deux
+ * listes coïncident.
+ *
+ * Conséquence assumée pour les imports : une nature étrangère doit être
+ * traduite vers l'une de ces cinq, ou refusée avec un code. Elle ne peut plus
+ * être portée telle quelle jusqu'au modèle, où elle échappait à tout contrôle.
  */
 export const FOOTPRINT_KINDS = [
   'cell',
@@ -47,7 +52,15 @@ export const FOOTPRINT_KINDS = [
   'outdoor',
 ] as const;
 
-export type FootprintKind = string;
+export type FootprintKind = (typeof FOOTPRINT_KINDS)[number];
+
+/**
+ * Restreint une chaîne venue de l'extérieur — base, import, fichier — à une
+ * nature connue. À employer à toute frontière qui reçoit du texte libre.
+ */
+export function isFootprintKind(value: string): value is FootprintKind {
+  return (FOOTPRINT_KINDS as readonly string[]).includes(value);
+}
 
 /** Nature portant un code d'unité obligatoire (règle S3). */
 export const CELL_FOOTPRINT_KIND = 'cell';
