@@ -12,6 +12,11 @@ import { detectDiscrepancies } from '@azimut/core-model';
  * jamais à la main.
  */
 export type SourceDiscrepancyReport = {
+  /**
+   * Affirmations lues. À zéro, le rapport n'a rien contrôlé, ce qui ne veut pas
+   * dire que les sources s'accordent — même raison qu'au rapport du lexique.
+   */
+  readonly checked_claims: number;
   readonly total: number;
   readonly open_count: number;
   readonly discrepancies: readonly Discrepancy[];
@@ -44,6 +49,7 @@ export function auditSourceClaims(
   }
 
   return {
+    checked_claims: claims.length,
     total: discrepancies.length,
     open_count: findings.length,
     discrepancies,

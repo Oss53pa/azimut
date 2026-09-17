@@ -50,3 +50,17 @@ describe('auditSourceClaims (M16)', () => {
       .toBe(JSON.stringify(auditSourceClaims([...NIVEAUX].reverse())));
   });
 });
+
+describe('un rapport vide dit s’il a contrôlé quelque chose', () => {
+  it('distingue « aucune affirmation » de « sources d’accord »', () => {
+    const sansSource = auditSourceClaims([]);
+    const accord = auditSourceClaims([
+      { key: 'parking_gratuit', source: 'Charte', value: 'oui', recorded_on: '2026-01-10' },
+      { key: 'parking_gratuit', source: 'Relevé', value: 'oui', recorded_on: '2026-05-04' },
+    ]);
+    expect(sansSource.total).toBe(0);
+    expect(accord.total).toBe(0);
+    expect(sansSource.checked_claims).toBe(0);
+    expect(accord.checked_claims).toBe(2);
+  });
+});

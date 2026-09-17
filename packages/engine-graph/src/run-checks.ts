@@ -2,13 +2,50 @@ import type {
   SiteData,
   Finding,
   Outcome,
+  LexiconTerm,
+  SiteFact,
+  SourceClaim,
+  DiscrepancyDecision,
 } from '@azimut/core-model';
 import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
+import { auditLexicon } from './audit-lexicon.js';
+import { auditSiteFacts } from './audit-site-facts.js';
+import { auditSourceClaims } from './audit-source-claims.js';
 
 export type CheckReport = {
   readonly checks_run: readonly string[];
+  /**
+   * Contrôles que le paquet de règles rendrait possibles et qui n'ont pas
+   * tourné faute de ce paquet. Remède : lier un paquet au site.
+   */
   readonly checks_skipped: readonly string[];
+  /**
+   * Contrôles qui n'ont pas tourné parce que le site ne déclare rien à leur
+   * opposer : pas de lexique de charte, pas de fait, pas d'affirmation de
+   * source.
+   *
+   * Liste distincte de `checks_skipped`, parce que la cause et le remède
+   * diffèrent : ici il faut saisir une donnée du site, là il faut lier un
+   * paquet de règles. Les confondre enverrait l'utilisateur au mauvais écran.
+   *
+   * Et surtout, un contrôle non exercé ne doit jamais se lire comme un contrôle
+   * passé : sans cette liste, une charte sans lexique produirait « aucune
+   * anomalie » et l'absence de règle passerait pour un satisfecit.
+   */
+  readonly checks_undeclared: readonly string[];
   readonly findings: readonly Finding[];
+};
+
+/**
+ * Ce que le site oppose à ses propres textes. Tout est facultatif : un site qui
+ * n'en déclare rien voit les contrôles correspondants rangés en
+ * `checks_undeclared`, jamais comptés comme réussis.
+ */
+export type SiteVocabulary = {
+  readonly lexicon?: readonly LexiconTerm[];
+  readonly facts?: readonly SiteFact[];
+  readonly claims?: readonly SourceClaim[];
+  readonly decisions?: Readonly<Record<string, DiscrepancyDecision>>;
 };
 
 /**
@@ -157,7 +194,10 @@ function checkAllVacantCategory(site: SiteData): Finding[] {
   return findings;
 }
 
-export function runChecks(site: SiteData): Outcome<CheckReport> {
+export function runChecks(
+  site: SiteData,
+  vocabulary: SiteVocabulary = {},
+): Outcome<CheckReport> {
   const findings: Finding[] = [];
 
   findings.push(...checkDuplicateDisplayName(site));
@@ -165,20 +205,48 @@ export function runChecks(site: SiteData): Outcome<CheckReport> {
   findings.push(...checkAllVacantCategory(site));
   findings.push(...checkNamingCollisions(site));
 
+  const run = [
+    'all_vacant_category',
+    'duplicate_display_name',
+    'incomplete_lang_coverage',
+    'naming_collision',
+  ];
+  const undeclared: string[] = [];
+
+  const lexicon = vocabulary.lexicon ?? [];
+  if (lexicon.length === 0) {
+    undeclared.push('charter_lexicon');
+  } else {
+    findings.push(...auditLexicon(site, lexicon).findings);
+    run.push('charter_lexicon');
+  }
+
+  const facts = vocabulary.facts ?? [];
+  if (facts.length === 0) {
+    undeclared.push('site_facts');
+  } else {
+    findings.push(...auditSiteFacts(site, facts).findings);
+    run.push('site_facts');
+  }
+
+  const claims = vocabulary.claims ?? [];
+  if (claims.length === 0) {
+    undeclared.push('source_discrepancies');
+  } else {
+    findings.push(...auditSourceClaims(claims, vocabulary.decisions).findings);
+    run.push('source_discrepancies');
+  }
+
   return {
     ok: true,
     value: {
-      checks_run: [
-        'all_vacant_category',
-        'duplicate_display_name',
-        'incomplete_lang_coverage',
-        'naming_collision',
-      ],
+      checks_run: run.sort((a, b) => a.localeCompare(b)),
       checks_skipped: [
         'adjacence_chromatique',
         'contraste',
         'lisibilite',
       ],
+      checks_undeclared: undeclared,
       findings,
     },
     warnings: [],

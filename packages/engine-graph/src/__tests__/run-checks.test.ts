@@ -375,3 +375,67 @@ describe('T-2.5 runChecks', () => {
     });
   });
 });
+
+describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
+  const terms = [{ lang: 'fr', term: 'client', severity: 'forbidden' as const }];
+  const facts = [{
+    key: 'parking_gratuit',
+    value: 'oui',
+    source: 'Direction',
+    recorded_on: '2026-03-12',
+    forbidden: [{ lang: 'fr', term: 'paiement' }],
+  }];
+  const claims = [
+    { key: 'niveaux', source: 'Charte', value: '3', recorded_on: '2026-01-10' },
+    { key: 'niveaux', source: 'Plans', value: '2', recorded_on: '2026-05-04' },
+  ];
+
+  it('range les trois contrôles en non exercés quand le site ne déclare rien', () => {
+    const r = runChecks(refMinimal);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.checks_undeclared).toEqual([
+      'charter_lexicon',
+      'site_facts',
+      'source_discrepancies',
+    ]);
+    // Non exercé n'est pas ignoré : la cause et le remède diffèrent.
+    expect(r.value.checks_skipped).not.toContain('charter_lexicon');
+  });
+
+  it('exerce le contrôle du lexique dès qu’un terme est déclaré', () => {
+    const r = runChecks(refMinimal, { lexicon: terms });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.checks_run).toContain('charter_lexicon');
+    expect(r.value.checks_undeclared).not.toContain('charter_lexicon');
+  });
+
+  it('remonte les anomalies des trois audits dans le rapport commun', () => {
+    const site = {
+      ...refMinimal,
+      destination_names: [{
+        id: 'n-1',
+        org_id: 'org-test-001',
+        destination_id: 'd-1',
+        lang: 'fr' as const,
+        value: 'Paiement et service client',
+      }],
+    };
+    const r = runChecks(site, { lexicon: terms, facts, claims });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const codes = r.value.findings.map((f) => f.code);
+    expect(codes).toContain('LAYOUT.LEXICON_FORBIDDEN_TERM');
+    expect(codes).toContain('LAYOUT.FACT_CONTRADICTED');
+    expect(codes).toContain('LAYOUT.SOURCE_DISCREPANCY_OPEN');
+    expect(r.value.checks_undeclared).toEqual([]);
+  });
+
+  it('garde un ordre stable des contrôles exercés', () => {
+    const r = runChecks(refMinimal, { lexicon: terms });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect([...r.value.checks_run]).toEqual([...r.value.checks_run].sort((a, b) => a.localeCompare(b)));
+  });
+});

@@ -96,3 +96,18 @@ describe('auditLexicon (A5.8)', () => {
       .toBe(JSON.stringify(auditLexicon(site, TERMS)));
   });
 });
+
+describe('un rapport vide dit s’il a contrôlé quelque chose', () => {
+  it('distingue « rien à opposer » de « rien à signaler »', () => {
+    const site = named([['n-1', 'fr', 'Service client']]);
+
+    const sansLexique = auditLexicon(site, []);
+    const avecLexique = auditLexicon(named([['n-1', 'fr', 'Accueil visiteurs']]), TERMS);
+
+    // Les deux ne rendent aucune anomalie, et ne disent pas la même chose.
+    expect(sansLexique.findings).toEqual([]);
+    expect(avecLexique.findings).toEqual([]);
+    expect(sansLexique.terms_declared).toBe(0);
+    expect(avecLexique.terms_declared).toBe(TERMS.length);
+  });
+});

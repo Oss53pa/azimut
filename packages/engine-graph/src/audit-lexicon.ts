@@ -22,6 +22,15 @@ import { checkableTexts } from './site-texts.js';
  */
 export type LexiconReport = {
   readonly checked_texts: number;
+  /**
+   * Nombre de termes réellement opposés aux textes, langues confondues.
+   *
+   * Sans ce compte, un rapport à zéro anomalie ne se distingue pas d'un rapport
+   * qui n'a rien contrôlé : une charte sans lexique déclaré produirait
+   * « aucune anomalie » et ferait passer l'absence de règle pour un satisfecit.
+   * Un lecteur, écran ou humain, doit pouvoir dire lequel des deux il lit.
+   */
+  readonly terms_declared: number;
   readonly forbidden_count: number;
   readonly discouraged_count: number;
   readonly findings: readonly Finding[];
@@ -73,6 +82,7 @@ export function auditLexicon(
 
   return {
     checked_texts: texts.length,
+    terms_declared: terms.length,
     forbidden_count: forbidden,
     discouraged_count: discouraged,
     findings,

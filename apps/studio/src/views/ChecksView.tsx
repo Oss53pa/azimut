@@ -14,6 +14,7 @@ type ValidationRun = {
   readonly findings: readonly Finding[];
   readonly checksRun: readonly string[];
   readonly checksSkipped: readonly string[];
+  readonly checksUndeclared: readonly string[];
   /** Horodatage du calcul, fourni par l'écran — jamais lu dans un moteur. */
   readonly ranAt: string;
 };
@@ -34,6 +35,7 @@ function validate(site: SiteData, ranAt: string): ValidationRun {
     ],
     checksRun: checks.ok ? checks.value.checks_run : [],
     checksSkipped: checks.ok ? checks.value.checks_skipped : [],
+    checksUndeclared: checks.ok ? checks.value.checks_undeclared : [],
     ranAt,
   };
 }
@@ -154,7 +156,11 @@ export function ChecksView(): JSX.Element {
           <StateBanner
             severity="valid"
             message={t('validation.clean.message', { count: run.checksRun.length })}
-            hint={t('validation.clean.hint')}
+            hint={
+              run.checksUndeclared.length > 0
+                ? t('validation.clean.hint.partial', { count: run.checksUndeclared.length })
+                : t('validation.clean.hint')
+            }
           />
         </div>
       )}
@@ -166,6 +172,16 @@ export function ChecksView(): JSX.Element {
             code="RULES.PACK_NOT_BOUND"
             message={t('validation.skipped.message', { list: run.checksSkipped.join(', ') })}
             hint={t('validation.skipped.hint')}
+          />
+        </div>
+      )}
+
+      {run.checksUndeclared.length > 0 && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="warning"
+            message={t('validation.undeclared.message', { list: run.checksUndeclared.join(', ') })}
+            hint={t('validation.undeclared.hint')}
           />
         </div>
       )}
