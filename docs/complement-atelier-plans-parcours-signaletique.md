@@ -1306,16 +1306,50 @@ pas la contrainte de réversibilité, qui est la raison d'être de la règle dan
 partie A. Lu seul, « exclusivement » se comprend comme une exigence d'usage,
 là où A3.4 pose une exigence de portabilité. La formulation est à aligner.
 
-### Points non tranchés, à décider avant toute implémentation
+### Point tranché le 17 septembre 2026
 
-1. Ce complément est-il une évolution du produit décrit par les parties A à N,
-   ou la spécification d'un produit distinct qui partage son nom ? Les sections
-   19, 19 bis et le découpage M1 à M17 se lisent plus naturellement comme le
-   second.
-2. Si c'est une évolution : lequel des deux découpages de modules fait foi, et
-   selon quelle transposition du modèle de données ?
-3. Si c'est un produit distinct : sous quel nom, dans quel dépôt, et quelles
-   parties du socle existant lui sont communes ?
+**Le complément est une évolution du produit décrit par les parties A à N**, et
+non la spécification d'un produit distinct. Décision de l'auteure du projet, en
+réponse à la question posée ci-dessous.
 
-Tant que le point 1 n'est pas tranché, aucune tâche d'implémentation issue de ce
-document ne peut être ouverte sans enfreindre A2.2.
+Conséquence immédiate : le vocabulaire et l'architecture des parties A à N
+restent ceux du produit. Les sections 19 et 19 bis, qui redéfinissent un schéma
+et déplacent le calcul lourd, ne s'appliquent pas telles quelles — voir C1 et
+C5, qui restent ouverts. Ce que le complément apporte réellement au produit, ce
+sont des capacités absentes du socle, pas un socle de rechange.
+
+### Points encore ouverts
+
+1. Lequel des deux découpages de modules fait foi ? Les douze modules des
+   parties L et N, ou les dix-sept M1 à M17 ? Sans réponse, les codes se citent
+   avec leur document d'origine, comme la note de collision de CLAUDE.md
+   l'impose.
+2. Les seuils du complément — résidu de calage, contraste, vitesse de marche,
+   distance de rappel — sont-ils d'origine normative, et donc à porter par un
+   paquet de règles (INV-5), ou des paramètres de produit ? Aucun n'est inscrit
+   dans le code tant que la question tient.
+3. P1 — « tout objet porte une source et un statut, une proposition ne s'affiche
+   jamais comme un existant » — n'a aucun appui dans le socle : aucune entité de
+   A5 ne porte ni statut ni source. Les objets du stationnement le portent,
+   ceux du socle non. Généraliser touche A5 en entier.
+4. La grille d'accessibilité (M12) attend les critères WCAG 2.2 et ISO 21542
+   nommés, que le complément dit lui-même ne pas inventer. C'est un paquet de
+   règles qui manque, pas du code.
+
+### Ce qui est implémenté à ce jour
+
+Quatre des sept capacités que le complément ajoute réellement au socle, chacune
+avec ses contrôles et ses tests :
+
+| Capacité | Où |
+| --- | --- |
+| Calage mesuré, affine à six réels et résidus (M1.4) | `core-model/affine-calibration.ts`, écran M2, migration 0018 |
+| Faits du site et mots interdits (M3, QC-05) | `core-model/site-facts.ts`, `engine-graph/audit-site-facts.ts`, migration 0019 |
+| Écarts entre sources (M16) | `core-model/source-claims.ts`, `engine-graph/audit-source-claims.ts`, migration 0020 |
+| Stationnement et refus de l'extrapolation (M2) | `core-model/parking.ts`, `engine-graph/audit-parking.ts`, migration 0021 |
+
+Le contrôle du lexique de charte (A5.8) a été écrit au passage : ses deux codes
+figuraient au catalogue D2 depuis l'origine sans qu'aucun moteur ne les lève.
+
+Restent non commencées : les grands formats imprimés A0 et A1, et le document de
+stratégie (M15).
