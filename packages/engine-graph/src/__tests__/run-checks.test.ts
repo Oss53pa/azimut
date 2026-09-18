@@ -472,3 +472,39 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
     expect(park?.params['missing']).toBe(2);
   });
 });
+
+describe('mode de contrôle : atelier ou livrable', () => {
+  const site = {
+    ...refMultilevel,
+    parking_spaces: refMultilevel.parking_spaces.map((s, i) =>
+      i === 0
+        ? { ...s, provenance: { status: 'proposition' as const, source: 'Détection' } }
+        : s,
+    ),
+  };
+
+  it('tolère une proposition à l’atelier', () => {
+    const r = runChecks(site);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.findings.map(f => f.code)).not.toContain('PARK.PROPOSAL_AS_EXISTING');
+    // Le contrôle P1 n'a pas tourné : il ne figure donc pas aux exercés.
+    expect(r.value.checks_run).not.toContain('parking_publication');
+  });
+
+  it('refuse la même proposition au livrable (P1)', () => {
+    const r = runChecks(site, {}, { mode: 'livrable' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.findings.map(f => f.code)).toContain('PARK.PROPOSAL_AS_EXISTING');
+    expect(r.value.checks_run).toContain('parking_publication');
+  });
+
+  it('un site entièrement existant passe dans les deux modes', () => {
+    const atelier = runChecks(refMultilevel);
+    const livrable = runChecks(refMultilevel, {}, { mode: 'livrable' });
+    expect(atelier.ok && livrable.ok).toBe(true);
+    if (!atelier.ok || !livrable.ok) return;
+    expect(livrable.value.findings.filter(f => f.code.startsWith('PARK.'))).toEqual([]);
+  });
+});

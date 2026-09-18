@@ -84,7 +84,9 @@ export type {
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
 export { runChecks } from './run-checks.js';
-export type { CheckReport } from './run-checks.js';
+export type {
+  CheckReport, SiteVocabulary, CheckMode, CheckOptions,
+} from './run-checks.js';
 export {
   renderFace, renderFaceWithMeasures, destinationListFontSizeMm, faceUsesAccent,
   headerFontSizeMm, checkFaceContentFit,

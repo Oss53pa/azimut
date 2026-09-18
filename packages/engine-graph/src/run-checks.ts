@@ -187,10 +187,30 @@ function checkAllVacantCategory(site: SiteData): Finding[] {
   return findings;
 }
 
+/**
+ * Ce pour quoi les contrôles tournent.
+ *
+ * `atelier` est le travail en cours : une proposition y est un état légitime.
+ * `livrable` est ce qui part à l'impression ou à la publication, et P1 y
+ * devient opposable — une proposition affichée s'y lirait comme un fait.
+ *
+ * La notion n'est pas inventée : QC-21 du complément décrit exactement une
+ * anomalie « signalante, bloquante à l'impression ». Un contrôle dont la
+ * sévérité dépend de la destination du rendu a besoin de connaître cette
+ * destination.
+ */
+export type CheckMode = 'atelier' | 'livrable';
+
+export type CheckOptions = {
+  readonly mode?: CheckMode;
+};
+
 export function runChecks(
   site: SiteData,
   vocabulary: SiteVocabulary = {},
+  options: CheckOptions = {},
 ): Outcome<CheckReport> {
+  const forDeliverable = options.mode === 'livrable';
   const findings: Finding[] = [];
 
   findings.push(...checkDuplicateDisplayName(site));
@@ -230,8 +250,11 @@ export function runChecks(
       parkings: site.parkings,
       spaces: site.parking_spaces,
       uncovered: site.parking_uncovered,
-    }).findings);
+    }, forDeliverable).findings);
     run.push('parking_coverage');
+    // Le contrôle P1 ne tourne qu'en mode livrable, et il se nomme, pour qu'un
+    // rapport d'atelier ne laisse pas croire qu'il a été exercé.
+    if (forDeliverable) run.push('parking_publication');
   }
 
   const claims = vocabulary.claims ?? [];
