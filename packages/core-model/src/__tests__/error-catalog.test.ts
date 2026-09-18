@@ -59,12 +59,12 @@ describe('ERROR_CATALOG', () => {
 
   it('the allowlist holds the base/E17/H domains plus partie I (I6), partie J, tranche M and the atelier complement', () => {
     // Liste épinglée volontairement : un domaine nouveau casse ce test, ce qui
-    // force à le déclarer plutôt qu'à le laisser apparaître. `PARK` vient du
-    // complément atelier (M2, stationnement).
+    // force à le déclarer plutôt qu'à le laisser apparaître. `PARK` et `DOC` viennent du
+    // complément atelier (M2, stationnement ; M15, document de stratégie).
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
         'AD', 'ASSET', 'ASSIST', 'CALIB', 'CHARTER', 'COLOR', 'COST', 'DATA',
-        'EDIT',
+        'DOC', 'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
         'LIBRARY', 'MODULE', 'NET', 'PACKAGE', 'PARK', 'PICTO', 'RENDER',
         'REVIEW', 'RULES',

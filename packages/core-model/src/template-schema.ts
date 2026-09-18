@@ -52,6 +52,13 @@ export const templateSchema = z.object({
   sizing: sizingSchema.default({ mode: 'computed' }),
 });
 
+/**
+ * La liaison D8 : d'où vient une valeur, et laquelle. Exportée pour être
+ * réutilisée hors des gabarits de panneau — le texte lié d'un document de
+ * stratégie (M15) désigne ses valeurs de la même façon, et deux notations pour
+ * la même idée finiraient par diverger.
+ */
+export type Binding = z.infer<typeof bindingSchema>;
 export type TemplateBlock = z.infer<typeof blockSchema>;
 export type TemplateGrid = z.infer<typeof gridSchema>;
 export type TemplateSizing = z.infer<typeof sizingSchema>;

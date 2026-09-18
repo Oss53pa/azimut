@@ -53,6 +53,10 @@ export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
 } from './parking.js';
 export type { VehicleGate } from './site.js';
+export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
+export type {
+  TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,
+} from './bound-text.js';
 export type { SiteVocabulary } from './site-vocabulary.js';
 export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
@@ -80,6 +84,7 @@ export {
   validateTemplate,
 } from './template-schema.js';
 export type {
+  Binding,
   Template,
   TemplateBlock,
   TemplateBlockKind,

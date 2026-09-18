@@ -75,6 +75,10 @@ export const ERROR_CATALOG = {
   'PARK.CAPACITY_EXCEEDED':                 { severity: 'blocking', description: 'Places numérisées au-delà de la capacité annoncée' },
   'PARK.SOURCE_MISSING':                    { severity: 'blocking', description: 'Objet de stationnement sans source' },
   'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de stationnement non existant porté à un livrable' },
+
+  // ── DOC (complément atelier, M15) ─────────────────────────
+  'DOC.BINDING_UNRESOLVED':                 { severity: 'blocking', description: 'Champ lié sans valeur : le paragraphe ne se rend pas' },
+  'DOC.LITERAL_NUMBER':                     { severity: 'warning',  description: 'Nombre écrit en littéral là où un champ lié est attendu' },
   'LAYOUT.CHROMATIC_ADJACENCY':             { severity: 'blocking', description: 'Adjacence chromatique interdite' },
   'LAYOUT.LOGO_BELOW_MIN_WIDTH':            { severity: 'blocking', description: 'Logo sous la largeur minimale' },
   'LAYOUT.ISO_LEVEL_NOT_FOUND':             { severity: 'blocking', description: 'Niveau introuvable pour vue isométrique' },
@@ -274,6 +278,8 @@ export const ANOMALY_DOMAINS = [
   'CALIB', 'NET',
   // Complément atelier (M2) : stationnement.
   'PARK',
+  // Complément atelier (M15) : document de stratégie et texte lié.
+  'DOC',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
   'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;

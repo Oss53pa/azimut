@@ -27,6 +27,8 @@ export { auditSourceClaims } from './audit-source-claims.js';
 export type { SourceDiscrepancyReport } from './audit-source-claims.js';
 export { auditParking } from './audit-parking.js';
 export type { ParkingReport, ParkingInput } from './audit-parking.js';
+export { auditBoundText } from './audit-bound-text.js';
+export type { DocumentTextReport } from './audit-bound-text.js';
 export { reconcile } from './reconciliation.js';
 export type {
   SurveyedSupport,
