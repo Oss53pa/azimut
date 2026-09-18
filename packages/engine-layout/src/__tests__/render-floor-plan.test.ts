@@ -8,6 +8,8 @@ const theme: FloorPlanTheme = {
   background: 'tok-bg',
   footprint_fill: 'tok-fp-fill',
   footprint_stroke: 'tok-fp-stroke',
+  parking_fill: 'tok-park-fill',
+  parking_stroke: 'tok-park-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',
@@ -364,5 +366,65 @@ describe('T-2.8 renderFloorPlan', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.value).toContain('<circle');
+  });
+});
+
+describe('emprise de parking (complément atelier M2)', () => {
+  const parking = (status: 'existant' | 'proposition') => ({
+    id: 'park-1',
+    org_id: 'org1',
+    level_id: 'lvl-ml-rdc',
+    geometry: {
+      vertices: [
+        { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
+        { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
+      ],
+    },
+    name: 'Ouest',
+    free: true,
+    declared_capacity: 0,
+    provenance: { status, source: 'Plan' },
+  });
+
+  it('dessine l’emprise avant les empreintes : le parking est le sol', () => {
+    const site = { ...refMultilevel, parkings: [parking('existant')] };
+    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const park = r.value.indexOf('tok-park-fill');
+    const fp = r.value.indexOf('tok-fp-fill');
+    expect(park).toBeGreaterThan(-1);
+    expect(park).toBeLessThan(fp);
+  });
+
+  it('cadre le plan sur l’emprise, qui déborde du bâti', () => {
+    // Sans le parking dans les bornes, il sortirait du cadre sans un mot.
+    const sans = renderFloorPlan({ ...refMultilevel, parkings: [] }, 'lvl-ml-rdc', defaultOptions);
+    const avec = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
+    expect(sans.ok && avec.ok).toBe(true);
+    if (!sans.ok || !avec.ok) return;
+    expect(avec.value).not.toBe(sans.value);
+  });
+
+  it('trait plein pour un existant, pointillé pour une proposition', () => {
+    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que P1
+    // demande d'une proposition.
+    const existant = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
+    const propose = renderFloorPlan({ ...refMultilevel, parkings: [parking('proposition')] }, 'lvl-ml-rdc', defaultOptions);
+    expect(existant.ok && propose.ok).toBe(true);
+    if (!existant.ok || !propose.ok) return;
+
+    const ligneExistant = /<polygon[^>]*tok-park-stroke[^>]*\/>/.exec(existant.value)?.[0] ?? '';
+    const lignePropose = /<polygon[^>]*tok-park-stroke[^>]*\/>/.exec(propose.value)?.[0] ?? '';
+    expect(ligneExistant).not.toContain('stroke-dasharray');
+    expect(lignePropose).toContain('stroke-dasharray');
+  });
+
+  it('écarte une emprise dégénérée plutôt que de dessiner un trait', () => {
+    const plat = { ...parking('existant'), geometry: { vertices: [{ x_m: 0, y_m: 0 }] } };
+    const r = renderFloorPlan({ ...refMultilevel, parkings: [plat] }, 'lvl-ml-rdc', defaultOptions);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-park-fill');
   });
 });

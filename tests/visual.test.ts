@@ -16,6 +16,8 @@ const floorTheme: FloorPlanTheme = {
   background: '#ffffff',
   footprint_fill: '#f0f0f0',
   footprint_stroke: '#cccccc',
+  parking_fill: '#e8e4dc',
+  parking_stroke: '#b9b2a6',
   edge_stroke: '#999999',
   edge_evacuation_stroke: '#00aa00',
   node_fill: '#4488ff',

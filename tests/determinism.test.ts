@@ -26,6 +26,8 @@ const floorTheme: FloorPlanTheme = {
   background: 'tok-bg',
   footprint_fill: 'tok-fp-fill',
   footprint_stroke: 'tok-fp-stroke',
+  parking_fill: 'tok-park-fill',
+  parking_stroke: 'tok-park-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',

@@ -3,6 +3,7 @@ import type {
   GraphNode,
   Edge,
   Footprint,
+  Parking,
   Destination,
   Point,
   Outcome,
@@ -14,6 +15,9 @@ export type FloorPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
+  /** Complément atelier M2 — emprise de parking, distincte d'un bâtiment. */
+  readonly parking_fill: string;
+  readonly parking_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -35,6 +39,7 @@ export type FloorPlanOptions = {
 
 export type FloorPlanData = {
   readonly footprints: readonly Footprint[];
+  readonly parkings: readonly Parking[];
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly destinations: readonly Destination[];
@@ -51,6 +56,7 @@ function esc(s: string): string {
 function computeBounds(
   footprints: readonly Footprint[],
   nodes: readonly GraphNode[],
+  parkings: readonly Parking[] = [],
 ): { min: Point; max: Point } | null {
   let minX = Infinity;
   let minY = Infinity;
@@ -60,6 +66,18 @@ function computeBounds(
 
   for (const fp of footprints) {
     for (const v of fp.geometry.vertices) {
+      minX = Math.min(minX, v.x_m);
+      minY = Math.min(minY, v.y_m);
+      maxX = Math.max(maxX, v.x_m);
+      maxY = Math.max(maxY, v.y_m);
+      hasPoints = true;
+    }
+  }
+
+  // Une emprise de parking déborde presque toujours du bâti : l'omettre du
+  // cadrage la ferait sortir du plan, silencieusement.
+  for (const park of parkings) {
+    for (const v of park.geometry.vertices) {
       minX = Math.min(minX, v.x_m);
       minY = Math.min(minY, v.y_m);
       maxX = Math.max(maxX, v.x_m);
@@ -151,7 +169,10 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
-  return { footprints, nodes, edges, destinations };
+  const parkings = site.parkings.filter(
+    (p) => p.level_id === levelId,
+  );
+  return { footprints, parkings, nodes, edges, destinations };
 }
 
 export function renderFloorPlan(
@@ -172,7 +193,7 @@ export function renderFloorPlan(
   }
 
   const data = filterLevelData(site, levelId);
-  const bounds = computeBounds(data.footprints, data.nodes);
+  const bounds = computeBounds(data.footprints, data.nodes, data.parkings);
   const warnings: Finding[] = [];
 
   if (!bounds) {
@@ -218,6 +239,33 @@ export function renderFloorPlan(
     `<rect width="100%" height="100%"` +
     ` fill="${esc(options.theme.background)}" />`,
   );
+
+  // Les parkings d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
+  // après recouvrirait une empreinte par une emprise.
+  const sortedParkings = [...data.parkings].sort(
+    (a, b) => a.id.localeCompare(b.id),
+  );
+  for (const park of sortedParkings) {
+    if (park.geometry.vertices.length < 3) continue;
+    const points = park.geometry.vertices
+      .map((v) => {
+        const p = tx(v, t);
+        return `${p.x},${p.y}`;
+      })
+      .join(' ');
+    // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
+    // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
+    // ce qui est exactement ce que P1 demande d'une proposition.
+    const dashed = park.provenance.status !== 'existant';
+    parts.push(
+      `<polygon points="${points}"` +
+      ` fill="${esc(options.theme.parking_fill)}"` +
+      ` stroke="${esc(options.theme.parking_stroke)}"` +
+      ` stroke-width="1"` +
+      (dashed ? ` stroke-dasharray="6 4"` : '') +
+      ` />`,
+    );
+  }
 
   const sortedFootprints = [...data.footprints].sort(
     (a, b) => a.id.localeCompare(b.id),

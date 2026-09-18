@@ -35,6 +35,10 @@ const KIOSK_FLOOR_THEME: FloorPlanTheme = {
   background: themePapier['surface-page'],
   footprint_fill: themePapier['surface-panel'],
   footprint_stroke: themePapier['border-hairline'],
+  // Le parking est du sol, pas du bâti : une surface en creux sous les
+  // empreintes, avec un contour plus affirmé pour que la limite se lise.
+  parking_fill: themePapier['surface-sunken'],
+  parking_stroke: themePapier['border-strong'],
   edge_stroke: themePapier['text-secondary'],
   edge_evacuation_stroke: stateColorsPapier['state-valid'],
   node_fill: themePapier['accent'],
