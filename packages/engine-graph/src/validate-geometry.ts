@@ -71,14 +71,42 @@ function segmentsProperlyIntersect(
 
 // ── Checks ─────────────────────────────────────────────────
 
-function tooFewVerticesFindings(footprints: readonly Footprint[]): Finding[] {
+/**
+ * Tout ce qui porte un polygone en coordonnées métier.
+ *
+ * Les quatre contrôles ci-dessous ne regardaient que les empreintes, parce que
+ * c'était la seule entité polygonale du modèle. L'emprise d'un parking en est
+ * une autre : la laisser hors contrôle acceptait un contour à zéro sommet ou
+ * auto-sécant sans que rien ne le dise.
+ *
+ * `kind` accompagne l'objet pour que l'anomalie désigne ce qu'elle a vu, et non
+ * « footprint » pour tout.
+ */
+type PolygonalObject = {
+  readonly id: string;
+  readonly kind: string;
+  readonly geometry: { readonly vertices: readonly Point[] };
+};
+
+/** Les empreintes et les emprises de parking, dans un ordre stable. */
+function polygonalObjects(
+  footprints: readonly Footprint[],
+  parkings: readonly { readonly id: string; readonly geometry: { readonly vertices: readonly Point[] } }[],
+): readonly PolygonalObject[] {
+  return [
+    ...footprints.map(f => ({ id: f.id, kind: 'footprint', geometry: f.geometry })),
+    ...parkings.map(p => ({ id: p.id, kind: 'parking', geometry: p.geometry })),
+  ];
+}
+
+function tooFewVerticesFindings(objects: readonly PolygonalObject[]): Finding[] {
   const findings: Finding[] = [];
-  for (const fp of footprints) {
+  for (const fp of objects) {
     if (fp.geometry.vertices.length < 3) {
       findings.push({
         code: 'GEOM.POLYGON_TOO_FEW_VERTICES',
         severity: 'blocking',
-        entity: { kind: 'footprint', id: fp.id },
+        entity: { kind: fp.kind, id: fp.id },
         params: { vertex_count: fp.geometry.vertices.length },
         ruleRef: null,
       });
@@ -87,9 +115,9 @@ function tooFewVerticesFindings(footprints: readonly Footprint[]): Finding[] {
   return findings;
 }
 
-function polygonNotClosedFindings(footprints: readonly Footprint[]): Finding[] {
+function polygonNotClosedFindings(objects: readonly PolygonalObject[]): Finding[] {
   const findings: Finding[] = [];
-  for (const fp of footprints) {
+  for (const fp of objects) {
     const verts = fp.geometry.vertices;
     if (verts.length < 3) continue;
     const first = verts[0] as Point;
@@ -100,7 +128,7 @@ function polygonNotClosedFindings(footprints: readonly Footprint[]): Finding[] {
       findings.push({
         code: 'GEOM.POLYGON_NOT_CLOSED',
         severity: 'blocking',
-        entity: { kind: 'footprint', id: fp.id },
+        entity: { kind: fp.kind, id: fp.id },
         params: { distance_m: distance(first, last) },
         ruleRef: null,
       });
@@ -109,16 +137,16 @@ function polygonNotClosedFindings(footprints: readonly Footprint[]): Finding[] {
   return findings;
 }
 
-function polygonDegenerateFindings(footprints: readonly Footprint[]): Finding[] {
+function polygonDegenerateFindings(objects: readonly PolygonalObject[]): Finding[] {
   const findings: Finding[] = [];
-  for (const fp of footprints) {
+  for (const fp of objects) {
     if (fp.geometry.vertices.length < 3) continue;
     const area = Math.abs(signedArea(fp.geometry.vertices));
     if (area < POLYGON_MIN_AREA_M2) {
       findings.push({
         code: 'GEOM.POLYGON_DEGENERATE',
         severity: 'blocking',
-        entity: { kind: 'footprint', id: fp.id },
+        entity: { kind: fp.kind, id: fp.id },
         params: { area_m2: Math.round(area * 1e6) / 1e6 },
         ruleRef: null,
       });
@@ -127,9 +155,9 @@ function polygonDegenerateFindings(footprints: readonly Footprint[]): Finding[] 
   return findings;
 }
 
-function selfIntersectingFindings(footprints: readonly Footprint[]): Finding[] {
+function selfIntersectingFindings(objects: readonly PolygonalObject[]): Finding[] {
   const findings: Finding[] = [];
-  for (const fp of footprints) {
+  for (const fp of objects) {
     const verts = fp.geometry.vertices;
     const n = verts.length;
     if (n < 4) continue; // Triangle cannot self-intersect.
@@ -156,7 +184,7 @@ function selfIntersectingFindings(footprints: readonly Footprint[]): Finding[] {
       findings.push({
         code: 'GEOM.POLYGON_SELF_INTERSECTING',
         severity: 'blocking',
-        entity: { kind: 'footprint', id: fp.id },
+        entity: { kind: fp.kind, id: fp.id },
         params: {},
         ruleRef: null,
       });
@@ -322,12 +350,19 @@ export function validateGeometry(
     a.id.localeCompare(b.id),
   );
 
+  const sortedParkings = [...site.parkings].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  const polygons = polygonalObjects(sortedFootprints, sortedParkings);
+
   const allFindings: Finding[] = [
-    ...tooFewVerticesFindings(sortedFootprints),
-    ...polygonNotClosedFindings(sortedFootprints),
-    ...polygonDegenerateFindings(sortedFootprints),
-    ...selfIntersectingFindings(sortedFootprints),
+    ...tooFewVerticesFindings(polygons),
+    ...polygonNotClosedFindings(polygons),
+    ...polygonDegenerateFindings(polygons),
+    ...selfIntersectingFindings(polygons),
     ...volumeNoHeightFindings(sortedVolumes),
+    // Le recouvrement reste propre aux empreintes : deux parkings mitoyens se
+    // touchent légitimement, et un parking recouvre souvent une empreinte.
     ...footprintsOverlapFindings(sortedFootprints),
   ];
 

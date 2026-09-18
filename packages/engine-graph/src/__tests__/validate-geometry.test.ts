@@ -27,10 +27,10 @@ function siteWith(
     content_blocks: [],
     support_versions: [],
     face_templates: [],
-  parkings: [],
-  parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
+    parkings: [],
+    parking_spaces: [],
+    parking_uncovered: [],
+    vehicle_gates: [],
   };
 }
 
@@ -367,5 +367,31 @@ describe('validateGeometry', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings.some((f) => f.code === 'GEOM.POLYGON_SELF_INTERSECTING')).toBe(true);
+  });
+});
+
+describe('emprise de parking (complément atelier M2)', () => {
+  it('refuse un contour de parking à moins de trois sommets', () => {
+    // Le contrôle ne regardait que les empreintes : une emprise de parking
+    // dégénérée passait sans que rien ne le dise.
+    const site = {
+      ...siteWith([GOOD_FP]),
+      parkings: [{
+        id: 'park-1',
+        org_id: 'org1',
+        level_id: 'l1',
+        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 1, y_m: 0 }] },
+        name: 'Ouest',
+        free: true,
+        declared_capacity: 0,
+        provenance: { status: 'existant' as const, source: 'Plan' },
+      }],
+    };
+    const r = validateGeometry(site);
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    const f = r.findings.find(x => x.code === 'GEOM.POLYGON_TOO_FEW_VERTICES');
+    // L'anomalie désigne un parking, pas une empreinte.
+    expect(f?.entity).toEqual({ kind: 'parking', id: 'park-1' });
   });
 });

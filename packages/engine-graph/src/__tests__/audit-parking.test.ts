@@ -145,3 +145,46 @@ describe('auditParking (M2)', () => {
     expect(report.findings[0]?.params['missing']).toBe(12);
   });
 });
+
+describe('une place retirée ne compte plus', () => {
+  const RETIRE: Provenance = { status: 'retire', source: 'Plan RDC indice 19' };
+
+  it('ne fait pas passer un parking complet pour un parking en dépassement', () => {
+    // 40 annoncées, 40 existantes, 2 retirées. Compter les retirées ferait
+    // 42 et lèverait un dépassement qui n'existe pas.
+    const report = auditParking({
+      parkings: [parking('ouest', 40)],
+      spaces: [...spaces('ouest', 40), ...spaces('ouest-r', 2, RETIRE).map(s => ({
+        ...s, parking_id: 'ouest',
+      }))],
+      uncovered: NONE,
+    });
+    expect(report.findings).toEqual([]);
+  });
+
+  it('voit le trou que deux places retirées laissent', () => {
+    // 40 annoncées, 38 existantes, 2 retirées : il manque bien deux places,
+    // et c'est exactement l'écart que M2 demande de voir.
+    const report = auditParking({
+      parkings: [parking('ouest', 40)],
+      spaces: [...spaces('ouest', 38), ...spaces('ouest-r', 2, RETIRE).map(s => ({
+        ...s, parking_id: 'ouest',
+      }))],
+      uncovered: NONE,
+    });
+    expect(report.findings[0]?.code).toBe('PARK.CAPACITY_UNEXPLAINED');
+    expect(report.findings[0]?.params['missing']).toBe(2);
+  });
+
+  it('compte une proposition : elle est sur le plan, quelqu’un l’a tracée', () => {
+    const proposition: Provenance = { status: 'proposition', source: 'Détection' };
+    const report = auditParking({
+      parkings: [parking('ouest', 2)],
+      spaces: [...spaces('ouest', 1), ...spaces('ouest-p', 1, proposition).map(s => ({
+        ...s, parking_id: 'ouest',
+      }))],
+      uncovered: NONE,
+    });
+    expect(report.findings).toEqual([]);
+  });
+});

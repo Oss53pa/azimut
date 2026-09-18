@@ -1,4 +1,5 @@
 import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimut/core-model';
+import { PUBLISHABLE_STATUSES } from '@azimut/core-model';
 
 /**
  * Ce qu'un document de stratégie peut lier — complément atelier, M15.
@@ -52,7 +53,18 @@ export function buildDocumentBindings(
   const parkings = [...site.parkings].sort((l, r) => l.id.localeCompare(r.id));
   const first = parkings[0];
   if (first !== undefined) {
-    const digitised = site.parking_spaces.filter(s => s.parking_id === first.id).length;
+    // Un document est un livrable : il ne compte que l'existant (P1). Une
+    // proposition non validée s'y afficherait comme un fait, et le nombre de
+    // places d'un parking est précisément le genre de fait qu'on cite ensuite
+    // sans le revérifier.
+    //
+    // Ce compte diffère donc de celui de `auditParking`, qui mesure la
+    // numérisation et retient aussi les propositions. Deux questions, deux
+    // comptes : « ce qui a été tracé » n'est pas « ce que le site a ».
+    const digitised = site.parking_spaces.filter(
+      s => s.parking_id === first.id
+        && PUBLISHABLE_STATUSES.includes(s.provenance.status),
+    ).length;
     values['parking'] = {
       name: first.name,
       capacity: String(first.declared_capacity),

@@ -27,7 +27,9 @@ CREATE TABLE azimut.parking (
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT parking_status_known CHECK (status IN ('existant','proposition','a_verifier','retire')),
   CONSTRAINT parking_source_not_blank CHECK (btrim(source) <> ''),
-  CONSTRAINT parking_capacity_non_negative CHECK (declared_capacity >= 0)
+  CONSTRAINT parking_capacity_non_negative CHECK (declared_capacity >= 0),
+  -- Un nom vide se rendrait dans un document lié : « Le  compte 89 places ».
+  CONSTRAINT parking_name_not_blank CHECK (btrim(name) <> '')
 );
 CREATE INDEX idx_parking_org ON azimut.parking(org_id);
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.parking
@@ -39,7 +41,10 @@ CREATE TABLE azimut.parking_space (
   parking_id uuid NOT NULL REFERENCES azimut.parking(id) ON DELETE CASCADE,
   kind text NOT NULL,
   row_label text NOT NULL,
-  geom jsonb NOT NULL,
+  -- Tracé de la place, facultatif : M2 la décrit « segment ou polygone » et le
+  -- modèle ne porte que le polygone. Non nul tant que la forme n'est pas
+  -- tranchée aurait rendu toute insertion impossible.
+  geometry jsonb,
   status text NOT NULL,
   source text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),

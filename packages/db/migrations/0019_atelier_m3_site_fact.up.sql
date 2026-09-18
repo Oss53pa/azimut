@@ -25,7 +25,9 @@ CREATE TABLE azimut.site_fact (
   -- Une clé de fait est unique par site : deux valeurs pour « parking gratuit »
   -- ne se départagent pas, et c'est un écart entre sources (M16), pas un fait.
   CONSTRAINT site_fact_key_unique UNIQUE (site_id, key),
-  CONSTRAINT site_fact_source_not_blank CHECK (btrim(source) <> '')
+  CONSTRAINT site_fact_source_not_blank CHECK (btrim(source) <> ''),
+  -- Une valeur vide se rendrait telle quelle dans un document lié (M15).
+  CONSTRAINT site_fact_value_not_blank CHECK (btrim(value) <> '')
 );
 CREATE INDEX idx_site_fact_org ON azimut.site_fact(org_id);
 

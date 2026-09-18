@@ -219,6 +219,7 @@ export type ParkingSpaceRow = {
   readonly parking_id: string;
   readonly kind: string;
   readonly row_label: string;
+  readonly geometry: unknown;
   readonly status: string;
   readonly source: string;
 };

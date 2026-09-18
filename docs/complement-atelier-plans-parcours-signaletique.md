@@ -1338,7 +1338,7 @@ sont des capacités absentes du socle, pas un socle de rechange.
 
 ### Ce qui est implémenté à ce jour
 
-Quatre des sept capacités que le complément ajoute réellement au socle, chacune
+Cinq des sept capacités que le complément ajoute réellement au socle, chacune
 avec ses contrôles et ses tests :
 
 | Capacité | Où |
@@ -1347,9 +1347,17 @@ avec ses contrôles et ses tests :
 | Faits du site et mots interdits (M3, QC-05) | `core-model/site-facts.ts`, `engine-graph/audit-site-facts.ts`, migration 0019 |
 | Écarts entre sources (M16) | `core-model/source-claims.ts`, `engine-graph/audit-source-claims.ts`, migration 0020 |
 | Stationnement et refus de l'extrapolation (M2) | `core-model/parking.ts`, `engine-graph/audit-parking.ts`, migration 0021 |
+| Texte lié d'un document (M15) | `core-model/bound-text.ts`, `engine-graph/audit-bound-text.ts`, `document-bindings.ts` |
 
 Le contrôle du lexique de charte (A5.8) a été écrit au passage : ses deux codes
 figuraient au catalogue D2 depuis l'origine sans qu'aucun moteur ne les lève.
 
-Restent non commencées : les grands formats imprimés A0 et A1, et le document de
-stratégie (M15).
+De M15, seul le mécanisme des champs liés est fait — celui sans lequel le reste
+ne vaudrait rien, puisqu'il est ce qui empêche le document de dupliquer une
+donnée. La structure du document, les objets de cartographie, l'ingestion de la
+plateforme de marque et la publication restent à faire.
+
+Reste entièrement non commencé : les grands formats imprimés A0 et A1.
+
+Les deux butent sur le même point : A3.1 réserve encore le choix de la
+bibliothèque de génération PDF à la tâche T-0.9, qui n'est pas tranchée.

@@ -68,3 +68,33 @@ describe('buildDocumentBindings (M15)', () => {
       .toBe(JSON.stringify(buildDocumentBindings(refMultilevel, [PARKING_GRATUIT])));
   });
 });
+
+describe('ce qu’un document a le droit de publier', () => {
+  it('ne compte que les places existantes, pas les propositions', () => {
+    // Le compte du document diffère de celui de l'audit, et c'est voulu :
+    // « ce qui a été tracé » n'est pas « ce que le site a » (P1).
+    const site = {
+      ...refMultilevel,
+      parking_spaces: refMultilevel.parking_spaces.map((s, i) =>
+        i === 0
+          ? { ...s, provenance: { status: 'proposition' as const, source: 'Détection' } }
+          : s,
+      ),
+    };
+    const { values } = buildDocumentBindings(site);
+    expect(values['parking']?.['digitised_spaces']).toBe('3');
+  });
+
+  it('ne compte pas une place retirée', () => {
+    const site = {
+      ...refMultilevel,
+      parking_spaces: refMultilevel.parking_spaces.map((s, i) =>
+        i === 0
+          ? { ...s, provenance: { status: 'retire' as const, source: 'Plan indice 19' } }
+          : s,
+      ),
+    };
+    const { values } = buildDocumentBindings(site);
+    expect(values['parking']?.['digitised_spaces']).toBe('3');
+  });
+});

@@ -17,7 +17,7 @@ import type {
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
   PictogramRegistry, SupportVersionState, DimensionsSource,
   Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea, VehicleGate,
-  ObjectStatus, Point,
+  ObjectStatus, Point, Polygon,
 } from '@azimut/core-model';
 import type {
   SiteRowSet, TimestampValue,
@@ -323,6 +323,11 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     kind: toSpaceKind(s.kind),
     row: s.row_label,
     provenance: { status: toObjectStatus(s.status), source: s.source },
+    // Colonne facultative : absente du modèle plutôt que présente et vide,
+    // comme les autres champs optionnels de ce module.
+    ...(s.geometry === null || s.geometry === undefined
+      ? {}
+      : { geometry: s.geometry as Polygon }),
   }));
 
   const parkingUncovered: UncoveredArea[] = rows.parking_uncovered.map(a => ({

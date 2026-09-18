@@ -237,7 +237,7 @@ export const parkingSpace = azimut.table('parking_space', {
   parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   row_label: text('row_label').notNull(),
-  geom: jsonb('geom').notNull(),
+  geometry: jsonb('geometry'),
   status: text('status').notNull(),
   source: text('source').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

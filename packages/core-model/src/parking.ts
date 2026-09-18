@@ -27,6 +27,24 @@ export type ObjectStatus = 'existant' | 'proposition' | 'a_verifier' | 'retire';
 /** Statuts qu'un livrable a le droit de montrer comme un fait. */
 export const PUBLISHABLE_STATUSES: readonly ObjectStatus[] = ['existant'];
 
+/**
+ * Un objet retiré ne compte plus, quoi qu'on lui demande.
+ *
+ * Distinct de `PUBLISHABLE_STATUSES`, et la nuance porte. Deux questions
+ * différentes se posent au même jeu de places :
+ *
+ * - « le plan a-t-il été numérisé ? » compte tout ce qui a été tracé, y compris
+ *   une proposition non validée : elle est sur le plan, quelqu'un l'a vue ;
+ * - « combien de places ce parking a-t-il ? », posée par un livrable, ne compte
+ *   que l'existant, parce que publier une proposition la transforme en fait
+ *   (P1).
+ *
+ * Seul le retiré tombe des deux côtés.
+ */
+export function countsAsDigitised(status: ObjectStatus): boolean {
+  return status !== 'retire';
+}
+
 export type Provenance = {
   readonly status: ObjectStatus;
   /** Le plan, le relevé ou la décision qui fonde l'objet. Jamais vide (P1). */
@@ -39,6 +57,16 @@ export type ParkingSpace = {
   readonly id: string;
   readonly org_id: string;
   readonly parking_id: string;
+  /**
+   * Tracé de la place sur le plan source, quand il est relevé.
+   *
+   * Facultatif, et la raison est une question ouverte : M2 décrit une place
+   * comme « segment ou polygone », et le modèle ne porte que `Polygon`. Un
+   * emplacement marqué d'un seul trait n'est pas un polygone, et le forcer à
+   * l'être inventerait une géométrie que le plan ne montre pas. Tant que la
+   * forme n'est pas tranchée, la place peut exister sans tracé.
+   */
+  readonly geometry?: Polygon;
   readonly kind: ParkingSpaceKind;
   /** Rangée ou travée, telle qu'elle est repérée sur le plan source. */
   readonly row: string;

@@ -1,7 +1,7 @@
 import type {
   Finding, Parking, ParkingSpace, Provenance, UncoveredArea,
 } from '@azimut/core-model';
-import { PUBLISHABLE_STATUSES } from '@azimut/core-model';
+import { PUBLISHABLE_STATUSES, countsAsDigitised } from '@azimut/core-model';
 
 /**
  * Contrôle du stationnement — complément atelier, M2.
@@ -62,8 +62,13 @@ export function auditParking(
   const parkings = [...input.parkings].sort((l, r) => l.id.localeCompare(r.id));
   const spaces = [...input.spaces].sort((l, r) => l.id.localeCompare(r.id));
 
+  // Une place retirée ne compte pas : la compter ferait passer un parking
+  // amputé pour complet, et pire, un parking où deux places ont été retirées
+  // pour un parking en dépassement. C'est exactement l'écart que M2 demande de
+  // voir, inversé par une ligne d'historique.
   const spacesByParking = new Map<string, number>();
   for (const space of spaces) {
+    if (!countsAsDigitised(space.provenance.status)) continue;
     spacesByParking.set(space.parking_id, (spacesByParking.get(space.parking_id) ?? 0) + 1);
   }
   const uncoveredParkings = new Set(input.uncovered.map((area) => area.parking_id));
