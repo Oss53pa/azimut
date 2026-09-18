@@ -77,6 +77,7 @@ export const ERROR_CATALOG = {
   'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de stationnement non existant porté à un livrable' },
 
   // ── DOC (complément atelier, M15) ─────────────────────────
+  'DOC.BINDING_UNKNOWN':                    { severity: 'blocking', description: 'Champ lié que le modèle n’offre pas : faute du document' },
   'DOC.BINDING_UNRESOLVED':                 { severity: 'blocking', description: 'Champ lié sans valeur : le paragraphe ne se rend pas' },
   'DOC.LITERAL_NUMBER':                     { severity: 'warning',  description: 'Nombre écrit en littéral là où un champ lié est attendu' },
   'LAYOUT.CHROMATIC_ADJACENCY':             { severity: 'blocking', description: 'Adjacence chromatique interdite' },

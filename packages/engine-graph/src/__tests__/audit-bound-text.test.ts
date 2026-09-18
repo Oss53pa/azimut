@@ -60,3 +60,21 @@ describe('auditBoundText (M15)', () => {
       .toBe(JSON.stringify(auditBoundText([RECOPIE, LIE], VALEURS)));
   });
 });
+
+describe('deux causes, deux codes', () => {
+  const CATALOGUE = { parking: ['capacity'] };
+
+  it('accuse le document quand le champ n’existe pas', () => {
+    const faute: BoundParagraph = {
+      id: 'p',
+      segments: [{ kind: 'bound', binding: { source: 'parking', field: 'capacite' } }],
+    };
+    const r = auditBoundText([faute], { parking: { capacity: '89' } }, CATALOGUE);
+    expect(r.findings[0]?.code).toBe('DOC.BINDING_UNKNOWN');
+  });
+
+  it('accuse la donnée quand le champ existe et reste vide', () => {
+    const r = auditBoundText([LIE], { parking: {} }, CATALOGUE);
+    expect(r.findings[0]?.code).toBe('DOC.BINDING_UNRESOLVED');
+  });
+});

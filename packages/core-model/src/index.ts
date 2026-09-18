@@ -56,6 +56,7 @@ export type { VehicleGate } from './site.js';
 export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
 export type {
   TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,
+  BindingCatalogue, MissingBinding,
 } from './bound-text.js';
 export type { SiteVocabulary } from './site-vocabulary.js';
 export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';

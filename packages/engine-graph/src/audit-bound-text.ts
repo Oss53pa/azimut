@@ -1,8 +1,15 @@
-import type { BindingValues, BoundParagraph, Finding } from '@azimut/core-model';
+import type {
+  BindingCatalogue, BindingValues, BoundParagraph, Finding,
+} from '@azimut/core-model';
 import { literalNumbers, resolveBoundParagraph } from '@azimut/core-model';
 
 /**
  * Contrôle du texte lié d'un document — complément atelier, M15.
+ *
+ * Trois anomalies. La liaison qui désigne un champ inexistant est une faute du
+ * document ; celle qui désigne un champ vide est une donnée qui manque ; le
+ * nombre écrit à la main est une valeur recopiée. Les deux premières bloquent,
+ * la troisième avertit.
  *
  * Deux anomalies de nature opposée. La première dit qu'une liaison n'a pas de
  * valeur : le paragraphe ne se rend pas, c'est bloquant. La seconde dit qu'un
@@ -22,23 +29,32 @@ export type DocumentTextReport = {
 export function auditBoundText(
   paragraphs: readonly BoundParagraph[],
   values: BindingValues,
+  catalogue?: BindingCatalogue,
 ): DocumentTextReport {
   const ordered = [...paragraphs].sort((l, r) => l.id.localeCompare(r.id));
   const findings: Finding[] = [];
   const rendered: { id: string; text: string }[] = [];
 
   for (const paragraph of ordered) {
-    const result = resolveBoundParagraph(paragraph, values);
+    const result = resolveBoundParagraph(paragraph, values, catalogue);
 
     if (result.ok) {
       rendered.push({ id: result.id, text: result.text });
     } else {
-      for (const binding of result.missing) {
+      for (const missing of result.missing) {
         findings.push({
-          code: 'DOC.BINDING_UNRESOLVED',
+          // Deux causes, deux gestes : corriger le document, ou saisir la
+          // donnée. Un seul code enverrait la moitié des lecteurs au mauvais
+          // endroit.
+          code: missing.cause === 'unknown'
+            ? 'DOC.BINDING_UNKNOWN'
+            : 'DOC.BINDING_UNRESOLVED',
           severity: 'blocking',
           entity: { kind: 'paragraph', id: paragraph.id },
-          params: { source: binding.source, field: binding.field },
+          params: {
+            source: missing.binding.source,
+            field: missing.binding.field,
+          },
           ruleRef: 'atelier-M15',
         });
       }

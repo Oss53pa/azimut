@@ -31,12 +31,45 @@ export type BoundParagraph = {
 /** Les valeurs disponibles au rendu, par source puis par champ. */
 export type BindingValues = Readonly<Record<string, Readonly<Record<string, string>>>>;
 
+/**
+ * Ce que chaque source sait offrir, qu'elle ait une valeur ou non.
+ *
+ * Sans ce catalogue, une liaison vers `parking.capacite` — orthographiée à la
+ * française alors que le champ est `capacity` — et une liaison vers
+ * `parking.capacity` d'un site qui n'a pas de parking se ressemblent
+ * exactement : dans les deux cas la recherche ne rend rien.
+ *
+ * Elles n'appellent pourtant pas le même geste. La première se corrige dans le
+ * document, la seconde se comble dans la donnée. Les confondre enverrait le
+ * rédacteur relire sa phrase alors qu'il faut numériser un parking, ou
+ * l'inverse.
+ */
+export type BindingCatalogue = Readonly<Record<string, readonly string[]>>;
+
+/** Pourquoi une liaison n'a pas rendu de valeur. */
+export type MissingBinding = {
+  readonly binding: Binding;
+  /**
+   * `unknown` : ni la source ni le champ ne figurent au catalogue — le document
+   * désigne quelque chose qui n'existe pas. `empty` : le champ existe et le site
+   * n'a rien à y mettre.
+   */
+  readonly cause: 'unknown' | 'empty';
+};
+
 export type ResolvedParagraph =
   | { readonly ok: true; readonly id: string; readonly text: string }
-  | { readonly ok: false; readonly id: string; readonly missing: readonly Binding[] };
+  | { readonly ok: false; readonly id: string; readonly missing: readonly MissingBinding[] };
 
 function lookup(values: BindingValues, binding: Binding): string | undefined {
   return values[binding.source]?.[binding.field];
+}
+
+function isDeclared(catalogue: BindingCatalogue | undefined, binding: Binding): boolean {
+  // Sans catalogue, on ne sait pas : tout manque est alors réputé une absence de
+  // valeur, ce qui est le diagnostic le moins accusateur pour le document.
+  if (catalogue === undefined) return true;
+  return catalogue[binding.source]?.includes(binding.field) ?? false;
 }
 
 /**
@@ -54,8 +87,9 @@ function lookup(values: BindingValues, binding: Binding): string | undefined {
 export function resolveBoundParagraph(
   paragraph: BoundParagraph,
   values: BindingValues,
+  catalogue?: BindingCatalogue,
 ): ResolvedParagraph {
-  const missing: Binding[] = [];
+  const missing: MissingBinding[] = [];
   let text = '';
 
   for (const segment of paragraph.segments) {
@@ -64,8 +98,14 @@ export function resolveBoundParagraph(
       continue;
     }
     const value = lookup(values, segment.binding);
-    if (value === undefined) missing.push(segment.binding);
-    else text += value;
+    if (value === undefined) {
+      missing.push({
+        binding: segment.binding,
+        cause: isDeclared(catalogue, segment.binding) ? 'empty' : 'unknown',
+      });
+    } else {
+      text += value;
+    }
   }
 
   return missing.length > 0

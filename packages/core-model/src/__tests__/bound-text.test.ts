@@ -49,7 +49,9 @@ describe('resolveBoundParagraph (M15)', () => {
     });
     expect(r.ok).toBe(false);
     if (r.ok) return;
-    expect(r.missing).toEqual([{ source: 'parking', field: 'capacity' }]);
+    expect(r.missing).toEqual([
+      { binding: { source: 'parking', field: 'capacity' }, cause: 'empty' },
+    ]);
   });
 
   it('nomme toutes les liaisons manquantes, pas seulement la première', () => {
@@ -59,9 +61,40 @@ describe('resolveBoundParagraph (M15)', () => {
     expect(r.missing).toHaveLength(3);
   });
 
-  it('distingue une source absente d’un champ absent', () => {
-    const sansSource = resolveBoundParagraph(STATIONNEMENT, { parking: {}, site_fact: {} });
-    expect(sansSource.ok).toBe(false);
+  it('sans catalogue, tout manque est réputé une absence de valeur', () => {
+    // Le diagnostic le moins accusateur pour le document : on ne sait pas si le
+    // champ existe, on ne l'accuse donc pas de ne pas exister.
+    const r = resolveBoundParagraph(STATIONNEMENT, { parking: {}, site_fact: {} });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.missing.every(m => m.cause === 'empty')).toBe(true);
+  });
+
+  it('avec catalogue, distingue un champ inexistant d’un champ vide', () => {
+    const faute: BoundParagraph = {
+      id: 'p',
+      segments: [
+        { kind: 'bound', binding: { source: 'parking', field: 'capacite' } },
+        { kind: 'bound', binding: { source: 'parking', field: 'capacity' } },
+      ],
+    };
+    const r = resolveBoundParagraph(faute, { parking: {} }, { parking: ['capacity'] });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    // « capacite » n'existe pas : faute du document. « capacity » existe et le
+    // site n'a rien à y mettre : donnée à saisir.
+    expect(r.missing.map(m => m.cause)).toEqual(['unknown', 'empty']);
+  });
+
+  it('une source entière hors catalogue est une faute du document', () => {
+    const r = resolveBoundParagraph(
+      { id: 'p', segments: [{ kind: 'bound', binding: { source: 'inventee', field: 'x' } }] },
+      {},
+      { parking: ['capacity'] },
+    );
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.missing[0]?.cause).toBe('unknown');
   });
 
   it('rend une valeur vide comme une valeur, pas comme un manque', () => {
