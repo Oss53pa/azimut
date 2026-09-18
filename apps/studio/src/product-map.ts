@@ -96,7 +96,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     entry: 'advertising',
     screens: [],
     engine: 'complete',
-    source: 'studio/domain/ad-planning',
+    source: 'studio/domain/ad-planning · ad-creative-intake · rules/ad-rules',
   },
   {
     number: '06',

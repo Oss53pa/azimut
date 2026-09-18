@@ -10,6 +10,10 @@
  *
  * This runs client-side for preview, but authoritative sanitization
  * happens server-side in an isolated environment (E14.1).
+ *
+ * Vit dans `domain/` et non dans `editor/` : l'assainissement n'est pas une
+ * affaire d'éditeur. Le module 05 le fait passer sur les visuels reçus d'un
+ * annonceur (R5), et l'éditeur le fera passer sur les actifs importés.
  */
 
 import type { Finding } from '@azimut/core-model';
