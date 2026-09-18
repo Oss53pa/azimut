@@ -10,7 +10,9 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg } from '@azimut/core-model';
+import {
+  roundSvg, countsAsDigitised, PUBLISHABLE_STATUSES,
+} from '@azimut/core-model';
 
 export type FloorPlanTheme = {
   readonly background: string;
@@ -59,9 +61,8 @@ function esc(s: string): string {
 }
 
 function computeBounds(
-  footprints: readonly Footprint[],
+  outlines: readonly (readonly Point[])[],
   nodes: readonly GraphNode[],
-  parkings: readonly Parking[] = [],
 ): { min: Point; max: Point } | null {
   let minX = Infinity;
   let minY = Infinity;
@@ -69,20 +70,13 @@ function computeBounds(
   let maxY = -Infinity;
   let hasPoints = false;
 
-  for (const fp of footprints) {
-    for (const v of fp.geometry.vertices) {
-      minX = Math.min(minX, v.x_m);
-      minY = Math.min(minY, v.y_m);
-      maxX = Math.max(maxX, v.x_m);
-      maxY = Math.max(maxY, v.y_m);
-      hasPoints = true;
-    }
-  }
-
-  // Une emprise de parking déborde presque toujours du bâti : l'omettre du
-  // cadrage la ferait sortir du plan, silencieusement.
-  for (const park of parkings) {
-    for (const v of park.geometry.vertices) {
+  // Tout ce qui se dessine se cadre. Une emprise de parking déborde presque
+  // toujours du bâti, et une zone non couverte peut border la page : les
+  // omettre du cadrage les ferait sortir du plan, silencieusement. La règle
+  // tient parce qu'il n'y a plus qu'une liste, et non une boucle par famille
+  // qu'on oublierait d'allonger.
+  for (const outline of outlines) {
+    for (const v of outline) {
       minX = Math.min(minX, v.x_m);
       minY = Math.min(minY, v.y_m);
       maxX = Math.max(maxX, v.x_m);
@@ -174,8 +168,12 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
+  // Un parking retiré sort du plan, parce qu'il sort des livrables (P1) : le
+  // modèle le garde en base pour l'historique, pas pour l'imprimer. Le dessiner
+  // en pointillé le rendrait indiscernable d'une proposition, qui est l'inverse
+  // — quelque chose qui n'existe pas encore, et non qui n'existe plus.
   const parkings = site.parkings.filter(
-    (p) => p.level_id === levelId,
+    (p) => p.level_id === levelId && countsAsDigitised(p.provenance.status),
   );
   const parkingIds = new Set(parkings.map((p) => p.id));
   const uncovered = site.parking_uncovered.filter(
@@ -202,7 +200,12 @@ export function renderFloorPlan(
   }
 
   const data = filterLevelData(site, levelId);
-  const bounds = computeBounds(data.footprints, data.nodes, data.parkings);
+  const outlines: (readonly Point[])[] = [
+    ...data.footprints.map((f) => f.geometry.vertices),
+    ...data.parkings.map((p) => p.geometry.vertices),
+    ...data.uncovered.flatMap((a) => (a.geometry ? [a.geometry.vertices] : [])),
+  ];
+  const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
 
   if (!bounds) {
@@ -265,7 +268,7 @@ export function renderFloorPlan(
     // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
     // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
     // ce qui est exactement ce que P1 demande d'une proposition.
-    const dashed = park.provenance.status !== 'existant';
+    const dashed = !PUBLISHABLE_STATUSES.includes(park.provenance.status);
     parts.push(
       `<polygon points="${points}"` +
       ` fill="${esc(options.theme.parking_fill)}"` +

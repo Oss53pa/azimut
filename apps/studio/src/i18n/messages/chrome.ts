@@ -29,6 +29,9 @@ export const CHROME_FR = {
   'header.building.fallback': 'Site',
   'header.publish.ready': 'Aucune anomalie bloquante ouverte.',
   'header.publish.blocked': 'Publication refusée : {count} anomalie(s) bloquante(s) ouverte(s).',
+  'header.publish.unreadable': 'Publication refusée : le vocabulaire du site n’a pas pu être lu ({code}). Un registre illisible n’est pas un registre vide.',
+  'header.publish.loading': 'Publication en attente : le vocabulaire du site est en cours de lecture.',
+  'header.publish.unchecked': '{count} contrôle(s) n’ont pas pu être exercés, faute de paquet de règles.',
   'header.action.openaudit': "Ouvrir l'audit",
   'header.action.publish': 'Publier',
 
@@ -60,6 +63,9 @@ export const CHROME_EN: Readonly<Record<keyof typeof CHROME_FR, string>> = {
   'header.building.fallback': 'Site',
   'header.publish.ready': 'No open blocking anomaly.',
   'header.publish.blocked': 'Publishing refused: {count} open blocking anomaly(ies).',
+  'header.publish.unreadable': 'Publishing refused: the site vocabulary could not be read ({code}). An unreadable registry is not an empty one.',
+  'header.publish.loading': 'Publishing on hold: the site vocabulary is still loading.',
+  'header.publish.unchecked': '{count} check(s) could not be run, for want of a rules pack.',
   'header.action.openaudit': 'Open audit',
   'header.action.publish': 'Publish',
 

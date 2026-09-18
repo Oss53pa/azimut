@@ -1,8 +1,8 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteVocabulary } from '../context/useSiteVocabulary.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
-import type { Finding } from '@azimut/core-model';
+import { evaluatePublishGate } from '../publish-gate.js';
 import type { ViewId } from '../views.js';
 import { SPACE, TEXT, BUTTON_STYLE, PRIMARY_BUTTON_STYLE, severityColor } from './ui/index.js';
 
@@ -28,10 +28,6 @@ const SEPARATOR_STYLE: React.CSSProperties = {
   flexShrink: 0,
 };
 
-function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
-  return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
-}
-
 /**
  * Barre d'en-tête.
  *
@@ -42,19 +38,26 @@ function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Find
  */
 export function HeaderBar({ onNavigate }: HeaderBarProps): JSX.Element {
   const site = useSiteData();
+  const vocabulary = useSiteVocabulary();
   const { t, lang, setLang } = useI18n();
 
-  const blocking = useMemo(() => {
-    const checks = runChecks(site);
-    return [
-      ...(checks.ok ? checks.value.findings : checks.findings),
-      ...findingsOf(validateGraph(site)),
-      ...findingsOf(validateGeometry(site)),
-      ...findingsOf(validateDirectory(site)),
-    ].filter(f => f.severity === 'blocking');
-  }, [site]);
+  const gate = useMemo(
+    () => evaluatePublishGate(site, vocabulary),
+    [site, vocabulary],
+  );
 
-  const publishable = blocking.length === 0;
+  const blocking = gate.blocking;
+  const publishable = gate.publishable;
+
+  const publishTitle = gate.vocabularyRefusal === 'failed'
+    ? t('header.publish.unreadable', { code: vocabulary.errorCode ?? '—' })
+    : gate.vocabularyRefusal === 'loading'
+      ? t('header.publish.loading')
+      : blocking.length > 0
+        ? t('header.publish.blocked', { count: blocking.length })
+        : gate.unchecked.length > 0
+          ? `${t('header.publish.ready')} ${t('header.publish.unchecked', { count: gate.unchecked.length })}`
+          : t('header.publish.ready');
   const buildingName = site.buildings[0]?.name ?? t('header.building.fallback');
 
   return (
@@ -103,9 +106,7 @@ export function HeaderBar({ onNavigate }: HeaderBarProps): JSX.Element {
           type="button"
           disabled={!publishable}
           onClick={() => { onNavigate('proofs'); }}
-          title={publishable
-            ? t('header.publish.ready')
-            : t('header.publish.blocked', { count: blocking.length })}
+          title={publishTitle}
           style={{
             ...PRIMARY_BUTTON_STYLE,
             opacity: publishable ? 1 : 0.45,

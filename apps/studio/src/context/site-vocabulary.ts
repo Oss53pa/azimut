@@ -25,8 +25,8 @@ export type VocabularyState = {
  *
  * Un site se charge et se dessine sans lexique ni fait ; seuls les contrôles de
  * vocabulaire en ont besoin. Les mêler obligerait chaque écran de carte à
- * porter une donnée qu'il n'emploie pas, et chaque construction de `SiteData` —
- * il y en a une quinzaine au dépôt — à la fournir.
+ * porter une donnée qu'il n'emploie pas, et chaque construction de `SiteData`
+ * à la fournir.
  */
 export const EMPTY_VOCABULARY_STATE: VocabularyState = {
   vocabulary: EMPTY_VOCABULARY,
