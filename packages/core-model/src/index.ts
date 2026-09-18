@@ -42,6 +42,7 @@ export {
   ANGLE_EQUALITY_DEG,
   EDGE_MIN_LENGTH_M,
   POLYGON_MIN_AREA_M2,
+  SHARE_SUM_TOLERANCE,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
