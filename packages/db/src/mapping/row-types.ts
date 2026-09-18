@@ -228,6 +228,7 @@ export type ParkingUncoveredAreaRow = {
   readonly id: string;
   readonly org_id: string;
   readonly parking_id: string;
+  readonly geometry: unknown;
   readonly reason: string;
 };
 

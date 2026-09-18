@@ -10,6 +10,8 @@ const theme: FloorPlanTheme = {
   footprint_stroke: 'tok-fp-stroke',
   parking_fill: 'tok-park-fill',
   parking_stroke: 'tok-park-stroke',
+  uncovered_fill: 'tok-unc-fill',
+  uncovered_stroke: 'tok-unc-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',
@@ -426,5 +428,83 @@ describe('emprise de parking (complément atelier M2)', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value).not.toContain('tok-park-fill');
+  });
+});
+
+describe('zone non couverte (complément atelier M2)', () => {
+  const parkingExistant = {
+    id: 'park-1',
+    org_id: 'org-test-001',
+    level_id: 'lvl-ml-rdc',
+    geometry: {
+      vertices: [
+        { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
+        { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
+      ],
+    },
+    name: 'Ouest',
+    free: true,
+    declared_capacity: 0,
+    provenance: { status: 'existant' as const, source: 'Plan' },
+  };
+
+  const zone = (withGeometry: boolean) => ({
+    id: 'unc-1',
+    org_id: 'org-test-001',
+    parking_id: 'park-1',
+    reason: 'Plan coupé au bord de page',
+    ...(withGeometry
+      ? {
+          geometry: {
+            vertices: [
+              { x_m: 0, y_m: -20 }, { x_m: 20, y_m: -20 },
+              { x_m: 20, y_m: -5 }, { x_m: 0, y_m: -5 },
+            ],
+          },
+        }
+      : {}),
+  });
+
+  it('dessine la zone tracée par-dessus l’emprise et sous le bâti', () => {
+    const site = {
+      ...refMultilevel,
+      parkings: [parkingExistant],
+      parking_uncovered: [zone(true)],
+    };
+    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const park = r.value.indexOf('tok-park-fill');
+    const unc = r.value.indexOf('tok-unc-fill');
+    const fp = r.value.indexOf('tok-fp-fill');
+    expect(park).toBeLessThan(unc);
+    expect(unc).toBeLessThan(fp);
+  });
+
+  it('ne dessine rien pour une zone sans tracé, plutôt que d’inventer sa limite', () => {
+    // Le plan reste alors muet sur une incomplétude que le contrôle connaît.
+    // C'est une limite assumée : dessiner reviendrait à inventer la limite que
+    // le relevé n'a pas trouvée.
+    const site = {
+      ...refMultilevel,
+      parkings: [parkingExistant],
+      parking_uncovered: [zone(false)],
+    };
+    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-unc-fill');
+  });
+
+  it('ignore une zone rattachée à un parking d’un autre niveau', () => {
+    const site = {
+      ...refMultilevel,
+      parkings: [parkingExistant],
+      parking_uncovered: [{ ...zone(true), parking_id: 'park-ailleurs' }],
+    };
+    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-unc-fill');
   });
 });

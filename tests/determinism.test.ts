@@ -28,6 +28,8 @@ const floorTheme: FloorPlanTheme = {
   footprint_stroke: 'tok-fp-stroke',
   parking_fill: 'tok-park-fill',
   parking_stroke: 'tok-park-stroke',
+  uncovered_fill: 'tok-unc-fill',
+  uncovered_stroke: 'tok-unc-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',

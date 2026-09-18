@@ -335,6 +335,9 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: a.org_id,
     parking_id: a.parking_id,
     reason: a.reason,
+    ...(a.geometry === null || a.geometry === undefined
+      ? {}
+      : { geometry: a.geometry as Polygon }),
   }));
 
   const vehicleGates: VehicleGate[] = rows.vehicle_gates.map(g => ({

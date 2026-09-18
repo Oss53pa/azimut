@@ -102,6 +102,16 @@ export type UncoveredArea = {
   readonly id: string;
   readonly org_id: string;
   readonly parking_id: string;
+  /**
+   * Étendue de la zone sur le plan, quand on sait la tracer.
+   *
+   * Facultative pour la même raison qu'un plan s'arrête de deux façons : parfois
+   * on sait où — le bord de page passe ici — et parfois on sait seulement que
+   * le relevé est incomplet, sans pouvoir en dessiner la limite. Exiger le tracé
+   * empêcherait de déclarer le second cas, qui est celui où le silence est le
+   * plus dangereux.
+   */
+  readonly geometry?: Polygon;
   /** Pourquoi le plan s'arrête : bord de page, calque absent, zone illisible. */
   readonly reason: string;
 };

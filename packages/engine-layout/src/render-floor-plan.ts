@@ -4,6 +4,7 @@ import type {
   Edge,
   Footprint,
   Parking,
+  UncoveredArea,
   Destination,
   Point,
   Outcome,
@@ -18,6 +19,9 @@ export type FloorPlanTheme = {
   /** Complément atelier M2 — emprise de parking, distincte d'un bâtiment. */
   readonly parking_fill: string;
   readonly parking_stroke: string;
+  /** Zone que le plan source ne couvre pas : ni vide, ni relevée. */
+  readonly uncovered_fill: string;
+  readonly uncovered_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -40,6 +44,7 @@ export type FloorPlanOptions = {
 export type FloorPlanData = {
   readonly footprints: readonly Footprint[];
   readonly parkings: readonly Parking[];
+  readonly uncovered: readonly UncoveredArea[];
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly destinations: readonly Destination[];
@@ -172,7 +177,11 @@ function filterLevelData(
   const parkings = site.parkings.filter(
     (p) => p.level_id === levelId,
   );
-  return { footprints, parkings, nodes, edges, destinations };
+  const parkingIds = new Set(parkings.map((p) => p.id));
+  const uncovered = site.parking_uncovered.filter(
+    (a) => parkingIds.has(a.parking_id),
+  );
+  return { footprints, parkings, uncovered, nodes, edges, destinations };
 }
 
 export function renderFloorPlan(
@@ -264,6 +273,34 @@ export function renderFloorPlan(
       ` stroke-width="1"` +
       (dashed ? ` stroke-dasharray="6 4"` : '') +
       ` />`,
+    );
+  }
+
+  // Les zones non couvertes juste après les emprises, avant le bâti : elles
+  // qualifient le sol qu'elles recouvrent.
+  //
+  // Une zone sans tracé ne se dessine pas, et c'est une limite assumée : le
+  // plan reste alors muet sur une incomplétude que le contrôle, lui, connaît.
+  // Dessiner une zone dont on ignore l'étendue reviendrait à inventer la limite
+  // que le relevé n'a pas trouvée.
+  const sortedUncovered = [...data.uncovered].sort(
+    (a, b) => a.id.localeCompare(b.id),
+  );
+  for (const area of sortedUncovered) {
+    const verts = area.geometry?.vertices ?? [];
+    if (verts.length < 3) continue;
+    const points = verts
+      .map((v) => {
+        const p = tx(v, t);
+        return `${p.x},${p.y}`;
+      })
+      .join(' ');
+    parts.push(
+      `<polygon points="${points}"` +
+      ` fill="${esc(options.theme.uncovered_fill)}"` +
+      ` stroke="${esc(options.theme.uncovered_stroke)}"` +
+      ` stroke-width="1"` +
+      ` stroke-dasharray="2 3" />`,
     );
   }
 

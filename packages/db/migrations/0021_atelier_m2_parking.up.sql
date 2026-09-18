@@ -64,7 +64,10 @@ CREATE TABLE azimut.parking_uncovered_area (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id uuid NOT NULL REFERENCES azimut.organization(id) ON DELETE CASCADE,
   parking_id uuid NOT NULL REFERENCES azimut.parking(id) ON DELETE CASCADE,
-  geom jsonb,
+  -- Étendue de la zone, facultative : un plan s'arrête parfois à un bord qu'on
+  -- sait tracer, parfois sans qu'on sache où. Exiger le tracé empêcherait de
+  -- déclarer le second cas, qui est celui où le silence est le plus dangereux.
+  geometry jsonb,
   reason text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT parking_uncovered_reason_not_blank CHECK (btrim(reason) <> '')

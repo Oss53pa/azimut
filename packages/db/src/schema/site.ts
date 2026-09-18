@@ -252,7 +252,7 @@ export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
-  geom: jsonb('geom'),
+  geometry: jsonb('geometry'),
   reason: text('reason').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

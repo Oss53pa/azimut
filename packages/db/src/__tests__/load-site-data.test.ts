@@ -375,3 +375,46 @@ describe('stationnement (complément atelier M2)', () => {
     expect(result.parking_spaces[0]?.kind).toBe('standard');
   });
 });
+
+describe('zone non couverte : tracé facultatif (M2)', () => {
+  const tables = (): Map<object, unknown[]> => new Map<object, unknown[]>([
+    [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
+    [site, [{
+      id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
+      rules_pack_id: null,
+    }]],
+    [building, [{
+      id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B', independent_access: true,
+    }]],
+    [level, [{
+      id: 'l-1', org_id: 'org-1', building_id: 'b-1', name: 'RDC', ordinal: 0,
+      elevation_m: '0',
+    }]],
+    [parking, [{
+      id: 'park-1', org_id: 'org-1', level_id: 'l-1',
+      geometry: { vertices: [] }, name: 'Ouest', free: true, declared_capacity: 0,
+      status: 'existant', source: 'Plan',
+    }]],
+  ]);
+
+  it('charge une zone sans tracé : on sait que le relevé s’arrête, pas où', async () => {
+    const byTable = tables();
+    byTable.set(parkingUncoveredArea, [{
+      id: 'unc-1', org_id: 'org-1', parking_id: 'park-1',
+      geometry: null, reason: 'Relevé incomplet',
+    }]);
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.parking_uncovered[0]?.reason).toBe('Relevé incomplet');
+    expect(result.parking_uncovered[0]?.geometry).toBeUndefined();
+  });
+
+  it('charge le tracé quand il existe', async () => {
+    const byTable = tables();
+    byTable.set(parkingUncoveredArea, [{
+      id: 'unc-1', org_id: 'org-1', parking_id: 'park-1',
+      geometry: { vertices: [{ x_m: 0, y_m: 0 }] }, reason: 'Bord de page',
+    }]);
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.parking_uncovered[0]?.geometry?.vertices).toHaveLength(1);
+  });
+});
