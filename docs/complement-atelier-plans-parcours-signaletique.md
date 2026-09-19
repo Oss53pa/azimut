@@ -1361,12 +1361,23 @@ avec ses contrôles et ses tests :
 | Stationnement et refus de l'extrapolation (M2) | `core-model/parking.ts`, `engine-graph/audit-parking.ts`, migration 0021 |
 | Texte lié d'un document (M15) | `core-model/bound-text.ts`, `engine-graph/audit-bound-text.ts`, `document-bindings.ts` |
 | Rédaction propre, caractères interdits (P7, QC-06) | `engine-graph/audit-typography.ts` |
+| Liaison verticale au même point d'un niveau à l'autre (P5, QC-12) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
 
 Deux contrôles ont été écrits au passage, parce que leurs codes figuraient au
 catalogue D2 sans qu'aucun moteur ne les lève : le lexique de charte (A5.8),
 et la normalisation des parts de fréquentation (I5.3, et P1 de la partie N).
 Un essai du dépôt, `tests/error-code-reachability.test.ts`, refuse désormais
 qu'un code déclaré reste muet sans raison inscrite.
+
+De QC-12, une seule décision est prise : l'escalier mécanique est hors du
+contrôle. P5 énumère l'ascenseur, l'escalier et la rampe, et ne le cite pas ;
+un escalier mécanique franchit d'ailleurs sa hauteur en avançant, ses deux
+extrémités ne peuvent pas coïncider, et le retenir produirait une anomalie
+bloquante sur une géométrie correcte. Le titre de QC-12, « liaison verticale
+non alignée », se lirait plus largement : l'écart entre l'énumération de P5 et
+ce titre n'est pas tranché, et relève de A2.2. Le seuil, lui, n'est pas posé
+par le contrôle — P5 dit « le même point », et D1.5 définit déjà à partir de
+quelle distance deux points n'en sont plus qu'un.
 
 De QC-06, la traduction des noms typographiques du document en points de code
 est écrite dans le moteur pour être relue. Deux limites y sont assumées : le

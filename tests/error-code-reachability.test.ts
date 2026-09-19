@@ -16,6 +16,11 @@ const ROOT = resolve(HERE, '..');
  * d'appelant ; `FLOW.WEIGHTS_NOT_NORMALIZED` attendait qu'on vérifie qu'une
  * part décompose bien le tout. Trois fois, la découverte a été fortuite.
  *
+ * **Ce que cet essai ne voit pas** : il vérifie qu'un code est levé quelque
+ * part, non que la fonction qui le lève soit appelée. Une fonction de contrôle
+ * écrite et laissée hors de son point d'entrée lui paraît saine. C'est
+ * `check-wiring.test.ts` qui tient ce second cas, et il a fallu les deux.
+ *
  * Cet essai la rend systématique. Il ne demande pas que tout code soit levé —
  * plusieurs attendent une capacité non construite ou une décision non prise —
  * mais que la liste de ceux qui ne le sont pas soit tenue à jour et motivée.

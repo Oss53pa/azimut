@@ -1,4 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
+import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
 
 export function crossLevelWithoutVlFindings(
   site: SiteData,
@@ -229,6 +230,80 @@ export function missingDestinationNameFindings(
         });
       }
     }
+  }
+  return findings;
+}
+
+/**
+ * QC-12 — une liaison verticale qui ne tombe pas au même endroit d'un niveau à
+ * l'autre (complément atelier).
+ *
+ * P5 (complément atelier) : « Un ascenseur, un escalier ou une rampe occupe le
+ * même point sur les deux niveaux qu'il relie. » Un visiteur qui monte par
+ * l'ascenseur ressort au même endroit du plan ; si les deux nœuds ne
+ * coïncident pas, le plan du niveau supérieur place la sortie ailleurs que là
+ * où elle est, et aucun contrôle existant ne le voyait — `VERTICAL_LINK_MISSING`
+ * ne juge que la présence de la liaison, pas sa position.
+ *
+ * **Le seuil n'est pas inventé et n'est pas normatif.** P5 dit « le même
+ * point » ; D1.5 définit déjà `POINT_COINCIDENCE_M` comme la distance en deçà
+ * de laquelle deux points sont le même point, et la range explicitement parmi
+ * les tolérances techniques. Le contrôle applique cette définition, il n'en
+ * pose pas une nouvelle.
+ *
+ * **L'escalier mécanique est hors du contrôle**, et c'est le seul choix que ce
+ * module prend. P5 énumère trois natures et ne le cite pas ; un escalier
+ * mécanique franchit d'ailleurs sa hauteur en avançant, ses deux extrémités ne
+ * peuvent pas coïncider. Le retenir produirait une anomalie bloquante sur une
+ * géométrie correcte. Le titre de QC-12, « liaison verticale non alignée », se
+ * lirait plus largement : l'écart entre l'énumération de P5 et ce titre n'est
+ * pas tranché ici.
+ */
+export function verticalLinkMisalignedFindings(
+  site: SiteData,
+): Finding[] {
+  const nodeById = new Map(site.graph.nodes.map((n) => [n.id, n]));
+  const edgeById = new Map(site.graph.edges.map((e) => [e.id, e]));
+
+  const findings: Finding[] = [];
+  const sorted = [...site.graph.vertical_links].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  for (const link of sorted) {
+    if (link.kind === 'escalator') continue;
+    const edge = edgeById.get(link.edge_id);
+    if (edge === undefined) continue;
+    const from = nodeById.get(edge.from_node_id);
+    const to = nodeById.get(edge.to_node_id);
+    if (from === undefined || to === undefined) continue;
+    // Une liaison dont les deux nœuds sont sur le même niveau n'est pas une
+    // liaison verticale : `VERTICAL_LINK_MISSING` couvre l'inverse, et il n'y a
+    // rien à aligner entre un niveau et lui-même.
+    if (from.level_id === to.level_id) continue;
+
+    const offset = Math.hypot(
+      from.position.x_m - to.position.x_m,
+      from.position.y_m - to.position.y_m,
+    );
+    if (offset <= POINT_COINCIDENCE_M) continue;
+
+    findings.push({
+      code: 'GRAPH.VERTICAL_LINK_MISALIGNED',
+      severity: 'blocking',
+      entity: { kind: 'vertical_link', id: link.id },
+      params: {
+        kind: link.kind,
+        edge_id: link.edge_id,
+        from_node_id: from.id,
+        to_node_id: to.id,
+        from_level_id: from.level_id,
+        to_level_id: to.level_id,
+        // Rapporté au millimètre entier, par D1.4 : un écart s'annonce au
+        // millimètre, pas avec quinze décimales.
+        offset_mm: roundHalfAwayFromZero(offset * 1000),
+      },
+      ruleRef: 'atelier-QC-12',
+    });
   }
   return findings;
 }

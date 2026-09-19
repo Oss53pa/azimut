@@ -13,6 +13,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'GRAPH.DISCONNECTED': 'Graph is disconnected',
   'GRAPH.DEAD_END_UNJUSTIFIED': 'Dead end without destination or justification',
   'GRAPH.VERTICAL_LINK_MISSING': 'Cross-level edge without vertical link',
+  'GRAPH.VERTICAL_LINK_MISALIGNED': 'Vertical link offset between two levels',
   'GRAPH.BUILDING_ISOLATED': 'Building with no link nor independent access',
   'GRAPH.NO_ENTRANCE': 'No entrance in the graph',
   'GRAPH.NOT_VALIDATED': 'Audit requested before completeness validation',

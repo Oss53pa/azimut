@@ -8,6 +8,7 @@ import type {
 import { buildAdjacency, bfs } from './graph-traversal.js';
 import {
   crossLevelWithoutVlFindings,
+  verticalLinkMisalignedFindings,
   multiLevelWithoutAnyVlFindings,
   multiLevelWithoutAccessibleVlFindings,
   buildingIsolatedFindings,
@@ -219,6 +220,7 @@ export function validateGraph(
     ...disconnectedFindings(nodes, edges),
     ...unreachableFromEntranceFindings(nodes, edges),
     ...crossLevelWithoutVlFindings(site),
+    ...verticalLinkMisalignedFindings(site),
     ...deadEndFindings(nodes, edges),
     ...multiLevelWithoutAnyVlFindings(site),
     ...multiLevelWithoutAccessibleVlFindings(site),

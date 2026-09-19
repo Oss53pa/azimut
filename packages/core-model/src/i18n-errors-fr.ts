@@ -13,6 +13,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'GRAPH.DISCONNECTED': 'Graphe non connexe',
   'GRAPH.DEAD_END_UNJUSTIFIED': 'Impasse sans destination ni justification',
   'GRAPH.VERTICAL_LINK_MISSING': 'Arête entre niveaux sans liaison verticale',
+  'GRAPH.VERTICAL_LINK_MISALIGNED': 'Liaison verticale décalée entre deux niveaux',
   'GRAPH.BUILDING_ISOLATED': 'Bâtiment sans liaison ni accès indépendant',
   'GRAPH.NO_ENTRANCE': 'Aucune entrée dans le graphe',
   'GRAPH.NOT_VALIDATED': 'Audit demandé avant validation de complétude',

@@ -19,6 +19,9 @@ export const ERROR_CATALOG = {
   'GRAPH.DISCONNECTED':                     { severity: 'blocking', description: 'Graphe non connexe' },
   'GRAPH.DEAD_END_UNJUSTIFIED':             { severity: 'warning',  description: 'Impasse sans destination ni justification' },
   'GRAPH.VERTICAL_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre niveaux sans liaison verticale' },
+  // Complément atelier, QC-12 : la liaison ne tombe pas au même point d'un
+  // niveau à l'autre, quand P5 (complément atelier) veut qu'elle y tombe.
+  'GRAPH.VERTICAL_LINK_MISALIGNED':         { severity: 'blocking', description: 'Liaison verticale décalée entre deux niveaux' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
