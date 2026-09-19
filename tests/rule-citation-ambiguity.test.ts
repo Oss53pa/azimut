@@ -26,10 +26,13 @@ const ROOT = resolve(HERE, '..');
  * lecteur à comprendre la mauvaise règle. L'essai exige que le bloc de
  * commentaire qui cite un jeton ambigu nomme aussi son document.
  *
- * Portée volontairement réduite aux commentaires. Ailleurs, les mêmes jetons
- * sont des données légitimes — `level: 'R1'` désigne un niveau, `d="M10 10"`
- * est un chemin SVG — et un balayage plus large rendrait l'essai bruyant, donc
- * tôt ou tard affaibli.
+ * Deux endroits sont balayés, et deux seulement. Les commentaires, où la
+ * citation s'écrit en prose. Et les champs `ruleRef` d'une anomalie, qui sont
+ * des citations par construction — un `ruleRef` ne contient rien d'autre. Le
+ * reste du code est laissé tranquille : les mêmes jetons y sont des données
+ * légitimes — `level: 'R1'` désigne un niveau, `d="M10 10"` est un chemin SVG
+ * — et un balayage plus large rendrait l'essai bruyant, donc tôt ou tard
+ * affaibli.
  */
 
 /** Jetons qui portent deux sens selon le document qui les écrit. */
@@ -39,6 +42,14 @@ const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b/;
 const QUALIFIER = /complément atelier|partie [MNL]|tranche M|atelier-/i;
 
 const COMMENT = /\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
+
+const RULE_REF = /ruleRef:\s*'([^']*)'/g;
+
+/**
+ * Un `ruleRef` ne se qualifie pas en prose : il porte son document en préfixe.
+ * `atelier-M1.4` et `partieM-M2` sont les deux formes en usage.
+ */
+const REF_QUALIFIER = /^(?:atelier|partieM|partieN|partieL)-/;
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -88,6 +99,25 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     ).toHaveLength(0);
   });
 
+  it('aucun ruleRef ne porte un jeton ambigu sans son préfixe de document', () => {
+    const offenders: string[] = [];
+    for (const file of sources()) {
+      const body = readFileSync(file, 'utf-8');
+      for (const match of body.matchAll(RULE_REF)) {
+        const ref = match[1] ?? '';
+        if (!AMBIGUOUS.test(ref)) continue;
+        if (REF_QUALIFIER.test(ref)) continue;
+        const line = body.slice(0, match.index ?? 0).split('\n').length;
+        offenders.push(`${relative(ROOT, file)}:${line} ruleRef: '${ref}'`);
+      }
+    }
+    expect(
+      offenders,
+      'ruleRef ambigus :\n' + offenders.join('\n') +
+      '\n\nUn ruleRef porte son document en préfixe : `atelier-M2`, `partieM-M2`.',
+    ).toHaveLength(0);
+  });
+
   it('l’essai voit une citation nue, sinon il ne garde rien', () => {
     // Garde-fou du garde-fou : si les deux motifs cessaient de mordre,
     // l'essai passerait sur un dépôt entièrement ambigu sans rien dire.
@@ -98,5 +128,10 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     // Et il ne mord pas sur ce qui n'est pas un jeton de règle.
     expect(AMBIGUOUS.test('// un chemin d="M20 30"')).toBe(false);
     expect(AMBIGUOUS.test('// le niveau R7')).toBe(false);
+    // Même garde sur les ruleRef.
+    expect(REF_QUALIFIER.test('M2')).toBe(false);
+    expect(REF_QUALIFIER.test('atelier-M2')).toBe(true);
+    expect(REF_QUALIFIER.test('partieM-M2')).toBe(true);
+    expect(AMBIGUOUS.test('A5.8')).toBe(false);
   });
 });

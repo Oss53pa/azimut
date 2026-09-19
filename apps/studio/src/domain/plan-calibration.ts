@@ -1,6 +1,10 @@
 /**
  * Tranche M · écran M2 — calage d'un fond de plan.
  *
+ * Les anomalies d'ici citent `partieM-M2`, et non `M2` : le complément
+ * atelier emploie `M2` pour son module de stationnement, et un jeton nu ne
+ * dirait pas laquelle des deux règles est opposée.
+ *
  * Deux points posés sur le fond et une distance réelle donnent la résolution
  * du fond ; l'azimut du nord donne son orientation. Tant que l'orientation
  * n'est pas saisie, le tracé des empreintes reste refusé (CALIB.NORTH_MISSING) :
@@ -81,7 +85,7 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
       severity: 'blocking',
       entity: null,
       params: { real_distance_m: input.real_distance_m },
-      ruleRef: 'M2',
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -92,7 +96,7 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
       severity: 'blocking',
       entity: null,
       params: { pixel_distance: roundHalfAwayFromZero(pixels), minimum: MIN_POINT_SEPARATION_PX },
-      ruleRef: 'M2',
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -102,7 +106,7 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
       severity: 'blocking',
       entity: null,
       params: {},
-      ruleRef: 'M2',
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -123,7 +127,7 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
         min_px_per_m: plausible.min_px_per_m,
         max_px_per_m: plausible.max_px_per_m,
       },
-      ruleRef: 'M2',
+      ruleRef: 'partieM-M2',
     });
   }
 
