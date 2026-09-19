@@ -6,6 +6,7 @@ import type {
 } from '@azimut/core-model';
 import { guardNamingCollisions, type NamedEntity } from './guard-naming.js';
 import { auditLexicon } from './audit-lexicon.js';
+import { auditTypography } from './audit-typography.js';
 import { auditSiteFacts } from './audit-site-facts.js';
 import { auditSourceClaims } from './audit-source-claims.js';
 import { auditParking } from './audit-parking.js';
@@ -233,6 +234,13 @@ export function runChecks(
     findings.push(...auditLexicon(site, lexicon).findings);
     run.push('charter_lexicon');
   }
+
+  // QC-06 (complément atelier) n'attend aucune déclaration : un caractère
+  // interdit l'est sans qu'une charte ait à le dire, et dans toutes les langues.
+  // Il tourne donc toujours, aux deux modes, puisque le contrôle est bloquant
+  // sans condition de destination — contrairement à QC-21.
+  findings.push(...auditTypography(site).findings);
+  run.push('forbidden_characters');
 
   const facts = vocabulary.facts ?? [];
   if (facts.length === 0) {

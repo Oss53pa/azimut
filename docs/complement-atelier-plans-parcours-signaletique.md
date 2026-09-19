@@ -1350,7 +1350,7 @@ sont des capacités absentes du socle, pas un socle de rechange.
 
 ### Ce qui est implémenté à ce jour
 
-Cinq des sept capacités que le complément ajoute réellement au socle, chacune
+Six des sept capacités que le complément ajoute réellement au socle, chacune
 avec ses contrôles et ses tests :
 
 | Capacité | Où |
@@ -1360,9 +1360,24 @@ avec ses contrôles et ses tests :
 | Écarts entre sources (M16) | `core-model/source-claims.ts`, `engine-graph/audit-source-claims.ts`, migration 0020 |
 | Stationnement et refus de l'extrapolation (M2) | `core-model/parking.ts`, `engine-graph/audit-parking.ts`, migration 0021 |
 | Texte lié d'un document (M15) | `core-model/bound-text.ts`, `engine-graph/audit-bound-text.ts`, `document-bindings.ts` |
+| Rédaction propre, caractères interdits (P7, QC-06) | `engine-graph/audit-typography.ts` |
 
-Le contrôle du lexique de charte (A5.8) a été écrit au passage : ses deux codes
-figuraient au catalogue D2 depuis l'origine sans qu'aucun moteur ne les lève.
+Deux contrôles ont été écrits au passage, parce que leurs codes figuraient au
+catalogue D2 sans qu'aucun moteur ne les lève : le lexique de charte (A5.8),
+et la normalisation des parts de fréquentation (I5.3, et P1 de la partie N).
+Un essai du dépôt, `tests/error-code-reachability.test.ts`, refuse désormais
+qu'un code déclaré reste muet sans raison inscrite.
+
+De QC-06, la traduction des noms typographiques du document en points de code
+est écrite dans le moteur pour être relue. Deux limites y sont assumées : le
+contrôle vise le caractère U+2026 et non trois points ASCII à la suite, et le
+bloc Unicode des flèches U+2190 à U+21FF et non les blocs supplémentaires.
+
+La seconde moitié de P7, « présent de l'indicatif, pas de conditionnel »,
+n'est pas faite, et ses deux contrôles voisins non plus : QC-07, le verbe au
+conditionnel, et QC-20, la phrase de plus de vingt-cinq mots. Les trois
+demandent une analyse de la langue, quand QC-06 ne demande que de lire des
+points de code.
 
 De M15, seul le mécanisme des champs liés est fait — celui sans lequel le reste
 ne vaudrait rien, puisqu'il est ce qui empêche le document de dupliquer une
