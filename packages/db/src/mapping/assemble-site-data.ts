@@ -8,7 +8,9 @@
  *
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
-import { readActiveLangs, readOpeningHours } from '@azimut/core-model';
+import {
+  readActiveLangs, readOpeningHours, computeEdgeLengths,
+} from '@azimut/core-model';
 import type {
   FootprintKind,
   SiteData,
@@ -260,6 +262,18 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     label: n.label,
   }));
 
+  /**
+   * S6 — la longueur d'une arête est calculée, jamais saisie. La colonne
+   * `length_m` n'est donc pas lue : elle est un cache que l'application ne
+   * croit pas. Deux nœuds déplacés d'un centimètre rendent toute valeur
+   * stockée fausse, et un itinéraire faux ne se voit pas.
+   *
+   * Une arête dont une extrémité est inconnue n'a pas de longueur calculable ;
+   * la valeur stockée lui reste, faute de mieux, et le nœud manquant est
+   * signalé par `validateGraph`.
+   */
+  const edgeLengths = computeEdgeLengths({ levels, nodes, edges: rows.edges });
+
   const edges: Edge[] = rows.edges.map(e => ({
     id: e.id,
     org_id: e.org_id,
@@ -270,7 +284,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     accessible: e.accessible,
     direction: e.direction as EdgeDirection,
     evacuation_route: e.evacuation_route,
-    length_m: num(e.length_m),
+    length_m: edgeLengths.get(e.id) ?? num(e.length_m),
   }));
 
   const verticalLinks: VerticalLink[] = rows.vertical_links.map(v => ({

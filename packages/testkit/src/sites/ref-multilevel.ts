@@ -277,7 +277,7 @@ export const refMultilevel: SiteData = {
         accessible: true,
         direction: 'both',
         evacuation_route: false,
-        length_m: 15.81,
+        length_m: 15.811,
       },
       {
         id: 'e-ml-elevator-vl',
@@ -301,7 +301,7 @@ export const refMultilevel: SiteData = {
         accessible: false,
         direction: 'both',
         evacuation_route: true,
-        length_m: 5,
+        length_m: 3,
       },
       {
         id: 'e-ml-elevator-r1-hall',
@@ -337,7 +337,7 @@ export const refMultilevel: SiteData = {
         accessible: true,
         direction: 'both',
         evacuation_route: false,
-        length_m: 15.81,
+        length_m: 15.811,
       },
     ],
     vertical_links: [

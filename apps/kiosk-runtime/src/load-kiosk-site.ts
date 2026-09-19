@@ -31,6 +31,8 @@ import type {
  * is the package manifest's responsibility (D10.2); this loader guards shape.
  */
 
+import { computeEdgeLengths } from '@azimut/core-model';
+
 const decoder = new TextDecoder();
 
 function readJson(
@@ -85,9 +87,22 @@ export function loadKioskSite(
   const sceneDoc = readJson(files, 'data/scene.json');
   const identityDoc = readJson(files, 'data/site.json');
 
+  const levels = readArray(sceneDoc, 'levels', 'data/scene.json') as Level[];
+  const nodes = readArray(graphDoc, 'nodes', 'data/graph.json') as GraphNode[];
+  const shippedEdges = readArray(graphDoc, 'edges', 'data/graph.json') as Edge[];
+
+  // S6 — la longueur d'une arête est calculée, jamais lue. Le paquet la
+  // transporte, le terminal ne la croit pas : un itinéraire est une somme de
+  // longueurs, et une longueur reçue fausse donnerait un itinéraire faux sans
+  // que rien ne le signale.
+  const edgeLengths = computeEdgeLengths({ levels, nodes, edges: shippedEdges });
+
   const graph = {
-    nodes: readArray(graphDoc, 'nodes', 'data/graph.json') as GraphNode[],
-    edges: readArray(graphDoc, 'edges', 'data/graph.json') as Edge[],
+    nodes,
+    edges: shippedEdges.map((edge): Edge => ({
+      ...edge,
+      length_m: edgeLengths.get(edge.id) ?? edge.length_m,
+    })),
     vertical_links: readArray(
       graphDoc,
       'vertical_links',
@@ -103,7 +118,7 @@ export function loadKioskSite(
     ) as unknown as Organization,
     site: readObject(identityDoc, 'site', 'data/site.json') as unknown as Site,
     buildings: readArray(sceneDoc, 'buildings', 'data/scene.json') as Building[],
-    levels: readArray(sceneDoc, 'levels', 'data/scene.json') as Level[],
+    levels,
     footprints: readArray(
       sceneDoc,
       'footprints',

@@ -232,7 +232,7 @@ export const refBroken: SiteData = {
         accessible: false,
         direction: 'both',
         evacuation_route: false,
-        length_m: 5,
+        length_m: 3,
       },
     ],
     vertical_links: [],

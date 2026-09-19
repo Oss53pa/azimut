@@ -4,6 +4,8 @@ export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
 } from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
+export { edgeLengthBetween, computeEdgeLengths } from './edge-length.js';
+export type { EdgeEnd, EdgeLengthInput } from './edge-length.js';
 export {
   isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
   firstCalibration,
@@ -32,6 +34,7 @@ export { guardTextFit } from './typography-fit.js';
 export type { TextFitBox } from './typography-fit.js';
 export {
   roundHalfAwayFromZero,
+  roundMetres,
   roundSvg,
   formatSvg,
   roundMm,

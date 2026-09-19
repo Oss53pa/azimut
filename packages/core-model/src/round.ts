@@ -28,6 +28,18 @@ export function formatSvg(value: number): string {
   return String(roundSvg(value));
 }
 
+/**
+ * Arrondit une longueur exprimée en mètres au millimètre.
+ *
+ * D1.5 pose que deux points distants de moins d'un millimètre sont le même
+ * point : une longueur ne veut donc rien dire en deçà, et la garder au
+ * millimètre rend une valeur calculée comparable à une valeur écrite. Délègue
+ * à la primitive de D1.4, comme tout arrondi de ce module.
+ */
+export function roundMetres(value: number): number {
+  return eliminateNegativeZero(roundHalfAwayFromZero(value * 1000) / 1000);
+}
+
 /** Nearest integer millimetre (ties away from zero, per D1.4). */
 export function roundMm(value: number): number {
   return roundHalfAwayFromZero(value);
