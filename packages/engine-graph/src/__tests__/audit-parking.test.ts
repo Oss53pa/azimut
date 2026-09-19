@@ -48,7 +48,7 @@ describe('auditParking (M2)', () => {
   });
 
   it('refuse un parking numérisé à moitié sans zone non couverte déclarée', () => {
-    // Le cas que M2 vise : 89 annoncées, 40 vues, et rien qui dise où le plan
+    // Le cas que M2 (complément atelier) vise : 89 annoncées, 40 vues, et rien qui dise où le plan
     // s'arrête. Un plan d'accueil annoncerait sinon une capacité inexistante.
     const report = auditParking({
       parkings: [parking('souterrain', 89)],
@@ -100,7 +100,7 @@ describe('auditParking (M2)', () => {
     expect(report.findings).toEqual([]);
   });
 
-  it('refuse la même proposition portée à un livrable (P1)', () => {
+  it('refuse la même proposition portée à un livrable (P1, complément atelier)', () => {
     const proposition: Provenance = { status: 'proposition', source: 'Détection assistée' };
     const report = auditParking({
       parkings: [parking('ouest', 2, proposition)],
@@ -164,7 +164,7 @@ describe('une place retirée ne compte plus', () => {
 
   it('voit le trou que deux places retirées laissent', () => {
     // 40 annoncées, 38 existantes, 2 retirées : il manque bien deux places,
-    // et c'est exactement l'écart que M2 demande de voir.
+    // et c'est exactement l'écart que M2 (complément atelier) demande de voir.
     const report = auditParking({
       parkings: [parking('ouest', 40)],
       spaces: [...spaces('ouest', 38), ...spaces('ouest-r', 2, RETIRE).map(s => ({

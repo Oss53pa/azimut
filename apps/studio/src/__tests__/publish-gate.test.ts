@@ -30,7 +30,7 @@ describe('porte de publication', () => {
   it('pose la question dans le mode du livrable, et non dans celui de l’atelier', () => {
     // La même donnée, les deux modes. À l'atelier une proposition est un état
     // de travail légitime ; portée à un livrable elle s'afficherait comme un
-    // fait, et P1 la refuse. Le bouton « Publier » doit lire la seconde
+    // fait, et P1 (complément atelier) la refuse. Le bouton « Publier » doit lire la seconde
     // réponse, pas la première.
     const atelier = runChecks(siteAvecProposition, EMPTY_VOCABULARY_STATE.vocabulary);
     expect(atelier.ok).toBe(true);

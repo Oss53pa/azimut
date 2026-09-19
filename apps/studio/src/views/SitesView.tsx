@@ -14,7 +14,7 @@ type SitesViewProps = {
 };
 
 /**
- * Module 01 · écran M1 — la liste des sites.
+ * Module 01 · écran M1 (partie M) — la liste des sites.
  *
  * Elle vient du dépôt, quel qu'il soit : les sites de référence quand aucune
  * URL n'est configurée, le dépôt réel sinon. L'écran dit toujours laquelle des

@@ -8,12 +8,12 @@ import type { Polygon } from './geometry.js';
  * saisi quelque part, sans rien pour le rattacher au plan qui le fonde.
  *
  * Ces objets portent un statut et une source, ce qu'aucune entité du socle ne
- * fait aujourd'hui (P1). Le retrofit de A5 est un autre sujet ; ici la place
+ * fait aujourd'hui (P1, complément atelier). Le retrofit de A5 est un autre sujet ; ici la place
  * était libre, et la prendre coûtait moins que de la laisser.
  */
 
 /**
- * P1 — d'où vient l'objet, et ce qu'il vaut.
+ * P1 (complément atelier) — d'où vient l'objet, et ce qu'il vaut.
  *
  * `proposition` désigne ce qu'une détection assistée a suggéré et que personne
  * n'a validé. `a_verifier` désigne ce qu'on a relevé sans pouvoir le confirmer.
@@ -37,7 +37,7 @@ export const PUBLISHABLE_STATUSES: readonly ObjectStatus[] = ['existant'];
  *   une proposition non validée : elle est sur le plan, quelqu'un l'a vue ;
  * - « combien de places ce parking a-t-il ? », posée par un livrable, ne compte
  *   que l'existant, parce que publier une proposition la transforme en fait
- *   (P1).
+ *   (P1, complément atelier).
  *
  * Seul le retiré tombe des deux côtés.
  */
@@ -47,7 +47,7 @@ export function countsAsDigitised(status: ObjectStatus): boolean {
 
 export type Provenance = {
   readonly status: ObjectStatus;
-  /** Le plan, le relevé ou la décision qui fonde l'objet. Jamais vide (P1). */
+  /** Le plan, le relevé ou la décision qui fonde l'objet. Jamais vide (P1, complément atelier). */
   readonly source: string;
 };
 
@@ -60,7 +60,7 @@ export type ParkingSpace = {
   /**
    * Tracé de la place sur le plan source, quand il est relevé.
    *
-   * Facultatif, et la raison est une question ouverte : M2 décrit une place
+   * Facultatif, et la raison est une question ouverte : M2 (complément atelier) décrit une place
    * comme « segment ou polygone », et le modèle ne porte que `Polygon`. Un
    * emplacement marqué d'un seul trait n'est pas un polygone, et le forcer à
    * l'être inventerait une géométrie que le plan ne montre pas. Tant que la
@@ -93,7 +93,7 @@ export type Parking = {
 /**
  * Là où le plan source s'arrête.
  *
- * M2 l'exige : « Là où le plan source s'arrête, la zone est marquée non
+ * M2 (complément atelier) l'exige : « Là où le plan source s'arrête, la zone est marquée non
  * couverte ; Azimut ne complète pas par extrapolation. » Sans cette
  * déclaration, un parking à demi numérisé serait indiscernable d'un parking
  * numérisé en entier et à demi vide.

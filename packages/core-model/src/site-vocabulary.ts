@@ -5,8 +5,8 @@
  * question — ce qu'on a le droit d'écrire sur un support :
  *
  * - le **lexique de charte** (A5.8) dit comment on parle ;
- * - les **faits du site** (M3) disent ce qui est vrai ;
- * - les **affirmations de source** (M16) disent ce qui reste discuté.
+ * - les **faits du site** (M3, complément atelier) disent ce qui est vrai ;
+ * - les **affirmations de source** (M16, complément atelier) disent ce qui reste discuté.
  *
  * Ce n'est pas de la géométrie, et cela ne rejoint donc pas `SiteData` : un site
  * se charge et se dessine sans qu'aucun de ces trois registres existe. Ils se

@@ -191,7 +191,7 @@ function checkAllVacantCategory(site: SiteData): Finding[] {
  * Ce pour quoi les contrôles tournent.
  *
  * `atelier` est le travail en cours : une proposition y est un état légitime.
- * `livrable` est ce qui part à l'impression ou à la publication, et P1 y
+ * `livrable` est ce qui part à l'impression ou à la publication, et P1 du complément atelier y
  * devient opposable — une proposition affichée s'y lirait comme un fait.
  *
  * La notion n'est pas inventée : QC-21 du complément décrit exactement une
@@ -252,7 +252,7 @@ export function runChecks(
       uncovered: site.parking_uncovered,
     }, forDeliverable).findings);
     run.push('parking_coverage');
-    // Le contrôle P1 ne tourne qu'en mode livrable, et il se nomme, pour qu'un
+    // Le contrôle de P1 (complément atelier) ne tourne qu'en mode livrable, et il se nomme, pour qu'un
     // rapport d'atelier ne laisse pas croire qu'il a été exercé.
     if (forDeliverable) run.push('parking_publication');
   }

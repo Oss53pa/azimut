@@ -29,7 +29,7 @@ import type {
  * Un statut que le code ne reconnaît pas ne devient jamais `existant`.
  *
  * `existant` est le seul statut qui autorise un objet à paraître dans un
- * livrable (P1). Une valeur mal orthographiée en base, ou venue d'une version
+ * livrable (P1, complément atelier). Une valeur mal orthographiée en base, ou venue d'une version
  * ultérieure du modèle, doit donc retomber sur un statut qui retient l'objet,
  * pas sur celui qui le publie. `a_verifier` dit exactement cela : on ne sait
  * pas, quelqu'un doit regarder.

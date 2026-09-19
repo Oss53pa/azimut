@@ -168,7 +168,7 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
-  // Un parking retiré sort du plan, parce qu'il sort des livrables (P1) : le
+  // Un parking retiré sort du plan, parce qu'il sort des livrables (P1, complément atelier) : le
   // modèle le garde en base pour l'historique, pas pour l'imprimer. Le dessiner
   // en pointillé le rendrait indiscernable d'une proposition, qui est l'inverse
   // — quelque chose qui n'existe pas encore, et non qui n'existe plus.
@@ -267,7 +267,7 @@ export function renderFloorPlan(
       .join(' ');
     // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
     // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
-    // ce qui est exactement ce que P1 demande d'une proposition.
+    // ce qui est exactement ce que P1 (complément atelier) demande d'une proposition.
     const dashed = !PUBLISHABLE_STATUSES.includes(park.provenance.status);
     parts.push(
       `<polygon points="${points}"` +

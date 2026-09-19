@@ -4,7 +4,7 @@
  * Fragment du catalogue.
  */
 export const FOUNDATION_FR = {
-  // M1 — liste des sites
+  // M1 (partie M) — liste des sites
   'sites.eyebrow': 'Module 01 · écran M1',
   'sites.title': 'Sites',
   'sites.subtitle': 'Sites',
@@ -67,7 +67,7 @@ export const FOUNDATION_FR = {
   'foundation.trace.unbound': 'Paquet non lié',
   'foundation.note': "Tout ce qui est affiché ici est dérivé du site. Aucun de ces compteurs n'est enregistré : deux ouvertures du même état de données donnent les mêmes chiffres.",
 
-  // M2 — calage
+  // M2 (partie M) — calage
   'calibration.eyebrow': 'Module 01 · écran M2',
   'calibration.title': 'Calage du plan',
   'calibration.subtitle': 'Plan calibration',
@@ -147,7 +147,7 @@ export const FOUNDATION_FR = {
   'measured.tolerance.unjudged': 'Sans tolérance déclarée, les résidus sont calculés et affichés, et aucun verdict n’est rendu.',
   'measured.findings.empty': 'Aucune anomalie de calage mesuré.',
 
-  // M3 — empreintes
+  // M3 (partie M) — empreintes
   'footprints.eyebrow': 'Module 01 · écran M3',
   'footprints.title': 'Empreintes',
   'footprints.subtitle': 'Footprints',
@@ -283,7 +283,7 @@ export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>>
   'calibration.findings.note': 'A plausibility warning does not stop the work: the override stays visible in the checks.',
   'calibration.note': 'Footprint tracing stays refused until the orientation is entered: a footprint drawn on an unoriented background is wrong with nothing to signal it.',
 
-  // M2 bis — measured calibration (atelier complement, M1.4)
+  // M2 bis (partie M) — measured calibration (complément atelier, M1.4)
   'measured.section': 'Measured calibration',
   'measured.panel.surface': 'Landmark surface',
   'measured.panel.surface.note': '{placed} of {total} placed',

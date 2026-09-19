@@ -76,7 +76,7 @@ describe('emprise de parking (complément atelier M2)', () => {
   });
 
   it('trait plein pour un existant, pointillé pour une proposition', () => {
-    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que P1
+    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que P1 (complément atelier)
     // demande d'une proposition.
     const existant = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
     const propose = renderFloorPlan({ ...refMultilevel, parkings: [parking('proposition')] }, 'lvl-ml-rdc', defaultOptions);
@@ -238,7 +238,7 @@ describe('revue : ce que le plan dessine, il le cadre', () => {
   });
 
   it('ne dessine pas un parking retiré, et ne le cadre pas non plus', () => {
-    // P1 : le retiré reste en base pour l'historique et sort des livrables. Le
+    // P1 (complément atelier) : le retiré reste en base pour l'historique et sort des livrables. Le
     // montrer en pointillé le confondrait avec une proposition — l'inverse même
     // d'un retrait, puisqu'une proposition n'existe pas encore.
     const retire = {

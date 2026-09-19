@@ -72,7 +72,7 @@ describe('buildDocumentBindings (M15)', () => {
 describe('ce qu’un document a le droit de publier', () => {
   it('ne compte que les places existantes, pas les propositions', () => {
     // Le compte du document diffère de celui de l'audit, et c'est voulu :
-    // « ce qui a été tracé » n'est pas « ce que le site a » (P1).
+    // « ce qui a été tracé » n'est pas « ce que le site a » (P1, complément atelier).
     const site = {
       ...refMultilevel,
       parking_spaces: refMultilevel.parking_spaces.map((s, i) =>

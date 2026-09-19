@@ -50,7 +50,7 @@ function sourceFinding(kind: string, id: string, provenance: Provenance): Findin
  *
  * `forDeliverable` durcit le contrôle : hors livrable, une proposition est un
  * état de travail légitime ; portée à un livrable, elle s'afficherait comme un
- * fait, ce que P1 refuse. Le même jeu d'objets est donc acceptable à l'atelier
+ * fait, ce que refuse P1 du complément atelier. Le même jeu d'objets est donc acceptable à l'atelier
  * et refusé à l'impression, et c'est voulu.
  */
 export function auditParking(
@@ -64,7 +64,7 @@ export function auditParking(
 
   // Une place retirée ne compte pas : la compter ferait passer un parking
   // amputé pour complet, et pire, un parking où deux places ont été retirées
-  // pour un parking en dépassement. C'est exactement l'écart que M2 demande de
+  // pour un parking en dépassement. C'est exactement l'écart que M2 (complément atelier) demande de
   // voir, inversé par une ligne d'historique.
   const spacesByParking = new Map<string, number>();
   for (const space of spaces) {

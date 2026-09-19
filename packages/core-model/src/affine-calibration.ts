@@ -54,7 +54,7 @@ export type ControlPointPair = {
 };
 
 /**
- * Transformation affine du fond vers le repère métier, les six réels de M1.4 :
+ * Transformation affine du fond vers le repère métier, les six réels de M1.4 (complément atelier) :
  *
  *   x_m = a·x_px + b·y_px + c
  *   y_m = d·x_px + e·y_px + f
@@ -94,7 +94,7 @@ export type ResidualTolerance = {
 };
 
 /**
- * Trois paires au minimum, comme M1.4 le demande : en deçà, l'affine n'est pas
+ * Trois paires au minimum, comme M1.4 (complément atelier) le demande : en deçà, l'affine n'est pas
  * déterminée.
  *
  * Mais trois paires ne suffisent pas à *mesurer*. Chaque paire donne deux
@@ -279,7 +279,7 @@ export function fitMeasuredCalibration(
  * Confronte un calage ajusté à ses tolérances de recette.
  *
  * Rend une anomalie par point hors tolérance, en plus de celle du résidu moyen,
- * pour que l'écran sache lesquels marquer (M1.4). Une liste vide vaut calage
+ * pour que l'écran sache lesquels marquer (M1.4, complément atelier). Une liste vide vaut calage
  * accepté. Les résidus sont rapportés en millimètres entiers, par D1.4 : un
  * résidu s'annonce au millimètre, pas avec quinze décimales.
  *

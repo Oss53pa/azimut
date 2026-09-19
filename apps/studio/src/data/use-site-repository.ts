@@ -4,7 +4,7 @@
  * Quatre états, pas trois : rien n'est encore demandé, une requête est en
  * cours, elle a rendu un site, elle a échoué. L'écran doit pouvoir les
  * distinguer — un écran vide qui ressemble à une réussite est le pire des
- * états (M5).
+ * états (M5, partie M).
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { SiteData } from '@azimut/core-model';

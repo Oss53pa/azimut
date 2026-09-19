@@ -53,7 +53,7 @@ export function buildDocumentBindings(
   const parkings = [...site.parkings].sort((l, r) => l.id.localeCompare(r.id));
   const first = parkings[0];
   if (first !== undefined) {
-    // Un document est un livrable : il ne compte que l'existant (P1). Une
+    // Un document est un livrable : il ne compte que l'existant (P1, complément atelier). Une
     // proposition non validée s'y afficherait comme un fait, et le nombre de
     // places d'un parking est précisément le genre de fait qu'on cite ensuite
     // sans le revérifier.

@@ -69,7 +69,7 @@ describe('stationnement (complément atelier M2)', () => {
   });
 
   it('ne lit jamais un statut inconnu comme existant', async () => {
-    // `existant` est le seul statut qui publie (P1). Une valeur mal
+    // `existant` est le seul statut qui publie (P1, complément atelier). Une valeur mal
     // orthographiée doit retenir l'objet, pas le laisser passer.
     const byTable = baseTables();
     byTable.set(parking, [{

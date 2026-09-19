@@ -1278,6 +1278,18 @@ levée avant tout usage de ces codes dans un nom de test ou un commentaire.
 De même, les codes `R1` à `R6` du moteur d'implantation de M6 entrent en
 collision avec les quatre règles d'intégration `R1` à `R4` de la partie L1.
 
+**Troisième collision, relevée le 19 septembre 2026.** Les treize principes
+opposables `P1` à `P13` de ce complément portent les mêmes jetons que les sept
+règles métier `P1` à `P7` du module 03 de la partie N (N3.2). `P1` y dit « tout
+objet porte une source et un statut » ; en N3.2, « les pondérations sont
+déclarées, jamais devinées par l'outil ». Les deux sont opposables, et rien
+dans le jeton ne dit laquelle. Les jetons `P8` à `P13` n'appartiennent qu'à ce
+complément, mais une règle ajoutée à N3.2 les rendrait ambigus à leur tour.
+
+La levée est la même que pour `M` et `R` : citer le document. Le dépôt
+l'applique et le vérifie — `tests/rule-citation-ambiguity.test.ts` refuse un
+jeton `M1`–`M17`, `R1`–`R6` ou `P1`–`P7` écrit seul dans un commentaire.
+
 ### C8. Registre de sécurité
 
 **Invariant INV-3, et A5 (`pictogram`, `registry = 'safety'`).** Le registre de

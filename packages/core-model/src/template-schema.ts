@@ -55,7 +55,7 @@ export const templateSchema = z.object({
 /**
  * La liaison D8 : d'où vient une valeur, et laquelle. Exportée pour être
  * réutilisée hors des gabarits de panneau — le texte lié d'un document de
- * stratégie (M15) désigne ses valeurs de la même façon, et deux notations pour
+ * stratégie (M15, complément atelier) désigne ses valeurs de la même façon, et deux notations pour
  * la même idée finiraient par diverger.
  */
 export type Binding = z.infer<typeof bindingSchema>;

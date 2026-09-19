@@ -22,7 +22,7 @@ type EdgeRow = {
 };
 
 /**
- * Module 01 · écran M4 — le graphe de circulation.
+ * Module 01 · écran M4 (partie M) — le graphe de circulation.
  *
  * Le tracé appartient à l'atelier : un second canevas de tracé ouvrirait deux
  * chemins vers la même géométrie. Cet écran porte ce qui manquait autour du

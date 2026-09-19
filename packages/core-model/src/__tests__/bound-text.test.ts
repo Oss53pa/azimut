@@ -30,7 +30,7 @@ describe('resolveBoundParagraph (M15)', () => {
   });
 
   it('suit un changement de valeur sans que le texte change', () => {
-    // C'est l'exigence de M15 : le relevé passe de 89 à 93, la phrase suit.
+    // C'est l'exigence de M15 (complément atelier) : le relevé passe de 89 à 93, la phrase suit.
     const r = resolveBoundParagraph(STATIONNEMENT, {
       ...VALEURS,
       parking: { name: 'parking Ouest', capacity: '93' },

@@ -1,5 +1,5 @@
 /**
- * D12.1 — module 04 (signalétique), écran M4 (graphe) et écran M5 (validation).
+ * D12.1 — module 04 (signalétique), écran M4 (graphe) et écran M5 (validation), tous deux de la partie M.
  */
 export const SIGNAGE_FR = {
   // Module 04 — signalétique
@@ -33,7 +33,7 @@ export const SIGNAGE_FR = {
   'signage.determinism.note': "L'aperçu mesure le texte avec une approximation déclarée. Le compilateur, lui, mesure sur les métriques réelles de la police embarquée : deux compilations d'un même état de données rendent des fichiers identiques octet pour octet.",
   'signage.note': "Un panneau est une vue, pas un dessin : le contenu d'une face est résolu depuis le graphe et l'annuaire au moment du rendu.",
 
-  // Écran M4 — graphe
+  // Écran M4 (partie M) — graphe
   'graph.eyebrow': 'Module 01 · écran M4',
   'graph.title': 'Graphe de circulation',
   'graph.subtitle': 'Circulation graph',
@@ -72,7 +72,7 @@ export const SIGNAGE_FR = {
   'graph.findings.empty': 'Aucune anomalie du graphe.',
   'graph.note': "Le tracé appartient à l'atelier : un second canevas ouvrirait deux chemins vers la même géométrie. Cet écran porte les propriétés, les points de décision et les anomalies.",
 
-  // Écran M5 — validation
+  // Écran M5 (partie M) — validation
   'validation.eyebrow': 'Module 01 · écran M5',
   'validation.title': 'Validation du graphe',
   'validation.subtitle': 'Validation',

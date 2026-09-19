@@ -52,7 +52,7 @@ function refusalOf(status: VocabularyState['status']): VocabularyRefusal {
  * Les contrôles tournent en mode `livrable`, et c'est tout l'objet de la
  * fonction.
  *
- * En mode atelier, une proposition est un état de travail légitime et P1 ne
+ * En mode atelier, une proposition est un état de travail légitime et P1 (complément atelier) ne
  * s'exerce pas. Poser la question de la publication dans ce mode allumerait le
  * bouton sur un site dont chaque objet n'est encore qu'une suggestion — soit
  * exactement ce que `PARK.PROPOSAL_AS_EXISTING` existe pour refuser.
