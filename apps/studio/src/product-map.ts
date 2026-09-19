@@ -85,8 +85,14 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'faces', labelKey: 'nav.item.faces' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
-    engine: 'complete',
-    source: 'engine-layout · engine-package',
+    // Partiel : G1, G2, G4, G5, G6, G8 et G10 tiennent. G3 et G7 ont leur
+    // moteur — le format se calcule, une version approuvée n'admet que son
+    // remplacement — mais aucune écriture ne les emprunte, faute de chemin
+    // d'écriture : rien n'écrit `dimensions_source: 'computed'`, rien n'appelle
+    // `transitionSupportVersion`. G9 vaut pour le SVG ; N4.8 laisse le
+    // déterminisme du PDF ouvert, et c'est la tâche T-0.9 qui le tranche.
+    engine: 'partial',
+    source: 'engine-layout · engine-package · engine-graph/face-format',
   },
   {
     number: '05',
