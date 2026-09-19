@@ -72,13 +72,14 @@ export { computeQuantities, quantityReportToCsv } from './compute-quantities.js'
 export { runChecks } from './run-checks.js';
 export type { CheckReport } from './run-checks.js';
 export {
-  renderFace, renderFaceWithMeasures, destinationListFontSizeMm, faceUsesAccent,
+  renderFace, renderFaceWithMeasures, destinationListFontSizeMm,
+  destinationListBlockHeightMm, faceUsesAccent,
   headerFontSizeMm, checkFaceContentFit,
 } from './render-face.js';
 export type { FaceRender, TextMeasure } from './render-face.js';
 export { checkFaceContrast } from './face-quality.js';
 export type { FaceContrastInput } from './face-quality.js';
-export { checkCharHeight } from '@azimut/rules';
+export { checkCharHeight, requiredCharHeightMm } from '@azimut/rules';
 export type { CharHeightInput } from '@azimut/rules';
 export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/rules';
 // buildRulesPackIndex lit le disque : il reste sur @azimut/rules/loader,
@@ -89,6 +90,8 @@ export { resolveSiteRulesPack } from '@azimut/rules';
 export { guardAdRulesPack } from '@azimut/rules';
 export type { AdRulesPack } from '@azimut/rules';
 export { compileTemplate } from './compile-template.js';
+export { computeFaceFormat } from './face-format.js';
+export type { FaceFormat, FaceFormatInput } from './face-format.js';
 export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export { validateProofs } from './validate-proofs.js';

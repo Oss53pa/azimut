@@ -47,10 +47,16 @@ export type CharHeightInput = {
  * `reading_distance_m * factor`, floored at `minimum_mm`. A measured height
  * below it raises LAYOUT.CHAR_HEIGHT_BELOW_MIN.
  */
-export function checkCharHeight(
+type ResolvedCharHeight = {
+  readonly required_mm: number;
+  readonly rule_code: string;
+};
+
+/** Résout la règle et applique sa formule. Un seul endroit la porte. */
+function resolveCharHeight(
   pack: LoadedRulesPack,
   input: CharHeightInput,
-): Outcome<null> {
+): Outcome<ResolvedCharHeight> {
   const scope: RuleScopeContext = input.context !== undefined
     ? { supportRegistry: input.supportRegistry, context: input.context }
     : { supportRegistry: input.supportRegistry };
@@ -61,7 +67,40 @@ export function checkCharHeight(
   const factor = numParam(rule, 'factor');
   if (factor === null) return { ok: false, findings: [paramInvalid(rule, 'factor')] };
   const floor = numParam(rule, 'minimum_mm') ?? 0;
-  const required = Math.max(input.reading_distance_m * factor, floor);
+  return {
+    ok: true,
+    value: {
+      required_mm: Math.max(input.reading_distance_m * factor, floor),
+      rule_code: rule.code,
+    },
+    warnings: [],
+  };
+}
+
+/**
+ * G3 / G4 — la hauteur de caractère exigée à cette distance de lecture, en
+ * millimètres, telle que le paquet de règles la définit.
+ *
+ * Le calcul du format l'emploie sans recopier la formule : le seuil qui refuse
+ * et la dimension qui se calcule viennent de la même règle et du même paquet
+ * (invariant 1, G4).
+ */
+export function requiredCharHeightMm(
+  pack: LoadedRulesPack,
+  input: CharHeightInput,
+): Outcome<number> {
+  const resolved = resolveCharHeight(pack, input);
+  if (!resolved.ok) return resolved;
+  return { ok: true, value: resolved.value.required_mm, warnings: [] };
+}
+
+export function checkCharHeight(
+  pack: LoadedRulesPack,
+  input: CharHeightInput,
+): Outcome<null> {
+  const resolved = resolveCharHeight(pack, input);
+  if (!resolved.ok) return resolved;
+  const { required_mm: required, rule_code: ruleCode } = resolved.value;
 
   if (input.char_height_mm < required) {
     return {
@@ -75,7 +114,7 @@ export function checkCharHeight(
           actual_mm: input.char_height_mm,
           reading_distance_m: input.reading_distance_m,
         },
-        ruleRef: rule.code,
+        ruleRef: ruleCode,
       }],
     };
   }

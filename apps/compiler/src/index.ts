@@ -26,6 +26,8 @@ export type {
   CompileContext,
 } from './compile-artwork.js';
 export { renderArtwork } from './artwork.js';
+export { requiredFaceFormat } from './artwork.js';
+export type { RequiredFormatInput } from './artwork.js';
 export type { ArtworkRenderParams, ArtworkRender } from './artwork.js';
 export { createBuildDeliveryArchiveHandler } from './build-delivery-archive.js';
 export type {

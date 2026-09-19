@@ -1,9 +1,11 @@
 import type { SiteData, Finding } from '@azimut/core-model';
 import {
   composeFace, renderFaceWithMeasures, checkFaceContrast, checkCharHeight, faceUsesAccent,
-  checkFaceContentFit,
+  checkFaceContentFit, computeFaceFormat, requiredCharHeightMm,
 } from '@azimut/engine-graph';
-import type { FaceTheme, LoadedRulesPack, TextMeasure } from '@azimut/engine-graph';
+import type {
+  FaceTheme, LoadedRulesPack, TextMeasure, FaceFormat, ResolvedFace,
+} from '@azimut/engine-graph';
 import { exportArtworkPdf } from '@azimut/engine-artwork';
 import type { PdfTarget } from '@azimut/engine-artwork';
 
@@ -99,6 +101,14 @@ export type ArtworkRender = {
    * is supplied; a piece of text wider than its block raises one.
    */
   readonly contentOverflowFindings: readonly Finding[];
+  /**
+   * G3 — le format que le contenu, la distance de lecture et la variante
+   * linguistique la plus longue imposent, indépendamment de celui qui a été
+   * employé. `null` quand il n'est pas calculable : pas de paquet rattaché, pas
+   * de distance relevée, ou pas de liste de destinations sur la face. Sa
+   * largeur reste `null` tant qu'aucune mesure de texte n'est fournie.
+   */
+  readonly computedFormat: FaceFormat | null;
 };
 
 export async function renderArtwork(
@@ -192,11 +202,20 @@ export async function renderArtwork(
     if (!legibility.ok) legibilityFindings = legibility.findings;
   }
 
-  // A5.6 — a hand-set format that comes out non-conform is a blocking anomaly
-  // distinct from the underlying failure: it tells the operator to fix the
-  // dimensions, not the content. Triggered by any format check — the text too
-  // small for the reading distance (legibility) or text wider than its block
-  // (content overflow).
+  // G3 — le format que le contenu, la distance de lecture et la variante
+  // linguistique la plus longue imposent. Calculé quand un paquet est rattaché
+  // et qu'une distance est relevée ; la largeur reste indéterminée tant
+  // qu'aucune mesure de texte n'est fournie (G5.1).
+  const computedFormat = requiredFaceFormat(params, resolved.value);
+
+  // A5.6 / G3 — a hand-set format that comes out non-conform is a blocking
+  // anomaly distinct from the underlying failure: it tells the operator to fix
+  // the dimensions, not the content. Triggered by any format check — the text
+  // too small for the reading distance (legibility) or text wider than its
+  // block (content overflow).
+  //
+  // Le format calculé accompagne l'anomalie quand il est connu : dire « non
+  // conforme » sans dire quelle taille conviendrait laisse l'opérateur tâtonner.
   let dimensionsFindings: readonly Finding[] = [];
   const formatNonConform = legibilityFindings.length > 0 || contentOverflowFindings.length > 0;
   if (params.dimensionsSource === 'overridden' && formatNonConform) {
@@ -204,8 +223,17 @@ export async function renderArtwork(
       code: 'LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM',
       severity: 'blocking',
       entity: { kind: 'support', id: params.supportId },
-      params: { width_mm: widthMm, height_mm: heightMm },
-      ruleRef: null,
+      params: {
+        width_mm: widthMm,
+        height_mm: heightMm,
+        ...(computedFormat !== null
+          ? { required_height_mm: computedFormat.height_mm }
+          : {}),
+        ...(computedFormat?.width_mm != null
+          ? { required_width_mm: computedFormat.width_mm }
+          : {}),
+      },
+      ruleRef: 'N4.3',
     }];
   }
 
@@ -221,6 +249,7 @@ export async function renderArtwork(
   return {
     svg,
     pdf,
+    computedFormat,
     side: template.side,
     supportTypeKey: template.support_type_key,
     widthMm,
@@ -231,4 +260,64 @@ export async function renderArtwork(
     dimensionsFindings,
     contentOverflowFindings,
   };
+}
+
+/**
+ * G3 — le format que le contenu, la distance de lecture et la variante
+ * linguistique la plus longue imposent.
+ *
+ * Rend `null` dès qu'une des trois entrées manque : sans paquet rattaché, la
+ * hauteur de caractère exigée est inconnue et aucune valeur normative ne doit
+ * lui être substituée (G4) ; sans distance relevée, la règle n'a rien à quoi
+ * s'appliquer ; sans liste de destinations, la face n'a pas de lignes à
+ * dimensionner.
+ */
+export type RequiredFormatInput = {
+  readonly rulesPack?: LoadedRulesPack | undefined;
+  readonly readingDistanceM?: number | undefined;
+  readonly supportRegistry?: string | undefined;
+  readonly supportContext?: string | undefined;
+  readonly supportId: string;
+  readonly measureText?: TextMeasure | undefined;
+};
+
+export function requiredFaceFormat(
+  params: RequiredFormatInput,
+  face: ResolvedFace,
+): FaceFormat | null {
+  if (params.rulesPack === undefined) return null;
+  if (params.readingDistanceM === undefined || params.readingDistanceM <= 0) return null;
+
+  const block = face.blocks.find(b => b.content.type === 'destination_list');
+  if (block === undefined || block.content.type !== 'destination_list') return null;
+  const entries = block.content.entries;
+  if (entries.length === 0) return null;
+
+  const required = requiredCharHeightMm(params.rulesPack, {
+    supportRegistry: params.supportRegistry ?? 'wayfinding',
+    ...(params.supportContext !== undefined ? { context: params.supportContext } : {}),
+    reading_distance_m: params.readingDistanceM,
+    char_height_mm: 0,
+    entity_id: params.supportId,
+  });
+  if (!required.ok) return null;
+
+  // La variante la plus longue parmi les dénominations de la face : une face
+  // dimensionnée sur le français déborderait en anglais, et l'inverse.
+  const longest = entries
+    .flatMap(entry => Object.values(entry.names))
+    .filter((name): name is string => typeof name === 'string')
+    .reduce((longestSoFar, name) => (
+      name.length > longestSoFar.length ? name : longestSoFar
+    ), '');
+
+  const format = computeFaceFormat({
+    entry_count: entries.length,
+    required_char_height_mm: required.value,
+    block_height_pct: block.region.h_pct,
+    block_width_pct: block.region.w_pct,
+    ...(longest.length > 0 ? { longest_variant: longest } : {}),
+    ...(params.measureText !== undefined ? { measure: params.measureText } : {}),
+  });
+  return format.ok ? format.value : null;
 }
