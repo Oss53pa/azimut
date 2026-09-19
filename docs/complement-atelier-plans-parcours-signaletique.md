@@ -1362,12 +1362,24 @@ avec ses contrôles et ses tests :
 | Texte lié d'un document (M15) | `core-model/bound-text.ts`, `engine-graph/audit-bound-text.ts`, `document-bindings.ts` |
 | Rédaction propre, caractères interdits (P7, QC-06) | `engine-graph/audit-typography.ts` |
 | Liaison verticale au même point d'un niveau à l'autre (P5, QC-12) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+| Desserte de toutes les entrées, sens de circulation compris (QC-10) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
 
 Deux contrôles ont été écrits au passage, parce que leurs codes figuraient au
 catalogue D2 sans qu'aucun moteur ne les lève : le lexique de charte (A5.8),
 et la normalisation des parts de fréquentation (I5.3, et P1 de la partie N).
 Un essai du dépôt, `tests/error-code-reachability.test.ts`, refuse désormais
 qu'un code déclaré reste muet sans raison inscrite.
+
+De QC-10, « nœud public » est lu comme « nœud portant une destination » : le
+modèle ne classe pas les nœuds en publics et privés, et en inventer la notion
+serait un choix de modèle de données (A2.2). Les commodités qui ne portent pas
+de destination restent donc hors du contrôle. Le contrôle a par ailleurs sorti
+un point que le socle ignorait : le champ `direction` d'une arête, présent au
+modèle depuis A5, n'était lu que par le calcul d'itinéraire. Aucun contrôle de
+complétude ne le lisait, si bien qu'un sens unique coupant une aile du site ne
+se voyait nulle part — l'aile restant reliée au sens du modèle. QC-10 lit ce
+champ ; les contrôles de structure continuent de l'ignorer, et disent
+désormais pourquoi.
 
 De QC-12, une seule décision est prise : l'escalier mécanique est hors du
 contrôle. P5 énumère l'ascenseur, l'escalier et la rampe, et ne le cite pas ;

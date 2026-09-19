@@ -1,5 +1,6 @@
 import type { SiteData, Finding } from '@azimut/core-model';
 import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
+import { buildDirectedAdjacency, bfs } from './graph-traversal.js';
 
 export function crossLevelWithoutVlFindings(
   site: SiteData,
@@ -303,6 +304,77 @@ export function verticalLinkMisalignedFindings(
         offset_mm: roundHalfAwayFromZero(offset * 1000),
       },
       ruleRef: 'atelier-QC-12',
+    });
+  }
+  return findings;
+}
+
+/**
+ * QC-10 — une destination que toutes les entrées n'atteignent pas (complément
+ * atelier).
+ *
+ * Le contrôle existant, `GRAPH.DESTINATION_UNREACHABLE`, réunit ce que toutes
+ * les entrées atteignent et signale ce qui reste dehors. Il répond donc à
+ * « peut-on y aller ? », quand QC-10 demande « peut-on y aller **d'où qu'on
+ * entre** ? ». Un visiteur qui pousse la porte nord et un autre qui pousse la
+ * porte sud ne sont pas au même endroit ; une aile qu'une seule des deux
+ * dessert est un défaut de jalonnement que rien ne voyait.
+ *
+ * Il lit de plus le sens de circulation, que les contrôles de structure
+ * ignorent — voir `buildDirectedAdjacency`. Un sens unique qui coupe une aile
+ * la laisse reliée au sens du modèle, donc muette pour eux.
+ *
+ * **« Nœud public » est lu comme « nœud portant une destination ».** Le modèle
+ * ne classe pas les nœuds en publics et privés ; en inventer la notion serait
+ * un choix de modèle de données (A2.2). Les destinations sont ce que le site
+ * publie, et le rapprochement est le plus étroit que le modèle permette. Les
+ * commodités qui ne portent pas de destination — sanitaires, point
+ * d'information — restent donc hors du contrôle.
+ *
+ * Une anomalie par destination, et non par couple entrée-destination : une aile
+ * coupée est un défaut, pas cinq. Les entrées en défaut sont nommées dans les
+ * paramètres.
+ */
+export function destinationNotReachedFromEveryEntranceFindings(
+  site: SiteData,
+): Finding[] {
+  const { nodes, edges } = site.graph;
+  const entrances = nodes
+    .filter((n) => n.kind === 'entrance')
+    .sort((a, b) => a.id.localeCompare(b.id));
+  // Sans entrée, `GRAPH.NO_ENTRANCE` le dit déjà ; le redire ici n'ajouterait
+  // rien et masquerait le vrai manque derrière un bruit de destinations.
+  if (entrances.length === 0) return [];
+
+  const adj = buildDirectedAdjacency(nodes, edges);
+  const reachedBy = new Map<string, string[]>();
+  for (const entrance of entrances) {
+    for (const id of bfs(adj, entrance.id)) {
+      const list = reachedBy.get(id);
+      if (list) list.push(entrance.id);
+      else reachedBy.set(id, [entrance.id]);
+    }
+  }
+
+  const findings: Finding[] = [];
+  const sorted = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+  for (const dest of sorted) {
+    const reached = reachedBy.get(dest.node_id) ?? [];
+    if (reached.length === entrances.length) continue;
+    const missing = entrances
+      .map((e) => e.id)
+      .filter((id) => !reached.includes(id));
+    findings.push({
+      code: 'GRAPH.DESTINATION_ENTRANCE_COVERAGE',
+      severity: 'blocking',
+      entity: { kind: 'destination', id: dest.id },
+      params: {
+        node_id: dest.node_id,
+        reached_from: reached.length,
+        entrances_total: entrances.length,
+        unreached_entrance_ids: missing.join(','),
+      },
+      ruleRef: 'atelier-QC-10',
     });
   }
   return findings;
