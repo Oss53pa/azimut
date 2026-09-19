@@ -111,6 +111,20 @@ describe('QC-10 (complément atelier) — toutes les entrées desservent-elles t
     expect(destinationNotReachedFromEveryEntranceFindings(site)).toHaveLength(0);
   });
 
+  it('se tait sur une destination dont le nœud n’existe pas', () => {
+    // Elle n'est pas mal desservie, elle est mal rattachée, et
+    // GRAPH.DESTINATION_UNLINKED le dit déjà dans validateDirectory. La
+    // signaler ici donnerait au lecteur une cause fausse : il chercherait un
+    // problème de cheminement là où la référence est rompue.
+    const premiere = refMultilevel.destinations[0];
+    if (premiere === undefined) throw new Error('aucune destination de référence');
+    const site: SiteData = {
+      ...refMultilevel,
+      destinations: [{ ...premiere, node_id: 'n-ml-inexistant' }],
+    };
+    expect(destinationNotReachedFromEveryEntranceFindings(site)).toHaveLength(0);
+  });
+
   it('remonte jusqu’à validateGraph', () => {
     const site = oriente(deuxEntrees(refMultilevel), 'e-ml-entrance-sud-hall', 'backward');
     const result = validateGraph(site);

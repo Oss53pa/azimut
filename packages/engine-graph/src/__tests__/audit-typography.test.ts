@@ -88,6 +88,31 @@ describe('QC-06 (complément atelier) — caractères interdits', () => {
     expect(report.findings[0]?.params['name']).toBe('flèche');
   });
 
+  it('parcourt les blocs d’un gabarit par rang, quel que soit l’ordre du tableau', () => {
+    // L'ordre annoncé est déterministe ; rien ne garantit que le tableau des
+    // blocs arrive trié de la base.
+    const template = refMultilevel.face_templates[0];
+    if (template === undefined) throw new Error('aucun gabarit de référence');
+    const bloc = (ordinal: number, text: string) => ({
+      kind: 'free_text' as const,
+      ordinal,
+      region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 10 },
+      config: { text },
+    });
+    const site: SiteData = {
+      ...refMultilevel,
+      face_templates: [{
+        ...template,
+        blocks: [bloc(3, 'trois \u2014'), bloc(1, 'un \u2014'), bloc(2, 'deux \u2014')],
+      }],
+    };
+    const report = auditTypography(site);
+    expect(report.findings).toHaveLength(3);
+    expect(report.findings.map(f => f.entity?.id)).toEqual([
+      `${template.id}#1`, `${template.id}#2`, `${template.id}#3`,
+    ]);
+  });
+
   it('couvre le bloc des flèches, pas un caractère voisin', () => {
     // U+2190 à U+21FF inclus. U+218F et U+2200 sont juste en dehors.
     const dedans = auditTypography(siteAvecDenomination('←⇿'));

@@ -356,9 +356,17 @@ export function destinationNotReachedFromEveryEntranceFindings(
     }
   }
 
+  // Une destination dont le nœud n'existe pas n'est pas mal desservie, elle est
+  // mal rattachée, et `GRAPH.DESTINATION_UNLINKED` le dit déjà dans
+  // `validateDirectory`. La signaler ici aussi donnerait au lecteur une cause
+  // fausse : il chercherait un problème de cheminement là où la référence est
+  // rompue.
+  const nodeIds = new Set(nodes.map((n) => n.id));
+
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
   for (const dest of sorted) {
+    if (!nodeIds.has(dest.node_id)) continue;
     const reached = reachedBy.get(dest.node_id) ?? [];
     if (reached.length === entrances.length) continue;
     const missing = entrances

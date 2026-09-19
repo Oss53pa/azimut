@@ -90,7 +90,10 @@ function templateFreeTexts(site: SiteData): readonly { id: string; value: string
   const out: { id: string; value: string }[] = [];
   const templates = [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id));
   for (const template of templates) {
-    for (const block of template.blocks) {
+    // Par rang, comme l'annonce l'ordre déterministe : rien ne garantit que le
+    // tableau des blocs arrive trié de la base.
+    const blocks = [...template.blocks].sort((a, b) => a.ordinal - b.ordinal);
+    for (const block of blocks) {
       if (block.kind !== 'free_text') continue;
       const text = block.config['text'];
       if (typeof text !== 'string' || text === '') continue;

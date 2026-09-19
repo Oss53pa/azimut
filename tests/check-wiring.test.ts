@@ -24,6 +24,10 @@ const ROOT = resolve(HERE, '..');
  * la citation suffit, la chaîne d'appel n'est pas suivie. Une fonction appelée
  * par une autre fonction elle-même jamais appelée passerait. Le contrôle est
  * une barrière basse, pas une preuve d'atteignabilité.
+ *
+ * Les commentaires sont retirés avant de chercher la citation : un nom cité en
+ * prose n'est pas un appel, et laisser passer une mention suffirait à rendre
+ * un orphelin invisible.
  */
 
 /** Ce qui ressemble à un contrôle : son nom le dit. */
@@ -80,12 +84,26 @@ function productionSources(): string[] {
   return out;
 }
 
+/** Un nom cité en commentaire n'est pas un appel. */
+function stripComments(source: string): string {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/^[ \t]*\/\/.*$/gm, '');
+}
+
+/** Le corps déclarant, tel quel : c'est là qu'on lit les `export function`. */
+const declarations = new Map<string, string>();
+/** Le corps sans commentaires : c'est là qu'on cherche les appels. */
 const bodies = new Map<string, string>();
-for (const file of productionSources()) bodies.set(file, readFileSync(file, 'utf-8'));
+for (const file of productionSources()) {
+  const raw = readFileSync(file, 'utf-8');
+  declarations.set(file, raw);
+  bodies.set(file, stripComments(raw));
+}
 
 /** Les contrôles exportés, et le fichier qui les déclare. */
 const declared: { name: string; file: string }[] = [];
-for (const [file, body] of bodies) {
+for (const [file, body] of declarations) {
   for (const match of body.matchAll(CHECK_NAME)) {
     declared.push({ name: match[1] ?? '', file });
   }
