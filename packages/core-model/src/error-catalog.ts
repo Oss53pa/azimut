@@ -135,6 +135,9 @@ export const ERROR_CATALOG = {
   'DATA.FACE_DIMENSIONS_INVALID':           { severity: 'blocking', description: 'Dimensions de face nulles ou négatives' },
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': { severity: 'blocking', description: 'Transition d’état de version de support interdite' },
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet de version de support sans motif' },
+  // N4.3 — règle G7 : une version approuvée est immuable, une correction crée
+  // une nouvelle version.
+  'DATA.APPROVED_VERSION_NOT_IMMUTABLE': { severity: 'blocking', description: 'Version approuvée dont l’immuabilité n’est pas tenue' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable pour l’empreinte' },
 
   // Partie N, module 01 (N1.4) : code de cellule (règle S3).

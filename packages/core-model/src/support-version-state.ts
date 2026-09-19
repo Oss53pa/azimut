@@ -1,6 +1,17 @@
-import type { Finding, Outcome, SupportVersionState } from '@azimut/core-model';
+import type { Finding, Outcome } from './outcome.js';
+import type { SupportVersionState } from './site.js';
 
 /**
+ * G7 / T-2.14a §5 — Support-version state machine.
+ *
+ * « Une version approuvée est immuable. Une correction crée une nouvelle
+ * version. » C'est cette table qui le dit : depuis `approved`, aucun événement
+ * n'est admis sauf `supersede`, qui ne modifie pas la version mais la remplace.
+ *
+ * Vit dans `core-model` et non dans `packages/db` : c'est une décision pure,
+ * sans ORM ni réseau, et l'écran des épreuves doit pouvoir l'interroger — il
+ * ne peut pas atteindre la racine de `@azimut/db`, qui ouvre une connexion.
+ *
  * T-2.14a §5 — Support-version state machine. Unlisted transitions are
  * forbidden and raise a blocking finding with a stable code. Pure: it decides
  * the target state and the effect; the effect (recompute the empreinte, freeze
@@ -31,6 +42,24 @@ const TABLE: ReadonlyMap<string, SupportVersionTransition> = new Map([
   ['in_review|approve', { to: 'approved', effect: 'write_approval' }],
   ['approved|supersede', { to: 'superseded', effect: 'automatic' }],
 ]);
+
+/**
+ * États depuis lesquels un événement est admis, et vers quoi il mène.
+ *
+ * Lu plutôt que recopié : D9 et cette table décrivaient la même machine à deux
+ * endroits, et deux tables finissent par diverger (invariant 1).
+ */
+export function admittedEvents(
+  from: SupportVersionState,
+): readonly { readonly event: SupportVersionEvent; readonly to: SupportVersionState }[] {
+  const admitted: { event: SupportVersionEvent; to: SupportVersionState }[] = [];
+  for (const [key, transition] of TABLE) {
+    const [state, event] = key.split('|') as [SupportVersionState, SupportVersionEvent];
+    if (state !== from) continue;
+    admitted.push({ event, to: transition.to });
+  }
+  return admitted;
+}
 
 function blocking(code: string, params: Record<string, string | number>): Finding {
   return { code, severity: 'blocking', entity: null, params, ruleRef: null };

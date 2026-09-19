@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { transitionSupportVersion } from '../support-version-state.js';
+import { transitionSupportVersion, admittedEvents } from '../support-version-state.js';
 import type { SupportVersionEvent } from '../support-version-state.js';
-import type { SupportVersionState } from '@azimut/core-model';
+import type { SupportVersionState } from '../site.js';
 
 const STATES: readonly SupportVersionState[] = ['draft', 'in_review', 'approved', 'superseded'];
 const EVENTS: readonly SupportVersionEvent[] = ['modify', 'emit_proof', 'reject', 'approve', 'supersede'];
@@ -61,5 +61,49 @@ describe('transitionSupportVersion (T-2.14a §5 / §6.8)', () => {
     expect(transitionSupportVersion('in_review', 'modify').ok).toBe(false);
     expect(transitionSupportVersion('approved', 'modify').ok).toBe(false);
     expect(transitionSupportVersion('superseded', 'modify').ok).toBe(false);
+  });
+});
+
+/**
+ * G7 — « Une version approuvée est immuable. Une correction crée une nouvelle
+ * version. » C'est la table d'événements qui le dit ; ce test l'y tient.
+ */
+describe('G7 — ce qu’une version approuvée admet', () => {
+  it('n’admet que le remplacement', () => {
+    expect(admittedEvents('approved')).toEqual([
+      { event: 'supersede', to: 'superseded' },
+    ]);
+  });
+
+  it('refuse toute modification d’une version approuvée', () => {
+    for (const event of ['modify', 'emit_proof', 'reject', 'approve'] as const) {
+      const result = transitionSupportVersion('approved', event);
+      expect(result.ok, event).toBe(false);
+      if (result.ok) continue;
+      expect(result.findings[0]?.code).toBe('DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN');
+    }
+  });
+
+  it('fait de « remplacé » un état terminal', () => {
+    expect(admittedEvents('superseded')).toEqual([]);
+  });
+
+  it('laisse un brouillon se modifier, et lui seul', () => {
+    const modifiable = STATES.filter(
+      state => admittedEvents(state).some(a => a.event === 'modify')
+        || transitionSupportVersion(state, 'modify').ok,
+    );
+    expect(modifiable).toEqual(['draft']);
+  });
+
+  it('rend les mêmes transitions que celles que la table porte', () => {
+    for (const state of STATES) {
+      for (const { event, to } of admittedEvents(state)) {
+        const result = transitionSupportVersion(event === 'reject' ? state : state, event, { motif: 'x' });
+        expect(result.ok, `${state}|${event}`).toBe(true);
+        if (!result.ok) continue;
+        expect(result.value.to).toBe(to);
+      }
+    }
   });
 });

@@ -79,6 +79,11 @@ export type {
   TemplateSizing,
   TemplateValidationError,
 } from './template-schema.js';
+export { transitionSupportVersion, admittedEvents } from './support-version-state.js';
+export type {
+  SupportVersionEvent, SupportVersionEffect, SupportVersionTransition,
+} from './support-version-state.js';
+export { SUPPORT_VERSION_STATES } from './site.js';
 export {
   assertProofTransition,
   assertJobTransition,
