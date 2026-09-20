@@ -1332,6 +1332,12 @@ sont des capacités absentes du socle, pas un socle de rechange.
 
 ### Points encore ouverts
 
+Tenue à jour au fil des travaux : ce que la mise en œuvre a soulevé s'ajoute
+ici, sans quoi la section dirait le premier jour et non l'état du dépôt.
+
+**Décisions attendues de la maîtrise d'ouvrage.** Rien n'avance dessus tant
+qu'elles ne sont pas prises ; aucune n'est contournée en silence.
+
 1. Lequel des deux découpages de modules fait foi ? Les douze modules des
    parties L et N, ou les dix-sept M1 à M17 ? Sans réponse, les codes se citent
    avec leur document d'origine, comme la note de collision de CLAUDE.md
@@ -1347,10 +1353,50 @@ sont des capacités absentes du socle, pas un socle de rechange.
 4. La grille d'accessibilité (M12) attend les critères WCAG 2.2 et ISO 21542
    nommés, que le complément dit lui-même ne pas inventer. C'est un paquet de
    règles qui manque, pas du code.
+5. Une place de stationnement est décrite par M2 comme « segment ou polygone »,
+   et le modèle ne porte que `Polygon`. Tant que la forme n'est pas tranchée,
+   une place peut exister sans tracé, et les places ne se dessinent pas.
+6. QC-12 s'intitule « liaison verticale non alignée », quand P5 énumère
+   l'ascenseur, l'escalier et la rampe sans citer l'escalier mécanique. Le
+   contrôle suit l'énumération ; le titre se lirait plus largement.
+7. Les contrôles de complétude ignorent le sens de circulation ; QC-10 est le
+   seul à le lire. Rendre `GRAPH.ZONE_UNREACHABLE` orienté changerait le sens
+   d'un code existant, ce qui n'est pas une décision de revue.
+8. I5.3 parle de destinations *motrices* pour les poids d'attraction. Le modèle
+   ne distingue pas une destination motrice d'une autre, et l'écran des
+   parcours clients attribue donc une part à toutes.
+
+**Travaux repérés, non entrepris.** Ils ne demandent pas d'arbitrage, seulement
+du temps, et chacun est nommé pour ne pas rester un silence.
+
+9. Le reste de M15 : structure du document, objets de cartographie, ingestion
+   de la plateforme de marque, publication.
+10. Les grands formats imprimés A0 et A1, qui butent sur le choix de la
+    bibliothèque de génération PDF, réservé par A3.1 à la tâche T-0.9.
+11. La seconde moitié de P7 — « présent de l'indicatif, pas de conditionnel » —
+    et ses deux contrôles voisins QC-07 et QC-20. Les trois demandent une
+    analyse de la langue, quand QC-06 ne demande que de lire des points de code.
+12. Onze codes du catalogue D2 restent muets, chacun avec sa raison inscrite
+    dans `tests/error-code-reachability.test.ts`. Trois familles : la capacité
+    n'est pas construite — import vectoriel, encre, éditeur de pictogrammes,
+    calcul d'exposition, variante de langue à la composition ; la donnée manque
+    au modèle — code d'unité sur l'empreinte, largeur minimale de logo, calage
+    par niveau ; ou le paquet de règles fait défaut, pour l'adjacence
+    chromatique.
+13. Neuf garde-fous du studio ne sont appelés par aucun écran : ils ont été
+    écrits d'avance sur les parties E, G et I. La liste et l'action qui manque
+    à chacun sont dans `tests/check-wiring.test.ts`.
+14. Une part de fréquentation négative qui laisserait la somme à un passerait
+    le contrôle de normalisation. Lui donner un code au catalogue est une
+    décision qui dépasse le fait de lever un code déjà déclaré.
+15. Les portails véhicules ne se dessinent pas : un point orienté sur un plan
+    demande un symbole, ce qui relève de la conception graphique.
+16. Neuf fichiers du dépôt dépassent les quatre cents lignes de A2.4, tous
+    antérieurs à ce complément.
 
 ### Ce qui est implémenté à ce jour
 
-Six des sept capacités que le complément ajoute réellement au socle, chacune
+Cinq des sept capacités que le complément ajoute réellement au socle, chacune
 avec ses contrôles et ses tests :
 
 | Capacité | Où |
@@ -1360,15 +1406,27 @@ avec ses contrôles et ses tests :
 | Écarts entre sources (M16) | `core-model/source-claims.ts`, `engine-graph/audit-source-claims.ts`, migration 0020 |
 | Stationnement et refus de l'extrapolation (M2) | `core-model/parking.ts`, `engine-graph/audit-parking.ts`, migration 0021 |
 | Texte lié d'un document (M15) | `core-model/bound-text.ts`, `engine-graph/audit-bound-text.ts`, `document-bindings.ts` |
-| Rédaction propre, caractères interdits (P7, QC-06) | `engine-graph/audit-typography.ts` |
-| Liaison verticale au même point d'un niveau à l'autre (P5, QC-12) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
-| Desserte de toutes les entrées, sens de circulation compris (QC-10) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
 
-Deux contrôles ont été écrits au passage, parce que leurs codes figuraient au
-catalogue D2 sans qu'aucun moteur ne les lève : le lexique de charte (A5.8),
-et la normalisation des parts de fréquentation (I5.3, et P1 de la partie N).
-Un essai du dépôt, `tests/error-code-reachability.test.ts`, refuse désormais
-qu'un code déclaré reste muet sans raison inscrite.
+Les deux qui manquent sont nommées plus bas : le reste de M15, et les grands
+formats imprimés.
+
+Trois contrôles de la liste QC, qui ne sont pas des capacités mais des règles
+qu'aucun moteur n'exerçait, ont été levés depuis :
+
+| Contrôle | Où |
+| --- | --- |
+| QC-06 — caractère interdit dans un texte de livrable (P7) | `engine-graph/audit-typography.ts` |
+| QC-10 — desserte de toutes les entrées, sens de circulation compris | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+| QC-12 — liaison verticale au même point d'un niveau à l'autre (P5) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+
+Deux contrôles du socle ont été écrits au passage, parce que leurs codes
+figuraient au catalogue D2 sans qu'aucun moteur ne les lève : le lexique de
+charte (A5.8), et la normalisation des parts de fréquentation (I5.3, et la
+règle P1 de la partie N). Cinq essais du dépôt ferment désormais les portes par
+lesquelles ces silences étaient entrés : un code déclaré et jamais levé, une
+fonction de contrôle jamais appelée, un jeton de règle cité sans son document,
+un caractère de contrôle qui fait passer une source pour un binaire, et une
+dérive entre les trois descriptions du schéma de base.
 
 De QC-10, « nœud public » est lu comme « nœud portant une destination » : le
 modèle ne classe pas les nœuds en publics et privés, et en inventer la notion
