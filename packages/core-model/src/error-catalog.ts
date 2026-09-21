@@ -215,6 +215,12 @@ export const ERROR_CATALOG = {
   'EDIT.OBJECT_LOCKED':                     { severity: 'warning',  description: 'Objet verrouillé par un autre utilisateur' },
   'EDIT.LOCK_OVERRIDDEN':                   { severity: 'info',     description: 'Verrou forcé, journalisé' },
   'EDIT.TOUCH_TOOL_UNAVAILABLE':            { severity: 'info',     description: 'Outil de tracé indisponible au doigt' },
+  'EDIT.TABLE_NOT_OWNED':                   { severity: 'blocking', description: 'Écriture demandée sur une table que le module ne possède pas' },
+  'EDIT.COMMAND_SHAPE_INVALID':             { severity: 'blocking', description: 'Commande dont les états avant et après ne s’accordent pas avec l’opération' },
+  'EDIT.TIMESTAMP_REQUIRED':                { severity: 'blocking', description: 'Commande sans horodatage fourni par l’appelant' },
+  'EDIT.WRITE_REFUSED':                     { severity: 'blocking', description: 'Écriture refusée par la base' },
+  'EDIT.NOTHING_TO_UNDO':                   { severity: 'info',     description: 'Aucun geste à annuler' },
+  'EDIT.NOTHING_TO_REDO':                   { severity: 'info',     description: 'Aucun geste à rétablir' },
 
   // ── ASSET (E17) ───────────────────────────────────────────
   'ASSET.SANITIZATION_FAILED':              { severity: 'blocking', description: 'Actif importé non assainissable' },

@@ -201,3 +201,17 @@ export {
   SUPPORT_CONTEXT_MANDATE,
 } from './module-ownership.js';
 export type { ModuleKey } from './module-ownership.js';
+export {
+  COMMAND_OPERATIONS,
+  buildCommand,
+  ownsTable,
+  inverseCommand,
+  changedColumns,
+} from './site-commands.js';
+export type {
+  CommandOperation,
+  ColumnValue,
+  RowValues,
+  EntityCommand,
+  CommandDraft,
+} from './site-commands.js';
