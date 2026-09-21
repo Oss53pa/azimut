@@ -151,6 +151,27 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      # Un secret vide ne dit pas pourquoi il est vide. La cause la plus
+      # fréquente est un rangement dans le mauvais volet : la page « Secrets and
+      # variables > Actions » en a deux, et ce qui est déposé sous « Variables »
+      # n'alimente jamais `secrets.*`. Ce pas lève ce doute-là, et lui seul.
+      #
+      # Il ne lit que le contexte `vars`, qui ne porte aucun identifiant, et
+      # n'en sort que les noms. Le contexte `secrets` n'est pas lu en bloc : le
+      # faire aurait la forme exacte d'une exfiltration, quand bien même on n'en
+      # imprimerait que les clés. Les deux secrets attendus restent donc éprouvés
+      # un par un, sur leur seule présence.
+      - name: Lister les variables du dépôt
+        env:
+          NOMS_VARIABLES: ${{ toJSON(vars) }}
+        run: |
+          echo "Variables visibles de ce job, par leur nom :"
+          printf '%s' "$NOMS_VARIABLES" \
+            | jq -r 'if length == 0 then "  (aucune)" else (keys[] | "  - " + .) end'
+          echo
+          echo "Un nom attendu qui figure ci-dessus est au mauvais volet : il a"
+          echo "été déposé en variable, là où le déploiement attend un secret."
+
       # Avant toute installation : un secret absent doit se dire ici, en une
       # phrase qui nomme le remède, et non trois minutes plus tard dans une
       # erreur d'authentification de wrangler.
@@ -163,7 +184,7 @@ jobs:
           [ -n "$CLOUDFLARE_API_TOKEN" ] || manquants="$manquants CLOUDFLARE_API_TOKEN"
           [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || manquants="$manquants CLOUDFLARE_ACCOUNT_ID"
           if [ -n "$manquants" ]; then
-            echo "::error::Secrets manquants :$manquants — à déclarer dans Settings > Secrets and variables > Actions du dépôt. Le jeton se crée sur le tableau de bord Cloudflare avec le droit « Edit Cloudflare Workers »."
+            echo "::error::Secrets manquants :$manquants — à déclarer dans Settings > Secrets and variables > Actions, volet « Secrets », section « Repository secrets ». Le pas précédent liste les variables du dépôt : un nom manquant qui y figure est au mauvais volet. Absent des deux, il n'a pas été enregistré ici — ou l'a été sous Dependabot, Codespaces, un environnement, ou au niveau de l'organisation sans accès accordé à ce dépôt. Le jeton se crée sur le tableau de bord Cloudflare avec le droit « Edit Cloudflare Workers »."
             exit 1
           fi
           echo "Les deux secrets sont déclarés."
