@@ -56,6 +56,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'LAYOUT.LANG_VARIANT_LONGER': 'Non-primary language variant is longer',
   'LAYOUT.LEXICON_FORBIDDEN_TERM': 'Term forbidden by charter',
   'LAYOUT.FORBIDDEN_CHARACTER': 'Character forbidden in deliverable text',
+  'LAYOUT.SENTENCE_TOO_LONG': 'Sentence longer than the writing rule allows',
   'LAYOUT.LEXICON_DISCOURAGED_TERM': 'Term discouraged by charter',
   'LAYOUT.FACT_CONTRADICTED': 'Text contradicting a site fact',
   'LAYOUT.SOURCE_DISCREPANCY_OPEN': 'Unsettled discrepancy between sources, retained value to be confirmed',

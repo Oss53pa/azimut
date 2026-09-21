@@ -72,6 +72,8 @@ export const ERROR_CATALOG = {
   'LAYOUT.LEXICON_FORBIDDEN_TERM':          { severity: 'blocking', description: 'Terme interdit par la charte' },
   // Complément atelier, QC-06 : caractère que la rédaction propre bannit.
   'LAYOUT.FORBIDDEN_CHARACTER':             { severity: 'blocking', description: 'Caractère interdit dans un texte de livrable' },
+  // Complément atelier, QC-20 : rédaction trop longue dans un texte libre.
+  'LAYOUT.SENTENCE_TOO_LONG':               { severity: 'warning',  description: 'Phrase plus longue que la rédaction ne l’admet' },
   'LAYOUT.LEXICON_DISCOURAGED_TERM':        { severity: 'warning',  description: 'Terme déconseillé par la charte' },
   // Complément atelier, M3 et QC-05 : un texte qui contredit un fait du site.
   'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte contraire à un fait du site' },

@@ -56,6 +56,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'LAYOUT.LANG_VARIANT_LONGER': 'La variante non primaire est plus longue',
   'LAYOUT.LEXICON_FORBIDDEN_TERM': 'Terme interdit par la charte',
   'LAYOUT.FORBIDDEN_CHARACTER': 'Caractère interdit dans un texte de livrable',
+  'LAYOUT.SENTENCE_TOO_LONG': 'Phrase plus longue que la rédaction ne l’admet',
   'LAYOUT.LEXICON_DISCOURAGED_TERM': 'Terme déconseillé par la charte',
   'LAYOUT.FACT_CONTRADICTED': 'Texte contraire à un fait du site',
   'LAYOUT.SOURCE_DISCREPANCY_OPEN': 'Écart entre sources non arbitré, valeur retenue à confirmer',
