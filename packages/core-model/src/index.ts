@@ -4,6 +4,21 @@ export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
 } from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
+export {
+  fitMeasuredCalibration,
+  auditCalibrationResiduals,
+  applyAffine,
+  MIN_CONTROL_POINTS,
+  MEASURING_CONTROL_POINTS,
+} from './affine-calibration.js';
+export type {
+  PlanPixelPoint,
+  ControlPointPair,
+  AffineTransform,
+  ControlPointResidual,
+  MeasuredCalibration,
+  ResidualTolerance,
+} from './affine-calibration.js';
 export { edgeLengthBetween, computeEdgeLengths } from './edge-length.js';
 export type { EdgeEnd, EdgeLengthInput } from './edge-length.js';
 export {
@@ -48,6 +63,23 @@ export {
   WEIGHT_SUM_TOLERANCE,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
+export { findLexiconMatches } from './lexicon.js';
+export type { SiteFact, ForbiddenWord } from './site-facts.js';
+export { detectDiscrepancies, markIfOpen } from './source-claims.js';
+export { EMPTY_VOCABULARY } from './site-vocabulary.js';
+export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
+export type {
+  ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
+} from './parking.js';
+export type { VehicleGate } from './site.js';
+export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
+export type {
+  TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,
+  BindingCatalogue, MissingBinding,
+} from './bound-text.js';
+export type { SiteVocabulary } from './site-vocabulary.js';
+export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
+export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
 export { canonicalContentJson, empreinte } from './empreinte.js';
 export {
@@ -72,6 +104,7 @@ export {
   validateTemplate,
 } from './template-schema.js';
 export type {
+  Binding,
   Template,
   TemplateBlock,
   TemplateBlockKind,

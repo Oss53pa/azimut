@@ -234,6 +234,50 @@ export type SupportVersionRow = {
 };
 
 /** Toutes les lignes d'un site, telles qu'un chemin de lecture les rassemble. */
+/** Complément atelier M2 — lignes du stationnement. */
+export type ParkingRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  readonly geometry: unknown;
+  readonly name: string;
+  readonly free: boolean;
+  readonly declared_capacity: number;
+  readonly status: string;
+  readonly source: string;
+};
+
+export type ParkingSpaceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly parking_id: string;
+  readonly kind: string;
+  readonly row_label: string;
+  readonly geometry: unknown;
+  readonly status: string;
+  readonly source: string;
+};
+
+export type ParkingUncoveredAreaRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly parking_id: string;
+  readonly geometry: unknown;
+  readonly reason: string;
+};
+
+export type VehicleGateRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  readonly code: string;
+  readonly role: string;
+  readonly width_m: string;
+  readonly position: unknown;
+  readonly status: string;
+  readonly source: string;
+};
+
 export type SiteRowSet = {
   readonly organization: OrganizationRow;
   readonly site: SiteRow;
@@ -256,4 +300,8 @@ export type SiteRowSet = {
   readonly support_faces: readonly SupportFaceRow[];
   readonly content_blocks: readonly SupportContentBlockRow[];
   readonly support_versions: readonly SupportVersionRow[];
+  readonly parkings: readonly ParkingRow[];
+  readonly parking_spaces: readonly ParkingSpaceRow[];
+  readonly parking_uncovered: readonly ParkingUncoveredAreaRow[];
+  readonly vehicle_gates: readonly VehicleGateRow[];
 };

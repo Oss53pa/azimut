@@ -34,7 +34,8 @@ export type PlanSource = {
  * Calage d'un fond de plan : ce qui transforme un pixel en mètre.
  *
  * `scale_m_per_px` est l'échelle du fond, en mètres réels par pixel — l'inverse
- * de la résolution manipulée à la saisie (M2, `resolution_px_per_m`). Les deux
+ * de la résolution manipulée à la saisie (écran M2 de la tranche M,
+ * `resolution_px_per_m`). Les deux
  * représentent la même mesure ; A5.2 fixe celle qui est stockée.
  *
  * `origin_x` / `origin_y` situent l'origine du fond dans le repère site, en

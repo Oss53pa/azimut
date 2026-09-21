@@ -19,6 +19,12 @@ export const ERROR_CATALOG = {
   'GRAPH.DISCONNECTED':                     { severity: 'blocking', description: 'Graphe non connexe' },
   'GRAPH.DEAD_END_UNJUSTIFIED':             { severity: 'warning',  description: 'Impasse sans destination ni justification' },
   'GRAPH.VERTICAL_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre niveaux sans liaison verticale' },
+  // Complément atelier, QC-12 : la liaison ne tombe pas au même point d'un
+  // niveau à l'autre, quand P5 (complément atelier) veut qu'elle y tombe.
+  'GRAPH.VERTICAL_LINK_MISALIGNED':         { severity: 'blocking', description: 'Liaison verticale décalée entre deux niveaux' },
+  // Complément atelier, QC-10 : atteignable depuis une entrée ne vaut pas
+  // atteignable depuis toutes, et le sens de circulation y entre.
+  'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'blocking', description: 'Destination que toutes les entrées n’atteignent pas' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
@@ -64,7 +70,24 @@ export const ERROR_CATALOG = {
   'LAYOUT.LANG_VARIANT_MISSING':            { severity: 'warning',  description: 'Dénomination absente dans une langue active' },
   'LAYOUT.LANG_VARIANT_LONGER':             { severity: 'info',     description: 'La variante non primaire est plus longue' },
   'LAYOUT.LEXICON_FORBIDDEN_TERM':          { severity: 'blocking', description: 'Terme interdit par la charte' },
+  // Complément atelier, QC-06 : caractère que la rédaction propre bannit.
+  'LAYOUT.FORBIDDEN_CHARACTER':             { severity: 'blocking', description: 'Caractère interdit dans un texte de livrable' },
   'LAYOUT.LEXICON_DISCOURAGED_TERM':        { severity: 'warning',  description: 'Terme déconseillé par la charte' },
+  // Complément atelier, M3 et QC-05 : un texte qui contredit un fait du site.
+  'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte contraire à un fait du site' },
+  // Complément atelier, M16 : deux sources donnent des valeurs différentes.
+  'LAYOUT.SOURCE_DISCREPANCY_OPEN':         { severity: 'warning',  description: 'Écart entre sources non arbitré, valeur retenue à confirmer' },
+
+  // ── PARK (complément atelier, M2) ─────────────────────────
+  'PARK.CAPACITY_UNEXPLAINED':              { severity: 'blocking', description: 'Places numérisées en deçà de la capacité annoncée, sans zone non couverte déclarée' },
+  'PARK.CAPACITY_EXCEEDED':                 { severity: 'blocking', description: 'Places numérisées au-delà de la capacité annoncée' },
+  'PARK.SOURCE_MISSING':                    { severity: 'blocking', description: 'Objet de stationnement sans source' },
+  'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de stationnement non existant porté à un livrable' },
+
+  // ── DOC (complément atelier, M15) ─────────────────────────
+  'DOC.BINDING_UNKNOWN':                    { severity: 'blocking', description: 'Champ lié que le modèle n’offre pas : faute du document' },
+  'DOC.BINDING_UNRESOLVED':                 { severity: 'blocking', description: 'Champ lié sans valeur : le paragraphe ne se rend pas' },
+  'DOC.LITERAL_NUMBER':                     { severity: 'warning',  description: 'Nombre écrit en littéral là où un champ lié est attendu' },
   'LAYOUT.CHROMATIC_ADJACENCY':             { severity: 'blocking', description: 'Adjacence chromatique interdite' },
   'LAYOUT.LOGO_BELOW_MIN_WIDTH':            { severity: 'blocking', description: 'Logo sous la largeur minimale' },
   'LAYOUT.ISO_LEVEL_NOT_FOUND':             { severity: 'blocking', description: 'Niveau introuvable pour vue isométrique' },
@@ -164,6 +187,12 @@ export const ERROR_CATALOG = {
   'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
   // Partie N, module 01 (N1.4) : niveau sans plan calé.
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
+  // Complément atelier, M1.4 : calage mesuré sur points homologues.
+  'CALIB.CONTROL_POINTS_INSUFFICIENT':      { severity: 'blocking', description: 'Moins de trois paires de points homologues pour un calage mesuré' },
+  'CALIB.CONTROL_POINTS_COLLINEAR':         { severity: 'blocking', description: 'Points homologues alignés, la transformation affine est indéterminée' },
+  'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien' },
+  'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus de la tolérance' },
+  'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point homologue au-dessus de la tolérance' },
   // N1.3 — règle S1 : le repère site est fixé au premier calage.
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
   'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Repère site différent de celui du premier calage' },
@@ -262,6 +291,10 @@ export const ANOMALY_DOMAINS = [
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
   // Tranche M : calage d'un fond de plan, et accès au dépôt de données.
   'CALIB', 'NET',
+  // Complément atelier (M2) : stationnement.
+  'PARK',
+  // Complément atelier (M15) : document de stratégie et texte lié.
+  'DOC',
   // Partie J: ink, sketch layer, revision, pictogram editor, libraries.
   'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
 ] as const;

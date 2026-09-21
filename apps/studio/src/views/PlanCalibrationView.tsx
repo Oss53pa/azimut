@@ -4,7 +4,6 @@ import {
   calibratedLevelIds, siteOrigin, guardSiteOrigin, firstCalibration,
 } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
-import type { Translate } from '../i18n/index.js';
 import {
   computeCalibration,
   DEFAULT_PLAUSIBLE_RESOLUTION,
@@ -12,11 +11,17 @@ import {
   type PlanPoint,
 } from '../domain/plan-calibration.js';
 import {
-  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow, DataTable, Tag,
-  SPACE, TEXT, LABEL_STYLE, type Column, type Metric,
+  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow, DataTable,
+  SPACE, TEXT, LABEL_STYLE, BUTTON_STYLE, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { CalibrationSurface, SURFACE_HEIGHT, SURFACE_WIDTH } from './calibration/CalibrationSurface.js';
+import { Field } from './calibration/Field.js';
+import { FIELD_STYLE } from './calibration/field-style.js';
+import { MeasuredCalibrationPanel } from './calibration/MeasuredCalibrationPanel.js';
+import {
+  LEVEL_COLUMNS, type LevelCalibrationState,
+} from './calibration/LevelCalibrationTable.js';
 
 /**
  * Tranche M · écran M2 — calage du fond de plan.
@@ -68,6 +73,17 @@ export function PlanCalibrationView(): JSX.Element {
   const [pointB, setPointB] = useState<PlanPoint | null>(null);
   const [distance, setDistance] = useState('42.500');
   const [azimuth, setAzimuth] = useState('');
+  // E6.2 — saisie numérique du point, équivalent clavier du clic sur la surface.
+  const [entryX, setEntryX] = useState('');
+  const [entryY, setEntryY] = useState('');
+  const [announcement, setAnnouncement] = useState('');
+
+  /**
+   * Le point que la prochaine pose vise. Le clic place A, puis B, puis
+   * recommence en A ; la saisie suit exactement le même cycle, pour que les
+   * deux voies ne divergent jamais.
+   */
+  const nextPoint: 'a' | 'b' = pointA === null || pointB !== null ? 'a' : 'b';
 
   function placePoint(point: PlanPoint): void {
     if (pointA === null) { setPointA(point); return; }
@@ -76,9 +92,40 @@ export function PlanCalibrationView(): JSX.Element {
     setPointB(null);
   }
 
+  function announcePlacement(point: PlanPoint): void {
+    setAnnouncement(t('calibration.announce.placed', {
+      point: t(`calibration.points.${nextPoint}`),
+      x: Math.round(point.x_px),
+      y: Math.round(point.y_px),
+    }));
+  }
+
+  function placeByPointer(point: PlanPoint): void {
+    placePoint(point);
+    announcePlacement(point);
+  }
+
+  /** Équivalent clavier du clic : le point saisi au chiffre près (E6.2). */
+  function placeFromEntry(): void {
+    // `Number('')` vaut 0 : sans ce rejet, presser le bouton sans rien saisir
+    // poserait le point à l'origine du fond, ce qui fausserait l'échelle.
+    if (entryX.trim() === '' || entryY.trim() === '') return;
+    const x = Number(entryX.replace(',', '.'));
+    const y = Number(entryY.replace(',', '.'));
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const point: PlanPoint = { x_px: x, y_px: y };
+    placePoint(point);
+    announcePlacement(point);
+    setEntryX('');
+    setEntryY('');
+  }
+
   function reset(): void {
     setPointA(null);
     setPointB(null);
+    setEntryX('');
+    setEntryY('');
+    setAnnouncement(t('calibration.announce.reset'));
   }
 
   const parsedDistance = Number(distance.replace(',', '.'));
@@ -168,7 +215,7 @@ export function PlanCalibrationView(): JSX.Element {
               levelId={levelId}
               pointA={pointA}
               pointB={pointB}
-              onPlace={placePoint}
+              onPlace={placeByPointer}
             />
             <p style={{
               margin: 0,
@@ -200,6 +247,28 @@ export function PlanCalibrationView(): JSX.Element {
                 <span style={LABEL_STYLE}>{t('calibration.points.title')}</span>
                 <PointReadout label={t('calibration.points.a')} point={pointA} empty={t('calibration.points.empty')} />
                 <PointReadout label={t('calibration.points.b')} point={pointB} empty={t('calibration.points.empty')} />
+              </div>
+              <div style={{ display: 'grid', gap: SPACE.md }}>
+                <Field
+                  label={t('calibration.field.x')}
+                  hint={t('calibration.field.px')}
+                  value={entryX}
+                  onChange={setEntryX}
+                  inputMode="decimal"
+                />
+                <Field
+                  label={t('calibration.field.y')}
+                  hint={t('calibration.field.px')}
+                  value={entryY}
+                  onChange={setEntryY}
+                  inputMode="decimal"
+                />
+                <button type="button" style={BUTTON_STYLE} onClick={placeFromEntry}>
+                  {t('calibration.action.place', { point: t(`calibration.points.${nextPoint}`) })}
+                </button>
+                <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
+                  {t('calibration.entry.note')}
+                </span>
               </div>
             </div>
             <Note>{t('calibration.plausible.note', {
@@ -271,86 +340,23 @@ export function PlanCalibrationView(): JSX.Element {
       </div>
 
       <Note>{t('calibration.note')}</Note>
+
+      <p
+        role="status"
+        aria-live="polite"
+        style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}
+      >
+        {announcement}
+      </p>
+
+      <h2 style={{ ...LABEL_STYLE, margin: `${String(SPACE.xl)}px 0 0` }}>
+        {t('measured.section')}
+      </h2>
+      <MeasuredCalibrationPanel key={levelId} site={site} levelId={levelId} />
     </div>
   );
 }
 
-type LevelCalibrationState = {
-  readonly id: string;
-  readonly name: string;
-  readonly sourceCount: number;
-  readonly calibrated: boolean;
-};
-
-/**
- * Trois états et non deux : le libellé dit s'il reste à importer un fond ou à
- * caler celui qui est là. Le code d'anomalie est le même, la conduite à tenir
- * ne l'est pas.
- */
-function LEVEL_COLUMNS(t: Translate): readonly Column<LevelCalibrationState>[] {
-  return [
-    { id: 'level', header: t('calibration.levels.col.level'), cell: (row) => row.name },
-    {
-      id: 'sources',
-      header: t('calibration.levels.col.sources'),
-      numeric: true,
-      cell: (row) => row.sourceCount,
-    },
-    {
-      id: 'state',
-      header: t('calibration.levels.col.state'),
-      cell: (row) => {
-        if (row.calibrated) {
-          return <Tag label={t('calibration.levels.state.calibrated')} severity="valid" />;
-        }
-        return (
-          <Tag
-            label={row.sourceCount === 0
-              ? t('calibration.levels.state.nosource')
-              : t('calibration.levels.state.uncalibrated')}
-            severity="blocking"
-          />
-        );
-      },
-    },
-  ];
-}
-
-const FIELD_STYLE: React.CSSProperties = {
-  border: '1px solid var(--border-interactive)',
-  background: 'var(--surface-panel)',
-  color: 'var(--text-primary)',
-  borderRadius: 4,
-  padding: '4px 8px',
-  fontSize: TEXT.small,
-  fontFamily: 'inherit',
-  textTransform: 'none',
-  letterSpacing: 0,
-};
-
-type FieldProps = {
-  readonly label: string;
-  readonly hint: string;
-  readonly value: string;
-  readonly onChange: (value: string) => void;
-  readonly inputMode?: 'decimal';
-};
-
-function Field({ label, hint, value, onChange, inputMode }: FieldProps): JSX.Element {
-  return (
-    <label style={{ display: 'grid', gap: SPACE.xs }}>
-      <span style={LABEL_STYLE}>{label}</span>
-      <input
-        type="text"
-        inputMode={inputMode}
-        value={value}
-        onChange={(e) => { onChange(e.target.value); }}
-        style={{ ...FIELD_STYLE, fontFamily: 'var(--font-mono)' }}
-      />
-      <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>{hint}</span>
-    </label>
-  );
-}
 
 type PointReadoutProps = {
   readonly label: string;

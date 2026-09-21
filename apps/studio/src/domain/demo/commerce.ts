@@ -29,7 +29,7 @@ export type CreativeSubmission = {
   readonly creative: Creative;
   readonly placement_id: string;
   readonly verdict: CreativeVerdict;
-  /** R5 — ce qui a été reçu, et qui passe par l'assainissement. */
+  /** R5 (partie N) — ce qui a été reçu, et qui passe par l'assainissement. */
   readonly payload: CreativePayload;
 };
 
@@ -166,7 +166,7 @@ export const DEMO_CREATIVES: readonly CreativeSubmission[] = [
       weight_bytes: 61_000_000,
     },
     // Binaire, et non conforme sur les cinq axes de la fiche : c'est le cas
-    // R6, celui que l'assainissement ne concerne pas.
+    // R6 (partie N), celui que l'assainissement ne concerne pas.
     payload: { kind: 'binary' },
   },
   {
@@ -180,7 +180,7 @@ export const DEMO_CREATIVES: readonly CreativeSubmission[] = [
       color_profile: 'CMYK',
       weight_bytes: 900_000,
     },
-    // R5 en situation : ce qui est stocké n'est pas ce qui a été reçu. Le
+    // R5 (partie N) en situation : ce qui est stocké n'est pas ce qui a été reçu. Le
     // script, le gestionnaire d'événement, l'entité externe et l'image
     // distante sont retirés ; ce qui reste est rendable, et l'écran dit ce qui
     // a été retiré.

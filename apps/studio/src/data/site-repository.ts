@@ -8,7 +8,7 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
-import type { SiteData } from '@azimut/core-model';
+import type { SiteData, SiteVocabulary } from '@azimut/core-model';
 
 export type SiteSummary = {
   readonly id: string;
@@ -27,6 +27,16 @@ export type SiteRepository = {
   readonly origin: string;
   listSites(): Promise<readonly SiteSummary[]>;
   loadSite(siteId: string): Promise<SiteData>;
+  /**
+   * Ce que le site oppose à ses textes : lexique de charte, faits,
+   * affirmations de source.
+   *
+   * Séparé de `loadSite` parce que ce n'est pas de la géométrie et qu'un site
+   * se dessine sans : une carte s'affiche, un contrôle de vocabulaire attend.
+   * Un dépôt qui n'en porte pas rend un vocabulaire vide, et les contrôles se
+   * rangent alors parmi les non exercés — jamais parmi les réussis.
+   */
+  loadVocabulary(siteId: string): Promise<SiteVocabulary>;
 };
 
 export const REPOSITORY_ERROR_CODES = [

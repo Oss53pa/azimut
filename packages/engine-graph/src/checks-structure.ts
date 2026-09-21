@@ -1,4 +1,6 @@
 import type { SiteData, Finding } from '@azimut/core-model';
+import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
+import { buildDirectedAdjacency, bfs } from './graph-traversal.js';
 
 export function crossLevelWithoutVlFindings(
   site: SiteData,
@@ -229,6 +231,159 @@ export function missingDestinationNameFindings(
         });
       }
     }
+  }
+  return findings;
+}
+
+/**
+ * QC-12 — une liaison verticale qui ne tombe pas au même endroit d'un niveau à
+ * l'autre (complément atelier).
+ *
+ * P5 (complément atelier) : « Un ascenseur, un escalier ou une rampe occupe le
+ * même point sur les deux niveaux qu'il relie. » Un visiteur qui monte par
+ * l'ascenseur ressort au même endroit du plan ; si les deux nœuds ne
+ * coïncident pas, le plan du niveau supérieur place la sortie ailleurs que là
+ * où elle est, et aucun contrôle existant ne le voyait — `VERTICAL_LINK_MISSING`
+ * ne juge que la présence de la liaison, pas sa position.
+ *
+ * **Le seuil n'est pas inventé et n'est pas normatif.** P5 dit « le même
+ * point » ; D1.5 définit déjà `POINT_COINCIDENCE_M` comme la distance en deçà
+ * de laquelle deux points sont le même point, et la range explicitement parmi
+ * les tolérances techniques. Le contrôle applique cette définition, il n'en
+ * pose pas une nouvelle.
+ *
+ * **L'escalier mécanique est hors du contrôle**, et c'est le seul choix que ce
+ * module prend. P5 énumère trois natures et ne le cite pas ; un escalier
+ * mécanique franchit d'ailleurs sa hauteur en avançant, ses deux extrémités ne
+ * peuvent pas coïncider. Le retenir produirait une anomalie bloquante sur une
+ * géométrie correcte. Le titre de QC-12, « liaison verticale non alignée », se
+ * lirait plus largement : l'écart entre l'énumération de P5 et ce titre n'est
+ * pas tranché ici.
+ */
+export function verticalLinkMisalignedFindings(
+  site: SiteData,
+): Finding[] {
+  const nodeById = new Map(site.graph.nodes.map((n) => [n.id, n]));
+  const edgeById = new Map(site.graph.edges.map((e) => [e.id, e]));
+
+  const findings: Finding[] = [];
+  const sorted = [...site.graph.vertical_links].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
+  for (const link of sorted) {
+    if (link.kind === 'escalator') continue;
+    const edge = edgeById.get(link.edge_id);
+    if (edge === undefined) continue;
+    const from = nodeById.get(edge.from_node_id);
+    const to = nodeById.get(edge.to_node_id);
+    if (from === undefined || to === undefined) continue;
+    // Une liaison dont les deux nœuds sont sur le même niveau n'est pas une
+    // liaison verticale : `VERTICAL_LINK_MISSING` couvre l'inverse, et il n'y a
+    // rien à aligner entre un niveau et lui-même.
+    if (from.level_id === to.level_id) continue;
+
+    const offset = Math.hypot(
+      from.position.x_m - to.position.x_m,
+      from.position.y_m - to.position.y_m,
+    );
+    if (offset <= POINT_COINCIDENCE_M) continue;
+
+    findings.push({
+      code: 'GRAPH.VERTICAL_LINK_MISALIGNED',
+      severity: 'blocking',
+      entity: { kind: 'vertical_link', id: link.id },
+      params: {
+        kind: link.kind,
+        edge_id: link.edge_id,
+        from_node_id: from.id,
+        to_node_id: to.id,
+        from_level_id: from.level_id,
+        to_level_id: to.level_id,
+        // Rapporté au millimètre entier, par D1.4 : un écart s'annonce au
+        // millimètre, pas avec quinze décimales.
+        offset_mm: roundHalfAwayFromZero(offset * 1000),
+      },
+      ruleRef: 'atelier-QC-12',
+    });
+  }
+  return findings;
+}
+
+/**
+ * QC-10 — une destination que toutes les entrées n'atteignent pas (complément
+ * atelier).
+ *
+ * Le contrôle existant, `GRAPH.DESTINATION_UNREACHABLE`, réunit ce que toutes
+ * les entrées atteignent et signale ce qui reste dehors. Il répond donc à
+ * « peut-on y aller ? », quand QC-10 demande « peut-on y aller **d'où qu'on
+ * entre** ? ». Un visiteur qui pousse la porte nord et un autre qui pousse la
+ * porte sud ne sont pas au même endroit ; une aile qu'une seule des deux
+ * dessert est un défaut de jalonnement que rien ne voyait.
+ *
+ * Il lit de plus le sens de circulation, que les contrôles de structure
+ * ignorent — voir `buildDirectedAdjacency`. Un sens unique qui coupe une aile
+ * la laisse reliée au sens du modèle, donc muette pour eux.
+ *
+ * **« Nœud public » est lu comme « nœud portant une destination ».** Le modèle
+ * ne classe pas les nœuds en publics et privés ; en inventer la notion serait
+ * un choix de modèle de données (A2.2). Les destinations sont ce que le site
+ * publie, et le rapprochement est le plus étroit que le modèle permette. Les
+ * commodités qui ne portent pas de destination — sanitaires, point
+ * d'information — restent donc hors du contrôle.
+ *
+ * Une anomalie par destination, et non par couple entrée-destination : une aile
+ * coupée est un défaut, pas cinq. Les entrées en défaut sont nommées dans les
+ * paramètres.
+ */
+export function destinationNotReachedFromEveryEntranceFindings(
+  site: SiteData,
+): Finding[] {
+  const { nodes, edges } = site.graph;
+  const entrances = nodes
+    .filter((n) => n.kind === 'entrance')
+    .sort((a, b) => a.id.localeCompare(b.id));
+  // Sans entrée, `GRAPH.NO_ENTRANCE` le dit déjà ; le redire ici n'ajouterait
+  // rien et masquerait le vrai manque derrière un bruit de destinations.
+  if (entrances.length === 0) return [];
+
+  const adj = buildDirectedAdjacency(nodes, edges);
+  const reachedBy = new Map<string, string[]>();
+  for (const entrance of entrances) {
+    for (const id of bfs(adj, entrance.id)) {
+      const list = reachedBy.get(id);
+      if (list) list.push(entrance.id);
+      else reachedBy.set(id, [entrance.id]);
+    }
+  }
+
+  // Une destination dont le nœud n'existe pas n'est pas mal desservie, elle est
+  // mal rattachée, et `GRAPH.DESTINATION_UNLINKED` le dit déjà dans
+  // `validateDirectory`. La signaler ici aussi donnerait au lecteur une cause
+  // fausse : il chercherait un problème de cheminement là où la référence est
+  // rompue.
+  const nodeIds = new Set(nodes.map((n) => n.id));
+
+  const findings: Finding[] = [];
+  const sorted = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+  for (const dest of sorted) {
+    if (!nodeIds.has(dest.node_id)) continue;
+    const reached = reachedBy.get(dest.node_id) ?? [];
+    if (reached.length === entrances.length) continue;
+    const missing = entrances
+      .map((e) => e.id)
+      .filter((id) => !reached.includes(id));
+    findings.push({
+      code: 'GRAPH.DESTINATION_ENTRANCE_COVERAGE',
+      severity: 'blocking',
+      entity: { kind: 'destination', id: dest.id },
+      params: {
+        node_id: dest.node_id,
+        reached_from: reached.length,
+        entrances_total: entrances.length,
+        unreached_entrance_ids: missing.join(','),
+      },
+      ruleRef: 'atelier-QC-10',
+    });
   }
   return findings;
 }

@@ -10,5 +10,7 @@ export {
 export type {
   SiteRepository, SiteSummary, RepositoryKind, RepositoryErrorCode,
 } from './site-repository.js';
-export { useSite, useSiteList, useAllSites } from './use-site-repository.js';
+export {
+  useSite, useSiteList, useAllSites, useSiteVocabularyLoad,
+} from './use-site-repository.js';
 export type { AsyncState } from './use-site-repository.js';

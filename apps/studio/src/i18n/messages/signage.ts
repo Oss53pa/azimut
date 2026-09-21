@@ -1,5 +1,5 @@
 /**
- * D12.1 — module 04 (signalétique), écran M4 (graphe) et écran M5 (validation).
+ * D12.1 — module 04 (signalétique), écran M4 (graphe) et écran M5 (validation), tous deux de la partie M.
  */
 export const SIGNAGE_FR = {
   // Module 04 — signalétique
@@ -33,7 +33,7 @@ export const SIGNAGE_FR = {
   'signage.determinism.note': "L'aperçu mesure le texte avec une approximation déclarée. Le compilateur, lui, mesure sur les métriques réelles de la police embarquée : deux compilations d'un même état de données rendent des fichiers identiques octet pour octet.",
   'signage.note': "Un panneau est une vue, pas un dessin : le contenu d'une face est résolu depuis le graphe et l'annuaire au moment du rendu.",
 
-  // Écran M4 — graphe
+  // Écran M4 (partie M) — graphe
   'graph.eyebrow': 'Module 01 · écran M4',
   'graph.title': 'Graphe de circulation',
   'graph.subtitle': 'Circulation graph',
@@ -72,7 +72,7 @@ export const SIGNAGE_FR = {
   'graph.findings.empty': 'Aucune anomalie du graphe.',
   'graph.note': "Le tracé appartient à l'atelier : un second canevas ouvrirait deux chemins vers la même géométrie. Cet écran porte les propriétés, les points de décision et les anomalies.",
 
-  // Écran M5 — validation
+  // Écran M5 (partie M) — validation
   'validation.eyebrow': 'Module 01 · écran M5',
   'validation.title': 'Validation du graphe',
   'validation.subtitle': 'Validation',
@@ -90,6 +90,13 @@ export const SIGNAGE_FR = {
   'validation.clean.hint': "La complétude n'est pas la justesse : le graphe est cohérent, pas nécessairement conforme au terrain. Une reconnaissance sur site reste nécessaire.",
   'validation.skipped.message': 'Contrôles ignorés : {list}',
   'validation.skipped.hint': "Un contrôle ignoré n'est pas un contrôle réussi. Lier un paquet de règles au site les rendra exécutables.",
+  'validation.undeclared.message': 'Contrôles non exercés, faute de donnée à opposer : {list}.',
+  'validation.undeclared.hint': "Cause différente d'un contrôle ignoré : le site ne déclare ni lexique de charte, ni fait, ni affirmation de source. Le remède est de les saisir, pas de lier un paquet de règles.",
+  'validation.vocabfailed.message': "Le vocabulaire du site n'a pas pu être lu.",
+  'validation.vocabfailed.hint': "Les contrôles de vocabulaire figurent ci-dessous comme non exercés, mais ce n'est pas parce que le site ne déclare rien : c'est parce que la lecture a échoué. Ne concluez rien de leur silence tant que la cause n'est pas levée.",
+  'validation.vocabloading.message': "Le vocabulaire du site est en cours de lecture.",
+  'validation.vocabloading.hint': "Cette validation a été lancée avant l'arrivée des registres : les contrôles de vocabulaire y figurent comme non exercés, faute d'avoir eu quelque chose à opposer au moment du calcul. Relancez-la une fois la lecture terminée.",
+  'validation.clean.hint.partial': "Aucune anomalie sur les contrôles exercés. {count} ne l'ont pas été, faute de donnée à leur opposer : ce rapport ne dit rien de ce qu'ils auraient trouvé.",
   'validation.panel.blocking': 'Bloquantes',
   'validation.panel.warnings': 'Avertissements',
   'validation.panel.info': 'Informations',
@@ -183,6 +190,13 @@ export const SIGNAGE_EN: Readonly<Record<keyof typeof SIGNAGE_FR, string>> = {
   'validation.clean.hint': 'Completeness is not correctness: the graph is consistent, not necessarily true to the site. A site survey is still needed.',
   'validation.skipped.message': 'Checks skipped: {list}',
   'validation.skipped.hint': 'A skipped check is not a passed check. Binding a rules pack to the site makes them runnable.',
+  'validation.undeclared.message': 'Checks not exercised, nothing declared to check against: {list}.',
+  'validation.undeclared.hint': 'A different cause from a skipped check: the site declares no charter lexicon, no fact and no source claim. The remedy is to enter them, not to bind a rules pack.',
+  'validation.vocabfailed.message': 'The site vocabulary could not be read.',
+  'validation.vocabfailed.hint': 'The vocabulary checks appear below as not exercised, but not because the site declares nothing: because the read failed. Conclude nothing from their silence until the cause is cleared.',
+  'validation.vocabloading.message': 'The site vocabulary is being read.',
+  'validation.vocabloading.hint': 'This validation ran before the registers arrived: the vocabulary checks appear as not exercised, having had nothing to check against at computation time. Run it again once the read completes.',
+  'validation.clean.hint.partial': 'No anomaly on the checks that ran. {count} did not run, with nothing to check against: this report says nothing about what they would have found.',
   'validation.panel.blocking': 'Blocking',
   'validation.panel.warnings': 'Warnings',
   'validation.panel.info': 'Information',

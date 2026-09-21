@@ -1,7 +1,8 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteVocabulary } from '../context/useSiteVocabulary.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
+import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
@@ -41,18 +42,15 @@ type QueueEntry = {
  */
 export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const site = useSiteData();
+  const vocabulary = useSiteVocabulary();
   const { t } = useI18n();
   const today = new Date().toISOString().slice(0, 10);
 
-  const siteFindings = useMemo<readonly Finding[]>(() => {
-    const checks = runChecks(site);
-    return [
-      ...(checks.ok ? checks.value.findings : checks.findings),
-      ...findingsOf(validateGraph(site)),
-      ...findingsOf(validateGeometry(site)),
-      ...findingsOf(validateDirectory(site)),
-    ];
-  }, [site]);
+  const gate = useMemo(
+    () => evaluatePublishGate(site, vocabulary),
+    [site, vocabulary],
+  );
+  const siteFindings = gate.findings;
 
   const queues = useMemo<readonly QueueEntry[]>(() => {
     const bookings = guardPlacementBookings(DEMO_BOOKINGS);
@@ -77,7 +75,15 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const blocking = all.filter(f => f.severity === 'blocking');
   const warnings = all.filter(f => f.severity === 'warning');
   const info = all.filter(f => f.severity === 'info');
-  const publishable = blocking.length === 0;
+  // Un vocabulaire non lu ne vaut pas un vocabulaire vide : tant qu'il manque,
+  // la case ne passe pas au vert, et la note dit pourquoi plutôt que de laisser
+  // croire à des anomalies qu'on n'a pas trouvées.
+  //
+  // Les bloquantes comptées ici dépassent celles du site : l'affichage, le
+  // chantier et l'exploitation entrent dans le même total, et une seule suffit
+  // à refuser. La porte, elle, ne connaît que le site.
+  const vocabReady = gate.vocabularyRefusal === 'none';
+  const publishable = blocking.length === 0 && vocabReady;
 
   const metrics: readonly Metric[] = [
     {
@@ -93,7 +99,13 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
       id: 'publishable',
       label: t('dashboard.metric.publishable'),
       value: publishable ? t('dashboard.publishable.yes') : t('dashboard.publishable.no'),
-      note: publishable ? undefined : t('dashboard.publishable.note', { count: blocking.length }),
+      ...(publishable
+        ? {}
+        : {
+            note: vocabReady
+              ? t('dashboard.publishable.note', { count: blocking.length })
+              : t('dashboard.publishable.vocab', { status: gate.vocabularyRefusal }),
+          }),
       severity: publishable ? 'valid' : 'blocking',
     },
     {

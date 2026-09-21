@@ -1,48 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { validateGeometry } from '../validate-geometry.js';
 import { refMinimal, refAdversarial } from '@azimut/testkit';
-import type { SiteData, Footprint, Volume } from '@azimut/core-model';
-
-/** Build a minimal SiteData with the given footprints and volumes. */
-function siteWith(
-  footprints: readonly Footprint[],
-  volumes: readonly Volume[] = [],
-): SiteData {
-  return {
-    organization: { id: 'org1', name: 'T', slug: 't' },
-    site: {
-      id: 's1', org_id: 'org1', name: 'S', country_code: 'FR',
-      rules_pack_id: null, active_langs: ['fr'],
-    },
-    buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B', independent_access: true }],
-    levels: [{ id: 'l1', org_id: 'org1', building_id: 'b1', name: 'RDC', ordinal: 0, elevation_m: 0 }],
-    plan_sources: [],
-    plan_calibrations: [],
-    footprints,
-    volumes,
-    graph: { nodes: [], edges: [], vertical_links: [] },
-    categories: [],
-    pictograms: [],
-    destinations: [],
-    destination_names: [],
-    travel_profiles: [],
-    support_types: [],
-    supports: [],
-    support_faces: [],
-    content_blocks: [],
-    support_versions: [],
-    face_templates: [],
-  };
-}
-
-function fp(id: string, verts: [number, number][], level = 'l1'): Footprint {
-  return {
-    id, org_id: 'org1', level_id: level,
-    geometry: { vertices: verts.map(([x, y]) => ({ x_m: x, y_m: y })) },
-    kind: 'cell',
-  };
-}
-const GOOD_FP = fp('fp-good', [[0, 0], [10, 0], [10, 10], [0, 10]]);
+import type { Volume } from '@azimut/core-model';
+import { siteWith, fp, GOOD_FP } from './geometry-fixtures.js';
 
 describe('validateGeometry', () => {
   it('passes for valid footprints and volumes', () => {

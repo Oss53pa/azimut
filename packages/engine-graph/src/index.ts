@@ -1,6 +1,6 @@
 export { validateGraph } from './validate-graph.js';
 export type { ValidationResult } from './validate-graph.js';
-export { buildAdjacency, bfs } from './graph-traversal.js';
+export { buildAdjacency, buildDirectedAdjacency, bfs } from './graph-traversal.js';
 export { computeRoute } from './compute-route.js';
 export type { Route } from './compute-route.js';
 export { RouteCache } from './route-cache.js';
@@ -17,6 +17,20 @@ export type {
   AccessibilityReport,
   EvacuationReport,
 } from './audit.js';
+export { auditLexicon } from './audit-lexicon.js';
+export type { LexiconReport } from './audit-lexicon.js';
+export { auditSiteFacts } from './audit-site-facts.js';
+export type { SiteFactReport } from './audit-site-facts.js';
+export { checkableTexts } from './site-texts.js';
+export type { CheckableText } from './site-texts.js';
+export { auditSourceClaims } from './audit-source-claims.js';
+export type { SourceDiscrepancyReport } from './audit-source-claims.js';
+export { auditParking } from './audit-parking.js';
+export type { ParkingReport, ParkingInput } from './audit-parking.js';
+export { auditBoundText } from './audit-bound-text.js';
+export type { DocumentTextReport } from './audit-bound-text.js';
+export { buildDocumentBindings } from './document-bindings.js';
+export type { DocumentBindings } from './document-bindings.js';
 export { reconcile } from './reconciliation.js';
 export type {
   SurveyedSupport,
@@ -69,8 +83,12 @@ export type {
   PictogramCreation,
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
+export { auditTypography, FORBIDDEN_CHARACTERS } from './audit-typography.js';
+export type { TypographyReport, ForbiddenCharacterRange } from './audit-typography.js';
 export { runChecks } from './run-checks.js';
-export type { CheckReport } from './run-checks.js';
+export type {
+  CheckReport, SiteVocabulary, CheckMode, CheckOptions,
+} from './run-checks.js';
 export {
   renderFace, renderFaceWithMeasures, destinationListFontSizeMm,
   destinationListBlockHeightMm, faceUsesAccent,

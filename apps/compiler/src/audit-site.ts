@@ -5,13 +5,26 @@ import {
   validateGeometry,
   runChecks,
 } from '@azimut/engine-graph';
+import type { CheckMode } from '@azimut/engine-graph';
 import type { Job } from './job.js';
+
+/**
+ * Le mode vient de la charge de travail, et vaut `atelier` par défaut.
+ *
+ * Un audit lancé sans le dire est un audit de travail : c'est le choix le moins
+ * surprenant, et surtout celui qui ne fait pas passer un jeu d'objets pour
+ * publiable sans que personne l'ait demandé.
+ */
+function parseMode(raw: unknown): CheckMode {
+  return raw === 'livrable' ? 'livrable' : 'atelier';
+}
 
 export type AuditSiteContext = {
   readonly site: SiteData;
 };
 
 export type AuditSiteResult = {
+  readonly mode: CheckMode;
   readonly checks_run: readonly string[];
   readonly checks_skipped: readonly string[];
   readonly total_findings: number;
@@ -39,7 +52,8 @@ export function createAuditSiteHandler(
 ): (job: Job) => Promise<Record<string, unknown>> {
   const { site } = context;
 
-  return async (): Promise<Record<string, unknown>> => {
+  return async (job: Job): Promise<Record<string, unknown>> => {
+    const mode = parseMode(job.payload['mode']);
     const checksRun: string[] = [];
     const checksSkipped: string[] = [];
     const allFindings: Finding[] = [];
@@ -72,7 +86,7 @@ export function createAuditSiteHandler(
     }
 
     // 4. Semantic checks (runChecks)
-    const checkResult = runChecks(site);
+    const checkResult = runChecks(site, {}, { mode });
     if (checkResult.ok) {
       checksRun.push(...checkResult.value.checks_run);
       checksSkipped.push(...checkResult.value.checks_skipped);
@@ -98,6 +112,9 @@ export function createAuditSiteHandler(
     }
 
     const result: AuditSiteResult = {
+      // Le rapport dit sous quel mode il a été produit : « zéro bloquant » n'a
+      // pas le même sens à l'atelier et à l'impression.
+      mode,
       checks_run: checksRun.sort(),
       checks_skipped: checksSkipped.sort(),
       total_findings: allFindings.length,

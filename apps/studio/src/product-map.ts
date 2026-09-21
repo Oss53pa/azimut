@@ -101,8 +101,8 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.05.summary',
     entry: 'advertising',
     screens: [],
-    // Partiel, et non complet : R3, R4, R5, R6 côté technique et R7 tiennent,
-    // mais R2 (indexation de la grille sur l'exposition du module 03), R8
+    // Partiel, et non complet : R3 (partie N), R4, R5, R6 côté technique et R7 tiennent,
+    // mais R2 (partie N) (indexation de la grille sur l'exposition du module 03), R8
     // (rendu en situation) et R9 (facture née d'une décision humaine) n'ont
     // aucun moteur. Un module qui ne facture pas n'a pas un moteur complet.
     engine: 'partial',

@@ -1,9 +1,11 @@
 import { type JSX, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteVocabulary } from '../context/useSiteVocabulary.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory, validateSupports } from '@azimut/engine-graph';
-import type { Finding, SiteData } from '@azimut/core-model';
+import type { Finding, SiteData, SiteVocabulary } from '@azimut/core-model';
 import { downloadText } from '../components/download.js';
+import { toChecksCsv } from './checks-export.js';
 import {
   ScreenHeader, MetricRow, Panel, StateBanner, Note,
   SPACE, TEXT, type Metric, type ScreenAction,
@@ -14,6 +16,7 @@ type ValidationRun = {
   readonly findings: readonly Finding[];
   readonly checksRun: readonly string[];
   readonly checksSkipped: readonly string[];
+  readonly checksUndeclared: readonly string[];
   /** Horodatage du calcul, fourni par l'écran — jamais lu dans un moteur. */
   readonly ranAt: string;
 };
@@ -22,8 +25,8 @@ function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Find
   return result.ok ? (result.warnings ?? []) : (result.findings ?? []);
 }
 
-function validate(site: SiteData, ranAt: string): ValidationRun {
-  const checks = runChecks(site);
+function validate(site: SiteData, vocabulary: SiteVocabulary, ranAt: string): ValidationRun {
+  const checks = runChecks(site, vocabulary);
   return {
     findings: [
       ...(checks.ok ? checks.value.findings : checks.findings),
@@ -34,25 +37,9 @@ function validate(site: SiteData, ranAt: string): ValidationRun {
     ],
     checksRun: checks.ok ? checks.value.checks_run : [],
     checksSkipped: checks.ok ? checks.value.checks_skipped : [],
+    checksUndeclared: checks.ok ? checks.value.checks_undeclared : [],
     ranAt,
   };
-}
-
-/** Une ligne d'export : code, sévérité, entité. Le reste se relit au catalogue. */
-function toCsv(run: ValidationRun, site: SiteData): string {
-  const rows = [
-    ['site', 'ran_at', 'severity', 'code', 'entity_kind', 'entity_id', 'rule_ref'].join(';'),
-    ...run.findings.map(f => [
-      site.site.id,
-      run.ranAt,
-      f.severity,
-      f.code,
-      f.entity?.kind ?? '',
-      f.entity?.id ?? '',
-      f.ruleRef ?? '',
-    ].join(';')),
-  ];
-  return rows.join('\n');
 }
 
 /**
@@ -64,11 +51,12 @@ function toCsv(run: ValidationRun, site: SiteData): string {
  */
 export function ChecksView(): JSX.Element {
   const site = useSiteData();
+  const vocabulary = useSiteVocabulary();
   const { t } = useI18n();
   const [run, setRun] = useState<ValidationRun | null>(null);
 
   function launch(): void {
-    setRun(validate(site, new Date().toISOString()));
+    setRun(validate(site, vocabulary.vocabulary, new Date().toISOString()));
   }
 
   const actions: readonly ScreenAction[] = [
@@ -78,7 +66,16 @@ export function ChecksView(): JSX.Element {
       disabled: run === null,
       onSelect: () => {
         if (run === null) return;
-        downloadText(`validation-${site.site.id}.csv`, 'text/csv', toCsv(run, site));
+        downloadText(`validation-${site.site.id}.csv`, 'text/csv', toChecksCsv({
+          siteId: site.site.id,
+          ranAt: run.ranAt,
+          findings: run.findings,
+          roster: {
+            run: run.checksRun,
+            skipped: run.checksSkipped,
+            undeclared: run.checksUndeclared,
+          },
+        }));
       },
     },
     {
@@ -154,7 +151,11 @@ export function ChecksView(): JSX.Element {
           <StateBanner
             severity="valid"
             message={t('validation.clean.message', { count: run.checksRun.length })}
-            hint={t('validation.clean.hint')}
+            hint={
+              run.checksUndeclared.length > 0
+                ? t('validation.clean.hint.partial', { count: run.checksUndeclared.length })
+                : t('validation.clean.hint')
+            }
           />
         </div>
       )}
@@ -166,6 +167,37 @@ export function ChecksView(): JSX.Element {
             code="RULES.PACK_NOT_BOUND"
             message={t('validation.skipped.message', { list: run.checksSkipped.join(', ') })}
             hint={t('validation.skipped.hint')}
+          />
+        </div>
+      )}
+
+      {vocabulary.status === 'loading' && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="info"
+            message={t('validation.vocabloading.message')}
+            hint={t('validation.vocabloading.hint')}
+          />
+        </div>
+      )}
+
+      {vocabulary.status === 'failed' && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="blocking"
+            code={vocabulary.errorCode ?? undefined}
+            message={t('validation.vocabfailed.message')}
+            hint={t('validation.vocabfailed.hint')}
+          />
+        </div>
+      )}
+
+      {run.checksUndeclared.length > 0 && (
+        <div style={{ marginTop: SPACE.md }}>
+          <StateBanner
+            severity="warning"
+            message={t('validation.undeclared.message', { list: run.checksUndeclared.join(', ') })}
+            hint={t('validation.undeclared.hint')}
           />
         </div>
       )}

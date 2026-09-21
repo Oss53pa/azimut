@@ -4,10 +4,14 @@
  * Quatre états, pas trois : rien n'est encore demandé, une requête est en
  * cours, elle a rendu un site, elle a échoué. L'écran doit pouvoir les
  * distinguer — un écran vide qui ressemble à une réussite est le pire des
- * états (M5).
+ * états (M5, partie M).
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { SiteData } from '@azimut/core-model';
+import { EMPTY_VOCABULARY } from '@azimut/core-model';
+import {
+  EMPTY_VOCABULARY_STATE, type VocabularyState,
+} from '../context/site-vocabulary.js';
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -121,4 +125,50 @@ export function useAllSites(repository: SiteRepository): {
   }, [repository]);
 
   return { state, loaded, total };
+}
+
+/**
+ * Vocabulaire du site courant : lexique de charte, faits, affirmations.
+ *
+ * Il ne partage pas l'état du site : un échec de lecture du vocabulaire ne doit
+ * pas empêcher d'ouvrir une carte. Mais il ne se tait pas non plus. Un registre
+ * vide et un registre illisible portent la même valeur et ne disent pas la
+ * même chose : sans `status`, une panne de lecture passerait pour « ce site ne
+ * déclare rien », et les contrôles se rangeraient parmi les non exercés sans
+ * que personne ne sache qu'ils auraient dû l'être.
+ */
+export function useSiteVocabularyLoad(
+  repository: SiteRepository,
+  siteId: string,
+): { readonly state: VocabularyState; readonly reload: () => void } {
+  const [state, setState] = useState<VocabularyState>(EMPTY_VOCABULARY_STATE);
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    if (siteId === '') {
+      setState(EMPTY_VOCABULARY_STATE);
+      return;
+    }
+    let cancelled = false;
+    setState({ vocabulary: EMPTY_VOCABULARY, status: 'loading', errorCode: null });
+    repository.loadVocabulary(siteId).then(
+      value => {
+        if (!cancelled) setState({ vocabulary: value, status: 'ready', errorCode: null });
+      },
+      cause => {
+        if (cancelled) return;
+        setState({
+          vocabulary: EMPTY_VOCABULARY,
+          status: 'failed',
+          errorCode: toRepositoryError(cause).code,
+        });
+      },
+    );
+    return () => { cancelled = true; };
+  }, [repository, siteId, attempt]);
+
+  // Sans reprise, une lecture échouée le reste pour la session : l'écran
+  // dirait « non exercé » jusqu'au rechargement de la page.
+  const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
+  return { state, reload };
 }

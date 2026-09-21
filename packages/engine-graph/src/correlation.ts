@@ -16,14 +16,14 @@ import type { Finding, Outcome } from '@azimut/core-model';
  * destination. Azimut produit le premier et jamais le second.
  */
 
-/** P6 — nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
+/** P6 (partie N) — nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
 export type PerformanceSourceKind =
   | 'footfall_count'
   | 'telemetry'
   | 'declared_revenue';
 
 /**
- * P6 — observation réelle importée pour une cellule.
+ * P6 (partie N) — observation réelle importée pour une cellule.
  *
  * `source_label` et `observed_at` ne sont pas facultatifs : P6 exige que
  * l'origine et la date soient conservées, et une observation qui ne les porte
@@ -40,14 +40,14 @@ export type PerformanceObservation = {
   readonly observed_at: string;
 };
 
-/** P2 / P3 — indice d'exposition calculé par Azimut pour une cellule. */
+/** P2 (partie N) / P3 — indice d'exposition calculé par Azimut pour une cellule. */
 export type ExposureIndex = {
   readonly destination_id: string;
   readonly index: number;
 };
 
 /**
- * P5 — hypothèse propre au chiffrage : le seuil de corrélation.
+ * P5 (partie N) — hypothèse propre au chiffrage : le seuil de corrélation.
  *
  * Il est déclaré par celui qui commande l'audit, jamais porté par le code et
  * jamais doté d'une valeur par défaut. Un seuil implicite serait un seuil que
@@ -62,7 +62,7 @@ export type MonetaryEstimateHypothesis = {
  * Méthode de corrélation. Une seule, nommée dans le résultat pour qu'un
  * lecteur sache laquelle a produit le verdict.
  *
- * Le rang, et non la valeur : P3 fait de l'exposition « un indice relatif et
+ * Le rang, et non la valeur : P3 (partie N) fait de l'exposition « un indice relatif et
  * un rang, jamais une valeur absolue ». Corréler linéairement un indice
  * ordinal à un chiffre d'affaires supposerait à cet indice une échelle
  * d'intervalle que P3 lui refuse. La corrélation des rangs de Spearman ne la
@@ -82,7 +82,7 @@ export type CorrelationAssessment = {
   readonly method: CorrelationMethod;
   /** Nombre de paires entrées dans le calcul. */
   readonly pairs: number;
-  /** Observations écartées faute d'origine ou de date (P6). */
+  /** Observations écartées faute d'origine ou de date (P6 (partie N)). */
   readonly dropped_unsourced: number;
   /** Coefficient dans [-1, 1], ou `null` quand il n'est pas établissable. */
   readonly coefficient: number | null;
@@ -103,7 +103,7 @@ export function isDeclaredThreshold(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value <= 1;
 }
 
-/** P6 — une observation sans origine ni date n'entre dans aucun calcul. */
+/** P6 (partie N) — une observation sans origine ni date n'entre dans aucun calcul. */
 export function isSourcedObservation(observation: PerformanceObservation): boolean {
   return observation.source_label.trim().length > 0
     && observation.observed_at.trim().length > 0;
@@ -257,7 +257,7 @@ export function assessCorrelation(
 }
 
 /**
- * P5 — garde-fou du montant.
+ * P5 (partie N) — garde-fou du montant.
  *
  * Refuse par `FLOW.CORRELATION_TOO_LOW` dans les trois cas où P5 ne permet pas
  * de produire un montant : le coefficient est établi mais sous le seuil,

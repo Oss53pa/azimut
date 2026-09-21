@@ -16,8 +16,12 @@ import type {
   PlanCalibrationRow, PlanSourceRow, SiteRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
+  ParkingRow, ParkingSpaceRow, ParkingUncoveredAreaRow, VehicleGateRow,
 } from '@azimut/db/mapping';
-import type { SiteData } from '@azimut/core-model';
+import type {
+  SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
+  SiteFact, SourceClaim, DiscrepancyDecision,
+} from '@azimut/core-model';
 import {
   RepositoryError, errorCodeForStatus,
   type SiteRepository, type SiteSummary,
@@ -36,6 +40,59 @@ export type PostgrestConfig = {
   /** Schéma interrogé. */
   readonly schema: string;
 };
+
+/**
+ * Lignes des registres de vocabulaire. Elles ne passent pas par `@azimut/db` :
+ * ce sont des lectures simples, sans assemblage, et les décrire ici évite une
+ * table de transposition qui n'aurait qu'un seul appelant.
+ */
+type CharterRow = { readonly id: string };
+
+type LexiconTermRow = {
+  readonly lang: string;
+  readonly term: string;
+  readonly severity: string;
+};
+
+type SiteFactRow = {
+  readonly id: string;
+  readonly key: string;
+  readonly value: string;
+  readonly source: string;
+  readonly recorded_on: string;
+};
+
+type ForbiddenWordRow = {
+  readonly site_fact_id: string;
+  readonly lang: string;
+  readonly term: string;
+};
+
+type SourceClaimRow = {
+  readonly key: string;
+  readonly source: string;
+  readonly value: string;
+  readonly recorded_on: string;
+};
+
+type DecisionRow = {
+  readonly key: string;
+  readonly decided_source: string;
+  readonly decided_by: string;
+  readonly decided_on: string;
+};
+
+/**
+ * Une sévérité inconnue vaut « interdit ».
+ *
+ * C'est le sens le plus strict, et c'est délibéré : une valeur que le code ne
+ * comprend pas ne doit pas se traduire par un contrôle plus indulgent. Mieux
+ * vaut un signalement de trop, qu'un relecteur écarte, qu'un terme interdit qui
+ * passe parce que sa sévérité était mal orthographiée en base.
+ */
+function toSeverity(raw: string): LexiconSeverity {
+  return raw === 'discouraged' ? 'discouraged' : 'forbidden';
+}
 
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
 function transportError(detail: string): RepositoryError {
@@ -177,9 +234,24 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<SupportVersionRow>(config, 'support_version', 'support_id', supportIds),
         ]);
 
-      const contentBlocks = await queryIn<SupportContentBlockRow>(
-        config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
-      );
+      // Complément atelier M2 — stationnement. Les portails et les parkings
+      // pendent aux niveaux, les places et les zones non couvertes aux
+      // parkings : deux vagues, comme pour les faces et leurs blocs.
+      const [contentBlocks, parkings, vehicleGates] = await Promise.all([
+        queryIn<SupportContentBlockRow>(
+          config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
+        ),
+        queryIn<ParkingRow>(config, 'parking', 'level_id', levelIds),
+        queryIn<VehicleGateRow>(config, 'vehicle_gate', 'level_id', levelIds),
+      ]);
+
+      const parkingIds = parkings.map(p => p.id);
+      const [parkingSpaces, parkingUncovered] = await Promise.all([
+        queryIn<ParkingSpaceRow>(config, 'parking_space', 'parking_id', parkingIds),
+        queryIn<ParkingUncoveredAreaRow>(
+          config, 'parking_uncovered_area', 'parking_id', parkingIds,
+        ),
+      ]);
 
       return assembleSiteData({
         organization,
@@ -203,7 +275,93 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         support_faces: supportFaces,
         content_blocks: contentBlocks,
         support_versions: supportVersions,
+        parkings,
+        parking_spaces: parkingSpaces,
+        parking_uncovered: parkingUncovered,
+        vehicle_gates: vehicleGates,
       });
+    },
+
+    async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
+      // Le site est vérifié d'abord. Sans cela, un identifiant inconnu — ou un
+      // site que le cloisonnement par ligne masque — rendrait quatre listes
+      // vides, et l'écran lirait « ce site ne déclare rien » au lieu de
+      // « ce site ne vous est pas accessible ». L'adaptateur de référence
+      // refuse déjà dans ce cas ; les deux doivent se comporter pareil.
+      const siteRows = await query<SiteRow>(config, 'site', `select=id&id=eq.${siteId}`);
+      if (siteRows.length === 0) {
+        throw new RepositoryError('NET.NOT_FOUND', `site: ${siteId}`);
+      }
+
+      const [charters, factRows, claimRows, decisionRows] = await Promise.all([
+        // Le lexique pend à la charte, elle-même au site. On passe par les
+        // identifiants de charte plutôt que par un filtre sur ressource
+        // imbriquée : la forme imbriquée de PostgREST exige que la ressource
+        // soit aussi dans le `select`, et la dépendre d'une syntaxe de jointure
+        // non éprouvée ferait échouer la requête entière. Le filtre par clé
+        // étrangère est déjà le mode employé partout ailleurs dans ce fichier.
+        query<CharterRow>(config, 'charter', `select=id&site_id=eq.${siteId}`),
+        query<SiteFactRow>(
+          config, 'site_fact', `select=id,key,value,source,recorded_on&site_id=eq.${siteId}`,
+        ),
+        query<SourceClaimRow>(
+          config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
+        ),
+        query<DecisionRow>(
+          config,
+          'discrepancy_decision',
+          `select=key,decided_source,decided_by,decided_on&site_id=eq.${siteId}`,
+        ),
+      ]);
+
+      const [lexiconRows, wordRows] = await Promise.all([
+        queryIn<LexiconTermRow>(
+          config, 'lexicon_term', 'charter_id', charters.map(c => c.id),
+        ),
+        queryIn<ForbiddenWordRow>(
+          config, 'site_fact_forbidden_word', 'site_fact_id', factRows.map(f => f.id),
+        ),
+      ]);
+
+      const wordsByFact = new Map<string, { lang: string; term: string }[]>();
+      for (const row of wordRows) {
+        const bucket = wordsByFact.get(row.site_fact_id);
+        const word = { lang: row.lang, term: row.term };
+        if (bucket === undefined) wordsByFact.set(row.site_fact_id, [word]);
+        else bucket.push(word);
+      }
+
+      const lexicon: LexiconTerm[] = lexiconRows.map(row => ({
+        lang: row.lang,
+        term: row.term,
+        severity: toSeverity(row.severity),
+      }));
+
+      const facts: SiteFact[] = factRows.map(row => ({
+        key: row.key,
+        value: row.value,
+        source: row.source,
+        recorded_on: row.recorded_on,
+        forbidden: wordsByFact.get(row.id) ?? [],
+      }));
+
+      const claims: SourceClaim[] = claimRows.map(row => ({
+        key: row.key,
+        source: row.source,
+        value: row.value,
+        recorded_on: row.recorded_on,
+      }));
+
+      const decisions: Record<string, DiscrepancyDecision> = {};
+      for (const row of decisionRows) {
+        decisions[row.key] = {
+          source: row.decided_source,
+          decided_by: row.decided_by,
+          decided_on: row.decided_on,
+        };
+      }
+
+      return { lexicon, facts, claims, decisions };
     },
   };
 }

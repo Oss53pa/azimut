@@ -44,7 +44,7 @@ export type CreativeIntake = {
   readonly creative_id: string;
   readonly sanitation: SanitationState;
   /**
-   * R5 — un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
+   * R5 (partie N) — un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
    * `deferred` n'est pas « propre en attendant », c'est « pas encore assaini ».
    */
   readonly renderable: boolean;

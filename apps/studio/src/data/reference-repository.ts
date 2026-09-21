@@ -6,7 +6,8 @@
  * n'est une donnée client.
  */
 import { allReferenceSites } from '@azimut/testkit/sites';
-import type { SiteData } from '@azimut/core-model';
+import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import { referenceVocabulary } from './reference-vocabulary.js';
 import {
   RepositoryError,
   type SiteRepository,
@@ -43,6 +44,13 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('NET.NOT_FOUND', siteId));
       }
       return Promise.resolve(site);
+    },
+
+    loadVocabulary(siteId: string): Promise<SiteVocabulary> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('NET.NOT_FOUND', siteId));
+      }
+      return Promise.resolve(referenceVocabulary(siteId));
     },
   };
 }

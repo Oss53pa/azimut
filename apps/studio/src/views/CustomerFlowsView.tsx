@@ -74,10 +74,17 @@ export function CustomerFlowsView(): JSX.Element {
    */
   const hypotheses = useMemo<ExposureHypotheses>(() => {
     if (!declared) return EMPTY_HYPOTHESES;
-    const share = entrances.length === 0 ? 0 : 1 / entrances.length;
+    // Des parts, donc une décomposition du tout — pour les deux familles.
+    // Les poids d'attraction valaient 1 chacun : ils sommaient au nombre de
+    // destinations, et l'écran présentait comme « hypothèses déclarées » un
+    // jeu que le contrôle de normalisation refuse désormais.
+    const entryShare = entrances.length === 0 ? 0 : 1 / entrances.length;
+    const attractionShare = site.destinations.length === 0
+      ? 0
+      : 1 / site.destinations.length;
     return {
-      entry_weights: entrances.map(node => ({ access_id: node.id, weight: share })),
-      attraction_weights: site.destinations.map(d => ({ destination_id: d.id, weight: 1 })),
+      entry_weights: entrances.map(node => ({ access_id: node.id, weight: entryShare })),
+      attraction_weights: site.destinations.map(d => ({ destination_id: d.id, weight: attractionShare })),
       visibility_cones: typologies.map(type => ({
         typology: type.key,
         angle_deg: 60,
@@ -87,7 +94,7 @@ export function CustomerFlowsView(): JSX.Element {
   }, [declared, entrances, site.destinations, typologies]);
 
   /**
-   * P5 — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
+   * P5 (partie N) — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
    * vide, aucune comparaison n'est possible et le garde-fou refuse le montant
    * faute de déclaration, non faute de corrélation.
    */

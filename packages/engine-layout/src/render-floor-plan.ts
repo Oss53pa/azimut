@@ -3,17 +3,27 @@ import type {
   GraphNode,
   Edge,
   Footprint,
+  Parking,
+  UncoveredArea,
   Destination,
   Point,
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg } from '@azimut/core-model';
+import {
+  roundSvg, countsAsDigitised, PUBLISHABLE_STATUSES,
+} from '@azimut/core-model';
 
 export type FloorPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
+  /** Complément atelier M2 — emprise de parking, distincte d'un bâtiment. */
+  readonly parking_fill: string;
+  readonly parking_stroke: string;
+  /** Zone que le plan source ne couvre pas : ni vide, ni relevée. */
+  readonly uncovered_fill: string;
+  readonly uncovered_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -35,6 +45,8 @@ export type FloorPlanOptions = {
 
 export type FloorPlanData = {
   readonly footprints: readonly Footprint[];
+  readonly parkings: readonly Parking[];
+  readonly uncovered: readonly UncoveredArea[];
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly destinations: readonly Destination[];
@@ -49,7 +61,7 @@ function esc(s: string): string {
 }
 
 function computeBounds(
-  footprints: readonly Footprint[],
+  outlines: readonly (readonly Point[])[],
   nodes: readonly GraphNode[],
 ): { min: Point; max: Point } | null {
   let minX = Infinity;
@@ -58,8 +70,13 @@ function computeBounds(
   let maxY = -Infinity;
   let hasPoints = false;
 
-  for (const fp of footprints) {
-    for (const v of fp.geometry.vertices) {
+  // Tout ce qui se dessine se cadre. Une emprise de parking déborde presque
+  // toujours du bâti, et une zone non couverte peut border la page : les
+  // omettre du cadrage les ferait sortir du plan, silencieusement. La règle
+  // tient parce qu'il n'y a plus qu'une liste, et non une boucle par famille
+  // qu'on oublierait d'allonger.
+  for (const outline of outlines) {
+    for (const v of outline) {
       minX = Math.min(minX, v.x_m);
       minY = Math.min(minY, v.y_m);
       maxX = Math.max(maxX, v.x_m);
@@ -151,7 +168,18 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
-  return { footprints, nodes, edges, destinations };
+  // Un parking retiré sort du plan, parce qu'il sort des livrables (P1, complément atelier) : le
+  // modèle le garde en base pour l'historique, pas pour l'imprimer. Le dessiner
+  // en pointillé le rendrait indiscernable d'une proposition, qui est l'inverse
+  // — quelque chose qui n'existe pas encore, et non qui n'existe plus.
+  const parkings = site.parkings.filter(
+    (p) => p.level_id === levelId && countsAsDigitised(p.provenance.status),
+  );
+  const parkingIds = new Set(parkings.map((p) => p.id));
+  const uncovered = site.parking_uncovered.filter(
+    (a) => parkingIds.has(a.parking_id),
+  );
+  return { footprints, parkings, uncovered, nodes, edges, destinations };
 }
 
 export function renderFloorPlan(
@@ -172,7 +200,12 @@ export function renderFloorPlan(
   }
 
   const data = filterLevelData(site, levelId);
-  const bounds = computeBounds(data.footprints, data.nodes);
+  const outlines: (readonly Point[])[] = [
+    ...data.footprints.map((f) => f.geometry.vertices),
+    ...data.parkings.map((p) => p.geometry.vertices),
+    ...data.uncovered.flatMap((a) => (a.geometry ? [a.geometry.vertices] : [])),
+  ];
+  const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
 
   if (!bounds) {
@@ -218,6 +251,61 @@ export function renderFloorPlan(
     `<rect width="100%" height="100%"` +
     ` fill="${esc(options.theme.background)}" />`,
   );
+
+  // Les parkings d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
+  // après recouvrirait une empreinte par une emprise.
+  const sortedParkings = [...data.parkings].sort(
+    (a, b) => a.id.localeCompare(b.id),
+  );
+  for (const park of sortedParkings) {
+    if (park.geometry.vertices.length < 3) continue;
+    const points = park.geometry.vertices
+      .map((v) => {
+        const p = tx(v, t);
+        return `${p.x},${p.y}`;
+      })
+      .join(' ');
+    // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
+    // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
+    // ce qui est exactement ce que P1 (complément atelier) demande d'une proposition.
+    const dashed = !PUBLISHABLE_STATUSES.includes(park.provenance.status);
+    parts.push(
+      `<polygon points="${points}"` +
+      ` fill="${esc(options.theme.parking_fill)}"` +
+      ` stroke="${esc(options.theme.parking_stroke)}"` +
+      ` stroke-width="1"` +
+      (dashed ? ` stroke-dasharray="6 4"` : '') +
+      ` />`,
+    );
+  }
+
+  // Les zones non couvertes juste après les emprises, avant le bâti : elles
+  // qualifient le sol qu'elles recouvrent.
+  //
+  // Une zone sans tracé ne se dessine pas, et c'est une limite assumée : le
+  // plan reste alors muet sur une incomplétude que le contrôle, lui, connaît.
+  // Dessiner une zone dont on ignore l'étendue reviendrait à inventer la limite
+  // que le relevé n'a pas trouvée.
+  const sortedUncovered = [...data.uncovered].sort(
+    (a, b) => a.id.localeCompare(b.id),
+  );
+  for (const area of sortedUncovered) {
+    const verts = area.geometry?.vertices ?? [];
+    if (verts.length < 3) continue;
+    const points = verts
+      .map((v) => {
+        const p = tx(v, t);
+        return `${p.x},${p.y}`;
+      })
+      .join(' ');
+    parts.push(
+      `<polygon points="${points}"` +
+      ` fill="${esc(options.theme.uncovered_fill)}"` +
+      ` stroke="${esc(options.theme.uncovered_stroke)}"` +
+      ` stroke-width="1"` +
+      ` stroke-dasharray="2 3" />`,
+    );
+  }
 
   const sortedFootprints = [...data.footprints].sort(
     (a, b) => a.id.localeCompare(b.id),
