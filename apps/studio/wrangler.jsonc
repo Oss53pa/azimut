@@ -35,6 +35,11 @@
 
   "assets": {
     // Sortie de `pnpm build` dans ce paquet, relative à ce fichier.
+    //
+    // Un seul emplacement, et c'est ce qui a permis de retirer le miroir que
+    // le build recopiait à la racine du dépôt : il existait pour couvrir deux
+    // conventions d'hébergeur à la fois, faute de savoir laquelle servirait.
+    // Ce fichier le dit, il n'y a plus à parier.
     "directory": "./dist",
 
     // Le studio n'a pas de routeur d'URL : toute la navigation se fait par
