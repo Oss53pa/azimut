@@ -13,7 +13,7 @@
 
 import type { Point } from './geometry.js';
 import { normalizeAzimuth } from './angle.js';
-import { roundSvg } from './round.js';
+import { roundSvg, roundHalfAwayFromZero } from './round.js';
 
 // ---------------------------------------------------------------------------
 // E3.2 — View state
@@ -172,11 +172,22 @@ export function applyZoomStep(
 // ---------------------------------------------------------------------------
 
 /**
- * Quantize a meter value to the nearest millimeter (E4.2).
- * Called at operation validation, never during a gesture.
+ * Quantifie une valeur en mètres au millimètre (E4.2).
+ * Appelée à la validation d'une opération, jamais pendant un geste.
+ *
+ * L'arrondi passe par la primitive unique de D1.4, et non par `Math.round`,
+ * pour deux raisons qui se sont vues à l'essai. `Math.round` arrondit au
+ * supérieur, donc `-0.5` vers `-0` là où « au plus loin de zéro » donne `-1` :
+ * deux règles d'arrondi dans le même produit, ce que D1.4 interdit
+ * nommément. Et il rend `-0` pour toute valeur négative proche de zéro, que
+ * D1.4 interdit en sortie — un sommet posé au pointeur à un micron sous
+ * l'origine et le même saisi au clavier donnaient alors deux valeurs
+ * différentes, contre le critère 3 de M3 (partie M).
  */
 export function quantizePosition(value_m: number): number {
-  return Math.round(value_m / POSITION_STEP_M) * POSITION_STEP_M;
+  const steps = roundHalfAwayFromZero(value_m / POSITION_STEP_M);
+  const quantized = steps * POSITION_STEP_M;
+  return quantized === 0 ? 0 : quantized;
 }
 
 /**

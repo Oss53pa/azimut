@@ -6,7 +6,10 @@ import type {
   Outcome,
   Point,
 } from '@azimut/core-model';
-import { POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2, signedArea } from '@azimut/core-model';
+import {
+  POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2, signedArea,
+  isSelfIntersecting, segmentsProperlyIntersect,
+} from '@azimut/core-model';
 
 export type GeometryValidationResult = {
   readonly total_footprints: number;
@@ -21,52 +24,6 @@ function distance(a: Point, b: Point): number {
   const dx = a.x_m - b.x_m;
   const dy = a.y_m - b.y_m;
   return Math.sqrt(dx * dx + dy * dy);
-}
-
-/**
- * Cross product of vectors (b - a) × (c - a).
- */
-function cross(a: Point, b: Point, c: Point): number {
-  return (b.x_m - a.x_m) * (c.y_m - a.y_m) - (b.y_m - a.y_m) * (c.x_m - a.x_m);
-}
-
-/**
- * Check if point q lies on segment [p, r], given that p, q, r are collinear.
- */
-function onSegment(p: Point, q: Point, r: Point): boolean {
-  return (
-    q.x_m <= Math.max(p.x_m, r.x_m) &&
-    q.x_m >= Math.min(p.x_m, r.x_m) &&
-    q.y_m <= Math.max(p.y_m, r.y_m) &&
-    q.y_m >= Math.min(p.y_m, r.y_m)
-  );
-}
-
-/**
- * Test whether segments [p1,p2] and [p3,p4] properly intersect
- * (cross each other, not just touch at endpoints).
- */
-function segmentsProperlyIntersect(
-  p1: Point, p2: Point,
-  p3: Point, p4: Point,
-): boolean {
-  const d1 = cross(p3, p4, p1);
-  const d2 = cross(p3, p4, p2);
-  const d3 = cross(p1, p2, p3);
-  const d4 = cross(p1, p2, p4);
-
-  if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) &&
-      ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0))) {
-    return true;
-  }
-
-  // Collinear cases — check overlap.
-  if (d1 === 0 && onSegment(p3, p1, p4)) return true;
-  if (d2 === 0 && onSegment(p3, p2, p4)) return true;
-  if (d3 === 0 && onSegment(p1, p3, p2)) return true;
-  if (d4 === 0 && onSegment(p1, p4, p2)) return true;
-
-  return false;
 }
 
 // ── Checks ─────────────────────────────────────────────────
@@ -158,37 +115,16 @@ function polygonDegenerateFindings(objects: readonly PolygonalObject[]): Finding
 function selfIntersectingFindings(objects: readonly PolygonalObject[]): Finding[] {
   const findings: Finding[] = [];
   for (const fp of objects) {
-    const verts = fp.geometry.vertices;
-    const n = verts.length;
-    if (n < 4) continue; // Triangle cannot self-intersect.
-
-    let intersects = false;
-    outer:
-    for (let i = 0; i < n && !intersects; i++) {
-      const a = verts[i] as Point;
-      const b = verts[(i + 1) % n] as Point;
-      // Check against non-adjacent edges.
-      for (let j = i + 2; j < n; j++) {
-        // Skip the edge that shares a vertex with edge i.
-        if (j === (i + n - 1) % n) continue;
-        const c = verts[j] as Point;
-        const d = verts[(j + 1) % n] as Point;
-        if (segmentsProperlyIntersect(a, b, c, d)) {
-          intersects = true;
-          break outer;
-        }
-      }
-    }
-
-    if (intersects) {
-      findings.push({
-        code: 'GEOM.POLYGON_SELF_INTERSECTING',
-        severity: 'blocking',
-        entity: { kind: fp.kind, id: fp.id },
-        params: {},
-        ruleRef: null,
-      });
-    }
+    // Le prédicat vit dans `core-model` : l'écran M3 (partie M) le contrôle à
+    // la saisie, et deux implémentations du même test finiraient par diverger.
+    if (!isSelfIntersecting(fp.geometry.vertices)) continue;
+    findings.push({
+      code: 'GEOM.POLYGON_SELF_INTERSECTING',
+      severity: 'blocking',
+      entity: { kind: fp.kind, id: fp.id },
+      params: {},
+      ruleRef: null,
+    });
   }
   return findings;
 }

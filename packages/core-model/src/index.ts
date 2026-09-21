@@ -216,3 +216,4 @@ export type {
   CommandDraft,
 } from './site-commands.js';
 export { RETIRED_CODES } from './error-catalog.js';
+export { segmentsProperlyIntersect, isSelfIntersecting } from './geometry.js';

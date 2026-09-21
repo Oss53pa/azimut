@@ -75,6 +75,18 @@ export const DATA_SOURCE_FR = {
   'calib.blocked.orientation': 'Le tracé attend l’azimut du nord.',
   'calib.replace.kept': 'Les dimensions concordent : le calage du fond précédent sera reporté sur le nouveau.',
   'calib.replace.lost': 'Les dimensions diffèrent : le calage sera perdu et le plan devra être recalé.',
+  // M3 (partie M) — tracé des empreintes : outils et raccourcis.
+  'fp.tool.select': 'Sélection',
+  'fp.tool.cell': 'Cellule',
+  'fp.tool.free_polygon': 'Polygone libre',
+  'fp.tool.rectangle': 'Rectangle',
+  'fp.tool.vertex': 'Sommet',
+  'fp.shortcut.close': 'Fermer le polygone en cours',
+  'fp.shortcut.abandon': 'Abandonner le tracé en cours',
+  'fp.shortcut.remove_vertex': 'Supprimer le dernier sommet',
+  'fp.shortcut.undo': 'Annuler',
+  'fp.shortcut.duplicate': 'Dupliquer',
+  'fp.series.hint': 'Les codes dérivés sont une commodité de saisie : ils se renomment.',
 } as const;
 
 export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string>> = {
@@ -143,4 +155,15 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'calib.blocked.orientation': 'Drawing is waiting for the north azimuth.',
   'calib.replace.kept': 'Dimensions match: the previous plan’s calibration will carry over to the new one.',
   'calib.replace.lost': 'Dimensions differ: the calibration will be lost and the plan will need recalibrating.',
+  'fp.tool.select': 'Select',
+  'fp.tool.cell': 'Cell',
+  'fp.tool.free_polygon': 'Free polygon',
+  'fp.tool.rectangle': 'Rectangle',
+  'fp.tool.vertex': 'Vertex',
+  'fp.shortcut.close': 'Close the current polygon',
+  'fp.shortcut.abandon': 'Abandon the current drawing',
+  'fp.shortcut.remove_vertex': 'Remove the last vertex',
+  'fp.shortcut.undo': 'Undo',
+  'fp.shortcut.duplicate': 'Duplicate',
+  'fp.series.hint': 'Derived codes are a typing convenience: they can be renamed.',
 };
