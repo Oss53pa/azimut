@@ -245,6 +245,8 @@ export const ERROR_CATALOG = {
   'FLOW.HYPOTHESIS_MISSING':                 { severity: 'blocking', description: 'Export d’un résultat de flux sans ses hypothèses' },
   // Partie N, module 03 (N3.3) : normalisation et corrélation.
   'FLOW.WEIGHTS_NOT_NORMALIZED':             { severity: 'blocking', description: 'Somme des parts de fréquentation différente de 100 %' },
+  // I5.3 : une pondération négative ou non finie n'est pas une pondération.
+  'FLOW.WEIGHT_INVALID':                     { severity: 'blocking', description: 'Pondération négative ou non finie' },
   'FLOW.CORRELATION_TOO_LOW':                { severity: 'blocking', description: 'Corrélation sous le seuil déclaré pour produire un montant' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
   'AD.PLACEMENT_DOUBLE_BOOKED':              { severity: 'blocking', description: 'Conflit de réservation' },

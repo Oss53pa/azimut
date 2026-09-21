@@ -1371,8 +1371,13 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 
 9. Le reste de M15 : structure du document, objets de cartographie, ingestion
    de la plateforme de marque, publication.
-10. Les grands formats imprimés A0 et A1, qui butent sur le choix de la
-    bibliothèque de génération PDF, réservé par A3.1 à la tâche T-0.9.
+10. Les grands formats imprimés A0 et A1. L'obstacle a changé de nature
+    depuis que `docs/decision-t-0-9-generation-pdf.md` existe : la note
+    comparative propose `pdf-lib` et attend ratification, et surtout le dépôt
+    n'a aucune notion de format de page — ni A4, ni A3, ni échelle de tirage.
+    Ce qui manque n'est donc plus le générateur mais le modèle : ce qu'un
+    livrable A0 est dans ce produit, et si les dimensions de l'ISO 216 sont une
+    donnée versionnée ou une constante. Cela relève de A2.2.
 11. La seconde moitié de P7 — « présent de l'indicatif, pas de conditionnel » —
     et son contrôle QC-07. Reconnaître un conditionnel demande une analyse de
     la langue que ce moteur ne fait pas.
@@ -1386,9 +1391,13 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 13. Neuf garde-fous du studio ne sont appelés par aucun écran : ils ont été
     écrits d'avance sur les parties E, G et I. La liste et l'action qui manque
     à chacun sont dans `tests/check-wiring.test.ts`.
-14. Une part de fréquentation négative qui laisserait la somme à un passerait
-    le contrôle de normalisation. Lui donner un code au catalogue est une
-    décision qui dépasse le fait de lever un code déjà déclaré.
+14. ~~Une part de fréquentation négative qui laisserait la somme à un
+    passerait le contrôle de normalisation.~~ **Fait.** `FLOW.WEIGHT_INVALID`
+    refuse une pondération négative ou non finie, dans les deux familles, avant
+    la normalisation. La justification que je donnais pour ne pas le faire —
+    « une décision qui dépasse le fait de lever un code déjà déclaré » — ne
+    tenait pas : une part d'un tout ne se soustrait pas, ce n'est pas une
+    décision mais de l'arithmétique.
 15. Les portails véhicules ne se dessinent pas : un point orienté sur un plan
     demande un symbole, ce qui relève de la conception graphique.
 16. Neuf fichiers du dépôt dépassent les quatre cents lignes de A2.4, tous

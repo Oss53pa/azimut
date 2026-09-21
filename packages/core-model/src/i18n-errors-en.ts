@@ -156,6 +156,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'FLOW.WEIGHTS_UNDECLARED': 'Exposure computed without declared weights',
   'FLOW.HYPOTHESIS_MISSING': 'Flow result exported without its hypotheses',
   'FLOW.WEIGHTS_NOT_NORMALIZED': 'Entry-share weights do not sum to 100%',
+  'FLOW.WEIGHT_INVALID': 'Weight is negative or not a finite number',
   'FLOW.CORRELATION_TOO_LOW': 'Correlation below the declared threshold for producing an amount',
   'AD.RULES_PACK_MISSING': 'No advertising rules pack attached',
   'AD.PLACEMENT_DOUBLE_BOOKED': 'Booking conflict',

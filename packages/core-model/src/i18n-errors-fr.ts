@@ -156,6 +156,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'FLOW.WEIGHTS_UNDECLARED': 'Calcul d’exposition sans pondérations déclarées',
   'FLOW.HYPOTHESIS_MISSING': 'Export d’un résultat de flux sans ses hypothèses',
   'FLOW.WEIGHTS_NOT_NORMALIZED': 'Somme des parts de fréquentation différente de 100 %',
+  'FLOW.WEIGHT_INVALID': 'Pondération négative ou non finie',
   'FLOW.CORRELATION_TOO_LOW': 'Corrélation sous le seuil déclaré pour produire un montant',
   'AD.RULES_PACK_MISSING': 'Aucun paquet de règles publicitaires rattaché',
   'AD.PLACEMENT_DOUBLE_BOOKED': 'Conflit de réservation',

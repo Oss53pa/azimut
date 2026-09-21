@@ -58,6 +58,52 @@ function undeclared(factor: string): Finding {
   };
 }
 
+/**
+ * Une pondération qui n'est pas un nombre positif ou nul.
+ *
+ * Deux causes sous un code, séparées par `reason`, comme la partie N le fait
+ * déjà pour `DATA.APPROVED_VERSION_NOT_IMMUTABLE` : `negative` pour une part
+ * ou un pouvoir d'attraction sous zéro, `not_finite` pour ce qui n'est pas un
+ * nombre du tout. Les deux disent la même chose au lecteur — cette valeur
+ * n'est pas une pondération — et la distinction, qui porte sur la saisie, est
+ * dans le paramètre.
+ *
+ * Ni l'une ni l'autre ne se déduit de la normalisation : deux parts de -0,5 et
+ * 1,5 somment à l'unité et passeraient, et une part `NaN` fait échouer la
+ * somme en désignant la normalisation là où le fautif est une seule ligne.
+ */
+function invalidWeight(
+  factor: string,
+  id: string,
+  weight: number,
+  reason: 'negative' | 'not_finite',
+): Finding {
+  return {
+    code: 'FLOW.WEIGHT_INVALID',
+    severity: 'blocking',
+    entity: null,
+    params: { factor, id, weight: String(weight), reason },
+    ruleRef: 'I5.3',
+  };
+}
+
+/** Les pondérations d'une famille qui ne sont pas des nombres positifs ou nuls. */
+function invalidWeights(
+  factor: string,
+  weights: readonly { readonly weight: number }[],
+  idOf: (index: number) => string,
+): Finding[] {
+  const findings: Finding[] = [];
+  weights.forEach((entry, index) => {
+    if (!Number.isFinite(entry.weight)) {
+      findings.push(invalidWeight(factor, idOf(index), entry.weight, 'not_finite'));
+    } else if (entry.weight < 0) {
+      findings.push(invalidWeight(factor, idOf(index), entry.weight, 'negative'));
+    }
+  });
+  return findings;
+}
+
 /** Somme des parts de fréquentation déclarées. */
 export function entryWeightSum(weights: readonly EntryWeight[]): number {
   return weights.reduce((total, entry) => total + entry.weight, 0);
@@ -78,6 +124,12 @@ export function entryWeightSum(weights: readonly EntryWeight[]): number {
  * manque simplement. Le contrôle de normalisation ne s'exécute donc que sur
  * des parts déclarées.
  *
+ * Un troisième refus s'intercale pour la même raison : une pondération
+ * négative ou non finie rend la somme muette, et signaler la normalisation
+ * désignerait le jeu entier là où une seule ligne est fautive. Il porte sur
+ * les deux familles de pondérations — une part ne se soustrait pas, et une
+ * destination n'a pas un pouvoir d'attraction négatif, elle n'attire pas.
+ *
  * Seules les parts de fréquentation sont normalisées. Le pouvoir d'attraction
  * est une pondération relative, pas une part d'un tout, et un cône de
  * visibilité porte un angle et une distance : ni l'un ni l'autre ne somme à
@@ -93,6 +145,16 @@ export function guardExposureHypotheses(
 
   if (findings.length > 0) {
     return { ok: false, findings };
+  }
+
+  const invalid = [
+    ...invalidWeights('entry_weights', hypotheses.entry_weights,
+      (i) => hypotheses.entry_weights[i]?.access_id ?? ''),
+    ...invalidWeights('attraction_weights', hypotheses.attraction_weights,
+      (i) => hypotheses.attraction_weights[i]?.destination_id ?? ''),
+  ];
+  if (invalid.length > 0) {
+    return { ok: false, findings: invalid };
   }
 
   const sum = entryWeightSum(hypotheses.entry_weights);
