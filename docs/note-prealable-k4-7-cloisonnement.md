@@ -1,6 +1,7 @@
 # Note — préalable K4 nº 7 : cloisonnement sur agrégats et jointures profondes
 
-**Statut : préalable fermé, avec quatre défauts à corriger avant la tranche 1.**
+**Statut : préalable fermé. Les quatre défauts sont corrigés, migrations 0024
+et 0025, lot 1.1 de la tranche 1. Voir le chapitre 7.**
 
 Livrable du sujet « Cloisonnement sur agrégats et jointures profondes », registre
 partie K, section K3.3, niveau de blocage **P** — bloque avant la première ligne
@@ -176,3 +177,53 @@ L'essai s'est tenu sur PostgreSQL 16.13, sur une grappe locale jetable, avec deu
 organisations fictives. Aucune donnée client, aucun projet réel, aucune chaîne de
 connexion. L'échafaudage `auth.users` et `auth.uid()` a été fabriqué pour l'essai
 et n'est pas versé au dépôt — le fabriquer est précisément le constat du § 3.4.
+
+
+---
+
+## 7. Suite donnée — lot 1.1 de la tranche 1
+
+Les quatre défauts du § 3 et le constat du § 4 sont corrigés par deux
+migrations, chacune éprouvée sur une grappe jetable avant d'être testée.
+
+| Défaut | Correction | Vérification |
+| --- | --- | --- |
+| § 3.1 propriétaire non cloisonné | `FORCE ROW LEVEL SECURITY` sur les 53 tables portant `org_id`, plus `organization` | Sous un propriétaire ordinaire : 1 site, 1 arête, somme 5, 1 organisation. Les valeurs de l'Org A, et rien d'autre |
+| § 3.2 aucun droit | `GRANT` sur le schéma, les tables et les séquences, plus `ALTER DEFAULT PRIVILEGES` pour les tables futures | 29 migrations appliquées sans échec |
+| § 3.3 trois tables sans politique | Sécurité activée et politique posée sur `approval`, `support_typology`, `support_version` | 55 tables avec sécurité, 53 forcées |
+| § 3.4 dépendance à la plateforme | Trois clés étrangères retirées ; `azimut.current_user_id()` lit un réglage de session, la plateforme en secours | Le schéma `auth` entièrement supprimé, le cloisonnement rend toujours les bonnes valeurs |
+| § 4 `TRUNCATE` | Déclencheur d'instruction `BEFORE TRUNCATE`, et retrait des droits de modification | `UPDATE`, `DELETE` et `TRUNCATE` refusés, la ligne survit |
+
+### 7.1 Ce que l'essai a trouvé et que la lecture n'aurait pas vu
+
+`FORCE` sur `membership` ferme une boucle que rien ne fermait jusque-là. Les
+deux politiques posées par `0007` sur cette table appellent `user_org_ids()`,
+qui lit `membership`, qui applique la politique. Tant que la table n'était pas
+forcée, la fonction, en `SECURITY DEFINER`, s'exécutait comme propriétaire et
+contournait la politique : la boucle restait ouverte. Sous `FORCE`, elle se
+ferme, et **toute requête du produit meurt sur un dépassement de pile**.
+
+La politique de `membership` devient donc non récursive : chacun voit ses
+propres rattachements. C'est plus strict que la politique générique de A6.1,
+jamais plus permissif, et c'est exactement l'ensemble dont `user_org_ids()` a
+besoin.
+
+Ce défaut ne se lit pas dans le SQL. Il ne se voit qu'en exécutant.
+
+### 7.2 Ce qui reste ouvert
+
+- **La liste des membres d'une organisation** n'est plus lisible par la
+  politique de `membership`. Ce service relève des droits de rôle de A6.2, dont
+  N13.4 dit que la déclinaison fine reste à faire au moment de construire
+  chaque module.
+- **Le journal d'audit** est en insertion seule selon A5.10, A12.3 et X4. Il ne
+  porte aujourd'hui ni déclencheur ni restriction de droits, contrairement à
+  `approval`. Hors du périmètre de ces deux migrations.
+- **La propagation de l'identité** jusqu'au réglage de session est le lot 1.2 :
+  la base sait désormais la lire, `connection.ts` ne la pose pas encore.
+- **Le second test obligatoire de A6.1** — « un utilisateur de l'organisation A
+  ne peut lire, écrire, ni détecter l'existence d'aucune ligne de
+  l'organisation B, y compris par message d'erreur, par compteur, ou par
+  différence de temps de réponse » — n'est pas automatisé. Les douze formes de
+  cette note en constituent le canevas, mais elles demandent une base, et la
+  suite d'essais n'en a aucune.
