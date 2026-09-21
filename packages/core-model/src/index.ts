@@ -186,3 +186,18 @@ export {
   ANGLE_STEP_DEG,
 } from './view-transform.js';
 export type { ViewState, ViewportSize } from './view-transform.js';
+export {
+  MODULE_KEYS,
+  MODULE_LAYER,
+  NON_OPTIONAL_MODULES,
+  OWNED_TABLES,
+  SUPPORT_COLUMN_OWNER,
+  SUPPORT_IDENTITY_COLUMNS,
+  MODULE_READS,
+  DECLARED_UPWARD_READS,
+  DEGRADATION_WHEN_ABSENT,
+  TABLES_WITHOUT_DECLARED_OWNER,
+  COLUMNS_SPECIFIED_NOT_YET_IN_SCHEMA,
+  SUPPORT_CONTEXT_MANDATE,
+} from './module-ownership.js';
+export type { ModuleKey } from './module-ownership.js';
