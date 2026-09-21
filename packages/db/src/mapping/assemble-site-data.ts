@@ -18,17 +18,21 @@ import type {
   GraphNode, Edge, VerticalLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
   PlanSource, PlanCalibration,
-  Support, SupportType, SupportFace, ContentBlockInstance, SupportVersion,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
-  PictogramRegistry, SupportVersionState, DimensionsSource,
-  Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea, VehicleGate,
+  PictogramRegistry, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea, VehicleGate,
   ObjectStatus, Point, Polygon,
 } from '@azimut/core-model';
 import type {
-  SiteRowSet, TimestampValue,
-  SupportRow, SupportTypologyRow, SupportFaceRow,
-  SupportContentBlockRow, SupportVersionRow,
-} from './row-types.js';
+  SiteRowSet, } from './row-types.js';
+import { num, isoString, asStringArray } from './row-scalars.js';
+import {
+  mapSupportTypologyRow, mapSupportFaceRow, mapContentBlockRow,
+  mapSupportVersionRow, mapSupportRow,
+} from './map-signage-rows.js';
+export {
+  mapSupportTypologyRow, mapSupportFaceRow, mapContentBlockRow,
+  mapSupportVersionRow, mapSupportRow,
+};
 
 /**
  * Un statut que le code ne reconnaît pas ne devient jamais `existant`.
@@ -54,124 +58,6 @@ function toSpaceKind(raw: string): ParkingSpaceKind {
   return raw === 'pmr' || raw === 'livraison' ? raw : 'standard';
 }
 
-/** Une colonne `numeric` revient en chaîne : la conversion est explicite. */
-function num(value: string): number {
-  return Number(value);
-}
-
-function isoString(value: TimestampValue): string {
-  return typeof value === 'string' ? value : value.toISOString();
-}
-
-function asRecord(value: unknown): Record<string, unknown> | undefined {
-  return value !== null && typeof value === 'object' && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : undefined;
-}
-
-function asStringArray(value: unknown): readonly string[] | undefined {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : undefined;
-}
-
-const VERSION_STATES: readonly SupportVersionState[] = [
-  'draft', 'in_review', 'approved', 'superseded',
-];
-
-function versionState(value: string): SupportVersionState {
-  return (VERSION_STATES as readonly string[]).includes(value)
-    ? (value as SupportVersionState)
-    : 'draft';
-}
-
-/**
- * A5.6 — la base ne stocke aucune dimension par défaut au niveau de la
- * typologie : elles vivent sur l'instance. `faces` reste donc vide, et
- * l'appelant retombe sur les dimensions de l'instance puis sur une taille
- * de face par défaut.
- */
-export function mapSupportTypologyRow(row: SupportTypologyRow): SupportType {
-  return {
-    id: row.id,
-    org_id: row.org_id,
-    key: row.key,
-    name: row.name,
-    face_count: row.face_count,
-    ...(row.template_key !== null ? { template_key: row.template_key } : {}),
-    faces: [],
-  };
-}
-
-/** A5.6 — `face_index` vaut 0 quand la colonne additive est nulle. */
-export function mapSupportFaceRow(row: SupportFaceRow): SupportFace {
-  const langs = asStringArray(row.langs);
-  return {
-    id: row.id,
-    org_id: row.org_id,
-    support_id: row.support_id,
-    face_index: row.face_index ?? 0,
-    ...(row.template_key !== null ? { template_key: row.template_key } : {}),
-    ...(langs !== undefined ? { langs } : {}),
-  };
-}
-
-/** A5.6 — `block_index` retombe sur l'`ordinal` antérieur. */
-export function mapContentBlockRow(row: SupportContentBlockRow): ContentBlockInstance {
-  const binding = asRecord(row.binding);
-  const freeText = asRecord(row.free_text);
-  return {
-    id: row.id,
-    org_id: row.org_id,
-    face_id: row.face_id,
-    block_index: row.block_index ?? row.ordinal,
-    kind: row.kind,
-    ...(binding !== undefined ? { binding } : {}),
-    ...(freeText !== undefined ? { free_text: freeText } : {}),
-  };
-}
-
-/** A5.6 — l'état est garanti par la contrainte CHECK de la base. */
-export function mapSupportVersionRow(row: SupportVersionRow): SupportVersion {
-  return {
-    id: row.id,
-    org_id: row.org_id,
-    support_id: row.support_id,
-    version: row.version,
-    state: versionState(row.state),
-    ...(row.artwork_path !== null ? { artwork_path: row.artwork_path } : {}),
-    ...(row.content_hash !== null ? { content_hash: row.content_hash } : {}),
-    created_at: isoString(row.created_at),
-    ...(row.created_by !== null ? { created_by: row.created_by } : {}),
-  };
-}
-
-/**
- * A5.6 — registre, contexte et distance de lecture sont des colonnes additives
- * et nullables : une ligne antérieure retombe sur les valeurs les plus
- * permissives — registre de wayfinding, contexte intérieur, distance nulle —
- * pour qu'un support non relevé n'emprunte jamais en silence une règle plus
- * stricte que sa donnée ne le permet. Les vraies valeurs viennent du relevé.
- */
-export function mapSupportRow(row: SupportRow): Support {
-  const dimensionsSource: DimensionsSource | undefined =
-    row.dimensions_source === 'overridden' ? 'overridden'
-      : row.dimensions_source === 'computed' ? 'computed'
-        : undefined;
-  return {
-    id: row.id,
-    org_id: row.org_id,
-    site_id: row.site_id,
-    node_id: row.node_id,
-    registry: row.registry === 'safety' ? 'safety' : 'wayfinding',
-    context: row.context === 'exterior' ? 'exterior' : 'interior',
-    reading_distance_m: row.reading_distance_m !== null ? num(row.reading_distance_m) : 0,
-    azimuth_deg: num(row.azimuth_deg),
-    ...(row.width_mm !== null ? { width_mm: row.width_mm } : {}),
-    ...(row.height_mm !== null ? { height_mm: row.height_mm } : {}),
-    ...(dimensionsSource !== undefined ? { dimensions_source: dimensionsSource } : {}),
-  };
-}
 
 /**
  * Assemble le modèle du site depuis ses lignes.

@@ -4,7 +4,6 @@ import {
   calibratedLevelIds, siteOrigin, guardSiteOrigin, firstCalibration,
 } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
-import type { Translate } from '../i18n/index.js';
 import {
   computeCalibration,
   DEFAULT_PLAUSIBLE_RESOLUTION,
@@ -12,14 +11,17 @@ import {
   type PlanPoint,
 } from '../domain/plan-calibration.js';
 import {
-  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow, DataTable, Tag,
-  SPACE, TEXT, LABEL_STYLE, BUTTON_STYLE, type Column, type Metric,
+  ScreenHeader, Panel, PanelGrid, StateBanner, Note, MetricRow, DataTable,
+  SPACE, TEXT, LABEL_STYLE, BUTTON_STYLE, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { CalibrationSurface, SURFACE_HEIGHT, SURFACE_WIDTH } from './calibration/CalibrationSurface.js';
 import { Field } from './calibration/Field.js';
 import { FIELD_STYLE } from './calibration/field-style.js';
 import { MeasuredCalibrationPanel } from './calibration/MeasuredCalibrationPanel.js';
+import {
+  LEVEL_COLUMNS, type LevelCalibrationState,
+} from './calibration/LevelCalibrationTable.js';
 
 /**
  * Tranche M · écran M2 — calage du fond de plan.
@@ -355,46 +357,6 @@ export function PlanCalibrationView(): JSX.Element {
   );
 }
 
-type LevelCalibrationState = {
-  readonly id: string;
-  readonly name: string;
-  readonly sourceCount: number;
-  readonly calibrated: boolean;
-};
-
-/**
- * Trois états et non deux : le libellé dit s'il reste à importer un fond ou à
- * caler celui qui est là. Le code d'anomalie est le même, la conduite à tenir
- * ne l'est pas.
- */
-function LEVEL_COLUMNS(t: Translate): readonly Column<LevelCalibrationState>[] {
-  return [
-    { id: 'level', header: t('calibration.levels.col.level'), cell: (row) => row.name },
-    {
-      id: 'sources',
-      header: t('calibration.levels.col.sources'),
-      numeric: true,
-      cell: (row) => row.sourceCount,
-    },
-    {
-      id: 'state',
-      header: t('calibration.levels.col.state'),
-      cell: (row) => {
-        if (row.calibrated) {
-          return <Tag label={t('calibration.levels.state.calibrated')} severity="valid" />;
-        }
-        return (
-          <Tag
-            label={row.sourceCount === 0
-              ? t('calibration.levels.state.nosource')
-              : t('calibration.levels.state.uncalibrated')}
-            severity="blocking"
-          />
-        );
-      },
-    },
-  ];
-}
 
 type PointReadoutProps = {
   readonly label: string;
