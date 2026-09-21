@@ -58,7 +58,7 @@ Non vérifié : <liste ou "rien">
 
 ## Référence complète
 
-Le cahier des charges principal (parties A, B, C) et son complément (partie D) sont désormais dans le dépôt, sous `docs/`. Ils font foi sur le modèle de données, les contrats des moteurs, les tâches et les conventions ; on ne les reconstitue pas, on les lit. Toute divergence du code existant avec ces documents relève de la procédure d'arrêt A2.2 (contradiction) et doit être signalée, pas résolue en silence.
+Les quatorze documents du cahier des charges sont dans le dépôt, sous `docs/`. Ils font foi sur le modèle de données, les contrats des moteurs, les tâches et les conventions ; on ne les reconstitue pas, on les lit. Toute divergence du code existant avec ces documents relève de la procédure d'arrêt A2.2 (contradiction) et doit être signalée, pas résolue en silence.
 
 Documents de référence présents dans `docs/` :
 
@@ -74,22 +74,36 @@ Documents de référence présents dans `docs/` :
 | `docs/partie-j-stylet-pictogrammes.md` | Saisie à l'encre, couche d'esquisse, annotation de révision, éditeur de pictogrammes, bibliothèques à trois étages. |
 | `docs/partie-k-registre-points-ouverts.md` | Registre consolidé des points ouverts. Remplace et fait seul foi contre les huit listes antérieures (C5, D18, E19, F19, G10, H14, I7, J10). |
 | `docs/partie-l-fiches-modules-integration.md` | Fiches de modules et modèle d'intégration. Propriété des données module par module, quatre règles d'intégration (L1), couches (L2), chaînes de propagation (L4), événements (L5), dégradation par module non souscrit (L6). **Modifie A5.6** : la scission de propriété de `support` entre wayfinding et signalétique (L0) est prioritaire sur elle. |
-| `docs/partie-n-cahier-detaille-modules.md` | Cahier des charges détaillé des douze modules. Champs, règles métier numérotées et opposables (S, W, P, G, R, T, C, E, B, F, X, A), contrôles, écrans, critères d'acceptation. S'appuie sur L pour la propriété et sur M pour les écrans. |
+| `docs/partie-m-specification-ecrans.md` | Spécification d'écran, première tranche verticale. Les cinq écrans du socle au champ près (M1 liste des sites, M2 import et calage, M3 tracé des empreintes, M4 saisie du graphe, M5 validation de complétude), la liste fermée des composants (M6), **les onze règles d'écran de M7** auxquelles tout écran construit ensuite se conforme, et les six critères d'acceptation de la tranche entière (M8), dont le chronométrage du parcours. |
+| `docs/partie-n1-modules-01-04.md` | Cahier des charges détaillé, premier fichier. Méthode de profondeur (N0), puis modules 01 socle, 02 wayfinding, 03 parcours clients et 04 signalétique, descendus au champ et à la règle : `S1`–`S9`, `W1`–`W10`, `P1`–`P7`, `G1`–`G10`. |
+| `docs/partie-n2-modules-05-12.md` | Cahier des charges détaillé, second fichier. Modules 05 à 12 au niveau de la règle et de la frontière : `R1`–`R9`, `T1`–`T5`, `C1`–`C5`, `E1`–`E5`, `B1`–`B5`, `F1`–`F4`, `X1`–`X5`, `A1`–`A9`. N13 dit ce que la partie ne couvre pas. |
+| `docs/consigne-t-2-14a-empreinte-contenu.md` | Consigne de travail T-2.14a. Composition de l'empreinte de contenu, sérialisation canonique entièrement spécifiée, machine à états de `support_version`, dix critères d'acceptation. Interdit explicitement le rewire de `composeFace` tant que le tableau des messages n'existe pas (§7). |
 | `docs/complement-atelier-plans-parcours-signaletique.md` | Complément « atelier de plans, parcours et signalétique », remis le 17 septembre 2026. Chaîne de production en huit étapes, modules M1 à M17, treize principes opposables P1 à P13, contrôles QC-01 à QC-22, écrans ECR-AZ-01 à ECR-AZ-20. **Ne fait pas foi contre les parties A à N** : il les contredit sur neuf points, relevés au chapitre « Contradictions relevées au versement » du document. **Tranché le 17 septembre 2026** : le complément est une évolution du produit des parties A à N, pas un produit distinct — son vocabulaire et son architecture ne remplacent donc pas les leurs. Ce qu'il apporte, ce sont des capacités absentes du socle, et le document dit lesquelles sont implémentées et lesquelles attendent encore une décision. |
 
-`docs/cahier-des-charges.md` porte la partie A elle-même. Les compléments (partie D, puis parties E à N) déclarent chacun prendre le même rang que la partie A dans l'ordre de préséance. Le complément « atelier » fait exception : il ne déclare pas ce rang et ne l'a pas reçu, il est versé pour être lu, pas pour trancher. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts, la partie L modifie A5.6 sur la propriété de `support` — et sinon la procédure d'arrêt de A2.2 s'applique.
+`docs/cahier-des-charges.md` porte la partie A elle-même. Les compléments (partie D, puis parties E à N) déclarent chacun prendre le même rang que la partie A dans l'ordre de préséance. Le complément « atelier » fait exception : il ne déclare pas ce rang et ne l'a pas reçu, il est versé pour être lu, pas pour trancher. **Confirmé le 21 septembre 2026**, au versement des quatorze : il reste au dépôt, il ne fait pas foi contre eux, et le code qui en dépend — les domaines d'anomalie `PARK` et `DOC`, `audit-parking.ts`, les migrations `0018` à `0021` marquées `atelier` — reste en place en portant cette mention. En cas de contradiction entre deux d'entre eux, le plus récent tranche lorsqu'il le dit explicitement — la partie J lève ainsi une exclusion posée par la partie G, la partie K fait seule foi sur les points ouverts, la partie L modifie A5.6 sur la propriété de `support` — et sinon la procédure d'arrêt de A2.2 s'applique.
 
 **Une règle numérotée de la partie N est opposable** (N0) : elle se cite dans une revue de code et dans un test. Écrire `W4` ou `G5` dans un commentaire ou un nom de test désigne la règle, pas une intention.
 
-### Partie M : absente du dépôt
+### Les quatorze documents font foi, et ils sont tous dans `docs/`
 
-Les parties L et N s'appuient sur une **partie M** — règles d'écran (M7), tranche d'écrans du socle, contrôles géométriques — qui n'a pas été versée dans `docs/`. Tant qu'elle manque :
+Le dossier des quatorze documents a été versé le 21 septembre 2026, dans sa
+dernière version, et vérifié octet pour octet contre la remise. C'est la seule
+référence : toute note antérieure, entrée de registre ou décision prise sans ces
+documents est à revérifier contre eux, jamais l'inverse.
 
-- les renvois à M dans L et N ne sont pas vérifiables ;
-- les onze règles de M7, citées comme la norme à laquelle tout nouvel écran se conforme, ne sont pas lisibles ;
-- les écrans déjà construits l'ont été d'après deux maquettes (« Tranche M — Cinq écrans » et « Les Douze Modules ») et non d'après le texte de M.
+Ordre de lecture : `cahier-des-charges.md` (parties A, B, C), puis
+`partie-d-conventions-formats-algorithmes.md` (la partie D, sans lettre dans son
+nom d'origine), puis les parties E à N, puis la consigne T-2.14a.
 
-Réclamer la partie M avant de spécifier un nouvel écran relève de A2.2.
+**La partie M n'est plus absente.** Un précédent état de ce fichier la déclarait
+manquante et en tirait une consigne d'arrêt avant toute spécification d'écran.
+Cette consigne est caduque et retirée : `docs/partie-m-specification-ecrans.md`
+porte les cinq écrans au champ près, les onze règles de M7 et les six critères
+de M8.
+
+**Une règle de M7 est opposable au même titre qu'une règle de la partie N** : les
+onze règles s'appliquent à tout écran construit après la tranche M, et se citent
+dans une revue de code et dans un test.
 
 **Collision de codes depuis le 17 septembre 2026.** Le complément « atelier » emploie `M1` à `M17` comme codes de ses propres modules, où `M7` désigne un générateur de plans. Le jeton `M7` a donc deux sens selon le document qui le porte. Comme une règle numérotée se cite en revue et en test (N0), un `M...` écrit seul dans un commentaire, un nom de test ou un message de commit est ambigu et n'est pas recevable : préciser « M7 (partie M) » ou « M7 (complément atelier) ». La même précaution vaut pour `R1` à `R6` du complément, qui entrent en collision avec les quatre règles d'intégration `R1` à `R4` de la partie L1.
 
