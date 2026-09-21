@@ -30,14 +30,21 @@ beforeAll(async () => {
   }
   client = postgres(URL);
   db = drizzle(client);
-  await db.execute(sql`alter table azimut.organization no force row level security`);
-  await db.execute(sql`alter table azimut.membership no force row level security`);
-  await db.execute(sql`delete from azimut.membership`);
-  await db.execute(sql`delete from azimut.organization`);
+  // La suite se rejoue : elle part d'un état connu plutôt que de supposer une
+  // base neuve. L'amorçage contourne les politiques, comme le ferait un import
+  // d'administration, et les rétablit aussitôt.
+  const seeded = ['level', 'building', 'site', 'membership', 'organization'];
+  for (const table of seeded) {
+    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
+  }
+  for (const table of seeded) {
+    await db.execute(sql`delete from ${sql.identifier('azimut')}.${sql.identifier(table)}`);
+  }
   await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG_A},'A','a'),(${ORG_B},'B','b')`);
   await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${ALICE},'admin'),(${ORG_B},${BOB},'admin')`);
-  await db.execute(sql`alter table azimut.organization force row level security`);
-  await db.execute(sql`alter table azimut.membership force row level security`);
+  for (const table of seeded) {
+    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} force row level security`);
+  }
 
 });
 afterAll(async () => { await client.end(); });
@@ -95,5 +102,76 @@ describe('chemin d’écriture et cloisonnement en écriture (A6.1)', () => {
     await applyCommands(db, { userId: ALICE }, [siteCreate(id, ORG_A, 'Chez Alice')]);
     expect((await readAs(ALICE, id)).length).toBe(1);
     expect((await readAs(BOB, id)).length).toBe(0);
+  });
+});
+
+/**
+ * E5.1 et M1 (partie M) — `azimut.apply_commands`, le chemin d'écriture
+ * atteignable depuis le poste.
+ *
+ * Le poste parle à PostgREST et ne peut pas ouvrir de transaction. Or M1 veut
+ * qu'un site naisse avec un bâtiment et un niveau — « un site sans niveau est
+ * un état inutile » — et trois requêtes séparées laisseraient ce cas se
+ * produire au moindre incident.
+ */
+describe('apply_commands — le chemin d’écriture du poste', () => {
+  const ORG = ORG_A;
+
+  async function callAs(userId: string, commands: unknown): Promise<unknown> {
+    return db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${userId}, true)`);
+      return tx.execute(sql`select azimut.apply_commands(${JSON.stringify(commands)}::jsonb) as applied`);
+    });
+  }
+
+  function creation(suffix: string, org: string) {
+    const site = `a5000000-0000-0000-0000-000000${suffix}`;
+    const building = `a6000000-0000-0000-0000-000000${suffix}`;
+    const level = `a7000000-0000-0000-0000-000000${suffix}`;
+    return {
+      site,
+      commands: [
+        { operation: 'create', table: 'site', id: site,
+          after: { id: site, org_id: org, name: `Site ${suffix}`, country_code: 'FR' } },
+        { operation: 'create', table: 'building', id: building,
+          after: { id: building, org_id: org, site_id: site, name: 'Bâtiment 1' } },
+        { operation: 'create', table: 'level', id: level,
+          after: { id: level, org_id: org, building_id: building, name: 'Niveau 0',
+                   ordinal: '0', elevation_m: '0' } },
+      ],
+    };
+  }
+
+  it('crée le site, son bâtiment et son niveau en une transaction', async () => {
+    const { site, commands } = creation('00ee01', ORG);
+    await callAs(ALICE, commands);
+    expect((await readAs(ALICE, site)).length).toBe(1);
+  });
+
+  it('refuse une création dans une autre organisation', async () => {
+    const { commands } = creation('00ee02', ORG_B);
+    await expect(callAs(ALICE, commands)).rejects.toThrow();
+  });
+
+  /**
+   * C'est la garantie qui motive la fonction : M1 (partie M) interdit un site
+   * sans niveau, et sans transaction le premier insert survivrait à l'échec du
+   * second.
+   */
+  it('annule tout si une seule commande échoue', async () => {
+    const { site, commands } = creation('00ee03', ORG);
+    const broken = [
+      commands[0],
+      { ...commands[1], after: { ...(commands[1]?.after ?? {}), site_id: '00000000-0000-0000-0000-000000000000' } },
+    ];
+    await expect(callAs(ALICE, broken)).rejects.toThrow();
+    expect((await readAs(ALICE, site)).length).toBe(0);
+  });
+
+  it('refuse une table qui n’est pas au schéma', async () => {
+    await expect(callAs(ALICE, [
+      { operation: 'create', table: 'pg_shadow', id: ALICE, after: { x: '1' } },
+    ])).rejects.toThrow();
   });
 });

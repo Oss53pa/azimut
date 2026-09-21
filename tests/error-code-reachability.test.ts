@@ -46,14 +46,6 @@ const CATALOGUE_FILES = [
  * lèvent pas en écrivant du code.
  */
 const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
-  'DATA.NAME_REQUIRED':
-    'Contrôle de saisie du formulaire de création de M1 (partie M), écran non encore construit. Lot 1.4 de la tranche 1.',
-  'DATA.NAME_DUPLICATE':
-    'Même écran, même lot. L’unicité se vérifie dans l’organisation, donc contre le dépôt, non dans un moteur.',
-  'DATA.COUNTRY_REQUIRED':
-    'Formulaire de création de M1 (partie M), champ « Pays », écran non encore construit. Lot 1.4 de la tranche 1.',
-  'DATA.LANG_REQUIRED':
-    'Formulaire de création de M1 (partie M), champ « Langues actives », qui en exige au moins une. Même lot.',
   'IMPORT.FILE_TOO_LARGE':
     'Contrôle de l’étape 1 de M2 (partie M), import du fond de plan. L’écran d’import n’est pas construit ; le seuil de 60 Mo que M2 nomme est une valeur d’interface, non normative.',
   'IMPORT.FORMAT_UNSUPPORTED':

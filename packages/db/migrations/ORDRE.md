@@ -69,6 +69,7 @@ non plus — elle n'en retire que les clés étrangères.
 0023_a5_2_one_calibration_per_plan
 0024_a2_4_no_platform_dependency
 0025_a6_1_partitioning_effective
+0026_e5_1_apply_commands
 ```
 
 ## Règle pour la suite

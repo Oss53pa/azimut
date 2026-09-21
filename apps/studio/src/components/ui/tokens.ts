@@ -78,3 +78,17 @@ export function severityColor(severity: Severity): string {
     case 'valid': return 'var(--state-valid)';
   }
 }
+
+/** Le style commun des contrôles de saisie, dans leurs états de F6.1. */
+export function controlStyle(invalid: boolean, disabled: boolean) {
+  return {
+    font: 'inherit',
+    fontSize: TEXT.body,
+    padding: '6px 8px',
+    borderRadius: 4,
+    border: `1px solid ${invalid ? 'var(--state-blocking)' : 'var(--border-interactive)'}`,
+    background: disabled ? 'var(--surface-sunken)' : 'var(--surface-panel)',
+    color: disabled ? 'var(--text-muted)' : 'var(--text-primary)',
+    minWidth: 0,
+  } as const;
+}
