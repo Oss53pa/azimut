@@ -14,6 +14,27 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    # Les essais `*.db.test.ts` demandent une base. Sans elle, le pas « RLS
+    # tests » s'arrête sur le mode d'emploi de `packages/db/migrations/ORDRE.md`
+    # au lieu de prouver quoi que ce soit. Le service la fournit.
+    #
+    # `trust` plutôt qu'un mot de passe : la base vit le temps du job, n'est
+    # jointe que depuis le runner, et un mot de passe écrit ici serait une
+    # chaîne de connexion au dépôt, que A2.4 interdit. Il n'y a donc aucun
+    # identifiant à écrire.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 54332:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -45,7 +66,41 @@ jobs:
       - name: Visual regression tests
         run: pnpm test:visual
 
+      # Le montage suit `packages/db/migrations/ORDRE.md` mot pour mot, et ses
+      # deux points d'attention en sont la raison d'être :
+      #
+      # `azimut` n'est pas superutilisateur. Un superutilisateur contourne
+      # `FORCE ROW LEVEL SECURITY` et toutes les sondes de cloisonnement
+      # réussissent en ne prouvant rien — l'erreur commise au premier montage du
+      # banc du préalable K4 nº 7.
+      #
+      # `azimut` est membre de `authenticated`. Les politiques ne s'adressent
+      # qu'à ce rôle ; un rôle qui n'en est pas membre ne voit rien, et le
+      # cloisonnement passerait pour acquis alors qu'il n'aurait pas été
+      # éprouvé.
+      #
+      # `bootstrap-standalone.sql` passe parce que le service est une base nue,
+      # sans schéma `auth` : c'est l'installation autonome que décrit ORDRE.md.
+      # L'ordre des migrations est celui, lexicographique, que ce fichier fixe.
+      - name: Monter la base d'essai
+        run: |
+          set -euo pipefail
+          psql "postgres://postgres@127.0.0.1:54332/postgres" -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE ROLE azimut LOGIN;
+          CREATE ROLE authenticated NOLOGIN;
+          GRANT authenticated TO azimut;
+          CREATE DATABASE azimut OWNER azimut;
+          SQL
+          base="postgres://azimut@127.0.0.1:54332/azimut"
+          psql "$base" -v ON_ERROR_STOP=1 -q -f packages/db/migrations/bootstrap-standalone.sql
+          for f in packages/db/migrations/0*.up.sql; do
+            psql "$base" -v ON_ERROR_STOP=1 -q -f "$f"
+          done
+          echo "Base montée : $(ls packages/db/migrations/0*.up.sql | wc -l) migrations appliquées."
+
       - name: RLS tests
+        env:
+          AZIMUT_TEST_DATABASE_URL: postgres://azimut@127.0.0.1:54332/azimut
         run: pnpm test:rls
 
       - name: Determinism tests
