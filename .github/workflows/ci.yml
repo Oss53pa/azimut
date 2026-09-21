@@ -5,6 +5,10 @@ on:
     branches: [master]
   push:
     branches: [master]
+  # Redéployer sans rien changer au code. Sans cela, le seul moyen de relancer
+  # un déploiement serait de pousser un commit vide, ce qui salit l'historique
+  # pour une raison qui ne le regarde pas.
+  workflow_dispatch:
 
 jobs:
   ci:
@@ -52,3 +56,82 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  deploy:
+    name: Déploiement Cloudflare
+    # Rien ne part tant que les quatre commandes de A2.3 et le build ne sont
+    # pas passés. C'est tout l'intérêt de tenir le déploiement ici plutôt que
+    # dans un workflow à part : l'ordre est garanti par la dépendance, pas
+    # espéré.
+    needs: ci
+    # Jamais depuis une pull request : le code d'une branche en revue n'a rien
+    # à faire en production, et une PR venue d'une bifurcation n'aurait de
+    # toute façon pas accès aux secrets.
+    if: >-
+      github.repository == 'Oss53pa/azimut'
+      && github.ref == 'refs/heads/master'
+      && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    # Deux déploiements simultanés publieraient dans un ordre indéterminé.
+    # `cancel-in-progress: false` : on ne coupe pas une publication en cours,
+    # on attend qu'elle finisse.
+    concurrency:
+      group: deploy-cloudflare-production
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Avant toute installation : un secret absent doit se dire ici, en une
+      # phrase qui nomme le remède, et non trois minutes plus tard dans une
+      # erreur d'authentification de wrangler.
+      - name: Vérifier que les secrets sont déclarés
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          manquants=""
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || manquants="$manquants CLOUDFLARE_API_TOKEN"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || manquants="$manquants CLOUDFLARE_ACCOUNT_ID"
+          if [ -n "$manquants" ]; then
+            echo "::error::Secrets manquants :$manquants — à déclarer dans Settings > Secrets and variables > Actions du dépôt. Le jeton se crée sur le tableau de bord Cloudflare avec le droit « Edit Cloudflare Workers »."
+            exit 1
+          fi
+          echo "Les deux secrets sont déclarés."
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Reconstruit plutôt que de transporter le `dist` du job précédent. Un
+      # artefact est une pièce mobile de plus, qui peut arriver partielle ou
+      # périmée sans le dire ; reconstruire depuis le même commit donne des
+      # octets dont on sait d'où ils viennent, et coûte une trentaine de
+      # secondes.
+      - name: Build
+        run: pnpm build
+
+      # `wrangler` n'est pas une dépendance du dépôt : rien d'autre ne
+      # l'emploie, et l'ajouter ferait entrer une bibliothèque tierce pour un
+      # seul appel (A2.2-4). La contrepartie est assumée : la version n'est pas
+      # figée. La figer est un mot à changer ici, le jour où l'on veut la
+      # tenir.
+      - name: Deploy
+        working-directory: apps/studio
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler deploy

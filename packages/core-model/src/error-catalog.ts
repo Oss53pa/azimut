@@ -72,6 +72,8 @@ export const ERROR_CATALOG = {
   'LAYOUT.LEXICON_FORBIDDEN_TERM':          { severity: 'blocking', description: 'Terme interdit par la charte' },
   // Complément atelier, QC-06 : caractère que la rédaction propre bannit.
   'LAYOUT.FORBIDDEN_CHARACTER':             { severity: 'blocking', description: 'Caractère interdit dans un texte de livrable' },
+  // Complément atelier, QC-20 : rédaction trop longue dans un texte libre.
+  'LAYOUT.SENTENCE_TOO_LONG':               { severity: 'warning',  description: 'Phrase plus longue que la rédaction ne l’admet' },
   'LAYOUT.LEXICON_DISCOURAGED_TERM':        { severity: 'warning',  description: 'Terme déconseillé par la charte' },
   // Complément atelier, M3 et QC-05 : un texte qui contredit un fait du site.
   'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte contraire à un fait du site' },
@@ -243,6 +245,8 @@ export const ERROR_CATALOG = {
   'FLOW.HYPOTHESIS_MISSING':                 { severity: 'blocking', description: 'Export d’un résultat de flux sans ses hypothèses' },
   // Partie N, module 03 (N3.3) : normalisation et corrélation.
   'FLOW.WEIGHTS_NOT_NORMALIZED':             { severity: 'blocking', description: 'Somme des parts de fréquentation différente de 100 %' },
+  // I5.3 : une pondération négative ou non finie n'est pas une pondération.
+  'FLOW.WEIGHT_INVALID':                     { severity: 'blocking', description: 'Pondération négative ou non finie' },
   'FLOW.CORRELATION_TOO_LOW':                { severity: 'blocking', description: 'Corrélation sous le seuil déclaré pour produire un montant' },
   'AD.RULES_PACK_MISSING':                   { severity: 'blocking', description: 'Aucun paquet de règles publicitaires rattaché' },
   'AD.PLACEMENT_DOUBLE_BOOKED':              { severity: 'blocking', description: 'Conflit de réservation' },

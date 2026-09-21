@@ -179,3 +179,91 @@ describe('N3.3 — normalisation des parts de fréquentation', () => {
     expect(result.findings[0]?.code).toBe('FLOW.WEIGHTS_NOT_NORMALIZED');
   });
 });
+
+describe('I5.3 — une pondération négative n’est pas une pondération', () => {
+  it('refuse une part de fréquentation négative, et nomme l’accès', () => {
+    // Deux parts de -0,5 et 1,5 somment à l'unité : la normalisation les
+    // laisse passer, et c'est pourquoi ce refus lui est antérieur.
+    const r = guardExposureHypotheses({
+      ...complete,
+      entry_weights: [
+        { access_id: 'a-main', weight: -0.5 },
+        { access_id: 'a-parking', weight: 1.5 },
+      ],
+    });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings).toHaveLength(1);
+    expect(r.findings[0]?.code).toBe('FLOW.WEIGHT_INVALID');
+    expect(r.findings[0]?.severity).toBe('blocking');
+    expect(r.findings[0]?.params['factor']).toBe('entry_weights');
+    expect(r.findings[0]?.params['id']).toBe('a-main');
+    expect(r.findings[0]?.params['reason']).toBe('negative');
+  });
+
+  it('refuse aussi un pouvoir d’attraction négatif', () => {
+    // Une destination n'a pas un pouvoir d'attraction négatif : elle n'attire
+    // pas. La famille n'est pas normalisée, donc rien d'autre ne le verrait.
+    const r = guardExposureHypotheses({
+      ...complete,
+      attraction_weights: [
+        { destination_id: 'd-anchor', weight: 0.5 },
+        { destination_id: 'd-food', weight: -0.5 },
+      ],
+    });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings).toHaveLength(1);
+    expect(r.findings[0]?.params['factor']).toBe('attraction_weights');
+    expect(r.findings[0]?.params['id']).toBe('d-food');
+  });
+
+  it('sépare « pas un nombre » de « négatif »', () => {
+    // Une part NaN fait échouer la somme, ce qui désignerait la normalisation
+    // là où une seule ligne est fautive.
+    const r = guardExposureHypotheses({
+      ...complete,
+      entry_weights: [
+        { access_id: 'a-main', weight: Number.NaN },
+        { access_id: 'a-parking', weight: 1 },
+      ],
+    });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings.map(f => f.params['reason'])).toEqual(['not_finite']);
+  });
+
+  it('admet une part nulle : un accès qui n’amène personne reste déclaré', () => {
+    const r = guardExposureHypotheses({
+      ...complete,
+      entry_weights: [
+        { access_id: 'a-service', weight: 0 },
+        { access_id: 'a-main', weight: 1 },
+      ],
+    });
+    expect(r.ok).toBe(true);
+  });
+
+  it('rend une anomalie par ligne fautive, pas une par famille', () => {
+    const r = guardExposureHypotheses({
+      ...complete,
+      entry_weights: [
+        { access_id: 'a-1', weight: -1 },
+        { access_id: 'a-2', weight: -1 },
+        { access_id: 'a-3', weight: 3 },
+      ],
+    });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings.map(f => f.params['id'])).toEqual(['a-1', 'a-2']);
+  });
+
+  it('ne parle pas de pondération avant que la déclaration existe', () => {
+    // Un jeu vide est une hypothèse qu'on n'a pas posée : c'est ce que dit
+    // FLOW.WEIGHTS_UNDECLARED, et rien d'autre ne doit se prononcer.
+    const r = guardExposureHypotheses({ ...complete, entry_weights: [] });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings.map(f => f.code)).toEqual(['FLOW.WEIGHTS_UNDECLARED']);
+  });
+});

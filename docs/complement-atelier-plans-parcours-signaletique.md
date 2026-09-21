@@ -1371,11 +1371,16 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 
 9. Le reste de M15 : structure du document, objets de cartographie, ingestion
    de la plateforme de marque, publication.
-10. Les grands formats imprimés A0 et A1, qui butent sur le choix de la
-    bibliothèque de génération PDF, réservé par A3.1 à la tâche T-0.9.
+10. Les grands formats imprimés A0 et A1. L'obstacle a changé de nature
+    depuis que `docs/decision-t-0-9-generation-pdf.md` existe : la note
+    comparative propose `pdf-lib` et attend ratification, et surtout le dépôt
+    n'a aucune notion de format de page — ni A4, ni A3, ni échelle de tirage.
+    Ce qui manque n'est donc plus le générateur mais le modèle : ce qu'un
+    livrable A0 est dans ce produit, et si les dimensions de l'ISO 216 sont une
+    donnée versionnée ou une constante. Cela relève de A2.2.
 11. La seconde moitié de P7 — « présent de l'indicatif, pas de conditionnel » —
-    et ses deux contrôles voisins QC-07 et QC-20. Les trois demandent une
-    analyse de la langue, quand QC-06 ne demande que de lire des points de code.
+    et son contrôle QC-07. Reconnaître un conditionnel demande une analyse de
+    la langue que ce moteur ne fait pas.
 12. Onze codes du catalogue D2 restent muets, chacun avec sa raison inscrite
     dans `tests/error-code-reachability.test.ts`. Trois familles : la capacité
     n'est pas construite — import vectoriel, encre, éditeur de pictogrammes,
@@ -1386,9 +1391,13 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 13. Neuf garde-fous du studio ne sont appelés par aucun écran : ils ont été
     écrits d'avance sur les parties E, G et I. La liste et l'action qui manque
     à chacun sont dans `tests/check-wiring.test.ts`.
-14. Une part de fréquentation négative qui laisserait la somme à un passerait
-    le contrôle de normalisation. Lui donner un code au catalogue est une
-    décision qui dépasse le fait de lever un code déjà déclaré.
+14. ~~Une part de fréquentation négative qui laisserait la somme à un
+    passerait le contrôle de normalisation.~~ **Fait.** `FLOW.WEIGHT_INVALID`
+    refuse une pondération négative ou non finie, dans les deux familles, avant
+    la normalisation. La justification que je donnais pour ne pas le faire —
+    « une décision qui dépasse le fait de lever un code déjà déclaré » — ne
+    tenait pas : une part d'un tout ne se soustrait pas, ce n'est pas une
+    décision mais de l'arithmétique.
 15. Les portails véhicules ne se dessinent pas : un point orienté sur un plan
     demande un symbole, ce qui relève de la conception graphique.
 16. Neuf fichiers du dépôt dépassent les quatre cents lignes de A2.4, tous
@@ -1410,7 +1419,7 @@ avec ses contrôles et ses tests :
 Les deux qui manquent sont nommées plus bas : le reste de M15, et les grands
 formats imprimés.
 
-Trois contrôles de la liste QC, qui ne sont pas des capacités mais des règles
+Quatre contrôles de la liste QC, qui ne sont pas des capacités mais des règles
 qu'aucun moteur n'exerçait, ont été levés depuis :
 
 | Contrôle | Où |
@@ -1418,6 +1427,7 @@ qu'aucun moteur n'exerçait, ont été levés depuis :
 | QC-06 — caractère interdit dans un texte de livrable (P7) | `engine-graph/audit-typography.ts` |
 | QC-10 — desserte de toutes les entrées, sens de circulation compris | `engine-graph/checks-structure.ts`, dans `validateGraph` |
 | QC-12 — liaison verticale au même point d'un niveau à l'autre (P5) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+| QC-20 — rédaction trop longue dans un texte libre | `engine-graph/audit-sentence-length.ts` |
 
 Deux contrôles du socle ont été écrits au passage, parce que leurs codes
 figuraient au catalogue D2 sans qu'aucun moteur ne les lève : le lexique de
@@ -1454,11 +1464,19 @@ est écrite dans le moteur pour être relue. Deux limites y sont assumées : le
 contrôle vise le caractère U+2026 et non trois points ASCII à la suite, et le
 bloc Unicode des flèches U+2190 à U+21FF et non les blocs supplémentaires.
 
-La seconde moitié de P7, « présent de l'indicatif, pas de conditionnel »,
-n'est pas faite, et ses deux contrôles voisins non plus : QC-07, le verbe au
-conditionnel, et QC-20, la phrase de plus de vingt-cinq mots. Les trois
-demandent une analyse de la langue, quand QC-06 ne demande que de lire des
-points de code.
+De QC-20, deux choses sont écrites dans le moteur plutôt que supposées. Le
+corpus se limite au texte libre d'un gabarit de face : le modèle ne porte ni
+cartouche ni note, et c'est ce qui s'en approche le plus, le seul endroit où
+l'on écrit des phrases. Et le découpage en phrases coupe à tort sur une
+abréviation — « M. Dupont » compte pour deux —, ce qui raccourcit les phrases
+et fait donc sous-estimer le contrôle plutôt que sur-signaler, ce qu'on veut
+d'un signalant qu'on ne veut pas voir ignoré à force de crier.
+
+**Rectification.** Une version antérieure de ce registre rangeait QC-20 parmi
+les contrôles demandant une analyse de la langue. C'était faux : compter les
+mots d'une phrase n'en demande pas. Seul QC-07, le verbe au conditionnel, est
+dans ce cas, et la seconde moitié de P7 avec lui — « présent de l'indicatif,
+pas de conditionnel » — qui n'est pas faite.
 
 De M15, seul le mécanisme des champs liés est fait — celui sans lequel le reste
 ne vaudrait rien, puisqu'il est ce qui empêche le document de dupliquer une

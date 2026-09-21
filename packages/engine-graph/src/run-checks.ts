@@ -10,6 +10,7 @@ import { checkLevelCalibrated, checkSiteOriginCoherent } from './checks/site-fra
 import { checkApprovedVersionImmutable } from './checks/support-version.js';
 import { auditLexicon } from './audit-lexicon.js';
 import { auditTypography } from './audit-typography.js';
+import { auditSentenceLength } from './audit-sentence-length.js';
 import { auditSiteFacts } from './audit-site-facts.js';
 import { auditSourceClaims } from './audit-source-claims.js';
 import { auditParking } from './audit-parking.js';
@@ -61,6 +62,7 @@ const BASE_CHECKS: readonly string[] = [
   'approved_version_immutable',
   'duplicate_display_name',
   'forbidden_characters',
+  'sentence_length',
   'incomplete_lang_coverage',
   'level_calibrated',
   'naming_collision',
@@ -97,6 +99,10 @@ export function runChecks(
   // Il tourne donc toujours, aux deux modes, puisque le contrôle est bloquant
   // sans condition de destination — contrairement à QC-21.
   findings.push(...auditTypography(site).findings);
+
+  // QC-20 (complément atelier), voisin du précédent et signalant : il n'attend
+  // aucune déclaration non plus, et ne juge que le texte libre d'un gabarit.
+  findings.push(...auditSentenceLength(site).findings);
 
   const run: string[] = [...BASE_CHECKS];
   const undeclared: string[] = [];

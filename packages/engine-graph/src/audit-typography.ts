@@ -86,7 +86,7 @@ function forbiddenAt(codePoint: number): ForbiddenCharacterRange | null {
  * plus de chances d'être enfreinte, puisque c'est le seul texte qu'on saisit
  * librement.
  */
-function templateFreeTexts(site: SiteData): readonly { id: string; value: string }[] {
+export function templateFreeTexts(site: SiteData): readonly { id: string; value: string }[] {
   const out: { id: string; value: string }[] = [];
   const templates = [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id));
   for (const template of templates) {

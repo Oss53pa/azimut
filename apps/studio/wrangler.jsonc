@@ -1,0 +1,57 @@
+{
+  // Cible Cloudflare du studio.
+  //
+  // Sans ce fichier, `wrangler deploy` lancé à la racine tombe sur
+  // `pnpm-workspace.yaml`, ne trouve aucun projet à déployer et refuse :
+  // « The Cloudflare application detection logic has been run in the root of a
+  // workspace instead of targeting a specific project. »
+  //
+  // Le dépôt ne peut pas tout régler seul. Deux réglages restent au tableau de
+  // bord Cloudflare, parce qu'ils ne vivent pas dans le dépôt :
+  //
+  //   Root directory   apps/studio
+  //   Deploy command   npx wrangler deploy
+  //
+  // L'installation des dépendances reste à la racine : les paquets du studio
+  // sont des dépendances d'espace de travail (`workspace:*`), et une
+  // installation faite dans `apps/studio` seul ne les résoudrait pas.
+  //
+  // `wrangler` n'est volontairement pas une dépendance du dépôt : l'image de
+  // construction de Cloudflare le fournit, et l'ajouter ferait entrer une
+  // bibliothèque tierce que rien d'autre n'emploie (A2.2-4).
+  //
+  // A2.4 — « ne pas employer une fonctionnalité de la plateforme d'hébergement
+  // indisponible en installation autonome ». Ce déploiement n'en emploie
+  // aucune : il sert des fichiers statiques, et rien d'autre. Pas de fonction
+  // serveur, pas de stockage propriétaire, pas de moteur d'exécution
+  // particulier. Le même `dist` se sert depuis n'importe quel serveur de
+  // fichiers, et c'est ce que fait déjà l'autre cible du dépôt.
+
+  // Le nom n'est pas libre : il désigne le Worker à mettre à jour. Celui du
+  // compte s'appelle `azimut`, créé le 21 septembre à 12 h 59 par Cloudflare
+  // au moment de relier le dépôt. Déployer sous un autre nom en créerait un
+  // second et laisserait le premier — celui qui porte la route — servir
+  // indéfiniment le « Hello world » de départ.
+  "name": "azimut",
+
+  // Date de compatibilité du moteur d'exécution. Elle est figée : la laisser
+  // glisser ferait dépendre le comportement du jour du déploiement, ce qui est
+  // une source d'indéterminisme (invariant 4).
+  "compatibility_date": "2026-09-21",
+
+  "assets": {
+    // Sortie de `pnpm build` dans ce paquet, relative à ce fichier.
+    //
+    // Un seul emplacement, et c'est ce qui a permis de retirer le miroir que
+    // le build recopiait à la racine du dépôt : il existait pour couvrir deux
+    // conventions d'hébergeur à la fois, faute de savoir laquelle servirait.
+    // Ce fichier le dit, il n'y a plus à parier.
+    "directory": "./dist",
+
+    // Le studio n'a pas de routeur d'URL : toute la navigation se fait par
+    // l'état de React, et il n'existe qu'une page. Le repli sur `index.html`
+    // est retenu quand même, pour qu'un lien profond ouvre l'application au
+    // lieu de rendre une erreur.
+    "not_found_handling": "single-page-application"
+  }
+}
