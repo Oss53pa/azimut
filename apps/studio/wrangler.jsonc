@@ -26,7 +26,13 @@
   // serveur, pas de stockage propriétaire, pas de moteur d'exécution
   // particulier. Le même `dist` se sert depuis n'importe quel serveur de
   // fichiers, et c'est ce que fait déjà l'autre cible du dépôt.
-  "name": "azimut-studio",
+
+  // Le nom n'est pas libre : il désigne le Worker à mettre à jour. Celui du
+  // compte s'appelle `azimut`, créé le 21 septembre à 12 h 59 par Cloudflare
+  // au moment de relier le dépôt. Déployer sous un autre nom en créerait un
+  // second et laisserait le premier — celui qui porte la route — servir
+  // indéfiniment le « Hello world » de départ.
+  "name": "azimut",
 
   // Date de compatibilité du moteur d'exécution. Elle est figée : la laisser
   // glisser ferait dépendre le comportement du jour du déploiement, ce qui est
