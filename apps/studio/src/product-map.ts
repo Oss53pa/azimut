@@ -51,7 +51,14 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'floor-plans', labelKey: 'nav.item.floorplans' },
       { view: 'checks', labelKey: 'nav.item.checks' },
     ],
-    engine: 'complete',
+    // Partiel : S1 à S4 et S6 à S8 tiennent, S6 depuis qu'une longueur d'arête
+    // se calcule au lieu d'être crue. S5 ne l'est qu'à moitié — les champs de
+    // période existent, aucune lecture ne les filtre et aucun jeu d'essai ne
+    // porte deux occupants successifs. S9 n'a aucun moteur : un fond de plan
+    // remplacé sans recalage n'est ni détecté ni signalé. Et
+    // `LAYOUT.LANG_VARIANT_MISSING`, l'un des cinq contrôles de N1.4, n'est
+    // levé nulle part, bien que `site.active_langs` le rende calculable.
+    engine: 'partial',
     source: 'engine-graph',
   },
   {
@@ -61,7 +68,15 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.02.summary',
     entry: 'message-schedule',
     screens: [],
-    engine: 'complete',
+    // Partiel : W1, W3 à W6, W8 et W10 tiennent. W2 ne détecte que les
+    // collisions — l'entité `naming_rule` n'existe pas, donc « une règle de
+    // nommage déclarée est vérifiée à toute création » n'a aucune règle à
+    // vérifier. W7 tient sur la forme, le tableau portant version, état et
+    // empreinte, mais aucun circuit ne les fait transiter. W9 a son contrôle et
+    // pas ses valeurs plafonds, ce que N2.8 pose. Enfin `orientation_zone`, une
+    // entité de N2.2, n'existe pas, alors que le zonage d'orientation est dans
+    // le périmètre du module et son premier écran.
+    engine: 'partial',
     source: 'engine-graph/message-schedule',
   },
   {
