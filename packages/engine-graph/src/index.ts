@@ -90,19 +90,26 @@ export type {
   CheckReport, SiteVocabulary, CheckMode, CheckOptions,
 } from './run-checks.js';
 export {
-  renderFace, renderFaceWithMeasures, destinationListFontSizeMm, faceUsesAccent,
+  renderFace, renderFaceWithMeasures, destinationListFontSizeMm,
+  destinationListBlockHeightMm, faceUsesAccent,
   headerFontSizeMm, checkFaceContentFit,
 } from './render-face.js';
 export type { FaceRender, TextMeasure } from './render-face.js';
 export { checkFaceContrast } from './face-quality.js';
 export type { FaceContrastInput } from './face-quality.js';
-export { checkCharHeight } from '@azimut/rules';
+export { checkCharHeight, requiredCharHeightMm } from '@azimut/rules';
 export type { CharHeightInput } from '@azimut/rules';
 export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/rules';
 // buildRulesPackIndex lit le disque : il reste sur @azimut/rules/loader,
 // sinon le studio l'embarquerait et son build casserait.
 export { resolveSiteRulesPack } from '@azimut/rules';
+// I5.4 / N5.2-R7 — le paquet de règles publicitaires. Même raison que ci-dessus :
+// le studio l'atteint par ici, sans dépendre du chargeur qui lit le disque.
+export { guardAdRulesPack } from '@azimut/rules';
+export type { AdRulesPack } from '@azimut/rules';
 export { compileTemplate } from './compile-template.js';
+export { computeFaceFormat } from './face-format.js';
+export type { FaceFormat, FaceFormatInput } from './face-format.js';
 export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export { validateProofs } from './validate-proofs.js';
@@ -163,13 +170,29 @@ export type {
   ComposeFaceOptions,
   ResolveFromScheduleOptions,
 } from './compose-face.js';
-export { guardExposureHypotheses, guardFlowResultExport } from './exposure.js';
+export {
+  guardExposureHypotheses, guardFlowResultExport,
+  entryWeightSum, ENTRY_WEIGHT_TOTAL,
+} from './exposure.js';
 export type {
   ExposureHypotheses,
   EntryWeight,
   AttractionWeight,
   VisibilityCone,
 } from './exposure.js';
+export {
+  assessCorrelation, guardMonetaryEstimate,
+  isDeclaredThreshold, isSourcedObservation, MIN_CORRELATION_PAIRS,
+} from './correlation.js';
+export type {
+  CorrelationAssessment,
+  CorrelationMethod,
+  CorrelationStatus,
+  ExposureIndex,
+  MonetaryEstimateHypothesis,
+  PerformanceObservation,
+  PerformanceSourceKind,
+} from './correlation.js';
 export { guardPictogramsVector } from './detect-raster.js';
 export type { PictogramSvg } from './detect-raster.js';
 export {

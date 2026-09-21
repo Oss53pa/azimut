@@ -158,6 +158,9 @@ export const ERROR_CATALOG = {
   'DATA.FACE_DIMENSIONS_INVALID':           { severity: 'blocking', description: 'Dimensions de face nulles ou négatives' },
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': { severity: 'blocking', description: 'Transition d’état de version de support interdite' },
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet de version de support sans motif' },
+  // N4.3 — règle G7 : une version approuvée est immuable, une correction crée
+  // une nouvelle version.
+  'DATA.APPROVED_VERSION_NOT_IMMUTABLE': { severity: 'blocking', description: 'Version approuvée dont l’immuabilité n’est pas tenue' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable pour l’empreinte' },
 
   // Partie N, module 01 (N1.4) : code de cellule (règle S3).
@@ -190,6 +193,9 @@ export const ERROR_CATALOG = {
   'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien' },
   'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus de la tolérance' },
   'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point homologue au-dessus de la tolérance' },
+  // N1.3 — règle S1 : le repère site est fixé au premier calage.
+  'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
+  'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Repère site différent de celui du premier calage' },
 
   // ── NET (tranche M) ───────────────────────────────────────
   'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },

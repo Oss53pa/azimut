@@ -22,7 +22,7 @@ function makeEntry(
     org_id: 'org1',
     level_id: 'l1',
     geometry: { vertices },
-    kind: 'room',
+    kind: 'cell',
   };
   const volume: Volume = {
     id: volumeId,

@@ -7,6 +7,7 @@ import {
   refMultilevel,
   siteChecksum,
 } from '../index.js';
+import { siteOrigin, firstCalibration } from '@azimut/core-model';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
@@ -133,4 +134,66 @@ describe('ref-broken specifics', () => {
     );
     expect(crossWithoutVl.length).toBeGreaterThan(0);
   });
+});
+
+/**
+ * N1.2 — la déclaration de langues d'un site de référence dit ce que le site
+ * porte réellement. Un écart dans un sens laisserait une dénomination hors
+ * de toute langue active ; dans l'autre, il déclarerait une langue que rien
+ * ne remplit.
+ */
+describe('N1.2 — langues déclarées et langues présentes', () => {
+  for (const [key, site] of allReferenceSites) {
+    it(`${key} déclare exactement les langues de ses dénominations`, () => {
+      const declared = [...site.site.active_langs].sort();
+      const present = [...new Set(site.destination_names.map(n => n.lang))].sort();
+      expect(declared).toEqual(present);
+      expect(declared.length).toBeGreaterThan(0);
+    });
+  }
+});
+
+/**
+ * S1 — le repère site d'un site de référence est celui de son premier calage.
+ *
+ * `calibrated_at` rend « le premier » identifiable : le test porte donc sur le
+ * premier calage et non sur un calage quelconque.
+ */
+describe('S1 — repère site et premier calage', () => {
+  for (const [key, site] of allReferenceSites) {
+    it(`${key} porte le repère de son premier calage, ou aucun`, () => {
+      const origin = siteOrigin(site.site);
+      const first = firstCalibration(site.plan_calibrations);
+      if (first === null) {
+        expect(origin).toBeNull();
+        return;
+      }
+      expect(origin).toEqual({ x_m: first.origin_x, y_m: first.origin_y });
+    });
+  }
+
+  it('désigne le calage du RDC sur ref-multilevel, pas celui du R+1', () => {
+    expect(firstCalibration(refMultilevel.plan_calibrations)?.id).toBe('cal-ml-rdc');
+  });
+});
+
+/**
+ * A5.2 — un fond de plan porte un calage et pas deux. La base le garantit par
+ * un index unique (migration 0023) ; les jeux d'essai ne doivent pas décrire un
+ * état que la base refuse.
+ */
+describe('A5.2 — un calage par fond de plan', () => {
+  for (const [key, site] of allReferenceSites) {
+    it(`${key} ne cale aucun fond deux fois`, () => {
+      const sourceIds = site.plan_calibrations.map(c => c.plan_source_id);
+      expect(new Set(sourceIds).size).toBe(sourceIds.length);
+    });
+
+    it(`${key} ne cale aucun fond qu'il ne porte pas`, () => {
+      const known = new Set(site.plan_sources.map(p => p.id));
+      for (const calibration of site.plan_calibrations) {
+        expect(known.has(calibration.plan_source_id)).toBe(true);
+      }
+    });
+  }
 });

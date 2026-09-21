@@ -12,7 +12,8 @@
 import { assembleSiteData } from '@azimut/db/mapping';
 import type {
   BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
-  FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow, SiteRow,
+  FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
+  PlanCalibrationRow, PlanSourceRow, SiteRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
   ParkingRow, ParkingSpaceRow, ParkingUncoveredAreaRow, VehicleGateRow,
@@ -25,6 +26,11 @@ import {
   RepositoryError, errorCodeForStatus,
   type SiteRepository, type SiteSummary,
 } from './site-repository.js';
+
+type SiteListRow = Pick<
+  SiteRow,
+  'id' | 'org_id' | 'name' | 'country_code' | 'rules_pack_id'
+>;
 
 export type PostgrestConfig = {
   /** Racine de l'API REST, sans barre oblique finale. */
@@ -157,7 +163,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     origin: `${config.url} · ${config.schema}`,
 
     async listSites(): Promise<readonly SiteSummary[]> {
-      const rows = await query<SiteRow>(
+      // La projection est plus étroite que `SiteRow` : la liste n'a besoin que
+      // de quoi nommer un site. Le type dit exactement les colonnes demandées,
+      // sinon il promettrait des champs que la réponse ne porte pas.
+      const rows = await query<SiteListRow>(
         config,
         'site',
         'select=id,org_id,name,country_code,rules_pack_id&order=name.asc',
@@ -186,9 +195,13 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       );
       const levelIds = levels.map(l => l.id);
 
-      const [footprints, nodes, categories, pictograms, travelProfiles, supports, typologies] =
+      const [
+        footprints, planSources, nodes, categories, pictograms, travelProfiles,
+        supports, typologies,
+      ] =
         await Promise.all([
           queryIn<FootprintRow>(config, 'footprint', 'level_id', levelIds),
+          queryIn<PlanSourceRow>(config, 'plan_source', 'level_id', levelIds),
           queryIn<NodeRow>(config, 'node', 'level_id', levelIds),
           query<CategoryRow>(config, 'category', `org_id=eq.${site.org_id}`),
           query<PictogramRow>(config, 'pictogram', `org_id=eq.${site.org_id}`),
@@ -200,10 +213,13 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       const footprintIds = footprints.map(f => f.id);
       const nodeIds = nodes.map(n => n.id);
 
-      const [volumes, edges, destinations] = await Promise.all([
+      const [volumes, edges, destinations, planCalibrations] = await Promise.all([
         queryIn<VolumeRow>(config, 'volume', 'footprint_id', footprintIds),
         queryIn<EdgeRow>(config, 'edge', 'from_node_id', nodeIds),
         queryIn<DestinationRow>(config, 'destination', 'footprint_id', footprintIds),
+        queryIn<PlanCalibrationRow>(
+          config, 'plan_calibration', 'plan_source_id', planSources.map(p => p.id),
+        ),
       ]);
 
       const supportIds = supports.map(s => s.id);
@@ -242,6 +258,8 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         site,
         buildings,
         levels,
+        plan_sources: planSources,
+        plan_calibrations: planCalibrations,
         footprints,
         volumes,
         nodes,

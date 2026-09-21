@@ -2,10 +2,11 @@ import { type JSX, useMemo } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
 import type { Finding } from '@azimut/core-model';
 import { guardPlacementBookings, auditOptionExpiry, type BookingState } from '../domain/ad-planning.js';
-import { guardCreativeAgainstSpec } from '../domain/ad-creative-control.js';
+import { guardAdRulesPack } from '@azimut/engine-graph';
+import { receiveCreatives, type CreativeIntake } from '../domain/ad-creative-intake.js';
 import {
   DEMO_PLACEMENTS, DEMO_BOOKINGS, DEMO_OPTIONS,
-  DEMO_CREATIVES, DEMO_CREATIVE_SPEC,
+  DEMO_CREATIVES, DEMO_CREATIVE_SPEC, DEMO_AD_RULES_PACK,
   type CreativeSubmission,
 } from '../domain/demo/commerce.js';
 import {
@@ -66,14 +67,32 @@ export function AdvertisingView(): JSX.Element {
     return result.ok ? result.warnings : result.findings;
   }, [today]);
 
-  const creativeFindings = useMemo(() => {
-    const byCreative = new Map<string, readonly Finding[]>();
-    for (const submission of DEMO_CREATIVES) {
-      const result = guardCreativeAgainstSpec(submission.creative, DEMO_CREATIVE_SPEC);
-      byCreative.set(submission.creative.id, result.ok ? [] : result.findings);
-    }
-    return byCreative;
+  /**
+   * R7 — les règles publicitaires viennent d'une extension du paquet de règles.
+   * En son absence, le module lève une anomalie et n'invente aucune règle : les
+   * contrôles techniques de R6 (partie N) continuent, les appréciations déclaratives, non,
+   * puisqu'elles reposeraient sur un règlement que personne n'a versé.
+   */
+  const rulesPackFindings = useMemo<readonly Finding[]>(() => {
+    const result = guardAdRulesPack(DEMO_AD_RULES_PACK);
+    return result.ok ? [] : result.findings;
   }, []);
+
+  /**
+   * R5 (partie N) puis R6 — chaque visuel reçu passe par l'assainissement avant tout, puis
+   * par sa fiche technique. L'écran ne contrôle rien lui-même : il affiche le
+   * constat de réception.
+   */
+  const intakes = useMemo(
+    () => receiveCreatives(DEMO_CREATIVES, DEMO_CREATIVE_SPEC),
+    [],
+  );
+  const intakeById = useMemo(() => {
+    const byId = new Map<string, CreativeIntake>();
+    for (const intake of intakes) byId.set(intake.creative_id, intake);
+    return byId;
+  }, [intakes]);
+  const unrenderable = intakes.filter(i => !i.renderable).length;
 
   const rows = useMemo<readonly PlacementRow[]>(() =>
     DEMO_PLACEMENTS.map((placement): PlacementRow => ({
@@ -107,6 +126,13 @@ export function AdvertisingView(): JSX.Element {
       severity: expiredOptions.length > 0 ? 'warning' : 'valid',
     },
     { id: 'review', label: t('ads.metric.review'), value: String(toReview) },
+    {
+      id: 'unrenderable',
+      label: t('ads.metric.unrenderable'),
+      value: String(unrenderable),
+      note: t('ads.metric.unrenderable.note'),
+      severity: unrenderable > 0 ? 'warning' : 'valid',
+    },
   ];
 
   const columns: readonly Column<PlacementRow>[] = [
@@ -133,13 +159,28 @@ export function AdvertisingView(): JSX.Element {
     { id: 'id', header: t('ads.creative.col.id'), cell: s => s.creative.id },
     { id: 'placement', header: t('ads.creative.col.placement'), cell: s => s.placement_id },
     {
+      id: 'intake',
+      header: t('ads.creative.col.intake'),
+      cell: s => {
+        const intake = intakeById.get(s.creative.id);
+        if (intake === undefined) return t('ads.creative.conform');
+        return (
+          <Tag
+            label={t(SANITATION_KEYS[intake.sanitation])}
+            severity={intake.renderable ? 'valid' : intake.sanitation === 'failed' ? 'blocking' : 'warning'}
+          />
+        );
+      },
+    },
+    {
       id: 'checks',
       header: t('ads.creative.col.checks'),
       cell: s => {
-        const findings = creativeFindings.get(s.creative.id) ?? [];
-        return findings.length === 0
-          ? t('ads.creative.conform')
-          : findings.map(f => String(f.params['axis'] ?? '')).join(' · ');
+        const findings = intakeById.get(s.creative.id)?.findings ?? [];
+        if (findings.length === 0) return t('ads.creative.conform');
+        return findings
+          .map(f => String(f.params['axis'] ?? f.params['reason'] ?? ''))
+          .join(' · ');
       },
     },
     {
@@ -162,7 +203,15 @@ export function AdvertisingView(): JSX.Element {
         subtitle={t('ads.subtitle')}
       />
 
-      <div style={{ marginBottom: SPACE.md }}>
+      <div style={{ display: 'grid', gap: SPACE.sm, marginBottom: SPACE.md }}>
+        {rulesPackFindings.length > 0 && (
+          <StateBanner
+            severity="blocking"
+            code="AD.RULES_PACK_MISSING"
+            message={t('ads.rulespack.missing')}
+            hint={t('ads.rulespack.hint')}
+          />
+        )}
         <StateBanner
           severity="info"
           message={t('demo.dataset.message')}
@@ -197,6 +246,18 @@ export function AdvertisingView(): JSX.Element {
           <Panel title={t('ads.panel.options')}>
             <FindingList findings={expiredOptions} empty={t('ads.options.empty')} />
           </Panel>
+          <Panel title={t('ads.panel.rulespack')}>
+            <FindingList findings={rulesPackFindings} empty={t('ads.rulespack.attached')} />
+            <Note>{t('ads.rulespack.note')}</Note>
+          </Panel>
+          <Panel title={t('ads.panel.intake')}>
+            <FindingList
+              findings={intakes.flatMap(i => i.findings)}
+              empty={t('ads.intake.empty')}
+              limit={8}
+            />
+            <Note>{t('ads.intake.note')}</Note>
+          </Panel>
           <Panel title={t('ads.panel.spec')}>
             <dl style={{ margin: 0, display: 'grid', gap: SPACE.xs, fontSize: TEXT.small }}>
               <SpecRow label={t('ads.spec.format')} value={DEMO_CREATIVE_SPEC.format} />
@@ -217,6 +278,12 @@ export function AdvertisingView(): JSX.Element {
     </div>
   );
 }
+
+const SANITATION_KEYS = {
+  clean: 'ads.sanitation.clean',
+  failed: 'ads.sanitation.failed',
+  deferred: 'ads.sanitation.deferred',
+} as const;
 
 const VERDICT_KEYS = {
   approved: 'ads.verdict.approved',

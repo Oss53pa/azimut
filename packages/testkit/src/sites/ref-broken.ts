@@ -12,6 +12,11 @@ export const refBroken: SiteData = {
     name: 'Site cassé',
     country_code: 'FR',
     rules_pack_id: null,
+    // S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
+    // `origin_x` / `origin_y` sont absents. Ce n'est pas l'origine (0, 0).
+    // N1.2 — site bilingue. L'altitude du niveau de référence n'est pas
+    // relevée : les altitudes de niveau restent justes, elles sont relatives.
+    active_langs: ['fr', 'en'],
   },
   buildings: [
     {
@@ -40,7 +45,94 @@ export const refBroken: SiteData = {
       elevation_m: 3,
     },
   ],
-  footprints: [],
+  /**
+   * N1.4 — les deux situations que `CALIB.LEVEL_NOT_CALIBRATED` recouvre :
+   *  - `lvl-brk-rdc` porte un fond de plan que personne n'a calé
+   *    (`plan_source_count` vaut 1, la conduite à tenir est de caler) ;
+   *  - `lvl-brk-r1` n'a aucun fond importé
+   *    (`plan_source_count` vaut 0, la conduite à tenir est d'importer).
+   */
+  plan_sources: [
+    {
+      id: 'ps-brk-rdc',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      storage_path: 'plans/site-broken-001/lvl-brk-rdc.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [],
+  /**
+   * N1.4 — trois empreintes, chacune posée pour un cas :
+   *  - `fp-brk-nocode` : cellule sans code, DATA.UNIT_CODE_REQUIRED ;
+   *  - `fp-brk-dup-a` et `fp-brk-dup-b` : même code sur le même niveau,
+   *    DATA.CODE_DUPLICATE ;
+   *  - `fp-brk-other-level` : même code, mais sur l'autre niveau — il ne
+   *    doit PAS être signalé, la portée de l'unicité étant le niveau.
+   */
+  footprints: [
+    {
+      id: 'fp-brk-nocode',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: 0 },
+          { x_m: 4, y_m: 0 },
+          { x_m: 4, y_m: 3 },
+          { x_m: 0, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-dup-a',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      unit_code: 'C-200',
+      geometry: {
+        vertices: [
+          { x_m: 10, y_m: 0 },
+          { x_m: 14, y_m: 0 },
+          { x_m: 14, y_m: 3 },
+          { x_m: 10, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-dup-b',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-rdc',
+      kind: 'cell',
+      // Même code, casse différente : un lecteur de panneau ne les distingue pas.
+      unit_code: 'c-200',
+      geometry: {
+        vertices: [
+          { x_m: 20, y_m: 0 },
+          { x_m: 24, y_m: 0 },
+          { x_m: 24, y_m: 3 },
+          { x_m: 20, y_m: 3 },
+        ],
+      },
+    },
+    {
+      id: 'fp-brk-other-level',
+      org_id: 'org-test-001',
+      level_id: 'lvl-brk-r1',
+      kind: 'cell',
+      unit_code: 'C-200',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: 10 },
+          { x_m: 4, y_m: 10 },
+          { x_m: 4, y_m: 13 },
+          { x_m: 0, y_m: 13 },
+        ],
+      },
+    },
+  ],
   volumes: [],
   graph: {
     nodes: [
@@ -140,7 +232,7 @@ export const refBroken: SiteData = {
         accessible: false,
         direction: 'both',
         evacuation_route: false,
-        length_m: 5,
+        length_m: 3,
       },
     ],
     vertical_links: [],

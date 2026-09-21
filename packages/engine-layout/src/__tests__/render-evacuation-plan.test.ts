@@ -313,7 +313,7 @@ describe('T-2.10 renderEvacuationPlan', () => {
           geometry: {
             vertices: [{ x_m: 5, y_m: 5 }],
           },
-          kind: 'room' as const,
+          kind: 'cell' as const,
         },
       ],
     };

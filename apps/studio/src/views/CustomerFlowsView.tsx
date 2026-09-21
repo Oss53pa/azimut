@@ -1,8 +1,14 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { guardExposureHypotheses, guardFlowResultExport } from '@azimut/engine-graph';
-import type { ExposureHypotheses } from '@azimut/engine-graph';
+import {
+  guardExposureHypotheses, guardFlowResultExport,
+  entryWeightSum, ENTRY_WEIGHT_TOTAL,
+  assessCorrelation, guardMonetaryEstimate, isDeclaredThreshold,
+} from '@azimut/engine-graph';
+import type {
+  ExposureHypotheses, ExposureIndex, PerformanceObservation,
+} from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner,
@@ -21,6 +27,18 @@ const EMPTY_HYPOTHESES: ExposureHypotheses = {
   attraction_weights: [],
   visibility_cones: [],
 };
+
+/**
+ * P6 — aucune donnée réelle n'est produite ici. Comptage, télémétrie et
+ * chiffre d'affaires déclaré viennent de tiers, et aucun chemin d'import
+ * n'existe encore : l'échantillon est donc vide, et il le reste jusqu'à ce
+ * qu'un import en verse un. Le remplir de nombres inventés ferait de cet
+ * écran exactement ce que la frontière de N3.1 interdit.
+ */
+const IMPORTED_OBSERVATIONS: readonly PerformanceObservation[] = [];
+
+/** I5.3 — le calcul d'exposition n'est pas construit : aucun indice à apparier. */
+const EXPOSURE_INDICES: readonly ExposureIndex[] = [];
 
 function findingsOf(outcome: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
   return outcome.ok ? (outcome.warnings ?? []) : (outcome.findings ?? []);
@@ -74,6 +92,29 @@ export function CustomerFlowsView(): JSX.Element {
       })),
     };
   }, [declared, entrances, site.destinations, typologies]);
+
+  /**
+   * P5 (partie N) — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
+   * vide, aucune comparaison n'est possible et le garde-fou refuse le montant
+   * faute de déclaration, non faute de corrélation.
+   */
+  const [threshold, setThreshold] = useState('');
+  const parsedThreshold = threshold.trim() === ''
+    ? Number.NaN
+    : Number(threshold.replace(',', '.'));
+
+  const assessment = useMemo(
+    () => assessCorrelation(EXPOSURE_INDICES, IMPORTED_OBSERVATIONS),
+    [],
+  );
+  const monetaryGuard = useMemo(
+    () => guardMonetaryEstimate(
+      { min_correlation: parsedThreshold },
+      EXPOSURE_INDICES,
+      IMPORTED_OBSERVATIONS,
+    ),
+    [parsedThreshold],
+  );
 
   const guard = useMemo(() => guardExposureHypotheses(hypotheses), [hypotheses]);
   const exportGuard = useMemo(
@@ -169,7 +210,15 @@ export function CustomerFlowsView(): JSX.Element {
 
       <div style={{ marginTop: SPACE.lg }}>
         <PanelGrid min={300}>
-          <Panel title={t('flows.panel.entries')} note={String(hypotheses.entry_weights.length)}>
+          <Panel
+            title={t('flows.panel.entries')}
+            note={hypotheses.entry_weights.length === 0
+              ? String(hypotheses.entry_weights.length)
+              : t('flows.entries.sum', {
+                sum: (entryWeightSum(hypotheses.entry_weights) * 100).toFixed(1),
+                expected: ENTRY_WEIGHT_TOTAL * 100,
+              })}
+          >
             <WeightList
               rows={hypotheses.entry_weights.map(w => ({
                 key: w.access_id,
@@ -206,9 +255,79 @@ export function CustomerFlowsView(): JSX.Element {
       </div>
 
       <div style={{ marginTop: SPACE.lg }}>
+        <Panel title={t('flows.panel.monetary')}>
+          <div style={{ display: 'grid', gap: SPACE.md }}>
+            <StateBanner severity="info" message={t('flows.monetary.imported')} />
+            <label style={{ display: 'grid', gap: SPACE.xs }}>
+              <span style={LABEL_STYLE}>{t('flows.monetary.threshold')}</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                value={threshold}
+                onChange={(e) => { setThreshold(e.target.value); }}
+                style={{
+                  border: '1px solid var(--border-interactive)',
+                  background: 'var(--surface-panel)',
+                  color: 'var(--text-primary)',
+                  borderRadius: 4,
+                  padding: '4px 8px',
+                  fontSize: TEXT.small,
+                  fontFamily: 'var(--font-mono)',
+                }}
+              />
+              <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
+                {t('flows.monetary.threshold.hint')}
+              </span>
+            </label>
+            <WeightList
+              rows={[
+                {
+                  key: t('flows.monetary.method'),
+                  value: t(`flows.monetary.method.${assessment.method}`),
+                },
+                { key: t('flows.monetary.pairs'), value: String(assessment.pairs) },
+                {
+                  key: t('flows.monetary.dropped'),
+                  value: String(assessment.dropped_unsourced),
+                },
+                {
+                  key: t('flows.monetary.coefficient'),
+                  value: assessment.coefficient === null
+                    ? t(`flows.monetary.status.${assessment.status}`)
+                    : assessment.coefficient.toFixed(3),
+                },
+              ]}
+              empty={t('flows.guards.empty')}
+            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: SPACE.sm }}>
+              <span style={LABEL_STYLE}>{t('flows.monetary.amount')}</span>
+              <Tag
+                label={monetaryGuard.ok
+                  ? t('flows.monetary.amount.allowed')
+                  : t('flows.monetary.amount.refused')}
+                severity={monetaryGuard.ok ? 'valid' : 'blocking'}
+              />
+            </div>
+            {!isDeclaredThreshold(parsedThreshold) && (
+              <StateBanner
+                severity="blocking"
+                code="FLOW.WEIGHTS_UNDECLARED"
+                message={t('flows.monetary.undeclared')}
+              />
+            )}
+          </div>
+          <Note>{t('flows.monetary.note')}</Note>
+        </Panel>
+      </div>
+
+      <div style={{ marginTop: SPACE.lg }}>
         <Panel title={t('flows.panel.guards')}>
           <FindingList
-            findings={[...findingsOf(guard), ...findingsOf(exportGuard)]}
+            findings={[
+              ...findingsOf(guard),
+              ...findingsOf(exportGuard),
+              ...findingsOf(monetaryGuard),
+            ]}
             empty={t('flows.guards.empty')}
           />
         </Panel>

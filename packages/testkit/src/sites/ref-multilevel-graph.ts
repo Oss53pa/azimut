@@ -3,8 +3,8 @@ import type { SiteData } from '@azimut/core-model';
 /**
  * Le graphe du site de référence multiniveau.
  *
- * Sorti du fichier principal, qu'il occupait à lui seul pour plus de la moitié
- * et qui franchissait les quatre cents lignes (A2.4). La donnée ne change pas :
+ * Sorti du fichier principal, qu'il occupait à lui seul pour les deux tiers et
+ * qui franchissait les quatre cents lignes (A2.4). La donnée ne change pas :
  * la constante est réinjectée telle quelle dans `refMultilevel`.
  */
 export const REF_MULTILEVEL_GRAPH: SiteData['graph'] = {
@@ -129,7 +129,7 @@ export const REF_MULTILEVEL_GRAPH: SiteData['graph'] = {
       accessible: true,
       direction: 'both',
       evacuation_route: false,
-      length_m: 15.81,
+      length_m: 15.811,
     },
     {
       id: 'e-ml-elevator-vl',
@@ -153,7 +153,7 @@ export const REF_MULTILEVEL_GRAPH: SiteData['graph'] = {
       accessible: false,
       direction: 'both',
       evacuation_route: true,
-      length_m: 5,
+      length_m: 3,
     },
     {
       id: 'e-ml-elevator-r1-hall',
@@ -189,7 +189,7 @@ export const REF_MULTILEVEL_GRAPH: SiteData['graph'] = {
       accessible: true,
       direction: 'both',
       evacuation_route: false,
-      length_m: 15.81,
+      length_m: 15.811,
     },
   ],
   vertical_links: [

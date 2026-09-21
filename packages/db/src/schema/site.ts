@@ -1,4 +1,7 @@
-import { uuid, text, timestamp, date, integer, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core';
+import {
+  uuid, text, timestamp, date, integer, numeric, boolean, jsonb,
+  uniqueIndex, index,
+} from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 
@@ -8,6 +11,19 @@ export const site = azimut.table('site', {
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
   rules_pack_id: uuid('rules_pack_id'),
+  // S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
+  // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
+  // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
+  origin_x: numeric('origin_x'),
+  origin_y: numeric('origin_y'),
+  // N1.2 — langues actives. Nullable : une ligne antérieure à la migration
+  // n'en déclare aucune, et la migration ne va pas en déclarer à sa place.
+  // Le CHECK interdit en revanche le tableau vide, qui ne dirait rien de plus
+  // que NULL tout en ayant l'air d'une déclaration.
+  active_langs: text('active_langs').array(),
+  // D1.1 / N1.2 — altitude du niveau de référence, Z = 0. Nullable : une
+  // altitude absolue non relevée n'invalide pas les altitudes relatives.
+  reference_elevation_m: numeric('reference_elevation_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   deleted_at: timestamp('deleted_at', { withTimezone: true }),
@@ -22,6 +38,8 @@ export const building = azimut.table('building', {
   name: text('name').notNull(),
   independent_access: boolean('independent_access').notNull().default(false),
   opening_hours: jsonb('opening_hours'),
+  // N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+  default_edge_width_m: numeric('default_edge_width_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -49,6 +67,11 @@ export const footprint = azimut.table('footprint', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry').notNull(),
   kind: text('kind').notNull(),
+  // N1.2 — code d'unité locative, requis pour une cellule, unique par niveau.
+  // Nullable : une empreinte relevée avant que son code soit connu doit
+  // pouvoir être enregistrée ; c'est le contrôle qui la signale, pas la base
+  // qui la refuse.
+  unit_code: text('unit_code'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -109,8 +132,17 @@ export const planCalibration = azimut.table('plan_calibration', {
   affine_f: numeric('affine_f'),
   mean_residual_m: numeric('mean_residual_m'),
   max_residual_m: numeric('max_residual_m'),
+  // S1 — date de l'opération de calage, distincte de l'import du fond que date
+  // `plan_source.uploaded_at`. C'est elle qui rend « le premier calage »
+  // identifiable. Nullable et sans valeur par défaut : une ligne enregistrée
+  // avant cette colonne n'a pas de date, et `now()` ferait passer la date de
+  // la migration pour celle du calage.
+  calibrated_at: timestamp('calibrated_at', { withTimezone: true }),
 }, (t) => [
   index('idx_plan_calibration_org').on(t.org_id),
+  // « Chacun est calé au plus une fois » : un fond porte un calage, pas deux.
+  // Recaler (S9) met la ligne à jour, il n'en ajoute pas une seconde.
+  uniqueIndex('uq_plan_calibration_plan_source').on(t.plan_source_id),
 ]);
 
 /**

@@ -10,9 +10,14 @@ function siteWith(
 ): SiteData {
   return {
     organization: { id: 'org1', name: 'T', slug: 't' },
-    site: { id: 's1', org_id: 'org1', name: 'S', country_code: 'FR', rules_pack_id: null },
+    site: {
+      id: 's1', org_id: 'org1', name: 'S', country_code: 'FR',
+      rules_pack_id: null, active_langs: ['fr'],
+    },
     buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B', independent_access: true }],
     levels: [{ id: 'l1', org_id: 'org1', building_id: 'b1', name: 'RDC', ordinal: 0, elevation_m: 0 }],
+    plan_sources: [],
+    plan_calibrations: [],
     footprints,
     volumes,
     graph: { nodes: [], edges: [], vertical_links: [] },
@@ -38,7 +43,7 @@ function fp(id: string, verts: [number, number][], level = 'l1'): Footprint {
   return {
     id, org_id: 'org1', level_id: level,
     geometry: { vertices: verts.map(([x, y]) => ({ x_m: x, y_m: y })) },
-    kind: 'room',
+    kind: 'cell',
   };
 }
 const GOOD_FP = fp('fp-good', [[0, 0], [10, 0], [10, 10], [0, 10]]);

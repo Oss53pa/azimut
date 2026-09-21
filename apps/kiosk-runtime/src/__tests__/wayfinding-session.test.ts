@@ -131,16 +131,23 @@ describe('computeWayfinding', () => {
     // Three consecutive junction nodes should collapse into one step.
     const corridorSite: SiteData = {
       organization: { id: 'org1', name: 'Test', slug: 'test' },
-      site: { id: 's1', org_id: 'org1', name: 'Corridor', country_code: 'FR', rules_pack_id: null },
+      site: {
+        id: 's1', org_id: 'org1', name: 'Corridor', country_code: 'FR',
+        rules_pack_id: null, active_langs: ['fr'],
+      },
       buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B1', independent_access: true }],
       levels: [{
         id: 'l1', org_id: 'org1', building_id: 'b1', name: 'RDC',
         ordinal: 0, elevation_m: 0,
       }],
+      // Un site de kiosque ne transporte ni fond de plan ni calage : le
+      // terminal trace depuis la géométrie métrique.
+      plan_sources: [],
+      plan_calibrations: [],
       footprints: [{
         id: 'fp1', org_id: 'org1', level_id: 'l1',
         geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 50, y_m: 0 }, { x_m: 50, y_m: 10 }, { x_m: 0, y_m: 10 }] },
-        kind: 'room',
+        kind: 'cell',
       }],
       volumes: [{
         id: 'vol1', org_id: 'org1', footprint_id: 'fp1',

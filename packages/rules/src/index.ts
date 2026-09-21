@@ -37,6 +37,7 @@ export { guardAdRulesPack } from './ad-rules.js';
 export type { AdRulesPack } from './ad-rules.js';
 export {
   checkCharHeight,
+  requiredCharHeightMm,
   checkContrast,
   checkStrokeToHeight,
   checkMountingHeight,

@@ -4,6 +4,7 @@ import {
   roundSvg,
   formatSvg,
   roundMm,
+  roundMetres,
   ceilMm,
 } from '../index.js';
 
@@ -202,5 +203,36 @@ describe('roundSvg — exact 3-decimal half-points', () => {
 describe('formatSvg — negative-to-zero', () => {
   it('serialises small negative as "0" (not "-0")', () => {
     expect(formatSvg(-0.0004)).toBe('0');
+  });
+});
+
+/**
+ * D1.4 / D1.5 — une longueur en mètres, gardée au millimètre : en deçà, deux
+ * points sont le même point et la longueur ne veut plus rien dire.
+ */
+describe('roundMetres', () => {
+  it('garde le millimètre', () => {
+    expect(roundMetres(15.811388300841898)).toBe(15.811);
+    expect(roundMetres(11.180339887498949)).toBe(11.18);
+  });
+
+  it('laisse intacte une valeur déjà au millimètre', () => {
+    expect(roundMetres(3)).toBe(3);
+    expect(roundMetres(0.001)).toBe(0.001);
+    expect(roundMetres(15.811)).toBe(15.811);
+  });
+
+  it('ramène à zéro ce qui est sous le millimètre', () => {
+    // D1.5 : deux points plus proches qu'un millimètre sont le même point.
+    expect(roundMetres(0.0004)).toBe(0);
+  });
+
+  it('tranche les demis en s’éloignant de zéro, comme la primitive de D1.4', () => {
+    expect(roundMetres(0.0015)).toBe(0.002);
+    expect(roundMetres(-0.0015)).toBe(-0.002);
+  });
+
+  it('ne rend jamais un zéro négatif', () => {
+    expect(Object.is(roundMetres(-0.0001), 0)).toBe(true);
   });
 });

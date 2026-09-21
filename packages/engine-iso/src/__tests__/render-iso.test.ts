@@ -282,7 +282,7 @@ describe('renderIsoView — edge-case geometry', () => {
           org_id: 'org-test-001',
           level_id: 'lvl-ml-rdc',
           geometry: { vertices: [{ x_m: 5, y_m: 5 }] },
-          kind: 'room' as const,
+          kind: 'cell' as const,
         },
       ],
       volumes: [
@@ -343,8 +343,8 @@ describe('renderIsoView — edge-case geometry', () => {
         { id: 'lvl-a', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'A', ordinal: 0, elevation_m: 0 },
       ],
       footprints: [
-        { id: 'fp-a', org_id: 'org-test-001', level_id: 'lvl-a', kind: 'floor', geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 }, { x_m: 5, y_m: 5 }, { x_m: 0, y_m: 5 }] } },
-        { id: 'fp-b', org_id: 'org-test-001', level_id: 'lvl-b', kind: 'floor', geometry: { vertices: [{ x_m: 10, y_m: 0 }, { x_m: 15, y_m: 0 }, { x_m: 15, y_m: 5 }, { x_m: 10, y_m: 5 }] } },
+        { id: 'fp-a', org_id: 'org-test-001', level_id: 'lvl-a', kind: 'cell' as const, geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0 }, { x_m: 5, y_m: 5 }, { x_m: 0, y_m: 5 }] } },
+        { id: 'fp-b', org_id: 'org-test-001', level_id: 'lvl-b', kind: 'cell' as const, geometry: { vertices: [{ x_m: 10, y_m: 0 }, { x_m: 15, y_m: 0 }, { x_m: 15, y_m: 5 }, { x_m: 10, y_m: 5 }] } },
       ],
       volumes: [
         { id: 'vol-a', org_id: 'org-test-001', footprint_id: 'fp-a', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
@@ -365,8 +365,8 @@ describe('renderIsoView — edge-case geometry', () => {
         { id: 'lvl-ol', org_id: 'org-test-001', building_id: 'bldg-ml-001', name: 'Overlap', ordinal: 0, elevation_m: 0 },
       ],
       footprints: [
-        { id: 'fp-1', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'floor', geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 }] } },
-        { id: 'fp-2', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'floor', geometry: { vertices: [{ x_m: 5, y_m: 5 }, { x_m: 15, y_m: 5 }, { x_m: 15, y_m: 15 }, { x_m: 5, y_m: 15 }] } },
+        { id: 'fp-1', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'cell' as const, geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 }] } },
+        { id: 'fp-2', org_id: 'org-test-001', level_id: 'lvl-ol', kind: 'cell' as const, geometry: { vertices: [{ x_m: 5, y_m: 5 }, { x_m: 15, y_m: 5 }, { x_m: 15, y_m: 15 }, { x_m: 5, y_m: 15 }] } },
       ],
       volumes: [
         { id: 'vol-1', org_id: 'org-test-001', footprint_id: 'fp-1', base_elevation_m: 0, height_m: 3, material_key: 'concrete' },
@@ -385,7 +385,7 @@ describe('renderIsoView — edge-case geometry', () => {
 
   it('renders mixed bare and volume footprints on same level', () => {
     const site = { ...refMultilevel, footprints: [...refMultilevel.footprints,
-      { id: 'fp-bare-mix', org_id: 'org-test-001', level_id: 'lvl-ml-rdc', kind: 'corridor' as const,
+      { id: 'fp-bare-mix', org_id: 'org-test-001', level_id: 'lvl-ml-rdc', kind: 'circulation' as const,
         geometry: { vertices: [{ x_m: 50, y_m: 0 }, { x_m: 60, y_m: 0 }, { x_m: 60, y_m: 10 }, { x_m: 50, y_m: 10 }] } }] };
     const result = renderIsoView(site, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);

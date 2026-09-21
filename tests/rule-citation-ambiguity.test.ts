@@ -38,8 +38,16 @@ const ROOT = resolve(HERE, '..');
 /** Jetons qui portent deux sens selon le document qui les écrit. */
 const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b/;
 
-/** Ce qui lève l'ambiguïté, et rien d'autre. */
-const QUALIFIER = /complément atelier|partie [MNL]|tranche M|atelier-/i;
+/**
+ * Ce qui lève l'ambiguïté, et rien d'autre.
+ *
+ * Une référence de section de la partie N — `N3.2`, `N5.2` — compte comme
+ * qualificatif : c'est là que vivent les règles `S`, `W`, `P`, `G`, `R` et les
+ * autres, et la citer nomme le document aussi sûrement que d'écrire « partie
+ * N ». La limite est assumée : un bloc qui citerait à la fois une section de N
+ * et un module du complément passerait, et c'est un cas qu'on n'a pas vu.
+ */
+const QUALIFIER = /complément atelier|partie [MNL]|tranche M|atelier-|\bN[0-9](?:\.[0-9]+)?\b/i;
 
 const COMMENT = /\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
 
@@ -125,6 +133,8 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     expect(QUALIFIER.test('// le contrôle M2 demande')).toBe(false);
     expect(QUALIFIER.test('// M2 (complément atelier) demande')).toBe(true);
     expect(QUALIFIER.test('// écran M4 (partie M)')).toBe(true);
+    expect(QUALIFIER.test('// N5.2 — R5 et R6')).toBe(true);
+    expect(QUALIFIER.test('// R5 tout seul')).toBe(false);
     // Et il ne mord pas sur ce qui n'est pas un jeton de règle.
     expect(AMBIGUOUS.test('// un chemin d="M20 30"')).toBe(false);
     expect(AMBIGUOUS.test('// le niveau R7')).toBe(false);

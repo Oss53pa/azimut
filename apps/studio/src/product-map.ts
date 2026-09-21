@@ -85,8 +85,14 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'faces', labelKey: 'nav.item.faces' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
-    engine: 'complete',
-    source: 'engine-layout · engine-package',
+    // Partiel : G1, G2, G4, G5, G6, G8 et G10 tiennent. G3 et G7 ont leur
+    // moteur — le format se calcule, une version approuvée n'admet que son
+    // remplacement — mais aucune écriture ne les emprunte, faute de chemin
+    // d'écriture : rien n'écrit `dimensions_source: 'computed'`, rien n'appelle
+    // `transitionSupportVersion`. G9 vaut pour le SVG ; N4.8 laisse le
+    // déterminisme du PDF ouvert, et c'est la tâche T-0.9 qui le tranche.
+    engine: 'partial',
+    source: 'engine-layout · engine-package · engine-graph/face-format',
   },
   {
     number: '05',
@@ -95,8 +101,12 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.05.summary',
     entry: 'advertising',
     screens: [],
-    engine: 'complete',
-    source: 'studio/domain/ad-planning',
+    // Partiel, et non complet : R3 (partie N), R4, R5, R6 côté technique et R7 tiennent,
+    // mais R2 (partie N) (indexation de la grille sur l'exposition du module 03), R8
+    // (rendu en situation) et R9 (facture née d'une décision humaine) n'ont
+    // aucun moteur. Un module qui ne facture pas n'a pas un moteur complet.
+    engine: 'partial',
+    source: 'studio/domain/ad-planning · ad-creative-intake · rules/ad-rules',
   },
   {
     number: '06',
@@ -105,7 +115,12 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.06.summary',
     entry: 'tenant-signs',
     screens: [],
-    engine: 'complete',
+    // Partiel : T1 ne couvre pas les plages horaires, faute de modèle
+    // temporel, et T2 n'a aucun objet « avis humain » à opposer au contrôle
+    // automatique. T3 (refus motivé, réserves qui se lèvent), T4 (historique
+    // par cellule) et T5 (constat de conformité avec photographie) n'ont aucun
+    // moteur, et les pièces déposées ne passent par aucun assainissement.
+    engine: 'partial',
     source: 'studio/domain/tenant-regulation',
   },
   {
@@ -125,7 +140,14 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.08.summary',
     entry: 'operations',
     screens: [],
-    engine: 'complete',
+    // Partiel, comme le tableau de la partie H le dit déjà. `reconcile` produit
+    // trois des six types de divergence de A5.7 et un quatrième sous un autre
+    // nom ; `outdated_content` et `damaged` manquent. Une ligne de
+    // rapprochement n'est ni datée ni résoluble, alors que E2 l'exige, et la
+    // machine à états qui porte cette règle n'est appelée par personne. E3
+    // (ordre de travaux né d'une décision humaine), E4 (tournée hors ligne) et
+    // E5 (relevé avec photographie et position) n'ont aucun moteur.
+    engine: 'partial',
     source: 'studio/domain/survey-sync · engine-graph/reconciliation',
   },
   {

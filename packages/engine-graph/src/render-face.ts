@@ -103,6 +103,25 @@ export function destinationListFontSizeMm(
   return lineHeight * 0.6;
 }
 
+/**
+ * G3 — l'inverse du calcul ci-dessus : la hauteur de bloc minimale pour que le
+ * texte y soit dessiné à au moins `fontSizeMm`.
+ *
+ * Écrit ici, contre la fonction qu'elle inverse, pour que les deux ne dérivent
+ * pas. `destinationListFontSizeMm(h, n) = 0,6 × h × min(1/(n+0,5) ; 0,15)`, donc
+ * la hauteur cherchée est `f / (0,6 × min(1/(n+0,5) ; 0,15))`. Aucune valeur
+ * normative n'entre ici : `fontSizeMm` est la hauteur exigée, elle vient du
+ * paquet de règles et jamais de ce fichier.
+ */
+export function destinationListBlockHeightMm(
+  fontSizeMm: number,
+  entryCount: number,
+): number {
+  if (entryCount <= 0 || fontSizeMm <= 0) return 0;
+  const ratio = Math.min(1 / (entryCount + 0.5), 0.15);
+  return fontSizeMm / (0.6 * ratio);
+}
+
 function renderDestinationList(
   content: Extract<ResolvedContent, { type: 'destination_list' }>,
   x: number,

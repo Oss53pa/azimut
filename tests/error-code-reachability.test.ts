@@ -57,14 +57,6 @@ const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
     'L’import vectoriel de D4, qui rencontrerait le cas, n’est pas un moteur.',
   'IMPORT.ENCODING_UNSUPPORTED':
     'Même raison : les importeurs reçoivent du texte déjà décodé, l’encodage se joue en amont.',
-  'DATA.UNIT_CODE_REQUIRED':
-    'Footprint ne porte pas de code d’unité. Lui en ajouter un est un choix de modèle de données. A2.2.',
-  'DATA.CODE_DUPLICATE':
-    'Même raison : sans code d’unité sur l’empreinte, il n’y a pas de doublon à détecter. A2.2.',
-  'CALIB.LEVEL_NOT_CALIBRATED':
-    'SiteData ne porte pas de calage par niveau — les objets de calage vivent dans leurs tables et n’entrent pas dans la charge du site. A2.2.',
-  'FLOW.CORRELATION_TOO_LOW':
-    'Le calcul d’exposition lui-même n’est pas construit (exposure.ts le dit) : il n’y a pas de corrélation à éprouver.',
   'INK.SHAPE_NOT_RECOGNIZED':
     'Couche d’esquisse et saisie à l’encre, partie J, non construite.',
   'PICTO.SAFETY_EDIT_DENIED':

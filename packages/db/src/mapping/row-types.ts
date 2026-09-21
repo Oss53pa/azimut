@@ -28,6 +28,12 @@ export type SiteRow = {
   readonly name: string;
   readonly country_code: string;
   readonly rules_pack_id: string | null;
+  /** S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
+  readonly origin_x: string | null;
+  readonly origin_y: string | null;
+  /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
+  readonly active_langs: readonly string[] | null;
+  readonly reference_elevation_m: string | null;
 };
 
 export type BuildingRow = {
@@ -36,6 +42,9 @@ export type BuildingRow = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
+  /** N1.2 — `jsonb`, forme libre du point de vue de la base. */
+  readonly opening_hours: unknown;
+  readonly default_edge_width_m: string | null;
 };
 
 export type LevelRow = {
@@ -47,12 +56,34 @@ export type LevelRow = {
   readonly elevation_m: string;
 };
 
+export type PlanSourceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  readonly storage_path: string;
+  readonly media_type: string;
+  readonly uploaded_at: TimestampValue;
+};
+
+export type PlanCalibrationRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly plan_source_id: string;
+  readonly scale_m_per_px: string;
+  readonly origin_x: string;
+  readonly origin_y: string;
+  readonly rotation_deg: string;
+  /** S1 — NULL sur une ligne antérieure à la migration 0022. */
+  readonly calibrated_at: TimestampValue | null;
+};
+
 export type FootprintRow = {
   readonly id: string;
   readonly org_id: string;
   readonly level_id: string;
   readonly geometry: unknown;
   readonly kind: string;
+  readonly unit_code: string | null;
 };
 
 export type VolumeRow = {
@@ -123,6 +154,9 @@ export type DestinationRow = {
   readonly occupant_name: string;
   readonly occupancy_status: string;
   readonly display_priority: number;
+  /** N1.2 / S5 — `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
+  readonly valid_from: string | null;
+  readonly valid_to: string | null;
 };
 
 export type DestinationNameRow = {
@@ -249,6 +283,8 @@ export type SiteRowSet = {
   readonly site: SiteRow;
   readonly buildings: readonly BuildingRow[];
   readonly levels: readonly LevelRow[];
+  readonly plan_sources: readonly PlanSourceRow[];
+  readonly plan_calibrations: readonly PlanCalibrationRow[];
   readonly footprints: readonly FootprintRow[];
   readonly volumes: readonly VolumeRow[];
   readonly nodes: readonly NodeRow[];

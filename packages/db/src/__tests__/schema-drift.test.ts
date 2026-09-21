@@ -38,8 +38,17 @@ const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
     'Suppression logique : le chargeur filtre dessus et n’a pas à la rendre au modèle.',
   'support.deleted_at':
     'Suppression logique, même raison que pour `site`.',
-  'building.opening_hours':
-    'Colonne JSON d’horaires qu’aucun moteur ne consomme encore.',
+  'plan_calibration.affine_a':
+    'Calage mesuré (M1.4, complément atelier) : les six réels de l’affine ne passent pas par `loadSiteData`, qui sert `SiteData`, et `SiteData` ne porte aucun calage. Le studio les lit par son propre dépôt.',
+  'plan_calibration.affine_b': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+  'plan_calibration.affine_c': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+  'plan_calibration.affine_d': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+  'plan_calibration.affine_e': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+  'plan_calibration.affine_f': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+  'plan_calibration.mean_residual_m':
+    'Résidu moyen du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
+  'plan_calibration.max_residual_m':
+    'Résidu maximal du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
   'edge.availability':
     'Colonne JSON de disponibilité d’une arête, sans lecteur à ce jour.',
   'travel_profile.weights':

@@ -1,5 +1,8 @@
 import type { Polygon, Point } from './geometry.js';
 import type { Parking, ParkingSpace, UncoveredArea, Provenance } from './parking.js';
+import type { PlanSource, PlanCalibration } from './plan.js';
+import type { ActiveLang } from './lang.js';
+import type { OpeningHours } from './opening-hours.js';
 
 export type Organization = {
   readonly id: string;
@@ -13,6 +16,28 @@ export type Site = {
   readonly name: string;
   readonly country_code: string;
   readonly rules_pack_id: string | null;
+  /**
+   * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que
+   * rien n'est déclaré, et non que le français s'applique. Voir `lang.ts`.
+   */
+  readonly active_langs: readonly ActiveLang[];
+  /**
+   * S1 / D1.1 / N1.2 — origine du repère site, en mètres.
+   *
+   * Les deux nombres sont ceux du premier calage du site, recopiés ici, et
+   * jamais modifiés ensuite. Absents tant qu'aucun calage n'a eu lieu : un
+   * repère non posé ne se lit pas comme un repère à l'origine (0, 0). Les deux
+   * colonnes s'apparient par `siteOrigin` et se protègent par
+   * `guardSiteOrigin` — voir `plan.ts`.
+   */
+  readonly origin_x?: number;
+  readonly origin_y?: number;
+  /**
+   * D1.1 / N1.2 — altitude du niveau de référence, à laquelle Z vaut 0.
+   * Absente quand l'altitude absolue du site n'est pas relevée : les
+   * `level.elevation_m` restent justes, ils sont relatifs à ce niveau.
+   */
+  readonly reference_elevation_m?: number;
 };
 
 export type Building = {
@@ -21,6 +46,16 @@ export type Building = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
+  /** N1.2 — horaires d'ouverture. Absents quand rien n'est déclaré. Voir `opening-hours.ts`. */
+  readonly opening_hours?: OpeningHours;
+  /**
+   * N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+   *
+   * Une valeur de saisie, pas une valeur de calcul : `edge.width_m` reste la
+   * seule largeur qu'un moteur lit (S6 pour la longueur, même principe). Une
+   * arête déjà tracée ne change pas de largeur parce que celle-ci change.
+   */
+  readonly default_edge_width_m?: number;
 };
 
 export type Level = {
@@ -32,7 +67,44 @@ export type Level = {
   readonly elevation_m: number;
 };
 
-export type FootprintKind = string;
+/**
+ * N1.2 — natures d'empreinte, énuméré fermé.
+ *
+ * La liste fait foi : une nature hors liste n'est pas représentable. La base
+ * porte la même contrainte par un CHECK (migration 0019), comme pour toute
+ * autre énumération du schéma — `node.kind`, `vertical_link.kind`,
+ * `destination.occupancy_status`. Un test structurel vérifie que les deux
+ * listes coïncident.
+ *
+ * Conséquence assumée pour les imports : une nature étrangère doit être
+ * traduite vers l'une de ces cinq, ou refusée avec un code. Elle ne peut plus
+ * être portée telle quelle jusqu'au modèle, où elle échappait à tout contrôle.
+ */
+export const FOOTPRINT_KINDS = [
+  'cell',
+  'circulation',
+  'technical',
+  'vertical_core',
+  'outdoor',
+] as const;
+
+export type FootprintKind = (typeof FOOTPRINT_KINDS)[number];
+
+/**
+ * Restreint une chaîne venue de l'extérieur — base, import, fichier — à une
+ * nature connue. À employer à toute frontière qui reçoit du texte libre.
+ */
+export function isFootprintKind(value: string): value is FootprintKind {
+  return (FOOTPRINT_KINDS as readonly string[]).includes(value);
+}
+
+/** Nature portant un code d'unité obligatoire (règle S3). */
+export const CELL_FOOTPRINT_KIND = 'cell';
+
+/** Vrai pour une empreinte de cellule, seule nature que S3 contraint. */
+export function isCellFootprint(kind: FootprintKind): boolean {
+  return kind === CELL_FOOTPRINT_KIND;
+}
 
 export type Footprint = {
   readonly id: string;
@@ -40,6 +112,16 @@ export type Footprint = {
   readonly level_id: string;
   readonly geometry: Polygon;
   readonly kind: FootprintKind;
+  /**
+   * N1.2 — code d'unité locative. Requis quand la nature est `cell`, unique
+   * par niveau ; absent pour les autres natures.
+   *
+   * Le champ est facultatif au modèle et la contrainte vit dans les contrôles
+   * (`DATA.UNIT_CODE_REQUIRED`, `DATA.CODE_DUPLICATE`) : une empreinte relevée
+   * avant que son code soit connu se charge et se signale, elle ne disparaît
+   * pas.
+   */
+  readonly unit_code?: string;
 };
 
 export type Volume = {
@@ -143,13 +225,24 @@ export type Destination = {
   readonly occupant_name: string;
   readonly occupancy_status: OccupancyStatus;
   readonly display_priority: number;
+  /**
+   * N1.2 / S5 — période d'occupation, dates ISO 8601 `AAAA-MM-JJ`.
+   *
+   * L'historique est conservé : une cellule peut porter plusieurs occupants
+   * successifs, chacun avec sa période. `valid_to` absent désigne l'occupant
+   * en cours, dont la sortie n'est pas connue ; `valid_from` absent, une
+   * occupation dont l'entrée n'a pas été relevée.
+   */
+  readonly valid_from?: string;
+  readonly valid_to?: string;
 };
 
 export type DestinationName = {
   readonly id: string;
   readonly org_id: string;
   readonly destination_id: string;
-  readonly lang: 'fr' | 'en';
+  /** Même énuméré que `site.active_langs` : voir `lang.ts`. */
+  readonly lang: ActiveLang;
   readonly value: string;
 };
 
@@ -248,8 +341,12 @@ export type ContentBlockInstance = {
 };
 
 /** A5.6 `support_version` state — the approval lifecycle of a support. */
-export type SupportVersionState =
-  | 'draft' | 'in_review' | 'approved' | 'superseded';
+/** A5.6 / G7 — états d'une version de support, énuméré fermé. */
+export const SUPPORT_VERSION_STATES = [
+  'draft', 'in_review', 'approved', 'superseded',
+] as const;
+
+export type SupportVersionState = (typeof SUPPORT_VERSION_STATES)[number];
 
 /**
  * A5.6 `support_version` — a versioned state of a support (its proof/approval
@@ -365,6 +462,13 @@ export type SiteData = {
   readonly site: Site;
   readonly buildings: readonly Building[];
   readonly levels: readonly Level[];
+  /**
+   * A5.2 — fonds de plan importés et leurs calages. Séparés du reste de la
+   * scène parce qu'ils ne sont pas de la géométrie métier : ils disent
+   * seulement comment un fond se lit en mètres. Voir `plan.ts`.
+   */
+  readonly plan_sources: readonly PlanSource[];
+  readonly plan_calibrations: readonly PlanCalibration[];
   readonly footprints: readonly Footprint[];
   readonly volumes: readonly Volume[];
   readonly graph: SiteGraph;

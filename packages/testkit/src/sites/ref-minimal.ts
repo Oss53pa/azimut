@@ -12,6 +12,15 @@ export const refMinimal: SiteData = {
     name: 'Site minimal',
     country_code: 'FR',
     rules_pack_id: null,
+    // S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // `cal-*`, recopiés, et plus jamais modifiés.
+    origin_x: 0,
+    origin_y: 0,
+    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // dit ce qu'ils portent, elle ne le décide pas.
+    active_langs: ['fr', 'en'],
+    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    reference_elevation_m: 42.5,
   },
   buildings: [
     {
@@ -20,6 +29,16 @@ export const refMinimal: SiteData = {
       site_id: 'site-minimal-001',
       name: 'Bâtiment principal',
       independent_access: true,
+      // N1.2 — un jour absent est fermé ; le dimanche n'est pas déclaré.
+      opening_hours: {
+        monday: [{ from: '08:00', to: '19:00' }],
+        tuesday: [{ from: '08:00', to: '19:00' }],
+        wednesday: [{ from: '08:00', to: '19:00' }],
+        thursday: [{ from: '08:00', to: '19:00' }],
+        friday: [{ from: '08:00', to: '19:00' }],
+        saturday: [{ from: '09:00', to: '13:00' }],
+      },
+      default_edge_width_m: 1.4,
     },
   ],
   levels: [
@@ -30,6 +49,33 @@ export const refMinimal: SiteData = {
       name: 'Rez-de-chaussée',
       ordinal: 0,
       elevation_m: 0,
+    },
+  ],
+  /**
+   * A5.2 / N1.4 — un fond de plan calé par niveau. Sans lui, le niveau serait
+   * signalé `CALIB.LEVEL_NOT_CALIBRATED` : le site de référence doit être
+   * propre, c'est `refBroken` qui porte les cas en faute.
+   */
+  plan_sources: [
+    {
+      id: 'ps-min-001',
+      org_id: 'org-test-001',
+      level_id: 'lvl-001',
+      storage_path: 'plans/site-minimal-001/lvl-001.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-min-001',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-min-001',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+      calibrated_at: '2026-01-05T10:15:00.000Z',
     },
   ],
   footprints: [
@@ -45,7 +91,8 @@ export const refMinimal: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-001',
     },
   ],
   volumes: [
@@ -219,6 +266,8 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau A',
       occupancy_status: 'occupied',
       display_priority: 1,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
     {
       id: 'dest-b',
@@ -229,6 +278,8 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau B',
       occupancy_status: 'occupied',
       display_priority: 2,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
     {
       id: 'dest-c',
@@ -239,6 +290,8 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau C',
       occupancy_status: 'vacant',
       display_priority: 3,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
     {
       id: 'dest-d',
@@ -249,6 +302,8 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau D',
       occupancy_status: 'occupied',
       display_priority: 4,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
   ],
   destination_names: [

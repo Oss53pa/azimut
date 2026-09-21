@@ -15,6 +15,15 @@ export const refAdversarial: SiteData = {
     name: 'Site adversarial',
     country_code: 'FR',
     rules_pack_id: null,
+    // S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // `cal-*`, recopiés, et plus jamais modifiés.
+    origin_x: 0,
+    origin_y: 0,
+    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // dit ce qu'ils portent, elle ne le décide pas.
+    active_langs: ['fr', 'en'],
+    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    reference_elevation_m: 42.5,
   },
   buildings: [
     {
@@ -23,6 +32,15 @@ export const refAdversarial: SiteData = {
       site_id: 'site-adversarial-001',
       name: 'Bâtiment',
       independent_access: true,
+      // N1.2 — deux plages dans la même journée : fermeture de midi.
+      opening_hours: {
+        monday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        tuesday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        wednesday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        thursday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+        friday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
+      },
+      default_edge_width_m: 1.2,
     },
   ],
   levels: [
@@ -33,6 +51,29 @@ export const refAdversarial: SiteData = {
       name: 'RDC',
       ordinal: 0,
       elevation_m: 0,
+    },
+  ],
+  /** A5.2 / N1.4 — le niveau est calé : ce site éprouve le texte, pas le calage. */
+  plan_sources: [
+    {
+      id: 'ps-adv-001',
+      org_id: 'org-test-001',
+      level_id: 'lvl-adv-001',
+      storage_path: 'plans/site-adversarial-001/lvl-adv-001.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-adv-001',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-adv-001',
+      scale_m_per_px: 0.05,
+      origin_x: 0,
+      origin_y: 0,
+      rotation_deg: 0,
+      calibrated_at: '2026-01-05T10:20:00.000Z',
     },
   ],
   footprints: [
@@ -47,7 +88,8 @@ export const refAdversarial: SiteData = {
           { x_m: 0, y_m: 0.001 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-A01',
     },
     {
       id: 'fp-adv-colinear',
@@ -61,7 +103,7 @@ export const refAdversarial: SiteData = {
           { x_m: 20, y_m: 10 },
         ],
       },
-      kind: 'corridor',
+      kind: 'circulation',
     },
   ],
   volumes: [],
@@ -182,6 +224,9 @@ export const refAdversarial: SiteData = {
       occupant_name: LONG_NAME_FR,
       occupancy_status: 'occupied',
       display_priority: 1,
+      // N1.2 / S5 — période close et période ouverte se déclarent pareil.
+      valid_from: '2025-09-01',
+      valid_to: '2027-08-31',
     },
   ],
   destination_names: [

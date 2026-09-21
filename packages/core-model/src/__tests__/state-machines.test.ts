@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   assertProofTransition,
+  admittedEvents,
+  SUPPORT_VERSION_STATES,
   assertJobTransition,
   assertDivergenceTransition,
   assertWorkOrderTransition,
@@ -175,5 +177,31 @@ describe('D9 — unknown and edge-case states', () => {
     expect(() => assertJobTransition('succeeded', 'succeeded')).toThrow(/forbidden/);
     expect(() => assertDivergenceTransition('resolved', 'resolved')).toThrow(/forbidden/);
     expect(() => assertWorkOrderTransition('done', 'done')).toThrow(/forbidden/);
+  });
+});
+
+/**
+ * D9 et la machine des versions de support décrivaient la même chose à deux
+ * endroits. Une seule table fait foi désormais ; ce test interdit à la
+ * dérivation de diverger (invariant 1).
+ */
+describe('D9 — une seule table pour la version de support', () => {
+  it('admet exactement les transitions que la table d’événements porte', () => {
+    for (const from of SUPPORT_VERSION_STATES) {
+      const admitted = new Set(admittedEvents(from).map(a => a.to));
+      for (const to of SUPPORT_VERSION_STATES) {
+        const allowed = (() => {
+          try { assertProofTransition(from, to); return true; } catch { return false; }
+        })();
+        expect(allowed, `${from} → ${to}`).toBe(admitted.has(to));
+      }
+    }
+  });
+
+  it('interdit toute sortie d’une version approuvée hors du remplacement', () => {
+    expect(() => { assertProofTransition('approved', 'draft'); }).toThrow(/forbidden/);
+    expect(() => { assertProofTransition('approved', 'in_review'); }).toThrow(/forbidden/);
+    expect(() => { assertProofTransition('approved', 'approved'); }).toThrow(/forbidden/);
+    expect(() => { assertProofTransition('approved', 'superseded'); }).not.toThrow();
   });
 });

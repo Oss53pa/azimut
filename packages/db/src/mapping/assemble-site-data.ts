@@ -8,11 +8,16 @@
  *
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
+import {
+  readActiveLangs, readOpeningHours, computeEdgeLengths,
+} from '@azimut/core-model';
 import type {
+  FootprintKind,
   SiteData,
   Organization, Site, Building, Level, Footprint, Volume,
   GraphNode, Edge, VerticalLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
+  PlanSource, PlanCalibration,
   Support, SupportType, SupportFace, ContentBlockInstance, SupportVersion,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
   PictogramRegistry, SupportVersionState, DimensionsSource,
@@ -188,15 +193,36 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     name: rows.site.name,
     country_code: rows.site.country_code,
     rules_pack_id: rows.site.rules_pack_id,
+    // S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
+    // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
+    ...(rows.site.origin_x !== null && rows.site.origin_y !== null
+      ? { origin_x: num(rows.site.origin_x), origin_y: num(rows.site.origin_y) }
+      : {}),
+    // N1.2 — les valeurs inconnues sont écartées à la frontière ; le CHECK de
+    // la migration 0020 les interdit déjà en base, cette lecture tient pour
+    // les données arrivées avant lui.
+    active_langs: readActiveLangs(rows.site.active_langs),
+    ...(rows.site.reference_elevation_m !== null
+      ? { reference_elevation_m: num(rows.site.reference_elevation_m) }
+      : {}),
   };
 
-  const buildings: Building[] = rows.buildings.map(b => ({
-    id: b.id,
-    org_id: b.org_id,
-    site_id: b.site_id,
-    name: b.name,
-    independent_access: b.independent_access,
-  }));
+  const buildings: Building[] = rows.buildings.map(b => {
+    // N1.2 — la colonne est du `jsonb` : la base n'en garantit pas la forme,
+    // et `readOpeningHours` écarte ce qui n'est pas lisible.
+    const hours = readOpeningHours(b.opening_hours);
+    return {
+      id: b.id,
+      org_id: b.org_id,
+      site_id: b.site_id,
+      name: b.name,
+      independent_access: b.independent_access,
+      ...(hours !== undefined ? { opening_hours: hours } : {}),
+      ...(b.default_edge_width_m !== null
+        ? { default_edge_width_m: num(b.default_edge_width_m) }
+        : {}),
+    };
+  });
 
   const levels: Level[] = rows.levels.map(l => ({
     id: l.id,
@@ -207,12 +233,40 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     elevation_m: num(l.elevation_m),
   }));
 
+  const planSources: PlanSource[] = rows.plan_sources.map(p => ({
+    id: p.id,
+    org_id: p.org_id,
+    level_id: p.level_id,
+    storage_path: p.storage_path,
+    media_type: p.media_type,
+    uploaded_at: isoString(p.uploaded_at),
+  }));
+
+  const planCalibrations: PlanCalibration[] = rows.plan_calibrations.map(c => ({
+    id: c.id,
+    org_id: c.org_id,
+    plan_source_id: c.plan_source_id,
+    scale_m_per_px: num(c.scale_m_per_px),
+    origin_x: num(c.origin_x),
+    origin_y: num(c.origin_y),
+    rotation_deg: num(c.rotation_deg),
+    ...(c.calibrated_at !== null
+      ? { calibrated_at: isoString(c.calibrated_at) }
+      : {}),
+  }));
+
   const footprints: Footprint[] = rows.footprints.map(f => ({
     id: f.id,
     org_id: f.org_id,
     level_id: f.level_id,
     geometry: f.geometry as Footprint['geometry'],
-    kind: f.kind,
+    // La colonne est du texte ; le CHECK de la migration 0019 la restreint aux
+    // cinq natures de N1.2. La restriction de type est donc adossée à une
+    // contrainte de la base, comme pour `node.kind` ou `occupancy_status`.
+    kind: f.kind as FootprintKind,
+    // Colonne additive : une ligne antérieure à la migration 0018 la rend
+    // nulle, et le champ reste alors absent du modèle plutôt que vide.
+    ...(f.unit_code !== null ? { unit_code: f.unit_code } : {}),
   }));
 
   const volumes: Volume[] = rows.volumes.map(v => ({
@@ -234,6 +288,18 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     label: n.label,
   }));
 
+  /**
+   * S6 — la longueur d'une arête est calculée, jamais saisie. La colonne
+   * `length_m` n'est donc pas lue : elle est un cache que l'application ne
+   * croit pas. Deux nœuds déplacés d'un centimètre rendent toute valeur
+   * stockée fausse, et un itinéraire faux ne se voit pas.
+   *
+   * Une arête dont une extrémité est inconnue n'a pas de longueur calculable ;
+   * la valeur stockée lui reste, faute de mieux, et le nœud manquant est
+   * signalé par `validateGraph`.
+   */
+  const edgeLengths = computeEdgeLengths({ levels, nodes, edges: rows.edges });
+
   const edges: Edge[] = rows.edges.map(e => ({
     id: e.id,
     org_id: e.org_id,
@@ -244,7 +310,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     accessible: e.accessible,
     direction: e.direction as EdgeDirection,
     evacuation_route: e.evacuation_route,
-    length_m: num(e.length_m),
+    length_m: edgeLengths.get(e.id) ?? num(e.length_m),
   }));
 
   const verticalLinks: VerticalLink[] = rows.vertical_links.map(v => ({
@@ -283,6 +349,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     occupant_name: d.occupant_name,
     occupancy_status: d.occupancy_status as OccupancyStatus,
     display_priority: d.display_priority,
+    ...(d.valid_from !== null ? { valid_from: d.valid_from } : {}),
+    ...(d.valid_to !== null ? { valid_to: d.valid_to } : {}),
   }));
 
   const destinationNames: DestinationName[] = rows.destination_names.map(n => ({
@@ -356,6 +424,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     site,
     buildings,
     levels,
+    plan_sources: planSources,
+    plan_calibrations: planCalibrations,
     footprints,
     volumes,
     graph: { nodes, edges, vertical_links: verticalLinks },

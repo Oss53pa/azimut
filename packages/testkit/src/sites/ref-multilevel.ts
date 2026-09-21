@@ -13,6 +13,16 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     rules_pack_id: null,
+    // S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
+    // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
+    // de l'image du premier fond.
+    origin_x: -12.5,
+    origin_y: -8,
+    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // dit ce qu'ils portent, elle ne le décide pas.
+    active_langs: ['fr', 'en'],
+    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    reference_elevation_m: 42.5,
   },
   buildings: [
     {
@@ -21,6 +31,16 @@ export const refMultilevel: SiteData = {
       site_id: 'site-multilevel-001',
       name: 'Bâtiment ML',
       independent_access: true,
+      // N1.2 — un jour absent est fermé ; le dimanche n'est pas déclaré.
+      opening_hours: {
+        monday: [{ from: '08:00', to: '19:00' }],
+        tuesday: [{ from: '08:00', to: '19:00' }],
+        wednesday: [{ from: '08:00', to: '19:00' }],
+        thursday: [{ from: '08:00', to: '19:00' }],
+        friday: [{ from: '08:00', to: '19:00' }],
+        saturday: [{ from: '09:00', to: '13:00' }],
+      },
+      default_edge_width_m: 1.4,
     },
   ],
   levels: [
@@ -41,6 +61,51 @@ export const refMultilevel: SiteData = {
       elevation_m: 3,
     },
   ],
+  /** A5.2 / N1.4 — les deux niveaux sont calés. */
+  plan_sources: [
+    {
+      id: 'ps-ml-rdc',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      storage_path: 'plans/site-multilevel-001/lvl-ml-rdc.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:00:00.000Z',
+    },
+    {
+      id: 'ps-ml-r1',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-r1',
+      storage_path: 'plans/site-multilevel-001/lvl-ml-r1.png',
+      media_type: 'image/png',
+      uploaded_at: '2026-01-05T09:05:00.000Z',
+    },
+  ],
+  plan_calibrations: [
+    {
+      id: 'cal-ml-rdc',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-ml-rdc',
+      scale_m_per_px: 0.05,
+      // Premier calage du site : c'est cette origine que `site` porte.
+      origin_x: -12.5,
+      origin_y: -8,
+      rotation_deg: 0,
+      // Le plus ancien des deux : c'est lui que `firstCalibration` désigne.
+      calibrated_at: '2026-01-05T10:30:00.000Z',
+    },
+    {
+      id: 'cal-ml-r1',
+      org_id: 'org-test-001',
+      plan_source_id: 'ps-ml-r1',
+      scale_m_per_px: 0.05,
+      // Autre fond, autre décalage : le repère site, lui, ne change pas.
+      origin_x: -12.5,
+      origin_y: -9.25,
+      rotation_deg: 0,
+      // Calé plus tard : il ne fixe rien.
+      calibrated_at: '2026-01-05T11:45:00.000Z',
+    },
+  ],
   footprints: [
     {
       id: 'fp-ml-rdc',
@@ -54,7 +119,8 @@ export const refMultilevel: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-000',
     },
     {
       id: 'fp-ml-r1',
@@ -68,7 +134,8 @@ export const refMultilevel: SiteData = {
           { x_m: 0, y_m: 20 },
         ],
       },
-      kind: 'room',
+      kind: 'cell',
+      unit_code: 'C-100',
     },
   ],
   volumes: [
@@ -129,6 +196,8 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau RDC',
       occupancy_status: 'occupied',
       display_priority: 1,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
     {
       id: 'dest-ml-r1',
@@ -139,6 +208,8 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau R+1',
       occupancy_status: 'occupied',
       display_priority: 2,
+      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      valid_from: '2026-01-01',
     },
   ],
   destination_names: [

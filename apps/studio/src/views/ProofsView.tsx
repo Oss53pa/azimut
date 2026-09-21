@@ -2,7 +2,8 @@ import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { composeFace } from '@azimut/engine-graph';
-import { assertProofTransition } from '@azimut/core-model';
+import { admittedEvents } from '@azimut/core-model';
+import type { SupportVersionEvent } from '@azimut/core-model';
 import type { FaceTemplate, SupportVersionState, SupportVersion } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { findPreviewNode } from './signage/face-preview.js';
@@ -32,18 +33,19 @@ type FaceStatus = {
 };
 
 /**
- * Transitions admises depuis un état, lues dans la machine à états de D9 en
- * l'interrogeant plutôt qu'en recopiant sa table (invariant 1).
+ * Ce qu'un état admet, lu dans la machine plutôt que recopié (invariant 1).
+ *
+ * L'écran interrogeait jusqu'ici la table de D9, qui ne porte que les états.
+ * Il interroge désormais celle des versions de support, qui porte les
+ * événements — et c'est elle qui dit G7 : depuis `approved`, aucun événement
+ * n'est admis sauf le remplacement. Montrer « approuvé → remplacé » sans
+ * nommer l'événement laissait croire qu'une version approuvée pouvait encore
+ * bouger d'elle-même.
  */
-function allowedFrom(state: SupportVersionState): readonly SupportVersionState[] {
-  return VERSION_STATES.filter(target => {
-    try {
-      assertProofTransition(state, target);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+function admittedFrom(
+  state: SupportVersionState,
+): readonly { readonly event: SupportVersionEvent; readonly to: SupportVersionState }[] {
+  return admittedEvents(state).filter(admitted => admitted.to !== state);
 }
 
 /**
@@ -224,22 +226,25 @@ export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
           <Panel title={t('proofs.panel.machine')} note={t('proofs.panel.machine.note')}>
             <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'grid', gap: SPACE.sm }}>
               {VERSION_STATES.map(state => {
-                const targets = allowedFrom(state).filter(target => target !== state);
+                const admitted = admittedFrom(state);
                 return (
                   <li key={state} style={{ display: 'grid', gap: 2 }}>
                     <span style={{ fontSize: TEXT.small, color: 'var(--text-primary)' }}>
                       {t(STATE_KEYS[state])}
                     </span>
                     <span style={{ fontSize: TEXT.micro, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
-                      {targets.length === 0
+                      {admitted.length === 0
                         ? t('proofs.machine.terminal')
-                        : targets.map(target => t(STATE_KEYS[target])).join(' · ')}
+                        : admitted
+                          .map(a => `${t(EVENT_KEYS[a.event])} → ${t(STATE_KEYS[a.to])}`)
+                          .join(' · ')}
                     </span>
                   </li>
                 );
               })}
             </ul>
             <Note>{t('proofs.machine.note')}</Note>
+            <Note>{t('proofs.g7.note')}</Note>
           </Panel>
 
           <Panel title={t('proofs.panel.blockers')} note={String(blockingFindings.length)}>
@@ -252,6 +257,14 @@ export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
     </div>
   );
 }
+
+const EVENT_KEYS = {
+  modify: 'proofs.event.modify',
+  emit_proof: 'proofs.event.emitproof',
+  reject: 'proofs.event.reject',
+  approve: 'proofs.event.approve',
+  supersede: 'proofs.event.supersede',
+} as const;
 
 const STATE_KEYS = {
   draft: 'proofs.state.draft',

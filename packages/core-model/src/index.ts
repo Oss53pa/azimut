@@ -1,5 +1,8 @@
 export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
+export {
+  FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
+} from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
 export {
   fitMeasuredCalibration,
@@ -16,6 +19,20 @@ export type {
   MeasuredCalibration,
   ResidualTolerance,
 } from './affine-calibration.js';
+export { edgeLengthBetween, computeEdgeLengths } from './edge-length.js';
+export type { EdgeEnd, EdgeLengthInput } from './edge-length.js';
+export {
+  isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
+  firstCalibration,
+} from './plan.js';
+export type { PlanSource, PlanCalibration, SiteOriginBearer } from './plan.js';
+export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';
+export type { ActiveLang } from './lang.js';
+export {
+  WEEKDAYS, isWeekday, isOpeningRange, minutesOfDay, readOpeningHours,
+  rangesForDay,
+} from './opening-hours.js';
+export type { Weekday, OpeningRange, OpeningHours } from './opening-hours.js';
 export { guardFontEmbedding } from './font-embedding.js';
 export type {
   FontAsset,
@@ -32,6 +49,7 @@ export { guardTextFit } from './typography-fit.js';
 export type { TextFitBox } from './typography-fit.js';
 export {
   roundHalfAwayFromZero,
+  roundMetres,
   roundSvg,
   formatSvg,
   roundMm,
@@ -42,7 +60,7 @@ export {
   ANGLE_EQUALITY_DEG,
   EDGE_MIN_LENGTH_M,
   POLYGON_MIN_AREA_M2,
-  SHARE_SUM_TOLERANCE,
+  WEIGHT_SUM_TOLERANCE,
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
@@ -94,6 +112,11 @@ export type {
   TemplateSizing,
   TemplateValidationError,
 } from './template-schema.js';
+export { transitionSupportVersion, admittedEvents } from './support-version-state.js';
+export type {
+  SupportVersionEvent, SupportVersionEffect, SupportVersionTransition,
+} from './support-version-state.js';
+export { SUPPORT_VERSION_STATES } from './site.js';
 export {
   assertProofTransition,
   assertJobTransition,
