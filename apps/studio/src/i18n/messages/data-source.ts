@@ -30,6 +30,19 @@ export const DATA_SOURCE_FR = {
   'sites.state.loading': 'Chargement de la liste…',
   'sites.state.failed': 'La liste des sites n’a pas pu être chargée.',
   'sites.action.reload': 'Recharger',
+  // F7 — une défaillance d'accès n'est pas une anomalie : elle appelle un état
+  // d'écran. F10 veut qu'un message dise ce qui s'est passé et comment le
+  // corriger, sans excuse ni formule vague.
+  'repo.failure.request_failed': 'Le dépôt n’a pas répondu.',
+  'repo.failure.request_failed.hint': 'Vérifiez la connexion, puis rechargez.',
+  'repo.failure.unauthorized': 'La session a expiré.',
+  'repo.failure.unauthorized.hint': 'Reconnectez-vous pour reprendre où vous en étiez.',
+  'repo.failure.forbidden': 'Votre rôle ne donne pas accès à cette ressource.',
+  'repo.failure.forbidden.hint': 'Demandez l’accès à un administrateur de votre organisation.',
+  'repo.failure.not_found': 'Cette ressource est introuvable au dépôt.',
+  'repo.failure.not_found.hint': 'Elle a pu être supprimée. Revenez à la liste des sites.',
+  'repo.failure.offline': 'Poste hors ligne.',
+  'repo.failure.offline.hint': 'Les sites déjà ouverts restent consultables. La création attend le retour du réseau.',
 } as const;
 
 export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string>> = {
@@ -59,4 +72,14 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'sites.state.loading': 'Loading the list…',
   'sites.state.failed': 'The site list could not be loaded.',
   'sites.action.reload': 'Reload',
+  'repo.failure.request_failed': 'The store did not answer.',
+  'repo.failure.request_failed.hint': 'Check the connection, then reload.',
+  'repo.failure.unauthorized': 'The session has expired.',
+  'repo.failure.unauthorized.hint': 'Sign in again to pick up where you left off.',
+  'repo.failure.forbidden': 'Your role does not grant access to this resource.',
+  'repo.failure.forbidden.hint': 'Ask an administrator of your organisation for access.',
+  'repo.failure.not_found': 'This resource is not in the store.',
+  'repo.failure.not_found.hint': 'It may have been deleted. Go back to the site list.',
+  'repo.failure.offline': 'Workstation offline.',
+  'repo.failure.offline.hint': 'Sites already open stay readable. Creation waits for the network.',
 };

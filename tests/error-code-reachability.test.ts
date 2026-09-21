@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { ERROR_CATALOG } from '@azimut/core-model';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,6 +46,20 @@ const CATALOGUE_FILES = [
  * lèvent pas en écrivant du code.
  */
 const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
+  'DATA.NAME_REQUIRED':
+    'Contrôle de saisie du formulaire de création de M1 (partie M), écran non encore construit. Lot 1.4 de la tranche 1.',
+  'DATA.NAME_DUPLICATE':
+    'Même écran, même lot. L’unicité se vérifie dans l’organisation, donc contre le dépôt, non dans un moteur.',
+  'DATA.COUNTRY_REQUIRED':
+    'Formulaire de création de M1 (partie M), champ « Pays », écran non encore construit. Lot 1.4 de la tranche 1.',
+  'DATA.LANG_REQUIRED':
+    'Formulaire de création de M1 (partie M), champ « Langues actives », qui en exige au moins une. Même lot.',
+  'IMPORT.FILE_TOO_LARGE':
+    'Contrôle de l’étape 1 de M2 (partie M), import du fond de plan. L’écran d’import n’est pas construit ; le seuil de 60 Mo que M2 nomme est une valeur d’interface, non normative.',
+  'IMPORT.FORMAT_UNSUPPORTED':
+    'Même étape, même lot. La liste des formats acceptés est celle de M2 (partie M) : PDF, PNG, JPG, DWG.',
+  'IMPORT.PAGE_REQUIRED':
+    'Même étape, même lot. Ne se lève que pour un PDF multipage, cas que l’import ne traite pas encore.',
   'LAYOUT.LANG_VARIANT_MISSING':
     'Jumeau côté composition de GRAPH.DESTINATION_NAME_MISSING, que validateDirectory lève. ' +
     'renderFace compose une langue à la fois et ne confronte pas son contenu à la liste des langues actives du site.',
@@ -94,15 +109,14 @@ function stripComments(source: string): string {
     .replace(/^[ \t]*\/\/.*$/gm, '');
 }
 
-const CODE_IN_CATALOGUE = /^\s*'([A-Z][A-Z0-9_]*\.[A-Z0-9_]+)':/gm;
 const CODE_LITERAL = /'([A-Z][A-Z0-9_]*\.[A-Z0-9_]+)'/g;
 
 describe('D2 — tout code du catalogue est levé, ou déclaré non levé et motivé', () => {
-  const catalogue = readFileSync(
-    resolve(ROOT, 'packages/core-model/src/error-catalog.ts'),
-    'utf-8',
-  );
-  const declared = [...catalogue.matchAll(CODE_IN_CATALOGUE)].map(m => m[1] ?? '');
+  // Le catalogue se lit comme un objet, non comme du texte. Le balayage
+  // textuel prenait aussi les codes de `RETIRED_CODES` pour des déclarations,
+  // alors qu'un code retiré n'est précisément plus au catalogue : sa valeur
+  // reste seulement réservée (D2.1).
+  const declared = Object.keys(ERROR_CATALOG);
 
   const raised = new Set<string>();
   for (const file of productionSources()) {

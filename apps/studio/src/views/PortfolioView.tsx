@@ -1,7 +1,6 @@
 import { type JSX, useMemo } from 'react';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
-import { getErrorMessage } from '@azimut/core-model';
-import type { SiteData, Finding, ErrorCode } from '@azimut/core-model';
+import type { SiteData, Finding } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import { appRepository, useAllSites } from '../data/index.js';
 import {
@@ -52,7 +51,7 @@ function auditSite(site: SiteData): readonly Finding[] {
  * faire semblant.
  */
 export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): JSX.Element {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const repository = useMemo(() => appRepository(), []);
   const { state, loaded, total } = useAllSites(repository);
 
@@ -174,10 +173,9 @@ export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): J
         )}
         {state.status === 'failed' && (
           <StateBanner
-            severity="blocking"
-            code={state.error.code}
-            message={getErrorMessage(state.error.code as ErrorCode, lang) ?? state.error.code}
-            hint={state.error.detail}
+            severity={state.error.failure === 'offline' ? 'warning' : 'blocking'}
+            message={t(`repo.failure.${state.error.failure}`)}
+            hint={t(`repo.failure.${state.error.failure}.hint`)}
           />
         )}
       </div>

@@ -4,11 +4,11 @@ export { createReferenceRepository } from './reference-repository.js';
 export { createPostgrestRepository } from './postgrest-repository.js';
 export type { PostgrestConfig } from './postgrest-repository.js';
 export {
-  RepositoryError, isRepositoryError, errorCodeForStatus,
-  REPOSITORY_KINDS, REPOSITORY_ERROR_CODES,
+  RepositoryError, isRepositoryError, failureForStatus,
+  REPOSITORY_KINDS, REPOSITORY_FAILURES,
 } from './site-repository.js';
 export type {
-  SiteRepository, SiteSummary, RepositoryKind, RepositoryErrorCode,
+  SiteRepository, SiteSummary, RepositoryKind, RepositoryFailure,
 } from './site-repository.js';
 export {
   useSite, useSiteList, useAllSites, useSiteVocabularyLoad,

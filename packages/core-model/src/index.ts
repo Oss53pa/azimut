@@ -215,3 +215,4 @@ export type {
   EntityCommand,
   CommandDraft,
 } from './site-commands.js';
+export { RETIRED_CODES } from './error-catalog.js';

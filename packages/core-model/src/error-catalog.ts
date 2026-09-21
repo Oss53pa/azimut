@@ -127,6 +127,9 @@ export const ERROR_CATALOG = {
   'IMPORT.NODE_NOT_FOUND':                  { severity: 'warning',  description: 'Nœud référencé inexistant' },
   'IMPORT.DUPLICATE_KEY':                   { severity: 'warning',  description: 'Clé en double' },
   'IMPORT.UNIT_AMBIGUOUS':                  { severity: 'blocking', description: 'Unité du fichier source indéterminable' },
+  'IMPORT.FILE_TOO_LARGE':                  { severity: 'blocking', description: 'Fichier au-delà de la taille acceptée' },
+  'IMPORT.FORMAT_UNSUPPORTED':              { severity: 'blocking', description: 'Format de fichier non pris en charge' },
+  'IMPORT.PAGE_REQUIRED':                   { severity: 'blocking', description: 'Page requise pour un document multipage' },
   'IMPORT.ENCODING_UNSUPPORTED':            { severity: 'blocking', description: 'Encodage non reconnu' },
   'IMPORT.EMPTY_FILE':                      { severity: 'blocking', description: 'Fichier d’import vide' },
   'IMPORT.VECTOR_AS_REFERENCE_ONLY':        { severity: 'info',     description: 'Fichier importé en référence de fond, sans exploitation' },
@@ -167,6 +170,10 @@ export const ERROR_CATALOG = {
 
   // Partie N, module 01 (N1.4) : code de cellule (règle S3).
   'DATA.UNIT_CODE_REQUIRED':                { severity: 'blocking', description: 'Empreinte de nature cellule sans code d’unité' },
+  'DATA.NAME_REQUIRED':                     { severity: 'blocking', description: 'Nom requis' },
+  'DATA.NAME_DUPLICATE':                    { severity: 'blocking', description: 'Nom déjà porté par un autre site de l’organisation' },
+  'DATA.COUNTRY_REQUIRED':                  { severity: 'blocking', description: 'Pays requis' },
+  'DATA.LANG_REQUIRED':                     { severity: 'blocking', description: 'Au moins une langue active requise' },
   'DATA.CODE_DUPLICATE':                    { severity: 'blocking', description: 'Deux cellules portent le même code sur un niveau' },
 
   // ── WAYFIND (H12) ─────────────────────────────────────────
@@ -184,9 +191,10 @@ export const ERROR_CATALOG = {
 
   // ── CALIB (D4 / tranche M) ────────────────────────────────
   'CALIB.DISTANCE_INVALID':                 { severity: 'blocking', description: 'Distance réelle nulle ou négative entre les deux points de calage' },
+  'CALIB.POINT_REQUIRED':                   { severity: 'blocking', description: 'Point de calage non saisi' },
+  'CALIB.AZIMUTH_INVALID':                  { severity: 'blocking', description: 'Azimut du nord hors de la plage 0 à 360 exclus' },
   'CALIB.POINTS_TOO_CLOSE':                 { severity: 'blocking', description: 'Points de calage trop proches pour une échelle fiable' },
   'CALIB.SCALE_IMPLAUSIBLE':                { severity: 'warning',  description: 'Résolution du fond de plan hors de la plage de vraisemblance' },
-  'CALIB.NORTH_MISSING':                    { severity: 'blocking', description: 'Orientation du fond de plan non saisie' },
   // Partie N, module 01 (N1.4) : niveau sans plan calé.
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan de fond calé' },
   // Complément atelier, M1.4 : calage mesuré sur points homologues.
@@ -199,12 +207,6 @@ export const ERROR_CATALOG = {
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
   'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Repère site différent de celui du premier calage' },
 
-  // ── NET (tranche M) ───────────────────────────────────────
-  'NET.REQUEST_FAILED':                     { severity: 'blocking', description: 'Le service de données n’a pas répondu' },
-  'NET.UNAUTHORIZED':                       { severity: 'blocking', description: 'Session absente ou expirée' },
-  'NET.FORBIDDEN':                          { severity: 'blocking', description: 'Droit refusé sur cette ressource' },
-  'NET.NOT_FOUND':                          { severity: 'blocking', description: 'Ressource introuvable au dépôt' },
-  'NET.OFFLINE':                            { severity: 'warning',  description: 'Poste hors ligne' },
 
   // ── EDIT (E17) ────────────────────────────────────────────
   'EDIT.CONTEXT_VIOLATION':                 { severity: 'blocking', description: "Opération interdite dans ce contexte d'édition" },
@@ -299,8 +301,8 @@ export const ANOMALY_DOMAINS = [
   'TENANT', 'INSTALL', 'COST',
   // Partie I (I6): drawing-workshop assistance, entitlement, exposure, ads, survey.
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
-  // Tranche M : calage d'un fond de plan, et accès au dépôt de données.
-  'CALIB', 'NET',
+  // Partie M : calage d'un fond de plan.
+  'CALIB',
   // Complément atelier (M2) : stationnement.
   'PARK',
   // Complément atelier (M15) : document de stratégie et texte lié.
@@ -310,3 +312,23 @@ export const ANOMALY_DOMAINS = [
 ] as const;
 
 export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
+
+/**
+ * D2.1 — « Un code est stable à vie. Il n'est jamais renommé, jamais traduit,
+ * jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et
+ * sa valeur reste réservée. »
+ *
+ * Ces valeurs ont existé dans le dépôt et n'y sont plus. Elles restent
+ * réservées : aucune ne peut être réemployée pour un autre sens. Un contrôle
+ * échoue si l'une d'elles reparaît au catalogue.
+ */
+export const RETIRED_CODES: Readonly<Record<string, string>> = {
+  'NET.REQUEST_FAILED':
+    'Le domaine `NET` n’était autorisé par aucun des quatorze documents, et D2.2 réserve le catalogue aux anomalies produites par un moteur — or un moteur n’a pas de réseau (A4.1). Remplacé par un genre de défaillance de dépôt, qui appelle un état d’écran de F7.',
+  'NET.UNAUTHORIZED': 'Même motif que `NET.REQUEST_FAILED`.',
+  'NET.FORBIDDEN': 'Même motif que `NET.REQUEST_FAILED`.',
+  'NET.NOT_FOUND': 'Même motif que `NET.REQUEST_FAILED`.',
+  'NET.OFFLINE': 'Même motif que `NET.REQUEST_FAILED`. F7 en fait un état d’écran, pas une anomalie.',
+  'CALIB.NORTH_MISSING':
+    'Inventé. M2 (partie M) nomme `CALIB.AZIMUTH_INVALID` pour l’azimut et `CALIB.POINT_REQUIRED` pour un point manquant. Les deux sont désormais au catalogue.',
+};

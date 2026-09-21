@@ -23,7 +23,7 @@ import type {
   SiteFact, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
 import {
-  RepositoryError, errorCodeForStatus,
+  RepositoryError, failureForStatus,
   type SiteRepository, type SiteSummary,
 } from './site-repository.js';
 
@@ -97,7 +97,7 @@ function toSeverity(raw: string): LexiconSeverity {
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
 function transportError(detail: string): RepositoryError {
   const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-  return new RepositoryError(offline ? 'NET.OFFLINE' : 'NET.REQUEST_FAILED', detail);
+  return new RepositoryError(offline ? 'offline' : 'request_failed', detail);
 }
 
 async function query<Row>(
@@ -122,7 +122,7 @@ async function query<Row>(
 
   if (!response.ok) {
     throw new RepositoryError(
-      errorCodeForStatus(response.status),
+      failureForStatus(response.status),
       `${table}: ${String(response.status)} ${response.statusText}`,
     );
   }
@@ -130,7 +130,7 @@ async function query<Row>(
   try {
     return await response.json() as readonly Row[];
   } catch (cause) {
-    throw new RepositoryError('NET.REQUEST_FAILED', `${table}: ${String(cause)}`);
+    throw new RepositoryError('request_failed', `${table}: ${String(cause)}`);
   }
 }
 
@@ -152,7 +152,7 @@ async function queryIn<Row>(
 function firstOrThrow<Row>(rows: readonly Row[], table: string, id: string): Row {
   const row = rows[0];
   if (row === undefined) {
-    throw new RepositoryError('NET.NOT_FOUND', `${table}:${id}`);
+    throw new RepositoryError('not_found', `${table}:${id}`);
   }
   return row;
 }
@@ -290,7 +290,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // refuse déjà dans ce cas ; les deux doivent se comporter pareil.
       const siteRows = await query<SiteRow>(config, 'site', `select=id&id=eq.${siteId}`);
       if (siteRows.length === 0) {
-        throw new RepositoryError('NET.NOT_FOUND', `site: ${siteId}`);
+        throw new RepositoryError('not_found', `site: ${siteId}`);
       }
 
       const [charters, factRows, claimRows, decisionRows] = await Promise.all([

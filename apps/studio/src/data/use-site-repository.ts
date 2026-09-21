@@ -26,7 +26,7 @@ export type AsyncState<T> =
 function toRepositoryError(cause: unknown): RepositoryError {
   return isRepositoryError(cause)
     ? cause
-    : new RepositoryError('NET.REQUEST_FAILED', String(cause));
+    : new RepositoryError('request_failed', String(cause));
 }
 
 /** Liste des sites du dépôt, chargée une fois. */
@@ -155,12 +155,15 @@ export function useSiteVocabularyLoad(
       value => {
         if (!cancelled) setState({ vocabulary: value, status: 'ready', errorCode: null });
       },
-      cause => {
+      () => {
         if (cancelled) return;
         setState({
           vocabulary: EMPTY_VOCABULARY,
           status: 'failed',
-          errorCode: toRepositoryError(cause).code,
+          // Quelle que soit la cause de transport, le fait que le domaine
+          // retient est que le vocabulaire n'a pas pu être lu. Le genre de
+          // défaillance sert l'état d'écran (F7), pas le registre d'anomalies.
+          errorCode: 'DATA.VOCABULARY_UNREADABLE',
         });
       },
     );

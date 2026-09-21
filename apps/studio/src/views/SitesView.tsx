@@ -1,6 +1,4 @@
 import { type JSX, useMemo, useState } from 'react';
-import { getErrorMessage } from '@azimut/core-model';
-import type { ErrorCode } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import { appRepository, useSiteList, type SiteSummary } from '../data/index.js';
 import {
@@ -22,7 +20,7 @@ type SitesViewProps = {
  * regarde des cas d'essai ou des sites réels.
  */
 export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Element {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
   const repository = useMemo(() => appRepository(), []);
   const { state, reload } = useSiteList(repository);
   const [query, setQuery] = useState('');
@@ -115,10 +113,9 @@ export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Eleme
         )}
         {state.status === 'failed' && (
           <StateBanner
-            severity={state.error.code === 'NET.OFFLINE' ? 'warning' : 'blocking'}
-            code={state.error.code}
-            message={getErrorMessage(state.error.code as ErrorCode, lang) ?? t('sites.state.failed')}
-            hint={state.error.detail}
+            severity={state.error.failure === 'offline' ? 'warning' : 'blocking'}
+            message={t(`repo.failure.${state.error.failure}`)}
+            hint={t(`repo.failure.${state.error.failure}.hint`)}
           />
         )}
       </div>

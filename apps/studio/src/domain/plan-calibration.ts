@@ -7,7 +7,7 @@
  *
  * Deux points posés sur le fond et une distance réelle donnent la résolution
  * du fond ; l'azimut du nord donne son orientation. Tant que l'orientation
- * n'est pas saisie, le tracé des empreintes reste refusé (CALIB.NORTH_MISSING) :
+ * n'est pas saisie, le tracé des empreintes reste refusé (CALIB.AZIMUTH_INVALID) :
  * une empreinte tracée sur un fond non orienté est fausse sans que rien ne le
  * signale.
  *
@@ -35,10 +35,16 @@ export const DEFAULT_PLAUSIBLE_RESOLUTION = {
 } as const;
 
 /**
- * Écart minimal entre les deux points, en pixels. En deçà, l'erreur de pose
- * du curseur pèse plus lourd que la mesure elle-même.
+ * Écart minimal entre les deux points, en pixels.
+ *
+ * M2 (partie M), étape 2 : « Point B, requis, distinct de A d'au moins
+ * 40 pixels ». La valeur était de 20 dans ce fichier, soit la moitié : elle
+ * avait été posée avant que la partie M ne soit versée au dépôt.
+ *
+ * Le motif tient : en deçà, l'erreur de pose du curseur pèse plus lourd que la
+ * mesure elle-même.
  */
-export const MIN_POINT_SEPARATION_PX = 20;
+export const MIN_POINT_SEPARATION_PX = 40;
 
 /**
  * Densité du fond en pixels par millimètre de papier. Un PDF exporté à
@@ -48,8 +54,14 @@ export const MIN_POINT_SEPARATION_PX = 20;
 export const DEFAULT_PAPER_DENSITY_PX_PER_MM = 1;
 
 export type CalibrationInput = {
-  readonly a: PlanPoint;
-  readonly b: PlanPoint;
+  /**
+   * M2 (partie M), étape 2 : les deux points sont requis, et un point non posé
+   * lève `CALIB.POINT_REQUIRED`. Ils sont donc nullables : sans cela, l'écran
+   * devait inventer une coordonnée pour appeler ce calcul, et l'absence se
+   * serait confondue avec un clic à l'origine du fond.
+   */
+  readonly a: PlanPoint | null;
+  readonly b: PlanPoint | null;
   readonly real_distance_m: number;
   readonly north_azimuth_deg: number | null;
   readonly paper_density_px_per_mm?: number;
@@ -89,8 +101,28 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
     });
   }
 
-  const pixels = pixelDistance(input.a, input.b);
-  if (pixels < MIN_POINT_SEPARATION_PX) {
+  // M2 (partie M), étape 2 : « Point A, clic dans la zone de travail, requis »
+  // et « Point B, requis, distinct de A d'au moins 40 pixels ».
+  const missing = [
+    ...(input.a === null ? ['a'] : []),
+    ...(input.b === null ? ['b'] : []),
+  ];
+  if (missing.length > 0) {
+    findings.push({
+      code: 'CALIB.POINT_REQUIRED',
+      severity: 'blocking',
+      entity: null,
+      params: { missing: missing.join(',') },
+      ruleRef: 'partieM-M2',
+    });
+  }
+
+  // L'écart ne se mesure que si les deux points sont posés : le mesurer sur un
+  // point absent produirait une seconde anomalie qui dit la même chose.
+  const pixels = input.a !== null && input.b !== null
+    ? pixelDistance(input.a, input.b)
+    : null;
+  if (pixels !== null && pixels < MIN_POINT_SEPARATION_PX) {
     findings.push({
       code: 'CALIB.POINTS_TOO_CLOSE',
       severity: 'blocking',
@@ -100,17 +132,36 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
     });
   }
 
-  if (input.north_azimuth_deg === null) {
+  // M2 (partie M), étape 3 : « Azimut du nord, numérique, degrés, 0 à 360
+  // exclus, convention compas » → `CALIB.AZIMUTH_INVALID`. Le domaine est
+  // celui de D1.3, [0, 360[ : un azimut de 0 est le nord franc et se saisit.
+  // Un azimut absent et un azimut hors domaine lèvent le même code, la partie
+  // M n'en distinguant pas deux.
+  const azimuth = input.north_azimuth_deg;
+  if (azimuth === null || !Number.isFinite(azimuth) || azimuth < 0 || azimuth >= 360) {
     findings.push({
-      code: 'CALIB.NORTH_MISSING',
+      code: 'CALIB.AZIMUTH_INVALID',
       severity: 'blocking',
       entity: null,
-      params: {},
+      params: azimuth === null ? { given: 'none' } : { given: azimuth },
       ruleRef: 'partieM-M2',
     });
   }
 
   if (findings.length > 0) return { ok: false, findings };
+
+  // Les contrôles ci-dessus ont déjà écarté ces trois cas. Le redire au typage
+  // plutôt que de forcer une valeur par défaut : un `?? 0` survivrait en
+  // silence à une régression de ces contrôles et rendrait un calage faux.
+  if (pixels === null || azimuth === null) {
+    return { ok: false, findings: [{
+      code: 'CALIB.POINT_REQUIRED',
+      severity: 'blocking',
+      entity: null,
+      params: { missing: 'unreachable' },
+      ruleRef: 'partieM-M2',
+    }] };
+  }
 
   const resolution = pixels / input.real_distance_m;
   const density = input.paper_density_px_per_mm ?? DEFAULT_PAPER_DENSITY_PX_PER_MM;
@@ -141,8 +192,7 @@ export function computeCalibration(input: CalibrationInput): Outcome<Calibration
       pixel_distance: pixels,
       resolution_px_per_m: resolution,
       scale_denominator: denominator,
-      // Le bloc de garde ci-dessus a déjà écarté le cas nul.
-      north_azimuth_deg: input.north_azimuth_deg ?? 0,
+      north_azimuth_deg: azimuth,
     },
     warnings,
   };

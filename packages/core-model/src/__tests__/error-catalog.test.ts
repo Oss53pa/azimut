@@ -57,16 +57,20 @@ describe('ERROR_CATALOG', () => {
     }
   });
 
-  it('the allowlist holds the base/E17/H domains plus partie I (I6), partie J, tranche M and the atelier complement', () => {
+  it('the allowlist holds the base/E17/H domains plus partie I (I6), partie J, partie M and the atelier complement', () => {
     // Liste épinglée volontairement : un domaine nouveau casse ce test, ce qui
     // force à le déclarer plutôt qu'à le laisser apparaître. `PARK` et `DOC` viennent du
     // complément atelier (M2, stationnement ; M15, document de stratégie).
+    //
+    // `NET` en est sorti : aucun des quatorze documents ne l'autorisait, et
+    // D2.2 réserve le catalogue aux anomalies produites par un moteur — or un
+    // moteur n'a ni réseau ni base (A4.1). Voir `RETIRED_CODES`.
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
         'AD', 'ASSET', 'ASSIST', 'CALIB', 'CHARTER', 'COLOR', 'COST', 'DATA',
         'DOC', 'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
-        'LIBRARY', 'MODULE', 'NET', 'PACKAGE', 'PARK', 'PICTO', 'RENDER',
+        'LIBRARY', 'MODULE', 'PACKAGE', 'PARK', 'PICTO', 'RENDER',
         'REVIEW', 'RULES',
         'SECURITY', 'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
       ],

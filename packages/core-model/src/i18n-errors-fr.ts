@@ -193,8 +193,16 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
 
   'CALIB.DISTANCE_INVALID': 'Distance réelle nulle ou négative entre les deux points de calage',
   'CALIB.POINTS_TOO_CLOSE': 'Points de calage trop proches pour une échelle fiable',
+  'CALIB.POINT_REQUIRED': 'Point de calage non saisi',
+  'CALIB.AZIMUTH_INVALID': 'Azimut du nord hors de la plage attendue',
+  'DATA.NAME_REQUIRED': 'Nom requis',
+  'DATA.NAME_DUPLICATE': 'Ce nom est déjà porté par un autre site',
+  'DATA.COUNTRY_REQUIRED': 'Pays requis',
+  'DATA.LANG_REQUIRED': 'Au moins une langue active est requise',
+  'IMPORT.FILE_TOO_LARGE': 'Fichier trop volumineux',
+  'IMPORT.FORMAT_UNSUPPORTED': 'Format de fichier non pris en charge',
+  'IMPORT.PAGE_REQUIRED': 'Page à sélectionner dans ce document',
   'CALIB.SCALE_IMPLAUSIBLE': 'Résolution du fond de plan hors de la plage de vraisemblance',
-  'CALIB.NORTH_MISSING': 'Orientation du fond de plan non saisie',
   'CALIB.ORIGIN_LOCKED': 'Repère site déjà fixé par le premier calage',
   'CALIB.ORIGIN_MISMATCH': 'Repère site différent de celui du premier calage',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Niveau sans plan de fond calé',
@@ -204,9 +212,4 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Résidu moyen de calage au-dessus de la tolérance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Résidu d’un point homologue au-dessus de la tolérance',
 
-  'NET.REQUEST_FAILED': 'Le service de données n\u2019a pas répondu',
-  'NET.UNAUTHORIZED': 'Session absente ou expirée',
-  'NET.FORBIDDEN': 'Droit refusé sur cette ressource',
-  'NET.NOT_FOUND': 'Ressource introuvable au dépôt',
-  'NET.OFFLINE': 'Poste hors ligne',
 };

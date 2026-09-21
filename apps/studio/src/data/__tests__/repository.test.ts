@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   createRepository, createReferenceRepository, createPostgrestRepository,
-  errorCodeForStatus, isRepositoryError, DEFAULT_SCHEMA,
+  failureForStatus, isRepositoryError, DEFAULT_SCHEMA,
 } from '../index.js';
 
 afterEach(() => { vi.unstubAllGlobals(); });
@@ -48,18 +48,18 @@ describe('Dépôt des sites de référence', () => {
 
   it('refuse une clé inconnue avec NET.NOT_FOUND', async () => {
     await expect(repo.loadSite('inexistant')).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.NOT_FOUND',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'not_found',
     );
   });
 });
 
 describe('Codes d’erreur d’accès', () => {
   it('traduit les statuts HTTP en codes du catalogue', () => {
-    expect(errorCodeForStatus(401)).toBe('NET.UNAUTHORIZED');
-    expect(errorCodeForStatus(403)).toBe('NET.FORBIDDEN');
-    expect(errorCodeForStatus(404)).toBe('NET.NOT_FOUND');
-    expect(errorCodeForStatus(500)).toBe('NET.REQUEST_FAILED');
-    expect(errorCodeForStatus(418)).toBe('NET.REQUEST_FAILED');
+    expect(failureForStatus(401)).toBe('unauthorized');
+    expect(failureForStatus(403)).toBe('forbidden');
+    expect(failureForStatus(404)).toBe('not_found');
+    expect(failureForStatus(500)).toBe('request_failed');
+    expect(failureForStatus(418)).toBe('request_failed');
   });
 });
 
@@ -87,14 +87,14 @@ describe('Dépôt lu par l’API REST', () => {
       new Response('', { status: 403, statusText: 'Forbidden' }),
     ));
     await expect(createPostgrestRepository(config).listSites()).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.FORBIDDEN',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'forbidden',
     );
   });
 
   it('remonte une coupure réseau en NET.REQUEST_FAILED', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('connexion refusée')));
     await expect(createPostgrestRepository(config).listSites()).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.REQUEST_FAILED',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'request_failed',
     );
   });
 
@@ -103,7 +103,7 @@ describe('Dépôt lu par l’API REST', () => {
       new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } }),
     ));
     await expect(createPostgrestRepository(config).loadSite('abc')).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.NOT_FOUND',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'not_found',
     );
   });
 });
@@ -128,7 +128,7 @@ describe('Vocabulaire du site', () => {
   it('refuse un site inconnu plutôt que de rendre un registre vide', async () => {
     // Un vide rendu ici se lirait comme « ce site ne déclare rien ».
     await expect(createReferenceRepository().loadVocabulary('ref-absent')).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.NOT_FOUND',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'not_found',
     );
   });
 
@@ -155,7 +155,7 @@ describe('Vocabulaire du site', () => {
       new Response('', { status: 403, statusText: 'Forbidden' }),
     ));
     await expect(createPostgrestRepository(config).loadVocabulary('site-1')).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.FORBIDDEN',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'forbidden',
     );
   });
 
@@ -180,7 +180,7 @@ describe('Vocabulaire : les pièges attrapés en revue', () => {
     // faudrait lire « ce site ne vous est pas accessible ».
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('[]', { status: 200 })));
     await expect(createPostgrestRepository(config).loadVocabulary('inconnu')).rejects.toSatisfy(
-      (e: unknown) => isRepositoryError(e) && e.code === 'NET.NOT_FOUND',
+      (e: unknown) => isRepositoryError(e) && e.failure === 'not_found',
     );
   });
 

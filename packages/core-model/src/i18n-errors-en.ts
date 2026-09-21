@@ -193,8 +193,16 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
 
   'CALIB.DISTANCE_INVALID': 'Real distance between the two calibration points is zero or negative',
   'CALIB.POINTS_TOO_CLOSE': 'Calibration points too close together for a reliable scale',
+  'CALIB.POINT_REQUIRED': 'Calibration point not set',
+  'CALIB.AZIMUTH_INVALID': 'North azimuth outside the expected range',
+  'DATA.NAME_REQUIRED': 'Name required',
+  'DATA.NAME_DUPLICATE': 'Another site already has this name',
+  'DATA.COUNTRY_REQUIRED': 'Country required',
+  'DATA.LANG_REQUIRED': 'At least one active language is required',
+  'IMPORT.FILE_TOO_LARGE': 'File too large',
+  'IMPORT.FORMAT_UNSUPPORTED': 'File format not supported',
+  'IMPORT.PAGE_REQUIRED': 'Select a page in this document',
   'CALIB.SCALE_IMPLAUSIBLE': 'Plan resolution outside the plausibility range',
-  'CALIB.NORTH_MISSING': 'Plan orientation not entered',
   'CALIB.ORIGIN_LOCKED': 'Site frame already fixed by the first calibration',
   'CALIB.ORIGIN_MISMATCH': 'Site frame differs from the first calibration’s',
   'CALIB.LEVEL_NOT_CALIBRATED': 'Level with no calibrated background plan',
@@ -204,9 +212,4 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Mean calibration residual above tolerance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Homologous point residual above tolerance',
 
-  'NET.REQUEST_FAILED': 'The data service did not respond',
-  'NET.UNAUTHORIZED': 'Session missing or expired',
-  'NET.FORBIDDEN': 'Access denied on this resource',
-  'NET.NOT_FOUND': 'Resource not found in the store',
-  'NET.OFFLINE': 'Workstation offline',
 };

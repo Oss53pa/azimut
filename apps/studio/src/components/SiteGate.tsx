@@ -1,6 +1,4 @@
 import { type JSX } from 'react';
-import { getErrorMessage } from '@azimut/core-model';
-import type { ErrorCode } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import type { AsyncState, RepositoryError, SiteRepository, SiteSummary } from '../data/index.js';
 import {
@@ -27,7 +25,7 @@ type SiteGateProps = {
 export function SiteGate(
   { repository, siteState, listState, onOpenSite, onRetry }: SiteGateProps,
 ): JSX.Element {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
 
   const failure: RepositoryError | null =
     siteState.status === 'failed' ? siteState.error
@@ -93,10 +91,9 @@ export function SiteGate(
 
         {failure !== null && (
           <StateBanner
-            severity={failure.code === 'NET.OFFLINE' ? 'warning' : 'blocking'}
-            code={failure.code}
-            message={getErrorMessage(failure.code as ErrorCode, lang) ?? failure.code}
-            hint={failure.detail}
+            severity={failure.failure === 'offline' ? 'warning' : 'blocking'}
+            message={t(`repo.failure.${failure.failure}`)}
+            hint={t(`repo.failure.${failure.failure}.hint`)}
           />
         )}
 

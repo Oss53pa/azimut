@@ -41,14 +41,14 @@ export function createReferenceRepository(): SiteRepository {
     loadSite(siteId: string): Promise<SiteData> {
       const site = allReferenceSites.get(siteId);
       if (site === undefined) {
-        return Promise.reject(new RepositoryError('NET.NOT_FOUND', siteId));
+        return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(site);
     },
 
     loadVocabulary(siteId: string): Promise<SiteVocabulary> {
       if (!allReferenceSites.has(siteId)) {
-        return Promise.reject(new RepositoryError('NET.NOT_FOUND', siteId));
+        return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(referenceVocabulary(siteId));
     },
