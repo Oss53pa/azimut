@@ -62,6 +62,19 @@ export const DATA_SOURCE_FR = {
   'sites.building.default': 'Bâtiment 1',
   'sites.level.default': 'Niveau 0',
   'sites.denied.create': 'Votre rôle ne permet pas de créer un site.',
+  // M2 (partie M) — import et calage. Raccourcis et étapes.
+  'calib.shortcut.zoom_fit': 'Ajuster à la fenêtre',
+  'calib.shortcut.next_step': 'Étape suivante',
+  'calib.shortcut.cancel_point': 'Annuler le point en cours',
+  'calib.mode.pan': 'Déplacer la vue (espace maintenu)',
+  'calib.step.plan': 'Fond de plan',
+  'calib.step.scale': 'Échelle',
+  'calib.step.orientation': 'Orientation',
+  'calib.blocked.plan': 'Le tracé attend un fond de plan.',
+  'calib.blocked.scale': 'Le tracé attend deux points de calage et une distance réelle.',
+  'calib.blocked.orientation': 'Le tracé attend l’azimut du nord.',
+  'calib.replace.kept': 'Les dimensions concordent : le calage du fond précédent sera reporté sur le nouveau.',
+  'calib.replace.lost': 'Les dimensions diffèrent : le calage sera perdu et le plan devra être recalé.',
 } as const;
 
 export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string>> = {
@@ -118,4 +131,16 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'sites.building.default': 'Building 1',
   'sites.level.default': 'Level 0',
   'sites.denied.create': 'Your role does not allow creating a site.',
+  'calib.shortcut.zoom_fit': 'Fit to window',
+  'calib.shortcut.next_step': 'Next step',
+  'calib.shortcut.cancel_point': 'Cancel current point',
+  'calib.mode.pan': 'Pan the view (hold space)',
+  'calib.step.plan': 'Base plan',
+  'calib.step.scale': 'Scale',
+  'calib.step.orientation': 'Orientation',
+  'calib.blocked.plan': 'Drawing is waiting for a base plan.',
+  'calib.blocked.scale': 'Drawing is waiting for two calibration points and a real distance.',
+  'calib.blocked.orientation': 'Drawing is waiting for the north azimuth.',
+  'calib.replace.kept': 'Dimensions match: the previous plan’s calibration will carry over to the new one.',
+  'calib.replace.lost': 'Dimensions differ: the calibration will be lost and the plan will need recalibrating.',
 };

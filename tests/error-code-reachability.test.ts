@@ -46,12 +46,6 @@ const CATALOGUE_FILES = [
  * lèvent pas en écrivant du code.
  */
 const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
-  'IMPORT.FILE_TOO_LARGE':
-    'Contrôle de l’étape 1 de M2 (partie M), import du fond de plan. L’écran d’import n’est pas construit ; le seuil de 60 Mo que M2 nomme est une valeur d’interface, non normative.',
-  'IMPORT.FORMAT_UNSUPPORTED':
-    'Même étape, même lot. La liste des formats acceptés est celle de M2 (partie M) : PDF, PNG, JPG, DWG.',
-  'IMPORT.PAGE_REQUIRED':
-    'Même étape, même lot. Ne se lève que pour un PDF multipage, cas que l’import ne traite pas encore.',
   'LAYOUT.LANG_VARIANT_MISSING':
     'Jumeau côté composition de GRAPH.DESTINATION_NAME_MISSING, que validateDirectory lève. ' +
     'renderFace compose une langue à la fois et ne confronte pas son contenu à la liste des langues actives du site.',
