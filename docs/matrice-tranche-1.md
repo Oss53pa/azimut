@@ -32,6 +32,15 @@ S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
 C'était faux — la migration `0020` les ajoute par `ALTER TABLE`, avec sa
 contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
+## 1bis. Module 01, critères d'acceptation (N1.7)
+
+| Critère | État | Preuve |
+| --- | --- | --- |
+| 1. Un site modélisé se recharge à l'identique | tenu | `db/__tests__/n1-7-1-rechargement.db.test.ts` — écriture par le chemin d'écriture, relecture par `loadSiteData`, cinq essais, contre une base réelle |
+| 2. Aucune coordonnée en pixels en base, par analyse du schéma | tenu | `db/__tests__/n1-3-no-pixels-in-schema.test.ts`, une infraction déclarée au §5 |
+| 3. Chaque cas de `validateGraph` a son site et son contre-exemple | tenu | `engine-graph/__tests__/n1-7-3-cas-et-contre-exemple.test.ts` — 18 essais. A révélé que `GRAPH.DESTINATION_UNLINKED` n'était levé par rien |
+| 4. L'historique survit à trois changements successifs | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants, donc trois changements |
+
 ## 2. Écrans de la partie M, critères d'acceptation
 
 ### M2, import et calage — 5 critères
@@ -88,7 +97,7 @@ sans anomalie, pour la raison donnée au §2 sur M5.
 | 1. La chaîne fonctionne, site vide → graphe validé | tenu | `m8-tranche.spec.ts` |
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
-| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — 1 356 ms, quatre étapes |
+| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — 1 669 ms au dernier relevé, quatre étapes |
 | 5. Conformité AA automatisée sur les cinq écrans | **absent** | Demande `axe-core`, bibliothèque nouvelle : A2.2 point 4, en attente d'arbitrage |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
@@ -103,6 +112,7 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
 | `control_point.source_x_px`, `source_y_px` | Infraction à S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
 | M8 critère 5 | Bibliothèque tierce nouvelle | Arbitrage, A2.2 point 4 |
+| `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
 
@@ -112,3 +122,9 @@ signature de `resolveFaceContent`, colonnes absentes de `pictogram` et de
 liste autorisée de D2.1, douze modules au lieu de treize plus la plateforme
 dans `module-ownership.ts`, `delivery_package` divergente de O16, et trois
 codes `EDIT.*` absents du catalogue.
+
+Ajouts de la version du 22 septembre, décisions 82 à 90 de l'annexe Z :
+`support.code` absent du schéma, `message_line.excluded` et
+`exclusion_reason` absents du type comme de la base, règle W11 sans code, et
+`FileNameParts.reference` qui nomme désormais autre chose que ce que D11
+décrit. Les migrations se font dans la tranche où leur table est concernée.
