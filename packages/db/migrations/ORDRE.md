@@ -76,6 +76,7 @@ non plus — elle n'en retire que les clés étrangères.
 0030_q5_legal_entity
 0031_o4_site_timezone
 0032_a5_2_calibration_pixels
+0033_a5_2_plan_calibration_point
 ```
 
 ## Règle pour la suite
