@@ -71,6 +71,7 @@ non plus — elle n'en retire que les clés étrangères.
 0025_a6_1_partitioning_effective
 0026_e5_1_apply_commands
 0027_n2_2_wayfinding_tables
+0028_n1_2_site_origin_unit_suffix
 ```
 
 ## Règle pour la suite
