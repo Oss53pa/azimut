@@ -97,4 +97,41 @@ describe('routes de la tranche M (partie M)', () => {
       }
     });
   });
+  /**
+   * R2 (partie R) : « Chemin. `/sites/:siteId/wayfinding/messages` ».
+   *
+   * L'écran porte sur le site et non sur un niveau : il n'entre pas dans la
+   * chaîne de M8 et ne partage pas ses chemins.
+   */
+  describe('l’écran du tableau des messages (partie R)', () => {
+    it('s’analyse à son chemin', () => {
+      expect(parseRoute('/sites/s1/wayfinding/messages')).toEqual({
+        screen: 'messages', siteId: 's1',
+      });
+    });
+
+    it('se reconstruit à l’identique', () => {
+      const route = parseRoute('/sites/s1/wayfinding/messages');
+      expect(buildPath(route)).toBe('/sites/s1/wayfinding/messages');
+    });
+
+    it('décode un identifiant de site échappé', () => {
+      const route = parseRoute('/sites/site%20un/wayfinding/messages');
+      expect(route).toEqual({ screen: 'messages', siteId: 'site un' });
+    });
+
+    it('n’attrape pas un chemin voisin', () => {
+      for (const path of [
+        '/sites/s1/wayfinding',
+        '/sites/s1/wayfinding/messages/7',
+        '/sites/s1/messages',
+      ]) {
+        expect(parseRoute(path).screen, path).toBe('legacy');
+      }
+    });
+
+    it('ne figure pas dans la chaîne de M8 (partie M)', () => {
+      expect([...TRANCHE_ORDER]).not.toContain('messages');
+    });
+  });
 });

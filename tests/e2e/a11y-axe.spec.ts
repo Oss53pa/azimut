@@ -41,6 +41,63 @@ const SCREENS = [
   { key: 'M5 validation', path: `/sites/${SITE}/validation` },
 ] as const;
 
+const SITE_R = 'site-axe-r';
+
+/**
+ * Pose un tableau des messages dans le magasin local, au format que le chemin
+ * d'écriture produit. C'est le seul moyen d'analyser l'écran rempli tant que
+ * l'écran de génération n'existe pas.
+ */
+async function seedSchedule(page: Page): Promise<void> {
+  const schedule = 'sched-axe';
+  const line = (index: number): unknown => ({
+    table: 'message_line',
+    id: `${schedule}-line-${String(index)}`,
+    values: {
+      id: `${schedule}-line-${String(index)}`,
+      org_id: 'org-axe', schedule_id: schedule, support_id: 'sup-axe',
+      face_index: 0, block_index: index,
+      content: JSON.stringify({
+        block_kind: 'destination_list',
+        entries: [{
+          destination_id: `dest-${String(index)}`,
+          text: { fr: `Destination ${String(index)}`, en: `Destination ${String(index)}` },
+          direction: 'left', distance_m: 40,
+        }],
+      }),
+      pictogram_id: null, direction: 'left', information_level: 2,
+      decision_point_id: 'n-hall', stale: index === 1,
+      excluded: false, exclusion_reason: null,
+    },
+  });
+
+  const session = {
+    rows: [
+      {
+        table: 'support', id: 'sup-axe',
+        values: { id: 'sup-axe', org_id: 'org-axe', site_id: SITE_R, code: 'D-042' },
+      },
+      {
+        table: 'message_schedule', id: schedule,
+        values: {
+          id: schedule, org_id: 'org-axe', site_id: SITE_R, version: 7,
+          state: 'draft', generated_at: '2026-04-01T00:00:00.000Z',
+          inputs_hash: '0123456789abcdef',
+        },
+      },
+      line(0), line(1),
+    ],
+    queued: [],
+  };
+
+  await page.addInitScript(
+    ([key, payload]: readonly string[]) => {
+      window.localStorage.setItem(key ?? '', payload ?? '');
+    },
+    [`azimut.session.${SITE_R}`, JSON.stringify(session)] as const,
+  );
+}
+
 /** Niveaux A et AA des trois versions de WCAG, et rien d'autre. */
 const WCAG_A_AA = [
   'wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa',
@@ -201,6 +258,31 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
     });
   }
 
+  /**
+   * Partie R — l'écran du tableau des messages, critère 14 de R18 : « Aucune
+   * violation détectable automatiquement aux niveaux A et AA, résultats
+   * incomplets listés pour revue manuelle. »
+   *
+   * Deux états l'un et l'autre atteignables : le tableau rempli, et l'état
+   * vide de R16, qui n'est pas le même écran amputé mais une invitation.
+   */
+  for (const lang of LANGS) {
+    test(`R tableau des messages, état nominal, ${lang}`, async ({ page }) => {
+      await seedSchedule(page);
+      await page.goto(url(`/sites/${SITE_R}/wayfinding/messages`, lang));
+      await page.getByRole('button', {
+        name: /Reprendre le travail local|Resume local work/,
+      }).click();
+      await expect(page.getByRole('table')).toBeVisible();
+      await check(page, 'R tableau des messages', 'nominal', lang);
+    });
+
+    test(`R tableau des messages, aucune version, ${lang}`, async ({ page }) => {
+      await page.goto(url(`/sites/${SITE_R}-vide/wayfinding/messages`, lang));
+      await check(page, 'R tableau des messages', 'aucune version', lang);
+    });
+  }
+
   test.afterAll(() => {
     const path = resolve(HERE, '..', '..', 'docs', 'releve-axe.json');
     mkdirSync(dirname(path), { recursive: true });
@@ -208,7 +290,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
       mesure: 'M8 (partie M) critère 5 — absence de violation détectable automatiquement',
       outil: 'axe-core, dépendance de développement, jamais livrée',
       regles: WCAG_A_AA,
-      portee: 'Les cinq écrans de la partie M, dans leurs états atteignables, en français et en anglais.',
+      portee: 'Les cinq écrans de la partie M et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.',
       limite: 'L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.',
       incomplets: incompletes,
     }, null, 2)}\n`, 'utf8');

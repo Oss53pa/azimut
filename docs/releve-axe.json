@@ -9,7 +9,7 @@
     "wcag22a",
     "wcag22aa"
   ],
-  "portee": "Les cinq écrans de la partie M, dans leurs états atteignables, en français et en anglais.",
+  "portee": "Les cinq écrans de la partie M et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.",
   "limite": "L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.",
   "incomplets": [
     {
@@ -30,6 +30,26 @@
       "aide": "Elements must meet minimum color contrast ratio thresholds",
       "elements": [
         "p[data-consequence=\"true\"]"
+      ]
+    },
+    {
+      "ecran": "R tableau des messages",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "th-has-data-cells",
+      "aide": "Table headers in a data table must refer to data cells",
+      "elements": [
+        "table"
+      ]
+    },
+    {
+      "ecran": "R tableau des messages",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "th-has-data-cells",
+      "aide": "Table headers in a data table must refer to data cells",
+      "elements": [
+        "table"
       ]
     }
   ]

@@ -1,0 +1,290 @@
+/**
+ * D12.1 — partie R, l'écran du tableau des messages.
+ *
+ * Fragment à part : la partie R spécifie cet écran au champ près, et son
+ * vocabulaire n'est pas celui du tableau exploratoire du fragment
+ * `wayfinding.ts`, construit avant elle.
+ *
+ * Les libellés d'état viennent de R4, ceux des niveaux d'information de R5,
+ * ceux des états de ligne de R10. Aucun n'est traduit librement.
+ */
+export const MESSAGE_TABLE_FR = {
+  'msgtable.eyebrow': 'Module 02 · partie R',
+  'msgtable.title': 'Tableau des messages',
+  'msgtable.subtitle': 'Ce que chaque face dira, et ce qui le justifie',
+
+  // R4 (partie R) — barre de version
+  'msgtable.version': 'Version {version}',
+  'msgtable.generated_at': 'Généré le',
+  'msgtable.inputs_hash': 'Empreinte des entrées',
+  'msgtable.inputs_hash.full': 'Empreinte complète : {hash}',
+  'msgtable.state.draft': 'Brouillon',
+  'msgtable.state.in_review': 'En revue',
+  'msgtable.state.approved': 'Approuvé',
+  'msgtable.state.superseded': 'Remplacé',
+
+  'msgtable.action.generate': 'Générer',
+  'msgtable.action.regenerate': 'Générer à nouveau',
+  'msgtable.action.submit_for_review': 'Émettre pour revue',
+  'msgtable.action.approve': 'Approuver',
+  'msgtable.action.reject': 'Rejeter',
+  'msgtable.action.compare': 'Comparer',
+  'msgtable.action.export': 'Exporter',
+
+  // R5 (partie R) — colonnes
+  'msgtable.column.stable_id': 'Identifiant',
+  'msgtable.column.support': 'Support',
+  'msgtable.column.face': 'Face',
+  'msgtable.column.block': 'Bloc',
+  'msgtable.column.content': 'Contenu {lang}',
+  'msgtable.column.pictogram': 'Pictogramme',
+  'msgtable.column.direction': 'Direction',
+  'msgtable.column.information_level': 'Niveau d’information',
+  'msgtable.column.decision_point': 'Point de décision',
+  'msgtable.column.state': 'État',
+
+  'msgtable.cell.no_support_code': 'Code de support absent',
+  'msgtable.cell.lang_missing': 'Aucun contenu dans cette langue',
+  'msgtable.cell.no_pictogram': 'Aucun',
+  'msgtable.cell.no_direction': 'Aucune',
+
+  // R5 (partie R) — niveaux d'information
+  'msgtable.level.1': 'Identification',
+  'msgtable.level.2': 'Orientation',
+  'msgtable.level.3': 'Direction',
+  'msgtable.level.4': 'Confirmation',
+
+  // N2.2 — les six directions, relatives à l'usager
+  'msgtable.direction.left': 'À gauche',
+  'msgtable.direction.right': 'À droite',
+  'msgtable.direction.ahead': 'Tout droit',
+  'msgtable.direction.up': 'Vers le haut',
+  'msgtable.direction.down': 'Vers le bas',
+  'msgtable.direction.back': 'En arrière',
+
+  // R10 — état des lignes
+  'msgtable.linestate.current': 'À jour',
+  'msgtable.linestate.stale': 'Périmée',
+  'msgtable.linestate.blocking': 'Anomalie bloquante',
+  'msgtable.linestate.excluded': 'Écartée',
+
+  // R6 (partie R) — regroupement, filtres, recherche
+  'msgtable.grouping': 'Regrouper par',
+  'msgtable.grouping.support': 'Support',
+  'msgtable.grouping.zone': 'Zone d’orientation',
+  'msgtable.grouping.level': 'Niveau',
+  'msgtable.grouping.decision_point': 'Point de décision',
+  'msgtable.group.unattached': 'Rattachement non déclaré',
+  'msgtable.group.count': '{count} ligne(s)',
+
+  'msgtable.filters': 'Filtres',
+  'msgtable.filter.support': 'Support',
+  'msgtable.filter.direction': 'Direction',
+  'msgtable.filter.information_level': 'Niveau d’information',
+  'msgtable.filter.decision_point': 'Point de décision',
+  'msgtable.filter.stale_only': 'Périmées seules',
+  'msgtable.filter.anomalies_only': 'Anomalies seules',
+  'msgtable.filter.excluded': 'Écartées',
+  'msgtable.filter.clear': 'Retirer ce filtre',
+  'msgtable.filter.hidden': '{count} ligne(s) masquée(s) par les filtres',
+  'msgtable.search': 'Recherche',
+  'msgtable.search.hint': 'Contenus, codes de support, codes de point de décision',
+
+  // R7 — panneau de détail
+  'msgtable.detail': 'Détail de la ligne',
+  'msgtable.detail.none': 'Aucune ligne sélectionnée.',
+  'msgtable.detail.justification': 'Justification',
+  'msgtable.detail.decision_point': 'Point de décision',
+  'msgtable.detail.profiles': 'Profils qui y passent',
+  'msgtable.detail.destination': 'Destination annoncée',
+  'msgtable.detail.continuity': 'Continuité',
+  'msgtable.detail.continuity.unavailable': 'La séquence du plan de jalonnement n’est pas chargée pour cette session.',
+  'msgtable.detail.sources': 'Sources',
+  'msgtable.detail.sources.note': 'C’est le seul moyen de corriger une ligne. Aucune cellule du tableau n’est modifiable.',
+  'msgtable.detail.annotations': 'Annotations',
+  'msgtable.detail.annotations.none': 'Aucune annotation sur cette ligne.',
+  'msgtable.detail.exclusion': 'Motif de l’écartement',
+  'msgtable.detail.exclusion.body': 'Plafond de {cap} destinations par face, règle {rule}. Priorité de la destination écartée : {excluded}. Dernière retenue : {kept}.',
+
+  'msgtable.source.directory': 'Destination et dénominations · Annuaire, module 01',
+  'msgtable.source.zoning': 'Nom de zone ou de lieu · Zonage et nomenclature, module 02',
+  'msgtable.source.placement': 'Implantation du support · Implantation des supports, module 02',
+  'msgtable.source.wayfinding': 'Point de décision et parcours · Plan de jalonnement, module 02',
+  'msgtable.source.pictogram': 'Pictogramme · Bibliothèque, partie J',
+
+  // R3 (partie R) — barre d'état
+  'msgtable.status.lines': '{count} ligne(s)',
+  'msgtable.status.stale': '{count} périmée(s)',
+  'msgtable.status.blocking': '{count} bloquante(s)',
+  'msgtable.status.excluded': '{count} écartée(s)',
+  'msgtable.status.sync': 'Synchronisé',
+  'msgtable.status.offline': 'Hors ligne',
+
+  // R10, R14 — bandeaux
+  'msgtable.banner.stale': '{count} ligne(s) périmée(s). Un tableau périmé ne peut pas être approuvé en l’état.',
+  'msgtable.banner.stale.action': 'Générer une nouvelle version',
+  'msgtable.banner.graph_not_validated': 'La validation de complétude du graphe n’est pas passée. L’émission pour revue est impossible.',
+  'msgtable.banner.graph_not_validated.hint': 'Écran de validation du site.',
+  'msgtable.banner.no_rules_pack': 'Aucun paquet de règles rattaché au site. Le plafond de destinations par face n’est pas appliqué.',
+  'msgtable.banner.approved': 'Version approuvée par {approver} le {date}. Aucune génération sur cette version.',
+  'msgtable.banner.unreadable': '{count} ligne(s) enregistrée(s) n’ont pas pu être lues et ne sont pas affichées.',
+
+  // R16 — états de l'écran
+  'msgtable.empty.message': 'Aucune version de tableau pour ce site. Prérequis : graphe validé, jalonnement établi, paquet de règles rattaché.',
+  'msgtable.empty.action': 'Générer la première version',
+  'msgtable.loading': 'Chargement du tableau des messages.',
+  'msgtable.partial': 'Supports non encore traités : {supports}.',
+  'msgtable.error.cause': 'La génération a échoué.',
+  'msgtable.error.recovery': 'La version précédente est conservée. Relancez la génération.',
+  'msgtable.offline': 'Consultation et annotation possibles. Générer, émettre et approuver sont indisponibles.',
+  'msgtable.denied': 'Ce rôle ne consulte pas le tableau des messages.',
+
+  // R15 — raccourcis
+  'msgtable.shortcuts': 'Raccourcis',
+  'msgtable.shortcut.rows': 'Ligne précédente, suivante',
+  'msgtable.shortcut.select': 'Ajouter à la sélection',
+  'msgtable.shortcut.open': 'Ouvrir le détail',
+  'msgtable.shortcut.close': 'Fermer le détail, puis vider la sélection',
+  'msgtable.shortcut.search': 'Chercher',
+  'msgtable.shortcut.next_issue': 'Prochaine ligne périmée ou en anomalie',
+  'msgtable.selection': '{count} ligne(s) sélectionnée(s)',
+
+  'msgtable.table.caption': 'Lignes du tableau des messages, une par bloc de face',
+  'msgtable.table.empty': 'Aucune ligne ne répond aux filtres.',
+  'msgtable.readonly': 'Aucune cellule de ce tableau n’est modifiable. Une ligne fausse se corrige à sa source.',
+} as const;
+
+export const MESSAGE_TABLE_EN: Readonly<Record<keyof typeof MESSAGE_TABLE_FR, string>> = {
+  'msgtable.eyebrow': 'Module 02 · part R',
+  'msgtable.title': 'Message schedule',
+  'msgtable.subtitle': 'What each face will say, and what justifies it',
+
+  'msgtable.version': 'Version {version}',
+  'msgtable.generated_at': 'Generated on',
+  'msgtable.inputs_hash': 'Inputs fingerprint',
+  'msgtable.inputs_hash.full': 'Full fingerprint: {hash}',
+  'msgtable.state.draft': 'Draft',
+  'msgtable.state.in_review': 'In review',
+  'msgtable.state.approved': 'Approved',
+  'msgtable.state.superseded': 'Superseded',
+
+  'msgtable.action.generate': 'Generate',
+  'msgtable.action.regenerate': 'Generate again',
+  'msgtable.action.submit_for_review': 'Submit for review',
+  'msgtable.action.approve': 'Approve',
+  'msgtable.action.reject': 'Reject',
+  'msgtable.action.compare': 'Compare',
+  'msgtable.action.export': 'Export',
+
+  'msgtable.column.stable_id': 'Identifier',
+  'msgtable.column.support': 'Support',
+  'msgtable.column.face': 'Face',
+  'msgtable.column.block': 'Block',
+  'msgtable.column.content': 'Content {lang}',
+  'msgtable.column.pictogram': 'Pictogram',
+  'msgtable.column.direction': 'Direction',
+  'msgtable.column.information_level': 'Information level',
+  'msgtable.column.decision_point': 'Decision point',
+  'msgtable.column.state': 'State',
+
+  'msgtable.cell.no_support_code': 'Support code missing',
+  'msgtable.cell.lang_missing': 'No content in this language',
+  'msgtable.cell.no_pictogram': 'None',
+  'msgtable.cell.no_direction': 'None',
+
+  'msgtable.level.1': 'Identification',
+  'msgtable.level.2': 'Orientation',
+  'msgtable.level.3': 'Direction',
+  'msgtable.level.4': 'Confirmation',
+
+  'msgtable.direction.left': 'Left',
+  'msgtable.direction.right': 'Right',
+  'msgtable.direction.ahead': 'Straight ahead',
+  'msgtable.direction.up': 'Up',
+  'msgtable.direction.down': 'Down',
+  'msgtable.direction.back': 'Back',
+
+  'msgtable.linestate.current': 'Up to date',
+  'msgtable.linestate.stale': 'Stale',
+  'msgtable.linestate.blocking': 'Blocking anomaly',
+  'msgtable.linestate.excluded': 'Excluded',
+
+  'msgtable.grouping': 'Group by',
+  'msgtable.grouping.support': 'Support',
+  'msgtable.grouping.zone': 'Orientation zone',
+  'msgtable.grouping.level': 'Level',
+  'msgtable.grouping.decision_point': 'Decision point',
+  'msgtable.group.unattached': 'Attachment not declared',
+  'msgtable.group.count': '{count} line(s)',
+
+  'msgtable.filters': 'Filters',
+  'msgtable.filter.support': 'Support',
+  'msgtable.filter.direction': 'Direction',
+  'msgtable.filter.information_level': 'Information level',
+  'msgtable.filter.decision_point': 'Decision point',
+  'msgtable.filter.stale_only': 'Stale only',
+  'msgtable.filter.anomalies_only': 'Anomalies only',
+  'msgtable.filter.excluded': 'Excluded',
+  'msgtable.filter.clear': 'Remove this filter',
+  'msgtable.filter.hidden': '{count} line(s) hidden by filters',
+  'msgtable.search': 'Search',
+  'msgtable.search.hint': 'Contents, support codes, decision point codes',
+
+  'msgtable.detail': 'Line detail',
+  'msgtable.detail.none': 'No line selected.',
+  'msgtable.detail.justification': 'Justification',
+  'msgtable.detail.decision_point': 'Decision point',
+  'msgtable.detail.profiles': 'Profiles passing through',
+  'msgtable.detail.destination': 'Announced destination',
+  'msgtable.detail.continuity': 'Continuity',
+  'msgtable.detail.continuity.unavailable': 'The wayfinding sequence is not loaded for this session.',
+  'msgtable.detail.sources': 'Sources',
+  'msgtable.detail.sources.note': 'This is the only way to correct a line. No cell of the table is editable.',
+  'msgtable.detail.annotations': 'Annotations',
+  'msgtable.detail.annotations.none': 'No annotation on this line.',
+  'msgtable.detail.exclusion': 'Reason for exclusion',
+  'msgtable.detail.exclusion.body': 'Cap of {cap} destinations per face, rule {rule}. Priority of the excluded destination: {excluded}. Last kept: {kept}.',
+
+  'msgtable.source.directory': 'Destination and names · Directory, module 01',
+  'msgtable.source.zoning': 'Zone or place name · Zoning and naming, module 02',
+  'msgtable.source.placement': 'Support placement · Support placement, module 02',
+  'msgtable.source.wayfinding': 'Decision point and routes · Wayfinding plan, module 02',
+  'msgtable.source.pictogram': 'Pictogram · Library, part J',
+
+  'msgtable.status.lines': '{count} line(s)',
+  'msgtable.status.stale': '{count} stale',
+  'msgtable.status.blocking': '{count} blocking',
+  'msgtable.status.excluded': '{count} excluded',
+  'msgtable.status.sync': 'Synchronised',
+  'msgtable.status.offline': 'Offline',
+
+  'msgtable.banner.stale': '{count} stale line(s). A stale schedule cannot be approved as it stands.',
+  'msgtable.banner.stale.action': 'Generate a new version',
+  'msgtable.banner.graph_not_validated': 'Graph completeness validation has not passed. Submitting for review is impossible.',
+  'msgtable.banner.graph_not_validated.hint': 'Site validation screen.',
+  'msgtable.banner.no_rules_pack': 'No rules pack bound to the site. The cap on destinations per face is not applied.',
+  'msgtable.banner.approved': 'Version approved by {approver} on {date}. No generation on this version.',
+  'msgtable.banner.unreadable': '{count} stored line(s) could not be read and are not displayed.',
+
+  'msgtable.empty.message': 'No schedule version for this site. Prerequisites: validated graph, established wayfinding plan, bound rules pack.',
+  'msgtable.empty.action': 'Generate the first version',
+  'msgtable.loading': 'Loading the message schedule.',
+  'msgtable.partial': 'Supports not yet processed: {supports}.',
+  'msgtable.error.cause': 'Generation failed.',
+  'msgtable.error.recovery': 'The previous version is kept. Run the generation again.',
+  'msgtable.offline': 'Consultation and annotation remain possible. Generate, submit and approve are unavailable.',
+  'msgtable.denied': 'This role does not consult the message schedule.',
+
+  'msgtable.shortcuts': 'Shortcuts',
+  'msgtable.shortcut.rows': 'Previous line, next line',
+  'msgtable.shortcut.select': 'Add to selection',
+  'msgtable.shortcut.open': 'Open detail',
+  'msgtable.shortcut.close': 'Close detail, then clear selection',
+  'msgtable.shortcut.search': 'Search',
+  'msgtable.shortcut.next_issue': 'Next stale or anomalous line',
+  'msgtable.selection': '{count} line(s) selected',
+
+  'msgtable.table.caption': 'Message schedule lines, one per face block',
+  'msgtable.table.empty': 'No line matches the filters.',
+  'msgtable.readonly': 'No cell of this table is editable. A wrong line is corrected at its source.',
+};

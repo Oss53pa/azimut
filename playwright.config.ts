@@ -52,9 +52,19 @@ export default defineConfig({
     launchOptions: chromiumLaunchOptions(),
   },
   webServer: {
-    command: 'pnpm --filter @azimut/studio preview --port 4317 --strictPort',
+    /**
+     * La construction précède le service.
+     *
+     * `preview` sert `dist/`, qu'il ne construit pas. Sans cette construction,
+     * la suite s'exécutait contre le dernier paquet construit — c'est-à-dire
+     * potentiellement contre du code qui n'est plus celui du dépôt, en
+     * annonçant vert. Une vérification qui peut porter sur autre chose que ce
+     * qu'on vérifie ne vérifie rien (A2.3).
+     */
+    command: 'pnpm --filter @azimut/studio build'
+      + ' && pnpm --filter @azimut/studio preview --port 4317 --strictPort',
     url: 'http://127.0.0.1:4317/sites',
     reuseExistingServer: false,
-    timeout: 60_000,
+    timeout: 120_000,
   },
 });

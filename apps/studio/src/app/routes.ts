@@ -20,12 +20,26 @@ export const M_ROUTES = [
 
 export type MScreen = (typeof M_ROUTES)[number]['screen'];
 
+/**
+ * L'écran du tableau des messages, à son chemin. R2 (partie R) :
+ * « Chemin. `/sites/:siteId/wayfinding/messages` ».
+ *
+ * Il est à part de `M_ROUTES` parce qu'il ne vient pas de la partie M et
+ * n'entre pas dans la chaîne que M8 chronomètre.
+ */
+export const R_ROUTE = {
+  screen: 'messages',
+  pattern: '/sites/:siteId/wayfinding/messages',
+} as const;
+
 export type Route =
   | { readonly screen: 'sites' }
   | { readonly screen: 'plan'; readonly siteId: string; readonly levelId: string }
   | { readonly screen: 'footprints'; readonly siteId: string; readonly levelId: string }
   | { readonly screen: 'graph'; readonly siteId: string; readonly levelId: string }
   | { readonly screen: 'validation'; readonly siteId: string }
+  /** Partie R, section R2. */
+  | { readonly screen: 'messages'; readonly siteId: string }
   /** Tout le reste : l'atelier existant, qui navigue par vue et non par chemin. */
   | { readonly screen: 'legacy'; readonly path: string };
 
@@ -47,6 +61,11 @@ export function parseRoute(pathname: string): Route {
     return { screen: 'validation', siteId: decode(segments[1]) };
   }
 
+  if (segments.length === 4 && segments[0] === 'sites'
+    && segments[2] === 'wayfinding' && segments[3] === 'messages') {
+    return { screen: 'messages', siteId: decode(segments[1]) };
+  }
+
   if (segments.length === 5 && segments[0] === 'sites' && segments[2] === 'levels') {
     const tail = segments[4];
     const siteId = decode(segments[1]);
@@ -66,6 +85,8 @@ export function buildPath(route: Route): string {
       return '/sites';
     case 'validation':
       return `/sites/${encode(route.siteId)}/validation`;
+    case 'messages':
+      return `/sites/${encode(route.siteId)}/wayfinding/messages`;
     case 'plan':
     case 'footprints':
     case 'graph':

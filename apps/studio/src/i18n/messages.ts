@@ -24,6 +24,7 @@ import { SIGNAGE_FR, SIGNAGE_EN } from './messages/signage.js';
 import { CATALOGUE_FR, CATALOGUE_EN } from './messages/catalogue.js';
 import { DATA_SOURCE_FR, DATA_SOURCE_EN } from './messages/data-source.js';
 import { SESSION_FR, SESSION_EN } from './messages/session.js';
+import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -39,6 +40,7 @@ export const MESSAGES_FR = {
   ...CATALOGUE_FR,
   ...DATA_SOURCE_FR,
   ...SESSION_FR,
+  ...MESSAGE_TABLE_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -57,6 +59,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...CATALOGUE_EN,
   ...DATA_SOURCE_EN,
   ...SESSION_EN,
+  ...MESSAGE_TABLE_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {
