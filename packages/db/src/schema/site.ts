@@ -370,3 +370,30 @@ export const legalEntity = azimut.table('legal_entity', {
 }, (t) => [
   index('idx_legal_entity_org').on(t.org_id),
 ]);
+
+/**
+ * A5.3 — la trace des passages de la validation de complétude du graphe.
+ *
+ * Propriété du module 01 (partie L). Insertion seule au sens d'A12.3 : la base
+ * refuse toute modification et toute suppression, y compris sous le rôle
+ * propriétaire du schéma.
+ *
+ * `graph_hash` est l'empreinte canonique des nœuds, arêtes et liaisons du
+ * site, section D7.2, sans profil. La règle M02.W11 la compare à l'empreinte
+ * du graphe courant : une validation obtenue avant une modification du graphe
+ * ne vaut pas.
+ */
+export const graphValidation = azimut.table('graph_validation', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  graph_hash: text('graph_hash').notNull(),
+  ran_at: timestamp('ran_at', { withTimezone: true }).notNull(),
+  passed: boolean('passed').notNull(),
+  blocking_count: integer('blocking_count').notNull(),
+  warning_count: integer('warning_count').notNull(),
+  findings: jsonb('findings').notNull(),
+}, (t) => [
+  index('idx_graph_validation_org').on(t.org_id),
+  index('idx_graph_validation_site_ran_at').on(t.site_id, t.ran_at),
+]);

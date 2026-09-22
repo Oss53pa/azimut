@@ -74,6 +74,9 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     'plan_calibration_point',
     'footprint', 'volume', 'opening', 'node', 'edge', 'vertical_link',
     'building_link', 'destination', 'destination_name', 'category',
+    // A5.3 et Q2 : la trace des passages de la validation de complétude
+    // appartient au module qui possède le graphe.
+    'graph_validation',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
   // d'implantation de `support` — dont `code` — par la scission L0, déclarée

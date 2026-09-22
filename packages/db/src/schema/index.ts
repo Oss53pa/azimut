@@ -3,6 +3,7 @@ export { organization, membership } from './org.js';
 export {
   site, building, level, footprint, volume, zone,
   planSource, planCalibration, planCalibrationPoint, controlPoint, opening, legalEntity,
+  graphValidation,
   siteFact, siteFactForbiddenWord,
   sourceClaim, discrepancyDecision,
   parking, parkingSpace, parkingUncoveredArea, vehicleGate,

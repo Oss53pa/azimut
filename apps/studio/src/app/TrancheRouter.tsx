@@ -103,7 +103,7 @@ function screenOf(
     case 'graph':
       return <GraphScreenAdapter session={session} levelId={levelId} />;
     case 'validation':
-      return <ValidationScreenAdapter />;
+      return <ValidationScreenAdapter session={session} siteId={route.siteId} />;
   }
 }
 

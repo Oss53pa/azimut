@@ -57,26 +57,59 @@ function pickProfileFields(
   };
 }
 
+/**
+ * Les trois collections du graphe, triées et réduites à leurs champs.
+ *
+ * D7.1 ne fait qu'une différence entre les deux empreintes du graphe : le
+ * profil. Le reste est identique, et l'écrire deux fois ferait deux empreintes
+ * qui divergeraient au premier champ ajouté d'un seul côté.
+ */
+function graphParts(graph: SiteData['graph']): {
+  nodes: Record<string, unknown>[];
+  edges: Record<string, unknown>[];
+  vertical_links: Record<string, unknown>[];
+} {
+  return {
+    nodes: [...graph.nodes]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(pickNodeFields),
+    edges: [...graph.edges]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(pickEdgeFields),
+    vertical_links: [...graph.vertical_links]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(pickVerticalLinkFields),
+  };
+}
+
 export function computeInputsHash(
   site: SiteData,
   profile: TravelProfile,
 ): string {
-  const nodes = [...site.graph.nodes]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map(pickNodeFields);
-  const edges = [...site.graph.edges]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map(pickEdgeFields);
-  const verticalLinks = [...site.graph.vertical_links]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map(pickVerticalLinkFields);
-
   return contentHash({
-    nodes,
-    edges,
-    vertical_links: verticalLinks,
+    ...graphParts(site.graph),
     profile: pickProfileFields(profile),
   });
+}
+
+/**
+ * A5.3 et D7.2 — l'empreinte du graphe d'un site, **sans profil**.
+ *
+ * Elle est portée par chaque enregistrement de `graph_validation` : une
+ * validation de complétude ne vaut que pour le graphe dont elle porte
+ * l'empreinte. C'est ce qui rend la règle M02.W11 vérifiable sans qu'on ait à
+ * supprimer un enregistrement quand le graphe change — il cesse simplement de
+ * correspondre.
+ *
+ * Le profil en est exclu parce que la complétude n'en dépend pas : un graphe
+ * n'est pas complet pour un profil et incomplet pour un autre.
+ *
+ * Elle prend le graphe et non le site : c'est tout ce dont D7.2 a besoin, et
+ * exiger un `SiteData` entier obligerait l'appelant à en fabriquer une coquille
+ * là où il n'a qu'un graphe.
+ */
+export function computeGraphHash(graph: SiteData['graph']): string {
+  return contentHash(graphParts(graph));
 }
 
 export type ContentHashInput = {
