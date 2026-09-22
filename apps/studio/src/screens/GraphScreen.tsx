@@ -68,6 +68,15 @@ export type GraphScreenProps = {
   readonly onApplyRemedy: () => void;
   readonly nodeCount: number;
   readonly edgeCount: number;
+  /**
+   * M4 (partie M), outil « Nœud » : « Le type se choisit avant le geste,
+   * jamais après. » Le geste se fait au pointeur dans la zone de travail, et
+   * au clavier par cette action — E6.2 : « Toute opération réalisable au
+   * pointeur l'est au clavier, y compris le dessin. »
+   */
+  readonly onPlaceNode: () => void;
+  /** Outil « Arête » : relie les nœuds posés, deux à deux. */
+  readonly onDrawEdges: () => void;
   readonly children?: JSX.Element;
 };
 
@@ -95,7 +104,7 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
       invitation={{
         message: t('graph.empty.message'),
         actionLabel: t('graph.empty.action'),
-        onAction: () => { props.onTool('node'); },
+        onAction: props.onPlaceNode,
       }}
       skeleton={<StateBanner severity="info" message={t('graph.loading')} />}
     >
@@ -214,6 +223,20 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
             </Button>
           </div>
         )}
+
+        <div style={{ display: 'flex', gap: SPACE.sm }}>
+          <Button rank="primary" onClick={props.onPlaceNode}>
+            {t('graph.action.place_node')}
+          </Button>
+          <Button
+            rank="secondary"
+            onClick={props.onDrawEdges}
+            // Une arête relie deux nœuds distincts (A5.3) : il en faut deux.
+            disabled={props.nodeCount < 2}
+          >
+            {t('graph.action.draw_edges')}
+          </Button>
+        </div>
 
         <StatusBar items={status} />
       </div>

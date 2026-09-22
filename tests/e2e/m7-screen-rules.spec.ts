@@ -46,7 +46,11 @@ test.describe('M7.1 (partie M) — les six états sont traités', () => {
     await page.goto(GRAPH);
     const body = await page.locator('body').innerText();
     expect(body).toMatch(/Posez les nœuds|Place the nodes/);
-    await expect(page.getByRole('button', { name: /Poser un nœud|Place a node/ })).toBeVisible();
+    // L'invitation est celle de l'état vide, et non le bouton d'outil du
+    // panneau, qui porte le même nom parce qu'il fait la même chose.
+    await expect(
+      page.getByRole('status').getByRole('button', { name: /Poser un nœud|Place a node/ }),
+    ).toBeVisible();
   });
 
   /**

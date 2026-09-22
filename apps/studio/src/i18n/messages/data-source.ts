@@ -175,6 +175,8 @@ export const DATA_SOURCE_FR = {
   'graph.edge.length.hint': 'Calculée depuis les deux extrémités. Elle ne se saisit pas.',
   'graph.remedy.vertical_link': 'Cette arête relie deux niveaux sans liaison verticale.',
   'graph.remedy.action': 'Créer la liaison',
+  'graph.action.place_node': 'Poser un nœud',
+  'graph.action.draw_edges': 'Tracer les arêtes',
   // M5 (partie M) — validation de complétude.
   'valid.loading': 'Chargement du rapport…',
   'valid.running': 'Validation en cours…',
@@ -358,6 +360,8 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'graph.edge.length.hint': 'Computed from both endpoints. It cannot be entered.',
   'graph.remedy.vertical_link': 'This edge links two levels without a vertical link.',
   'graph.remedy.action': 'Create the link',
+  'graph.action.place_node': 'Place a node',
+  'graph.action.draw_edges': 'Draw the edges',
   'valid.loading': 'Loading the report…',
   'valid.running': 'Validation in progress…',
   'valid.never_run': 'Validation has not been run yet. No result is available: this is neither a success nor a failure.',

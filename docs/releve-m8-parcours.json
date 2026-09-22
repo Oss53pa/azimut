@@ -1,0 +1,24 @@
+{
+  "mesure": "M8 (partie M) critère 1 — parcours complet de la tranche",
+  "releve_le": "2026-09-22T06:53:09.967Z",
+  "etapes": [
+    {
+      "step": "import et calage",
+      "ms": 432
+    },
+    {
+      "step": "tracé de trois cellules",
+      "ms": 426
+    },
+    {
+      "step": "saisie du graphe",
+      "ms": 350
+    },
+    {
+      "step": "validation",
+      "ms": 202
+    }
+  ],
+  "total_ms": 1410,
+  "note": "Parcours automatisé, non chronométré sur un opérateur réel. K3.4 place cette seconde mesure dans les sessions d’essai sur usagers."
+}
