@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { computeCalibration, MIN_POINT_SEPARATION_PX } from '../plan-calibration.js';
+import type { PlanPoint } from '../plan-calibration.js';
 
 const A = { x_px: 100, y_px: 100 };
 
@@ -146,5 +147,57 @@ describe('M2 (partie M) — contrôles de saisie du calage', () => {
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.findings.map(f => f.code)).toContain('CALIB.AZIMUTH_INVALID');
     });
+  });
+});
+
+/**
+ * M2 (partie M), critère d'acceptation 1 : « Un plan calé restitue une
+ * distance connue à moins de 1 % d'erreur. »
+ *
+ * Le critère ne porte pas sur les deux points du calage, qui sont exacts par
+ * construction, mais sur une **troisième** distance, mesurée après coup au
+ * travers de la résolution retenue. C'est le seul aller-retour qui éprouve
+ * quelque chose : poser, calculer l'échelle, puis remesurer ailleurs.
+ */
+describe('M2 (partie M) critère 1 — une distance connue est restituée', () => {
+  /** Mesure une distance en mètres depuis la résolution calculée. */
+  function measured_m(resolution_px_per_m: number, a: PlanPoint, b: PlanPoint): number {
+    const dx = b.x_px - a.x_px;
+    const dy = b.y_px - a.y_px;
+    return Math.hypot(dx, dy) / resolution_px_per_m;
+  }
+
+  function calibrate(pixels: number, real_m: number): number {
+    const out = computeCalibration({
+      a: { x_px: 0, y_px: 0 },
+      b: { x_px: pixels, y_px: 0 },
+      real_distance_m: real_m,
+      north_azimuth_deg: 0,
+    });
+    if (!out.ok) throw new Error(out.findings.map(f => f.code).join(','));
+    return out.value.resolution_px_per_m;
+  }
+
+  it('restitue une distance tierce à moins de 1 % d’erreur', () => {
+    // Calage : 200 pixels valent 20 mètres, soit 10 px/m.
+    const resolution = calibrate(200, 20);
+    // Une distance connue ailleurs sur le plan : 537 pixels valent 53,7 m.
+    const found = measured_m(resolution, { x_px: 120, y_px: 40 }, { x_px: 657, y_px: 40 });
+    expect(Math.abs(found - 53.7) / 53.7).toBeLessThan(0.01);
+  });
+
+  it('restitue une distance oblique à moins de 1 % d’erreur', () => {
+    const resolution = calibrate(200, 20);
+    // 300 par 400 pixels : 500 pixels d'hypoténuse, donc 50 mètres.
+    const found = measured_m(resolution, { x_px: 10, y_px: 10 }, { x_px: 310, y_px: 410 });
+    expect(Math.abs(found - 50) / 50).toBeLessThan(0.01);
+  });
+
+  it('tient sur un calage à échelle serrée, où l’erreur relative grandit', () => {
+    // 41 pixels pour 2 mètres : au-dessus des 40 pixels exigés, et le pire cas
+    // praticable. L'écart relatif doit rester sous le pour-cent.
+    const resolution = calibrate(41, 2);
+    const found = measured_m(resolution, { x_px: 0, y_px: 0 }, { x_px: 410, y_px: 0 });
+    expect(Math.abs(found - 20) / 20).toBeLessThan(0.01);
   });
 });
