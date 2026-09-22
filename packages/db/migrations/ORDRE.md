@@ -78,6 +78,7 @@ non plus — elle n'en retire que les clés étrangères.
 0032_a5_2_calibration_pixels
 0033_a5_2_plan_calibration_point
 0034_m01_s3_unit_code_required
+0035_a5_3_graph_validation
 ```
 
 ## Règle pour la suite
