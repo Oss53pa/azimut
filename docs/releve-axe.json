@@ -9,9 +9,29 @@
     "wcag22a",
     "wcag22aa"
   ],
-  "portee": "Les cinq écrans de la partie M et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.",
+  "portee": "Les cinq écrans de la partie M, leurs deux boîtes de dialogue et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.",
   "limite": "L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.",
   "incomplets": [
+    {
+      "ecran": "M1 création d’un site",
+      "etat": "formulaire ouvert",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(4) > div[role=\"status\"] > div > div"
+      ]
+    },
+    {
+      "ecran": "M1 création d’un site",
+      "etat": "formulaire ouvert",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(4) > div[role=\"status\"] > div > div"
+      ]
+    },
     {
       "ecran": "M2 import et calage",
       "etat": "confirmation de remplacement",
