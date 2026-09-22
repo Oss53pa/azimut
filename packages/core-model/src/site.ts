@@ -60,8 +60,8 @@ export type Site = {
    * colonnes s'apparient par `siteOrigin` et se protègent par
    * `guardSiteOrigin` — voir `plan.ts`.
    */
-  readonly origin_x?: number;
-  readonly origin_y?: number;
+  readonly origin_x_m?: number;
+  readonly origin_y_m?: number;
   /**
    * D1.1 / N1.2 — altitude du niveau de référence, à laquelle Z vaut 0.
    * Absente quand l'altitude absolue du site n'est pas relevée : les

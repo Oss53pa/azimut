@@ -14,8 +14,8 @@ export const refMinimal: SiteData = {
     rules_pack_id: null,
     // S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
-    origin_x: 0,
-    origin_y: 0,
+    origin_x_m: 0,
+    origin_y_m: 0,
     // N1.2 — les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],

@@ -62,7 +62,7 @@ describe('S1 — repère site cohérent avec le premier calage', () => {
   it('signale un repère déplacé', () => {
     const site: SiteData = {
       ...refMultilevel,
-      site: { ...refMultilevel.site, origin_x: 0, origin_y: 0 },
+      site: { ...refMultilevel.site, origin_x_m: 0, origin_y_m: 0 },
     };
     const found = mismatches(site);
     expect(found).toHaveLength(1);
@@ -79,7 +79,7 @@ describe('S1 — repère site cohérent avec le premier calage', () => {
     // L'origine du R+1, qui n'est pas le premier calage.
     const site: SiteData = {
       ...refMultilevel,
-      site: { ...refMultilevel.site, origin_x: -12.5, origin_y: -9.25 },
+      site: { ...refMultilevel.site, origin_x_m: -12.5, origin_y_m: -9.25 },
     };
     expect(mismatches(site)).toHaveLength(1);
   });
@@ -100,7 +100,7 @@ describe('S1 — repère site cohérent avec le premier calage', () => {
     // bloquante d'une donnée manquante désignerait un coupable au hasard.
     const site: SiteData = {
       ...refMultilevel,
-      site: { ...refMultilevel.site, origin_x: 999, origin_y: 999 },
+      site: { ...refMultilevel.site, origin_x_m: 999, origin_y_m: 999 },
       plan_calibrations: refMultilevel.plan_calibrations.map(undate),
     };
     expect(mismatches(site)).toHaveLength(0);

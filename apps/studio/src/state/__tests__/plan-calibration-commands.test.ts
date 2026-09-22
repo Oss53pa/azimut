@@ -52,7 +52,7 @@ describe('M2 (partie M) — écriture du calage', () => {
    */
   it('n’écrit plus le repère quand le site en a déjà un', () => {
     const r = calibrationCommands(PLAN, calibration(), {
-      site: { origin_x: 12.5, origin_y: -3.25 },
+      site: { origin_x_m: 12.5, origin_y_m: -3.25 },
       proposed: { x_m: 12.5, y_m: -3.25 },
     }, WRITE);
     expect(r.ok).toBe(true);
@@ -61,7 +61,7 @@ describe('M2 (partie M) — écriture du calage', () => {
 
   it('refuse un calage qui déplacerait le repère du site', () => {
     const r = calibrationCommands(PLAN, calibration(), {
-      site: { origin_x: 12.5, origin_y: -3.25 },
+      site: { origin_x_m: 12.5, origin_y_m: -3.25 },
       proposed: { x_m: 99, y_m: 0 },
     }, WRITE);
     expect(r.ok).toBe(false);

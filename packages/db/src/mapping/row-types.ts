@@ -29,8 +29,8 @@ export type SiteRow = {
   readonly country_code: string;
   readonly rules_pack_id: string | null;
   /** S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
-  readonly origin_x: string | null;
-  readonly origin_y: string | null;
+  readonly origin_x_m: string | null;
+  readonly origin_y_m: string | null;
   /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
   readonly active_langs: readonly string[] | null;
   readonly reference_elevation_m: string | null;

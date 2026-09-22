@@ -162,8 +162,8 @@ export function calibratedLevelIds(
  * — les deux se lisent autrement et le premier interdit de tracer.
  */
 export type SiteOriginBearer = {
-  readonly origin_x?: number;
-  readonly origin_y?: number;
+  readonly origin_x_m?: number;
+  readonly origin_y_m?: number;
 };
 
 /**
@@ -174,10 +174,10 @@ export type SiteOriginBearer = {
  * dont une coordonnée vaudrait zéro par défaut.
  */
 export function siteOrigin(site: SiteOriginBearer): Point | null {
-  const { origin_x, origin_y } = site;
-  if (origin_x === undefined || origin_y === undefined) return null;
-  if (!Number.isFinite(origin_x) || !Number.isFinite(origin_y)) return null;
-  return { x_m: origin_x, y_m: origin_y };
+  const { origin_x_m, origin_y_m } = site;
+  if (origin_x_m === undefined || origin_y_m === undefined) return null;
+  if (!Number.isFinite(origin_x_m) || !Number.isFinite(origin_y_m)) return null;
+  return { x_m: origin_x_m, y_m: origin_y_m };
 }
 
 /**

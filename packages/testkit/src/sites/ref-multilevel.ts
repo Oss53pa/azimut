@@ -16,8 +16,8 @@ export const refMultilevel: SiteData = {
     // S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
     // de l'image du premier fond.
-    origin_x: -12.5,
-    origin_y: -8,
+    origin_x_m: -12.5,
+    origin_y_m: -8,
     // N1.2 — les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],

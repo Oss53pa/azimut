@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { siteOrigin, guardSiteOrigin, firstCalibration } from '../plan.js';
 import type { PlanCalibration, SiteOriginBearer } from '../plan.js';
 
-const POSED: SiteOriginBearer = { origin_x: -12.5, origin_y: -8 };
+const POSED: SiteOriginBearer = { origin_x_m: -12.5, origin_y_m: -8 };
 const UNPOSED: SiteOriginBearer = {};
 
 /**
@@ -21,16 +21,16 @@ describe('siteOrigin', () => {
 
   it('lit une origine à moitié saisie comme absente', () => {
     // Surtout pas comme un point dont l'autre coordonnée vaudrait zéro.
-    expect(siteOrigin({ origin_x: -12.5 })).toBeNull();
-    expect(siteOrigin({ origin_y: -8 })).toBeNull();
+    expect(siteOrigin({ origin_x_m: -12.5 })).toBeNull();
+    expect(siteOrigin({ origin_y_m: -8 })).toBeNull();
   });
 
   it('rend null sur une valeur stockée illisible', () => {
-    expect(siteOrigin({ origin_x: Number.NaN, origin_y: 0 })).toBeNull();
+    expect(siteOrigin({ origin_x_m: Number.NaN, origin_y_m: 0 })).toBeNull();
   });
 
   it('distingue le repère posé à (0, 0) du repère non posé', () => {
-    expect(siteOrigin({ origin_x: 0, origin_y: 0 })).toEqual({ x_m: 0, y_m: 0 });
+    expect(siteOrigin({ origin_x_m: 0, origin_y_m: 0 })).toEqual({ x_m: 0, y_m: 0 });
     expect(siteOrigin({})).toBeNull();
   });
 });
@@ -77,7 +77,7 @@ describe('guardSiteOrigin — S1', () => {
 
   it('pose le repère sur un site dont une seule coordonnée traînait', () => {
     // La lecture tient la paire pour absente : c'est donc un premier calage.
-    expect(guardSiteOrigin({ origin_x: 3 }, { x_m: 0, y_m: 0 }).ok).toBe(true);
+    expect(guardSiteOrigin({ origin_x_m: 3 }, { x_m: 0, y_m: 0 }).ok).toBe(true);
   });
 });
 

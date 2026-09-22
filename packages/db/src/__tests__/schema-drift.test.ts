@@ -124,6 +124,15 @@ function migratedTables(): Map<string, Set<string>> {
       )) {
         table.delete(dropped[1] ?? '');
       }
+      // Un renommage ne crée ni ne supprime de colonne : sans cette lecture,
+      // la migration 0028 faisait apparaître une dérive dans les deux sens,
+      // l'ancien nom manquant chez Drizzle et le nouveau manquant en SQL.
+      for (const renamed of (altered[2] ?? '').matchAll(
+        /RENAME COLUMN ([a-z_][a-z0-9_]*) TO ([a-z_][a-z0-9_]*)/g,
+      )) {
+        table.delete(renamed[1] ?? '');
+        table.add(renamed[2] ?? '');
+      }
       out.set(altered[1] ?? '', table);
     }
 
