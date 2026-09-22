@@ -21,11 +21,24 @@ export type ButtonProps = {
   readonly children: ReactNode;
 };
 
+/**
+ * Les trois rangs, et aucun n'emploie l'accent.
+ *
+ * M7.10 (partie M) : « L'accent ne signale que ce que le logiciel a calculé. »
+ * La partie F le dit deux fois : « accent réservé aux valeurs produites par un
+ * moteur », et « ce que l'utilisateur a saisi reste neutre. Le concepteur
+ * distingue ainsi d'un coup d'œil ce qu'il a décidé de ce qui lui est
+ * proposé. »
+ *
+ * Un bouton est une action, jamais une valeur calculée. Le bouton principal
+ * tirait sa teinte de l'accent : il la prend désormais d'un neutre inversé,
+ * qui le détache autant sans mentir sur la nature de ce qu'il porte.
+ */
 const RANK_STYLE: Readonly<Record<ButtonRank, { background: string; color: string; border: string }>> = {
   primary: {
-    background: 'var(--accent)',
+    background: 'var(--text-primary)',
     color: 'var(--surface-panel)',
-    border: '1px solid var(--accent)',
+    border: '1px solid var(--text-primary)',
   },
   secondary: {
     background: 'var(--surface-panel)',

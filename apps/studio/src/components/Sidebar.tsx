@@ -35,9 +35,11 @@ function itemStyle(active: boolean, hovered: boolean, depth: number): React.CSSP
     padding: `4px 12px 4px ${String(12 + depth * 16)}px`,
     border: 'none',
     background: active || hovered ? 'var(--surface-sunken)' : 'transparent',
-    color: active ? 'var(--accent)' : 'var(--text-primary)',
+    // M7.10 (partie M) : l'accent ne dit que ce qui est calculé. Un élément
+    // de navigation actif se marque au trait et au poids, pas à l'accent.
+    color: 'var(--text-primary)',
     fontFamily: 'inherit',
-    fontWeight: active ? 500 : 400,
+    fontWeight: active ? 600 : 400,
     fontSize: depth === 0 ? TEXT.body : TEXT.small,
     cursor: 'pointer',
     borderRadius: 4,

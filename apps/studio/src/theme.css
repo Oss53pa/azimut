@@ -18,18 +18,44 @@ h1, h2, h3 {
   font-weight: 500;
 }
 
+/*
+ * M7.10 (partie M) et partie F : « L'accent ne dit qu'une chose. Ce que le
+ * logiciel a calculé. » Un lien n'est pas une valeur calculée : il se signale
+ * par son soulignement, qui survit au rendu en niveaux de gris (M7.7).
+ */
 a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover {
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
+/*
+ * M7.8 (partie M) et F6.1 : « L'indicateur de focus est visible et distinct de
+ * l'indicateur de sélection. Confondre les deux rend l'application inutilisable
+ * au clavier. »
+ *
+ * Deux indicateurs, deux géométries, et c'est délibéré :
+ *
+ *   · le focus est un contour *extérieur*, détaché de deux pixels, dans le
+ *     jeton que F désigne pour cet usage — « `border-interactive` est la
+ *     bordure des champs, des boutons et de l'indicateur de focus » ;
+ *   · la sélection est un fond, et non un contour.
+ *
+ * Un élément à la fois sélectionné et focalisé porte donc les deux marques
+ * sans qu'elles se confondent, ce qui est précisément le cas que F6.1 vise.
+ */
+:focus-visible {
+  outline: 2px solid var(--border-interactive);
+  outline-offset: 2px;
+}
+
 ::selection {
-  background: var(--accent-soft);
-  color: var(--accent);
+  background: var(--surface-sunken);
+  color: var(--text-primary);
+}
+
+[aria-selected='true'],
+[data-selected='true'] {
+  background: var(--surface-sunken);
 }
 
 ::-webkit-scrollbar {

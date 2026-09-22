@@ -86,12 +86,17 @@ describe('M6 (partie M) — aucun composant hors de la liste fermée', () => {
 
   /**
    * Aucun écran ne fabrique son propre contrôle de saisie. Un `<input>` écrit
-   * dans un écran échapperait à l'unité obligatoire de F6.1 et aux états de
-   * F6.1. Deux exceptions, et elles sont nommées : le sélecteur de fichier de
-   * M2 (partie M), que F6 range parmi les superpositions, et rien d'autre.
+   * dans un écran échapperait à l'unité obligatoire de F6.1 et à ses états.
+   *
+   * Une seule exception, nommée : les deux sélecteurs de fichier de M2
+   * (partie M), que F6 range parmi les superpositions. M2 en demande deux, et
+   * leurs actions diffèrent — « Fichier » à l'étape 1, et « Remplacer le
+   * fond », qui est l'une des trois actions de l'écran. Le compte est figé :
+   * un troisième `<input>` ferait échouer ce contrôle, comme il l'a fait quand
+   * le second est apparu.
    */
   it('aucun écran ne fabrique son propre champ de saisie', () => {
-    const allowed = new Map<string, number>([['PlanCalibrationScreen.tsx', 1]]);
+    const allowed = new Map<string, number>([['PlanCalibrationScreen.tsx', 2]]);
     for (const screen of TRANCHE_M) {
       const inputs = [...source(screen).matchAll(/<input\b/g)].length;
       expect(inputs, screen).toBe(allowed.get(screen) ?? 0);

@@ -87,8 +87,9 @@ export function HeaderBar({ onNavigate }: HeaderBarProps): JSX.Element {
                 padding: '4px 8px',
                 fontSize: TEXT.micro,
                 textTransform: 'uppercase',
-                color: lang === code ? 'var(--accent)' : 'var(--text-secondary)',
-                borderColor: lang === code ? 'var(--accent)' : 'var(--border-interactive)',
+                // M7.10 (partie M) : la langue choisie n'est pas une valeur calculée.
+                color: lang === code ? 'var(--text-primary)' : 'var(--text-secondary)',
+                borderColor: lang === code ? 'var(--border-strong)' : 'var(--border-interactive)',
               }}
             >
               {code}

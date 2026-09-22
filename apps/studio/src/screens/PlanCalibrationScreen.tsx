@@ -11,7 +11,8 @@ import { CALIBRATION_STEPS } from '../state/use-plan-calibration.js';
 import type { CalibrationDraft, CalibrationStep } from '../state/use-plan-calibration.js';
 import { CALIBRATION_SHORTCUTS } from '../state/calibration-shortcuts.js';
 import { MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
-import type { PlanFile } from '../state/plan-import.js';
+import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
+import { ConsequenceDialog } from './ConsequenceDialog.js';
 
 /**
  * M2 (partie M) — écran d'import et de calage de plan.
@@ -33,10 +34,20 @@ export type PlanCalibrationScreenProps = {
   readonly busy: boolean;
   readonly calibrated: boolean;
   readonly onPickFile: (file: PlanFile) => void;
+  /** M2 (partie M), action « Remplacer le fond ». */
+  readonly onReplaceFile?: ((file: PlanFile) => void) | undefined;
   readonly onDistance: (metres: number | null) => void;
   readonly onAzimuth: (degrees: number | null) => void;
   readonly onRecalibrate: () => void;
   readonly onValidate: () => void;
+  /**
+   * M2 (partie M) : « Remplacer un fond sans recaler est le geste qui décale
+   * silencieusement toute une modélisation. Il demande donc une confirmation
+   * nommant la conséquence. » Non nul quand un remplacement attend l'accord.
+   */
+  readonly pendingReplacement?: ReplacementVerdict | undefined;
+  readonly onConfirmReplacement?: (() => void) | undefined;
+  readonly onCancelReplacement?: (() => void) | undefined;
 };
 
 export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.Element {
@@ -98,7 +109,32 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
               }}
             />
             {draft.plan !== null && (
-              <Tag label={t('calib.plan.loaded', { format: draft.plan.format.toUpperCase() })} severity="valid" />
+              <>
+                <Tag label={t('calib.plan.loaded', { format: draft.plan.format.toUpperCase() })} severity="valid" />
+                {/*
+                  M2 (partie M), troisième action : « Remplacer le fond |
+                  Conserve le calage si les dimensions concordent, sinon
+                  avertit et propose de recaler. » Elle n'apparaît qu'une fois
+                  un fond chargé : remplacer ce qui n'existe pas n'a pas de
+                  sens.
+                */}
+                <input
+                  type="file"
+                  aria-label={t('calib.plan.replace')}
+                  disabled={busy}
+                  onChange={event => {
+                    const file = event.target.files?.[0];
+                    if (file === undefined) return;
+                    props.onReplaceFile?.({
+                      name: file.name,
+                      byteSize: file.size,
+                      mediaType: file.type,
+                      pageCount: null,
+                      page: null,
+                    });
+                  }}
+                />
+              </>
             )}
             <Anomaly message={messageFor(
               'IMPORT.FORMAT_UNSUPPORTED', 'IMPORT.FILE_TOO_LARGE', 'IMPORT.PAGE_REQUIRED',
@@ -160,6 +196,20 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
             {busy ? t('calib.action.validating') : t('calib.action.validate')}
           </Button>
         </div>
+
+        {/* M7.9 (partie M) : la confirmation nomme la conséquence. */}
+        {props.pendingReplacement !== undefined && (
+          <ConsequenceDialog
+            title={t('calib.replace.title')}
+            consequence={props.pendingReplacement.consequence === 'calibration_kept'
+              ? t('calib.replace.kept')
+              : t('calib.replace.lost')}
+            confirmLabel={t('calib.replace.confirm')}
+            cancelLabel={t('calib.replace.cancel')}
+            onConfirm={() => { props.onConfirmReplacement?.(); }}
+            onCancel={() => { props.onCancelReplacement?.(); }}
+          />
+        )}
 
         <StatusBar items={status}>
           <span style={{ color: 'var(--text-muted)' }}>

@@ -8,6 +8,8 @@ import { GraphScreen } from '../screens/GraphScreen.js';
 import { ValidationScreen } from '../screens/ValidationScreen.js';
 import { SitesView } from '../views/SitesView.js';
 import { EMPTY_DRAFT, stepOf } from '../state/use-plan-calibration.js';
+import { judgeReplacement } from '../state/plan-import.js';
+import type { ReplacementVerdict } from '../state/plan-import.js';
 import { NEVER_RUN } from '../state/validation-report.js';
 import type { ValidationState } from '../state/validation-report.js';
 import type { Point } from '@azimut/core-model';
@@ -72,6 +74,7 @@ function SitesScreenAdapter(): JSX.Element {
 
 function PlanScreenAdapter(): JSX.Element {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
+  const [pending, setPending] = useState<ReplacementVerdict | null>(null);
   return (
     <PlanCalibrationScreen
       state={{ kind: 'ready' }}
@@ -89,6 +92,17 @@ function PlanScreenAdapter(): JSX.Element {
       }}
       onDistance={metres => { setDraft(p => ({ ...p, realDistanceM: metres ?? 0 })); }}
       onAzimuth={degrees => { setDraft(p => ({ ...p, northAzimuthDeg: degrees })); }}
+      onReplaceFile={() => {
+        // Les dimensions du fond déposé ne sont pas encore lues : tant
+        // qu'elles ne le sont pas, le remplacement est jugé sur des
+        // dimensions différentes — le cas le plus prudent, qui exige un
+        // recalage. Le jugement passe par `judgeReplacement`, qui est ce que
+        // la confirmation nomme.
+        setPending(judgeReplacement({ widthPx: 0, heightPx: 0 }, { widthPx: 1, heightPx: 1 }));
+      }}
+      pendingReplacement={pending ?? undefined}
+      onConfirmReplacement={() => { setPending(null); setDraft(EMPTY_DRAFT); }}
+      onCancelReplacement={() => { setPending(null); }}
       onRecalibrate={() => { setDraft(EMPTY_DRAFT); }}
       onValidate={() => { /* l'écriture passe par le magasin, lot 1.2 */ }}
     />
