@@ -106,7 +106,15 @@ jobs:
       - name: Determinism tests
         run: pnpm test:determinism
 
+      # A3.1 range Playwright parmi les outils du produit. Le Chromium du
+      # runner est celui qu'installe l'action ; en local, la variable
+      # CHROMIUM_PATH désigne un binaire déjà présent.
+      - name: Installer le navigateur d'essai
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: End-to-end tests
+        env:
+          CHROMIUM_PATH: ''
         run: pnpm test:e2e
 
       - name: Build

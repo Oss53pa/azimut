@@ -75,6 +75,10 @@ export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
   return (
     <ScreenStates
       state={props.state}
+      // M3 (partie M) : « Vide | Plan calé visible, invitation à tracer la
+      // première cellule, outil cellule déjà actif. » L'état vide s'ajoute à
+      // la zone de travail, il ne la remplace pas.
+      emptyKeepsContent
       invitation={{
         message: t('fp.empty.message'),
         actionLabel: t('fp.empty.action'),

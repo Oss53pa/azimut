@@ -36,6 +36,17 @@ export type ScreenStatesProps = {
   readonly invitation?: EmptyInvitation | undefined;
   /** La structure d'attente, calquée sur la forme du contenu (F7). */
   readonly skeleton?: ReactNode;
+  /**
+   * L'état vide laisse voir le contenu, l'invitation venant par-dessus.
+   *
+   * M3 (partie M) le demande explicitement : « Vide | Plan calé visible,
+   * invitation à tracer la première cellule, outil cellule déjà actif. » Un
+   * écran d'atelier dont la zone de travail disparaît quand il n'y a encore
+   * rien à montrer cache justement ce sur quoi l'opérateur va travailler.
+   *
+   * Faux par défaut : un registre vide n'a rien à laisser voir.
+   */
+  readonly emptyKeepsContent?: boolean | undefined;
   /** Le contenu, rendu dans les états `ready`, `partial` et `offline`. */
   readonly children: ReactNode;
 };
@@ -48,8 +59,23 @@ export type ScreenStatesProps = {
  * autres le remplacent, parce qu'il n'y a rien de fiable à montrer.
  */
 export function ScreenStates({
-  state, invitation, skeleton, children,
+  state, invitation, skeleton, children, emptyKeepsContent = false,
 }: ScreenStatesProps): JSX.Element {
+  if (state.kind === 'empty' && emptyKeepsContent) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md }}>
+        {invitation !== undefined && (
+          <StateBanner severity="info" message={invitation.message}>
+            <Button rank="primary" onClick={invitation.onAction}>
+              {invitation.actionLabel}
+            </Button>
+          </StateBanner>
+        )}
+        {children}
+      </div>
+    );
+  }
+
   if (state.kind === 'empty') {
     return invitation === undefined
       ? <StateBanner severity="info" message="" />

@@ -88,6 +88,10 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
   return (
     <ScreenStates
       state={props.state}
+      // Même raison que M3 (partie M) : un écran d'atelier dont la zone de
+      // travail disparaît quand il n'y a encore rien cache ce sur quoi
+      // l'opérateur va travailler.
+      emptyKeepsContent
       invitation={{
         message: t('graph.empty.message'),
         actionLabel: t('graph.empty.action'),
