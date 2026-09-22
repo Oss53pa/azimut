@@ -138,6 +138,6 @@ CREATE TRIGGER guard_approval_truncate
   BEFORE TRUNCATE ON azimut.approval
   FOR EACH STATEMENT EXECUTE FUNCTION azimut.block_approval_truncate();
 
--- Le journal d'audit est lui aussi en insertion seule (A5.10, A12.3, X4). Il
+-- Le journal d'audit est lui aussi en insertion seule (A5.10, A12.3, M11.X4). Il
 -- ne porte aujourd'hui ni déclencheur ni restriction de droits : porté en
 -- « constaté, non traité », hors du périmètre de cette migration.

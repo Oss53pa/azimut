@@ -1,4 +1,4 @@
--- S1 / D1.1 / N1.2 — origine du repère site.
+-- M01.S1 / D1.1 / N1.2 — origine du repère site.
 --
 -- Les deux nombres sont ceux du premier calage du site, recopiés sur la ligne
 -- `site`, en mètres du repère site. Ils n'y sont plus jamais modifiés : les

@@ -100,13 +100,13 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.message_schedule
   FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
 
 -- ── message_line ──────────────────────────────────────────────────────────
--- `decision_point_id` est NOT NULL : W4, « une ligne sans justification est
+-- `decision_point_id` est NOT NULL : M02.W4, « une ligne sans justification est
 -- une anomalie bloquante », et N2.7 critère 4 va plus loin — une telle ligne
 -- ne peut pas être créée. La contrainte le rend vrai en base, pas seulement
 -- dans le moteur.
 --
 -- `excluded` et `exclusion_reason` : décision d'Atlas Studio reportée en N2.2
--- et H11. W9 impose que l'écartement soit tracé, jamais silencieux.
+-- et H11. M02.W9 impose que l'écartement soit tracé, jamais silencieux.
 
 CREATE TABLE azimut.message_line (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

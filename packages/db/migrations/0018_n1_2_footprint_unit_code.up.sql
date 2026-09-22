@@ -1,6 +1,6 @@
 -- N1.2 / N1.4 — code d'unité locative d'une empreinte.
 --
--- Requis quand la nature est « cell », unique par niveau (règle S3). La
+-- Requis quand la nature est « cell », unique par niveau (règle M01.S3). La
 -- colonne est nullable : une empreinte relevée avant que son code soit connu
 -- doit pouvoir être enregistrée, et c'est le contrôle qui la signale. Une
 -- contrainte NOT NULL rendrait le relevé impossible et pousserait à inventer

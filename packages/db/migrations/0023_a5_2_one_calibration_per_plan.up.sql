@@ -5,9 +5,9 @@
 -- pixel → mètre pour la même image, et rien ne dirait laquelle s'applique : la
 -- géométrie relevée dessus deviendrait indéterminée.
 --
--- Recaler un fond (S9) met cette ligne à jour ; cela n'en ajoute pas une
+-- Recaler un fond (M01.S9) met cette ligne à jour ; cela n'en ajoute pas une
 -- seconde. `calibrated_at` reste alors la date à laquelle le calage a été
--- établi, et ne suit pas la mise à jour — sinon « le premier calage » de S1
+-- établi, et ne suit pas la mise à jour — sinon « le premier calage » de M01.S1
 -- se déplacerait à chaque recalage, et le contrôle du repère site
 -- (CALIB.ORIGIN_MISMATCH) désignerait un autre fond que celui qui a fixé le
 -- repère.

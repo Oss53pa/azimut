@@ -1,4 +1,4 @@
--- E5.1 et A2 (module 12) — le chemin d'écriture, atteignable depuis le poste.
+-- E5.1 et M12.A2 — le chemin d'écriture, atteignable depuis le poste.
 --
 -- `applyCommands` (packages/db/src/write-path.ts) est le chemin d'écriture
 -- côté serveur. Le poste, lui, parle à PostgREST et non à PostgreSQL : il ne

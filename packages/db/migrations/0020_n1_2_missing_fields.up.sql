@@ -33,7 +33,7 @@ ALTER TABLE azimut.building
     default_edge_width_m IS NULL OR default_edge_width_m > 0
   );
 
--- N1.2 / S5 — période d'occupation. `valid_to` NULL désigne l'occupant en
+-- N1.2 / M01.S5 — période d'occupation. `valid_to` NULL désigne l'occupant en
 -- cours ; `valid_from` NULL une entrée non relevée. L'historique se lit par la
 -- succession des lignes, aucune n'est écrasée.
 ALTER TABLE azimut.destination
