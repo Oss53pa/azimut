@@ -44,10 +44,12 @@ const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b/;
  * Une référence de section de la partie N — `N3.2`, `N5.2` — compte comme
  * qualificatif : c'est là que vivent les règles `S`, `W`, `P`, `G`, `R` et les
  * autres, et la citer nomme le document aussi sûrement que d'écrire « partie
- * N ». La limite est assumée : un bloc qui citerait à la fois une section de N
+ * N ». La partie R, spécification de l'écran du tableau des messages, numérote
+ * ses règles `R1`, `R5`, `R12` : elle entre donc dans la liste des documents
+ * qu'une citation peut nommer. La limite est assumée : un bloc qui citerait à la fois une section de N
  * et un module du complément passerait, et c'est un cas qu'on n'a pas vu.
  */
-const QUALIFIER = /complément atelier|partie [MNL]|tranche M|atelier-|\bN[0-9](?:\.[0-9]+)?\b/i;
+const QUALIFIER = /complément atelier|partie [MNLR]|tranche M|atelier-|\bN[0-9](?:\.[0-9]+)?\b/i;
 
 const COMMENT = /\/\*[\s\S]*?\*\/|^[ \t]*\/\/.*$/gm;
 
@@ -57,7 +59,7 @@ const RULE_REF = /ruleRef:\s*'([^']*)'/g;
  * Un `ruleRef` ne se qualifie pas en prose : il porte son document en préfixe.
  * `atelier-M1.4` et `partieM-M2` sont les deux formes en usage.
  */
-const REF_QUALIFIER = /^(?:atelier|partieM|partieN|partieL)-/;
+const REF_QUALIFIER = /^(?:atelier|partieM|partieN|partieL|partieR)-/;
 
 function walk(dir: string): string[] {
   const out: string[] = [];

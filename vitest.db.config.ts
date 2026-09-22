@@ -14,5 +14,10 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['packages/**/*.db.test.ts', 'apps/**/*.db.test.ts'],
+    // Ces suites partagent une seule base : chacune amorce son décor et
+    // nettoie ses lignes. Les laisser tourner en parallèle ferait effacer le
+    // décor de l'une pendant que l'autre écrit, et l'échec paraîtrait venir du
+    // code plutôt que de l'ordonnancement.
+    fileParallelism: false,
   },
 });

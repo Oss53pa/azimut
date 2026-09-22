@@ -15,7 +15,9 @@
  * ne l'applique pas.
  */
 import type { ModuleKey } from './module-ownership.js';
-import { OWNED_TABLES } from './module-ownership.js';
+import {
+  OWNED_TABLES, SPLIT_OWNERSHIP_TABLE, ownsSupportColumn,
+} from './module-ownership.js';
 import type { Outcome, Finding } from './outcome.js';
 
 // ---------------------------------------------------------------------------
@@ -76,7 +78,8 @@ export type CommandDraft = {
  * Construit une commande, ou refuse.
  *
  * Trois refus, et chacun protège une règle :
- *  · une table que le module émetteur ne possède pas (R1 et R2, partie L) ;
+ *  · une table — ou, pour `support`, une colonne — que le module émetteur ne
+ *    possède pas (R1 et R2, partie L, et la scission de L0) ;
  *  · une forme incohérente avec l'opération, qui rendrait l'inverse incalculable ;
  *  · un horodatage absent, que la commande ne peut pas suppléer sans lire
  *    l'horloge.
@@ -86,11 +89,8 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
   const before = draft.before ?? null;
   const after = draft.after ?? null;
 
-  if (!ownsTable(draft.module, draft.table)) {
-    findings.push(finding('EDIT.TABLE_NOT_OWNED', {
-      module: draft.module,
-      table: draft.table,
-    }, draft.id));
+  for (const fault of ownershipFaults(draft)) {
+    findings.push(finding('EDIT.TABLE_NOT_OWNED', fault, draft.id));
   }
 
   const shapeFault = shapeOf(draft.operation, before, after);
@@ -129,6 +129,56 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
 /** R1 et R2 (partie L) : un module n'écrit que ce qu'il possède. */
 export function ownsTable(module: ModuleKey, table: string): boolean {
   return OWNED_TABLES[module].includes(table);
+}
+
+/**
+ * Ce que la propriété unique refuse dans cette commande.
+ *
+ * Le cas courant est la table entière : un module qui ne la possède pas n'y
+ * écrit rien. `support` fait exception — L0 lui donne deux propriétaires,
+ * colonne par colonne, et c'est ce qui supprime le cycle entre les modules 02
+ * et 04. Le contrôle y porte donc sur les colonnes que la commande changerait,
+ * et non sur le nom de la table.
+ *
+ * Supprimer une ligne de `support` n'est le fait d'aucun des deux : la
+ * suppression ne porte pas sur une colonne, et aucun des deux propriétaires
+ * n'a autorité sur la part de l'autre. L'opération est refusée.
+ */
+function ownershipFaults(
+  draft: CommandDraft,
+): readonly Readonly<Record<string, string>>[] {
+  const base = { module: draft.module, table: draft.table };
+
+  if (draft.table !== SPLIT_OWNERSHIP_TABLE) {
+    return ownsTable(draft.module, draft.table) ? [] : [base];
+  }
+  if (draft.operation === 'delete') {
+    return [{ ...base, column: '*' }];
+  }
+  return touchedColumns(draft.before ?? null, draft.after ?? null)
+    .filter(column => !ownsSupportColumn(draft.module, column))
+    .map(column => ({ ...base, column }));
+}
+
+/**
+ * Les colonnes qu'une commande change réellement.
+ *
+ * À la création comme à la suppression, tout ce qui est nommé est changé. À la
+ * modification, seules les valeurs qui diffèrent : reposer une colonne à sa
+ * propre valeur n'est pas une écriture, et l'exiger du propriétaire voisin
+ * ferait échouer des commandes qui ne touchent à rien.
+ */
+function touchedColumns(
+  before: RowValues | null,
+  after: RowValues | null,
+): readonly string[] {
+  if (before === null || after === null) {
+    return [...new Set([
+      ...Object.keys(before ?? {}), ...Object.keys(after ?? {}),
+    ])].sort();
+  }
+  const names = new Set([...Object.keys(before), ...Object.keys(after)]);
+  return [...names].filter(n => before[n] !== after[n]).sort();
 }
 
 function shapeOf(
@@ -209,11 +259,5 @@ export function inverseCommand(
  * concernées. Ni plus, ni moins. » Une commande qui ne change rien se voit.
  */
 export function changedColumns(command: EntityCommand): readonly string[] {
-  const before = command.before;
-  const after = command.after;
-  if (before === null || after === null) {
-    return [...new Set([...Object.keys(before ?? {}), ...Object.keys(after ?? {})])].sort();
-  }
-  const names = new Set([...Object.keys(before), ...Object.keys(after)]);
-  return [...names].filter(n => before[n] !== after[n]).sort();
+  return touchedColumns(command.before, command.after);
 }

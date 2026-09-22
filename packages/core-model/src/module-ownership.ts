@@ -172,6 +172,33 @@ export const SUPPORT_IDENTITY_COLUMNS: readonly string[] = [
   'id', 'org_id', 'site_id', 'created_at', 'updated_at', 'deleted_at',
 ];
 
+/**
+ * La seule table du modèle dont la propriété se décide colonne par colonne.
+ *
+ * La nommer ici plutôt qu'au fil du code évite que le cas particulier se
+ * disperse : `buildCommand` la traite à part, et rien d'autre.
+ */
+export const SPLIT_OWNERSHIP_TABLE = 'support';
+
+/**
+ * Le module qui possède une colonne de `support`, ou `null` si L0 ne la nomme
+ * pas.
+ *
+ * Une colonne sans propriétaire déclaré n'appartient à personne : elle n'est
+ * écrite par aucune commande. C'est le cas aujourd'hui de `kind`, et des
+ * colonnes d'identité, que L0 réserve à la création — laquelle n'a pas encore
+ * de module émetteur. Le silence se lit donc comme un refus, jamais comme une
+ * permission.
+ */
+export function supportColumnOwner(column: string): ModuleKey | null {
+  return SUPPORT_COLUMN_OWNER[column] ?? null;
+}
+
+/** R1 et R2 (partie L), appliqués à la table scindée. */
+export function ownsSupportColumn(module: ModuleKey, column: string): boolean {
+  return supportColumnOwner(column) === module;
+}
+
 // ---------------------------------------------------------------------------
 // R3 (partie L) — dépendance descendante : ce que chaque module lit
 // ---------------------------------------------------------------------------

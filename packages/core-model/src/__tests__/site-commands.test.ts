@@ -172,3 +172,96 @@ describe('W8 (partie N) — les colonnes réellement changées', () => {
     expect(changedColumns(a)).toEqual(['a', 'b']);
   });
 });
+
+/**
+ * L0 — « L'implantation d'un support est une décision de wayfinding, pas de
+ * signalétique. » `support` est la seule table à deux propriétaires, et la
+ * garantie ne vaut que si `buildCommand` la tient colonne par colonne :
+ * déclarée dans `SUPPORT_COLUMN_OWNER` sans être appliquée, la scission
+ * n'était qu'un commentaire.
+ */
+describe('la table scindée — `support`, colonne par colonne', () => {
+  const BASE = {
+    operation: 'update' as const,
+    table: 'support',
+    id: 'sup-1',
+    org_id: 'org-1',
+    timestamp: '2026-09-22T10:00:00.000Z',
+  };
+
+  it('laisse le wayfinding écrire une colonne d’implantation', () => {
+    const out = buildCommand({
+      ...BASE, module: '02-wayfinding',
+      before: { code: null }, after: { code: 'D-042' },
+    });
+    expect(out.ok).toBe(true);
+  });
+
+  it('laisse la signalétique écrire une cote', () => {
+    const out = buildCommand({
+      ...BASE, module: '04-signaletique',
+      before: { width_mm: 600 }, after: { width_mm: 800 },
+    });
+    expect(out.ok).toBe(true);
+  });
+
+  it('refuse au wayfinding la part de la signalétique, et l’inverse', () => {
+    const wayfinding = buildCommand({
+      ...BASE, module: '02-wayfinding',
+      before: { width_mm: 600 }, after: { width_mm: 800 },
+    });
+    const signage = buildCommand({
+      ...BASE, module: '04-signaletique',
+      before: { node_id: 'n-1' }, after: { node_id: 'n-2' },
+    });
+    expect(wayfinding.ok).toBe(false);
+    expect(signage.ok).toBe(false);
+    if (!wayfinding.ok) {
+      expect(wayfinding.findings[0]?.code).toBe('EDIT.TABLE_NOT_OWNED');
+      expect(wayfinding.findings[0]?.params['column']).toBe('width_mm');
+    }
+  });
+
+  it('nomme chaque colonne refusée, et non la première', () => {
+    const out = buildCommand({
+      ...BASE, module: '02-wayfinding',
+      before: { code: null, width_mm: 600, kind: 'totem' },
+      after: { code: 'D-042', width_mm: 800, kind: 'drapeau' },
+    });
+    expect(out.ok).toBe(false);
+    if (!out.ok) {
+      expect(out.findings.map(f => f.params['column'])).toEqual(['kind', 'width_mm']);
+    }
+  });
+
+  it('ne refuse pas une colonne reposée à sa propre valeur', () => {
+    // Le propriétaire voisin n'écrit rien : la colonne figure au message, elle
+    // ne change pas. Refuser ici ferait échouer des commandes inoffensives.
+    const out = buildCommand({
+      ...BASE, module: '02-wayfinding',
+      before: { code: null, width_mm: 600 },
+      after: { code: 'D-042', width_mm: 600 },
+    });
+    expect(out.ok).toBe(true);
+  });
+
+  it('refuse la suppression de la ligne aux deux propriétaires', () => {
+    for (const module of ['02-wayfinding', '04-signaletique'] as const) {
+      const out = buildCommand({
+        ...BASE, operation: 'delete', module, before: { code: 'D-042' },
+      });
+      expect(out.ok, module).toBe(false);
+    }
+  });
+
+  it('refuse une création : les colonnes d’identité n’ont pas de propriétaire', () => {
+    // L0 réserve l'identité à la création par le socle, et le socle ne possède
+    // pas `support`. Aucune commande ne crée donc un support aujourd'hui ;
+    // c'est un manque constaté, pas une permission implicite.
+    const out = buildCommand({
+      ...BASE, operation: 'create', module: '02-wayfinding', before: null,
+      after: { id: 'sup-1', org_id: 'org-1', site_id: 's-1', node_id: 'n-1', kind: 'totem' },
+    });
+    expect(out.ok).toBe(false);
+  });
+});
