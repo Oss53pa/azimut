@@ -44,12 +44,34 @@
     },
     {
       "ecran": "R tableau des messages",
+      "etat": "comparaison de versions",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "td[rowspan=\"1\"]:nth-child(1) > span > span:nth-child(1)",
+        "tr:nth-child(2) > td:nth-child(1) > span > span:nth-child(1)"
+      ]
+    },
+    {
+      "ecran": "R tableau des messages",
       "etat": "nominal",
       "langue": "en",
       "regle": "th-has-data-cells",
       "aide": "Table headers in a data table must refer to data cells",
       "elements": [
         "table"
+      ]
+    },
+    {
+      "ecran": "R tableau des messages",
+      "etat": "comparaison de versions",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "td[rowspan=\"1\"]:nth-child(1) > span > span:nth-child(1)",
+        "tr:nth-child(2) > td:nth-child(1) > span > span:nth-child(1)"
       ]
     }
   ]

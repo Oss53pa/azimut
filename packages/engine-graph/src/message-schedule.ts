@@ -21,7 +21,7 @@ import type {
   SiteData,
   TravelProfile,
 } from '@azimut/core-model';
-import { contentHash } from '@azimut/core-model';
+import { canonicalSerialize, contentHash } from '@azimut/core-model';
 import type { PlacedSupport } from './compute-quantities.js';
 
 // ---------------------------------------------------------------------------
@@ -144,6 +144,30 @@ export type MessageSchedule = {
   readonly inputs_hash: string;
   readonly lines: readonly MessageLine[];
 };
+
+/**
+ * Empreinte du contenu d'une ligne, hors drapeau de péremption.
+ *
+ * Elle sert à deux endroits — la péremption de M02.W8 et la comparaison de
+ * versions de R11 (partie R) — et elle est définie une fois : deux empreintes
+ * concurrentes finiraient par juger la même ligne changée ici et intacte là.
+ *
+ * `stale` en est exclu : il est dérivé, jamais saisi (R10), et une ligne qui
+ * ne fait que devenir périmée n'a pas changé de contenu.
+ */
+export function lineFingerprint(line: MessageLine): string {
+  return canonicalSerialize({
+    support_id: line.support_id,
+    face_index: line.face_index,
+    block_index: line.block_index,
+    block_kind: line.block_kind,
+    entries: line.entries,
+    pictogram_id: line.pictogram_id,
+    direction: line.direction,
+    information_level: line.information_level,
+    decision_point_id: line.decision_point_id,
+  });
+}
 
 /** Identifiant de ligne : déterministe, lisible, stable entre versions. */
 export function messageLineId(

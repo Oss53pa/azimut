@@ -24,6 +24,7 @@ const SCREEN = source('MessageTableScreen.tsx');
 const TABLE = source('message-table', 'LineTable.tsx');
 const DETAIL = source('message-table', 'LineDetail.tsx');
 const VERSION_BAR = source('message-table', 'VersionBar.tsx');
+const COMPARE = source('message-table', 'CompareView.tsx');
 
 /**
  * Critère 2 de R18 : « Aucune cellule n'est modifiable, par aucune voie :
@@ -43,6 +44,14 @@ describe('R18 (partie R) critère 2 — aucune cellule n’est modifiable', () =
   it('le tableau n’écoute ni le collage ni la saisie', () => {
     for (const forbidden of ['onPaste', 'onInput', 'onChange', 'onBeforeInput']) {
       expect(TABLE, forbidden).not.toContain(forbidden);
+    }
+  });
+
+  it('la comparaison de versions non plus', () => {
+    // R11 (partie R) montre des valeurs anciennes et nouvelles : les montrer
+    // dans un champ de saisie laisserait croire qu'on peut les reprendre là.
+    for (const forbidden of ['<input', '<textarea', 'contentEditable', 'onPaste']) {
+      expect(COMPARE, forbidden).not.toContain(forbidden);
     }
   });
 
@@ -129,6 +138,37 @@ describe('R10 et R17 (partie R) — aucun état porté par la seule couleur', ()
     expect(TABLE).toContain('borderLeft: focused');
     expect(TABLE).toContain('background: selected');
     expect(TABLE).toContain('aria-selected');
+  });
+});
+
+/**
+ * R11 (partie R) : « Les marques combinent symbole et libellé, jamais la
+ * couleur seule. » Critère 13 de R18, lisibilité en niveaux de gris.
+ */
+describe('R11 (partie R) — chaque marque porte un symbole et un libellé', () => {
+  it('les quatre marques ont leur libellé dans les deux langues', () => {
+    for (const change of ['added', 'removed', 'modified', 'unchanged'] as const) {
+      const key = `msgtable.change.${change}` as const;
+      expect(MESSAGES_FR[key].length, key).toBeGreaterThan(0);
+      expect(MESSAGES_EN[key].length, key).toBeGreaterThan(0);
+    }
+  });
+
+  it('et leur symbole, distinct l’un de l’autre', () => {
+    const symbols = (['added', 'removed', 'modified', 'unchanged'] as const)
+      .map(change => MESSAGES_FR[`msgtable.change.symbol.${change}`]);
+    expect(new Set(symbols).size).toBe(4);
+  });
+
+  /**
+   * Le symbole n'est pas caché aux technologies d'assistance : le cacher en
+   * ferait une information réservée à la vue, quand R11 (partie R) veut les
+   * deux. Il porte sa couleur en propre, pour rester calculable sur la rangée
+   * en `text-muted` d'une ligne écartée.
+   */
+  it('le symbole n’est pas réservé à la vue, et porte sa couleur', () => {
+    expect(COMPARE).not.toContain('aria-hidden');
+    expect(COMPARE).toContain("color: 'var(--text-primary)'");
   });
 });
 

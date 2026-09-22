@@ -2,7 +2,7 @@ import { type JSX, useMemo, useState } from 'react';
 import { useTrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { rowsOf } from '../state/session-store.js';
-import { readSchedule } from '../state/message-schedule-read.js';
+import { readSchedule, scheduleVersions } from '../state/message-schedule-read.js';
 import {
   NO_FILTERS, applyFilters, buildRows, groupRows,
 } from '../state/message-schedule-rows.js';
@@ -11,7 +11,7 @@ import { NO_SELECTION, applyAction } from '../state/message-table-selection.js';
 import type { TableSelection } from '../state/message-table-selection.js';
 import { can } from '../state/message-schedule-permissions.js';
 import type { ScheduleActor } from '../state/message-schedule-permissions.js';
-import { triggersFrom } from '@azimut/engine-graph';
+import { diffSchedules, triggersFrom } from '@azimut/engine-graph';
 import type { ScheduleState } from '@azimut/engine-graph';
 import { MessageTableScreen } from '../screens/MessageTableScreen.js';
 import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
@@ -41,6 +41,11 @@ export function MessageTableAdapter({ siteId, actor }: {
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);
+  // R11 (partie R) — la comparaison, fermée tant qu'on ne la demande pas.
+  const [comparing, setComparing] = useState(false);
+  const [showUnchanged, setShowUnchanged] = useState(false);
+  const [referenceVersion, setReferenceVersion] = useState<number | null>(null);
+  const [comparedVersion, setComparedVersion] = useState<number | null>(null);
 
   const read = useMemo(
     () => readSchedule(session.state, siteId),
@@ -96,6 +101,28 @@ export function MessageTableAdapter({ siteId, actor }: {
 
   const state: ScreenState = read === null ? { kind: 'empty' } : { kind: 'ready' };
 
+  // R4 (partie R) : « Comparer | Au moins deux versions. »
+  const versions = scheduleVersions(session.state, siteId);
+  const canCompare = versions.length >= 2;
+
+  /**
+   * Les deux versions comparées. Par défaut les deux plus hautes, dans le sens
+   * que R11 donne : la plus ancienne est la référence, la plus récente celle
+   * qu'on lui oppose, de sorte qu'une ligne neuve soit « ajoutée » et non
+   * « supprimée ».
+   */
+  const reference = referenceVersion ?? versions[1] ?? versions[0] ?? 0;
+  const compared = comparedVersion ?? versions[0] ?? 0;
+
+  const compare = useMemo(() => {
+    if (!comparing) return null;
+    if (reference === compared) return null;
+    const before = readSchedule(session.state, siteId, reference);
+    const after = readSchedule(session.state, siteId, compared);
+    if (before === null || after === null) return null;
+    return diffSchedules(before.schedule, after.schedule, LANGS);
+  }, [comparing, reference, compared, session.state, siteId]);
+
   const scheduleState: ScheduleState | null = read?.schedule.state ?? null;
   const actions = triggersFrom(scheduleState).filter(trigger => {
     const permission = permissionOfTrigger(trigger);
@@ -138,8 +165,21 @@ export function MessageTableAdapter({ siteId, actor }: {
       onOpenSource={() => { /* R7.3 — la navigation vers l'écran source */ }}
       actions={actions}
       onTrigger={() => { /* R12 — les transitions relèvent de l'autre moitié */ }}
-      canCompare={false}
-      onCompare={() => { /* R11 — la comparaison de versions */ }}
+      canCompare={canCompare}
+      onCompare={() => { setComparing(true); }}
+      compare={comparing ? {
+        versions,
+        referenceVersion: reference,
+        comparedVersion: compared,
+        onReference: setReferenceVersion,
+        onCompared: setComparedVersion,
+        diff: compare,
+        showUnchanged,
+        onShowUnchanged: setShowUnchanged,
+        supportCodes,
+        langs: LANGS,
+        onClose: () => { setComparing(false); },
+      } : null}
       canExport={can(actor, 'export')}
       onExport={() => { /* R13 — l'export */ }}
       staleCount={rows.filter(row => row.state === 'stale').length}

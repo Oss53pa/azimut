@@ -181,27 +181,34 @@ function readLine(row: StoredRow): MessageLine | null {
 // ---------------------------------------------------------------------------
 
 /**
- * Le tableau enregistré pour un site, à sa version la plus haute.
+ * Le tableau enregistré pour un site.
  *
- * `null` quand aucune version n'existe : c'est l'état vide de R16, « jamais un
- * tableau vide présenté comme un résultat ».
+ * Sans `version`, c'est la version la plus haute — celle que R4 affiche.
+ * Avec, c'est cette version-là : R11 (partie R) en compare deux, et la
+ * comparaison ne peut pas se contenter de la dernière.
+ *
+ * `null` quand la version demandée n'existe pas, ou qu'aucune n'existe : c'est
+ * l'état vide de R16, « jamais un tableau vide présenté comme un résultat ».
  */
 export function readSchedule(
   session: SessionState,
   siteId: string,
+  version?: number,
 ): ReadSchedule | null {
   const heads = rowsOf(session, 'message_schedule')
     .filter(row => text(row.values, 'site_id') === siteId);
   if (heads.length === 0) return null;
 
-  const head = latest(heads);
+  const head = version === undefined
+    ? latest(heads)
+    : heads.find(row => integer(row.values, 'version') === version) ?? null;
   if (head === null) return null;
 
-  const version = integer(head.values, 'version');
+  const storedVersion = integer(head.values, 'version');
   const state = text(head.values, 'state');
   const generatedAt = text(head.values, 'generated_at');
   const inputsHash = text(head.values, 'inputs_hash');
-  if (version === null || state === null || !isScheduleState(state)) return null;
+  if (storedVersion === null || state === null || !isScheduleState(state)) return null;
   if (generatedAt === null || inputsHash === null) return null;
 
   const lines: MessageLine[] = [];
@@ -235,7 +242,7 @@ export function readSchedule(
   return {
     schedule: {
       site_id: siteId,
-      version,
+      version: storedVersion,
       state,
       generated_at: generatedAt,
       inputs_hash: inputsHash,

@@ -13,7 +13,7 @@
  */
 
 import type { Finding } from '@azimut/core-model';
-import { canonicalSerialize } from '@azimut/core-model';
+import { lineFingerprint } from './message-schedule.js';
 import type {
   MessageLine,
   MessageSchedule,
@@ -23,21 +23,6 @@ import type {
 // ---------------------------------------------------------------------------
 // Péremption
 // ---------------------------------------------------------------------------
-
-/** Empreinte du contenu d'une ligne, hors drapeau de péremption. */
-function lineFingerprint(line: MessageLine): string {
-  return canonicalSerialize({
-    support_id: line.support_id,
-    face_index: line.face_index,
-    block_index: line.block_index,
-    block_kind: line.block_kind,
-    entries: line.entries,
-    pictogram_id: line.pictogram_id,
-    direction: line.direction,
-    information_level: line.information_level,
-    decision_point_id: line.decision_point_id,
-  });
-}
 
 export type StaleDiff = {
   /** Tableau enregistré, drapeaux de péremption remis à jour. */

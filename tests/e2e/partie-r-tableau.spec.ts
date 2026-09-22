@@ -53,6 +53,23 @@ function storedLine(index: number, over: Record<string, unknown> = {}) {
   };
 }
 
+/** Une seconde version, où le bloc 1 change de direction et le bloc 2 disparaît. */
+const SCHEDULE_V8 = 'sched-partie-r-8';
+
+function storedLineV8(index: number, over: Record<string, unknown> = {}) {
+  const line = storedLine(index, over);
+  return {
+    ...line,
+    id: `${SCHEDULE_V8}-line-${String(index)}`,
+    values: {
+      ...line.values,
+      id: `${SCHEDULE_V8}-line-${String(index)}`,
+      schedule_id: SCHEDULE_V8,
+      ...over,
+    },
+  };
+}
+
 const SESSION = {
   rows: [
     {
@@ -76,6 +93,22 @@ const SESSION = {
     storedLine(0),
     storedLine(1),
     storedLine(2),
+    {
+      table: 'message_schedule',
+      id: SCHEDULE_V8,
+      values: {
+        id: SCHEDULE_V8,
+        org_id: 'org-r',
+        site_id: SITE,
+        version: 8,
+        state: 'draft',
+        generated_at: '2026-04-02T00:00:00.000Z',
+        inputs_hash: 'fedcba9876543210',
+      },
+    },
+    storedLineV8(0),
+    storedLineV8(1, { direction: 'right' }),
+    storedLineV8(3),
   ],
   queued: [],
 };
@@ -96,18 +129,19 @@ async function openTable(page: Page, lang = 'fr'): Promise<void> {
 test.describe('partie R — le tableau des messages en consultation', () => {
   test('affiche la version, son état et l’empreinte de ses entrées', async ({ page }) => {
     await openTable(page);
-    // R4 (partie R) — les quatre éléments de la barre de version.
-    await expect(page.getByText('Version 7')).toBeVisible();
+    // R4 (partie R) — les quatre éléments de la barre de version. C'est la
+    // version la plus haute qui s'affiche : deux sont enregistrées.
+    await expect(page.getByText('Version 8')).toBeVisible();
     await expect(page.getByText('Brouillon', { exact: true })).toBeVisible();
     // R4 (partie R) : huit premiers caractères, valeur complète en infobulle.
-    await expect(page.getByText('01234567', { exact: true })).toBeVisible();
+    await expect(page.getByText('fedcba98', { exact: true })).toBeVisible();
   });
 
   test('forme l’identifiant stable depuis le code du support', async ({ page }) => {
     await openTable(page);
     // R5 (partie R) : « D-042/F1/B3 », formé de `support.code`, face et bloc.
     await expect(page.getByText('D-042/F0/B0')).toBeVisible();
-    await expect(page.getByText('D-042/F0/B2')).toBeVisible();
+    await expect(page.getByText('D-042/F0/B3')).toBeVisible();
   });
 
   /**
@@ -190,6 +224,48 @@ test.describe('partie R — le tableau des messages en consultation', () => {
     const focusedBorder = await page.locator('tr[tabindex="0"]').evaluate(
       el => getComputedStyle(el).borderLeftWidth);
     expect(focusedBorder).not.toBe('0px');
+  });
+
+  /**
+   * R11 (partie R) — comparaison de versions, et critère 7 de R18 : « distingue
+   * ajoutées, supprimées et modifiées, sans fausse suppression d'une ligne
+   * regénérée ».
+   */
+  test('compare deux versions et marque chaque écart', async ({ page }) => {
+    await openTable(page);
+    await page.getByRole('button', { name: /^Comparer$|^Compare$/ }).click();
+
+    // Les deux plus hautes versions, l'ancienne en référence.
+    await expect(page.getByLabel(/Version de référence/)).toHaveValue('7');
+    await expect(page.getByLabel(/Version comparée/)).toHaveValue('8');
+
+    // Un ajout, une suppression, une modification, une inchangée masquée.
+    await expect(page.getByText(/1 ajoutée\(s\).*1 supprimée\(s\).*1 modifiée\(s\).*1 inchangée\(s\)/)).toBeVisible();
+
+    // Chaque marque porte son libellé, jamais la seule couleur.
+    await expect(page.getByText('Ajoutée', { exact: true })).toBeVisible();
+    await expect(page.getByText('Supprimée', { exact: true })).toBeVisible();
+    await expect(page.getByText('Modifiée', { exact: true })).toBeVisible();
+
+    // La valeur ancienne et la nouvelle, côte à côte.
+    await expect(page.getByText('À gauche', { exact: true })).toBeVisible();
+    await expect(page.getByText('À droite', { exact: true })).toBeVisible();
+  });
+
+  test('les lignes inchangées sont masquées par défaut, et se montrent', async ({ page }) => {
+    await openTable(page);
+    await page.getByRole('button', { name: /^Comparer$|^Compare$/ }).click();
+    await expect(page.getByText('Inchangée', { exact: true })).toHaveCount(0);
+
+    await page.getByLabel(/Montrer les lignes inchangées/).check();
+    await expect(page.getByText('Inchangée', { exact: true })).toBeVisible();
+  });
+
+  test('comparer une version à elle-même le dit, au lieu de ne rien montrer', async ({ page }) => {
+    await openTable(page);
+    await page.getByRole('button', { name: /^Comparer$|^Compare$/ }).click();
+    await page.getByLabel(/Version de référence/).selectOption('8');
+    await expect(page.getByText(/Les deux versions choisies sont la même/)).toBeVisible();
   });
 
   test('le même écran se lit en anglais', async ({ page }) => {

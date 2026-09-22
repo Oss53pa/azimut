@@ -86,6 +86,22 @@ async function seedSchedule(page: Page): Promise<void> {
         },
       },
       line(0), line(1),
+      {
+        table: 'message_schedule', id: `${schedule}-8`,
+        values: {
+          id: `${schedule}-8`, org_id: 'org-axe', site_id: SITE_R, version: 8,
+          state: 'draft', generated_at: '2026-04-02T00:00:00.000Z',
+          inputs_hash: 'fedcba9876543210',
+        },
+      },
+      {
+        ...(line(0) as { table: string; id: string; values: Record<string, unknown> }),
+        id: `${schedule}-8-line-0`,
+        values: {
+          ...(line(0) as { values: Record<string, unknown> }).values,
+          id: `${schedule}-8-line-0`, schedule_id: `${schedule}-8`, direction: 'right',
+        },
+      },
     ],
     queued: [],
   };
@@ -275,6 +291,19 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
       }).click();
       await expect(page.getByRole('table')).toBeVisible();
       await check(page, 'R tableau des messages', 'nominal', lang);
+    });
+
+    test(`R tableau des messages, comparaison de versions, ${lang}`, async ({ page }) => {
+      await seedSchedule(page);
+      await page.goto(url(`/sites/${SITE_R}/wayfinding/messages`, lang));
+      await page.getByRole('button', {
+        name: /Reprendre le travail local|Resume local work/,
+      }).click();
+      await page.getByRole('button', { name: /^Comparer$|^Compare$/ }).click();
+      // La comparaison doit être là : sans elle, l'analyse porterait sur le
+      // tableau ordinaire et l'essai passerait sans rien éprouver.
+      await expect(page.getByText(/ajoutée|added/)).toBeVisible();
+      await check(page, 'R tableau des messages', 'comparaison de versions', lang);
     });
 
     test(`R tableau des messages, aucune version, ${lang}`, async ({ page }) => {

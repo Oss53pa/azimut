@@ -149,6 +149,7 @@ export {
   computeScheduleInputsHash,
   isInformationLevel,
   isScheduleState,
+  lineFingerprint,
   messageLineId,
   reduceInformationLevel,
 } from './message-schedule.js';
@@ -169,6 +170,10 @@ export type { StaleDiff } from './message-schedule-checks.js';
 export { messageScheduleToCsv, messageScheduleToMarkdown } from './message-schedule-export.js';
 export type { ScheduleLang } from './message-schedule-export.js';
 // R12 (partie R) — circuit de validation du tableau des messages
+export { diffSchedules, visibleDiffLines, LINE_CHANGES } from './message-schedule-diff.js';
+export type {
+  DiffCounts, FieldChange, LineChange, LineDiff, ScheduleDiff,
+} from './message-schedule-diff.js';
 export {
   SCHEDULE_TRANSITIONS,
   SCHEDULE_TRIGGERS,

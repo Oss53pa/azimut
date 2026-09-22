@@ -17,6 +17,8 @@ import { FilterBar } from './message-table/FilterBar.js';
 import { LineTable } from './message-table/LineTable.js';
 import { LineDetail } from './message-table/LineDetail.js';
 import type { SourceKey } from './message-table/LineDetail.js';
+import { CompareView } from './message-table/CompareView.js';
+import type { CompareViewProps } from './message-table/CompareView.js';
 
 /**
  * Partie R — l'écran du tableau des messages, moitié consultation.
@@ -60,8 +62,15 @@ export type MessageTableScreenProps = {
   /** R4 (partie R) — actions croisées : légalité de l'état (R12) et droit (R2). */
   readonly actions: readonly ScheduleTrigger[];
   readonly onTrigger: (trigger: ScheduleTrigger) => void;
+  /** R4 (partie R) — « Comparer | Au moins deux versions ». */
   readonly canCompare: boolean;
   readonly onCompare: () => void;
+  /**
+   * R11 — la comparaison, quand elle est ouverte. Elle prend la place du
+   * tableau : R11 en veut « un seul tableau », et en montrer deux ferait
+   * chercher l'écart d'un œil à l'autre.
+   */
+  readonly compare: CompareViewProps | null;
   readonly canExport: boolean;
   readonly onExport: () => void;
 
@@ -127,6 +136,8 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
           onExport={props.onExport}
         />
 
+        {props.compare !== null ? <CompareView {...props.compare} /> : (
+        <>
         <FilterBar
           filters={props.filters}
           onFilters={props.onFilters}
@@ -164,6 +175,9 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
             />
           )}
         </div>
+
+        </>
+        )}
 
         <StatusLine
           lines={lineCount}
