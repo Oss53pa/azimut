@@ -1,0 +1,1 @@
+ALTER TABLE azimut.footprint DROP CONSTRAINT footprint_unit_code_required_for_cell;

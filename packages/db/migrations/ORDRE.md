@@ -77,6 +77,7 @@ non plus — elle n'en retire que les clés étrangères.
 0031_o4_site_timezone
 0032_a5_2_calibration_pixels
 0033_a5_2_plan_calibration_point
+0034_m01_s3_unit_code_required
 ```
 
 ## Règle pour la suite
