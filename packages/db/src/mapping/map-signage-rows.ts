@@ -93,6 +93,7 @@ export function mapSupportRow(row: SupportRow): Support {
     id: row.id,
     org_id: row.org_id,
     site_id: row.site_id,
+    ...(row.code !== null ? { code: row.code } : {}),
     node_id: row.node_id,
     registry: row.registry === 'safety' ? 'safety' : 'wayfinding',
     context: row.context === 'exterior' ? 'exterior' : 'interior',

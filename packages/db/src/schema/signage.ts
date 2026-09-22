@@ -21,6 +21,10 @@ export const support = azimut.table('support', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  // A5.6 et N2.2 : code lisible, unique par site, propriété du module 02
+  // (implantation, scission L0). Nullable tant que les supports déjà écrits
+  // n'ont pas de code : le rendre requis transformerait des données (A2.2-7).
+  code: text('code'),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   // A5.6 : typologie de l'instance. Additif, nullable — cf. migration 0015.
   typology_id: uuid('typology_id').references(() => supportTypology.id, { onDelete: 'set null' }),

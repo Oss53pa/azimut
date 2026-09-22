@@ -72,7 +72,13 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     'footprint', 'volume', 'opening', 'node', 'edge', 'vertical_link',
     'building_link', 'destination', 'destination_name', 'category',
   ],
-  '02-wayfinding': [],
+  // N2.2, migration 0027. Le module possède aussi les attributs
+  // d'implantation de `support` — dont `code` — par la scission L0, déclarée
+  // dans SUPPORT_COLUMN_OWNER.
+  '02-wayfinding': [
+    'orientation_zone', 'naming_rule', 'information_level',
+    'wayfinding_sequence', 'message_schedule', 'message_line',
+  ],
   '03-parcours': ['travel_profile', 'route_cache', 'decision_point'],
   '04-signaletique': [
     'support_typology', 'support_face', 'support_content_block',
@@ -106,6 +112,9 @@ export const SUPPORT_COLUMN_OWNER: Readonly<Record<string, ModuleKey>> = {
   // Wayfinding : nœud, azimut, typologie, distance de lecture. Le niveau
   // d'information lui revient aussi, mais sa colonne n'existe pas encore :
   // voir COLUMNS_SPECIFIED_NOT_YET_IN_SCHEMA.
+  // A5.6 : « implantation, soit code, node_id, azimuth_deg, typology_id,
+  // reading_distance_m, au module 02 ».
+  code: '02-wayfinding',
   node_id: '02-wayfinding',
   azimuth_deg: '02-wayfinding',
   typology_id: '02-wayfinding',

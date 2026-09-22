@@ -182,6 +182,8 @@ export type SupportRow = {
   readonly id: string;
   readonly org_id: string;
   readonly site_id: string;
+  /** A5.6 et N2.2 — code lisible, unique par site. Nullable, voir 0027. */
+  readonly code: string | null;
   readonly node_id: string;
   readonly registry: string | null;
   readonly context: string | null;

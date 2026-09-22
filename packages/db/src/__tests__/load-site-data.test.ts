@@ -19,6 +19,7 @@ function row(overrides: Partial<SupportRow>): SupportRow {
     id: 'sup-1',
     org_id: 'org-1',
     site_id: 'site-1',
+    code: null,
     node_id: 'node-1',
     kind: 'directional',
     azimuth_deg: '90',

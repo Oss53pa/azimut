@@ -56,6 +56,15 @@ export type Support = {
   readonly id: string;
   readonly org_id: string;
   readonly site_id: string;
+  /**
+   * A5.6 et N2.2 — code lisible, unique par site, par exemple `D-042`.
+   * Propriété du module 02 (implantation, scission L0), et segment de support
+   * du nom de fichier livré (D11).
+   *
+   * Facultatif tant que les supports déjà écrits n'en portent pas : le rendre
+   * requis transformerait des données existantes (A2.2-7).
+   */
+  readonly code?: string;
   readonly node_id: string;
   readonly registry: PictogramRegistry;
   readonly context: SupportContext;
