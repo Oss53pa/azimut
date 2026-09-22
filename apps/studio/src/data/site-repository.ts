@@ -65,8 +65,15 @@ export const REPOSITORY_FAILURES = [
 ] as const;
 export type RepositoryFailure = (typeof REPOSITORY_FAILURES)[number];
 
-/** Les six états de F7 qu'un écran traite. */
-export type ScreenState =
+/**
+ * Les six états de F7 qu'un écran traite, par leur seul nom.
+ *
+ * Le type homonyme de  porte, lui, la charge de
+ * chaque état — le message d'erreur, ce qui manque, ce qui reste possible. Ici
+ * on n'a que le genre, parce qu'une défaillance de dépôt ne sait pas encore ce
+ * que l'écran dira.
+ */
+export type ScreenStateKind =
   | 'empty' | 'loading' | 'partial' | 'error' | 'offline' | 'permission_denied';
 
 /**
@@ -76,7 +83,7 @@ export type ScreenState =
  * de l'écran, une session expirée et un droit manquant demandent la même
  * chose — dire ce qui n'est pas permis et à qui s'adresser.
  */
-export const FAILURE_SCREEN_STATE: Readonly<Record<RepositoryFailure, ScreenState>> = {
+export const FAILURE_SCREEN_STATE: Readonly<Record<RepositoryFailure, ScreenStateKind>> = {
   'request_failed': 'error',
   unauthorized: 'permission_denied',
   forbidden: 'permission_denied',
@@ -98,7 +105,7 @@ export class RepositoryError extends Error {
   }
 
   /** L'état d'écran que cette défaillance appelle (F7). */
-  get screenState(): ScreenState {
+  get screenState(): ScreenStateKind {
     return FAILURE_SCREEN_STATE[this.failure];
   }
 }
