@@ -60,7 +60,7 @@ async function readAs(userId: string, id: string) {
 function siteCreate(id: string, org: string, name: string) {
   const out = buildCommand({
     operation: 'create', module: '01-socle', table: 'site', id, org_id: org,
-    after: { id, org_id: org, name, country_code: 'FR' },
+    after: { id, org_id: org, name, country_code: 'FR', timezone: 'Europe/Paris' },
     timestamp: '2026-09-21T00:00:00.000Z',
   });
   if (!out.ok) throw new Error(JSON.stringify(out.findings));
@@ -133,7 +133,8 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
       site,
       commands: [
         { operation: 'create', table: 'site', id: site,
-          after: { id: site, org_id: org, name: `Site ${suffix}`, country_code: 'FR' } },
+          after: { id: site, org_id: org, name: `Site ${suffix}`, country_code: 'FR',
+                   timezone: 'Europe/Paris' } },
         { operation: 'create', table: 'building', id: building,
           after: { id: building, org_id: org, site_id: site, name: 'Bâtiment 1' } },
         { operation: 'create', table: 'level', id: level,

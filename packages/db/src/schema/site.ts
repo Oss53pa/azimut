@@ -10,6 +10,13 @@ export const site = azimut.table('site', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
+  // O4 et A5.2 — fuseau du site, requis. Tous les horaires, disponibilités
+  // d'arêtes et échéances s'y interprètent ; les horodatages techniques
+  // restent en temps universel.
+  timezone: text('timezone').notNull(),
+  // Q5 — entité juridique émettrice. Facultative à la création, requise avant
+  // l'émission de la première facture : elle ne sert qu'à facturer.
+  legal_entity_id: uuid('legal_entity_id'),
   rules_pack_id: uuid('rules_pack_id'),
   // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
@@ -121,8 +128,15 @@ export const planCalibration = azimut.table('plan_calibration', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   plan_source_id: uuid('plan_source_id').notNull().references(() => planSource.id, { onDelete: 'cascade' }),
   scale_m_per_px: numeric('scale_m_per_px').notNull(),
-  origin_x: numeric('origin_x').notNull(),
-  origin_y: numeric('origin_y').notNull(),
+  // A5.2 — position, dans l'image, de l'origine du repère site. Seules
+  // colonnes en pixels que M01.S2 admette avec celles des points de calage.
+  // Nullables : l'origine du repère ne tombe pas dans l'image de tous les
+  // calages, et aucun écran ne désigne aujourd'hui le point qui la porte.
+  origin_x_px: numeric('origin_x_px'),
+  origin_y_px: numeric('origin_y_px'),
+  // A5.2 — distance réelle saisie à l'étape 2 de M2 (partie M), celle dont l'échelle est
+  // tirée. Nullable : le calage par points mesurés n'en produit pas.
+  reference_distance_m: numeric('reference_distance_m'),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
   // Complément atelier M1.4 : transformation affine ajustée par moindres
   // carrés. Nulles tant que le plan n'est calé qu'à deux points.
@@ -309,4 +323,50 @@ export const vehicleGate = azimut.table('vehicle_gate', {
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_vehicle_gate_org').on(t.org_id),
+]);
+
+/**
+ * A5.2 — les points de calage d'une source de plan.
+ *
+ * « Les points de calage permettent de rejouer le calage à l'identique. » Sans
+ * eux, la base garde l'échelle obtenue et jamais la mesure qui l'a produite.
+ * Les coordonnées sont en pixels de l'image, seconde des deux exceptions que
+ * M01.S2 admet.
+ */
+export const planCalibrationPoint = azimut.table('plan_calibration_point', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  calibration_id: uuid('calibration_id').notNull()
+    .references(() => planCalibration.id, { onDelete: 'cascade' }),
+  ordinal: integer('ordinal').notNull(),
+  image_x_px: numeric('image_x_px').notNull(),
+  image_y_px: numeric('image_y_px').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_plan_calibration_point_org').on(t.org_id),
+  index('idx_plan_calibration_point_calibration').on(t.calibration_id),
+  uniqueIndex('plan_calibration_point_calibration_id_ordinal_key')
+    .on(t.calibration_id, t.ordinal),
+]);
+
+/**
+ * Q5 — l'entité juridique qui émet une facture.
+ *
+ * Elle appartient à la plateforme (Q2) : une organisation en contient une ou
+ * plusieurs, et un site est rattaché à une seule, au plus tard avant sa
+ * première facture.
+ */
+export const legalEntity = azimut.table('legal_entity', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  legal_name: text('legal_name').notNull(),
+  registration_ref: text('registration_ref'),
+  tax_ref: text('tax_ref'),
+  address: jsonb('address'),
+  country_code: text('country_code').notNull(),
+  currency_code: text('currency_code').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_legal_entity_org').on(t.org_id),
 ]);

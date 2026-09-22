@@ -45,6 +45,19 @@ export type Site = {
   readonly org_id: string;
   readonly name: string;
   readonly country_code: string;
+  /**
+   * O4 et A5.2 — fuseau du site, requis.
+   *
+   * Tous les horaires, disponibilités d'arêtes, plages de fermeture et
+   * échéances s'y interprètent. Les horodatages techniques restent en temps
+   * universel.
+   */
+  readonly timezone: string;
+  /**
+   * Q5 — entité juridique émettrice, facultative à la création et requise
+   * avant l'émission de la première facture. Elle ne sert qu'à facturer.
+   */
+  readonly legal_entity_id?: string;
   readonly rules_pack_id: string | null;
   /**
    * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que

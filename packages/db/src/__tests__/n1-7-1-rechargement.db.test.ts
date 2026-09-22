@@ -118,7 +118,9 @@ afterAll(async () => {
 describe('N1.7 critère 1 — un site modélisé se recharge à l’identique', () => {
   it('s’écrit entièrement par le chemin d’écriture du module 01', async () => {
     const written = await applyCommands(db, { userId: USER }, [
-      command('site', SITE, { name: 'Site du rechargement', country_code: 'FR' }),
+      command('site', SITE, {
+        name: 'Site du rechargement', country_code: 'FR', timezone: 'Europe/Paris',
+      }),
       command('building', BUILDING, { site_id: SITE, name: 'Bâtiment A' }),
       command('level', LEVEL, {
         building_id: BUILDING, name: 'R+1', ordinal: 1, elevation_m: 3.5,

@@ -44,56 +44,41 @@ export function checkLevelCalibrated(site: SiteData): Finding[] {
  * M01.S1 — le repère site est celui du premier calage.
  *
  * `calibrated_at` rend ce contrôle possible : sans lui, « le premier calage »
- * n'était pas identifiable et la règle, bien qu'opposable, restait invérifiable.
+ * n'était pas identifiable et la règle, bien qu'opposable, restait
+ * invérifiable.
  *
- * Deux incohérences, séparées par `status` :
- *  - `origin_differs` : le site porte une origine, et ce n'est pas celle du
- *    premier calage. Quelqu'un a déplacé le repère, ou l'a recopié du mauvais
- *    calage ; dans les deux cas la géométrie déjà saisie ne désigne plus ce
- *    qu'elle désignait.
- *  - `origin_absent` : le premier calage a eu lieu et le site n'a pas de
- *    repère. Rien d'autre ne le dirait — les niveaux étant calés,
- *    `CALIB.LEVEL_NOT_CALIBRATED` se tait.
+ * Le contrôle comparait l'origine du site à celle du premier calage. La
+ * migration 0032 a aligné `plan_calibration` sur A5.2 : le calage porte
+ * désormais une position en pixels de l'image, et non plus une origine en
+ * mètres. Les deux grandeurs ne sont plus comparables, et A5 ne dit pas
+ * comment elles se correspondent. La moitié du contrôle qui reposait sur
+ * cette comparaison — `origin_differs` — est donc retirée plutôt que
+ * devinée, et le point est porté au rapport selon A2.2.
  *
- * Le contrôle ne dit rien quand le premier calage n'est pas déterminable, c'est
- * à dire quand un calage au moins n'a pas de date : désigner un premier calage
+ * Ce qui reste, et qui suffit à ce que rien ne passe en silence :
+ * `origin_absent`, le premier calage a eu lieu et le site n'a pas de repère.
+ * Rien d'autre ne le dirait — les niveaux étant calés,
+ * `CALIB.LEVEL_NOT_CALIBRATED` se tait.
+ *
+ * Le contrôle ne dit rien quand le premier calage n'est pas déterminable, à
+ * savoir quand un calage au moins n'a pas de date : désigner un premier calage
  * au hasard des lignes datées ferait dépendre une anomalie bloquante d'une
- * donnée manquante. Un site sans aucun calage ne dit rien non plus, ses niveaux
- * étant déjà tous signalés.
+ * donnée manquante. Un site sans aucun calage ne dit rien non plus, ses
+ * niveaux étant déjà tous signalés.
  */
 export function checkSiteOriginCoherent(site: SiteData): Finding[] {
   const first = firstCalibration(site.plan_calibrations);
   if (first === null) return [];
 
-  const origin = siteOrigin(site.site);
-  if (origin === null) {
-    return [{
-      code: 'CALIB.ORIGIN_MISMATCH',
-      severity: 'blocking',
-      entity: { kind: 'site', id: site.site.id },
-      params: {
-        status: 'origin_absent',
-        first_calibration_id: first.id,
-        first_x: first.origin_x,
-        first_y: first.origin_y,
-      },
-      ruleRef: 'N1.3',
-    }];
-  }
-
-  if (origin.x_m === first.origin_x && origin.y_m === first.origin_y) return [];
+  if (siteOrigin(site.site) !== null) return [];
 
   return [{
     code: 'CALIB.ORIGIN_MISMATCH',
     severity: 'blocking',
     entity: { kind: 'site', id: site.site.id },
     params: {
-      status: 'origin_differs',
+      status: 'origin_absent',
       first_calibration_id: first.id,
-      first_x: first.origin_x,
-      first_y: first.origin_y,
-      site_x: origin.x_m,
-      site_y: origin.y_m,
     },
     ruleRef: 'N1.3',
   }];

@@ -78,6 +78,10 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: rows.site.org_id,
     name: rows.site.name,
     country_code: rows.site.country_code,
+    timezone: rows.site.timezone,
+    ...(rows.site.legal_entity_id !== null
+      ? { legal_entity_id: rows.site.legal_entity_id }
+      : {}),
     rules_pack_id: rows.site.rules_pack_id,
     // M01.S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
     // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
@@ -133,8 +137,14 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: c.org_id,
     plan_source_id: c.plan_source_id,
     scale_m_per_px: num(c.scale_m_per_px),
-    origin_x: num(c.origin_x),
-    origin_y: num(c.origin_y),
+    // A5.2 — les deux coordonnées vont ensemble ; le CHECK de la migration
+    // 0032 l'impose, et une origine à moitié lue n'entre pas au modèle.
+    ...(c.origin_x_px !== null && c.origin_y_px !== null
+      ? { origin_x_px: num(c.origin_x_px), origin_y_px: num(c.origin_y_px) }
+      : {}),
+    ...(c.reference_distance_m !== null
+      ? { reference_distance_m: num(c.reference_distance_m) }
+      : {}),
     rotation_deg: num(c.rotation_deg),
     ...(c.calibrated_at !== null
       ? { calibrated_at: isoString(c.calibrated_at) }

@@ -27,6 +27,10 @@ export type SiteRow = {
   readonly org_id: string;
   readonly name: string;
   readonly country_code: string;
+  /** O4 — fuseau du site, requis depuis la migration 0031. */
+  readonly timezone: string;
+  /** Q5 — entité juridique émettrice, NULL tant que rien n'est facturé. */
+  readonly legal_entity_id: string | null;
   readonly rules_pack_id: string | null;
   /** M01.S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
   readonly origin_x_m: string | null;
@@ -70,8 +74,11 @@ export type PlanCalibrationRow = {
   readonly org_id: string;
   readonly plan_source_id: string;
   readonly scale_m_per_px: string;
-  readonly origin_x: string;
-  readonly origin_y: string;
+  /** A5.2 — position, dans l'image, de l'origine du repère site. */
+  readonly origin_x_px: string | null;
+  readonly origin_y_px: string | null;
+  /** A5.2 — distance réelle dont l'échelle est tirée. */
+  readonly reference_distance_m: string | null;
   readonly rotation_deg: string;
   /** M01.S1 — NULL sur une ligne antérieure à la migration 0022. */
   readonly calibrated_at: TimestampValue | null;

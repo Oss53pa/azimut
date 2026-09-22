@@ -180,6 +180,12 @@ function PlanScreenAdapter({ session, siteId, levelId }: {
             planSourceId: session.newId(),
             calibrationId: session.newId(),
             storagePath: `plans/${siteId}/${levelId}`,
+            // A5.2 — les deux points de la mesure, dans l'ordre de pose.
+            points: [
+              { id: session.newId(), point: draft.a ?? { x_px: 0, y_px: 0 } },
+              { id: session.newId(), point: draft.b ?? { x_px: 200, y_px: 0 } },
+            ],
+            referenceDistanceM: draft.realDistanceM,
             timestamp: session.now(),
           });
           if (!commands.ok) { setFindings(commands.findings); setBusy(false); return; }

@@ -2,8 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { allUpSql } from '../migration-corpus.js';
 
 /**
- * M01.S2 (partie N) : « Aucune coordonnée en pixels n'est stockée. La conversion
- * se fait à l'affichage, jamais en base. »
+ * M01.S2 : « Aucune coordonnée **de géométrie du site** n'est stockée en
+ * pixels. La conversion se fait à l'affichage, jamais en base. Seule
+ * exception, le calage d'une source de plan, qui décrit l'image et non le
+ * site : ses points sont conservés en pixels de l'image, suffixe `_px`, dans
+ * les tables `plan_calibration` et `plan_calibration_point`. »
  *
  * N1.7, critère 2, dit comment le vérifier : « Aucune coordonnée en pixels en
  * base, **vérifié par analyse du schéma**. » Un essai qui n'inspecterait que
@@ -37,6 +40,21 @@ const DECLARED_BREACHES: Readonly<Record<string, string>> = {
   'control_point.source_y_px':
     'Migration 0018, même origine et même motif que `source_x_px`.',
 };
+
+/**
+ * Les deux tables que A5.2 autorise nommément à porter des pixels.
+ *
+ * Ce n'est pas une tolérance mais une exception écrite : « Seules colonnes en
+ * pixels de la base : elles décrivent l'image source, jamais le site. » Le
+ * garde continue de refuser toute autre occurrence, y compris dans ces deux
+ * tables si une colonne nouvelle y apparaissait sans figurer ici.
+ */
+const AUTHORISED_BY_A5_2: ReadonlySet<string> = new Set([
+  'plan_calibration.origin_x_px',
+  'plan_calibration.origin_y_px',
+  'plan_calibration_point.image_x_px',
+  'plan_calibration_point.image_y_px',
+]);
 
 /** Les colonnes créées par les migrations, table par table. */
 function migratedColumns(): ReadonlyMap<string, readonly string[]> {
@@ -82,6 +100,7 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
       for (const column of columns) {
         const qualified = `${table}.${column}`;
         if (!COORDINATE_IN_PIXELS.test(column)) continue;
+        if (AUTHORISED_BY_A5_2.has(qualified)) continue;
         if (qualified in DECLARED_BREACHES) continue;
         offenders.push(qualified);
       }
@@ -111,5 +130,21 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
     // Une échelle et une dimension de fichier ne sont pas des coordonnées.
     expect(COORDINATE_IN_PIXELS.test('scale_m_per_px')).toBe(false);
     expect(COORDINATE_IN_PIXELS.test('width_px')).toBe(false);
+  });
+});
+
+/**
+ * L'exception de A5.2 est une exception, et une exception se vérifie dans les
+ * deux sens : si les quatre colonnes disparaissaient, l'autorisation
+ * deviendrait un commentaire sans objet, et le garde cesserait de dire quoi
+ * que ce soit sur elles.
+ */
+describe('A5.2 — les quatre colonnes autorisées existent', () => {
+  it('chacune est bien créée par une migration', () => {
+    const tables = migratedColumns();
+    for (const qualified of AUTHORISED_BY_A5_2) {
+      const [table, column] = qualified.split('.');
+      expect(tables.get(table ?? ''), qualified).toContain(column);
+    }
   });
 });

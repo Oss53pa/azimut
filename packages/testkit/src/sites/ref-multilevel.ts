@@ -12,6 +12,7 @@ export const refMultilevel: SiteData = {
     org_id: 'org-test-001',
     name: 'Site multi-niveaux',
     country_code: 'FR',
+    timezone: 'Europe/Paris',
     rules_pack_id: null,
     // M01.S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
@@ -87,8 +88,7 @@ export const refMultilevel: SiteData = {
       plan_source_id: 'ps-ml-rdc',
       scale_m_per_px: 0.05,
       // Premier calage du site : c'est cette origine que `site` porte.
-      origin_x: -12.5,
-      origin_y: -8,
+      reference_distance_m: 10,
       rotation_deg: 0,
       // Le plus ancien des deux : c'est lui que `firstCalibration` désigne.
       calibrated_at: '2026-01-05T10:30:00.000Z',
@@ -99,8 +99,7 @@ export const refMultilevel: SiteData = {
       plan_source_id: 'ps-ml-r1',
       scale_m_per_px: 0.05,
       // Autre fond, autre décalage : le repère site, lui, ne change pas.
-      origin_x: -12.5,
-      origin_y: -9.25,
+      reference_distance_m: 10,
       rotation_deg: 0,
       // Calé plus tard : il ne fixe rien.
       calibrated_at: '2026-01-05T11:45:00.000Z',

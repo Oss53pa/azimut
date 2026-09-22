@@ -133,7 +133,7 @@ describe('computeWayfinding', () => {
       organization: { id: 'org1', name: 'Test', slug: 'test' },
       site: {
         id: 's1', org_id: 'org1', name: 'Corridor', country_code: 'FR',
-        rules_pack_id: null, active_langs: ['fr'],
+        timezone: 'Europe/Paris', rules_pack_id: null, active_langs: ['fr'],
       },
       buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B1', independent_access: true }],
       levels: [{

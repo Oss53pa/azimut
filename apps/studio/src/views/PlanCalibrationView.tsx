@@ -56,17 +56,20 @@ export function PlanCalibrationView(): JSX.Element {
   const uncalibratedCount = levelStates.filter(l => !l.calibrated).length;
 
   /**
-   * M01.S1 — le repère site. Posé au premier calage, jamais modifié ensuite. Le
-   * garde-fou est interrogé avec l'origine qu'un nouveau calage voudrait
-   * poser, celle du premier calage enregistré : sur un site déjà calé, il dit
-   * ce qu'il dirait d'une tentative de déplacement.
+   * M01.S1 — le repère site. Posé au premier calage, jamais modifié ensuite.
+   *
+   * Le garde-fou était interrogé avec l'origine du premier calage. Depuis que
+   * `plan_calibration` suit A5.2, cette ligne ne porte plus d'origine en
+   * mètres : le panneau montre le repère du site et la date du premier calage,
+   * et le garde-fou s'exerce à l'écriture, sur l'origine que le calage en
+   * cours propose.
    */
   const origin = siteOrigin(site.site);
   const first = useMemo(() => firstCalibration(site.plan_calibrations), [site]);
   const originGuard = useMemo(() => {
-    if (first === null) return null;
-    return guardSiteOrigin(site.site, { x_m: first.origin_x, y_m: first.origin_y });
-  }, [site, first]);
+    if (first === null || origin === null) return null;
+    return guardSiteOrigin(site.site, origin);
+  }, [site, first, origin]);
 
   const [levelId, setLevelId] = useState(levels[0]?.id ?? '');
   const [pointA, setPointA] = useState<PlanPoint | null>(null);

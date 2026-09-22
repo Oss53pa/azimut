@@ -69,6 +69,9 @@ export const NON_OPTIONAL_MODULES: readonly ModuleKey[] = [
 export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   '01-socle': [
     'site', 'building', 'level', 'zone', 'plan_source', 'plan_calibration',
+    // Q2 range les points de calage au module 01 : ils décrivent la source de
+    // plan d'un niveau, qui lui appartient.
+    'plan_calibration_point',
     'footprint', 'volume', 'opening', 'node', 'edge', 'vertical_link',
     'building_link', 'destination', 'destination_name', 'category',
   ],
@@ -286,6 +289,7 @@ export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
  * ici, sans quoi le contrôle de INT-1 échoue.
  */
 export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
+  legal_entity: 'Q2 l’attribue à la plateforme, numérotée 00. Ce registre ne connaît que les douze modules métier : la plateforme n’y a pas de clé, et lui en donner une touche les couches de L2, les lectures de L3 et leurs contrôles. Inscrite ici en attendant, plutôt qu’attribuée d’office à un module qui ne la possède pas.',
   organization: 'A5.1, accès et cloisonnement. N’appartient à aucun module : c’est la frontière dans laquelle les modules vivent.',
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',

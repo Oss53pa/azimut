@@ -11,6 +11,7 @@ export const refBroken: SiteData = {
     org_id: 'org-test-001',
     name: 'Site cassé',
     country_code: 'FR',
+    timezone: 'Europe/Paris',
     rules_pack_id: null,
     // M01.S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
     // `origin_x_m` / `origin_y_m` sont absents. Ce n'est pas l'origine (0, 0).

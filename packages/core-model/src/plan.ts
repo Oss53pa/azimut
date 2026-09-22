@@ -38,10 +38,17 @@ export type PlanSource = {
  * `resolution_px_per_m`). Les deux
  * représentent la même mesure ; A5.2 fixe celle qui est stockée.
  *
- * `origin_x` / `origin_y` situent l'origine du fond dans le repère site, en
- * mètres. Ce sont ces deux nombres que le premier calage d'un site recopie sur
- * la ligne `site`, où ils deviennent le repère du site et ne bougent plus (M01.S1,
- * D1.1) — voir `guardSiteOrigin`.
+ * `origin_x_px` / `origin_y_px` situent, **dans l'image**, l'origine du repère
+ * site (A5.2). Les deux colonnes ont remplacé une origine en mètres à la
+ * migration 0032 : la base ne garde plus de coordonnée métier tirée du fond.
+ *
+ * Elles sont facultatives, et c'est un point ouvert plutôt qu'un choix : aucun
+ * écran ne désigne le point de l'image qui porte l'origine du repère. A5.2 ne
+ * dit pas non plus comment `site.origin_x_m` et ces deux colonnes se
+ * correspondent — l'une est un point du repère site, l'autre sa position dans
+ * une image, et le lien demande une décision de modèle que A5 ne prend pas.
+ * Elles restent donc non écrites, et `guardSiteOrigin` continue de tenir
+ * M01.S1 sur la seule ligne `site`.
  *
  * `calibrated_at` date l'opération de calage, et non l'import du fond que date
  * `plan_source.uploaded_at`. C'est lui qui rend « le premier calage » de M01.S1
@@ -66,8 +73,14 @@ export type PlanCalibration = {
   readonly org_id: string;
   readonly plan_source_id: string;
   readonly scale_m_per_px: number;
-  readonly origin_x: number;
-  readonly origin_y: number;
+  /**
+   * A5.2 — position, dans l'image, de l'origine du repère site. Absente tant
+   * que rien ne la désigne : voir la note ci-dessus.
+   */
+  readonly origin_x_px?: number;
+  readonly origin_y_px?: number;
+  /** A5.2 — distance réelle dont l'échelle est tirée, étape 2 de M2 (partie M). */
+  readonly reference_distance_m?: number;
   readonly rotation_deg: number;
   /** Horodatage ISO 8601 du calage. */
   readonly calibrated_at?: string;

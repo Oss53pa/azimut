@@ -13,6 +13,7 @@ function siteWithoutOrigin(): SiteData['site'] {
     org_id: site.org_id,
     name: site.name,
     country_code: site.country_code,
+    timezone: site.timezone,
     rules_pack_id: site.rules_pack_id,
     active_langs: site.active_langs,
     ...(site.reference_elevation_m !== undefined
@@ -28,8 +29,6 @@ function undate(calibration: PlanCalibration): PlanCalibration {
     org_id: calibration.org_id,
     plan_source_id: calibration.plan_source_id,
     scale_m_per_px: calibration.scale_m_per_px,
-    origin_x: calibration.origin_x,
-    origin_y: calibration.origin_y,
     rotation_deg: calibration.rotation_deg,
   };
 }
@@ -59,31 +58,18 @@ describe('M01.S1 — repère site cohérent avec le premier calage', () => {
     expect(mismatches(refBroken)).toHaveLength(0);
   });
 
-  it('signale un repère déplacé', () => {
-    const site: SiteData = {
-      ...refMultilevel,
-      site: { ...refMultilevel.site, origin_x_m: 0, origin_y_m: 0 },
-    };
-    const found = mismatches(site);
-    expect(found).toHaveLength(1);
-    expect(found[0]?.severity).toBe('blocking');
-    expect(found[0]?.ruleRef).toBe('N1.3');
-    expect(found[0]?.entity).toEqual({ kind: 'site', id: refMultilevel.site.id });
-    expect(found[0]?.params['status']).toBe('origin_differs');
-    expect(found[0]?.params['first_calibration_id']).toBe('cal-ml-rdc');
-    expect(found[0]?.params['first_x']).toBe(-12.5);
-    expect(found[0]?.params['site_x']).toBe(0);
-  });
-
-  it('signale un repère recopié du mauvais calage', () => {
-    // L'origine du R+1, qui n'est pas le premier calage.
-    const site: SiteData = {
-      ...refMultilevel,
-      site: { ...refMultilevel.site, origin_x_m: -12.5, origin_y_m: -9.25 },
-    };
-    expect(mismatches(site)).toHaveLength(1);
-  });
-
+  /**
+   * Le contrôle signalait aussi un repère déplacé, en comparant l'origine du
+   * site à celle du premier calage. La migration 0032 a aligné
+   * `plan_calibration` sur A5.2 : le calage porte une position en pixels de
+   * l'image, et non plus une origine en mètres. Les deux grandeurs ne sont
+   * plus comparables, et A5 ne dit pas comment elles se correspondent. Les
+   * deux essais qui l'éprouvaient sont retirés avec la moitié de contrôle
+   * qu'ils couvraient, plutôt que réécrits sur une correspondance devinée.
+   *
+   * Ce qui reste est le cas que rien d'autre ne dirait : un premier calage a
+   * eu lieu et le site n'a pas de repère.
+   */
   it('signale un premier calage sans repère enregistré', () => {
     // Site reconstruit sans les deux clés plutôt qu'avec des clés à
     // `undefined` : `exactOptionalPropertyTypes` distingue les deux, et c'est

@@ -114,7 +114,9 @@ beforeAll(async () => {
   // donc posés en SQL, sous l'identité et sous les politiques. C'est un manque
   // constaté du modèle de commande, pas un contournement du cloisonnement.
   const decor = await applyCommands(db, { userId: ALICE }, [
-    command('01-socle', 'site', SITE, { name: 'Site du module 02', country_code: 'FR' }),
+    command('01-socle', 'site', SITE, {
+      name: 'Site du module 02', country_code: 'FR', timezone: 'Europe/Paris',
+    }),
     command('01-socle', 'building', BUILDING, { site_id: SITE, name: 'Bâtiment A' }),
     command('01-socle', 'level', LEVEL, {
       building_id: BUILDING, name: 'RDC', ordinal: 0, elevation_m: 0,

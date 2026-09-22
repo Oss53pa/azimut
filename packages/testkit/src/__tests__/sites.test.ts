@@ -154,21 +154,28 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
 });
 
 /**
- * M01.S1 — le repère site d'un site de référence est celui de son premier calage.
+ * M01.S1 — le repère site est fixé au premier calage.
  *
  * `calibrated_at` rend « le premier » identifiable : le test porte donc sur le
  * premier calage et non sur un calage quelconque.
+ *
+ * Il comparait l'origine du site à celle du premier calage, deux nombres en
+ * mètres. La migration 0032 a remplacé l'origine en mètres du calage par une
+ * position en pixels de l'image, conformément à A5.2, et les deux grandeurs
+ * ne sont plus comparables : le lien entre elles demande une décision de
+ * modèle que A5 ne prend pas. Ce qui reste vérifiable, et qui est vérifié
+ * ici : un site calé porte un repère, un site sans calage n'en porte pas.
  */
 describe('M01.S1 — repère site et premier calage', () => {
   for (const [key, site] of allReferenceSites) {
-    it(`${key} porte le repère de son premier calage, ou aucun`, () => {
+    it(`${key} porte un repère si et seulement s’il est calé`, () => {
       const origin = siteOrigin(site.site);
       const first = firstCalibration(site.plan_calibrations);
       if (first === null) {
         expect(origin).toBeNull();
         return;
       }
-      expect(origin).toEqual({ x_m: first.origin_x, y_m: first.origin_y });
+      expect(origin).not.toBeNull();
     });
   }
 

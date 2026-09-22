@@ -14,6 +14,7 @@ export const refAdversarial: SiteData = {
     org_id: 'org-test-001',
     name: 'Site adversarial',
     country_code: 'FR',
+    timezone: 'Europe/Paris',
     rules_pack_id: null,
     // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
@@ -70,8 +71,7 @@ export const refAdversarial: SiteData = {
       org_id: 'org-test-001',
       plan_source_id: 'ps-adv-001',
       scale_m_per_px: 0.05,
-      origin_x: 0,
-      origin_y: 0,
+      reference_distance_m: 10,
       rotation_deg: 0,
       calibrated_at: '2026-01-05T10:20:00.000Z',
     },

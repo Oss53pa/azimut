@@ -14,6 +14,7 @@ export function siteWith(
     organization: { id: 'org1', name: 'T', slug: 't' },
     site: {
       id: 's1', org_id: 'org1', name: 'S', country_code: 'FR',
+      timezone: 'Europe/Paris',
       rules_pack_id: null, active_langs: ['fr'],
     },
     buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B', independent_access: true }],

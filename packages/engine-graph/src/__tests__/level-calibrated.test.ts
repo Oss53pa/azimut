@@ -32,8 +32,6 @@ function calibration(id: string, sourceId: string, scale: number): PlanCalibrati
     org_id: 'org-test-001',
     plan_source_id: sourceId,
     scale_m_per_px: scale,
-    origin_x: 0,
-    origin_y: 0,
     rotation_deg: 0,
   };
 }

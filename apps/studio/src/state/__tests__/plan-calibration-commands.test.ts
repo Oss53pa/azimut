@@ -15,6 +15,11 @@ const WRITE: CalibrationWrite = {
   planSourceId: 'plan-1',
   calibrationId: 'calib-1',
   storagePath: 'plans/site-1/level-1/plan.pdf',
+  points: [
+    { id: 'point-a', point: { x_px: 0, y_px: 0 } },
+    { id: 'point-b', point: { x_px: 200, y_px: 0 } },
+  ],
+  referenceDistanceM: 20,
   timestamp: '2026-09-21T10:00:00.000Z',
 };
 
@@ -42,7 +47,13 @@ describe('M2 (partie M) — écriture du calage', () => {
   it('écrit le fond, son calage, et fixe l’origine au premier calage', () => {
     const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.value.map(c => c.table)).toEqual(['plan_source', 'plan_calibration', 'site']);
+    if (r.ok) {
+      expect(r.value.map(c => c.table)).toEqual([
+        'plan_source', 'plan_calibration',
+        'plan_calibration_point', 'plan_calibration_point',
+        'site',
+      ]);
+    }
   });
 
   /**
@@ -56,7 +67,12 @@ describe('M2 (partie M) — écriture du calage', () => {
       proposed: { x_m: 12.5, y_m: -3.25 },
     }, WRITE);
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.value.map(c => c.table)).toEqual(['plan_source', 'plan_calibration']);
+    if (r.ok) {
+      expect(r.value.map(c => c.table)).toEqual([
+        'plan_source', 'plan_calibration',
+        'plan_calibration_point', 'plan_calibration_point',
+      ]);
+    }
   });
 
   it('refuse un calage qui déplacerait le repère du site', () => {
@@ -78,24 +94,48 @@ describe('M2 (partie M) — écriture du calage', () => {
    * distinguer tient à ce contrôle : un `x_px` ou un `y_px` écrit en base
    * rendrait la modélisation dépendante de la résolution du fond.
    */
-  it('n’écrit aucune coordonnée en pixels', () => {
+  it('n’écrit de pixels que sur les points de calage', () => {
     const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     for (const command of r.value) {
       for (const column of Object.keys(command.after ?? {})) {
-        expect(column, `${command.table}.${column}`).not.toMatch(/(^|_)[xy]_px$/);
+        if (!/(^|_)[xy]_px$/.test(column)) continue;
+        // M01.S2 et A5.2 : la seule table du geste qui décrive l'image.
+        expect(command.table, `${command.table}.${column}`)
+          .toBe('plan_calibration_point');
       }
     }
   });
 
-  it('l’origine écrite est en mètres, celle du calage', () => {
+  it('fixe le repère du site en mètres, sur la ligne du site', () => {
     const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.value[1]?.after?.['origin_x']).toBe('12.5');
-      expect(r.value[1]?.after?.['origin_y']).toBe('-3.25');
+      const fixed = r.value.find(c => c.table === 'site');
+      expect(fixed?.after?.['origin_x_m']).toBe('12.5');
+      expect(fixed?.after?.['origin_y_m']).toBe('-3.25');
     }
+  });
+
+  /**
+   * A5.2 — « Les points de calage permettent de rejouer le calage à
+   * l'identique. » Ils sont écrits dans l'ordre de pose, et c'est le rang qui
+   * le dit : deux points sans rang ne se rejouent pas.
+   */
+  it('écrit les deux points de la mesure, dans l’ordre de pose', () => {
+    const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const points = r.value.filter(c => c.table === 'plan_calibration_point');
+    expect(points.map(c => c.after?.['ordinal'])).toEqual([0, 1]);
+    expect(points.map(c => c.after?.['image_x_px'])).toEqual(['0', '200']);
+  });
+
+  it('reporte la distance réelle saisie à l’étape 2', () => {
+    const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value[1]?.after?.['reference_distance_m']).toBe('20');
   });
 
   it('écrit une échelle en mètres par pixel, inverse de la résolution', () => {

@@ -154,6 +154,11 @@ export function usePlanCalibration(
       ...environment.write,
       planSourceId: environment.newId(),
       calibrationId: environment.newId(),
+      points: [
+        ...(draft.a !== null ? [{ id: environment.newId(), point: draft.a }] : []),
+        ...(draft.b !== null ? [{ id: environment.newId(), point: draft.b }] : []),
+      ],
+      referenceDistanceM: draft.realDistanceM,
       timestamp: environment.now(),
     });
     if (!commands.ok) {

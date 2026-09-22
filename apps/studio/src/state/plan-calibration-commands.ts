@@ -7,12 +7,14 @@
  * partent sous un même groupe, comme la création d'un site : un geste, une
  * annulation.
  *
- * M2 (partie M), critère d'acceptation 3 : « Aucune coordonnée en pixels n'est écrite en
- * base. » Les pixels servent à mesurer, puis disparaissent : ce qui est écrit
- * est une échelle en mètres par pixel et une origine en mètres. Un test le
- * vérifie sur les commandes elles-mêmes.
+ * M2 (partie M), critère d'acceptation 3, tel que A5.2 le borne : « Aucune
+ * coordonnée **de géométrie du site** n'est écrite en pixels. Seuls les points
+ * de calage de la source de plan le sont. » Ce qui est écrit du site est donc
+ * en mètres ; ce qui est écrit de l'image — les points de la mesure — est en
+ * pixels et le dit dans son nom. Un test le vérifie sur les commandes.
  */
 import type { EntityCommand, Finding, Outcome, Point } from '@azimut/core-model';
+import type { PlanPoint } from '../domain/plan-calibration.js';
 import { buildCommand, guardSiteOrigin, siteOrigin } from '@azimut/core-model';
 import type { SiteOriginBearer } from '@azimut/core-model';
 import type { Calibration } from '../domain/plan-calibration.js';
@@ -27,6 +29,15 @@ export type CalibrationWrite = {
   readonly calibrationId: string;
   /** Chemin de l'artefact téléversé, hors de la base. */
   readonly storagePath: string;
+  /**
+   * A5.2 — les points de calage, dans l'ordre où l'opérateur les a posés, avec
+   * l'identifiant tiré pour chacun. « Les points de calage permettent de
+   * rejouer le calage à l'identique » : sans eux, la base garde l'échelle et
+   * perd la mesure qui l'a produite.
+   */
+  readonly points: readonly { readonly id: string; readonly point: PlanPoint }[];
+  /** A5.2 — la distance réelle saisie à l'étape 2 de M2 (partie M). */
+  readonly referenceDistanceM: number;
   /** ISO-8601, fourni par l'appelant (E5.1). */
   readonly timestamp: string;
 };
@@ -87,8 +98,7 @@ export function calibrationCommands(
       // Mètres par pixel : l'inverse de la résolution mesurée. C'est la seule
       // trace de la mesure, et ce n'est pas une coordonnée en pixels.
       scale_m_per_px: String(1 / calibration.resolution_px_per_m),
-      origin_x: String(point.x_m),
-      origin_y: String(point.y_m),
+      reference_distance_m: String(write.referenceDistanceM),
       rotation_deg: String(calibration.north_azimuth_deg),
       calibrated_at: write.timestamp,
     },
@@ -96,6 +106,27 @@ export function calibrationCommands(
   if (!calibrated.ok) return { ok: false, findings: calibrated.findings };
 
   const commands: EntityCommand[] = [source.value, calibrated.value];
+
+  // A5.2 — les points de la mesure, en pixels de l'image. Seconde des deux
+  // exceptions que M01.S2 admet : ils décrivent l'image, jamais le site.
+  for (const [ordinal, entry] of write.points.entries()) {
+    const stored = buildCommand({
+      ...common,
+      operation: 'create',
+      table: 'plan_calibration_point',
+      id: entry.id,
+      after: {
+        id: entry.id,
+        org_id: write.orgId,
+        calibration_id: write.calibrationId,
+        ordinal,
+        image_x_px: String(entry.point.x_px),
+        image_y_px: String(entry.point.y_px),
+      },
+    });
+    if (!stored.ok) return { ok: false, findings: stored.findings };
+    commands.push(stored.value);
+  }
 
   // M01.S1 (partie N) : le premier calage fixe le repère du site. Les suivants le
   // confirment, et n'écrivent donc rien — repasser la même valeur n'est pas
@@ -106,8 +137,8 @@ export function calibrationCommands(
       operation: 'update',
       table: 'site',
       id: write.siteId,
-      before: { origin_x: null, origin_y: null },
-      after: { origin_x: String(point.x_m), origin_y: String(point.y_m) },
+      before: { origin_x_m: null, origin_y_m: null },
+      after: { origin_x_m: String(point.x_m), origin_y_m: String(point.y_m) },
     });
     if (!fixed.ok) return { ok: false, findings: fixed.findings };
     commands.push(fixed.value);
