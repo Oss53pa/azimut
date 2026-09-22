@@ -120,6 +120,27 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # Condition posée à l'autorisation d'axe-core : jamais dans un livrable.
+      # La source est vérifiée par `pnpm test` ; ceci vérifie l'artefact, ce
+      # qu'aucune lecture de source ne remplace.
+      - name: axe-core n'est livré nulle part
+        run: |
+          set -euo pipefail
+          built=0
+          for dir in apps/studio/dist apps/kiosk-runtime/dist; do
+            [ -d "$dir" ] || continue
+            built=$((built + 1))
+            if grep -rl "axe-core" "$dir"; then
+              echo "axe-core est un outil d'essai : il ne doit pas être livré." >&2
+              exit 1
+            fi
+          done
+          if [ "$built" -eq 0 ]; then
+            echo "Aucun livrable construit à inspecter." >&2
+            exit 1
+          fi
+          echo "$built livrable(s) inspecté(s), axe-core absent."
+
   deploy:
     name: Déploiement Cloudflare
     # Rien ne part tant que les quatre commandes de A2.3 et le build ne sont
@@ -207,6 +228,27 @@ jobs:
       # secondes.
       - name: Build
         run: pnpm build
+
+      # Condition posée à l'autorisation d'axe-core : jamais dans un livrable.
+      # La source est vérifiée par `pnpm test` ; ceci vérifie l'artefact, ce
+      # qu'aucune lecture de source ne remplace.
+      - name: axe-core n'est livré nulle part
+        run: |
+          set -euo pipefail
+          built=0
+          for dir in apps/studio/dist apps/kiosk-runtime/dist; do
+            [ -d "$dir" ] || continue
+            built=$((built + 1))
+            if grep -rl "axe-core" "$dir"; then
+              echo "axe-core est un outil d'essai : il ne doit pas être livré." >&2
+              exit 1
+            fi
+          done
+          if [ "$built" -eq 0 ]; then
+            echo "Aucun livrable construit à inspecter." >&2
+            exit 1
+          fi
+          echo "$built livrable(s) inspecté(s), axe-core absent."
 
       # `wrangler` n'est pas une dépendance du dépôt : rien d'autre ne
       # l'emploie, et l'ajouter ferait entrer une bibliothèque tierce pour un

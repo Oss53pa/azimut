@@ -98,7 +98,7 @@ sans anomalie, pour la raison donnée au §2 sur M5.
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
 | 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — 1 669 ms au dernier relevé, quatre étapes |
-| 5. Conformité AA automatisée sur les cinq écrans | **absent** | Demande `axe-core`, bibliothèque nouvelle : A2.2 point 4, en attente d'arbitrage |
+| 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` — 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
 Le critère 4 est un parcours automatisé. K3.4 place la mesure sur opérateur
@@ -111,7 +111,7 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Rôle `marketing` | Contradiction du document : A5.1 énumère sept valeurs, sa phrase suivante en annonce six, A6.2 en définit six | Arbitrage. Ni ajouté, ni retiré |
 | Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
 | `control_point.source_x_px`, `source_y_px` | Infraction à S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
-| M8 critère 5 | Bibliothèque tierce nouvelle | Arbitrage, A2.2 point 4 |
+| Formulaire de création d'un site | `NewSiteDialog` est construit et éprouvé, mais monté nulle part : `/sites` rend `SitesView`, qui n'expose aucun bouton de création | Décision de périmètre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 
 ## 6. Divergences hors tranche, relevées à la consolidation

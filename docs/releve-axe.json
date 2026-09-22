@@ -1,0 +1,36 @@
+{
+  "mesure": "M8 (partie M) critère 5 — absence de violation détectable automatiquement",
+  "outil": "axe-core, dépendance de développement, jamais livrée",
+  "regles": [
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "wcag22a",
+    "wcag22aa"
+  ],
+  "portee": "Les cinq écrans de la partie M, dans leurs états atteignables, en français et en anglais.",
+  "limite": "L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.",
+  "incomplets": [
+    {
+      "ecran": "M2 import et calage",
+      "etat": "confirmation de remplacement",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "p[data-consequence=\"true\"]"
+      ]
+    },
+    {
+      "ecran": "M2 import et calage",
+      "etat": "confirmation de remplacement",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "p[data-consequence=\"true\"]"
+      ]
+    }
+  ]
+}
