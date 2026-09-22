@@ -8,7 +8,7 @@
  * la garantit.
  *
  * Ce module traduit, il ne décide pas. Le tableau lui arrive tel que le
- * générateur l'a produit (W6) ; ce qu'il refuse, il le refuse parce que le
+ * générateur l'a produit (M02.W6) ; ce qu'il refuse, il le refuse parce que le
  * modèle de N2.2 l'exige, jamais parce qu'il en jugerait le contenu.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
@@ -44,7 +44,7 @@ export type ScheduleState = (typeof SCHEDULE_STATES)[number];
 export const LINE_DIRECTIONS = ['left', 'right', 'ahead', 'up', 'down', 'back'] as const;
 export type LineDirection = (typeof LINE_DIRECTIONS)[number];
 
-/** L'écartement d'une ligne par l'arbitrage de W9, et son motif. */
+/** L'écartement d'une ligne par l'arbitrage de M02.W9, et son motif. */
 export type Exclusion = {
   readonly cap: number;
   readonly ruleRef: string;
@@ -73,8 +73,8 @@ function isLineDirection(value: string | null): value is LineDirection | null {
 /**
  * Les commandes d'écriture d'un tableau et de toutes ses lignes.
  *
- * `excluded` porte, ligne par ligne, ce que l'arbitrage de W9 a écarté. Une
- * ligne écartée s'écrit quand même : W9 veut que l'écartement soit tracé,
+ * `excluded` porte, ligne par ligne, ce que l'arbitrage de M02.W9 a écarté. Une
+ * ligne écartée s'écrit quand même : M02.W9 veut que l'écartement soit tracé,
  * jamais silencieux, et R9 la montre à la maîtrise d'ouvrage pour qu'elle
  * puisse faire changer une priorité à la source.
  */
@@ -108,7 +108,7 @@ export function writeScheduleCommands(
       site_id: write.siteId,
       version: schedule.version,
       // Un tableau qu'on vient de générer est un brouillon. L'émission pour
-      // revue est une transition séparée (R12), et elle exige W11.
+      // revue est une transition séparée (R12), et elle exige M02.W11.
       state: 'draft',
       generated_at: schedule.generated_at,
       inputs_hash: schedule.inputs_hash,
@@ -137,7 +137,7 @@ function lineCommand(
   groupKey: string,
   exclusion: Exclusion | undefined,
 ): Outcome<EntityCommand> {
-  // W4, et le critère 4 de N2.7 : « une ligne sans point de décision ne peut
+  // M02.W4, et le critère 4 de N2.7 : « une ligne sans point de décision ne peut
   // pas être créée ». La colonne est NOT NULL en base ; le refus ici nomme la
   // règle au lieu de laisser la base rendre une violation de contrainte.
   if (line.decision_point_id.trim() === '') {

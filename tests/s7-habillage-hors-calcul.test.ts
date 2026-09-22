@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * S7 (partie N) — « La couche d'habillage ne participe à aucun calcul. Elle
+ * M01.S7 (partie N) — « La couche d'habillage ne participe à aucun calcul. Elle
  * n'apparaît dans aucun quantitatif, aucune zone cliquable, aucun parcours. »
  *
  * La règle se prouve par la structure, et non par l'inspection de trois
@@ -62,7 +62,7 @@ function enginePackages(): readonly string[] {
     .map(name => resolve(ROOT, 'packages', name, 'src'));
 }
 
-describe('S7 (partie N) — la couche d’habillage ne participe à aucun calcul', () => {
+describe('M01.S7 (partie N) — la couche d’habillage ne participe à aucun calcul', () => {
   it('les cinq moteurs sont bien tous inspectés', () => {
     const packages = enginePackages();
     expect(packages).toHaveLength(5);
@@ -80,7 +80,7 @@ describe('S7 (partie N) — la couche d’habillage ne participe à aucun calcul
     }
     expect(
       carried,
-      'S7 : ces tables d’habillage entrent dans l’entrée des moteurs.\n' + carried.join('\n'),
+      'M01.S7 : ces tables d’habillage entrent dans l’entrée des moteurs.\n' + carried.join('\n'),
     ).toHaveLength(0);
   });
 
@@ -99,7 +99,7 @@ describe('S7 (partie N) — la couche d’habillage ne participe à aucun calcul
     }
     expect(
       offenders,
-      'S7 : un moteur atteint la couche d’habillage.\n' + offenders.join('\n'),
+      'M01.S7 : un moteur atteint la couche d’habillage.\n' + offenders.join('\n'),
     ).toHaveLength(0);
   });
 

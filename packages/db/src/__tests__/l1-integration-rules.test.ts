@@ -18,19 +18,19 @@ import { createdTables, allUpSql } from '../migration-corpus.js';
  * L1 — les quatre règles d'intégration, une par test.
  *
  * Une règle numérotée est opposable et se cite dans une revue et dans un test
- * (N0). Attention au jeton : `R1` à `R4` désignent ici les règles
- * d'intégration de L1, non les règles métier `R1` à `R9` du module 05 (N5.2)
- * ni les `R1` à `R6` du complément « atelier ».
+ * (N0). Elles s'appellent désormais `INT-1` à `INT-4` : le jeton `R1` seul
+ * désignait aussi bien ces règles que celles du module 05 ou celles du
+ * complément « atelier », et la collision disparaît avec le préfixe.
  */
 describe('L1 — règles d’intégration', () => {
   const schemaTables = [...createdTables().keys()].sort();
 
   /**
-   * R1 (partie L). Propriété unique. « Chaque entité appartient à exactement un module.
+   * INT-1. Propriété unique. « Chaque entité appartient à exactement un module.
    * Lui seul l'écrit. Une entité sans propriétaire déclaré ne peut pas être
    * créée. »
    */
-  describe('R1 — propriété unique', () => {
+  describe('INT-1 — propriété unique', () => {
     it('aucune table n’a deux propriétaires', () => {
       const seen = new Map<string, ModuleKey>();
       const doubles: string[] = [];
@@ -88,13 +88,13 @@ describe('L1 — règles d’intégration', () => {
   });
 
   /**
-   * R1 (partie L) — le registre ne doit jamais déclarer la propriété d'une
+   * INT-1 — le registre ne doit jamais déclarer la propriété d'une
    * colonne qui
    * n'existe pas : ce serait décrire un modèle au lieu de décrire le schéma.
    * Les colonnes que A5.6 et N4.2 spécifient et que le schéma n'a pas encore
    * sont recensées à part, avec la tranche qui les construira.
    */
-  describe('R1 — le registre ne déclare que ce qui existe', () => {
+  describe('INT-1 — le registre ne déclare que ce qui existe', () => {
     const sql = allUpSql();
 
     function supportHasColumn(column: string): boolean {
@@ -122,7 +122,7 @@ describe('L1 — règles d’intégration', () => {
   });
 
   /**
-   * R2 (partie L). Lecture sans écriture. « Tout module lit ce dont il a besoin dans les
+   * INT-2. Lecture sans écriture. « Tout module lit ce dont il a besoin dans les
    * autres, aucun n'y écrit. »
    *
    * Le contrôle complet demande un chemin d'écriture, qui est le lot 1.2 de la
@@ -131,7 +131,7 @@ describe('L1 — règles d’intégration', () => {
    * possède déjà — une telle déclaration signalerait une attribution fausse,
    * comme le cycle que L0 a résolu.
    */
-  describe('R2 — lecture sans écriture', () => {
+  describe('INT-2 — lecture sans écriture', () => {
     it('aucun module ne déclare lire ses propres données', () => {
       const fautes = MODULE_KEYS
         .filter(m => MODULE_READS[m].includes(m))
@@ -141,11 +141,11 @@ describe('L1 — règles d’intégration', () => {
   });
 
   /**
-   * R3 (partie L). Dépendance descendante. « Une couche lit les couches inférieures,
+   * INT-3. Dépendance descendante. « Une couche lit les couches inférieures,
    * jamais les supérieures. Un cycle est une erreur de conception, jamais un
    * cas à gérer. »
    */
-  describe('R3 — dépendance descendante', () => {
+  describe('INT-3 — dépendance descendante', () => {
     it('aucune lecture ne remonte d’une couche, hors celles que L3 déclare', () => {
       const declared = new Set(DECLARED_UPWARD_READS.map(r => `${r.from}->${r.to}`));
       const remontees = MODULE_KEYS.flatMap(from =>
@@ -173,11 +173,11 @@ describe('L1 — règles d’intégration', () => {
   });
 
   /**
-   * R4 (partie L). Dégradation déclarée. « Chaque module dit ce qu'il devient quand un
+   * INT-4. Dégradation déclarée. « Chaque module dit ce qu'il devient quand un
    * module dont il dépend n'est pas souscrit. Le comportement dégradé est
    * spécifié, jamais improvisé, et jamais silencieux. »
    */
-  describe('R4 — dégradation déclarée', () => {
+  describe('INT-4 — dégradation déclarée', () => {
     it('les douze modules déclarent leur dégradation', () => {
       const muets = MODULE_KEYS.filter(m => (DEGRADATION_WHEN_ABSENT[m] ?? '').trim() === '');
       expect(muets).toEqual([]);

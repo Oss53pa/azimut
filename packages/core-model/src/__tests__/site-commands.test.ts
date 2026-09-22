@@ -146,11 +146,11 @@ describe('E5.1 — réversibilité', () => {
 });
 
 /**
- * W8 (partie N) — « Toute modification du graphe ou de l'annuaire marque
+ * M02.W8 (partie N) — « Toute modification du graphe ou de l'annuaire marque
  * périmées les seules lignes concernées. Ni plus, ni moins. » La précision de
  * la péremption commence ici : savoir exactement ce qui a changé.
  */
-describe('W8 (partie N) — les colonnes réellement changées', () => {
+describe('M02.W8 (partie N) — les colonnes réellement changées', () => {
   it('ne retient que les colonnes dont la valeur diffère', () => {
     const c = built({
       operation: 'update',

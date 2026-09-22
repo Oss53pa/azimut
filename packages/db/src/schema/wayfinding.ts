@@ -102,11 +102,11 @@ export const messageLine = azimut.table('message_line', {
   pictogram_id: uuid('pictogram_id').references(() => pictogram.id, { onDelete: 'set null' }),
   direction: text('direction'),
   information_level: integer('information_level').notNull(),
-  // W4 : non nullable en base, et pas seulement refusé par le moteur.
+  // M02.W4 : non nullable en base, et pas seulement refusé par le moteur.
   decision_point_id: uuid('decision_point_id').notNull()
     .references(() => node.id, { onDelete: 'cascade' }),
   stale: boolean('stale').notNull().default(false),
-  // W9, décision reportée en N2.2 et H11 : l'écartement est tracé.
+  // M02.W9, décision reportée en N2.2 et H11 : l'écartement est tracé.
   excluded: boolean('excluded').notNull().default(false),
   exclusion_reason: jsonb('exclusion_reason'),
 }, (t) => [

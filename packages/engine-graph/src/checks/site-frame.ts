@@ -41,7 +41,7 @@ export function checkLevelCalibrated(site: SiteData): Finding[] {
 }
 
 /**
- * S1 — le repère site est celui du premier calage.
+ * M01.S1 — le repère site est celui du premier calage.
  *
  * `calibrated_at` rend ce contrôle possible : sans lui, « le premier calage »
  * n'était pas identifiable et la règle, bien qu'opposable, restait invérifiable.

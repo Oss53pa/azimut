@@ -138,7 +138,7 @@ describe('M4 (partie M) — la longueur est calculée, jamais saisie', () => {
     if (r.ok) expect(r.value.lengthM).toBe(5);
   });
 
-  /** Elle tient compte de la dénivelée entre niveaux (S6, partie N). */
+  /** Elle tient compte de la dénivelée entre niveaux (M01.S6, partie N). */
   it('compte la dénivelée quand l’arête change de niveau', () => {
     const r = acceptEdge(edge({
       to: endpoint('n2', 3, 0, 'level-2', 4), hasVerticalLink: true,

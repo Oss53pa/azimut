@@ -2,7 +2,7 @@ import type { Point } from './geometry.js';
 import { roundMetres } from './round.js';
 
 /**
- * S6 — « La longueur d'une arête est calculée, jamais saisie, et recalculée à
+ * M01.S6 — « La longueur d'une arête est calculée, jamais saisie, et recalculée à
  * toute modification de position. »
  *
  * Une arête n'a pas de géométrie propre : elle relie deux nœuds et rien

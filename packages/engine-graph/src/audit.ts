@@ -48,7 +48,7 @@ export type EvacuationReport = {
 /**
  * Audit de couverture (N2.6).
  *
- * W10 — aucun taux de couverture n'est publié tant que la validation de
+ * M02.W10 — aucun taux de couverture n'est publié tant que la validation de
  * complétude du graphe échoue : le refus ci-dessous est cette règle. Il ne rend
  * aucun rapport, pas même partiel, parce qu'un taux calculé sur un graphe faux
  * serait lu comme un taux.

@@ -6,7 +6,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
  * layer, not an engine. Two anomaly codes surface from here:
  *  - ASSIST.PROPOSAL_REJECTED (info): a would-be proposal matches a prior
  *    rejection, so it is suppressed rather than re-presented.
- *  - ASSIST.EXTRACTION_BELOW_THRESHOLD (warning): a contour-detection (A1) run
+ *  - ASSIST.EXTRACTION_BELOW_THRESHOLD (warning): a contour-detection (M12.AS1) run
  *    extracted too little, so manual calage is recommended.
  */
 export type AssistProposal = {

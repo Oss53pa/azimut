@@ -42,8 +42,7 @@ async function apply(state: StoreState, sink: CommandSink, cs: EntityCommand[]) 
 }
 
 /**
- * F15 — `state/`, « magasin et commandes, écrit dans le dépôt », et A2 du
- * module 12 : l'atelier n'écrit jamais directement, il passe par les commandes
+ * F15 — `state/`, « magasin et commandes, écrit dans le dépôt », et M12.A2 : l'atelier n'écrit jamais directement, il passe par les commandes
  * du module propriétaire.
  */
 describe('magasin de commandes', () => {
@@ -157,7 +156,7 @@ describe('annulation et rétablissement', () => {
  * synchronisé n'est plus annulable localement. » C'est la règle qui rend
  * tenable la rencontre d'un historique local et d'une fusion par objet.
  *
- * A6 du module 12 la reprend : « La pile d'annulation est vidée à la
+ * M12.A6 la reprend : « La pile d'annulation est vidée à la
  * synchronisation. Revenir sur une modification synchronisée se fait par une
  * commande inverse tracée. »
  */

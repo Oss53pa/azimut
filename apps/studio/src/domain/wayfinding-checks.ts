@@ -33,7 +33,7 @@ export function jalonnementFromSchedule(
   const announced = new Map<string, Set<string>>();
 
   for (const line of schedule.lines) {
-    // W4 — toute ligne porte son point de décision : le moteur n'en produit
+    // M02.W4 — toute ligne porte son point de décision : le moteur n'en produit
     // aucune qui n'en ait pas.
     const point = line.decision_point_id;
     const set = announced.get(point) ?? new Set<string>();

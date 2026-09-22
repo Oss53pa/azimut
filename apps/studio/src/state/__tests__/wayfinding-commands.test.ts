@@ -140,7 +140,7 @@ describe('module 02 — niveau d’information et jalonnement', () => {
 
 describe('module 02 — ce que la propriété unique interdit', () => {
   it('n’écrit jamais hors des tables du module', () => {
-    // R1 (partie L) : la garantie ne vient pas de la discipline de l'appelant mais du
+    // INT-1 : la garantie ne vient pas de la discipline de l'appelant mais du
     // refus de `buildCommand`. Les quatre constructeurs nomment leur table en
     // dur, donc aucun n'a de voie vers une table voisine.
     const tables = [

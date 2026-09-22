@@ -29,7 +29,7 @@ function violations(versions: readonly SupportVersion[]): readonly Finding[] {
 }
 
 /**
- * N4.3 — règle G7. « Une version approuvée est immuable. Une correction crée
+ * N4.3 — règle M04.G7. « Une version approuvée est immuable. Une correction crée
  * une nouvelle version. »
  */
 describe('G7 — immuabilité d’une version approuvée', () => {
@@ -67,7 +67,7 @@ describe('G7 — immuabilité d’une version approuvée', () => {
 
   it('signale un numéro de version réécrit', () => {
     // Une correction qui réutilise le numéro est exactement ce que la seconde
-    // phrase de G7 interdit.
+    // phrase de M04.G7 interdit.
     const found = violations([
       version('sv-1', { version: 2, state: 'superseded' }),
       version('sv-2', { version: 2, state: 'draft' }),

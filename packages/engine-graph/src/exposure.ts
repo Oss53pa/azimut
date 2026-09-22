@@ -114,7 +114,7 @@ export function entryWeightSum(weights: readonly EntryWeight[]): number {
  *
  * Deux refus, dans cet ordre :
  *
- * 1. P1 — les trois pondérations sont déclarées. Une anomalie
+ * 1. M03.P1 — les trois pondérations sont déclarées. Une anomalie
  *    `FLOW.WEIGHTS_UNDECLARED` par facteur manquant.
  * 2. N3.3 — les parts de fréquentation somment à l'unité. Une anomalie
  *    `FLOW.WEIGHTS_NOT_NORMALIZED` sinon.

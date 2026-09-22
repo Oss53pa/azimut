@@ -163,12 +163,12 @@ export const ERROR_CATALOG = {
   'DATA.FACE_DIMENSIONS_INVALID':           { severity: 'blocking', description: 'Dimensions de face nulles ou négatives' },
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': { severity: 'blocking', description: 'Transition d’état de version de support interdite' },
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet de version de support sans motif' },
-  // N4.3 — règle G7 : une version approuvée est immuable, une correction crée
+  // N4.3 — règle M04.G7 : une version approuvée est immuable, une correction crée
   // une nouvelle version.
   'DATA.APPROVED_VERSION_NOT_IMMUTABLE': { severity: 'blocking', description: 'Version approuvée dont l’immuabilité n’est pas tenue' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable pour l’empreinte' },
 
-  // Partie N, module 01 (N1.4) : code de cellule (règle S3).
+  // Partie N, module 01 (N1.4) : code de cellule (règle M01.S3).
   'DATA.UNIT_CODE_REQUIRED':                { severity: 'blocking', description: 'Empreinte de nature cellule sans code d’unité' },
   'DATA.NAME_REQUIRED':                     { severity: 'blocking', description: 'Nom requis' },
   'DATA.NAME_DUPLICATE':                    { severity: 'blocking', description: 'Nom déjà porté par un autre site de l’organisation' },
@@ -186,7 +186,7 @@ export const ERROR_CATALOG = {
   'WAYFIND.LINE_MALFORMED':                 { severity: 'blocking', description: 'Ligne de message inexploitable à la composition' },
   'WAYFIND.SUPPORT_TYPE_UNKNOWN':           { severity: 'blocking', description: 'Support rattaché à une typologie inconnue' },
   'WAYFIND.FACE_TEMPLATE_MISSING':          { severity: 'blocking', description: 'Aucun gabarit pour cette face de typologie' },
-  // Partie N, module 02 (N2.4) : justification d'une ligne (règle W4).
+  // Partie N, module 02 (N2.4) : justification d'une ligne (règle M02.W4).
   'WAYFIND.LINE_UNJUSTIFIED':               { severity: 'blocking', description: 'Ligne de message sans point de décision qui la justifie' },
 
   // ── CALIB (D4 / tranche M) ────────────────────────────────
@@ -203,7 +203,7 @@ export const ERROR_CATALOG = {
   'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien' },
   'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus de la tolérance' },
   'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point homologue au-dessus de la tolérance' },
-  // N1.3 — règle S1 : le repère site est fixé au premier calage.
+  // N1.3 — règle M01.S1 : le repère site est fixé au premier calage.
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Repère site déjà fixé par le premier calage' },
   'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Repère site différent de celui du premier calage' },
 

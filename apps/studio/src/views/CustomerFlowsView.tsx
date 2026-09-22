@@ -29,7 +29,7 @@ const EMPTY_HYPOTHESES: ExposureHypotheses = {
 };
 
 /**
- * P6 — aucune donnée réelle n'est produite ici. Comptage, télémétrie et
+ * M03.P6 — aucune donnée réelle n'est produite ici. Comptage, télémétrie et
  * chiffre d'affaires déclaré viennent de tiers, et aucun chemin d'import
  * n'existe encore : l'échantillon est donc vide, et il le reste jusqu'à ce
  * qu'un import en verse un. Le remplir de nombres inventés ferait de cet
@@ -94,7 +94,7 @@ export function CustomerFlowsView(): JSX.Element {
   }, [declared, entrances, site.destinations, typologies]);
 
   /**
-   * P5 (partie N) — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
+   * M03.P5 (partie N) — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
    * vide, aucune comparaison n'est possible et le garde-fou refuse le montant
    * faute de déclaration, non faute de corrélation.
    */

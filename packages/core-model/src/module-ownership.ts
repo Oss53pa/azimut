@@ -1,7 +1,7 @@
 /**
  * L1 de la partie L — propriété unique, déclarée.
  *
- * « R1 (partie L). Propriété unique. Chaque entité appartient à exactement un module. Lui
+ * « INT-1. Propriété unique. Chaque entité appartient à exactement un module. Lui
  * seul l'écrit. Une entité sans propriétaire déclaré ne peut pas être créée. »
  *
  * Ce fichier est ce registre. Il ne contient que ce que les fiches de modules
@@ -55,7 +55,7 @@ export const NON_OPTIONAL_MODULES: readonly ModuleKey[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// R1 (partie L) — qui possède quoi
+// INT-1 — qui possède quoi
 // ---------------------------------------------------------------------------
 
 /**
@@ -136,7 +136,7 @@ export const SUPPORT_COLUMN_OWNER: Readonly<Record<string, ModuleKey>> = {
  * 01 : L0 en donne l'implantation au wayfinding et la fabrication à la
  * signalétique. Les créer pendant la tranche 1 serait de la largeur avant la
  * profondeur. Chacune porte donc la tranche qui la construira, et le contrôle
- * de R1 vérifie qu'aucune n'est déclarée possédée tant qu'elle n'existe pas.
+ * de INT-1 vérifie qu'aucune n'est déclarée possédée tant qu'elle n'existe pas.
  */
 export const COLUMNS_SPECIFIED_NOT_YET_IN_SCHEMA: Readonly<Record<string, string>> = {
   'support.substrate_key':
@@ -194,13 +194,13 @@ export function supportColumnOwner(column: string): ModuleKey | null {
   return SUPPORT_COLUMN_OWNER[column] ?? null;
 }
 
-/** R1 et R2 (partie L), appliqués à la table scindée. */
+/** INT-1 et INT-2, appliqués à la table scindée. */
 export function ownsSupportColumn(module: ModuleKey, column: string): boolean {
   return supportColumnOwner(column) === module;
 }
 
 // ---------------------------------------------------------------------------
-// R3 (partie L) — dépendance descendante : ce que chaque module lit
+// INT-3 — dépendance descendante : ce que chaque module lit
 // ---------------------------------------------------------------------------
 
 /**
@@ -226,7 +226,7 @@ export const MODULE_READS: Readonly<Record<ModuleKey, readonly ModuleKey[]>> = {
 /**
  * Les deux lectures que L3 déclare et qui remontent d'une couche.
  *
- * Ce ne sont pas des manquements à R3 (partie L) : les fiches de la partie L
+ * Ce ne sont pas des manquements à INT-3 : les fiches de la partie L
  * les posent explicitement,
  * et chacune est conditionnelle. Les recenser ici les rend opposables, au lieu
  * de les laisser passer pour des oublis.
@@ -249,7 +249,7 @@ export const DECLARED_UPWARD_READS: readonly {
 ];
 
 // ---------------------------------------------------------------------------
-// R4 (partie L) — dégradation déclarée
+// INT-4 — dégradation déclarée
 // ---------------------------------------------------------------------------
 
 /**
@@ -279,11 +279,11 @@ export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
 /**
  * Tables du schéma qu'aucune fiche de L3 ne range sous un module.
  *
- * R1 (partie L) dit qu'une entité sans propriétaire déclaré ne peut pas être
+ * INT-1 dit qu'une entité sans propriétaire déclaré ne peut pas être
  * créée. Ces
  * tables existent pourtant. Les inscrire ici, avec leur motif, rend le manque
  * visible et opposable : une table nouvelle doit être attribuée ou justifiée
- * ici, sans quoi le contrôle de R1 échoue.
+ * ici, sans quoi le contrôle de INT-1 échoue.
  */
 export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   organization: 'A5.1, accès et cloisonnement. N’appartient à aucun module : c’est la frontière dans laquelle les modules vivent.',

@@ -91,7 +91,7 @@ export function loadKioskSite(
   const nodes = readArray(graphDoc, 'nodes', 'data/graph.json') as GraphNode[];
   const shippedEdges = readArray(graphDoc, 'edges', 'data/graph.json') as Edge[];
 
-  // S6 — la longueur d'une arête est calculée, jamais lue. Le paquet la
+  // M01.S6 — la longueur d'une arête est calculée, jamais lue. Le paquet la
   // transporte, le terminal ne la croit pas : un itinéraire est une somme de
   // longueurs, et une longueur reçue fausse donnerait un itinéraire faux sans
   // que rien ne le signale.

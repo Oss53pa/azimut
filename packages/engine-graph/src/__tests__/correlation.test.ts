@@ -62,7 +62,7 @@ describe('assessCorrelation — mesure', () => {
     expect(result.coefficient).toBe(-1);
   });
 
-  it('corrèle les rangs et non les valeurs (P3)', () => {
+  it('corrèle les rangs et non les valeurs (M03.P3)', () => {
     // Même ordre que AGREEING, mais une performance très étirée sur d5. Une
     // corrélation linéaire changerait ; une corrélation de rangs non.
     const stretched = [
@@ -111,7 +111,7 @@ describe('assessCorrelation — mesure', () => {
     expect(result.coefficient).toBe(1);
   });
 
-  it('écarte et compte une observation sans origine ni date (P6)', () => {
+  it('écarte et compte une observation sans origine ni date (M03.P6)', () => {
     const result = assessCorrelation(AGREEING.indices, [
       ...AGREEING.observations,
       observation('d1', 100, { source_label: '  ' }),
@@ -129,7 +129,7 @@ describe('assessCorrelation — mesure', () => {
   });
 });
 
-describe('P5 — un montant est refusé tant que la corrélation est sous le seuil', () => {
+describe('M03.P5 — un montant est refusé tant que la corrélation est sous le seuil', () => {
   it('laisse passer une corrélation qui atteint le seuil', () => {
     const result = guardMonetaryEstimate(
       { min_correlation: 0.8 },
@@ -141,7 +141,7 @@ describe('P5 — un montant est refusé tant que la corrélation est sous le seu
     expect(result.value.coefficient).toBe(1);
   });
 
-  it('accepte l’égalité stricte au seuil : P5 dit « atteint »', () => {
+  it('accepte l’égalité stricte au seuil : M03.P5 dit « atteint »', () => {
     const result = guardMonetaryEstimate(
       { min_correlation: 1 },
       AGREEING.indices,

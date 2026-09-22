@@ -2,7 +2,7 @@
  * Chemin d'écriture du module 02, première partie : zonage, nommage,
  * hiérarchie de l'information, jalonnement.
  *
- * R1 et R2 (partie L) : seul le module propriétaire écrit ses tables.
+ * INT-1 et INT-2 : seul le module propriétaire écrit ses tables.
  * `buildCommand` le refuse autrement, et c'est ce refus qui rend la propriété opposable
  * plutôt que documentaire.
  *
@@ -174,7 +174,7 @@ export function createNamingRule(
 }
 
 /**
- * W3 — « Tout support porte au moins un niveau d'information. »
+ * M02.W3 — « Tout support porte au moins un niveau d'information. »
  *
  * Le rattachement se fait typologie par typologie. L'absence de rattachement
  * n'est pas refusée ici, puisqu'il n'y a rien à écrire : c'est l'audit du

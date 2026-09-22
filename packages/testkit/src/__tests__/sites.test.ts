@@ -154,12 +154,12 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
 });
 
 /**
- * S1 — le repère site d'un site de référence est celui de son premier calage.
+ * M01.S1 — le repère site d'un site de référence est celui de son premier calage.
  *
  * `calibrated_at` rend « le premier » identifiable : le test porte donc sur le
  * premier calage et non sur un calage quelconque.
  */
-describe('S1 — repère site et premier calage', () => {
+describe('M01.S1 — repère site et premier calage', () => {
   for (const [key, site] of allReferenceSites) {
     it(`${key} porte le repère de son premier calage, ou aucun`, () => {
       const origin = siteOrigin(site.site);

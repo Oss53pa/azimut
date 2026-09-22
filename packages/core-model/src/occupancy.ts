@@ -1,5 +1,5 @@
 /**
- * S5 (partie N) — « L'historique d'occupation est conservé. Une cellule qui
+ * M01.S5 (partie N) — « L'historique d'occupation est conservé. Une cellule qui
  * change d'occupant ne perd pas la trace du précédent, ce qui alimente les
  * modules 03 et 09. »
  *

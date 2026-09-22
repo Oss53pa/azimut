@@ -11,7 +11,7 @@ import type { Outcome } from './outcome.js';
  * relevée dessus est fausse sans que rien ne le signale. D'où la règle N1.4 :
  * un niveau sans plan calé est une anomalie bloquante.
  *
- * S2 et D1.1 tiennent sans exception : aucune coordonnée en pixels n'est
+ * M01.S2 et D1.1 tiennent sans exception : aucune coordonnée en pixels n'est
  * stockée, ici pas davantage qu'ailleurs. Un calage porte une échelle — un
  * rapport, pas une coordonnée —, un angle, et l'origine du fond exprimée en
  * mètres du repère site. La conversion s'écrit
@@ -40,11 +40,11 @@ export type PlanSource = {
  *
  * `origin_x` / `origin_y` situent l'origine du fond dans le repère site, en
  * mètres. Ce sont ces deux nombres que le premier calage d'un site recopie sur
- * la ligne `site`, où ils deviennent le repère du site et ne bougent plus (S1,
+ * la ligne `site`, où ils deviennent le repère du site et ne bougent plus (M01.S1,
  * D1.1) — voir `guardSiteOrigin`.
  *
  * `calibrated_at` date l'opération de calage, et non l'import du fond que date
- * `plan_source.uploaded_at`. C'est lui qui rend « le premier calage » de S1
+ * `plan_source.uploaded_at`. C'est lui qui rend « le premier calage » de M01.S1
  * identifiable : sans lui, la règle est écrite mais invérifiable. Facultatif
  * parce qu'une ligne enregistrée avant qu'il existe n'a pas de date, et qu'en
  * inventer une ferait passer une inconnue pour un fait.
@@ -55,7 +55,7 @@ export type PlanSource = {
  * ne dise laquelle s'applique.
  *
  * Conséquence sur `calibrated_at`, et c'est un contrat que l'écriture devra
- * tenir : recaler un fond (S9) met cette ligne à jour et **ne touche pas** à
+ * tenir : recaler un fond (M01.S9) met cette ligne à jour et **ne touche pas** à
  * `calibrated_at`, qui reste la date d'établissement du calage. Le faire suivre
  * la mise à jour déplacerait « le premier calage » à chaque recalage, et
  * `checkSiteOriginCoherent` finirait par comparer le repère du site à l'origine
@@ -80,7 +80,7 @@ export type PlanCalibration = {
  * lisible. Un seul calage sans date suffit à rendre la réponse inconnue — il
  * pourrait être le plus ancien, et rien ne permet de l'écarter. Répondre quand
  * même, en ne classant que les datés, désignerait un premier calage qui n'en
- * est peut-être pas un, et c'est sur lui que S1 est vérifiée.
+ * est peut-être pas un, et c'est sur lui que M01.S1 est vérifiée.
  *
  * À dates égales, l'identifiant tranche : deux exécutions rendent le même
  * calage (invariant 4). Une égalité ne devrait pas se produire entre deux
@@ -147,7 +147,7 @@ export function calibratedLevelIds(
 }
 
 /**
- * S1 / D1.1 — le repère site.
+ * M01.S1 / D1.1 — le repère site.
  *
  * Son origine est celle du premier calage du site : les deux nombres que porte
  * ce calage sont recopiés sur la ligne `site`, en mètres, et n'y sont plus
@@ -181,7 +181,7 @@ export function siteOrigin(site: SiteOriginBearer): Point | null {
 }
 
 /**
- * S1 — garde-fou du repère site.
+ * M01.S1 — garde-fou du repère site.
  *
  * Accepte de poser l'origine quand le site n'en a pas : c'est le premier
  * calage, et c'est lui qui fixe le repère. Refuse toute valeur différente
@@ -194,7 +194,7 @@ export function siteOrigin(site: SiteOriginBearer): Point | null {
  * millième de millimètre viennent de deux mesures différentes, donc de deux
  * repères différents.
  *
- * Un seul objet ici, la règle S1. Le point reçu est celui d'un calage que
+ * Un seul objet ici, la règle M01.S1. Le point reçu est celui d'un calage que
  * `computeCalibration` a déjà accepté ; valider la mesure une seconde fois
  * demanderait un code que le catalogue n'a pas et dédoublerait un contrôle qui
  * a son écran. Une valeur stockée illisible est de toute façon neutralisée à

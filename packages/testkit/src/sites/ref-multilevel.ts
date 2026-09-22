@@ -13,7 +13,7 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     rules_pack_id: null,
-    // S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
+    // M01.S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
     // de l'image du premier fond.
     origin_x_m: -12.5,
@@ -196,7 +196,7 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau RDC',
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -208,7 +208,7 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau R+1',
       occupancy_status: 'occupied',
       display_priority: 2,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
   ],

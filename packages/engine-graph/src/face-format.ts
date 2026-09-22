@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { destinationListBlockHeightMm, type TextMeasure } from './render-face.js';
 
 /**
- * N4.3 — règle G3. « Le format est calculé depuis le contenu, la distance de
+ * N4.3 — règle M04.G3. « Le format est calculé depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue. »
  *
  * Les trois entrées sont là, et chacune joue son rôle :
@@ -10,7 +10,7 @@ import { destinationListBlockHeightMm, type TextMeasure } from './render-face.js
  *  - le **contenu** donne le nombre de lignes, donc la hauteur qu'il faut pour
  *    les dessiner ;
  *  - la **distance de lecture** donne, par le paquet de règles, la hauteur de
- *    caractère exigée — jamais une constante de ce fichier (G4) ;
+ *    caractère exigée — jamais une constante de ce fichier (M04.G4) ;
  *  - la **variante linguistique la plus longue** donne la largeur : une face
  *    dimensionnée sur le français déborderait en anglais, et l'inverse.
  *

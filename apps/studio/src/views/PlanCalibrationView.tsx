@@ -56,7 +56,7 @@ export function PlanCalibrationView(): JSX.Element {
   const uncalibratedCount = levelStates.filter(l => !l.calibrated).length;
 
   /**
-   * S1 — le repère site. Posé au premier calage, jamais modifié ensuite. Le
+   * M01.S1 — le repère site. Posé au premier calage, jamais modifié ensuite. Le
    * garde-fou est interrogé avec l'origine qu'un nouveau calage voudrait
    * poser, celle du premier calage enregistré : sur un site déjà calé, il dit
    * ce qu'il dirait d'une tentative de déplacement.

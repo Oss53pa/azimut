@@ -78,12 +78,12 @@ function resolveCharHeight(
 }
 
 /**
- * G3 / G4 — la hauteur de caractère exigée à cette distance de lecture, en
+ * M04.G3 / M04.G4 — la hauteur de caractère exigée à cette distance de lecture, en
  * millimètres, telle que le paquet de règles la définit.
  *
  * Le calcul du format l'emploie sans recopier la formule : le seuil qui refuse
  * et la dimension qui se calcule viennent de la même règle et du même paquet
- * (invariant 1, G4).
+ * (invariant 1, M04.G4).
  */
 export function requiredCharHeightMm(
   pack: LoadedRulesPack,

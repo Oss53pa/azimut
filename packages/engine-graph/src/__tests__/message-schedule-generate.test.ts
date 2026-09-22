@@ -15,7 +15,7 @@ import type { TypologyInformationLevels } from '../message-schedule.js';
  * Le générateur, 243 lignes, n'avait pas d'essai propre : quatre fichiers
  * l'employaient comme décor pour éprouver autre chose. Ce qu'il produit
  * n'était donc vérifié nulle part, et c'est le producteur unique du contenu de
- * toutes les faces (règle W6, et fiche du module 02 : « le tableau des
+ * toutes les faces (règle M02.W6, et fiche du module 02 : « le tableau des
  * messages est le seul producteur de contenu de face »).
  *
  * L'attente est **dérivée du site**, jamais recopiée d'une exécution. Un essai
@@ -95,7 +95,7 @@ describe('N2.7 critère 1 — le tableau généré est exactement celui attendu'
     );
   });
 
-  it('justifie chaque ligne par le point de décision où le support est posé (W4)', () => {
+  it('justifie chaque ligne par le point de décision où le support est posé (M02.W4)', () => {
     const out = generate();
     if (!out.ok) throw new Error('génération refusée');
     for (const line of out.value.lines) {
@@ -103,7 +103,7 @@ describe('N2.7 critère 1 — le tableau généré est exactement celui attendu'
     }
   });
 
-  it('porte le niveau d’information réduit de la typologie (W3)', () => {
+  it('porte le niveau d’information réduit de la typologie (M02.W3)', () => {
     const out = generate();
     if (!out.ok) throw new Error('génération refusée');
     const expected = reduceInformationLevel(LEVELS[0]?.levels ?? []);
@@ -164,7 +164,7 @@ describe('N2.7 critère 1 — le tableau généré est exactement celui attendu'
     expect(order).toEqual(['sup-1', 'sup-2']);
   });
 
-  it('refuse la ligne d’un support posé hors d’un point de décision (W4)', () => {
+  it('refuse la ligne d’un support posé hors d’un point de décision (M02.W4)', () => {
     const elsewhere: readonly PlacedSupport[] = [
       { id: 'sup-hors', node_id: 'n-ml-dest-rdc', support_type_key: TYPOLOGY },
     ];

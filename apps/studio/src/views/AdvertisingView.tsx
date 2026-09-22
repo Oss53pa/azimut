@@ -68,9 +68,9 @@ export function AdvertisingView(): JSX.Element {
   }, [today]);
 
   /**
-   * R7 — les règles publicitaires viennent d'une extension du paquet de règles.
+   * M05.R7 — les règles publicitaires viennent d'une extension du paquet de règles.
    * En son absence, le module lève une anomalie et n'invente aucune règle : les
-   * contrôles techniques de R6 (partie N) continuent, les appréciations déclaratives, non,
+   * contrôles techniques de M05.R6 (partie N) continuent, les appréciations déclaratives, non,
    * puisqu'elles reposeraient sur un règlement que personne n'a versé.
    */
   const rulesPackFindings = useMemo<readonly Finding[]>(() => {
@@ -79,7 +79,7 @@ export function AdvertisingView(): JSX.Element {
   }, []);
 
   /**
-   * R5 (partie N) puis R6 — chaque visuel reçu passe par l'assainissement avant tout, puis
+   * M05.R5 (partie N) puis M05.R6 — chaque visuel reçu passe par l'assainissement avant tout, puis
    * par sa fiche technique. L'écran ne contrôle rien lui-même : il affiche le
    * constat de réception.
    */

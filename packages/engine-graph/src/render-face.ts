@@ -104,7 +104,7 @@ export function destinationListFontSizeMm(
 }
 
 /**
- * G3 — l'inverse du calcul ci-dessus : la hauteur de bloc minimale pour que le
+ * M04.G3 — l'inverse du calcul ci-dessus : la hauteur de bloc minimale pour que le
  * texte y soit dessiné à au moins `fontSizeMm`.
  *
  * Écrit ici, contre la fonction qu'elle inverse, pour que les deux ne dérivent

@@ -3,7 +3,7 @@
  * tracé ».
  *
  * Le geste écrit deux lignes, parfois trois : le fond de plan, son calage, et
- * l'origine du site quand c'est le premier calage (S1, partie N). Les trois
+ * l'origine du site quand c'est le premier calage (M01.S1, partie N). Les trois
  * partent sous un même groupe, comme la création d'un site : un geste, une
  * annulation.
  *
@@ -34,7 +34,7 @@ export type CalibrationWrite = {
 /**
  * L'origine du repère site que ce calage pose ou confirme.
  *
- * S1 : le repère est fixé par le premier calage et ne bouge plus. L'origine
+ * M01.S1 : le repère est fixé par le premier calage et ne bouge plus. L'origine
  * est donc celle du site quand il en a déjà une, et celle du calage sinon.
  */
 export type OriginProposal = {
@@ -97,7 +97,7 @@ export function calibrationCommands(
 
   const commands: EntityCommand[] = [source.value, calibrated.value];
 
-  // S1 (partie N) : le premier calage fixe le repère du site. Les suivants le
+  // M01.S1 (partie N) : le premier calage fixe le repère du site. Les suivants le
   // confirment, et n'écrivent donc rien — repasser la même valeur n'est pas
   // une modification, et `guardSiteOrigin` l'a déjà admise.
   if (siteOrigin(origin.site) === null) {

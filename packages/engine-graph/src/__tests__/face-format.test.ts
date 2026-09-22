@@ -15,7 +15,7 @@ function input(overrides: Partial<FaceFormatInput> = {}): FaceFormatInput {
 }
 
 /**
- * N4.3 — règle G3. Le format se calcule depuis le contenu, la distance de
+ * N4.3 — règle M04.G3. Le format se calcule depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue.
  */
 describe('destinationListBlockHeightMm — l’inverse du dimensionnement du rendu', () => {

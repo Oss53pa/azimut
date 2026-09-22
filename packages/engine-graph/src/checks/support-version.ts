@@ -1,7 +1,7 @@
 import type { SiteData, Finding } from '@azimut/core-model';
 
 /**
- * N4.3 — règle G7. « Une version approuvée est immuable. Une correction crée
+ * N4.3 — règle M04.G7. « Une version approuvée est immuable. Une correction crée
  * une nouvelle version. »
  *
  * La machine à états refuse toute modification d'une version approuvée, et la
@@ -14,7 +14,7 @@ import type { SiteData, Finding } from '@azimut/core-model';
  *    coexistent et rien ne dit laquelle part en fabrication.
  *  - `duplicate_number` : deux versions du même numéro sur un support. Une
  *    correction a réécrit un numéro au lieu d'en créer un nouveau — c'est
- *    exactement ce que la seconde phrase de G7 interdit.
+ *    exactement ce que la seconde phrase de M04.G7 interdit.
  *  - `hash_absent` : une version approuvée sans empreinte de contenu. Le
  *    déclencheur de la base fige ce qui existe ; il ne fige pas une absence,
  *    et une version sans empreinte ne peut pas être prouvée intacte.

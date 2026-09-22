@@ -6,7 +6,7 @@
  * horodatage fourni par l'appelant, jamais lu par la commande elle-même. Une
  * commande est réversible. »
  *
- * Ces commandes sont celles du module propriétaire, au sens de A2 (module 12) :
+ * Ces commandes sont celles du module propriétaire, au sens de M12.A2 :
  * « L'atelier n'écrit jamais directement en base. Il appelle les commandes du
  * module propriétaire. C'est ce qui empêche la règle de propriété unique
  * d'être contournée par l'interface. »
@@ -42,7 +42,7 @@ export type RowValues = Readonly<Record<string, ColumnValue>>;
  */
 export type EntityCommand = {
   readonly operation: CommandOperation;
-  /** Le module qui émet la commande. Contrôlé contre la propriété (R1, partie L). */
+  /** Le module qui émet la commande. Contrôlé contre la propriété (INT-1). */
   readonly module: ModuleKey;
   /** La table visée, telle que le schéma la nomme. */
   readonly table: string;
@@ -79,7 +79,7 @@ export type CommandDraft = {
  *
  * Trois refus, et chacun protège une règle :
  *  · une table — ou, pour `support`, une colonne — que le module émetteur ne
- *    possède pas (R1 et R2, partie L, et la scission de L0) ;
+ *    possède pas (INT-1 et INT-2, et la scission de L0) ;
  *  · une forme incohérente avec l'opération, qui rendrait l'inverse incalculable ;
  *  · un horodatage absent, que la commande ne peut pas suppléer sans lire
  *    l'horloge.
@@ -126,7 +126,7 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
   };
 }
 
-/** R1 et R2 (partie L) : un module n'écrit que ce qu'il possède. */
+/** INT-1 et INT-2 : un module n'écrit que ce qu'il possède. */
 export function ownsTable(module: ModuleKey, table: string): boolean {
   return OWNED_TABLES[module].includes(table);
 }
@@ -254,7 +254,7 @@ export function inverseCommand(
 /**
  * Les colonnes qu'une mise à jour change réellement.
  *
- * Sert au tableau des messages (W8) autant qu'à l'écriture : « Toute
+ * Sert au tableau des messages (M02.W8) autant qu'à l'écriture : « Toute
  * modification du graphe ou de l'annuaire marque périmées les seules lignes
  * concernées. Ni plus, ni moins. » Une commande qui ne change rien se voit.
  */

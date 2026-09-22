@@ -11,7 +11,7 @@ export const site = azimut.table('site', {
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
   rules_pack_id: uuid('rules_pack_id'),
-  // S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
+  // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
   // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
   origin_x_m: numeric('origin_x_m'),
@@ -96,6 +96,8 @@ export const zone = azimut.table('zone', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
+  // A5.2 — `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
+  // socle, à ne pas confondre avec la zone d'orientation du module 02.
   kind: text('kind').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -132,7 +134,7 @@ export const planCalibration = azimut.table('plan_calibration', {
   affine_f: numeric('affine_f'),
   mean_residual_m: numeric('mean_residual_m'),
   max_residual_m: numeric('max_residual_m'),
-  // S1 — date de l'opération de calage, distincte de l'import du fond que date
+  // M01.S1 — date de l'opération de calage, distincte de l'import du fond que date
   // `plan_source.uploaded_at`. C'est elle qui rend « le premier calage »
   // identifiable. Nullable et sans valeur par défaut : une ligne enregistrée
   // avant cette colonne n'a pas de date, et `now()` ferait passer la date de
@@ -141,7 +143,7 @@ export const planCalibration = azimut.table('plan_calibration', {
 }, (t) => [
   index('idx_plan_calibration_org').on(t.org_id),
   // « Chacun est calé au plus une fois » : un fond porte un calage, pas deux.
-  // Recaler (S9) met la ligne à jour, il n'en ajoute pas une seconde.
+  // Recaler (M01.S9) met la ligne à jour, il n'en ajoute pas une seconde.
   uniqueIndex('uq_plan_calibration_plan_source').on(t.plan_source_id),
 ]);
 
@@ -171,6 +173,7 @@ export const opening = azimut.table('opening', {
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   position: jsonb('position').notNull(),
   width_m: numeric('width_m').notNull(),
+  // A5.2 — `OPENING_KINDS`, contrainte posée par la migration 0029.
   kind: text('kind').notNull(),
 }, (t) => [
   index('idx_opening_org').on(t.org_id),

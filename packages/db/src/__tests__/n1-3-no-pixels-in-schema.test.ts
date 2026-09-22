@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { allUpSql } from '../migration-corpus.js';
 
 /**
- * S2 (partie N) : « Aucune coordonnée en pixels n'est stockée. La conversion
+ * M01.S2 (partie N) : « Aucune coordonnée en pixels n'est stockée. La conversion
  * se fait à l'affichage, jamais en base. »
  *
  * N1.7, critère 2, dit comment le vérifier : « Aucune coordonnée en pixels en
@@ -23,7 +23,7 @@ const COORDINATE_IN_PIXELS = /(^|_)[xy]_px$/;
  *
  * `control_point` vient de la migration `0018_atelier_m1_4_measured_calibration`,
  * écrite d'après le complément « atelier ». Ce document ne fait plus foi
- * depuis la consolidation, et S2 ne souffre aucune exception : « Aucune
+ * depuis la consolidation, et M01.S2 ne souffre aucune exception : « Aucune
  * coordonnée en pixels n'est stockée. »
  *
  * La retirer est une migration destructrice, donc un cas d'arrêt de A2.2,
@@ -69,7 +69,7 @@ const RESERVED = new Set([
   'PRIMARY', 'FOREIGN', 'UNIQUE', 'CHECK', 'CONSTRAINT', 'EXCLUDE', 'LIKE',
 ]);
 
-describe('S2 (partie N) — aucune coordonnée en pixels en base', () => {
+describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
   it('le schéma se lit, sans quoi l’essai ne prouverait rien', () => {
     const tables = migratedColumns();
     expect(tables.size).toBeGreaterThan(40);
@@ -88,7 +88,7 @@ describe('S2 (partie N) — aucune coordonnée en pixels en base', () => {
     }
     expect(
       offenders,
-      'S2 (partie N) : ces colonnes stockent une position en pixels. '
+      'M01.S2 (partie N) : ces colonnes stockent une position en pixels. '
       + 'Le repère de stockage est le repère site, en mètres (D1.1).\n'
       + offenders.join('\n'),
     ).toHaveLength(0);

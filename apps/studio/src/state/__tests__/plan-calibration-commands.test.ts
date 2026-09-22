@@ -46,7 +46,7 @@ describe('M2 (partie M) — écriture du calage', () => {
   });
 
   /**
-   * S1 (partie N) : « le repère est fixé par le premier calage ». Un second
+   * M01.S1 (partie N) : « le repère est fixé par le premier calage ». Un second
    * calage le confirme sans le réécrire — repasser la même valeur n'est pas
    * une modification.
    */

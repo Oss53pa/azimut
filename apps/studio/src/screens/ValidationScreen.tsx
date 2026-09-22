@@ -125,7 +125,7 @@ function Counts({ counts }: { readonly counts: Readonly<Record<Severity, number>
 }
 
 /**
- * W10 (partie N) et M5 (partie M) : le compteur dit que le calcul est
+ * M02.W10 (partie N) et M5 (partie M) : le compteur dit que le calcul est
  * conditionné, « il n'affiche jamais zéro ni un tiret ».
  */
 function Coverage({ display }: {

@@ -11,24 +11,24 @@ d'essai qui le prouve.
 
 ---
 
-## 1. Module 01, règles S1 à S9 (N1.3)
+## 1. Module 01, règles M01.S1 à M01.S9 (N1.3)
 
 | Règle | État | Preuve |
 | --- | --- | --- |
-| **S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
-| **S2** Aucune coordonnée en pixels stockée | **tenu avec une infraction déclarée** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Deux colonnes en infraction, voir §5 |
-| **S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
-| **S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
-| **S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
-| **S6** `edge.length_m` calculée, jamais saisie | tenu | `state/__tests__/graph-input.test.ts` — recalcul à chaque déplacement, dénivelée comprise |
-| **S7** La couche d'habillage ne participe à aucun calcul | tenu | `tests/s7-habillage-hors-calcul.test.ts` — `SiteData` ne porte aucune table d'habillage, et aucun des cinq moteurs ne la nomme ni n'importe l'atelier |
-| **S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
-| **S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
+| **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
+| **M01.S2** Aucune coordonnée en pixels stockée | **tenu avec une infraction déclarée** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Deux colonnes en infraction, voir §5 |
+| **M01.S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
+| **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
+| **M01.S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
+| **M01.S6** `edge.length_m` calculée, jamais saisie | tenu | `state/__tests__/graph-input.test.ts` — recalcul à chaque déplacement, dénivelée comprise |
+| **M01.S7** La couche d'habillage ne participe à aucun calcul | tenu | `tests/s7-habillage-hors-calcul.test.ts` — `SiteData` ne porte aucune table d'habillage, et aucun des cinq moteurs ne la nomme ni n'importe l'atelier |
+| **M01.S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
+| **M01.S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
 
-**Les neuf règles sont tenues.** S2 porte une dette nommée, arbitrage au §5.
+**Les neuf règles sont tenues.** M01.S2 porte une dette nommée, arbitrage au §5.
 
 Correction du 22 septembre : une première rédaction de cette matrice déclarait
-S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
+M01.S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
 C'était faux — la migration `0020` les ajoute par `ALTER TABLE`, avec sa
 contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
@@ -110,7 +110,7 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | --- | --- | --- |
 | Rôle `marketing` | Contradiction du document : A5.1 énumère sept valeurs, sa phrase suivante en annonce six, A6.2 en définit six | Arbitrage. Ni ajouté, ni retiré |
 | Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
-| `control_point.source_x_px`, `source_y_px` | Infraction à S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
+| `control_point.source_x_px`, `source_y_px` | Infraction à M01.S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
 | Formulaire de création d'un site | `NewSiteDialog` est construit et éprouvé, mais monté nulle part : `/sites` rend `SitesView`, qui n'expose aucun bouton de création | Décision de périmètre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 
@@ -125,6 +125,6 @@ codes `EDIT.*` absents du catalogue.
 
 Ajouts de la version du 22 septembre, décisions 82 à 90 de l'annexe Z :
 `support.code` absent du schéma, `message_line.excluded` et
-`exclusion_reason` absents du type comme de la base, règle W11 sans code, et
+`exclusion_reason` absents du type comme de la base, règle M02.W11 sans code, et
 `FileNameParts.reference` qui nomme désormais autre chose que ce que D11
 décrit. Les migrations se font dans la tranche où leur table est concernée.

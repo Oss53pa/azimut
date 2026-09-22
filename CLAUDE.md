@@ -23,7 +23,7 @@ besoins d'un rendu.
 **INV-2. Un panneau est une vue, pas un dessin.**
 Le contenu d'une face de support est résolu depuis le tableau des messages au
 moment du rendu, et le tableau des messages est lui-même généré depuis le
-graphe, le plan de jalonnement et l'annuaire (partie H, règle W6 de la partie
+graphe, le plan de jalonnement et l'annuaire (partie H, règle M02.W6 de la partie
 N). Le contenu n'est jamais saisi librement, sauf pour les blocs explicitement
 typés comme libres.
 

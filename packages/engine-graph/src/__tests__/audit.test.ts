@@ -199,7 +199,7 @@ describe('auditCoverage — anomalies nommées (N2.4)', () => {
     expect(ids).toEqual(['sup-a', 'sup-z']);
   });
 
-  it('W10 — aucun rapport, donc aucun taux, tant que le graphe ne valide pas', () => {
+  it('M02.W10 — aucun rapport, donc aucun taux, tant que le graphe ne valide pas', () => {
     const profile = refBroken.travel_profiles[0];
     if (profile === undefined) throw new Error('No profile in refBroken');
     const result = auditCoverage(refBroken, profile, [

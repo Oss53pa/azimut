@@ -15,7 +15,7 @@ export const refAdversarial: SiteData = {
     name: 'Site adversarial',
     country_code: 'FR',
     rules_pack_id: null,
-    // S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
     origin_y_m: 0,
@@ -224,7 +224,7 @@ export const refAdversarial: SiteData = {
       occupant_name: LONG_NAME_FR,
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / S5 — période close et période ouverte se déclarent pareil.
+      // N1.2 / M01.S5 — période close et période ouverte se déclarent pareil.
       valid_from: '2025-09-01',
       valid_to: '2027-08-31',
     },

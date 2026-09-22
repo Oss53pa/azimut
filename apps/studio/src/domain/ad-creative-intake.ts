@@ -3,11 +3,11 @@ import { guardCreativeAgainstSpec, type Creative, type CreativeSpec } from './ad
 import { sanitizeSvg, DEFAULT_SANITIZE_CONFIG, type SanitizeConfig } from './asset-sanitizer.js';
 
 /**
- * N5.2 — réception d'un visuel d'annonceur, règles R5 et R6.
+ * N5.2 — réception d'un visuel d'annonceur, règles M05.R5 et M05.R6.
  *
- * R5 : « Tout visuel reçu est assaini avant stockage, selon les règles d'import
+ * M05.R5 : « Tout visuel reçu est assaini avant stockage, selon les règles d'import
  * d'actifs déjà posées. Un visuel non assaini n'est jamais rendu. »
- * R6 : les contrôles techniques sont automatiques.
+ * M05.R6 : les contrôles techniques sont automatiques.
  *
  * Les deux sont ici dans cet ordre, et l'ordre porte du sens : on assainit
  * avant de stocker, donc avant tout le reste. Un visuel dont l'assainissement
@@ -44,7 +44,7 @@ export type CreativeIntake = {
   readonly creative_id: string;
   readonly sanitation: SanitationState;
   /**
-   * R5 (partie N) — un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
+   * M05.R5 (partie N) — un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
    * `deferred` n'est pas « propre en attendant », c'est « pas encore assaini ».
    */
   readonly renderable: boolean;

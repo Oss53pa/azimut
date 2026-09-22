@@ -2,7 +2,7 @@ import type { Finding, Outcome } from './outcome.js';
 import type { SupportVersionState } from './site.js';
 
 /**
- * G7 / T-2.14a §5 — Support-version state machine.
+ * M04.G7 / T-2.14a §5 — Support-version state machine.
  *
  * « Une version approuvée est immuable. Une correction crée une nouvelle
  * version. » C'est cette table qui le dit : depuis `approved`, aucun événement

@@ -6,7 +6,7 @@ const POSED: SiteOriginBearer = { origin_x_m: -12.5, origin_y_m: -8 };
 const UNPOSED: SiteOriginBearer = {};
 
 /**
- * S1 — « Le repère site est fixé au premier calage et n'est jamais modifié. »
+ * M01.S1 — « Le repère site est fixé au premier calage et n'est jamais modifié. »
  *
  * Les deux nombres sont ceux du premier calage, recopiés sur la ligne `site`.
  */
@@ -35,7 +35,7 @@ describe('siteOrigin', () => {
   });
 });
 
-describe('guardSiteOrigin — S1', () => {
+describe('guardSiteOrigin — M01.S1', () => {
   it('laisse le premier calage poser le repère', () => {
     const result = guardSiteOrigin(UNPOSED, { x_m: -12.5, y_m: -8 });
     expect(result.ok).toBe(true);
@@ -95,7 +95,7 @@ function cal(id: string, at?: string): PlanCalibration {
 }
 
 /**
- * S1 — `calibrated_at` rend « le premier calage » identifiable. Sans lui, la
+ * M01.S1 — `calibrated_at` rend « le premier calage » identifiable. Sans lui, la
  * règle était opposable et invérifiable.
  */
 describe('firstCalibration', () => {

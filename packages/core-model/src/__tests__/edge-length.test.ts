@@ -16,7 +16,7 @@ function edge(id: string, from: string, to: string): EdgeLengthInput['edges'][nu
 }
 
 /**
- * S6 — la longueur d'une arête est calculée depuis ses extrémités.
+ * M01.S6 — la longueur d'une arête est calculée depuis ses extrémités.
  */
 describe('edgeLengthBetween', () => {
   it('mesure dans le plan quand les deux bouts sont au même niveau', () => {

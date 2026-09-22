@@ -41,12 +41,12 @@ function mismatches(site: SiteData): readonly Finding[] {
 }
 
 /**
- * S1 — « Le repère site est fixé au premier calage et n'est jamais modifié. »
+ * M01.S1 — « Le repère site est fixé au premier calage et n'est jamais modifié. »
  *
  * `guardSiteOrigin` refuse l'écriture ; ce contrôle constate l'état enregistré,
  * ce que `calibrated_at` rend possible.
  */
-describe('S1 — repère site cohérent avec le premier calage', () => {
+describe('M01.S1 — repère site cohérent avec le premier calage', () => {
   it('ne signale rien sur les sites cohérents', () => {
     expect(mismatches(refMinimal)).toHaveLength(0);
     expect(mismatches(refMultilevel)).toHaveLength(0);

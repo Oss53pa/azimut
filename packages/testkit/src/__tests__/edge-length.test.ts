@@ -3,7 +3,7 @@ import { computeEdgeLengths } from '@azimut/core-model';
 import { allReferenceSites } from '../index.js';
 
 /**
- * S6 — « La longueur d'une arête est calculée, jamais saisie. »
+ * M01.S6 — « La longueur d'une arête est calculée, jamais saisie. »
  *
  * Les jeux d'essai sont des littéraux : la longueur y est écrite à la main, et
  * rien n'empêcherait d'en écrire une fausse. Ce test l'empêche.
@@ -12,7 +12,7 @@ import { allReferenceSites } from '../index.js';
  * donc une longueur écrite au millimètre lui est exactement comparable. Une
  * tolérance laisserait passer une valeur approchée, c'est à dire une saisie.
  */
-describe('S6 — longueur des arêtes des sites de référence', () => {
+describe('M01.S6 — longueur des arêtes des sites de référence', () => {
   for (const [key, site] of allReferenceSites) {
     it(`${key} : chaque longueur écrite est celle que mesurent ses nœuds`, () => {
       const computed = computeEdgeLengths({

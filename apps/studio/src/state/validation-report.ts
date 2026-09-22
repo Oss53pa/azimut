@@ -141,7 +141,7 @@ export function present(state: ValidationState): Presentation {
 /**
  * Le taux de couverture, ou la raison de son absence.
  *
- * W10 (partie N) : « Aucun taux de couverture n'est publié tant que la
+ * M02.W10 (partie N) : « Aucun taux de couverture n'est publié tant que la
  * validation de complétude échoue. » M5 (partie M) ajoute comment le dire :
  * « Le compteur correspondant indique que le calcul est conditionné, il
  * n'affiche jamais zéro ni un tiret. »

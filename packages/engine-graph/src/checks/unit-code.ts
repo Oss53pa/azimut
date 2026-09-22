@@ -2,7 +2,7 @@ import type { SiteData, Finding } from '@azimut/core-model';
 import { isCellFootprint } from '@azimut/core-model';
 
 /**
- * N1.4 — règle S3. Une empreinte de nature cellule porte obligatoirement un
+ * N1.4 — règle M01.S3. Une empreinte de nature cellule porte obligatoirement un
  * code d'unité ; les autres natures ne l'exigent pas.
  *
  * Un code vide ou fait d'espaces vaut un code absent : sur un panneau, il ne
@@ -43,7 +43,7 @@ export function checkUnitCodeDuplicate(site: SiteData): Finding[] {
   for (const footprint of site.footprints) {
     if (!isCellFootprint(footprint.kind)) continue;
     const code = (footprint.unit_code ?? '').trim().toLowerCase();
-    if (code.length === 0) continue; // déjà signalé par S3
+    if (code.length === 0) continue; // déjà signalé par M01.S3
     const byCode = byLevel.get(footprint.level_id) ?? new Map<string, string[]>();
     byCode.set(code, [...(byCode.get(code) ?? []), footprint.id]);
     byLevel.set(footprint.level_id, byCode);

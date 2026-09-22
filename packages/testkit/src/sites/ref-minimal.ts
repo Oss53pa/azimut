@@ -12,7 +12,7 @@ export const refMinimal: SiteData = {
     name: 'Site minimal',
     country_code: 'FR',
     rules_pack_id: null,
-    // S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
     origin_y_m: 0,
@@ -266,7 +266,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau A',
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -278,7 +278,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau B',
       occupancy_status: 'occupied',
       display_priority: 2,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -290,7 +290,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau C',
       occupancy_status: 'vacant',
       display_priority: 3,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -302,7 +302,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau D',
       occupancy_status: 'occupied',
       display_priority: 4,
-      // N1.2 / S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
   ],

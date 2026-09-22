@@ -7,7 +7,7 @@
  *
  * Ce module tient cette session d'un écran à l'autre : les cinq écrans
  * partagent un même état, sans quoi le parcours n'en serait pas un. Il écrit
- * par les commandes du module propriétaire (A2, module 12), sauvegarde
+ * par les commandes du module propriétaire (M12.A2), sauvegarde
  * localement à chaque geste (E5.4), et met en file quand le réseau manque
  * (E5.3).
  */

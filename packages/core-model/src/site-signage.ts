@@ -112,7 +112,7 @@ export type ContentBlockInstance = {
 };
 
 /** A5.6 `support_version` state — the approval lifecycle of a support. */
-/** A5.6 / G7 — états d'une version de support, énuméré fermé. */
+/** A5.6 / M04.G7 — états d'une version de support, énuméré fermé. */
 export const SUPPORT_VERSION_STATES = [
   'draft', 'in_review', 'approved', 'superseded',
 ] as const;

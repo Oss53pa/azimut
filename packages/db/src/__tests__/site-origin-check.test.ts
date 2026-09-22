@@ -23,7 +23,7 @@ function statementsOf(sql: string): string {
 }
 
 /**
- * S1 — origine du repère site, recopiée du premier calage et jamais modifiée.
+ * M01.S1 — origine du repère site, recopiée du premier calage et jamais modifiée.
  */
 describe('migration 0021', () => {
   it('ajoute les deux colonnes de l’origine', () => {
@@ -58,7 +58,7 @@ const DOWN_0022 = readFileSync(
 );
 
 /**
- * S1 — `calibrated_at` rend « le premier calage » identifiable.
+ * M01.S1 — `calibrated_at` rend « le premier calage » identifiable.
  */
 describe('migration 0022', () => {
   it('ajoute la date de calage sur plan_calibration', () => {

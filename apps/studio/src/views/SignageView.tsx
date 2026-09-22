@@ -19,7 +19,7 @@ type SignageViewProps = {
 /**
  * Mesure de texte d'aperçu. Approximation déclarée : la largeur moyenne d'un
  * glyphe vaut 0,55 cadratin. Le compilateur, lui, mesure sur les métriques
- * réelles de la police embarquée (G9) ; cet écran n'est qu'un aperçu et le dit.
+ * réelles de la police embarquée (M04.G9) ; cet écran n'est qu'un aperçu et le dit.
  */
 const PREVIEW_GLYPH_RATIO = 0.55;
 const previewMeasure: TextMeasure = (text, fontSizeMm) =>

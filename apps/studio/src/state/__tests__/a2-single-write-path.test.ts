@@ -25,7 +25,7 @@ function isUnderState(file: string): boolean {
 }
 
 /**
- * A2 (module 12) — « L'atelier n'écrit jamais directement en base. Il appelle
+ * M12.A2 — « L'atelier n'écrit jamais directement en base. Il appelle
  * les commandes du module propriétaire. C'est ce qui empêche la règle de
  * propriété unique d'être contournée par l'interface. »
  *
@@ -37,7 +37,7 @@ function isUnderState(file: string): boolean {
  * F15 pose la même chose en structure : `state/` est le dossier décrit comme
  * « magasin et commandes, écrit dans le dépôt ». Aucun autre n'écrit.
  */
-describe('A2 (module 12) — un seul chemin d’écriture', () => {
+describe('M12.A2 — un seul chemin d’écriture', () => {
   it('seul `state/` connaît le paquet de base', () => {
     const fautifs = FILES
       .filter(f => !isUnderState(f))

@@ -2,7 +2,7 @@
  * F15, `state/` — le magasin de l'écran M1 (partie M).
  *
  * Il tient l'état du formulaire, appelle la logique de création, confie les
- * commandes à l'émetteur, et rend les anomalies à l'écran. A2 (module 12) :
+ * commandes à l'émetteur, et rend les anomalies à l'écran. M12.A2 :
  * l'écran n'écrit pas, il passe par ici.
  */
 import { useCallback, useState } from 'react';

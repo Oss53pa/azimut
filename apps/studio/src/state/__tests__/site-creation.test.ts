@@ -151,7 +151,7 @@ describe('M1 (partie M) — le site naît avec un bâtiment et un niveau', () =>
   });
 
   /**
-   * A2 (module 12) et R1 (partie L) : les trois tables appartiennent au module
+   * M12.A2 et INT-1 : les trois tables appartiennent au module
    * 01, et c'est lui qui les écrit. `buildCommand` refuserait une table d'un
    * autre module.
    */

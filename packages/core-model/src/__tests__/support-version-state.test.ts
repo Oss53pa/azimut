@@ -65,10 +65,10 @@ describe('transitionSupportVersion (T-2.14a §5 / §6.8)', () => {
 });
 
 /**
- * G7 — « Une version approuvée est immuable. Une correction crée une nouvelle
+ * M04.G7 — « Une version approuvée est immuable. Une correction crée une nouvelle
  * version. » C'est la table d'événements qui le dit ; ce test l'y tient.
  */
-describe('G7 — ce qu’une version approuvée admet', () => {
+describe('M04.G7 — ce qu’une version approuvée admet', () => {
   it('n’admet que le remplacement', () => {
     expect(admittedEvents('approved')).toEqual([
       { event: 'supersede', to: 'superseded' },

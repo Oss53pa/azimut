@@ -9,7 +9,7 @@
  * La longueur n'est jamais saisie. M4 (partie M) : « La longueur est recalculée à toute
  * modification de position. Un champ de longueur saisissable serait une source
  * permanente d'incohérence. » Elle vient donc de `edgeLengthBetween`, la même
- * fonction que la validation de complétude emploie (S6, partie N).
+ * fonction que la validation de complétude emploie (M01.S6, partie N).
  */
 import type { EdgeEnd, Finding, NodeKind, Outcome, Point } from '@azimut/core-model';
 import { EDGE_MIN_LENGTH_M, edgeLengthBetween, quantizePoint } from '@azimut/core-model';

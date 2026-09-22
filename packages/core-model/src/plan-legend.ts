@@ -1,5 +1,5 @@
 /**
- * S8 (partie N) — « La légende et la rose des vents ne sont pas dessinées.
+ * M01.S8 (partie N) — « La légende et la rose des vents ne sont pas dessinées.
  * Elles sont générées depuis les catégories présentes et depuis l'orientation.
  * Seule leur position est composée. »
  *

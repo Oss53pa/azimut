@@ -37,7 +37,7 @@ type FaceStatus = {
  *
  * L'écran interrogeait jusqu'ici la table de D9, qui ne porte que les états.
  * Il interroge désormais celle des versions de support, qui porte les
- * événements — et c'est elle qui dit G7 : depuis `approved`, aucun événement
+ * événements — et c'est elle qui dit M04.G7 : depuis `approved`, aucun événement
  * n'est admis sauf le remplacement. Montrer « approuvé → remplacé » sans
  * nommer l'événement laissait croire qu'une version approuvée pouvait encore
  * bouger d'elle-même.

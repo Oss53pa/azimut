@@ -93,7 +93,7 @@ describe('écriture du tableau des messages', () => {
 });
 
 describe('ce que l’écriture refuse, et sous quelle règle', () => {
-  it('refuse une ligne sans point de décision (W4)', () => {
+  it('refuse une ligne sans point de décision (M02.W4)', () => {
     const out = writeScheduleCommands(schedule([line({ decision_point_id: '' })]), {
       ...WRITE, lineIds: [WRITE.lineIds[0] ?? ''],
     });
@@ -101,7 +101,7 @@ describe('ce que l’écriture refuse, et sous quelle règle', () => {
     if (!out.ok) expect(out.findings[0]?.code).toBe('WAYFIND.LINE_UNJUSTIFIED');
   });
 
-  it('refuse une ligne sans niveau d’information (W3)', () => {
+  it('refuse une ligne sans niveau d’information (M02.W3)', () => {
     const out = writeScheduleCommands(schedule([line({ information_level: null })]), {
       ...WRITE, lineIds: [WRITE.lineIds[0] ?? ''],
     });
@@ -130,7 +130,7 @@ describe('ce que l’écriture refuse, et sous quelle règle', () => {
   });
 });
 
-describe('W9 — l’écartement est tracé, jamais silencieux', () => {
+describe('M02.W9 — l’écartement est tracé, jamais silencieux', () => {
   const EXCLUSION: Exclusion = {
     cap: 4,
     ruleRef: 'WAYFIND.MAX_DESTINATIONS',

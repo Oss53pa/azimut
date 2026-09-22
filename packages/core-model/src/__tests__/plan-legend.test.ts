@@ -48,7 +48,7 @@ const DESTINATIONS = [
 
 const SITE = { categories: CATEGORIES, destinations: DESTINATIONS, footprints: FOOTPRINTS };
 
-describe('S8 (partie N) — la légende est générée, jamais dessinée', () => {
+describe('M01.S8 (partie N) — la légende est générée, jamais dessinée', () => {
   it('ne retient que les catégories réellement présentes sur le niveau', () => {
     expect(deriveLegend(SITE, LEVEL).map(e => e.code)).toEqual(['MODE', 'RESTAURATION']);
   });
@@ -98,7 +98,7 @@ describe('S8 (partie N) — la légende est générée, jamais dessinée', () =>
   });
 });
 
-describe('S8 et D6.3 — la rose des vents est orientée depuis les données', () => {
+describe('M01.S8 et D6.3 — la rose des vents est orientée depuis les données', () => {
   it('suit la rotation de la carte, pour que son nord tombe où le nord tombe', () => {
     expect(compassRoseAngleDeg(0)).toBe(0);
     expect(compassRoseAngleDeg(90)).toBe(90);

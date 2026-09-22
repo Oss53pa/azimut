@@ -12,7 +12,7 @@ export const refBroken: SiteData = {
     name: 'Site cassé',
     country_code: 'FR',
     rules_pack_id: null,
-    // S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
+    // M01.S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
     // `origin_x_m` / `origin_y_m` sont absents. Ce n'est pas l'origine (0, 0).
     // N1.2 — site bilingue. L'altitude du niveau de référence n'est pas
     // relevée : les altitudes de niveau restent justes, elles sont relatives.

@@ -1,7 +1,7 @@
 /**
  * Le chemin d'écriture, et il n'y en a qu'un.
  *
- * A2 (module 12) : « L'atelier n'écrit jamais directement en base. Il appelle
+ * M12.A2 : « L'atelier n'écrit jamais directement en base. Il appelle
  * les commandes du module propriétaire. C'est ce qui empêche la règle de
  * propriété unique d'être contournée par l'interface. »
  *
@@ -45,7 +45,7 @@ export type WriteSession = {
 /** Ce qu'une commande appliquée rend à l'appelant. */
 export type AppliedCommand = {
   readonly command: EntityCommand;
-  /** Les colonnes réellement changées, pour la péremption (W8, partie N). */
+  /** Les colonnes réellement changées, pour la péremption (M02.W8, partie N). */
   readonly changed: readonly string[];
 };
 
@@ -139,7 +139,7 @@ async function applyOne(tx: Executor, command: EntityCommand): Promise<void> {
  * cités séparément.
  *
  * Le nom est aussi revalidé ici. `buildCommand` l'a déjà contrôlé contre la
- * propriété du module (R1, partie L), mais le chemin d'écriture ne suppose pas
+ * propriété du module (INT-1), mais le chemin d'écriture ne suppose pas
  * que son appelant soit passé par là : c'est la seule voie vers la base, elle
  * ne fait confiance à personne.
  */

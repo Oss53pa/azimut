@@ -9,17 +9,18 @@ const ROOT = resolve(HERE, '..');
 /**
  * N0 — une règle numérotée est opposable : elle se cite en revue et en test.
  *
- * Trois jeux de jetons se recouvrent d'un document à l'autre, et CLAUDE.md
- * refuse qu'on les écrive seuls :
+ * Les règles de module portent désormais leur numéro de module — `M01.S2`,
+ * `M02.W6`, `M04.G1` — et les quatre règles d'intégration de la partie L
+ * s'appellent `INT-1` à `INT-4`. Ce préfixe lève la collision du côté du
+ * cahier des charges consolidé. Elle demeure du côté des seize documents
+ * antérieurs, qui ne font plus foi mais que du code écrit sous eux cite
+ * encore :
  *
  * - `M1` à `M17` : modules du complément atelier contre écrans de la partie M,
  *   où `M7` est un générateur de plans d'un côté et des règles d'écran de
  *   l'autre ;
- * - `R1` à `R6` : principes du complément contre les quatre règles
- *   d'intégration de la partie L1 ;
- * - `P1` à `P7` : principes du complément contre les règles métier du module 03
- *   de la partie N, où `P1` dit « tout objet porte une source et un statut »
- *   d'un côté et « les pondérations sont déclarées » de l'autre.
+ * - `R1` à `R6` et `P1` à `P7` : principes du même complément, dont les jetons
+ *   ressemblent à s'y méprendre aux anciennes règles de module.
  *
  * Un jeton écrit seul dans un commentaire ne désigne donc rien de précis. Pire,
  * il en a l'air : c'est une citation qui ne se vérifie pas, et qui autorise le
@@ -35,8 +36,13 @@ const ROOT = resolve(HERE, '..');
  * affaibli.
  */
 
-/** Jetons qui portent deux sens selon le document qui les écrit. */
-const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b/;
+/**
+ * Jetons qui portent deux sens selon le document qui les écrit.
+ *
+ * La garde finale écarte `M12.A2` et `M11.X4` : un préfixe de module suivi
+ * d'une lettre de règle n'est plus un jeton ambigu, c'est le nom complet.
+ */
+const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b(?!\.[A-Z])/;
 
 /**
  * Ce qui lève l'ambiguïté, et rien d'autre.

@@ -114,7 +114,7 @@ describe('M5 (partie M) — groupement et ordre', () => {
 });
 
 /**
- * W10 (partie N) : « Aucun taux de couverture n'est publié tant que la
+ * M02.W10 (partie N) : « Aucun taux de couverture n'est publié tant que la
  * validation de complétude échoue. » M5 (partie M) : « Le compteur
  * correspondant indique que le calcul est conditionné, il n'affiche jamais
  * zéro ni un tiret. »

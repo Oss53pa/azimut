@@ -29,7 +29,7 @@ export type CreativeSubmission = {
   readonly creative: Creative;
   readonly placement_id: string;
   readonly verdict: CreativeVerdict;
-  /** R5 (partie N) — ce qui a été reçu, et qui passe par l'assainissement. */
+  /** M05.R5 (partie N) — ce qui a été reçu, et qui passe par l'assainissement. */
   readonly payload: CreativePayload;
 };
 
@@ -38,9 +38,9 @@ export type CreativeSubmission = {
  *
  * Aucun n'est rattaché, et ce n'est pas un oubli du jeu d'essai : N5.7 pose que
  * le corpus réglementaire publicitaire par pays n'existe pas encore —
- * « mécanisme prêt, contenu absent ». R7 veut qu'en son absence le module lève
+ * « mécanisme prêt, contenu absent ». M05.R7 veut qu'en son absence le module lève
  * une anomalie et n'invente aucune règle. En attacher un ici inventerait
- * justement ce que R7 interdit d'inventer.
+ * justement ce que M05.R7 interdit d'inventer.
  */
 export const DEMO_AD_RULES_PACK: AdRulesPack | null = null;
 
@@ -166,7 +166,7 @@ export const DEMO_CREATIVES: readonly CreativeSubmission[] = [
       weight_bytes: 61_000_000,
     },
     // Binaire, et non conforme sur les cinq axes de la fiche : c'est le cas
-    // R6 (partie N), celui que l'assainissement ne concerne pas.
+    // M05.R6 (partie N), celui que l'assainissement ne concerne pas.
     payload: { kind: 'binary' },
   },
   {
@@ -180,7 +180,7 @@ export const DEMO_CREATIVES: readonly CreativeSubmission[] = [
       color_profile: 'CMYK',
       weight_bytes: 900_000,
     },
-    // R5 (partie N) en situation : ce qui est stocké n'est pas ce qui a été reçu. Le
+    // M05.R5 (partie N) en situation : ce qui est stocké n'est pas ce qui a été reçu. Le
     // script, le gestionnaire d'événement, l'entité externe et l'image
     // distante sont retirés ; ce qui reste est rendable, et l'écran dit ce qui
     // a été retiré.

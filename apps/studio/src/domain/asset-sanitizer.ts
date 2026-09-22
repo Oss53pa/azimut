@@ -13,7 +13,7 @@
  *
  * Vit dans `domain/` et non dans `editor/` : l'assainissement n'est pas une
  * affaire d'éditeur. Le module 05 le fait passer sur les visuels reçus d'un
- * annonceur (R5 (partie N)), et l'éditeur le fera passer sur les actifs importés.
+ * annonceur (M05.R5 (partie N)), et l'éditeur le fera passer sur les actifs importés.
  */
 
 import type { Finding } from '@azimut/core-model';

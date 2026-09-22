@@ -1,7 +1,7 @@
 /**
  * F15 — `state/`, « magasin et commandes, écrit dans le dépôt ».
  *
- * C'est le seul endroit de l'interface qui mène à une écriture. A2 (module 12)
+ * C'est le seul endroit de l'interface qui mène à une écriture. M12.A2
  * le formule comme une interdiction : « L'atelier n'écrit jamais directement
  * en base. Il appelle les commandes du module propriétaire. C'est ce qui
  * empêche la règle de propriété unique d'être contournée par l'interface. »

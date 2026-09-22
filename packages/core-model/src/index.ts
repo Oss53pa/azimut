@@ -2,7 +2,9 @@ export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
 export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
+  ZONE_KINDS, isSiteZoneKind, OPENING_KINDS, isOpeningKind,
 } from './site.js';
+export type { SiteZoneKind, OpeningKind } from './site.js';
 export { signedArea, polygonArea } from './geometry.js';
 export {
   fitMeasuredCalibration,

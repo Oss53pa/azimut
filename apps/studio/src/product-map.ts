@@ -51,10 +51,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'floor-plans', labelKey: 'nav.item.floorplans' },
       { view: 'checks', labelKey: 'nav.item.checks' },
     ],
-    // Partiel : S1 à S4 et S6 à S8 tiennent, S6 depuis qu'une longueur d'arête
-    // se calcule au lieu d'être crue. S5 ne l'est qu'à moitié — les champs de
+    // Partiel : M01.S1 à M01.S4 et M01.S6 à M01.S8 tiennent, M01.S6 depuis qu'une longueur d'arête
+    // se calcule au lieu d'être crue. M01.S5 ne l'est qu'à moitié — les champs de
     // période existent, aucune lecture ne les filtre et aucun jeu d'essai ne
-    // porte deux occupants successifs. S9 n'a aucun moteur : un fond de plan
+    // porte deux occupants successifs. M01.S9 n'a aucun moteur : un fond de plan
     // remplacé sans recalage n'est ni détecté ni signalé. Et
     // `LAYOUT.LANG_VARIANT_MISSING`, l'un des cinq contrôles de N1.4, n'est
     // levé nulle part, bien que `site.active_langs` le rende calculable.
@@ -68,11 +68,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.02.summary',
     entry: 'message-schedule',
     screens: [],
-    // Partiel : W1, W3 à W6, W8 et W10 tiennent. W2 ne détecte que les
+    // Partiel : M02.W1, M02.W3 à M02.W6, M02.W8 et M02.W10 tiennent. M02.W2 ne détecte que les
     // collisions — l'entité `naming_rule` n'existe pas, donc « une règle de
     // nommage déclarée est vérifiée à toute création » n'a aucune règle à
-    // vérifier. W7 tient sur la forme, le tableau portant version, état et
-    // empreinte, mais aucun circuit ne les fait transiter. W9 a son contrôle et
+    // vérifier. M02.W7 tient sur la forme, le tableau portant version, état et
+    // empreinte, mais aucun circuit ne les fait transiter. M02.W9 a son contrôle et
     // pas ses valeurs plafonds, ce que N2.8 pose. Enfin `orientation_zone`, une
     // entité de N2.2, n'existe pas, alors que le zonage d'orientation est dans
     // le périmètre du module et son premier écran.
@@ -100,11 +100,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'faces', labelKey: 'nav.item.faces' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
-    // Partiel : G1, G2, G4, G5, G6, G8 et G10 tiennent. G3 et G7 ont leur
+    // Partiel : M04.G1, M04.G2, M04.G4, M04.G5, M04.G6, M04.G8 et M04.G10 tiennent. M04.G3 et M04.G7 ont leur
     // moteur — le format se calcule, une version approuvée n'admet que son
     // remplacement — mais aucune écriture ne les emprunte, faute de chemin
     // d'écriture : rien n'écrit `dimensions_source: 'computed'`, rien n'appelle
-    // `transitionSupportVersion`. G9 vaut pour le SVG ; N4.8 laisse le
+    // `transitionSupportVersion`. M04.G9 vaut pour le SVG ; N4.8 laisse le
     // déterminisme du PDF ouvert, et c'est la tâche T-0.9 qui le tranche.
     engine: 'partial',
     source: 'engine-layout · engine-package · engine-graph/face-format',
@@ -116,9 +116,9 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.05.summary',
     entry: 'advertising',
     screens: [],
-    // Partiel, et non complet : R3 (partie N), R4, R5, R6 côté technique et R7 tiennent,
-    // mais R2 (partie N) (indexation de la grille sur l'exposition du module 03), R8
-    // (rendu en situation) et R9 (facture née d'une décision humaine) n'ont
+    // Partiel, et non complet : M05.R3 (partie N), M05.R4, M05.R5, M05.R6 côté technique et M05.R7 tiennent,
+    // mais M05.R2 (partie N) (indexation de la grille sur l'exposition du module 03), M05.R8
+    // (rendu en situation) et M05.R9 (facture née d'une décision humaine) n'ont
     // aucun moteur. Un module qui ne facture pas n'a pas un moteur complet.
     engine: 'partial',
     source: 'studio/domain/ad-planning · ad-creative-intake · rules/ad-rules',
@@ -130,10 +130,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.06.summary',
     entry: 'tenant-signs',
     screens: [],
-    // Partiel : T1 ne couvre pas les plages horaires, faute de modèle
-    // temporel, et T2 n'a aucun objet « avis humain » à opposer au contrôle
-    // automatique. T3 (refus motivé, réserves qui se lèvent), T4 (historique
-    // par cellule) et T5 (constat de conformité avec photographie) n'ont aucun
+    // Partiel : M06.T1 ne couvre pas les plages horaires, faute de modèle
+    // temporel, et M06.T2 n'a aucun objet « avis humain » à opposer au contrôle
+    // automatique. M06.T3 (refus motivé, réserves qui se lèvent), M06.T4 (historique
+    // par cellule) et M06.T5 (constat de conformité avec photographie) n'ont aucun
     // moteur, et les pièces déposées ne passent par aucun assainissement.
     engine: 'partial',
     source: 'studio/domain/tenant-regulation',

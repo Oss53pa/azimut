@@ -163,7 +163,7 @@ export function generateMessageSchedule(
       levelsByKey.get(support.support_type_key) ?? [],
     );
 
-    // W4 / N2.7-4 — une ligne sans point de décision ne peut pas être créée.
+    // M02.W4 / N2.7-4 — une ligne sans point de décision ne peut pas être créée.
     // Un support posé ailleurs qu'à un point de décision ne produit donc
     // aucune ligne : il est signalé, comme l'est une typologie inconnue ou
     // une face sans gabarit. Mieux vaut une ligne manquante et nommée qu'une

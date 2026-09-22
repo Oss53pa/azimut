@@ -102,7 +102,7 @@ export type ArtworkRender = {
    */
   readonly contentOverflowFindings: readonly Finding[];
   /**
-   * G3 — le format que le contenu, la distance de lecture et la variante
+   * M04.G3 — le format que le contenu, la distance de lecture et la variante
    * linguistique la plus longue imposent, indépendamment de celui qui a été
    * employé. `null` quand il n'est pas calculable : pas de paquet rattaché, pas
    * de distance relevée, ou pas de liste de destinations sur la face. Sa
@@ -202,13 +202,13 @@ export async function renderArtwork(
     if (!legibility.ok) legibilityFindings = legibility.findings;
   }
 
-  // G3 — le format que le contenu, la distance de lecture et la variante
+  // M04.G3 — le format que le contenu, la distance de lecture et la variante
   // linguistique la plus longue imposent. Calculé quand un paquet est rattaché
   // et qu'une distance est relevée ; la largeur reste indéterminée tant
   // qu'aucune mesure de texte n'est fournie (G5.1).
   const computedFormat = requiredFaceFormat(params, resolved.value);
 
-  // A5.6 / G3 — a hand-set format that comes out non-conform is a blocking
+  // A5.6 / M04.G3 — a hand-set format that comes out non-conform is a blocking
   // anomaly distinct from the underlying failure: it tells the operator to fix
   // the dimensions, not the content. Triggered by any format check — the text
   // too small for the reading distance (legibility) or text wider than its
@@ -263,12 +263,12 @@ export async function renderArtwork(
 }
 
 /**
- * G3 — le format que le contenu, la distance de lecture et la variante
+ * M04.G3 — le format que le contenu, la distance de lecture et la variante
  * linguistique la plus longue imposent.
  *
  * Rend `null` dès qu'une des trois entrées manque : sans paquet rattaché, la
  * hauteur de caractère exigée est inconnue et aucune valeur normative ne doit
- * lui être substituée (G4) ; sans distance relevée, la règle n'a rien à quoi
+ * lui être substituée (M04.G4) ; sans distance relevée, la règle n'a rien à quoi
  * s'appliquer ; sans liste de destinations, la face n'a pas de lignes à
  * dimensionner.
  */

@@ -1,31 +1,31 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * N3.2 / N3.3 — P5 : un montant n'est calculé que si la corrélation entre
+ * N3.2 / N3.3 — M03.P5 : un montant n'est calculé que si la corrélation entre
  * exposition et performance réelle atteint le seuil déclaré. En dessous, seuls
  * les écarts d'exposition sont produits, et l'interface le dit.
  *
- * Ce module ne calcule aucun montant. Il ne fait que la seule chose dont P5
+ * Ce module ne calcule aucun montant. Il ne fait que la seule chose dont M03.P5
  * fait dépendre le montant : établir la corrélation, la comparer au seuil
  * déclaré, et refuser par `FLOW.CORRELATION_TOO_LOW` quand elle n'y atteint
  * pas. Le montant lui-même relève du module 09, qui n'appellera son calcul
  * qu'après avoir franchi ce garde-fou.
  *
- * La frontière de P6 est portée par les types : l'indice d'exposition et
+ * La frontière de M03.P6 est portée par les types : l'indice d'exposition et
  * l'observation réelle sont deux enregistrements distincts, appariés ici par
  * destination. Azimut produit le premier et jamais le second.
  */
 
-/** P6 (partie N) — nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
+/** M03.P6 (partie N) — nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
 export type PerformanceSourceKind =
   | 'footfall_count'
   | 'telemetry'
   | 'declared_revenue';
 
 /**
- * P6 (partie N) — observation réelle importée pour une cellule.
+ * M03.P6 (partie N) — observation réelle importée pour une cellule.
  *
- * `source_label` et `observed_at` ne sont pas facultatifs : P6 exige que
+ * `source_label` et `observed_at` ne sont pas facultatifs : M03.P6 exige que
  * l'origine et la date soient conservées, et une observation qui ne les porte
  * pas n'est pas une observation, c'est un nombre.
  */
@@ -40,14 +40,14 @@ export type PerformanceObservation = {
   readonly observed_at: string;
 };
 
-/** P2 (partie N) / P3 — indice d'exposition calculé par Azimut pour une cellule. */
+/** M03.P2 (partie N) / M03.P3 — indice d'exposition calculé par Azimut pour une cellule. */
 export type ExposureIndex = {
   readonly destination_id: string;
   readonly index: number;
 };
 
 /**
- * P5 (partie N) — hypothèse propre au chiffrage : le seuil de corrélation.
+ * M03.P5 (partie N) — hypothèse propre au chiffrage : le seuil de corrélation.
  *
  * Il est déclaré par celui qui commande l'audit, jamais porté par le code et
  * jamais doté d'une valeur par défaut. Un seuil implicite serait un seuil que
@@ -62,10 +62,10 @@ export type MonetaryEstimateHypothesis = {
  * Méthode de corrélation. Une seule, nommée dans le résultat pour qu'un
  * lecteur sache laquelle a produit le verdict.
  *
- * Le rang, et non la valeur : P3 (partie N) fait de l'exposition « un indice relatif et
+ * Le rang, et non la valeur : M03.P3 (partie N) fait de l'exposition « un indice relatif et
  * un rang, jamais une valeur absolue ». Corréler linéairement un indice
  * ordinal à un chiffre d'affaires supposerait à cet indice une échelle
- * d'intervalle que P3 lui refuse. La corrélation des rangs de Spearman ne la
+ * d'intervalle que M03.P3 lui refuse. La corrélation des rangs de Spearman ne la
  * suppose pas.
  */
 export type CorrelationMethod = 'spearman';
@@ -82,7 +82,7 @@ export type CorrelationAssessment = {
   readonly method: CorrelationMethod;
   /** Nombre de paires entrées dans le calcul. */
   readonly pairs: number;
-  /** Observations écartées faute d'origine ou de date (P6 (partie N)). */
+  /** Observations écartées faute d'origine ou de date (M03.P6 (partie N)). */
   readonly dropped_unsourced: number;
   /** Coefficient dans [-1, 1], ou `null` quand il n'est pas établissable. */
   readonly coefficient: number | null;
@@ -103,7 +103,7 @@ export function isDeclaredThreshold(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value <= 1;
 }
 
-/** P6 (partie N) — une observation sans origine ni date n'entre dans aucun calcul. */
+/** M03.P6 (partie N) — une observation sans origine ni date n'entre dans aucun calcul. */
 export function isSourcedObservation(observation: PerformanceObservation): boolean {
   return observation.source_label.trim().length > 0
     && observation.observed_at.trim().length > 0;
@@ -257,21 +257,21 @@ export function assessCorrelation(
 }
 
 /**
- * P5 (partie N) — garde-fou du montant.
+ * M03.P5 (partie N) — garde-fou du montant.
  *
- * Refuse par `FLOW.CORRELATION_TOO_LOW` dans les trois cas où P5 ne permet pas
+ * Refuse par `FLOW.CORRELATION_TOO_LOW` dans les trois cas où M03.P5 ne permet pas
  * de produire un montant : le coefficient est établi mais sous le seuil,
  * l'échantillon est trop petit, ou le coefficient n'est pas défini. Les deux
  * derniers ne sont pas « une corrélation basse » mais une corrélation non
  * établie ; `status` le dit dans le rapport, et un montant y est refusé de la
- * même façon — P5 exige que la corrélation *atteigne* le seuil, et une
+ * même façon — M03.P5 exige que la corrélation *atteigne* le seuil, et une
  * corrélation inconnue ne l'atteint pas.
  *
  * Un seuil qui n'est pas déclaré est refusé avant tout calcul, par
  * `FLOW.WEIGHTS_UNDECLARED` : la déclaration manque, et prétendre comparer à
  * un seuil absent serait rendre un verdict sur rien.
  *
- * L'appelant qui essuie un refus garde le rapport d'exposition : P5 prévoit
+ * L'appelant qui essuie un refus garde le rapport d'exposition : M03.P5 prévoit
  * que « seuls les écarts d'exposition sont produits ». Le refus porte sur le
  * montant, pas sur l'analyse.
  */

@@ -79,7 +79,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     name: rows.site.name,
     country_code: rows.site.country_code,
     rules_pack_id: rows.site.rules_pack_id,
-    // S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
+    // M01.S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
     // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
     ...(rows.site.origin_x_m !== null && rows.site.origin_y_m !== null
       ? { origin_x_m: num(rows.site.origin_x_m), origin_y_m: num(rows.site.origin_y_m) }
@@ -175,7 +175,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
   }));
 
   /**
-   * S6 — la longueur d'une arête est calculée, jamais saisie. La colonne
+   * M01.S6 — la longueur d'une arête est calculée, jamais saisie. La colonne
    * `length_m` n'est donc pas lue : elle est un cache que l'application ne
    * croit pas. Deux nœuds déplacés d'un centimètre rendent toute valeur
    * stockée fausse, et un itinéraire faux ne se voit pas.

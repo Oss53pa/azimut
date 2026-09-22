@@ -110,7 +110,7 @@ export type MessageLine = {
   /**
    * N2.2 — **requis**. Le point de décision qui justifie la ligne.
    *
-   * W4 : une ligne sans justification est une anomalie bloquante, et le
+   * M02.W4 : une ligne sans justification est une anomalie bloquante, et le
    * critère N2.7-4 va plus loin — une telle ligne ne peut pas être créée.
    * C'est ce qui empêche un panneau de dire quelque chose que rien ne motive,
    * et c'est pourquoi ce champ n'est pas nullable.

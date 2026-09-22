@@ -50,7 +50,7 @@ function input(overrides: Partial<RequiredFormatInput> = {}): RequiredFormatInpu
 const TWO = [{ fr: 'Sortie', en: 'Exit' }, { fr: 'Accueil', en: 'Reception' }];
 
 /**
- * N4.3 — règle G3. Le format se calcule depuis le contenu, la distance de
+ * N4.3 — règle M04.G3. Le format se calcule depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue. Ce fichier éprouve la
  * lecture de ces trois entrées sur une face résolue ; `face-format.test.ts`
  * éprouve le calcul lui-même.
@@ -105,7 +105,7 @@ describe('G3 — le format exigé par une face', () => {
   });
 
   it('ne calcule rien sans paquet de règles rattaché', () => {
-    // Aucune valeur normative ne doit être substituée à la règle absente (G4).
+    // Aucune valeur normative ne doit être substituée à la règle absente (M04.G4).
     expect(requiredFaceFormat(input({ rulesPack: undefined }), face(TWO))).toBeNull();
   });
 

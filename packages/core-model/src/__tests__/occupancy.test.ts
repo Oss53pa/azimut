@@ -42,7 +42,7 @@ const B01_HISTORY: readonly Destination[] = [
   occupancy('d-4', 'Maison Perrin', { from: '2026-02-01' }),
 ];
 
-describe('S5 (partie N) — l’historique d’occupation se lit', () => {
+describe('M01.S5 (partie N) — l’historique d’occupation se lit', () => {
   it('survit à trois changements successifs sur une même cellule', () => {
     const history = occupancyHistory(B01_HISTORY, CELL);
     expect(history.map(d => d.occupant_name)).toEqual([
@@ -80,7 +80,7 @@ describe('S5 (partie N) — l’historique d’occupation se lit', () => {
   });
 });
 
-describe('S5 (partie N) — l’occupant en vigueur à une date', () => {
+describe('M01.S5 (partie N) — l’occupant en vigueur à une date', () => {
   it('retrouve chacun des quatre à une date de sa période', () => {
     const at = (on: string): readonly string[] =>
       occupantsOn(B01_HISTORY, CELL, on).map(d => d.occupant_name);
@@ -124,7 +124,7 @@ describe('S5 (partie N) — l’occupant en vigueur à une date', () => {
   });
 });
 
-describe('S5 (partie N) — l’occupation précédente, pour le chiffrage de reprise', () => {
+describe('M01.S5 (partie N) — l’occupation précédente, pour le chiffrage de reprise', () => {
   it('rend celle qui précède', () => {
     expect(previousOccupancy(B01_HISTORY, 'd-3')?.occupant_name).toBe('Optique Vallon');
   });

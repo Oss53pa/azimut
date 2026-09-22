@@ -41,10 +41,10 @@ function svg(source: string): CreativePayload {
 const BINARY: CreativePayload = { kind: 'binary' };
 
 /**
- * N5.2 — R5 (assainissement avant stockage, jamais rendu sinon) et R6
+ * N5.2 — M05.R5 (assainissement avant stockage, jamais rendu sinon) et M05.R6
  * (contrôles techniques automatiques), dans cet ordre.
  */
-describe('R5 — assainissement du visuel reçu', () => {
+describe('M05.R5 — assainissement du visuel reçu', () => {
   it('assainit un SVG et le rend affichable', () => {
     const intake = receiveCreative({ creative: creative('cr-1'), payload: svg(CLEAN_SVG) }, SPEC);
     expect(intake.sanitation).toBe('clean');
@@ -106,7 +106,7 @@ describe('R5 — assainissement du visuel reçu', () => {
   });
 });
 
-describe('R6 — fiche technique, après l’assainissement', () => {
+describe('M05.R6 — fiche technique, après l’assainissement', () => {
   it('signale chaque axe non conforme d’un visuel assaini', () => {
     const intake = receiveCreative(
       {

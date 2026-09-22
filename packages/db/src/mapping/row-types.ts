@@ -28,7 +28,7 @@ export type SiteRow = {
   readonly name: string;
   readonly country_code: string;
   readonly rules_pack_id: string | null;
-  /** S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
+  /** M01.S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
   readonly origin_x_m: string | null;
   readonly origin_y_m: string | null;
   /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
@@ -73,7 +73,7 @@ export type PlanCalibrationRow = {
   readonly origin_x: string;
   readonly origin_y: string;
   readonly rotation_deg: string;
-  /** S1 — NULL sur une ligne antérieure à la migration 0022. */
+  /** M01.S1 — NULL sur une ligne antérieure à la migration 0022. */
   readonly calibrated_at: TimestampValue | null;
 };
 
@@ -154,7 +154,7 @@ export type DestinationRow = {
   readonly occupant_name: string;
   readonly occupancy_status: string;
   readonly display_priority: number;
-  /** N1.2 / S5 — `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
+  /** N1.2 / M01.S5 — `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
   readonly valid_from: string | null;
   readonly valid_to: string | null;
 };

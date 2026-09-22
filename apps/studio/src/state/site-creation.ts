@@ -3,7 +3,7 @@
  *
  * Le formulaire de M1 (partie M) porte quatre champs et quatre contrôles. Cette fonction
  * les tient, et rend les commandes à écrire — elle n'écrit pas elle-même :
- * A2 (module 12) veut que l'interface passe par les commandes du module
+ * M12.A2 veut que l'interface passe par les commandes du module
  * propriétaire, et le module 01 possède `site`, `building` et `level` (L3).
  *
  * « Créer un site crée aussi un premier bâtiment et un premier niveau, nommés
@@ -119,7 +119,7 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         building_id: context.buildingId,
         name: context.defaultLevelName,
         // Premier niveau : rang zéro, altitude de référence. Ce n'est pas une
-        // valeur normative mais le point d'origine vertical du site, que S1
+        // valeur normative mais le point d'origine vertical du site, que M01.S1
         // fige ensuite avec le premier calage.
         ordinal: 0,
         elevation_m: 0,

@@ -14,7 +14,7 @@ import { writeScheduleCommands } from '../message-schedule-commands.js';
  *
  * Les essais unitaires prouvent que les commandes ont la forme voulue. Ils ne
  * prouvent pas qu'elles s'écrivent : les contraintes qui portent les règles du
- * module — `decision_point_id` non nul pour W4, le motif obligatoire pour W9,
+ * module — `decision_point_id` non nul pour M02.W4, le motif obligatoire pour M02.W9,
  * les politiques de cloisonnement — sont en base et nulle part ailleurs. Le
  * préalable K4 nº 7 a montré que ces trois points se décident à l'exécution.
  *
@@ -268,7 +268,7 @@ describe('le tableau des messages et ses lignes', () => {
     expect(lines.length).toBe(2);
     expect(lines[0]?.['excluded']).toBe(false);
     expect(lines[1]?.['excluded']).toBe(true);
-    // W9 : l'écartement est tracé. Le motif traverse l'aller-retour entier.
+    // M02.W9 : l'écartement est tracé. Le motif traverse l'aller-retour entier.
     expect(lines[1]?.['exclusion_reason']).toEqual({
       cap: 4, rule_ref: 'WAYFIND.MAX_DESTINATIONS',
       excluded_priority: 7, last_kept_priority: 3,
@@ -298,9 +298,9 @@ describe('le tableau des messages et ses lignes', () => {
  *
  * Les commandes du module produisent des lignes conformes ; ces essais posent
  * la question inverse — si quelque chose d'autre écrivait, la règle tiendrait-
- * elle ? W4 et W9 ne sont des règles opposables que si la réponse est oui.
+ * elle ? M02.W4 et M02.W9 ne sont des règles opposables que si la réponse est oui.
  */
-describe('W4 et W9 tenues par la base, et non par l’appelant', () => {
+describe('M02.W4 et M02.W9 tenues par la base, et non par l’appelant', () => {
   const SCHEDULE = 'a2000000-0000-0000-0000-000000000240';
 
   beforeAll(async () => {
@@ -329,14 +329,14 @@ describe('W4 et W9 tenues par la base, et non par l’appelant', () => {
     return out.value;
   }
 
-  it('refuse une ligne sans point de décision (W4)', async () => {
+  it('refuse une ligne sans point de décision (M02.W4)', async () => {
     const applied = await applyCommands(db, { userId: ALICE }, [
       rawLine('a2000000-0000-0000-0000-000000000241', { decision_point_id: null }),
     ]);
     expect(applied.ok).toBe(false);
   });
 
-  it('refuse une ligne écartée sans motif (W9)', async () => {
+  it('refuse une ligne écartée sans motif (M02.W9)', async () => {
     const applied = await applyCommands(db, { userId: ALICE }, [
       rawLine('a2000000-0000-0000-0000-000000000242', {
         excluded: true, exclusion_reason: null,

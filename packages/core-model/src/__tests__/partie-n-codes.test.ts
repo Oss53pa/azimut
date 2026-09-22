@@ -18,12 +18,12 @@ const PARTIE_N_CODES: readonly {
   readonly source: string;
 }[] = [
   // Module 01 — socle du site
-  { code: 'DATA.UNIT_CODE_REQUIRED', severity: 'blocking', source: 'N1.4 · règle S3' },
-  { code: 'DATA.CODE_DUPLICATE', severity: 'blocking', source: 'N1.4 · règle S3' },
+  { code: 'DATA.UNIT_CODE_REQUIRED', severity: 'blocking', source: 'N1.4 · règle M01.S3' },
+  { code: 'DATA.CODE_DUPLICATE', severity: 'blocking', source: 'N1.4 · règle M01.S3' },
   { code: 'CALIB.LEVEL_NOT_CALIBRATED', severity: 'blocking', source: 'N1.4' },
 
   // Module 02 — wayfinding
-  { code: 'WAYFIND.LINE_UNJUSTIFIED', severity: 'blocking', source: 'N2.4 · règle W4' },
+  { code: 'WAYFIND.LINE_UNJUSTIFIED', severity: 'blocking', source: 'N2.4 · règle M02.W4' },
   { code: 'GRAPH.DECISION_POINT_UNCOVERED', severity: 'blocking', source: 'N2.4' },
   { code: 'GRAPH.SUPPORT_UNUSED', severity: 'warning', source: 'N2.4' },
 

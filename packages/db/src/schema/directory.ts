@@ -39,7 +39,7 @@ export const destination = azimut.table('destination', {
   occupant_name: text('occupant_name').notNull().default(''),
   occupancy_status: text('occupancy_status').notNull().default('vacant'),
   display_priority: integer('display_priority').notNull().default(0),
-  // N1.2 / S5 — période d'occupation. Les deux bornes sont nullables :
+  // N1.2 / M01.S5 — période d'occupation. Les deux bornes sont nullables :
   // `valid_to` NULL désigne l'occupant en cours, `valid_from` NULL une entrée
   // non relevée. L'historique se lit par la succession des lignes.
   valid_from: date('valid_from'),

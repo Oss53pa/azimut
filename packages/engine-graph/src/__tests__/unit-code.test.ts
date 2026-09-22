@@ -13,13 +13,13 @@ function codes(site: SiteData, code: string): readonly Finding[] {
 }
 
 /**
- * N1.4 — règle S3 et unicité du code d'unité.
+ * N1.4 — règle M01.S3 et unicité du code d'unité.
  *
  * Le critère N1.7-3 demande que chaque cas soit détecté sur un site de
  * référence dédié, et ne le soit pas sur le site voisin. `ref-broken` porte
  * les violations, les trois autres sites sont propres.
  */
-describe('S3 — une cellule porte obligatoirement un code d’unité', () => {
+describe('M01.S3 — une cellule porte obligatoirement un code d’unité', () => {
   it('signale la cellule sans code, et elle seule', () => {
     const found = codes(refBroken, 'DATA.UNIT_CODE_REQUIRED');
     expect(found).toHaveLength(1);
@@ -90,7 +90,7 @@ describe('N1.4 — unicité du code d’unité par niveau', () => {
 
   it('ne compte pas deux fois une cellule déjà signalée sans code', () => {
     // Trois cellules sans code sur un niveau ne sont pas trois doublons : le
-    // code absent relève de S3, pas de l'unicité.
+    // code absent relève de M01.S3, pas de l'unicité.
     const noCodes: SiteData = {
       ...refMinimal,
       footprints: [0, 1, 2].map(i => ({
