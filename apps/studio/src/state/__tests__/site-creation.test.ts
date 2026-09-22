@@ -16,6 +16,7 @@ const CONTEXT: CreationContext = {
 const DRAFT: SiteDraft = {
   name: 'Gare de Lille Flandres',
   countryCode: 'FR',
+  timezone: 'Europe/Paris',
   rulesPackId: 'fr-erp-2026',
   activeLangs: ['fr', 'en'],
 };
@@ -91,17 +92,53 @@ describe('M1 (partie M) — création d’un site', () => {
     });
   });
 
+  /**
+   * M1 (partie M), version 6 : « facultatif à la création | aucune anomalie à
+   * la création ; information affichée ». `RULES.PACK_NOT_BOUND` a désormais
+   * une gravité unique, bloquante, et se lève à l'opération qui exige des
+   * règles — jamais ici.
+   */
   describe('paquet de règles', () => {
-    it('est facultatif, et son absence est un avertissement', () => {
+    it('est facultatif, et son absence ne lève aucune anomalie', () => {
       const r = createSiteCommands({ ...DRAFT, rulesPackId: null }, CONTEXT);
       expect(r.ok).toBe(true);
-      if (r.ok) expect(r.warnings.map(f => f.code)).toEqual(['RULES.PACK_NOT_BOUND']);
+      if (r.ok) expect(r.warnings).toEqual([]);
     });
 
-    it('ne prévient pas quand il est lié', () => {
+    it('ne lève rien non plus quand il est lié', () => {
       const r = createSiteCommands(DRAFT, CONTEXT);
       expect(r.ok).toBe(true);
       if (r.ok) expect(r.warnings).toEqual([]);
+    });
+  });
+
+  /**
+   * O4 et A5.2 — le fuseau du site est requis. La colonne est NOT NULL en
+   * base : sans contrôle ici, la création échouerait à l'écriture sur une
+   * violation de contrainte, là où il faut dire quel champ manque.
+   */
+  describe('fuseau horaire', () => {
+    it('est écrit sur la ligne du site', () => {
+      const r = createSiteCommands(DRAFT, CONTEXT);
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.value[0]?.after?.['timezone']).toBe('Europe/Paris');
+    });
+
+    it('est requis', () => {
+      const r = createSiteCommands({ ...DRAFT, timezone: '' }, CONTEXT);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.findings.map(f => f.code)).toContain('DATA.TIMEZONE_REQUIRED');
+    });
+
+    it('doit être un fuseau que la plateforme connaît', () => {
+      const r = createSiteCommands({ ...DRAFT, timezone: 'Europe/Atlantide' }, CONTEXT);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.findings.map(f => f.code)).toContain('DATA.TIMEZONE_REQUIRED');
+    });
+
+    it('accepte un fuseau hors d’Europe : le produit n’est pas français', () => {
+      const r = createSiteCommands({ ...DRAFT, timezone: 'Africa/Abidjan' }, CONTEXT);
+      expect(r.ok).toBe(true);
     });
   });
 

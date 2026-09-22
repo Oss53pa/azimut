@@ -22,6 +22,15 @@ export type SiteDraft = {
   readonly name: string;
   /** Code pays sur deux lettres, tel que M1 (partie M) l'affiche en colonne. */
   readonly countryCode: string;
+  /**
+   * O4 et A5.2 — identifiant de fuseau, requis à la création.
+   *
+   * « Tous les horaires, disponibilités d'arêtes, plages de fermeture et
+   * échéances de contrats s'interprètent dans ce fuseau. » La colonne est
+   * NOT NULL en base : sans lui, la création échouerait à l'écriture au lieu
+   * d'être refusée à la saisie.
+   */
+  readonly timezone: string;
   /** M1 (partie M) : « facultatif à la création ». */
   readonly rulesPackId: string | null;
   /** M1 (partie M) : « au moins une, français et anglais proposés ». */
@@ -58,6 +67,7 @@ export function createSiteCommands(
   const findings = [
     ...checkName(draft.name, context.existingNames),
     ...checkCountry(draft.countryCode),
+    ...checkTimezone(draft.timezone),
     ...checkLangs(draft.activeLangs),
   ];
   if (findings.length > 0) return { ok: false, findings };
@@ -72,7 +82,12 @@ export function createSiteCommands(
     commands.push(built.value);
   }
 
-  return { ok: true, value: commands, warnings: [...packWarning(draft)] };
+  // M1 (partie M), version 6 : le paquet de règles est facultatif à la
+  // création et n'y lève **aucune anomalie**. L'écran affiche à la place une
+  // information : la composition restera bloquée tant qu'aucun paquet n'est
+  // rattaché. `RULES.PACK_NOT_BOUND` garde sa gravité unique, bloquante, et se
+  // lève à l'opération qui exige des règles, pas ici.
+  return { ok: true, value: commands, warnings: [] };
 }
 
 function rowsOf(draft: SiteDraft, context: CreationContext) {
@@ -94,6 +109,7 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         org_id: context.orgId,
         name: draft.name.trim(),
         country_code: draft.countryCode,
+        timezone: draft.timezone,
         rules_pack_id: draft.rulesPackId,
         active_langs: JSON.stringify([...draft.activeLangs].sort()),
       },
@@ -156,6 +172,19 @@ function checkCountry(code: string): readonly Finding[] {
     : [finding('DATA.COUNTRY_REQUIRED', { given: code === '' ? 'none' : code })];
 }
 
+/**
+ * O4 — le fuseau du site. Requis, et vérifié contre les fuseaux que la
+ * plateforme connaît plutôt que contre une liste écrite ici : une liste de
+ * fuseaux copiée à la main vieillit, et le produit n'a pas à tenir la base
+ * de données des fuseaux du monde.
+ */
+function checkTimezone(timezone: string): readonly Finding[] {
+  if (timezone.trim() !== '' && knownTimezones().includes(timezone)) return [];
+  return [finding('DATA.TIMEZONE_REQUIRED', {
+    given: timezone === '' ? 'none' : timezone,
+  })];
+}
+
 function checkLangs(langs: readonly string[]): readonly Finding[] {
   return langs.length > 0
     ? []
@@ -163,21 +192,19 @@ function checkLangs(langs: readonly string[]): readonly Finding[] {
 }
 
 /**
- * M1 (partie M) : le paquet de règles est « facultatif à la création », et son absence
- * lève un avertissement. Sans paquet, le produit refusera de composer plus
- * tard plutôt que d'inventer une règle — ce qui est le comportement correct,
- * mais vaut mieux d'être dit au moment de la création qu'au moment du refus.
+ * Les fuseaux que la plateforme d'exécution déclare.
+ *
+ * `Intl.supportedValuesOf` les rend depuis la base de données de fuseaux du
+ * système, versionnée avec lui. C'est une donnée, pas une constante écrite
+ * ici, et elle reste juste quand un pays change de règle.
  */
-function packWarning(draft: SiteDraft): readonly Finding[] {
-  return draft.rulesPackId === null
-    ? [{
-        code: 'RULES.PACK_NOT_BOUND',
-        severity: 'warning',
-        entity: null,
-        params: {},
-        ruleRef: 'partieM-M1 (partie M)',
-      }]
-    : [];
+export function knownTimezones(): readonly string[] {
+  const intl: unknown = Intl;
+  if (typeof intl !== 'object' || intl === null) return [];
+  const supported = (intl as { supportedValuesOf?: unknown }).supportedValuesOf;
+  if (typeof supported !== 'function') return [];
+  const values: unknown = (supported as (key: string) => unknown).call(Intl, 'timeZone');
+  return Array.isArray(values) ? values.filter((v): v is string => typeof v === 'string') : [];
 }
 
 function normalise(value: string): string {

@@ -9,6 +9,13 @@ import {
 type SitesViewProps = {
   readonly currentKey: string;
   readonly onOpenSite: (key: string) => void;
+  /**
+   * M1 (partie M) — « Création réservée à `admin` et `designer` ».
+   *
+   * Absente, l'action n'est pas dessinée : F5bis.2 veut qu'une action non
+   * permise soit absente, jamais grisée.
+   */
+  readonly onCreate?: (() => void) | undefined;
 };
 
 /**
@@ -19,7 +26,7 @@ type SitesViewProps = {
  * deux, parce qu'une liste de sites ne se lit pas de la même façon selon qu'on
  * regarde des cas d'essai ou des sites réels.
  */
-export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Element {
+export function SitesView({ currentKey, onOpenSite, onCreate }: SitesViewProps): JSX.Element {
   const { t } = useI18n();
   const repository = useMemo(() => appRepository(), []);
   const { state, reload } = useSiteList(repository);
@@ -45,6 +52,9 @@ export function SitesView({ currentKey, onOpenSite }: SitesViewProps): JSX.Eleme
   ];
 
   const actions: readonly ScreenAction[] = [
+    ...(onCreate === undefined
+      ? []
+      : [{ id: 'create', label: t('sites.create.open'), onSelect: onCreate }]),
     { id: 'reload', label: t('sites.action.reload'), onSelect: reload },
   ];
 

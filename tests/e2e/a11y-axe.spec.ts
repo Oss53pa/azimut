@@ -245,14 +245,25 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
   }
 
   /**
-   * M7.9 (partie M) — la boîte de confirmation, qui porte son propre piège de focus et
-   * dont le contenu n'est analysable que quand elle est ouverte.
+   * M7.9 (partie M) — les boîtes de dialogue, qui portent leur propre piège de
+   * focus et dont le contenu n'est analysable que quand elles sont ouvertes.
    *
-   * C'est le remplacement de fond de M2, seule boîte atteignable dans les cinq
-   * écrans. Celle de création d'un site, spécifiée au champ près en M1, est
-   * construite mais n'est montée nulle part : `/sites` rend `SitesView`, qui
-   * n'expose aucun bouton de création. Porté en « constaté, non traité »
-   * plutôt que couvert par un essai qui ne s'exécuterait pas.
+   * Deux sont atteignables : le remplacement de fond de M2, et la création
+   * d'un site de M1, désormais montée sur `/sites`. La seconde figurait
+   * jusqu'ici en « constaté, non traité », faute d'un chemin pour l'ouvrir.
+   */
+  for (const lang of LANGS) {
+    test(`M1 création d’un site, formulaire ouvert, ${lang}`, async ({ page }) => {
+      await page.goto(url('/sites', lang));
+      await page.getByRole('button', { name: /^Nouveau site$|^New site$/ }).click();
+      // La boîte doit être là : sans elle, l'analyse porterait sur la liste et
+      // l'essai passerait sans rien éprouver.
+      await expect(page.getByRole('dialog')).toBeVisible();
+      await check(page, 'M1 création d’un site', 'formulaire ouvert', lang);
+    });
+  }
+  /**
+   * Le remplacement de fond de M2 (partie M).
    */
   for (const lang of LANGS) {
     test(`M2 import et calage, confirmation de remplacement, ${lang}`, async ({ page }) => {
@@ -319,7 +330,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
       mesure: 'M8 (partie M) critère 5 — absence de violation détectable automatiquement',
       outil: 'axe-core, dépendance de développement, jamais livrée',
       regles: WCAG_A_AA,
-      portee: 'Les cinq écrans de la partie M et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.',
+      portee: 'Les cinq écrans de la partie M, leurs deux boîtes de dialogue et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.',
       limite: 'L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.',
       incomplets: incompletes,
     }, null, 2)}\n`, 'utf8');

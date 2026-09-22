@@ -8,9 +8,10 @@ import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import {
-  SitesScreenAdapter, PlanScreenAdapter, FootprintsScreenAdapter,
+  PlanScreenAdapter, FootprintsScreenAdapter,
   GraphScreenAdapter, ValidationScreenAdapter,
 } from './workshop-adapters.js';
+import { SitesAdapter } from './SitesAdapter.js';
 
 /**
  * F15 — `app/`, la composition des écrans.
@@ -23,7 +24,7 @@ import {
 export function TrancheRouter(): JSX.Element {
   const route = useCurrentRoute();
   if (route.screen === 'legacy') return <Shell />;
-  if (route.screen === 'sites') return <SitesScreenAdapter />;
+  if (route.screen === 'sites') return <SitesAdapter />;
   // Partie R : l'écran du tableau des messages est de la famille Registre et
   // porte sur le site, non sur un niveau. Il n'entre donc pas dans l'atelier,
   // dont les quatre écrans partagent une session par niveau.

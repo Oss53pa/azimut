@@ -1,5 +1,7 @@
 import { type JSX, useState } from 'react';
-import { Button, Dialog, MultiChoice, SelectField, TextField, SPACE } from '../components/ui/index.js';
+import {
+  Button, Dialog, MultiChoice, SelectField, StateBanner, TextField, SPACE,
+} from '../components/ui/index.js';
 import type { Option } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { getErrorMessage } from '@azimut/core-model';
@@ -19,6 +21,8 @@ import { SITE_NAME_MAX } from '../state/site-creation.js';
  */
 export type NewSiteDialogProps = {
   readonly countries: readonly Option[];
+  /** O4 — les fuseaux que la plateforme déclare, jamais une liste écrite ici. */
+  readonly timezones: readonly Option[];
   readonly rulesPacks: readonly Option[];
   readonly langs: readonly Option[];
   readonly findings: readonly Finding[];
@@ -28,11 +32,12 @@ export type NewSiteDialogProps = {
 };
 
 export function NewSiteDialog({
-  countries, rulesPacks, langs, findings, busy, onSubmit, onClose,
+  countries, timezones, rulesPacks, langs, findings, busy, onSubmit, onClose,
 }: NewSiteDialogProps): JSX.Element {
   const { t, lang } = useI18n();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
+  const [timezone, setTimezone] = useState('');
   const [pack, setPack] = useState('');
   const [active, setActive] = useState<readonly string[]>(() => langs.map(l => l.value));
 
@@ -46,6 +51,7 @@ export function NewSiteDialog({
     onSubmit({
       name,
       countryCode: country,
+      timezone,
       rulesPackId: pack === '' ? null : pack,
       activeLangs: active,
     });
@@ -87,14 +93,36 @@ export function NewSiteDialog({
         />
 
         <SelectField
-          label={t('sites.create.pack')}
-          value={pack}
-          options={rulesPacks}
-          onChange={setPack}
-          placeholder={t('sites.create.pack.none')}
+          label={t('sites.create.timezone')}
+          value={timezone}
+          options={timezones}
+          onChange={setTimezone}
+          placeholder={t('sites.create.timezone.placeholder')}
           disabled={busy}
-          hint={t('sites.create.pack.hint')}
+          hint={t('sites.create.timezone.hint')}
+          error={messageFor('DATA.TIMEZONE_REQUIRED')}
         />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.xs }}>
+          <SelectField
+            label={t('sites.create.pack')}
+            value={pack}
+            options={rulesPacks}
+            onChange={setPack}
+            placeholder={t('sites.create.pack.none')}
+            disabled={busy}
+            hint={t('sites.create.pack.hint')}
+          />
+          {/*
+            M1 (partie M), version 6 : « aucune anomalie à la création ;
+            information affichée ». Un bandeau d'information, et non une
+            pastille d'avertissement : l'absence de paquet à la création n'est
+            pas un défaut, c'est une conséquence à connaître.
+          */}
+          {pack === '' && (
+            <StateBanner severity="info" message={t('sites.create.pack.note')} />
+          )}
+        </div>
 
         <MultiChoice
           label={t('sites.create.langs')}

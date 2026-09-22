@@ -14,6 +14,7 @@ const ENV = {
 const DRAFT = {
   name: 'Gare de Lille Flandres',
   countryCode: 'FR',
+      timezone: 'Europe/Paris',
   rulesPackId: null,
   activeLangs: ['fr'],
 };
