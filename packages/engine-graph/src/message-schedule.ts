@@ -18,7 +18,6 @@
 
 import type {
   ContentBlockKind,
-  ProofStatus,
   SiteData,
   TravelProfile,
 } from '@azimut/core-model';
@@ -119,11 +118,27 @@ export type MessageLine = {
   readonly stale: boolean;
 };
 
+/**
+ * N2.2 et R12 (partie R) — les quatre états d'un tableau, et eux seuls.
+ *
+ * Le vocabulaire des bons à tirer, `pending` et `rejected`, ne convient pas :
+ * R12 fait reposer l'émission pour revue sur `in_review`, qui n'y existe pas,
+ * et un rejet y ramène au brouillon au lieu de créer un état propre. Le
+ * circuit est le même, au sens de M02.W7, mais les états sont ceux-ci.
+ */
+export const SCHEDULE_STATES = ['draft', 'in_review', 'approved', 'superseded'] as const;
+
+export type ScheduleState = (typeof SCHEDULE_STATES)[number];
+
+export function isScheduleState(value: string): value is ScheduleState {
+  return SCHEDULE_STATES.some(state => state === value);
+}
+
 export type MessageSchedule = {
   readonly site_id: string;
   readonly version: number;
-  /** Même circuit de validation que les bons à tirer (H2.5). */
-  readonly state: ProofStatus;
+  /** Même circuit de validation que les bons à tirer (M02.W7, R12). */
+  readonly state: ScheduleState;
   /** ISO-8601, fourni par l'appelant, jamais lu ici. */
   readonly generated_at: string;
   readonly inputs_hash: string;

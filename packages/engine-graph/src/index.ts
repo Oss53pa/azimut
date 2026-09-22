@@ -145,8 +145,10 @@ export type {
 export {
   INFORMATION_LEVELS,
   NO_WAYFINDING_RULES,
+  SCHEDULE_STATES,
   computeScheduleInputsHash,
   isInformationLevel,
+  isScheduleState,
   messageLineId,
   reduceInformationLevel,
 } from './message-schedule.js';
@@ -156,6 +158,7 @@ export type {
   MessageLine,
   MessageSchedule,
   ScheduleInputs,
+  ScheduleState,
   TypologyInformationLevels,
   WayfindingRules,
 } from './message-schedule.js';
@@ -165,6 +168,19 @@ export { checkMessageSchedule, refreshStaleFlags } from './message-schedule-chec
 export type { StaleDiff } from './message-schedule-checks.js';
 export { messageScheduleToCsv, messageScheduleToMarkdown } from './message-schedule-export.js';
 export type { ScheduleLang } from './message-schedule-export.js';
+// R12 (partie R) — circuit de validation du tableau des messages
+export {
+  SCHEDULE_TRANSITIONS,
+  SCHEDULE_TRIGGERS,
+  transitionSchedule,
+  triggersFrom,
+} from './message-schedule-state.js';
+export type {
+  ScheduleTransition,
+  ScheduleTransitionContext,
+  ScheduleTransitionRule,
+  ScheduleTrigger,
+} from './message-schedule-state.js';
 export {
   composeFace,
   faceIndexForSide,

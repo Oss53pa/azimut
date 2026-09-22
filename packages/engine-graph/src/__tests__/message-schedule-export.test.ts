@@ -131,7 +131,7 @@ describe('H2.5 — export en document', () => {
     const doc = messageScheduleToMarkdown(build());
     expect(doc).toContain('# Tableau des messages');
     expect(doc).toContain('Version : 3');
-    expect(doc).toContain('État : pending');
+    expect(doc).toContain('État : draft');
     expect(doc).toContain('Généré le : 2026-04-01T00:00:00.000Z');
     expect(doc).toContain('Empreinte des entrées : ');
   });

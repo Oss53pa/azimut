@@ -231,7 +231,10 @@ export function generateMessageSchedule(
     value: {
       site_id: site.site.id,
       version,
-      state: 'pending',
+      // R12 (partie R), première ligne de la table : une génération produit un
+      // brouillon. L'émission pour revue est une transition séparée, et elle
+      // exige M02.W11.
+      state: 'draft',
       generated_at,
       inputs_hash: computeScheduleInputsHash({
         site, supports, profile, informationLevels, rules,

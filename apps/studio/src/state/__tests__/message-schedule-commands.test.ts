@@ -37,7 +37,7 @@ function schedule(lines: readonly MessageLine[]): MessageSchedule {
   return {
     site_id: WRITE.siteId,
     version: 7,
-    state: 'pending',
+    state: 'draft',
     generated_at: '2026-09-22T09:00:00.000Z',
     inputs_hash: 'sha256:abc',
     lines,

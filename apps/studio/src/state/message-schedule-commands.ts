@@ -28,18 +28,6 @@ export type ScheduleWrite = {
   readonly lineIds: readonly string[];
 };
 
-/**
- * N2.2 et R12 — les quatre états, et eux seuls.
- *
- * Le générateur rend aujourd'hui `pending`, hérité du vocabulaire des bons à
- * tirer. Ce n'est pas un état de tableau : R12 fait reposer l'émission pour
- * revue sur `in_review`, qui n'existe pas dans ce vocabulaire-là. Un tableau
- * généré entre donc en `draft`, qui est bien ce qu'il est, et la traduction
- * est faite ici plutôt que devinée par la base.
- */
-export const SCHEDULE_STATES = ['draft', 'in_review', 'approved', 'superseded'] as const;
-export type ScheduleState = (typeof SCHEDULE_STATES)[number];
-
 /** N2.2 — les six directions, relatives à l'usager. */
 export const LINE_DIRECTIONS = ['left', 'right', 'ahead', 'up', 'down', 'back'] as const;
 export type LineDirection = (typeof LINE_DIRECTIONS)[number];
@@ -93,6 +81,17 @@ export function writeScheduleCommands(
     };
   }
 
+  // R12 (partie R), première ligne de la table : une génération produit un
+  // brouillon, et l'émission pour revue est une transition séparée qui exige
+  // M02.W11. Écrire un tableau déjà en revue par le chemin de création
+  // contournerait cette transition, donc son contrôle.
+  if (schedule.state !== 'draft') {
+    return {
+      ok: false,
+      findings: [shapeRefusal('state', { state: schedule.state }, write.scheduleId)],
+    };
+  }
+
   const groupKey = `message_schedule:${write.scheduleId}`;
   const commands: EntityCommand[] = [];
 
@@ -107,9 +106,7 @@ export function writeScheduleCommands(
       org_id: write.orgId,
       site_id: write.siteId,
       version: schedule.version,
-      // Un tableau qu'on vient de générer est un brouillon. L'émission pour
-      // revue est une transition séparée (R12), et elle exige M02.W11.
-      state: 'draft',
+      state: schedule.state,
       generated_at: schedule.generated_at,
       inputs_hash: schedule.inputs_hash,
     },

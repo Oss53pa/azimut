@@ -234,7 +234,7 @@ function schedule(version: number, lines: readonly MessageLine[]): MessageSchedu
   return {
     site_id: SITE,
     version,
-    state: 'pending',
+    state: 'draft',
     generated_at: '2026-09-22T09:00:00.000Z',
     inputs_hash: 'sha256:abc',
     lines,

@@ -108,8 +108,10 @@ describe('H2.5 — génération du tableau des messages', () => {
     expect(schedule.lines[1]?.id).toBe(messageLineId('sup-1', 0, 1));
   });
 
-  it('entre dans le circuit de validation des bons à tirer', () => {
-    expect(scheduleOrThrow().state).toBe('pending');
+  // R12 (partie R), première ligne de la table : générer produit un brouillon.
+  // M02.W7 garde le circuit des bons à tirer, R12 en fixe les états.
+  it('entre dans le circuit de validation par le brouillon', () => {
+    expect(scheduleOrThrow().state).toBe('draft');
   });
 
   it('reprend l’horodatage de l’appelant, sans lire d’horloge', () => {
