@@ -19,6 +19,11 @@ import {
   highestLocalRank,
 } from '../state/session-store.js';
 import type { SessionState } from '../state/session-store.js';
+import {
+  EMPTY_STORE, dispatch, undo as undoLast, redo as redoLast, afterSync,
+  canUndo, canRedo,
+} from '../state/command-store.js';
+import type { StoreState } from '../state/command-store.js';
 
 /** L'organisation et le site du parcours, fournis par l'appelant. */
 export type SessionContext = {
@@ -31,6 +36,20 @@ export type TrancheSession = {
   readonly state: SessionState;
   readonly write: (commands: readonly EntityCommand[]) => Promise<boolean>;
   readonly count: (table: string) => number;
+  /**
+   * T-1.2b et E5.2 — la pile d'annulation du parcours.
+   *
+   * Elle est ici et non dans chaque écran : la portée est « le site en cours
+   * d'édition, par utilisateur », et un écran qui tiendrait la sienne perdrait
+   * l'annulation au changement d'écran.
+   */
+  readonly store: StoreState;
+  readonly canUndo: boolean;
+  readonly canRedo: boolean;
+  /** Annule le dernier geste en écrivant son inverse (E5.2). */
+  readonly undo: () => Promise<boolean>;
+  /** Rétablit le dernier geste annulé (E5.2). */
+  readonly redo: () => Promise<boolean>;
   /**
    * L'état local trouvé à la réouverture, tant que l'utilisateur n'a pas
    * tranché. `null` le reste du temps (E5.4).
@@ -75,6 +94,10 @@ export function useTrancheSession(
     [],
   );
   const [pendingResume, setPendingResume] = useState<SessionState | null>(null);
+  // E5.2 — la pile d'annulation du site en cours. Le `ref` porte l'état
+  // courant, pour qu'un second geste parte du premier et non du dernier rendu.
+  const [storeState, setStore] = useState<StoreState>(EMPTY_STORE);
+  const store = useRef<StoreState>(EMPTY_STORE);
 
   /**
    * Prend un état pour état courant. Le compteur d'identifiants reprend après
@@ -127,6 +150,11 @@ export function useTrancheSession(
         const { state: flushedState } = await flushQueue(current.current, send);
         current.current = flushedState;
         setState(flushedState);
+        // E5.3 — « La pile d'annulation est vidée à la synchronisation. Ce qui
+        // est synchronisé n'est plus annulable localement. » Revenir dessus
+        // demande une commande inverse tracée, jamais une annulation.
+        store.current = afterSync(store.current);
+        setStore(store.current);
       })();
     };
     const onOffline = (): void => {
@@ -141,18 +169,48 @@ export function useTrancheSession(
     };
   }, [send]);
 
-  const write = useCallback(async (commands: readonly EntityCommand[]): Promise<boolean> => {
+  /**
+   * L'émetteur que le magasin de commandes appelle.
+   *
+   * C'est lui qui applique à l'état local, sauvegarde (E5.4) et met en file ce
+   * que le réseau n'a pas pris. Le magasin, lui, n'empile qu'après : un geste
+   * refusé ne laisse rien dans la pile, sans quoi on pourrait « annuler » une
+   * écriture qui n'a pas eu lieu.
+   */
+  const sink = useCallback(async (
+    commands: readonly EntityCommand[],
+  ): Promise<Outcome<unknown>> => {
     const written = await writeToSession(current.current, commands, send);
     current.current = written;
-    // E5.4 : sauvegarde locale à chaque commande validée, distincte de la
-    // synchronisation serveur.
     saveSession(context.siteId, written, storage);
     markOpenInTab(context.siteId, tabStorage);
     setState(written);
+    return { ok: true, value: null, warnings: [] };
+  }, [context.siteId, send, storage, tabStorage]);
+
+  const write = useCallback(async (commands: readonly EntityCommand[]): Promise<boolean> => {
+    const queuedBefore = current.current.queued.length;
+    const result = await dispatch(store.current, sink, commands);
+    store.current = result.state;
+    setStore(result.state);
     // Rien ne reste en file quand l'envoi a abouti ; sinon il repartira à la
     // synchronisation, et l'écran le dit.
-    return written.queued.length === current.current.queued.length;
-  }, [context.siteId, send, storage, tabStorage]);
+    return current.current.queued.length === queuedBefore;
+  }, [sink]);
+
+  const undo = useCallback(async (): Promise<boolean> => {
+    const result = await undoLast(store.current, sink, new Date().toISOString());
+    store.current = result.state;
+    setStore(result.state);
+    return result.outcome.ok;
+  }, [sink]);
+
+  const redo = useCallback(async (): Promise<boolean> => {
+    const result = await redoLast(store.current, sink, new Date().toISOString());
+    store.current = result.state;
+    setStore(result.state);
+    return result.outcome.ok;
+  }, [sink]);
 
   const newId = useCallback((): string => {
     counter.current += 1;
@@ -166,6 +224,11 @@ export function useTrancheSession(
   return {
     state,
     write,
+    store: storeState,
+    canUndo: canUndo(storeState),
+    canRedo: canRedo(storeState),
+    undo,
+    redo,
     pendingResume,
     acceptResume,
     discardResume,

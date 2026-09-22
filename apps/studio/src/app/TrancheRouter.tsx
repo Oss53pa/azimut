@@ -1,4 +1,4 @@
-import { type JSX, useState } from 'react';
+import { type JSX, useEffect, useState } from 'react';
 import { useCurrentRoute } from './useCurrentRoute.js';
 import type { Route } from './routes.js';
 import { useTrancheSession } from './useTrancheSession.js';
@@ -60,6 +60,26 @@ function TrancheWorkspace({ route }: {
   // Cacher le travail pendant qu'on demande quoi en faire priverait
   // l'utilisateur de ce sur quoi il doit se décider.
   const resume = session.pendingResume;
+
+  /**
+   * E5.2 et M3 (partie M) — `Ctrl+Z` annule, `Ctrl+Maj+Z` rétablit.
+   *
+   * La liaison est posée ici et non dans chaque écran : la portée de la pile
+   * est « le site en cours d'édition », et deux liaisons concurrentes
+   * annuleraient deux gestes pour une frappe. Un champ de saisie garde la
+   * sienne : annuler une frappe n'est pas annuler un geste d'édition.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent): void => {
+      if (!(event.ctrlKey || event.metaKey) || event.key.toLowerCase() !== 'z') return;
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+      event.preventDefault();
+      void (event.shiftKey ? session.redo() : session.undo());
+    };
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); };
+  }, [session]);
 
   return (
     <>
