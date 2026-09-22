@@ -19,14 +19,18 @@ d'essai qui le prouve.
 | **S2** Aucune coordonnée en pixels stockée | **tenu avec une infraction déclarée** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Deux colonnes en infraction, voir §5 |
 | **S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
 | **S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
-| **S5** L'historique d'occupation est conservé | **absent** | `destination` ne porte ni `valid_from` ni `valid_to`. N1.7 critère 4 exige trois occupants successifs sur une cellule ; aucun essai |
+| **S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
 | **S6** `edge.length_m` calculée, jamais saisie | tenu | `state/__tests__/graph-input.test.ts` — recalcul à chaque déplacement, dénivelée comprise |
-| **S7** La couche d'habillage ne participe à aucun calcul | **partiel** | `editor/__tests__/decoration-label.test.ts` couvre le rendu du libellé. Aucun essai ne prouve l'absence de l'habillage du quantitatif, des zones cliquables et des parcours |
-| **S8** Légende et rose des vents générées, jamais dessinées | **absent** | Aucun producteur, aucun essai |
+| **S7** La couche d'habillage ne participe à aucun calcul | tenu | `tests/s7-habillage-hors-calcul.test.ts` — `SiteData` ne porte aucune table d'habillage, et aucun des cinq moteurs ne la nomme ni n'importe l'atelier |
+| **S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
 | **S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
 
-**Quatre sur neuf incomplètes.** S5 et S8 n'ont ni code ni essai ; S7 est
-partiel ; S2 porte une dette nommée.
+**Les neuf règles sont tenues.** S2 porte une dette nommée, arbitrage au §5.
+
+Correction du 22 septembre : une première rédaction de cette matrice déclarait
+S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
+C'était faux — la migration `0020` les ajoute par `ALTER TABLE`, avec sa
+contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
 ## 2. Écrans de la partie M, critères d'acceptation
 

@@ -217,3 +217,11 @@ export type {
 } from './site-commands.js';
 export { RETIRED_CODES } from './error-catalog.js';
 export { segmentsProperlyIntersect, isSelfIntersecting } from './geometry.js';
+export {
+  occupancyHistory, occupantsOn, isInForceOn, previousOccupancy,
+} from './occupancy.js';
+export type { IsoDate } from './occupancy.js';
+export {
+  deriveLegend, compassRoseAngleDeg, mapRotationForAzimuthDeg,
+} from './plan-legend.js';
+export type { LegendEntry } from './plan-legend.js';
