@@ -74,6 +74,7 @@ non plus — elle n'en retire que les clés étrangères.
 0028_n1_2_site_origin_unit_suffix
 0029_a5_2_zone_opening_kind
 0030_q5_legal_entity
+0031_o4_site_timezone
 ```
 
 ## Règle pour la suite
