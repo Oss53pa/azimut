@@ -18,7 +18,6 @@ import { PlanCalibrationScreen } from '../screens/PlanCalibrationScreen.js';
 import { FootprintsScreen } from '../screens/FootprintsScreen.js';
 import { GraphScreen } from '../screens/GraphScreen.js';
 import { ValidationScreen } from '../screens/ValidationScreen.js';
-import { SitesView } from '../views/SitesView.js';
 import { EMPTY_DRAFT, stepOf } from '../state/use-plan-calibration.js';
 import { judgeReplacement } from '../state/plan-import.js';
 import type { ReplacementVerdict } from '../state/plan-import.js';
@@ -46,11 +45,6 @@ import type { GraphTool, NodeSelection, EdgeSelection } from '../screens/GraphSc
  * clavier fonctionne. C'est l'ordre voulu, puisque M8 (partie M) critère 2
  * exige le parcours au clavier seul.
  */
-export function SitesScreenAdapter(): JSX.Element {
-  const [key, setKey] = useState('');
-  return <SitesView currentKey={key} onOpenSite={setKey} />;
-}
-
 export function PlanScreenAdapter({ session, siteId, levelId }: {
   readonly session: TrancheSession;
   readonly siteId: string;
@@ -389,7 +383,11 @@ export function ValidationScreenAdapter({ session, siteId }: {
           timestamp: ranAt,
           graphHash: computeGraphHash(graph),
         });
-        if (command.ok) void session.write([command.value]);
+        // `record` et non `write` : un passage de validation ne s'annule pas.
+        // La table est en insertion seule (A12.3) et l'inverse de son
+        // insertion serait une suppression que la base refuse. L'empiler
+        // offrirait une annulation qui échouerait à l'exécution.
+        if (command.ok) void session.record([command.value]);
       }}
       onOpen={() => { /* le lien ouvre la zone de travail, non construite */ }}
       onExport={() => { /* l'export passe par prepareExport */ }}

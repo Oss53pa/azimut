@@ -33,13 +33,17 @@ beforeAll(async () => {
   // La suite se rejoue : elle part d'un état connu plutôt que de supposer une
   // base neuve. L'amorçage contourne les politiques, comme le ferait un import
   // d'administration, et les rétablit aussitôt.
+  //
+  // Le nettoyage porte sur les deux organisations de cette suite, et sur elles
+  // seules. Il vidait les cinq tables entières, ce qui emportait les fixtures
+  // des autres suites : une suite qui nettoie au-delà de ce qu'elle a écrit
+  // fait échouer ses voisines selon l'ordre d'exécution. La cascade des clés
+  // étrangères suffit ici, en partant de l'organisation.
   const seeded = ['level', 'building', 'site', 'membership', 'organization'];
   for (const table of seeded) {
     await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
   }
-  for (const table of seeded) {
-    await db.execute(sql`delete from ${sql.identifier('azimut')}.${sql.identifier(table)}`);
-  }
+  await db.execute(sql`delete from azimut.organization where id in (${ORG_A}, ${ORG_B})`);
   await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG_A},'A','a'),(${ORG_B},'B','b')`);
   await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${ALICE},'admin'),(${ORG_B},${BOB},'admin')`);
   for (const table of seeded) {

@@ -35,6 +35,17 @@ export type SessionContext = {
 export type TrancheSession = {
   readonly state: SessionState;
   readonly write: (commands: readonly EntityCommand[]) => Promise<boolean>;
+  /**
+   * Écrit sans empiler, pour les seules tables en insertion seule (A12.3).
+   *
+   * E5.1 exige qu'une commande soit réversible. L'inverse d'une insertion dans
+   * `graph_validation`, `approval`, `message_schedule_approval` ou `audit_log`
+   * serait une suppression, que la base refuse par construction. Empiler une
+   * telle commande offrirait une annulation qui échouerait à l'exécution :
+   * mieux vaut ne pas l'offrir. Le fait reste écrit, et c'est ce qu'on veut
+   * d'un fait daté.
+   */
+  readonly record: (commands: readonly EntityCommand[]) => Promise<boolean>;
   readonly count: (table: string) => number;
   /**
    * T-1.2b et E5.2 — la pile d'annulation du parcours.
@@ -198,6 +209,14 @@ export function useTrancheSession(
     return current.current.queued.length === queuedBefore;
   }, [sink]);
 
+  const record = useCallback(async (
+    commands: readonly EntityCommand[],
+  ): Promise<boolean> => {
+    const queuedBefore = current.current.queued.length;
+    await sink(commands);
+    return current.current.queued.length === queuedBefore;
+  }, [sink]);
+
   const undo = useCallback(async (): Promise<boolean> => {
     const result = await undoLast(store.current, sink, new Date().toISOString());
     store.current = result.state;
@@ -224,6 +243,7 @@ export function useTrancheSession(
   return {
     state,
     write,
+    record,
     store: storeState,
     canUndo: canUndo(storeState),
     canRedo: canRedo(storeState),
