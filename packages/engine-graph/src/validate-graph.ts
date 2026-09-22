@@ -5,6 +5,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import { destinationNodeMissingFindings } from './validate-directory.js';
 import { buildAdjacency, bfs } from './graph-traversal.js';
 import {
   crossLevelWithoutVlFindings,
@@ -228,6 +229,10 @@ export function validateGraph(
     ...multiLevelWithoutAccessibleVlFindings(site),
     ...buildingIsolatedFindings(site),
     ...missingDestinationNameFindings(site),
+    // A7.1 range « destinations non reliées » parmi ce que ce moteur détecte.
+    // Le contrôle vivait dans `validateDirectory`, qu'aucun code de production
+    // n'appelle : il existait sans jamais s'exécuter.
+    ...destinationNodeMissingFindings(site),
   ];
 
   const adj = buildAdjacency(nodes, edges);

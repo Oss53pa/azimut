@@ -10,7 +10,15 @@ export type DirectoryValidationResult = {
   readonly active_langs: readonly string[];
 };
 
-function destNodeNotFoundFindings(site: SiteData): Finding[] {
+/**
+ * Destinations dont le nœud d'accès n'existe pas dans le graphe.
+ *
+ * Exportée parce que A7.1 range « destinations non reliées » parmi ce que
+ * `validateGraph` détecte. Le contrôle vivait ici, et seul `validateDirectory`
+ * l'appelait — or aucun code de production n'appelle `validateDirectory`. La
+ * détection existait donc sans jamais s'exécuter.
+ */
+export function destinationNodeMissingFindings(site: SiteData): Finding[] {
   const nodeIds = new Set(site.graph.nodes.map((n) => n.id));
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
@@ -185,7 +193,7 @@ export function validateDirectory(
   site: SiteData,
 ): Outcome<DirectoryValidationResult> {
   const allFindings: Finding[] = [
-    ...destNodeNotFoundFindings(site),
+    ...destinationNodeMissingFindings(site),
     ...destFootprintNotFoundFindings(site),
     ...destNodeWrongKindFindings(site),
     ...duplicateDestOnNodeFindings(site),
