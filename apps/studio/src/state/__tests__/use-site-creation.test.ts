@@ -7,6 +7,8 @@ import { createSiteCommands } from '../site-creation.js';
 const ENV = {
   orgId: 'aaaaaaaa-0000-0000-0000-000000000001',
   existingNames: ['Déjà pris'],
+  // Q9 — l'extrait du référentiel contre lequel pays et fuseau se jugent.
+  countries: [{ code: 'FR', timezones: ['Europe/Paris'] }],
   defaultBuildingName: 'Bâtiment 1',
   defaultLevelName: 'Niveau 0',
 };
@@ -14,9 +16,10 @@ const ENV = {
 const DRAFT = {
   name: 'Gare de Lille Flandres',
   countryCode: 'FR',
-      timezone: 'Europe/Paris',
+  timezone: 'Europe/Paris',
   rulesPackId: null,
   activeLangs: ['fr'],
+  legalEntityId: null,
 };
 
 function ids(): () => string {

@@ -57,4 +57,65 @@ test.describe('M1 (partie M) — création d’un site', () => {
     await page.getByRole('button', { name: /^New site$/ }).click();
     await expect(page.getByLabel(/Time zone/)).toBeVisible();
   });
+
+  /**
+   * Q9, version 7 — « Aucune liste de pays ni correspondance vers les fuseaux
+   * dans le code. » Le sélecteur porte le référentiel, et non les seuls pays
+   * des sites déjà créés, qui était le contenu précédent.
+   */
+  test('les pays proposés viennent du référentiel, pas des sites existants', async ({ page }) => {
+    await page.goto('/sites');
+    await page.getByRole('button', { name: /^Nouveau site$/ }).click();
+
+    const pays = page.getByLabel(/^Pays/);
+    // Le référentiel en porte deux cent quarante-neuf. Le seuil est bas à
+    // dessein : il distingue le référentiel d'une liste tirée des sites de
+    // référence, sans figer un nombre que la base des fuseaux fera bouger.
+    expect(await pays.locator('option').count()).toBeGreaterThan(100);
+    await expect(pays.locator('option', { hasText: /^France$/ })).toHaveCount(1);
+    await expect(pays.locator('option', { hasText: /^Côte d’Ivoire$/ })).toHaveCount(1);
+  });
+
+  /**
+   * M1 (partie M) — « valeurs issues de `country.timezones`, pré-rempli quand
+   * le pays n'en compte qu'un ».
+   */
+  test('le fuseau se pré-remplit quand le pays n’en compte qu’un', async ({ page }) => {
+    await page.goto('/sites');
+    await page.getByRole('button', { name: /^Nouveau site$/ }).click();
+
+    const fuseau = page.getByLabel(/Fuseau horaire/);
+    await expect(fuseau).toHaveValue('');
+
+    await page.getByLabel(/^Pays/).selectOption('FR');
+    await expect(fuseau).toHaveValue('Europe/Paris');
+    // Et seulement les siens : la France n'ouvre pas les fuseaux du monde.
+    await expect(fuseau.locator('option[value="America/New_York"]')).toHaveCount(0);
+  });
+
+  test('un pays à plusieurs fuseaux n’en choisit aucun, et les offre tous', async ({ page }) => {
+    await page.goto('/sites');
+    await page.getByRole('button', { name: /^Nouveau site$/ }).click();
+
+    await page.getByLabel(/^Pays/).selectOption('US');
+    const fuseau = page.getByLabel(/Fuseau horaire/);
+    await expect(fuseau).toHaveValue('');
+    await expect(fuseau.locator('option[value="America/New_York"]')).toHaveCount(1);
+    await expect(fuseau.locator('option[value="Pacific/Honolulu"]')).toHaveCount(1);
+  });
+
+  /**
+   * Q5, version 7 — « Le champ n'apparaît que si l'organisation en porte au
+   * moins une. À défaut, le formulaire indique où la créer, jamais un
+   * sélecteur vide. »
+   */
+  test('l’entité juridique est absente, et dit où elle se crée', async ({ page }) => {
+    await page.goto('/sites');
+    await page.getByRole('button', { name: /^Nouveau site$/ }).click();
+
+    await expect(page.getByLabel(/^Entité juridique/)).toHaveCount(0);
+    const note = page.getByText(/Aucune entité juridique n’est enregistrée/);
+    await expect(note).toBeVisible();
+    await expect(note.locator('xpath=ancestor::*[@role][1]')).toHaveAttribute('role', 'status');
+  });
 });

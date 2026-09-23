@@ -9,8 +9,10 @@ export {
 } from './site-repository.js';
 export type {
   SiteRepository, SiteSummary, RepositoryKind, RepositoryFailure,
+  CountrySummary, LegalEntitySummary,
 } from './site-repository.js';
 export {
   useSite, useSiteList, useAllSites, useSiteVocabularyLoad,
+  useCountries, useLegalEntities,
 } from './use-site-repository.js';
 export type { AsyncState } from './use-site-repository.js';

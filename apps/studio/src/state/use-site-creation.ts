@@ -10,7 +10,7 @@ import type { Finding } from '@azimut/core-model';
 import { EMPTY_STORE, dispatch } from './command-store.js';
 import type { CommandSink, StoreState } from './command-store.js';
 import { createSiteCommands } from './site-creation.js';
-import type { SiteDraft } from './site-creation.js';
+import type { CountryChoice, SiteDraft } from './site-creation.js';
 
 export type CreationState = {
   readonly open: boolean;
@@ -37,6 +37,8 @@ export type CreationEnvironment = {
   /** Rend l'instant courant. Injecté : E5.1 interdit de lire l'horloge ici. */
   readonly now: () => string;
   readonly existingNames: readonly string[];
+  /** Q9 — les pays du référentiel, contre lesquels pays et fuseau se jugent. */
+  readonly countries: readonly CountryChoice[];
   readonly defaultBuildingName: string;
   readonly defaultLevelName: string;
 };
@@ -72,6 +74,7 @@ export function useSiteCreation(
       buildingId: environment.newId(),
       levelId: environment.newId(),
       existingNames: environment.existingNames,
+      countries: environment.countries,
       defaultBuildingName: environment.defaultBuildingName,
       defaultLevelName: environment.defaultLevelName,
       timestamp: environment.now(),

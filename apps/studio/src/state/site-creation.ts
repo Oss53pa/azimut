@@ -35,6 +35,26 @@ export type SiteDraft = {
   readonly rulesPackId: string | null;
   /** M1 (partie M) : « au moins une, français et anglais proposés ». */
   readonly activeLangs: readonly string[];
+  /**
+   * Q5 et M1 (partie M), version 7 — l'entité juridique émettrice.
+   *
+   * « Facultative à la création, requise avant l'émission de la première
+   * facture. Le champ n'apparaît que si l'organisation porte au moins une
+   * entité juridique. » Nulle quand le champ est absent, ce qui est le cas
+   * courant tant que la plateforme n'en enregistre aucune.
+   */
+  readonly legalEntityId: string | null;
+};
+
+/**
+ * Q9 — ce que le référentiel des pays apporte au contrôle.
+ *
+ * La forme est réduite à ce dont la validation a besoin. Le référentiel
+ * complet, avec ses noms dans les deux langues, appartient à l'écran.
+ */
+export type CountryChoice = {
+  readonly code: string;
+  readonly timezones: readonly string[];
 };
 
 /** Ce que l'appelant fournit et que le calcul ne peut pas inventer. */
@@ -46,6 +66,14 @@ export type CreationContext = {
   readonly levelId: string;
   /** Les noms des sites de l'organisation, pour l'unicité de M1 (partie M). */
   readonly existingNames: readonly string[];
+  /**
+   * Q9 — les pays du référentiel, lus dans la table `country`.
+   *
+   * Le contrôle du pays et celui du fuseau s'y adossent tous les deux : un
+   * fuseau n'est valable que s'il est l'un de ceux que le pays déclare, ce que
+   * seule cette table dit. Aucune liste n'est écrite ici (Q9.2).
+   */
+  readonly countries: readonly CountryChoice[];
   /** Noms par défaut du premier bâtiment et du premier niveau, traduits. */
   readonly defaultBuildingName: string;
   readonly defaultLevelName: string;
@@ -64,10 +92,11 @@ export function createSiteCommands(
   draft: SiteDraft,
   context: CreationContext,
 ): Outcome<readonly EntityCommand[]> {
+  const country = context.countries.find(c => c.code === draft.countryCode);
   const findings = [
     ...checkName(draft.name, context.existingNames),
-    ...checkCountry(draft.countryCode),
-    ...checkTimezone(draft.timezone),
+    ...checkCountry(draft.countryCode, country),
+    ...checkTimezone(draft.timezone, country),
     ...checkLangs(draft.activeLangs),
   ];
   if (findings.length > 0) return { ok: false, findings };
@@ -111,6 +140,7 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         country_code: draft.countryCode,
         timezone: draft.timezone,
         rules_pack_id: draft.rulesPackId,
+        legal_entity_id: draft.legalEntityId,
         active_langs: JSON.stringify([...draft.activeLangs].sort()),
       },
     },
@@ -166,20 +196,35 @@ function checkName(name: string, existing: readonly string[]): readonly Finding[
   return [];
 }
 
-function checkCountry(code: string): readonly Finding[] {
-  return /^[A-Z]{2}$/.test(code)
-    ? []
-    : [finding('DATA.COUNTRY_REQUIRED', { given: code === '' ? 'none' : code })];
+/**
+ * Q9 — le pays doit figurer au référentiel, et pas seulement ressembler à un
+ * code. Un code de deux majuscules qu'aucune ligne de `country` ne porte
+ * donnerait un site dont le fuseau ne se contrôle contre rien.
+ */
+function checkCountry(
+  code: string, country: CountryChoice | undefined,
+): readonly Finding[] {
+  return country === undefined
+    ? [finding('DATA.COUNTRY_REQUIRED', { given: code === '' ? 'none' : code })]
+    : [];
 }
 
 /**
- * O4 — le fuseau du site. Requis, et vérifié contre les fuseaux que la
- * plateforme connaît plutôt que contre une liste écrite ici : une liste de
- * fuseaux copiée à la main vieillit, et le produit n'a pas à tenir la base
- * de données des fuseaux du monde.
+ * O4 et M1 (partie M) — le fuseau du site, « valeurs issues de
+ * `country.timezones` ».
+ *
+ * Version 7 : le contrôle ne porte plus sur les fuseaux que la plateforme
+ * d'exécution déclare, mais sur ceux que le référentiel donne au pays choisi.
+ * Un fuseau valide ailleurs mais étranger au pays du site est une erreur de
+ * saisie, et c'est la seule que le contrôle précédent laissait passer.
+ *
+ * Quand le pays est inconnu, le fuseau n'est jugé contre rien : l'anomalie est
+ * levée, et celle du pays l'accompagne.
  */
-function checkTimezone(timezone: string): readonly Finding[] {
-  if (timezone.trim() !== '' && knownTimezones().includes(timezone)) return [];
+function checkTimezone(
+  timezone: string, country: CountryChoice | undefined,
+): readonly Finding[] {
+  if (country !== undefined && country.timezones.includes(timezone)) return [];
   return [finding('DATA.TIMEZONE_REQUIRED', {
     given: timezone === '' ? 'none' : timezone,
   })];
@@ -189,22 +234,6 @@ function checkLangs(langs: readonly string[]): readonly Finding[] {
   return langs.length > 0
     ? []
     : [finding('DATA.LANG_REQUIRED', { count: 0 })];
-}
-
-/**
- * Les fuseaux que la plateforme d'exécution déclare.
- *
- * `Intl.supportedValuesOf` les rend depuis la base de données de fuseaux du
- * système, versionnée avec lui. C'est une donnée, pas une constante écrite
- * ici, et elle reste juste quand un pays change de règle.
- */
-export function knownTimezones(): readonly string[] {
-  const intl: unknown = Intl;
-  if (typeof intl !== 'object' || intl === null) return [];
-  const supported = (intl as { supportedValuesOf?: unknown }).supportedValuesOf;
-  if (typeof supported !== 'function') return [];
-  const values: unknown = (supported as (key: string) => unknown).call(Intl, 'timeZone');
-  return Array.isArray(values) ? values.filter((v): v is string => typeof v === 'string') : [];
 }
 
 function normalise(value: string): string {

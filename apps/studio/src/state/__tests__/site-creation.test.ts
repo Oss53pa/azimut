@@ -8,6 +8,13 @@ const CONTEXT: CreationContext = {
   buildingId: 'building-1',
   levelId: 'level-1',
   existingNames: ['Centre commercial du Port'],
+  // Q9 — un extrait du référentiel. Les contrôles de pays et de fuseau s'y
+  // adossent ; l'essai n'a pas besoin des 249 lignes pour les exercer.
+  countries: [
+    { code: 'FR', timezones: ['Europe/Paris'] },
+    { code: 'CI', timezones: ['Africa/Abidjan'] },
+    { code: 'US', timezones: ['America/New_York', 'America/Chicago'] },
+  ],
   defaultBuildingName: 'Bâtiment 1',
   defaultLevelName: 'Niveau 0',
   timestamp: '2026-09-21T10:00:00.000Z',
@@ -19,6 +26,7 @@ const DRAFT: SiteDraft = {
   timezone: 'Europe/Paris',
   rulesPackId: 'fr-erp-2026',
   activeLangs: ['fr', 'en'],
+  legalEntityId: null,
 };
 
 function codes(draft: Partial<SiteDraft>, context: Partial<CreationContext> = {}): string[] {
@@ -77,6 +85,19 @@ describe('M1 (partie M) — création d’un site', () => {
       expect(codes({ countryCode: 'fra' })).toContain('DATA.COUNTRY_REQUIRED');
       expect(codes({ countryCode: 'fr' })).toContain('DATA.COUNTRY_REQUIRED');
     });
+
+    /**
+     * Q9, version 7 — le pays se juge contre le référentiel et non contre une
+     * forme. Un code bien formé qu'aucune ligne de `country` ne porte donnerait
+     * un site dont le fuseau ne se contrôle contre rien.
+     */
+    it('refuse un code bien formé mais absent du référentiel', () => {
+      expect(codes({ countryCode: 'ZZ' })).toContain('DATA.COUNTRY_REQUIRED');
+    });
+
+    it('refuse tout pays quand le référentiel n’a pas pu être lu', () => {
+      expect(codes({}, { countries: [] })).toContain('DATA.COUNTRY_REQUIRED');
+    });
   });
 
   describe('langues actives', () => {
@@ -130,15 +151,55 @@ describe('M1 (partie M) — création d’un site', () => {
       if (!r.ok) expect(r.findings.map(f => f.code)).toContain('DATA.TIMEZONE_REQUIRED');
     });
 
-    it('doit être un fuseau que la plateforme connaît', () => {
+    it('doit être un fuseau que le référentiel connaît', () => {
       const r = createSiteCommands({ ...DRAFT, timezone: 'Europe/Atlantide' }, CONTEXT);
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.findings.map(f => f.code)).toContain('DATA.TIMEZONE_REQUIRED');
     });
 
     it('accepte un fuseau hors d’Europe : le produit n’est pas français', () => {
-      const r = createSiteCommands({ ...DRAFT, timezone: 'Africa/Abidjan' }, CONTEXT);
+      const r = createSiteCommands(
+        { ...DRAFT, countryCode: 'CI', timezone: 'Africa/Abidjan' }, CONTEXT);
       expect(r.ok).toBe(true);
+    });
+
+    /**
+     * M1 (partie M), version 7 : « valeurs issues de `country.timezones` ». Un
+     * fuseau valide ailleurs mais étranger au pays choisi est une erreur de
+     * saisie, et c'est la seule que le contrôle précédent laissait passer.
+     */
+    it('refuse un fuseau valide mais étranger au pays choisi', () => {
+      const r = createSiteCommands(
+        { ...DRAFT, countryCode: 'FR', timezone: 'America/New_York' }, CONTEXT);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.findings.map(f => f.code)).toContain('DATA.TIMEZONE_REQUIRED');
+    });
+
+    it('accepte l’un quelconque des fuseaux d’un pays qui en compte plusieurs', () => {
+      for (const zone of ['America/New_York', 'America/Chicago']) {
+        const r = createSiteCommands(
+          { ...DRAFT, countryCode: 'US', timezone: zone }, CONTEXT);
+        expect(r.ok, zone).toBe(true);
+      }
+    });
+  });
+
+  /**
+   * Q5 et M1 (partie M), version 7 — l'entité juridique est facultative à la
+   * création, « requise avant l'émission de la première facture ».
+   */
+  describe('entité juridique', () => {
+    it('s’écrit sur la ligne du site quand elle est choisie', () => {
+      const id = 'e0000000-0000-0000-0000-000000000001';
+      const r = createSiteCommands({ ...DRAFT, legalEntityId: id }, CONTEXT);
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.value[0]?.after?.['legal_entity_id']).toBe(id);
+    });
+
+    it('ne lève aucune anomalie quand elle est absente', () => {
+      const r = createSiteCommands({ ...DRAFT, legalEntityId: null }, CONTEXT);
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.value[0]?.after?.['legal_entity_id']).toBeNull();
     });
   });
 

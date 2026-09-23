@@ -15,6 +15,7 @@ import {
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
+  type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
 
 export type AsyncState<T> =
@@ -49,6 +50,45 @@ export function useSiteList(repository: SiteRepository): {
 
   const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
   return { state, reload };
+}
+
+/**
+ * Q9 — le référentiel des pays, chargé une fois.
+ *
+ * Il ne dépend d'aucun site et ne change pas en cours de session : il se lit à
+ * l'ouverture de l'écran et ne se recharge pas.
+ */
+export function useCountries(repository: SiteRepository): AsyncState<readonly CountrySummary[]> {
+  return useLoaded(repository, useCallback(() => repository.listCountries(), [repository]));
+}
+
+/** Q5 — les entités juridiques de l'organisation, chargées une fois. */
+export function useLegalEntities(
+  repository: SiteRepository,
+): AsyncState<readonly LegalEntitySummary[]> {
+  return useLoaded(repository, useCallback(() => repository.listLegalEntities(), [repository]));
+}
+
+/**
+ * Charge une liste une fois, sans rechargement.
+ *
+ * Les deux listes ci-dessus suivent le même chemin ; l'écrire deux fois aurait
+ * dupliqué la gestion de l'annulation, qui est la partie qu'on se trompe.
+ */
+function useLoaded<T>(
+  repository: SiteRepository, load: () => Promise<T>,
+): AsyncState<T> {
+  const [state, setState] = useState<AsyncState<T>>({ status: 'idle' });
+  useEffect(() => {
+    let cancelled = false;
+    setState({ status: 'loading' });
+    load().then(
+      value => { if (!cancelled) setState({ status: 'ready', value }); },
+      cause => { if (!cancelled) setState({ status: 'failed', error: toRepositoryError(cause) }); },
+    );
+    return () => { cancelled = true; };
+  }, [repository, load]);
+  return state;
 }
 
 /** Site courant. `siteId` vide signifie qu'aucun site n'est ouvert. */

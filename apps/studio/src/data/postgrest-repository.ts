@@ -25,6 +25,7 @@ import type {
 import {
   RepositoryError, failureForStatus,
   type SiteRepository, type SiteSummary,
+  type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
 
 type SiteListRow = Pick<
@@ -47,6 +48,15 @@ export type PostgrestConfig = {
  * table de transposition qui n'aurait qu'un seul appelant.
  */
 type CharterRow = { readonly id: string };
+
+type CountryRow = {
+  readonly code: string;
+  readonly name_fr: string;
+  readonly name_en: string;
+  readonly timezones: readonly string[];
+};
+
+type LegalEntityRow = { readonly id: string; readonly legal_name: string };
 
 type LexiconTermRow = {
   readonly lang: string;
@@ -362,6 +372,36 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       }
 
       return { lexicon, facts, claims, decisions };
+    },
+
+    /**
+     * Q9 — lecture du référentiel global. Il n'est pas cloisonné : la table
+     * n'a pas d'`org_id` et sa politique la rend lisible par tout compte
+     * authentifié.
+     */
+    async listCountries(): Promise<readonly CountrySummary[]> {
+      const rows = await query<CountryRow>(
+        config, 'country', 'select=code,name_fr,name_en,timezones&order=code.asc',
+      );
+      return rows.map((row): CountrySummary => ({
+        code: row.code,
+        name_fr: row.name_fr,
+        name_en: row.name_en,
+        timezones: row.timezones,
+      }));
+    },
+
+    /**
+     * Q5 — les entités juridiques visibles. Le cloisonnement est celui de la
+     * base : la requête ne filtre pas par organisation, la politique le fait.
+     */
+    async listLegalEntities(): Promise<readonly LegalEntitySummary[]> {
+      const rows = await query<LegalEntityRow>(
+        config, 'legal_entity', 'select=id,legal_name&order=legal_name.asc',
+      );
+      return rows.map((row): LegalEntitySummary => ({
+        id: row.id, legal_name: row.legal_name,
+      }));
     },
   };
 }

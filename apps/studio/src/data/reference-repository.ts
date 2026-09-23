@@ -6,12 +6,15 @@
  * n'est une donnée client.
  */
 import { allReferenceSites } from '@azimut/testkit/sites';
+import { COUNTRIES } from '@azimut/db/reference';
 import type { SiteData, SiteVocabulary } from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
 import {
   RepositoryError,
   type SiteRepository,
   type SiteSummary,
+  type CountrySummary,
+  type LegalEntitySummary,
 } from './site-repository.js';
 
 /**
@@ -51,6 +54,29 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(referenceVocabulary(siteId));
+    },
+
+    /**
+     * Q9 — le même fichier que celui versé dans `azimut.country` par
+     * `pnpm seed:reference`. Sur un poste sans base, l'écran de création doit
+     * rester praticable, et une seconde liste divergerait de la table (INV-1).
+     */
+    listCountries(): Promise<readonly CountrySummary[]> {
+      return Promise.resolve(COUNTRIES.map((country): CountrySummary => ({
+        code: country.code,
+        name_fr: country.name_fr,
+        name_en: country.name_en,
+        timezones: country.timezones,
+      })));
+    },
+
+    /**
+     * Aucune. Les sites de référence ne portent pas d'entité juridique, et en
+     * inventer une ferait apparaître dans M1 (partie M) un sélecteur que la
+     * version 7 veut absent tant que l'organisation n'en porte aucune.
+     */
+    listLegalEntities(): Promise<readonly LegalEntitySummary[]> {
+      return Promise.resolve([]);
     },
   };
 }

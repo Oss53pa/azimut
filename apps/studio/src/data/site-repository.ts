@@ -18,6 +18,32 @@ export type SiteSummary = {
   readonly rules_pack_id: string | null;
 };
 
+/**
+ * Q9 — un pays du référentiel global, tel que M1 (partie M) le propose.
+ *
+ * Les deux noms voyagent ensemble : l'écran affiche celui de la langue active,
+ * et le référentiel ne se relit pas à chaque bascule de langue.
+ */
+export type CountrySummary = {
+  readonly code: string;
+  readonly name_fr: string;
+  readonly name_en: string;
+  /** Les fuseaux du pays. M1 (partie M) pré-remplit quand il n'y en a qu'un. */
+  readonly timezones: readonly string[];
+};
+
+/**
+ * Q5 — une entité juridique de l'organisation.
+ *
+ * M1 (partie M) n'affiche son champ que si l'organisation en porte au moins
+ * une : « à défaut, le formulaire indique où la créer, jamais un sélecteur
+ * vide ».
+ */
+export type LegalEntitySummary = {
+  readonly id: string;
+  readonly legal_name: string;
+};
+
 export const REPOSITORY_KINDS = ['reference', 'postgrest'] as const;
 export type RepositoryKind = (typeof REPOSITORY_KINDS)[number];
 
@@ -37,6 +63,15 @@ export type SiteRepository = {
    * rangent alors parmi les non exercés — jamais parmi les réussis.
    */
   loadVocabulary(siteId: string): Promise<SiteVocabulary>;
+  /**
+   * Q9 — les pays du référentiel global, triés par code.
+   *
+   * Lecture de la table `country`, et non d'une liste écrite dans l'écran :
+   * « Aucune liste de pays ni correspondance vers les fuseaux dans le code. »
+   */
+  listCountries(): Promise<readonly CountrySummary[]>;
+  /** Q5 — les entités juridiques de l'organisation, triées par nom. */
+  listLegalEntities(): Promise<readonly LegalEntitySummary[]>;
 };
 
 /**

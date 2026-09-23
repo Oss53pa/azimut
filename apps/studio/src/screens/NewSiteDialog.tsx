@@ -10,20 +10,25 @@ import type { SiteDraft } from '../state/site-creation.js';
 import { SITE_NAME_MAX } from '../state/site-creation.js';
 
 /**
- * M1 (partie M) — le formulaire de création d'un site.
+ * Q9 — un pays du référentiel, avec ses fuseaux.
  *
- * Quatre champs, quatre contrôles, et rien de plus : le nom, le pays, le
- * paquet de règles — facultatif à la création — et les langues actives.
- *
- * Les anomalies arrivent ensemble et se rangent sous leur champ. M7.5 (partie
- * M) : « Un refus de saisie n'efface jamais le travail en cours. » La saisie
- * reste donc à l'écran après un refus, telle quelle.
+ * Les fuseaux voyagent avec le pays parce que M1 (partie M) les lie : le champ
+ * de fuseau n'offre que ceux du pays choisi, et se pré-remplit quand le pays
+ * n'en compte qu'un.
  */
+export type CountryOption = Option & {
+  readonly timezones: readonly string[];
+};
+
 export type NewSiteDialogProps = {
-  readonly countries: readonly Option[];
-  /** O4 — les fuseaux que la plateforme déclare, jamais une liste écrite ici. */
-  readonly timezones: readonly Option[];
+  readonly countries: readonly CountryOption[];
   readonly rulesPacks: readonly Option[];
+  /**
+   * Q5 — les entités juridiques de l'organisation. Vide, le champ n'apparaît
+   * pas : « à défaut, le formulaire indique où la créer, jamais un sélecteur
+   * vide ».
+   */
+  readonly legalEntities: readonly Option[];
   readonly langs: readonly Option[];
   readonly findings: readonly Finding[];
   readonly busy: boolean;
@@ -31,15 +36,44 @@ export type NewSiteDialogProps = {
   readonly onClose: () => void;
 };
 
+/**
+ * M1 (partie M) — le formulaire de création d'un site.
+ *
+ * Six champs : le nom, le pays, le fuseau, le paquet de règles — facultatif à
+ * la création —, l'entité juridique — affichée seulement si l'organisation en
+ * porte une — et les langues actives.
+ *
+ * Les anomalies arrivent ensemble et se rangent sous leur champ. M7.5 (partie
+ * M) : « Un refus de saisie n'efface jamais le travail en cours. » La saisie
+ * reste donc à l'écran après un refus, telle quelle.
+ */
 export function NewSiteDialog({
-  countries, timezones, rulesPacks, langs, findings, busy, onSubmit, onClose,
+  countries, rulesPacks, legalEntities, langs, findings, busy, onSubmit, onClose,
 }: NewSiteDialogProps): JSX.Element {
   const { t, lang } = useI18n();
   const [name, setName] = useState('');
   const [country, setCountry] = useState('');
   const [timezone, setTimezone] = useState('');
   const [pack, setPack] = useState('');
+  const [legalEntity, setLegalEntity] = useState('');
   const [active, setActive] = useState<readonly string[]>(() => langs.map(l => l.value));
+
+  const chosen = countries.find(option => option.value === country);
+  const timezones: readonly Option[] =
+    chosen?.timezones.map(zone => ({ value: zone, label: zone })) ?? [];
+
+  /**
+   * M1 (partie M) : « pré-rempli quand le pays n'en compte qu'un ».
+   *
+   * Au-delà d'un fuseau, le champ se vide : le fuseau retenu pour le pays
+   * précédent n'a aucune raison de valoir pour le nouveau, et le laisser en
+   * place ferait passer une erreur pour un choix.
+   */
+  function pickCountry(code: string): void {
+    setCountry(code);
+    const zones = countries.find(option => option.value === code)?.timezones ?? [];
+    setTimezone(zones.length === 1 ? zones[0] ?? '' : '');
+  }
 
   function messageFor(...codes: readonly string[]): string | undefined {
     const found = findings.find(f => codes.includes(f.code));
@@ -54,6 +88,7 @@ export function NewSiteDialog({
       timezone,
       rulesPackId: pack === '' ? null : pack,
       activeLangs: active,
+      legalEntityId: legalEntity === '' ? null : legalEntity,
     });
   }
 
@@ -86,7 +121,7 @@ export function NewSiteDialog({
           label={t('sites.create.country')}
           value={country}
           options={countries}
-          onChange={setCountry}
+          onChange={pickCountry}
           placeholder={t('sites.create.country.placeholder')}
           disabled={busy}
           error={messageFor('DATA.COUNTRY_REQUIRED')}
@@ -99,7 +134,9 @@ export function NewSiteDialog({
           onChange={setTimezone}
           placeholder={t('sites.create.timezone.placeholder')}
           disabled={busy}
-          hint={t('sites.create.timezone.hint')}
+          hint={country === ''
+            ? t('sites.create.timezone.needs.country')
+            : t('sites.create.timezone.hint')}
           error={messageFor('DATA.TIMEZONE_REQUIRED')}
         />
 
@@ -123,6 +160,26 @@ export function NewSiteDialog({
             <StateBanner severity="info" message={t('sites.create.pack.note')} />
           )}
         </div>
+
+        {/*
+          Q5 et version 7 : « Le champ n'apparaît que si l'organisation en
+          porte au moins une. À défaut, le formulaire indique où la créer,
+          jamais un sélecteur vide. » Un sélecteur vide ferait chercher une
+          valeur qui n'existe nulle part.
+        */}
+        {legalEntities.length > 0 ? (
+          <SelectField
+            label={t('sites.create.entity')}
+            value={legalEntity}
+            options={legalEntities}
+            onChange={setLegalEntity}
+            placeholder={t('sites.create.entity.none')}
+            disabled={busy}
+            hint={t('sites.create.entity.hint')}
+          />
+        ) : (
+          <StateBanner severity="info" message={t('sites.create.entity.absent')} />
+        )}
 
         <MultiChoice
           label={t('sites.create.langs')}

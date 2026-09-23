@@ -1,12 +1,16 @@
 import { type JSX, useCallback, useMemo, useState } from 'react';
 import { SitesView } from '../views/SitesView.js';
 import { NewSiteDialog } from '../screens/NewSiteDialog.js';
+import type { CountryOption } from '../screens/NewSiteDialog.js';
 import { StateBanner } from '../components/ui/index.js';
 import type { Option } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { appRepository, useSiteList } from '../data/index.js';
+import {
+  appRepository, useCountries, useLegalEntities, useSiteList,
+} from '../data/index.js';
+import type { CountrySummary, LegalEntitySummary } from '../data/index.js';
 import { useSiteCreation } from '../state/use-site-creation.js';
-import { knownTimezones } from '../state/site-creation.js';
+import { appSink } from '../state/app-sink.js';
 import type { CommandSink } from '../state/command-store.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 
@@ -17,28 +21,34 @@ import { ORG_OF_SESSION } from './session-identity.js';
  * Le formulaire existait depuis la tranche M et n'était monté nulle part :
  * `/sites` rendait la liste sans bouton de création. Un écran spécifié au
  * champ près mais inatteignable ne vaut pas mieux qu'un écran absent, et
- * l'essai d'accessibilité de M8 ne pouvait pas l'analyser.
+ * l'essai d'accessibilité de M8 (partie M) ne pouvait pas l'analyser.
  */
 export function SitesAdapter(): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [current, setCurrent] = useState('');
   const repository = useMemo(() => appRepository(), []);
   const { state: list, reload } = useSiteList(repository);
+  const countryState = useCountries(repository);
+  const entityState = useLegalEntities(repository);
 
   /**
    * L'émetteur de la création.
    *
-   * Le dépôt réel n'est pas câblé sur ce chemin : `appRepository` lit, il
-   * n'écrit pas. L'émetteur accepte donc la commande sans l'envoyer, comme le
-   * fait la session de l'atelier tant qu'aucun dépôt n'est configuré — c'est
-   * le cas hors ligne de M8 (partie M) critère 3, et le refuser rendrait l'écran
-   * invérifiable sur un poste nu. Ce que la création produit est rechargé
-   * depuis le dépôt, qui reste la source de vérité.
+   * Le chemin d'écriture réel dès que le dépôt est configuré : la commande
+   * part vers `apply_commands`, en une transaction, et la liste se recharge
+   * depuis le dépôt qui reste la source de vérité. Sans configuration, la
+   * commande est acceptée sans être envoyée — c'est le cas hors ligne de M8
+   * (partie M) critère 3, et le refuser rendrait l'écran invérifiable sur un
+   * poste nu.
    */
-  const sink: CommandSink = useCallback(async () => {
-    reload();
-    return { ok: true, value: null, warnings: [] };
-  }, [reload]);
+  const remote = useMemo(() => appSink(), []);
+  const sink: CommandSink = useCallback(async commands => {
+    const outcome = remote === null
+      ? { ok: true as const, value: null, warnings: [] }
+      : await remote(commands);
+    if (outcome.ok) reload();
+    return outcome;
+  }, [remote, reload]);
 
   // Mémorisée : sans cela le tableau vide de l'état non chargé serait neuf à
   // chaque rendu, et les listes qui en dérivent se recalculeraient sans fin.
@@ -47,26 +57,43 @@ export function SitesAdapter(): JSX.Element {
     [list],
   );
 
+  const countries: readonly CountrySummary[] = useMemo(
+    () => (countryState.status === 'ready' ? countryState.value : []),
+    [countryState],
+  );
+
+  const entities: readonly LegalEntitySummary[] = useMemo(
+    () => (entityState.status === 'ready' ? entityState.value : []),
+    [entityState],
+  );
+
   const creation = useSiteCreation(sink, {
     orgId: ORG_OF_SESSION,
     newId: () => crypto.randomUUID(),
     now: () => new Date().toISOString(),
     existingNames: sites.map(site => site.name),
+    countries,
     defaultBuildingName: t('sites.create.building.default'),
     defaultLevelName: t('sites.create.level.default'),
   });
 
-  const countries: readonly Option[] = useMemo(() => {
-    // Les pays proposés sont ceux que l'organisation exploite déjà. Écrire ici
-    // la liste des pays du monde en ferait une donnée du code, et elle
-    // vieillirait ; le champ reste saisissable pour un pays nouveau.
-    const codes = [...new Set(sites.map(site => site.country_code))].sort();
-    return codes.map(code => ({ value: code, label: code }));
-  }, [sites]);
+  /**
+   * Q9 — les pays viennent de la table, jamais d'une liste écrite ici. Le nom
+   * affiché est celui de la langue active ; le référentiel porte les deux et
+   * ne se relit pas à la bascule.
+   */
+  const countryOptions: readonly CountryOption[] = useMemo(
+    () => countries.map(country => ({
+      value: country.code,
+      label: lang === 'en' ? country.name_en : country.name_fr,
+      timezones: country.timezones,
+    })),
+    [countries, lang],
+  );
 
-  const timezones: readonly Option[] = useMemo(
-    () => knownTimezones().map(zone => ({ value: zone, label: zone })),
-    [],
+  const entityOptions: readonly Option[] = useMemo(
+    () => entities.map(entity => ({ value: entity.id, label: entity.legal_name })),
+    [entities],
   );
 
   return (
@@ -83,12 +110,12 @@ export function SitesAdapter(): JSX.Element {
 
       {creation.state.open && (
         <NewSiteDialog
-          countries={countries}
-          timezones={timezones}
+          countries={countryOptions}
           // Aucun paquet de règles n'est chargé dans le parcours de la
           // tranche. Le sélecteur est donc vide, et son information dit ce
           // que cela emporte : la composition attendra.
           rulesPacks={[]}
+          legalEntities={entityOptions}
           langs={ACTIVE_LANGS}
           findings={creation.state.findings}
           busy={creation.state.busy}
