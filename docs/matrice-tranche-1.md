@@ -27,6 +27,11 @@ d'essai qui le prouve.
 
 **Les neuf règles sont tenues.** M01.S2 porte une dette nommée, arbitrage au §5.
 
+Au 23 septembre, plus aucun critère numéroté de la partie M n'est porté
+absent. Ce qui reste est au §5 : deux contradictions du document en attente
+d'arbitrage, une infraction héritée dont le retrait serait une migration
+destructrice, et trois réserves de périmètre nommées à leur place.
+
 Correction du 22 septembre : une première rédaction de cette matrice déclarait
 M01.S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
 C'était faux — la migration `0020` les ajoute par `ALTER TABLE`, avec sa
@@ -67,11 +72,18 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
 | Critère | État | Preuve |
 | --- | --- | --- |
-| 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | **absent** | L'outil d'axe de circulation n'est pas construit |
+| 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | tenu | `state/__tests__/graph-axis.test.ts` — 10 essais, dont le doublon de nœud, le doublon d'arête dans les deux sens, et leurs contre-exemples ; `tests/e2e/m4-axe.spec.ts` — la passe est un geste, donc une annulation, et l'écran rend compte de ce qu'il a repris |
 | — Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` — le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
 | 2. Longueur jamais saisissable, recalculée | tenu | `graph-input.test.ts` ; M7.3 en bout en bout |
 | 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède |
 | 4. Graphe saisissable au clavier seul | tenu | `m8-tranche.spec.ts`, critère 2 |
+
+Réserve sur la table des outils : trois des quatre outils de M4 sont
+construits — nœud, arête, axe de circulation. Le quatrième, la liaison
+verticale, ne l'est pas : elle relie deux nœuds de niveaux différents, et la
+session de la tranche porte un niveau. `GRAPH.VERTICAL_LINK_MISSING` est levé
+avec son remède, mais l'appliquer ne fait rien. La liaison entre avec le
+module 02.
 
 ### M1 et M5
 
