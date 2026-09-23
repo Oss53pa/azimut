@@ -1,7 +1,7 @@
 {
   "mesure": "M8 (partie M) critère 4 — temps du parcours complet de la tranche",
   "protocole": "D13",
-  "releve_le": "2026-09-23T20:38:30.811Z",
+  "releve_le": "2026-09-23T20:55:03.155Z",
   "machine": {
     "plateforme": "linux 6.18.44-fc-v37",
     "processeur": "Intel(R) Xeon(R) Processor @ 2.80GHz",
@@ -15,136 +15,136 @@
     {
       "rang": 1,
       "ecartee": true,
-      "total_ms": 2081,
+      "total_ms": 2027,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 542
+          "ms": 512
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 576
+          "ms": 440
         },
         {
           "step": "saisie du graphe",
-          "ms": 590
+          "ms": 651
         },
         {
           "step": "validation",
-          "ms": 373
+          "ms": 424
         }
       ]
     },
     {
       "rang": 2,
       "ecartee": false,
-      "total_ms": 1983,
+      "total_ms": 1902,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 516
+          "ms": 491
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 567
+          "ms": 498
         },
         {
           "step": "saisie du graphe",
-          "ms": 597
+          "ms": 525
         },
         {
           "step": "validation",
-          "ms": 303
+          "ms": 388
         }
       ]
     },
     {
       "rang": 3,
       "ecartee": false,
-      "total_ms": 2118,
+      "total_ms": 2110,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 467
+          "ms": 592
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 525
+          "ms": 501
         },
         {
           "step": "saisie du graphe",
-          "ms": 700
+          "ms": 613
         },
         {
           "step": "validation",
-          "ms": 426
+          "ms": 404
         }
       ]
     },
     {
       "rang": 4,
       "ecartee": false,
-      "total_ms": 1979,
+      "total_ms": 2050,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 414
+          "ms": 628
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 653
+          "ms": 516
         },
         {
           "step": "saisie du graphe",
-          "ms": 532
+          "ms": 653
         },
         {
           "step": "validation",
-          "ms": 380
+          "ms": 253
         }
       ]
     },
     {
       "rang": 5,
       "ecartee": false,
-      "total_ms": 2199,
+      "total_ms": 2253,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 526
+          "ms": 536
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 581
+          "ms": 517
         },
         {
           "step": "saisie du graphe",
-          "ms": 691
+          "ms": 781
         },
         {
           "step": "validation",
-          "ms": 401
+          "ms": 419
         }
       ]
     }
   ],
-  "mediane_ms": 2051,
+  "mediane_ms": 2080,
   "mediane_par_etape_ms": [
     {
       "step": "import et calage",
-      "ms": 492
+      "ms": 564
     },
     {
       "step": "tracé de trois cellules",
-      "ms": 574
+      "ms": 509
     },
     {
       "step": "saisie du graphe",
-      "ms": 644
+      "ms": 633
     },
     {
       "step": "validation",
-      "ms": 391
+      "ms": 396
     }
   ],
   "note": "Parcours automatisé, non chronométré sur un opérateur réel. K3.4 place cette seconde mesure dans les sessions d’essai sur usagers. Aucun seuil n’est révisé sur ce relevé : D13 réserve la révision au premier site réel modélisé, et la trace."
