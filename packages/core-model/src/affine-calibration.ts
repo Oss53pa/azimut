@@ -46,7 +46,7 @@ export type PlanPixelPoint = {
  * Une paire de points homologues : le même lieu physique, désigné une fois sur
  * le fond et une fois dans le repère métier du niveau (D1.1, mètres).
  */
-export type ControlPointPair = {
+export type CalibrationPointPair = {
   /** Identité stable, pour désigner le point fautif à l'opérateur. */
   readonly id: string;
   readonly source: PlanPixelPoint;
@@ -73,7 +73,7 @@ export type AffineTransform = {
 };
 
 /** Résidu d'un point homologue : l'écart que l'ajustement laisse. */
-export type ControlPointResidual = {
+export type CalibrationPointResidual = {
   readonly id: string;
   readonly residual_m: number;
 };
@@ -81,10 +81,10 @@ export type ControlPointResidual = {
 export type MeasuredCalibration = {
   readonly transform: AffineTransform;
   /** Un résidu par paire, dans l'ordre où les paires ont été fournies. */
-  readonly residuals: readonly ControlPointResidual[];
+  readonly residuals: readonly CalibrationPointResidual[];
   readonly mean_residual_m: number;
   readonly max_residual_m: number;
-  readonly control_point_count: number;
+  readonly calibration_point_count: number;
 };
 
 /** Tolérances de recette d'un calage. Fournies par l'appelant, jamais devinées. */
@@ -107,13 +107,13 @@ export type ResidualTolerance = {
  * degrés de liberté restent pour le porter. `fitMeasuredCalibration` le
  * signale.
  */
-export const MIN_CONTROL_POINTS = 3;
+export const MIN_CALIBRATION_POINTS = 3;
 
 /**
  * Nombre de paires à partir duquel le résidu mesure quelque chose. Ce n'est pas
  * un seuil de recette, c'est le rang à partir duquel le système est surdéterminé.
  */
-export const MEASURING_CONTROL_POINTS = MIN_CONTROL_POINTS + 1;
+export const MEASURING_CALIBRATION_POINTS = MIN_CALIBRATION_POINTS + 1;
 
 /**
  * Garde d'alignement. Après centrage, `det / (Suu · Svv)` vaut le sinus carré
@@ -140,7 +140,7 @@ type Centroid = {
   readonly ty: number;
 };
 
-function centroidOf(pairs: readonly ControlPointPair[]): Centroid {
+function centroidOf(pairs: readonly CalibrationPointPair[]): Centroid {
   let sx = 0;
   let sy = 0;
   let tx = 0;
@@ -169,9 +169,9 @@ function centroidOf(pairs: readonly ControlPointPair[]): Centroid {
  * second membre : une seule passe sur les points suffit aux sept sommes.
  */
 export function fitMeasuredCalibration(
-  pairs: readonly ControlPointPair[],
+  pairs: readonly CalibrationPointPair[],
 ): Outcome<MeasuredCalibration> {
-  if (pairs.length < MIN_CONTROL_POINTS) {
+  if (pairs.length < MIN_CALIBRATION_POINTS) {
     return {
       ok: false,
       findings: [
@@ -179,7 +179,7 @@ export function fitMeasuredCalibration(
           code: 'CALIB.CONTROL_POINTS_INSUFFICIENT',
           severity: 'blocking',
           entity: null,
-          params: { count: pairs.length, minimum: MIN_CONTROL_POINTS },
+          params: { count: pairs.length, minimum: MIN_CALIBRATION_POINTS },
           ruleRef: 'atelier-M1.4',
         },
       ],
@@ -240,7 +240,7 @@ export function fitMeasuredCalibration(
     f: centroid.ty - d * centroid.sx - e * centroid.sy,
   };
 
-  const residuals: ControlPointResidual[] = [];
+  const residuals: CalibrationPointResidual[] = [];
   let total = 0;
   let max = 0;
   for (const pair of pairs) {
@@ -252,12 +252,12 @@ export function fitMeasuredCalibration(
   }
 
   const warnings: Finding[] = [];
-  if (pairs.length < MEASURING_CONTROL_POINTS) {
+  if (pairs.length < MEASURING_CALIBRATION_POINTS) {
     warnings.push({
       code: 'CALIB.RESIDUAL_NOT_MEASURED',
       severity: 'warning',
       entity: null,
-      params: { count: pairs.length, measuring_minimum: MEASURING_CONTROL_POINTS },
+      params: { count: pairs.length, measuring_minimum: MEASURING_CALIBRATION_POINTS },
       ruleRef: 'atelier-M1.4',
     });
   }
@@ -269,7 +269,7 @@ export function fitMeasuredCalibration(
       residuals,
       mean_residual_m: total / pairs.length,
       max_residual_m: max,
-      control_point_count: pairs.length,
+      calibration_point_count: pairs.length,
     },
     warnings,
   };
@@ -313,10 +313,14 @@ export function auditCalibrationResiduals(
 
   for (const residual of calibration.residuals) {
     if (residual.residual_m > tolerance.point_m) {
+      // La nature désignée est la paire, et non une table. L'identité portée
+      // est celle que l'appelant a donnée à la paire — côté atelier, celle du
+      // nœud servant d'amer : nommer ici une table ferait passer un
+      // identifiant de nœud pour la clé d'une ligne qui n'existe pas.
       findings.push({
         code: 'CALIB.RESIDUAL_POINT_EXCEEDED',
         severity: 'blocking',
-        entity: { kind: 'control_point', id: residual.id },
+        entity: { kind: 'calibration_pair', id: residual.id },
         params: {
           residual_mm: roundMm(residual.residual_m * 1000),
           tolerance_mm: roundMm(tolerance.point_m * 1000),

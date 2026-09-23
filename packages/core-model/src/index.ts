@@ -10,14 +10,14 @@ export {
   fitMeasuredCalibration,
   auditCalibrationResiduals,
   applyAffine,
-  MIN_CONTROL_POINTS,
-  MEASURING_CONTROL_POINTS,
+  MIN_CALIBRATION_POINTS,
+  MEASURING_CALIBRATION_POINTS,
 } from './affine-calibration.js';
 export type {
   PlanPixelPoint,
-  ControlPointPair,
+  CalibrationPointPair,
   AffineTransform,
-  ControlPointResidual,
+  CalibrationPointResidual,
   MeasuredCalibration,
   ResidualTolerance,
 } from './affine-calibration.js';
