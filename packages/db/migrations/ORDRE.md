@@ -86,6 +86,7 @@ non plus — elle n'en retire que les clés étrangères.
 0040_q9_country
 0041_m01_s2_control_point_image_px
 0042_a4_migrations_registry_in_schema
+0043_m01_s2_drop_control_point
 ```
 
 ## Règle pour la suite
