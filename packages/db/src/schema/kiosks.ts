@@ -6,8 +6,8 @@ import { node } from './graph.js';
 
 export const kiosk = azimut.table('kiosk', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   azimuth_deg: numeric('azimuth_deg').notNull().default('0'),
   default_lang: text('default_lang').notNull().default('fr'),
@@ -20,8 +20,8 @@ export const kiosk = azimut.table('kiosk', {
 
 export const kioskPackage = azimut.table('kiosk_package', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   version: integer('version').notNull(),
   storage_path: text('storage_path').notNull(),
   checksum: text('checksum').notNull(),
@@ -33,7 +33,7 @@ export const kioskPackage = azimut.table('kiosk_package', {
 
 export const kioskTelemetry = azimut.table('kiosk_telemetry', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   kiosk_id: uuid('kiosk_id').notNull().references(() => kiosk.id, { onDelete: 'cascade' }),
   occurred_at: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
   event_kind: text('event_kind').notNull(),

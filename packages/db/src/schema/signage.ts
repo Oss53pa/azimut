@@ -8,7 +8,7 @@ import { node } from './graph.js';
 // instancie une typologie ; les dimensions restent portées par l'instance.
 export const supportTypology = azimut.table('support_typology', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
   name: text('name').notNull(),
   face_count: integer('face_count').notNull(),
@@ -19,8 +19,8 @@ export const supportTypology = azimut.table('support_typology', {
 
 export const support = azimut.table('support', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   // A5.6 et N2.2 : code lisible, unique par site, propriété du module 02
   // (implantation, scission L0). Nullable tant que les supports déjà écrits
   // n'ont pas de code : le rendre requis transformerait des données (A2.2-7).
@@ -53,7 +53,7 @@ export const support = azimut.table('support', {
 
 export const supportFace = azimut.table('support_face', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
   side: text('side').notNull(),
   width_mm: numeric('width_mm'),
@@ -71,7 +71,7 @@ export const supportFace = azimut.table('support_face', {
 
 export const supportContentBlock = azimut.table('support_content_block', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   face_id: uuid('face_id').notNull().references(() => supportFace.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   ordinal: integer('ordinal').notNull(),
@@ -89,7 +89,7 @@ export const supportContentBlock = azimut.table('support_content_block', {
 // l'empreinte du contenu et le chemin de l'artwork produit.
 export const supportVersion = azimut.table('support_version', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
   version: integer('version').notNull(),
   state: text('state').notNull().default('draft'),
@@ -104,7 +104,7 @@ export const supportVersion = azimut.table('support_version', {
 
 export const proof = azimut.table('proof', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   face_id: uuid('face_id').notNull().references(() => supportFace.id, { onDelete: 'cascade' }),
   version: integer('version').notNull(),
   storage_path: text('storage_path').notNull(),
@@ -118,8 +118,8 @@ export const proof = azimut.table('proof', {
 
 export const approval = azimut.table('approval', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  proof_id: uuid('proof_id').notNull().references(() => proof.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  proof_id: uuid('proof_id').notNull().references(() => proof.id, { onDelete: 'restrict' }),
   decision: text('decision').notNull(),
   reviewer_id: uuid('reviewer_id').notNull(),
   comment: text('comment').notNull().default(''),
@@ -131,7 +131,7 @@ export const approval = azimut.table('approval', {
 
 export const installedSupport = azimut.table('installed_support', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
   installed_at: timestamp('installed_at', { withTimezone: true }).notNull().defaultNow(),
   photo_path: text('photo_path'),
@@ -142,7 +142,7 @@ export const installedSupport = azimut.table('installed_support', {
 
 export const divergence = azimut.table('divergence', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   installed_support_id: uuid('installed_support_id').notNull().references(() => installedSupport.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   detected_at: timestamp('detected_at', { withTimezone: true }).notNull().defaultNow(),
@@ -154,8 +154,8 @@ export const divergence = azimut.table('divergence', {
 
 export const workOrder = azimut.table('work_order', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   scope: jsonb('scope'),
   estimated_cost: numeric('estimated_cost'),
   currency: text('currency').notNull().default('EUR'),

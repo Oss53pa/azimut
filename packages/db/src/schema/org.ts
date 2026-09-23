@@ -11,7 +11,7 @@ export const organization = azimut.table('organization', {
 
 export const membership = azimut.table('membership', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   user_id: uuid('user_id').notNull(),
   role: text('role').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -20,3 +20,4 @@ export const membership = azimut.table('membership', {
   index('idx_membership_org').on(t.org_id),
   index('idx_membership_user').on(t.user_id),
 ]);
+

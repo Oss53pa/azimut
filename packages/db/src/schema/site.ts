@@ -7,7 +7,7 @@ import { organization } from './org.js';
 
 export const site = azimut.table('site', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
   // O4 et A5.2 — fuseau du site, requis. Tous les horaires, disponibilités
@@ -40,8 +40,8 @@ export const site = azimut.table('site', {
 
 export const building = azimut.table('building', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   independent_access: boolean('independent_access').notNull().default(false),
   opening_hours: jsonb('opening_hours'),
@@ -56,7 +56,7 @@ export const building = azimut.table('building', {
 
 export const level = azimut.table('level', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   building_id: uuid('building_id').notNull().references(() => building.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   ordinal: integer('ordinal').notNull(),
@@ -70,7 +70,7 @@ export const level = azimut.table('level', {
 
 export const footprint = azimut.table('footprint', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry').notNull(),
   kind: text('kind').notNull(),
@@ -87,7 +87,7 @@ export const footprint = azimut.table('footprint', {
 
 export const volume = azimut.table('volume', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   base_elevation_m: numeric('base_elevation_m').notNull(),
   height_m: numeric('height_m').notNull(),
@@ -100,7 +100,7 @@ export const volume = azimut.table('volume', {
 
 export const zone = azimut.table('zone', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
   // A5.2 — `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
@@ -114,7 +114,7 @@ export const zone = azimut.table('zone', {
 
 export const planSource = azimut.table('plan_source', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   storage_path: text('storage_path').notNull(),
   media_type: text('media_type').notNull(),
@@ -125,7 +125,7 @@ export const planSource = azimut.table('plan_source', {
 
 export const planCalibration = azimut.table('plan_calibration', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   plan_source_id: uuid('plan_source_id').notNull().references(() => planSource.id, { onDelete: 'cascade' }),
   scale_m_per_px: numeric('scale_m_per_px').notNull(),
   // A5.2 — position, dans l'image, de l'origine du repère site. Seules
@@ -167,7 +167,7 @@ export const planCalibration = azimut.table('plan_calibration', {
  */
 export const controlPoint = azimut.table('control_point', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   calibration_id: uuid('calibration_id').notNull().references(() => planCalibration.id, { onDelete: 'cascade' }),
   source_x_px: numeric('source_x_px').notNull(),
   source_y_px: numeric('source_y_px').notNull(),
@@ -183,7 +183,7 @@ export const controlPoint = azimut.table('control_point', {
 
 export const opening = azimut.table('opening', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   position: jsonb('position').notNull(),
   width_m: numeric('width_m').notNull(),
@@ -199,8 +199,8 @@ export const opening = azimut.table('opening', {
  */
 export const siteFact = azimut.table('site_fact', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
   value: text('value').notNull(),
   source: text('source').notNull(),
@@ -216,7 +216,7 @@ export const siteFact = azimut.table('site_fact', {
 /** Les mots qu'un fait bannit, chacun dans la langue où il est interdit. */
 export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_fact_id: uuid('site_fact_id').notNull().references(() => siteFact.id, { onDelete: 'cascade' }),
   lang: text('lang').notNull(),
   term: text('term').notNull(),
@@ -231,8 +231,8 @@ export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
  */
 export const sourceClaim = azimut.table('source_claim', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
   source: text('source').notNull(),
   value: text('value').notNull(),
@@ -252,8 +252,8 @@ export const sourceClaim = azimut.table('source_claim', {
  */
 export const discrepancyDecision = azimut.table('discrepancy_decision', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
   decided_source: text('decided_source').notNull(),
   decided_by: text('decided_by').notNull(),
@@ -266,7 +266,7 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
 /** Complément atelier M2 — un parking, avec sa capacité annoncée et sa source. */
 export const parking = azimut.table('parking', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry').notNull(),
   name: text('name').notNull(),
@@ -282,7 +282,7 @@ export const parking = azimut.table('parking', {
 
 export const parkingSpace = azimut.table('parking_space', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   row_label: text('row_label').notNull(),
@@ -299,7 +299,7 @@ export const parkingSpace = azimut.table('parking_space', {
 /** Là où le plan source s'arrête : sans elle, aucune extrapolation n'est visible. */
 export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry'),
   reason: text('reason').notNull(),
@@ -311,7 +311,7 @@ export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
 
 export const vehicleGate = azimut.table('vehicle_gate', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   code: text('code').notNull(),
   role: text('role').notNull(),
@@ -335,7 +335,7 @@ export const vehicleGate = azimut.table('vehicle_gate', {
  */
 export const planCalibrationPoint = azimut.table('plan_calibration_point', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   calibration_id: uuid('calibration_id').notNull()
     .references(() => planCalibration.id, { onDelete: 'cascade' }),
   ordinal: integer('ordinal').notNull(),
@@ -358,7 +358,7 @@ export const planCalibrationPoint = azimut.table('plan_calibration_point', {
  */
 export const legalEntity = azimut.table('legal_entity', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   legal_name: text('legal_name').notNull(),
   registration_ref: text('registration_ref'),
   tax_ref: text('tax_ref'),
@@ -385,8 +385,8 @@ export const legalEntity = azimut.table('legal_entity', {
  */
 export const graphValidation = azimut.table('graph_validation', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   graph_hash: text('graph_hash').notNull(),
   ran_at: timestamp('ran_at', { withTimezone: true }).notNull(),
   passed: boolean('passed').notNull(),

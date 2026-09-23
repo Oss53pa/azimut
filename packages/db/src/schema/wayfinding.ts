@@ -20,8 +20,8 @@ import { supportTypology, support } from './signage.js';
 
 export const orientationZone = azimut.table('orientation_zone', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   code: text('code').notNull(),
   name_fr: text('name_fr').notNull(),
   name_en: text('name_en').notNull(),
@@ -36,8 +36,8 @@ export const orientationZone = azimut.table('orientation_zone', {
 
 export const namingRule = azimut.table('naming_rule', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   target: text('target').notNull(),
   pattern: text('pattern').notNull(),
   max_length: integer('max_length').notNull(),
@@ -50,7 +50,7 @@ export const namingRule = azimut.table('naming_rule', {
 
 export const informationLevel = azimut.table('information_level', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   typology_id: uuid('typology_id').notNull()
     .references(() => supportTypology.id, { onDelete: 'cascade' }),
   level: integer('level').notNull(),
@@ -61,8 +61,8 @@ export const informationLevel = azimut.table('information_level', {
 
 export const wayfindingSequence = azimut.table('wayfinding_sequence', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   profile_id: uuid('profile_id').notNull()
     .references(() => travelProfile.id, { onDelete: 'cascade' }),
   ordinal: integer('ordinal').notNull(),
@@ -75,8 +75,8 @@ export const wayfindingSequence = azimut.table('wayfinding_sequence', {
 
 export const messageSchedule = azimut.table('message_schedule', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   version: integer('version').notNull(),
   // N2.2 et R12 : draft, in_review, approved, superseded. Et eux seuls.
   state: text('state').notNull().default('draft'),
@@ -91,7 +91,7 @@ export const messageSchedule = azimut.table('message_schedule', {
 
 export const messageLine = azimut.table('message_line', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   schedule_id: uuid('schedule_id').notNull()
     .references(() => messageSchedule.id, { onDelete: 'cascade' }),
   support_id: uuid('support_id').notNull()

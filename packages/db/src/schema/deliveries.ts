@@ -12,8 +12,8 @@ import { site } from './site.js';
  */
 export const deliveryPackage = azimut.table('delivery_package', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   site_code: text('site_code').notNull(),
   building: text('building').notNull(),
   level: text('level').notNull(),

@@ -10,7 +10,7 @@ import { node } from './graph.js';
 
 export const category = azimut.table('category', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   sector_key: text('sector_key').notNull(),
   code: text('code').notNull(),
   parent_id: uuid('parent_id'),
@@ -20,7 +20,7 @@ export const category = azimut.table('category', {
 
 export const pictogram = azimut.table('pictogram', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   category_id: uuid('category_id').notNull().references(() => category.id, { onDelete: 'cascade' }),
   source: text('source').notNull(),
   standard_ref: text('standard_ref').notNull(),
@@ -32,7 +32,7 @@ export const pictogram = azimut.table('pictogram', {
 
 export const destination = azimut.table('destination', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   category_id: uuid('category_id').notNull().references(() => category.id, { onDelete: 'cascade' }),
@@ -52,7 +52,7 @@ export const destination = azimut.table('destination', {
 
 export const destinationName = azimut.table('destination_name', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   destination_id: uuid('destination_id').notNull().references(() => destination.id, { onDelete: 'cascade' }),
   lang: text('lang').notNull(),
   value: text('value').notNull(),
@@ -63,8 +63,8 @@ export const destinationName = azimut.table('destination_name', {
 
 export const travelProfile = azimut.table('travel_profile', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
   name: text('name').notNull(),
   excluded_edge_kinds: jsonb('excluded_edge_kinds').notNull().default([]),
@@ -79,8 +79,8 @@ export const travelProfile = azimut.table('travel_profile', {
 
 export const routeCache = azimut.table('route_cache', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   profile_id: uuid('profile_id').notNull().references(() => travelProfile.id, { onDelete: 'cascade' }),
   from_node_id: uuid('from_node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   to_node_id: uuid('to_node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
@@ -94,8 +94,8 @@ export const routeCache = azimut.table('route_cache', {
 
 export const decisionPoint = azimut.table('decision_point', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
-  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   profile_id: uuid('profile_id').notNull().references(() => travelProfile.id, { onDelete: 'cascade' }),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   branch_count: integer('branch_count').notNull(),

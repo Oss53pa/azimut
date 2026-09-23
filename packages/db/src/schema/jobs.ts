@@ -5,7 +5,7 @@ import { organization } from './org.js';
 
 export const job = azimut.table('job', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   kind: text('kind').notNull(),
   state: text('state').notNull().default('queued'),
   payload: jsonb('payload').notNull().default('{}'),
@@ -22,7 +22,7 @@ export const job = azimut.table('job', {
 
 export const auditLog = azimut.table('audit_log', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   actor_id: uuid('actor_id'),
   action: text('action').notNull(),
   entity: text('entity').notNull(),

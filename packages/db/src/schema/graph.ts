@@ -5,7 +5,7 @@ import { level, building } from './site.js';
 
 export const node = azimut.table('node', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   position: jsonb('position').notNull(),
@@ -19,7 +19,7 @@ export const node = azimut.table('node', {
 
 export const edge = azimut.table('edge', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   from_node_id: uuid('from_node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   to_node_id: uuid('to_node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   width_m: numeric('width_m').notNull(),
@@ -39,7 +39,7 @@ export const edge = azimut.table('edge', {
 
 export const verticalLink = azimut.table('vertical_link', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   edge_id: uuid('edge_id').notNull().references(() => edge.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   capacity: integer('capacity').notNull().default(1),
@@ -50,7 +50,7 @@ export const verticalLink = azimut.table('vertical_link', {
 
 export const buildingLink = azimut.table('building_link', {
   id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   edge_id: uuid('edge_id').notNull().references(() => edge.id, { onDelete: 'cascade' }),
   from_building_id: uuid('from_building_id').notNull().references(() => building.id, { onDelete: 'cascade' }),
   to_building_id: uuid('to_building_id').notNull().references(() => building.id, { onDelete: 'cascade' }),
