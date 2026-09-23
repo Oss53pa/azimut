@@ -110,6 +110,20 @@ export type GraphScreenProps = {
   readonly onAxisDraw: () => void;
   /** Ce que la dernière passe a produit, ou `null` si aucune n'a eu lieu. */
   readonly axisReport: AxisReport | null;
+  /**
+   * M4 (partie M) — « Propriétés d'un nœud », « Propriétés d'une arête ».
+   *
+   * Les deux panneaux existaient et n'étaient jamais atteints : la sélection
+   * restait nulle, et aucun geste ne la posait. Libellé, position, largeur,
+   * pente, sens et cheminement d'évacuation étaient spécifiés et inopérants.
+   *
+   * L'application est explicite plutôt qu'à la frappe : une commande par
+   * caractère saisi remplirait la pile d'annulation d'un geste par touche, ce
+   * que E5.2 écarte — « les commandes d'un même geste continu sont regroupées
+   * en une seule entrée annulable ».
+   */
+  readonly onApplyProperties: () => void;
+  readonly propertiesDirty: boolean;
   readonly children?: JSX.Element;
 };
 
@@ -156,6 +170,15 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
             <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
               {props.selection === null && (
                 <p style={{ margin: 0, color: 'var(--text-muted)' }}>{t('graph.no_selection')}</p>
+              )}
+              {props.selection !== null && (
+                <Button
+                  rank="primary"
+                  onClick={props.onApplyProperties}
+                  disabled={!props.propertiesDirty}
+                >
+                  {t('graph.action.apply')}
+                </Button>
               )}
 
               {props.selection?.kind === 'node' && (

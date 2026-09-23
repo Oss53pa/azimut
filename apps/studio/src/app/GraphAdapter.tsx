@@ -6,6 +6,10 @@ import { acceptNode, acceptEdge } from '../state/graph-input.js';
 import { acceptAxis } from '../state/graph-axis.js';
 import { graphCommands } from '../state/graph-commands.js';
 import { point, structured } from '../state/row-values.js';
+import { readSessionGraph } from '../state/session-graph.js';
+import { updateNodeCommands, updateEdgeCommands } from '../state/graph-update-commands.js';
+import { GraphView } from '../viewport/GraphView.js';
+import type { GraphSelection } from '../viewport/GraphView.js';
 import type { StoredRow } from '../state/session-store.js';
 import { GraphScreen } from '../screens/GraphScreen.js';
 import type {
@@ -55,6 +59,71 @@ export function GraphScreenAdapter({ session, levelId }: {
   const [nextNodeKind, setNextNodeKind] = useState<NodeKind>('junction');
   const [axis, setAxis] = useState<readonly Point[]>(DEFAULT_AXIS);
   const [axisReport, setAxisReport] = useState<AxisReport | null>(null);
+  // M4 (partie M) : ce que la sélection désigne, et ce que le panneau a changé
+  // sans l'avoir encore écrit. Les deux sont distincts : le panneau se remplit
+  // depuis le graphe à la sélection, puis vit sa vie jusqu'à l'application.
+  const [chosen, setChosen] = useState<GraphSelection | null>(null);
+  const [dirty, setDirty] = useState(false);
+
+  const graph = readSessionGraph(session.state);
+
+  function select(picked: GraphSelection): void {
+    setChosen(picked);
+    setDirty(false);
+    if (picked.kind === 'node') {
+      const found = graph.nodes.find(n => n.id === picked.id);
+      setSelection(found === undefined ? null : {
+        kind: 'node', nodeKind: found.kind, label: found.label, position: found.position,
+      });
+      return;
+    }
+    const found = graph.edges.find(e => e.id === picked.id);
+    setSelection(found === undefined ? null : {
+      kind: 'edge', widthM: found.width_m, slopePct: found.slope_pct,
+      accessible: found.accessible, direction: found.direction,
+      evacuationRoute: found.evacuation_route, lengthM: found.length_m,
+    });
+  }
+
+  /**
+   * M4 (partie M) — l'application des propriétés, en un geste annulable.
+   *
+   * Déplacer un nœud recalcule la longueur des arêtes qui le touchent, dans la
+   * même commande : « La longueur est recalculée à toute modification de
+   * position. » Laisser ces longueurs en l'état écrirait en base des valeurs
+   * qui ne correspondent plus à leurs extrémités, et aucun écran ne le dirait.
+   */
+  function applyProperties(): void {
+    void (async () => {
+      if (chosen === null || selection === null) return;
+      const write = { orgId: ORG_OF_SESSION, timestamp: session.now() };
+
+      if (chosen.kind === 'node' && selection.kind === 'node') {
+        const before = graph.nodes.find(n => n.id === chosen.id);
+        if (before === undefined) return;
+        const built = updateNodeCommands(before, {
+          kind: selection.nodeKind, label: selection.label, position: selection.position,
+        }, graph.edges, graph.nodes, write, `node:${chosen.id}`);
+        if (!built.ok) { setFindings(built.findings); return; }
+        await session.write(built.value);
+      }
+
+      if (chosen.kind === 'edge' && selection.kind === 'edge') {
+        const before = graph.edges.find(e => e.id === chosen.id);
+        if (before === undefined) return;
+        const built = updateEdgeCommands(before, {
+          widthM: selection.widthM, slopePct: selection.slopePct,
+          accessible: selection.accessible, direction: selection.direction,
+          evacuationRoute: selection.evacuationRoute,
+        }, write, `edge:${chosen.id}`);
+        if (!built.ok) { setFindings(built.findings); return; }
+        await session.write(built.value);
+      }
+
+      setFindings([]);
+      setDirty(false);
+    })();
+  }
 
   const nodes: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'node');
   const edges: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'edge');
@@ -65,18 +134,20 @@ export function GraphScreenAdapter({ session, levelId }: {
       tool={tool}
       onTool={setTool}
       selection={selection}
-      onNodeKind={nodeKind => { setSelection(s => (s?.kind === 'node' ? { ...s, nodeKind } : s)); }}
-      onNodeLabel={label => { setSelection(s => (s?.kind === 'node' ? { ...s, label } : s)); }}
+      onNodeKind={nodeKind => { setDirty(true); setSelection(s => (s?.kind === 'node' ? { ...s, nodeKind } : s)); }}
+      onNodeLabel={label => { setDirty(true); setSelection(s => (s?.kind === 'node' ? { ...s, label } : s)); }}
       onNodePosition={(axis, value) => {
+        setDirty(true);
         setSelection(s => (s?.kind === 'node'
           ? { ...s, position: { ...s.position, [axis]: value ?? 0 } }
           : s));
       }}
-      onEdgeWidth={value => { setSelection(s => (s?.kind === 'edge' ? { ...s, widthM: value ?? 0 } : s)); }}
-      onEdgeSlope={value => { setSelection(s => (s?.kind === 'edge' ? { ...s, slopePct: value ?? 0 } : s)); }}
-      onEdgeAccessible={accessible => { setSelection(s => (s?.kind === 'edge' ? { ...s, accessible } : s)); }}
-      onEdgeDirection={direction => { setSelection(s => (s?.kind === 'edge' ? { ...s, direction } : s)); }}
+      onEdgeWidth={value => { setDirty(true); setSelection(s => (s?.kind === 'edge' ? { ...s, widthM: value ?? 0 } : s)); }}
+      onEdgeSlope={value => { setDirty(true); setSelection(s => (s?.kind === 'edge' ? { ...s, slopePct: value ?? 0 } : s)); }}
+      onEdgeAccessible={accessible => { setDirty(true); setSelection(s => (s?.kind === 'edge' ? { ...s, accessible } : s)); }}
+      onEdgeDirection={direction => { setDirty(true); setSelection(s => (s?.kind === 'edge' ? { ...s, direction } : s)); }}
       onEdgeEvacuation={evacuationRoute => {
+        setDirty(true);
         setSelection(s => (s?.kind === 'edge' ? { ...s, evacuationRoute } : s));
       }}
       findings={findings}
@@ -102,6 +173,8 @@ export function GraphScreenAdapter({ session, levelId }: {
       }}
       onAxisRemove={() => { setAxis(previous => previous.slice(0, -1)); }}
       axisReport={axisReport}
+      onApplyProperties={applyProperties}
+      propertiesDirty={dirty}
       onAxisDraw={() => {
         void (async () => {
           const outcome = acceptAxis(axis, {
@@ -214,7 +287,20 @@ export function GraphScreenAdapter({ session, levelId }: {
           setFindings([]);
         })();
       }}
-    />
+    >
+      {/*
+        F15 — la zone de travail, montée ici parce que l'adaptateur sait ce
+        que la session porte. M4 (partie M) veut que les nœuds se distinguent
+        par leur forme et les arêtes par leur trait : c'est cette vue qui le
+        rend, depuis l'encodage en donnée.
+      */}
+      <GraphView
+        nodes={graph.nodes}
+        edges={graph.edges}
+        selected={chosen}
+        onSelect={select}
+      />
+    </GraphScreen>
   );
 }
 
