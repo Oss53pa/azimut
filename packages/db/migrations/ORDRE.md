@@ -85,6 +85,7 @@ non plus — elle n'en retire que les clés étrangères.
 0039_a5_11_no_cascade_to_org_or_site
 0040_q9_country
 0041_m01_s2_control_point_image_px
+0042_a4_migrations_registry_in_schema
 ```
 
 ## Règle pour la suite
