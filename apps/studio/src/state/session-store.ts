@@ -13,7 +13,7 @@
  * E5.3 : ce qui est écrit hors ligne attend en file, et part à la
  * synchronisation. La pile d'annulation est alors vidée.
  */
-import type { EntityCommand, Outcome, Point } from '@azimut/core-model';
+import type { EntityCommand, Outcome } from '@azimut/core-model';
 
 /** Une ligne telle que le magasin la garde : la table, l'identifiant, l'état. */
 export type StoredRow = {
@@ -165,23 +165,6 @@ export async function flushQueue(
   return sent.ok
     ? { state: { ...state, queued: [], online: true }, flushed: state.queued.length }
     : { state: { ...state, online: true }, flushed: 0 };
-}
-
-// ---------------------------------------------------------------------------
-// Lecture de ce que le parcours a construit
-// ---------------------------------------------------------------------------
-
-/** La géométrie d'une empreinte, relue depuis l'état local. */
-export function footprintVertices(row: StoredRow): readonly Point[] {
-  const raw = row.values['geometry'];
-  if (typeof raw !== 'string') return [];
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    const vertices = (parsed as { vertices?: unknown }).vertices;
-    return Array.isArray(vertices) ? vertices as readonly Point[] : [];
-  } catch {
-    return [];
-  }
 }
 
 // ---------------------------------------------------------------------------

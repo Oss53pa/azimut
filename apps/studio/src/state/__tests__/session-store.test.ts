@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   EMPTY_SESSION, applyToSession, rowsOf, countOf, storageKey,
   saveSession, readSession, clearSession, writeToSession, flushQueue,
-  footprintVertices, resumeDecision, markOpenInTab, isOpenInTab, highestLocalRank,
+  resumeDecision, markOpenInTab, isOpenInTab, highestLocalRank,
 } from '../session-store.js';
 import type { SessionState } from '../session-store.js';
 import { buildCommand } from '@azimut/core-model';
@@ -176,22 +176,6 @@ describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
   });
 });
 
-describe('relecture de la géométrie', () => {
-  it('relit les sommets d’une empreinte', () => {
-    const vertices = [{ x_m: 0, y_m: 0 }, { x_m: 3, y_m: 0 }, { x_m: 3, y_m: 4 }];
-    const state = applyToSession(EMPTY_SESSION, cmd('footprint', 'f1', {
-      id: 'f1', org_id: ORG, geometry: JSON.stringify({ vertices }),
-    }));
-    expect(footprintVertices(rowsOf(state, 'footprint')[0] as never)).toEqual(vertices);
-  });
-
-  it('rend une liste vide plutôt que d’échouer sur une géométrie illisible', () => {
-    const state = applyToSession(EMPTY_SESSION, cmd('footprint', 'f1', {
-      id: 'f1', org_id: ORG, geometry: 'pas du JSON',
-    }));
-    expect(footprintVertices(rowsOf(state, 'footprint')[0] as never)).toEqual([]);
-  });
-});
 
 describe('E5.4 — la reprise, et ce qui la distingue d’une navigation', () => {
   const site = 'site-reprise';
