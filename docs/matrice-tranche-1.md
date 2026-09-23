@@ -7,7 +7,7 @@ Règle de lecture : **une exigence sans preuve par un essai est absente**, même
 si du code paraît la couvrir. Un état « tenu » porte donc toujours le fichier
 d'essai qui le prouve.
 
-Établie le 22 septembre 2026.
+Établie le 22 septembre 2026. Révisée le 23 septembre 2026.
 
 ---
 
@@ -67,6 +67,7 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 | Critère | État | Preuve |
 | --- | --- | --- |
 | 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | **absent** | L'outil d'axe de circulation n'est pas construit |
+| — Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` — le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
 | 2. Longueur jamais saisissable, recalculée | tenu | `graph-input.test.ts` ; M7.3 en bout en bout |
 | 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède |
 | 4. Graphe saisissable au clavier seul | tenu | `m8-tranche.spec.ts`, critère 2 |
@@ -74,11 +75,22 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 ### M1 et M5
 
 M1 et M5 ne portent pas de critères numérotés. Leurs règles d'écran sont
-couvertes par M7 ci-dessous. Deux réserves : le formulaire de création de M1
-est **bloqué** par la contradiction du §4 ; l'écran M5 ne fait pas encore
-tourner `runChecks`, faute d'assemblage de `SiteData` depuis la session — il
-dit honnêtement qu'il a tourné sans rien trouver plutôt que de fabriquer des
-anomalies.
+couvertes par M7 ci-dessous. Une réserve subsiste : le formulaire de création
+de M1 reste **bloqué** par la contradiction du §5 sur les champs requis ; il
+est monté et éprouvé, et lit le référentiel des pays de Q9.
+
+L'écran M5 fait tourner `validateGraph`. Il portait auparavant, dans l'écran,
+une reprise à la main de deux des quatorze contrôles du moteur, et affichait
+« aucune anomalie » sur n'importe quel graphe. Le moteur ne demandait le site
+entier que par sa signature : il n'en lit que six champs, que `GraphScope`
+nomme désormais, et `graphScopeFromSession` les assemble depuis la session
+sans rien compléter. Preuve : `state/__tests__/session-scope.test.ts`,
+`engine-graph/__tests__/graph-scope.test.ts`, et le contre-exemple de bout en
+bout — quatre carrefours, aucune entrée, `GRAPH.NO_ENTRANCE` nommé à l'écran.
+
+`runChecks` reste hors tranche : il porte les contrôles sémantiques — annuaire,
+lexique de charte, faits de site — dont aucun n'a de donnée à lire avant le
+module 02.
 
 ## 3. M7, les onze règles d'écran
 
@@ -87,8 +99,8 @@ Toutes tenues, et opposables par un essai nommé dans
 M7.11, 21 essais.
 
 
-Réserve sur **M7.6** : la règle est vérifiée de bout en bout sur le seul cas
-sans anomalie, pour la raison donnée au §2 sur M5.
+**M7.6** est désormais vérifiée dans les deux sens : le parcours sans anomalie,
+et le graphe sans entrée que l'écran refuse en nommant le code.
 
 ## 4. M8, les six critères de la tranche
 
@@ -97,7 +109,7 @@ sans anomalie, pour la raison donnée au §2 sur M5.
 | 1. La chaîne fonctionne, site vide → graphe validé | tenu | `m8-tranche.spec.ts` |
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
-| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — 1 669 ms au dernier relevé, quatre étapes |
+| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — quatre étapes. Le parcours a coûté environ 200 ms de plus depuis que le type du nœud se choisit et que le moteur tourne réellement |
 | 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` — 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
@@ -111,7 +123,6 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Rôle `marketing` | Contradiction du document : A5.1 énumère sept valeurs, sa phrase suivante en annonce six, A6.2 en définit six | Arbitrage. Ni ajouté, ni retiré |
 | Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
 | `control_point.source_x_px`, `source_y_px` | Infraction à M01.S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
-| Formulaire de création d'un site | `NewSiteDialog` est construit et éprouvé, mais monté nulle part : `/sites` rend `SitesView`, qui n'expose aucun bouton de création | Décision de périmètre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
