@@ -108,16 +108,31 @@ describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
   });
 
   /**
-   * Deux sommets coïncidents résolvent vers le même nœud : le segment
-   * n'existe pas, et le refuser lèverait `GRAPH.EDGE_SELF_LOOP` sur un geste
-   * que l'opérateur n'a pas fait.
+   * Deux sommets coïncidents n'en font qu'un, et le segment entre eux n'existe
+   * jamais : `unfoldAxis` les confond avant qu'aucune arête soit formée. Rien
+   * n'est donc « passé » — il n'y avait rien à passer, et lever
+   * `GRAPH.EDGE_SELF_LOOP` porterait sur un geste que l'opérateur n'a pas fait.
    */
-  it('passe un segment dont les deux extrémités sont le même nœud', () => {
+  it('confond deux sommets coïncidents sans former de segment', () => {
     const outcome = acceptAxis([A, A, B], contextOf());
     if (!outcome.ok) throw new Error('l’axe doit être accepté');
     expect(outcome.value.nodes).toHaveLength(2);
     expect(outcome.value.edges).toHaveLength(1);
-    expect(outcome.value.skipped).toBe(1);
+    expect(outcome.value.skipped).toBe(0);
+  });
+
+  /**
+   * La maille de reprise est celle de `unfoldAxis` : la position quantifiée au
+   * millimètre. Deux notions de « même point » feraient reprendre un nœud d'un
+   * côté et pas de l'autre, et le graphe se déconnecterait sans qu'on le voie.
+   */
+  it('reprend un nœud sous le millimètre, comme le déroulement le fait', () => {
+    const outcome = acceptAxis([{ x_m: 0.0004, y_m: 0 }, B], contextOf({
+      nodes: [{ id: 'n-existant', position: A }],
+    }));
+    if (!outcome.ok) throw new Error('l’axe doit être accepté');
+    expect(outcome.value.reused).toEqual(['n-existant']);
+    expect(outcome.value.nodes).toHaveLength(1);
   });
 
   it('ne produit rien sous deux points', () => {
