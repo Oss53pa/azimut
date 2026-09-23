@@ -124,6 +124,8 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
 | `control_point.source_x_px`, `source_y_px` | Infraction à M01.S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
+| Fiabilité du relevé du critère 4 | Sept mesures du même parcours sur la machine de développement : 1651, 1868, 1990, 2075, 2206, 2340, 2804 ms, un rapport de 1 à 1,7. L'écart entre deux états du code est plus petit que celui de la machine à elle-même | Une mesure isolée ne vaut pas comme base de révision. K3.4 place la mesure sur opérateur réel dans les sessions d'essai sur usagers ; en attendant, ne rien conclure d'un relevé unique |
+| Panneau de propriétés de M4 | `selection` reste `null` : aucun geste ne le remplit. Libellé, position, largeur, pente, sens et cheminement d'évacuation sont spécifiés par M4 et inatteignables | Décision de périmètre : la sélection suppose la zone de travail, qui n'est pas construite |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
 
