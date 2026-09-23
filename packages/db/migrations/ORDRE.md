@@ -147,3 +147,38 @@ raison qui n'a rien de métier.
 
 `pnpm test:rls` lance la même suite : c'est elle que ce script annonçait sans
 l'avoir.
+
+## Étanchéité par PostgREST
+
+A10.4 nº 2 veut l'étanchéité « y compris par canal indirect », et A6.1 nomme
+ces canaux : message d'erreur, compteur, temps de réponse. Aucun n'est
+traversé par une connexion SQL directe. L'application parle à PostgREST, qui
+décide du rôle depuis un jeton, expose un schéma, rend des compteurs en
+en-tête et formule ses propres messages. La suite
+`a10-4-etancheite-postgrest.db.test.ts` passe donc par ce chemin.
+
+Elle ne s'exécute que si `AZIMUT_TEST_POSTGREST` désigne un binaire PostgREST.
+Sans lui, elle est ignorée plutôt que fausse : un essai d'étanchéité qui
+passerait sans avoir rien interrogé serait pire que son absence.
+
+Deux rôles sont posés une fois, par un compte d'administration, parce que le
+propriétaire de la base n'a pas le droit d'en créer :
+
+```sql
+CREATE ROLE anon NOLOGIN NOINHERIT;
+CREATE ROLE authenticator LOGIN NOINHERIT PASSWORD '<mot de passe local>';
+GRANT anon, authenticated TO authenticator;
+GRANT USAGE ON SCHEMA azimut TO anon;
+```
+
+`auth.uid()` est installé par la suite elle-même. C'est un objet de la
+plateforme, que Supabase fournit en production et que la base de développement
+n'a pas ; sa définition reproduit celle de Supabase, la revendication `sub` du
+jeton. Il n'entre dans aucune migration : la partie Q le range du côté de la
+plateforme, pas du produit.
+
+```
+AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:5433/azimut' \
+AZIMUT_TEST_POSTGREST=/chemin/vers/postgrest \
+pnpm test:rls
+```
