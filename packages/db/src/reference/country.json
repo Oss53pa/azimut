@@ -1,0 +1,2662 @@
+{
+  "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2",
+  "countries": [
+    {
+      "code": "AD",
+      "name_fr": "Andorre",
+      "name_en": "Andorra",
+      "timezones": [
+        "Europe/Andorra"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AE",
+      "name_fr": "Émirats arabes unis",
+      "name_en": "United Arab Emirates",
+      "timezones": [
+        "Asia/Dubai"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AF",
+      "name_fr": "Afghanistan",
+      "name_en": "Afghanistan",
+      "timezones": [
+        "Asia/Kabul"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AG",
+      "name_fr": "Antigua-et-Barbuda",
+      "name_en": "Antigua & Barbuda",
+      "timezones": [
+        "America/Antigua"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AI",
+      "name_fr": "Anguilla",
+      "name_en": "Anguilla",
+      "timezones": [
+        "America/Anguilla"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AL",
+      "name_fr": "Albanie",
+      "name_en": "Albania",
+      "timezones": [
+        "Europe/Tirane"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AM",
+      "name_fr": "Arménie",
+      "name_en": "Armenia",
+      "timezones": [
+        "Asia/Yerevan"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AO",
+      "name_fr": "Angola",
+      "name_en": "Angola",
+      "timezones": [
+        "Africa/Luanda"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AQ",
+      "name_fr": "Antarctique",
+      "name_en": "Antarctica",
+      "timezones": [
+        "Antarctica/Casey",
+        "Antarctica/Davis",
+        "Antarctica/DumontDUrville",
+        "Antarctica/Mawson",
+        "Antarctica/McMurdo",
+        "Antarctica/Palmer",
+        "Antarctica/Rothera",
+        "Antarctica/Syowa",
+        "Antarctica/Troll",
+        "Antarctica/Vostok"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AR",
+      "name_fr": "Argentine",
+      "name_en": "Argentina",
+      "timezones": [
+        "America/Argentina/Buenos_Aires",
+        "America/Argentina/Catamarca",
+        "America/Argentina/Cordoba",
+        "America/Argentina/Jujuy",
+        "America/Argentina/La_Rioja",
+        "America/Argentina/Mendoza",
+        "America/Argentina/Rio_Gallegos",
+        "America/Argentina/Salta",
+        "America/Argentina/San_Juan",
+        "America/Argentina/San_Luis",
+        "America/Argentina/Tucuman",
+        "America/Argentina/Ushuaia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AS",
+      "name_fr": "Samoa américaines",
+      "name_en": "Samoa (American)",
+      "timezones": [
+        "Pacific/Pago_Pago"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AT",
+      "name_fr": "Autriche",
+      "name_en": "Austria",
+      "timezones": [
+        "Europe/Vienna"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AU",
+      "name_fr": "Australie",
+      "name_en": "Australia",
+      "timezones": [
+        "Antarctica/Macquarie",
+        "Australia/Adelaide",
+        "Australia/Brisbane",
+        "Australia/Broken_Hill",
+        "Australia/Darwin",
+        "Australia/Eucla",
+        "Australia/Hobart",
+        "Australia/Lindeman",
+        "Australia/Lord_Howe",
+        "Australia/Melbourne",
+        "Australia/Perth",
+        "Australia/Sydney"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AW",
+      "name_fr": "Aruba",
+      "name_en": "Aruba",
+      "timezones": [
+        "America/Aruba"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AX",
+      "name_fr": "Îles Åland",
+      "name_en": "Åland Islands",
+      "timezones": [
+        "Europe/Mariehamn"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "AZ",
+      "name_fr": "Azerbaïdjan",
+      "name_en": "Azerbaijan",
+      "timezones": [
+        "Asia/Baku"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BA",
+      "name_fr": "Bosnie-Herzégovine",
+      "name_en": "Bosnia & Herzegovina",
+      "timezones": [
+        "Europe/Sarajevo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BB",
+      "name_fr": "Barbade",
+      "name_en": "Barbados",
+      "timezones": [
+        "America/Barbados"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BD",
+      "name_fr": "Bangladesh",
+      "name_en": "Bangladesh",
+      "timezones": [
+        "Asia/Dhaka"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BE",
+      "name_fr": "Belgique",
+      "name_en": "Belgium",
+      "timezones": [
+        "Europe/Brussels"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BF",
+      "name_fr": "Burkina Faso",
+      "name_en": "Burkina Faso",
+      "timezones": [
+        "Africa/Ouagadougou"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BG",
+      "name_fr": "Bulgarie",
+      "name_en": "Bulgaria",
+      "timezones": [
+        "Europe/Sofia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BH",
+      "name_fr": "Bahreïn",
+      "name_en": "Bahrain",
+      "timezones": [
+        "Asia/Bahrain"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BI",
+      "name_fr": "Burundi",
+      "name_en": "Burundi",
+      "timezones": [
+        "Africa/Bujumbura"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BJ",
+      "name_fr": "Bénin",
+      "name_en": "Benin",
+      "timezones": [
+        "Africa/Porto-Novo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BL",
+      "name_fr": "Saint-Barthélemy",
+      "name_en": "St Barthelemy",
+      "timezones": [
+        "America/St_Barthelemy"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BM",
+      "name_fr": "Bermudes",
+      "name_en": "Bermuda",
+      "timezones": [
+        "Atlantic/Bermuda"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BN",
+      "name_fr": "Brunei",
+      "name_en": "Brunei",
+      "timezones": [
+        "Asia/Brunei"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BO",
+      "name_fr": "Bolivie",
+      "name_en": "Bolivia",
+      "timezones": [
+        "America/La_Paz"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BQ",
+      "name_fr": "Pays-Bas caribéens",
+      "name_en": "Caribbean NL",
+      "timezones": [
+        "America/Kralendijk"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BR",
+      "name_fr": "Brésil",
+      "name_en": "Brazil",
+      "timezones": [
+        "America/Araguaina",
+        "America/Bahia",
+        "America/Belem",
+        "America/Boa_Vista",
+        "America/Campo_Grande",
+        "America/Cuiaba",
+        "America/Eirunepe",
+        "America/Fortaleza",
+        "America/Maceio",
+        "America/Manaus",
+        "America/Noronha",
+        "America/Porto_Velho",
+        "America/Recife",
+        "America/Rio_Branco",
+        "America/Santarem",
+        "America/Sao_Paulo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BS",
+      "name_fr": "Bahamas",
+      "name_en": "Bahamas",
+      "timezones": [
+        "America/Nassau"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BT",
+      "name_fr": "Bhoutan",
+      "name_en": "Bhutan",
+      "timezones": [
+        "Asia/Thimphu"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BV",
+      "name_fr": "Île Bouvet",
+      "name_en": "Bouvet Island",
+      "timezones": [],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BW",
+      "name_fr": "Botswana",
+      "name_en": "Botswana",
+      "timezones": [
+        "Africa/Gaborone"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BY",
+      "name_fr": "Biélorussie",
+      "name_en": "Belarus",
+      "timezones": [
+        "Europe/Minsk"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "BZ",
+      "name_fr": "Belize",
+      "name_en": "Belize",
+      "timezones": [
+        "America/Belize"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CA",
+      "name_fr": "Canada",
+      "name_en": "Canada",
+      "timezones": [
+        "America/Atikokan",
+        "America/Blanc-Sablon",
+        "America/Cambridge_Bay",
+        "America/Creston",
+        "America/Dawson",
+        "America/Dawson_Creek",
+        "America/Edmonton",
+        "America/Fort_Nelson",
+        "America/Glace_Bay",
+        "America/Goose_Bay",
+        "America/Halifax",
+        "America/Inuvik",
+        "America/Iqaluit",
+        "America/Moncton",
+        "America/Rankin_Inlet",
+        "America/Regina",
+        "America/Resolute",
+        "America/St_Johns",
+        "America/Swift_Current",
+        "America/Toronto",
+        "America/Vancouver",
+        "America/Whitehorse",
+        "America/Winnipeg"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CC",
+      "name_fr": "Îles Cocos",
+      "name_en": "Cocos (Keeling) Islands",
+      "timezones": [
+        "Indian/Cocos"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CD",
+      "name_fr": "Congo-Kinshasa",
+      "name_en": "Congo (Dem. Rep.)",
+      "timezones": [
+        "Africa/Kinshasa",
+        "Africa/Lubumbashi"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CF",
+      "name_fr": "République centrafricaine",
+      "name_en": "Central African Rep.",
+      "timezones": [
+        "Africa/Bangui"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CG",
+      "name_fr": "Congo-Brazzaville",
+      "name_en": "Congo (Rep.)",
+      "timezones": [
+        "Africa/Brazzaville"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CH",
+      "name_fr": "Suisse",
+      "name_en": "Switzerland",
+      "timezones": [
+        "Europe/Zurich"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CI",
+      "name_fr": "Côte d’Ivoire",
+      "name_en": "Côte d'Ivoire",
+      "timezones": [
+        "Africa/Abidjan"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CK",
+      "name_fr": "Îles Cook",
+      "name_en": "Cook Islands",
+      "timezones": [
+        "Pacific/Rarotonga"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CL",
+      "name_fr": "Chili",
+      "name_en": "Chile",
+      "timezones": [
+        "America/Coyhaique",
+        "America/Punta_Arenas",
+        "America/Santiago",
+        "Pacific/Easter"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CM",
+      "name_fr": "Cameroun",
+      "name_en": "Cameroon",
+      "timezones": [
+        "Africa/Douala"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CN",
+      "name_fr": "Chine",
+      "name_en": "China",
+      "timezones": [
+        "Asia/Shanghai",
+        "Asia/Urumqi"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CO",
+      "name_fr": "Colombie",
+      "name_en": "Colombia",
+      "timezones": [
+        "America/Bogota"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CR",
+      "name_fr": "Costa Rica",
+      "name_en": "Costa Rica",
+      "timezones": [
+        "America/Costa_Rica"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CU",
+      "name_fr": "Cuba",
+      "name_en": "Cuba",
+      "timezones": [
+        "America/Havana"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CV",
+      "name_fr": "Cap-Vert",
+      "name_en": "Cape Verde",
+      "timezones": [
+        "Atlantic/Cape_Verde"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CW",
+      "name_fr": "Curaçao",
+      "name_en": "Curaçao",
+      "timezones": [
+        "America/Curacao"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CX",
+      "name_fr": "Île Christmas",
+      "name_en": "Christmas Island",
+      "timezones": [
+        "Indian/Christmas"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CY",
+      "name_fr": "Chypre",
+      "name_en": "Cyprus",
+      "timezones": [
+        "Asia/Famagusta",
+        "Asia/Nicosia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "CZ",
+      "name_fr": "Tchéquie",
+      "name_en": "Czech Republic",
+      "timezones": [
+        "Europe/Prague"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DE",
+      "name_fr": "Allemagne",
+      "name_en": "Germany",
+      "timezones": [
+        "Europe/Berlin",
+        "Europe/Busingen"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DJ",
+      "name_fr": "Djibouti",
+      "name_en": "Djibouti",
+      "timezones": [
+        "Africa/Djibouti"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DK",
+      "name_fr": "Danemark",
+      "name_en": "Denmark",
+      "timezones": [
+        "Europe/Copenhagen"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DM",
+      "name_fr": "Dominique",
+      "name_en": "Dominica",
+      "timezones": [
+        "America/Dominica"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DO",
+      "name_fr": "République dominicaine",
+      "name_en": "Dominican Republic",
+      "timezones": [
+        "America/Santo_Domingo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "DZ",
+      "name_fr": "Algérie",
+      "name_en": "Algeria",
+      "timezones": [
+        "Africa/Algiers"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "EC",
+      "name_fr": "Équateur",
+      "name_en": "Ecuador",
+      "timezones": [
+        "America/Guayaquil",
+        "Pacific/Galapagos"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "EE",
+      "name_fr": "Estonie",
+      "name_en": "Estonia",
+      "timezones": [
+        "Europe/Tallinn"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "EG",
+      "name_fr": "Égypte",
+      "name_en": "Egypt",
+      "timezones": [
+        "Africa/Cairo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "EH",
+      "name_fr": "Sahara occidental",
+      "name_en": "Western Sahara",
+      "timezones": [
+        "Africa/El_Aaiun"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ER",
+      "name_fr": "Érythrée",
+      "name_en": "Eritrea",
+      "timezones": [
+        "Africa/Asmara"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ES",
+      "name_fr": "Espagne",
+      "name_en": "Spain",
+      "timezones": [
+        "Africa/Ceuta",
+        "Atlantic/Canary",
+        "Europe/Madrid"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ET",
+      "name_fr": "Éthiopie",
+      "name_en": "Ethiopia",
+      "timezones": [
+        "Africa/Addis_Ababa"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FI",
+      "name_fr": "Finlande",
+      "name_en": "Finland",
+      "timezones": [
+        "Europe/Helsinki"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FJ",
+      "name_fr": "Fidji",
+      "name_en": "Fiji",
+      "timezones": [
+        "Pacific/Fiji"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FK",
+      "name_fr": "Îles Malouines",
+      "name_en": "Falkland Islands",
+      "timezones": [
+        "Atlantic/Stanley"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FM",
+      "name_fr": "Micronésie",
+      "name_en": "Micronesia",
+      "timezones": [
+        "Pacific/Chuuk",
+        "Pacific/Kosrae",
+        "Pacific/Pohnpei"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FO",
+      "name_fr": "Îles Féroé",
+      "name_en": "Faroe Islands",
+      "timezones": [
+        "Atlantic/Faroe"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "FR",
+      "name_fr": "France",
+      "name_en": "France",
+      "timezones": [
+        "Europe/Paris"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GA",
+      "name_fr": "Gabon",
+      "name_en": "Gabon",
+      "timezones": [
+        "Africa/Libreville"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GB",
+      "name_fr": "Royaume-Uni",
+      "name_en": "Britain (UK)",
+      "timezones": [
+        "Europe/London"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GD",
+      "name_fr": "Grenade",
+      "name_en": "Grenada",
+      "timezones": [
+        "America/Grenada"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GE",
+      "name_fr": "Géorgie",
+      "name_en": "Georgia",
+      "timezones": [
+        "Asia/Tbilisi"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GF",
+      "name_fr": "Guyane française",
+      "name_en": "French Guiana",
+      "timezones": [
+        "America/Cayenne"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GG",
+      "name_fr": "Guernesey",
+      "name_en": "Guernsey",
+      "timezones": [
+        "Europe/Guernsey"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GH",
+      "name_fr": "Ghana",
+      "name_en": "Ghana",
+      "timezones": [
+        "Africa/Accra"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GI",
+      "name_fr": "Gibraltar",
+      "name_en": "Gibraltar",
+      "timezones": [
+        "Europe/Gibraltar"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GL",
+      "name_fr": "Groenland",
+      "name_en": "Greenland",
+      "timezones": [
+        "America/Danmarkshavn",
+        "America/Nuuk",
+        "America/Scoresbysund",
+        "America/Thule"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GM",
+      "name_fr": "Gambie",
+      "name_en": "Gambia",
+      "timezones": [
+        "Africa/Banjul"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GN",
+      "name_fr": "Guinée",
+      "name_en": "Guinea",
+      "timezones": [
+        "Africa/Conakry"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GP",
+      "name_fr": "Guadeloupe",
+      "name_en": "Guadeloupe",
+      "timezones": [
+        "America/Guadeloupe"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GQ",
+      "name_fr": "Guinée équatoriale",
+      "name_en": "Equatorial Guinea",
+      "timezones": [
+        "Africa/Malabo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GR",
+      "name_fr": "Grèce",
+      "name_en": "Greece",
+      "timezones": [
+        "Europe/Athens"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GS",
+      "name_fr": "Géorgie du Sud-et-les Îles Sandwich du Sud",
+      "name_en": "South Georgia & the South Sandwich Islands",
+      "timezones": [
+        "Atlantic/South_Georgia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GT",
+      "name_fr": "Guatemala",
+      "name_en": "Guatemala",
+      "timezones": [
+        "America/Guatemala"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GU",
+      "name_fr": "Guam",
+      "name_en": "Guam",
+      "timezones": [
+        "Pacific/Guam"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GW",
+      "name_fr": "Guinée-Bissau",
+      "name_en": "Guinea-Bissau",
+      "timezones": [
+        "Africa/Bissau"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "GY",
+      "name_fr": "Guyana",
+      "name_en": "Guyana",
+      "timezones": [
+        "America/Guyana"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HK",
+      "name_fr": "R.A.S. chinoise de Hong Kong",
+      "name_en": "Hong Kong",
+      "timezones": [
+        "Asia/Hong_Kong"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HM",
+      "name_fr": "Îles Heard-et-MacDonald",
+      "name_en": "Heard Island & McDonald Islands",
+      "timezones": [],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HN",
+      "name_fr": "Honduras",
+      "name_en": "Honduras",
+      "timezones": [
+        "America/Tegucigalpa"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HR",
+      "name_fr": "Croatie",
+      "name_en": "Croatia",
+      "timezones": [
+        "Europe/Zagreb"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HT",
+      "name_fr": "Haïti",
+      "name_en": "Haiti",
+      "timezones": [
+        "America/Port-au-Prince"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "HU",
+      "name_fr": "Hongrie",
+      "name_en": "Hungary",
+      "timezones": [
+        "Europe/Budapest"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ID",
+      "name_fr": "Indonésie",
+      "name_en": "Indonesia",
+      "timezones": [
+        "Asia/Jakarta",
+        "Asia/Jayapura",
+        "Asia/Makassar",
+        "Asia/Pontianak"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IE",
+      "name_fr": "Irlande",
+      "name_en": "Ireland",
+      "timezones": [
+        "Europe/Dublin"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IL",
+      "name_fr": "Israël",
+      "name_en": "Israel",
+      "timezones": [
+        "Asia/Jerusalem"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IM",
+      "name_fr": "Île de Man",
+      "name_en": "Isle of Man",
+      "timezones": [
+        "Europe/Isle_of_Man"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IN",
+      "name_fr": "Inde",
+      "name_en": "India",
+      "timezones": [
+        "Asia/Kolkata"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IO",
+      "name_fr": "Territoire britannique de l’océan Indien",
+      "name_en": "British Indian Ocean Territory",
+      "timezones": [
+        "Indian/Chagos"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IQ",
+      "name_fr": "Irak",
+      "name_en": "Iraq",
+      "timezones": [
+        "Asia/Baghdad"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IR",
+      "name_fr": "Iran",
+      "name_en": "Iran",
+      "timezones": [
+        "Asia/Tehran"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IS",
+      "name_fr": "Islande",
+      "name_en": "Iceland",
+      "timezones": [
+        "Atlantic/Reykjavik"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "IT",
+      "name_fr": "Italie",
+      "name_en": "Italy",
+      "timezones": [
+        "Europe/Rome"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "JE",
+      "name_fr": "Jersey",
+      "name_en": "Jersey",
+      "timezones": [
+        "Europe/Jersey"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "JM",
+      "name_fr": "Jamaïque",
+      "name_en": "Jamaica",
+      "timezones": [
+        "America/Jamaica"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "JO",
+      "name_fr": "Jordanie",
+      "name_en": "Jordan",
+      "timezones": [
+        "Asia/Amman"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "JP",
+      "name_fr": "Japon",
+      "name_en": "Japan",
+      "timezones": [
+        "Asia/Tokyo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KE",
+      "name_fr": "Kenya",
+      "name_en": "Kenya",
+      "timezones": [
+        "Africa/Nairobi"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KG",
+      "name_fr": "Kirghizstan",
+      "name_en": "Kyrgyzstan",
+      "timezones": [
+        "Asia/Bishkek"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KH",
+      "name_fr": "Cambodge",
+      "name_en": "Cambodia",
+      "timezones": [
+        "Asia/Phnom_Penh"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KI",
+      "name_fr": "Kiribati",
+      "name_en": "Kiribati",
+      "timezones": [
+        "Pacific/Kanton",
+        "Pacific/Kiritimati",
+        "Pacific/Tarawa"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KM",
+      "name_fr": "Comores",
+      "name_en": "Comoros",
+      "timezones": [
+        "Indian/Comoro"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KN",
+      "name_fr": "Saint-Christophe-et-Niévès",
+      "name_en": "St Kitts & Nevis",
+      "timezones": [
+        "America/St_Kitts"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KP",
+      "name_fr": "Corée du Nord",
+      "name_en": "Korea (North)",
+      "timezones": [
+        "Asia/Pyongyang"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KR",
+      "name_fr": "Corée du Sud",
+      "name_en": "Korea (South)",
+      "timezones": [
+        "Asia/Seoul"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KW",
+      "name_fr": "Koweït",
+      "name_en": "Kuwait",
+      "timezones": [
+        "Asia/Kuwait"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KY",
+      "name_fr": "Îles Caïmans",
+      "name_en": "Cayman Islands",
+      "timezones": [
+        "America/Cayman"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "KZ",
+      "name_fr": "Kazakhstan",
+      "name_en": "Kazakhstan",
+      "timezones": [
+        "Asia/Almaty",
+        "Asia/Aqtau",
+        "Asia/Aqtobe",
+        "Asia/Atyrau",
+        "Asia/Oral",
+        "Asia/Qostanay",
+        "Asia/Qyzylorda"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LA",
+      "name_fr": "Laos",
+      "name_en": "Laos",
+      "timezones": [
+        "Asia/Vientiane"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LB",
+      "name_fr": "Liban",
+      "name_en": "Lebanon",
+      "timezones": [
+        "Asia/Beirut"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LC",
+      "name_fr": "Sainte-Lucie",
+      "name_en": "St Lucia",
+      "timezones": [
+        "America/St_Lucia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LI",
+      "name_fr": "Liechtenstein",
+      "name_en": "Liechtenstein",
+      "timezones": [
+        "Europe/Vaduz"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LK",
+      "name_fr": "Sri Lanka",
+      "name_en": "Sri Lanka",
+      "timezones": [
+        "Asia/Colombo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LR",
+      "name_fr": "Liberia",
+      "name_en": "Liberia",
+      "timezones": [
+        "Africa/Monrovia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LS",
+      "name_fr": "Lesotho",
+      "name_en": "Lesotho",
+      "timezones": [
+        "Africa/Maseru"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LT",
+      "name_fr": "Lituanie",
+      "name_en": "Lithuania",
+      "timezones": [
+        "Europe/Vilnius"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LU",
+      "name_fr": "Luxembourg",
+      "name_en": "Luxembourg",
+      "timezones": [
+        "Europe/Luxembourg"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LV",
+      "name_fr": "Lettonie",
+      "name_en": "Latvia",
+      "timezones": [
+        "Europe/Riga"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "LY",
+      "name_fr": "Libye",
+      "name_en": "Libya",
+      "timezones": [
+        "Africa/Tripoli"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MA",
+      "name_fr": "Maroc",
+      "name_en": "Morocco",
+      "timezones": [
+        "Africa/Casablanca"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MC",
+      "name_fr": "Monaco",
+      "name_en": "Monaco",
+      "timezones": [
+        "Europe/Monaco"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MD",
+      "name_fr": "Moldavie",
+      "name_en": "Moldova",
+      "timezones": [
+        "Europe/Chisinau"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ME",
+      "name_fr": "Monténégro",
+      "name_en": "Montenegro",
+      "timezones": [
+        "Europe/Podgorica"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MF",
+      "name_fr": "Saint-Martin",
+      "name_en": "St Martin (French)",
+      "timezones": [
+        "America/Marigot"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MG",
+      "name_fr": "Madagascar",
+      "name_en": "Madagascar",
+      "timezones": [
+        "Indian/Antananarivo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MH",
+      "name_fr": "Îles Marshall",
+      "name_en": "Marshall Islands",
+      "timezones": [
+        "Pacific/Kwajalein",
+        "Pacific/Majuro"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MK",
+      "name_fr": "Macédoine du Nord",
+      "name_en": "North Macedonia",
+      "timezones": [
+        "Europe/Skopje"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ML",
+      "name_fr": "Mali",
+      "name_en": "Mali",
+      "timezones": [
+        "Africa/Bamako"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MM",
+      "name_fr": "Myanmar (Birmanie)",
+      "name_en": "Myanmar (Burma)",
+      "timezones": [
+        "Asia/Yangon"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MN",
+      "name_fr": "Mongolie",
+      "name_en": "Mongolia",
+      "timezones": [
+        "Asia/Hovd",
+        "Asia/Ulaanbaatar"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MO",
+      "name_fr": "R.A.S. chinoise de Macao",
+      "name_en": "Macau",
+      "timezones": [
+        "Asia/Macau"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MP",
+      "name_fr": "Îles Mariannes du Nord",
+      "name_en": "Northern Mariana Islands",
+      "timezones": [
+        "Pacific/Saipan"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MQ",
+      "name_fr": "Martinique",
+      "name_en": "Martinique",
+      "timezones": [
+        "America/Martinique"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MR",
+      "name_fr": "Mauritanie",
+      "name_en": "Mauritania",
+      "timezones": [
+        "Africa/Nouakchott"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MS",
+      "name_fr": "Montserrat",
+      "name_en": "Montserrat",
+      "timezones": [
+        "America/Montserrat"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MT",
+      "name_fr": "Malte",
+      "name_en": "Malta",
+      "timezones": [
+        "Europe/Malta"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MU",
+      "name_fr": "Maurice",
+      "name_en": "Mauritius",
+      "timezones": [
+        "Indian/Mauritius"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MV",
+      "name_fr": "Maldives",
+      "name_en": "Maldives",
+      "timezones": [
+        "Indian/Maldives"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MW",
+      "name_fr": "Malawi",
+      "name_en": "Malawi",
+      "timezones": [
+        "Africa/Blantyre"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MX",
+      "name_fr": "Mexique",
+      "name_en": "Mexico",
+      "timezones": [
+        "America/Bahia_Banderas",
+        "America/Cancun",
+        "America/Chihuahua",
+        "America/Ciudad_Juarez",
+        "America/Hermosillo",
+        "America/Matamoros",
+        "America/Mazatlan",
+        "America/Merida",
+        "America/Mexico_City",
+        "America/Monterrey",
+        "America/Ojinaga",
+        "America/Tijuana"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MY",
+      "name_fr": "Malaisie",
+      "name_en": "Malaysia",
+      "timezones": [
+        "Asia/Kuala_Lumpur",
+        "Asia/Kuching"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "MZ",
+      "name_fr": "Mozambique",
+      "name_en": "Mozambique",
+      "timezones": [
+        "Africa/Maputo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NA",
+      "name_fr": "Namibie",
+      "name_en": "Namibia",
+      "timezones": [
+        "Africa/Windhoek"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NC",
+      "name_fr": "Nouvelle-Calédonie",
+      "name_en": "New Caledonia",
+      "timezones": [
+        "Pacific/Noumea"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NE",
+      "name_fr": "Niger",
+      "name_en": "Niger",
+      "timezones": [
+        "Africa/Niamey"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NF",
+      "name_fr": "Île Norfolk",
+      "name_en": "Norfolk Island",
+      "timezones": [
+        "Pacific/Norfolk"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NG",
+      "name_fr": "Nigeria",
+      "name_en": "Nigeria",
+      "timezones": [
+        "Africa/Lagos"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NI",
+      "name_fr": "Nicaragua",
+      "name_en": "Nicaragua",
+      "timezones": [
+        "America/Managua"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NL",
+      "name_fr": "Pays-Bas",
+      "name_en": "Netherlands",
+      "timezones": [
+        "Europe/Amsterdam"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NO",
+      "name_fr": "Norvège",
+      "name_en": "Norway",
+      "timezones": [
+        "Europe/Oslo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NP",
+      "name_fr": "Népal",
+      "name_en": "Nepal",
+      "timezones": [
+        "Asia/Kathmandu"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NR",
+      "name_fr": "Nauru",
+      "name_en": "Nauru",
+      "timezones": [
+        "Pacific/Nauru"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NU",
+      "name_fr": "Niue",
+      "name_en": "Niue",
+      "timezones": [
+        "Pacific/Niue"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "NZ",
+      "name_fr": "Nouvelle-Zélande",
+      "name_en": "New Zealand",
+      "timezones": [
+        "Pacific/Auckland",
+        "Pacific/Chatham"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "OM",
+      "name_fr": "Oman",
+      "name_en": "Oman",
+      "timezones": [
+        "Asia/Muscat"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PA",
+      "name_fr": "Panama",
+      "name_en": "Panama",
+      "timezones": [
+        "America/Panama"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PE",
+      "name_fr": "Pérou",
+      "name_en": "Peru",
+      "timezones": [
+        "America/Lima"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PF",
+      "name_fr": "Polynésie française",
+      "name_en": "French Polynesia",
+      "timezones": [
+        "Pacific/Gambier",
+        "Pacific/Marquesas",
+        "Pacific/Tahiti"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PG",
+      "name_fr": "Papouasie-Nouvelle-Guinée",
+      "name_en": "Papua New Guinea",
+      "timezones": [
+        "Pacific/Bougainville",
+        "Pacific/Port_Moresby"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PH",
+      "name_fr": "Philippines",
+      "name_en": "Philippines",
+      "timezones": [
+        "Asia/Manila"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PK",
+      "name_fr": "Pakistan",
+      "name_en": "Pakistan",
+      "timezones": [
+        "Asia/Karachi"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PL",
+      "name_fr": "Pologne",
+      "name_en": "Poland",
+      "timezones": [
+        "Europe/Warsaw"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PM",
+      "name_fr": "Saint-Pierre-et-Miquelon",
+      "name_en": "St Pierre & Miquelon",
+      "timezones": [
+        "America/Miquelon"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PN",
+      "name_fr": "Îles Pitcairn",
+      "name_en": "Pitcairn",
+      "timezones": [
+        "Pacific/Pitcairn"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PR",
+      "name_fr": "Porto Rico",
+      "name_en": "Puerto Rico",
+      "timezones": [
+        "America/Puerto_Rico"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PS",
+      "name_fr": "Territoires palestiniens",
+      "name_en": "Palestine",
+      "timezones": [
+        "Asia/Gaza",
+        "Asia/Hebron"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PT",
+      "name_fr": "Portugal",
+      "name_en": "Portugal",
+      "timezones": [
+        "Atlantic/Azores",
+        "Atlantic/Madeira",
+        "Europe/Lisbon"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PW",
+      "name_fr": "Palaos",
+      "name_en": "Palau",
+      "timezones": [
+        "Pacific/Palau"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "PY",
+      "name_fr": "Paraguay",
+      "name_en": "Paraguay",
+      "timezones": [
+        "America/Asuncion"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "QA",
+      "name_fr": "Qatar",
+      "name_en": "Qatar",
+      "timezones": [
+        "Asia/Qatar"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "RE",
+      "name_fr": "La Réunion",
+      "name_en": "Réunion",
+      "timezones": [
+        "Indian/Reunion"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "RO",
+      "name_fr": "Roumanie",
+      "name_en": "Romania",
+      "timezones": [
+        "Europe/Bucharest"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "RS",
+      "name_fr": "Serbie",
+      "name_en": "Serbia",
+      "timezones": [
+        "Europe/Belgrade"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "RU",
+      "name_fr": "Russie",
+      "name_en": "Russia",
+      "timezones": [
+        "Asia/Anadyr",
+        "Asia/Barnaul",
+        "Asia/Chita",
+        "Asia/Irkutsk",
+        "Asia/Kamchatka",
+        "Asia/Khandyga",
+        "Asia/Krasnoyarsk",
+        "Asia/Magadan",
+        "Asia/Novokuznetsk",
+        "Asia/Novosibirsk",
+        "Asia/Omsk",
+        "Asia/Sakhalin",
+        "Asia/Srednekolymsk",
+        "Asia/Tomsk",
+        "Asia/Ust-Nera",
+        "Asia/Vladivostok",
+        "Asia/Yakutsk",
+        "Asia/Yekaterinburg",
+        "Europe/Astrakhan",
+        "Europe/Kaliningrad",
+        "Europe/Kirov",
+        "Europe/Moscow",
+        "Europe/Samara",
+        "Europe/Saratov",
+        "Europe/Ulyanovsk",
+        "Europe/Volgograd"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "RW",
+      "name_fr": "Rwanda",
+      "name_en": "Rwanda",
+      "timezones": [
+        "Africa/Kigali"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SA",
+      "name_fr": "Arabie saoudite",
+      "name_en": "Saudi Arabia",
+      "timezones": [
+        "Asia/Riyadh"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SB",
+      "name_fr": "Îles Salomon",
+      "name_en": "Solomon Islands",
+      "timezones": [
+        "Pacific/Guadalcanal"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SC",
+      "name_fr": "Seychelles",
+      "name_en": "Seychelles",
+      "timezones": [
+        "Indian/Mahe"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SD",
+      "name_fr": "Soudan",
+      "name_en": "Sudan",
+      "timezones": [
+        "Africa/Khartoum"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SE",
+      "name_fr": "Suède",
+      "name_en": "Sweden",
+      "timezones": [
+        "Europe/Stockholm"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SG",
+      "name_fr": "Singapour",
+      "name_en": "Singapore",
+      "timezones": [
+        "Asia/Singapore"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SH",
+      "name_fr": "Sainte-Hélène",
+      "name_en": "St Helena",
+      "timezones": [
+        "Atlantic/St_Helena"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SI",
+      "name_fr": "Slovénie",
+      "name_en": "Slovenia",
+      "timezones": [
+        "Europe/Ljubljana"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SJ",
+      "name_fr": "Svalbard et Jan Mayen",
+      "name_en": "Svalbard & Jan Mayen",
+      "timezones": [
+        "Arctic/Longyearbyen"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SK",
+      "name_fr": "Slovaquie",
+      "name_en": "Slovakia",
+      "timezones": [
+        "Europe/Bratislava"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SL",
+      "name_fr": "Sierra Leone",
+      "name_en": "Sierra Leone",
+      "timezones": [
+        "Africa/Freetown"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SM",
+      "name_fr": "Saint-Marin",
+      "name_en": "San Marino",
+      "timezones": [
+        "Europe/San_Marino"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SN",
+      "name_fr": "Sénégal",
+      "name_en": "Senegal",
+      "timezones": [
+        "Africa/Dakar"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SO",
+      "name_fr": "Somalie",
+      "name_en": "Somalia",
+      "timezones": [
+        "Africa/Mogadishu"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SR",
+      "name_fr": "Suriname",
+      "name_en": "Suriname",
+      "timezones": [
+        "America/Paramaribo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SS",
+      "name_fr": "Soudan du Sud",
+      "name_en": "South Sudan",
+      "timezones": [
+        "Africa/Juba"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ST",
+      "name_fr": "Sao Tomé-et-Principe",
+      "name_en": "Sao Tome & Principe",
+      "timezones": [
+        "Africa/Sao_Tome"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SV",
+      "name_fr": "Salvador",
+      "name_en": "El Salvador",
+      "timezones": [
+        "America/El_Salvador"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SX",
+      "name_fr": "Saint-Martin (partie néerlandaise)",
+      "name_en": "St Maarten (Dutch)",
+      "timezones": [
+        "America/Lower_Princes"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SY",
+      "name_fr": "Syrie",
+      "name_en": "Syria",
+      "timezones": [
+        "Asia/Damascus"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "SZ",
+      "name_fr": "Eswatini",
+      "name_en": "Eswatini (Swaziland)",
+      "timezones": [
+        "Africa/Mbabane"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TC",
+      "name_fr": "Îles Turques-et-Caïques",
+      "name_en": "Turks & Caicos Is",
+      "timezones": [
+        "America/Grand_Turk"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TD",
+      "name_fr": "Tchad",
+      "name_en": "Chad",
+      "timezones": [
+        "Africa/Ndjamena"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TF",
+      "name_fr": "Terres australes françaises",
+      "name_en": "French S. Terr.",
+      "timezones": [
+        "Indian/Kerguelen"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TG",
+      "name_fr": "Togo",
+      "name_en": "Togo",
+      "timezones": [
+        "Africa/Lome"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TH",
+      "name_fr": "Thaïlande",
+      "name_en": "Thailand",
+      "timezones": [
+        "Asia/Bangkok"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TJ",
+      "name_fr": "Tadjikistan",
+      "name_en": "Tajikistan",
+      "timezones": [
+        "Asia/Dushanbe"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TK",
+      "name_fr": "Tokelau",
+      "name_en": "Tokelau",
+      "timezones": [
+        "Pacific/Fakaofo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TL",
+      "name_fr": "Timor oriental",
+      "name_en": "East Timor",
+      "timezones": [
+        "Asia/Dili"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TM",
+      "name_fr": "Turkménistan",
+      "name_en": "Turkmenistan",
+      "timezones": [
+        "Asia/Ashgabat"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TN",
+      "name_fr": "Tunisie",
+      "name_en": "Tunisia",
+      "timezones": [
+        "Africa/Tunis"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TO",
+      "name_fr": "Tonga",
+      "name_en": "Tonga",
+      "timezones": [
+        "Pacific/Tongatapu"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TR",
+      "name_fr": "Turquie",
+      "name_en": "Turkey",
+      "timezones": [
+        "Europe/Istanbul"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TT",
+      "name_fr": "Trinité-et-Tobago",
+      "name_en": "Trinidad & Tobago",
+      "timezones": [
+        "America/Port_of_Spain"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TV",
+      "name_fr": "Tuvalu",
+      "name_en": "Tuvalu",
+      "timezones": [
+        "Pacific/Funafuti"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TW",
+      "name_fr": "Taïwan",
+      "name_en": "Taiwan",
+      "timezones": [
+        "Asia/Taipei"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "TZ",
+      "name_fr": "Tanzanie",
+      "name_en": "Tanzania",
+      "timezones": [
+        "Africa/Dar_es_Salaam"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "UA",
+      "name_fr": "Ukraine",
+      "name_en": "Ukraine",
+      "timezones": [
+        "Europe/Kyiv",
+        "Europe/Simferopol"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "UG",
+      "name_fr": "Ouganda",
+      "name_en": "Uganda",
+      "timezones": [
+        "Africa/Kampala"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "UM",
+      "name_fr": "Îles mineures éloignées des États-Unis",
+      "name_en": "US minor outlying islands",
+      "timezones": [
+        "Pacific/Midway",
+        "Pacific/Wake"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "US",
+      "name_fr": "États-Unis",
+      "name_en": "United States",
+      "timezones": [
+        "America/Adak",
+        "America/Anchorage",
+        "America/Boise",
+        "America/Chicago",
+        "America/Denver",
+        "America/Detroit",
+        "America/Indiana/Indianapolis",
+        "America/Indiana/Knox",
+        "America/Indiana/Marengo",
+        "America/Indiana/Petersburg",
+        "America/Indiana/Tell_City",
+        "America/Indiana/Vevay",
+        "America/Indiana/Vincennes",
+        "America/Indiana/Winamac",
+        "America/Juneau",
+        "America/Kentucky/Louisville",
+        "America/Kentucky/Monticello",
+        "America/Los_Angeles",
+        "America/Menominee",
+        "America/Metlakatla",
+        "America/New_York",
+        "America/Nome",
+        "America/North_Dakota/Beulah",
+        "America/North_Dakota/Center",
+        "America/North_Dakota/New_Salem",
+        "America/Phoenix",
+        "America/Sitka",
+        "America/Yakutat",
+        "Pacific/Honolulu"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "UY",
+      "name_fr": "Uruguay",
+      "name_en": "Uruguay",
+      "timezones": [
+        "America/Montevideo"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "UZ",
+      "name_fr": "Ouzbékistan",
+      "name_en": "Uzbekistan",
+      "timezones": [
+        "Asia/Samarkand",
+        "Asia/Tashkent"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VA",
+      "name_fr": "État de la Cité du Vatican",
+      "name_en": "Vatican City",
+      "timezones": [
+        "Europe/Vatican"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VC",
+      "name_fr": "Saint-Vincent-et-les Grenadines",
+      "name_en": "St Vincent",
+      "timezones": [
+        "America/St_Vincent"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VE",
+      "name_fr": "Venezuela",
+      "name_en": "Venezuela",
+      "timezones": [
+        "America/Caracas"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VG",
+      "name_fr": "Îles Vierges britanniques",
+      "name_en": "Virgin Islands (UK)",
+      "timezones": [
+        "America/Tortola"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VI",
+      "name_fr": "Îles Vierges des États-Unis",
+      "name_en": "Virgin Islands (US)",
+      "timezones": [
+        "America/St_Thomas"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VN",
+      "name_fr": "Viêt Nam",
+      "name_en": "Vietnam",
+      "timezones": [
+        "Asia/Ho_Chi_Minh"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "VU",
+      "name_fr": "Vanuatu",
+      "name_en": "Vanuatu",
+      "timezones": [
+        "Pacific/Efate"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "WF",
+      "name_fr": "Wallis-et-Futuna",
+      "name_en": "Wallis & Futuna",
+      "timezones": [
+        "Pacific/Wallis"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "WS",
+      "name_fr": "Samoa",
+      "name_en": "Samoa (western)",
+      "timezones": [
+        "Pacific/Apia"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "YE",
+      "name_fr": "Yémen",
+      "name_en": "Yemen",
+      "timezones": [
+        "Asia/Aden"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "YT",
+      "name_fr": "Mayotte",
+      "name_en": "Mayotte",
+      "timezones": [
+        "Indian/Mayotte"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ZA",
+      "name_fr": "Afrique du Sud",
+      "name_en": "South Africa",
+      "timezones": [
+        "Africa/Johannesburg"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ZM",
+      "name_fr": "Zambie",
+      "name_en": "Zambia",
+      "timezones": [
+        "Africa/Lusaka"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    },
+    {
+      "code": "ZW",
+      "name_fr": "Zimbabwe",
+      "name_en": "Zimbabwe",
+      "timezones": [
+        "Africa/Harare"
+      ],
+      "default_currency_code": null,
+      "source_ref": "IANA tzdb 2025b (iso3166.tab, zone.tab) ; CLDR via ICU 78.2"
+    }
+  ]
+}

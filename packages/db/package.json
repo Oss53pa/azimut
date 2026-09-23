@@ -11,6 +11,10 @@
     "./mapping": {
       "types": "./src/mapping/index.ts",
       "import": "./src/mapping/index.ts"
+    },
+    "./reference": {
+      "types": "./src/reference/index.ts",
+      "import": "./src/reference/index.ts"
     }
   },
   "dependencies": {
@@ -24,7 +28,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.js",
     "db:rollback": "node scripts/rollback.js",
-    "db:reset": "node scripts/reset.js"
+    "db:reset": "node scripts/reset.js",
+    "db:seed:reference": "node scripts/seed-reference.js"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.10"

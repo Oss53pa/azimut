@@ -293,6 +293,7 @@ export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
  */
 export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   legal_entity: 'Q2 l’attribue à la plateforme, numérotée 00. Ce registre ne connaît que les douze modules métier : la plateforme n’y a pas de clé, et lui en donner une touche les couches de L2, les lectures de L3 et leurs contrôles. Inscrite ici en attendant, plutôt qu’attribuée d’office à un module qui ne la possède pas.',
+  country: 'Q9 et Q2 : référentiel global des pays, sans org_id, rangé à la plateforme numérotée 00. Même motif que `legal_entity` — ce registre ne connaît que les douze modules métier.',
   organization: 'A5.1, accès et cloisonnement. N’appartient à aucun module : c’est la frontière dans laquelle les modules vivent.',
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',

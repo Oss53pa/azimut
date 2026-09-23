@@ -1,5 +1,5 @@
 export { azimut } from './azimut.js';
-export { organization, membership } from './org.js';
+export { organization, membership, country } from './org.js';
 export {
   site, building, level, footprint, volume, zone,
   planSource, planCalibration, planCalibrationPoint, controlPoint, opening, legalEntity,
