@@ -75,6 +75,8 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 | Critère | État | Preuve |
 | --- | --- | --- |
 | 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | tenu | `state/__tests__/graph-axis.test.ts` — 10 essais, dont le doublon de nœud, le doublon d'arête dans les deux sens, et leurs contre-exemples ; `tests/e2e/m4-axe.spec.ts` — la passe est un geste, donc une annulation, et l'écran rend compte de ce qu'il a repris |
+| — Propriétés d'un nœud et d'une arête, atteignables et écrites | tenu | `tests/e2e/m4-proprietes.spec.ts` — la zone de travail rend le graphe, la sélection remplit le panneau au pointeur comme au clavier, et déplacer un nœud recalcule la longueur de ses arêtes. Les deux panneaux étaient construits et inatteignables |
+| — Affichage : forme, trait interrompu, liseré | tenu | `viewport/GraphView.tsx` branche `graph-encoding`, qui portait l'encodage en donnée sans qu'aucun écran l'appelle ; `tests/e2e/greyscale.spec.ts` |
 | — Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` — le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
 | 2. Longueur jamais saisissable, recalculée | tenu | `graph-input.test.ts` ; M7.3 en bout en bout |
 | 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède |
@@ -82,10 +84,12 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
 Réserve sur la table des outils : trois des quatre outils de M4 sont
 construits — nœud, arête, axe de circulation. Le quatrième, la liaison
-verticale, ne l'est pas : elle relie deux nœuds de niveaux différents, et la
-session de la tranche porte un niveau. `GRAPH.VERTICAL_LINK_MISSING` est levé
-avec son remède, mais l'appliquer ne fait rien. La liaison entre avec le
-module 02.
+verticale, ne l'est pas, et ne peut pas l'être en l'état : elle relie deux
+nœuds de niveaux différents, et la session de l'atelier porte un seul niveau,
+celui de sa route. Aucun geste de l'écran ne peut donc produire l'arête
+inter-niveaux que la liaison accompagne. `GRAPH.VERTICAL_LINK_MISSING` est levé
+avec son remède, et l'appliquer ne fait rien. L'outil demande la session
+multi-niveaux, c'est-à-dire la tâche T-1.5.
 
 ### M1 et M5
 
@@ -142,7 +146,8 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | `control_point`, nom de la table | Infraction résiduelle à M01.S2. Les colonnes portent le nom d'A5.2 depuis la migration 0041 ; la table n'est pas l'une des deux que la règle autorise, et le nom `plan_calibration_point` est pris par la table conforme de la migration 0033 | Arbitrage. Fusionner perdrait `target_x_m`, `target_y_m` et `residual_m`, que A5.2 ne définit pas ; supprimer est destructeur. A2.2 points 2 et 7 |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
-| Panneau de propriétés de M4 | `selection` reste `null` : aucun geste ne le remplit. Libellé, position, largeur, pente, sens et cheminement d'évacuation sont spécifiés par M4 et inatteignables | Décision de périmètre : la sélection suppose la zone de travail, qui n'est pas construite |
+| Outil de liaison verticale, M4 | Non construit, et non constructible en l'état : la liaison relie deux niveaux, la session de l'atelier n'en porte qu'un. Aucun geste de l'écran ne peut produire l'arête inter-niveaux qu'elle accompagne | Périmètre. Demande la session multi-niveaux, tâche T-1.5 |
+| Étanchéité par PostgREST, en intégration continue | La suite existe et passe, mais elle est ignorée tant que `AZIMUT_TEST_POSTGREST` ne désigne aucun binaire. La chaîne d'A13.2 ne l'exécute donc pas encore | Installer PostgREST dans l'image d'intégration, ou déclarer explicitement que `test:rls` tourne sans elle |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
 
