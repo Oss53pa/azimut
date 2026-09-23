@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { stepOf, blockingReason, EMPTY_DRAFT, CALIBRATION_STEPS } from '../use-plan-calibration.js';
-import type { CalibrationDraft } from '../use-plan-calibration.js';
+import { stepOf, blockingReason, EMPTY_DRAFT, CALIBRATION_STEPS } from '../plan-calibration-steps.js';
+import type { CalibrationDraft } from '../plan-calibration-steps.js';
 
 const PLAN = { format: 'pdf', mediaType: 'application/pdf', byteSize: 1, page: 1 } as const;
 

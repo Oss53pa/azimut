@@ -65,6 +65,24 @@ async function placeChainNodes(page: Page): Promise<void> {
 }
 
 /**
+ * Les deux points de calage, posés au clavier.
+ *
+ * M2 (partie M) les pose au clic dans la zone de travail, et M7.2 (partie M)
+ * veut la même valeur saisissable au clavier. Ils sont distants de 200 pixels,
+ * bien au-delà des 40 que `CALIB.POINTS_TOO_CLOSE` exige.
+ */
+const CALIBRATION_POINTS = [
+  [/Point A · X/, '0'], [/Point A · Y/, '0'],
+  [/Point B · X/, '200'], [/Point B · Y/, '0'],
+] as const;
+
+async function placeCalibrationPoints(page: Page): Promise<void> {
+  for (const [label, value] of CALIBRATION_POINTS) {
+    await page.getByLabel(label).fill(value);
+  }
+}
+
+/**
  * Le parcours de M8 (partie M) critère 1, au pointeur.
  *
  * « Un opérateur part d'un site vide, importe un plan, le cale, trace trois
@@ -75,6 +93,7 @@ async function runChain(page: Page): Promise<void> {
   // Importer un plan, et le caler.
   await page.goto(PLAN);
   await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles(PLAN_FILE);
+  await placeCalibrationPoints(page);
   await page.getByLabel(/Distance réelle|Real distance/).fill('20');
   await page.getByLabel(/Azimut du nord|North azimuth/).fill('0');
   await page.getByRole('button', { name: /^Valider le calage$|^Validate calibration$/ }).click();
@@ -143,6 +162,10 @@ test.describe('M8 (partie M) critère 2 — le même parcours au clavier seul', 
     await page.goto(PLAN);
     await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles(PLAN_FILE);
 
+    for (const [label, value] of CALIBRATION_POINTS) {
+      await page.getByLabel(label).focus();
+      await page.keyboard.type(value);
+    }
     await page.getByLabel(/Distance réelle|Real distance/).focus();
     await page.keyboard.type('20');
     await page.getByLabel(/Azimut du nord|North azimuth/).focus();
@@ -321,6 +344,7 @@ test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et 
     await timed('import et calage', async () => {
       await page.goto(PLAN);
       await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles(PLAN_FILE);
+      await placeCalibrationPoints(page);
       await page.getByLabel(/Distance réelle|Real distance/).fill('20');
       await page.getByLabel(/Azimut du nord|North azimuth/).fill('0');
       await page.getByRole('button', { name: /^Valider le calage$|^Validate calibration$/ }).click();

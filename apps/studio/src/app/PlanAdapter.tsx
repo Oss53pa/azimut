@@ -5,8 +5,10 @@ import { ORG_OF_SESSION } from './session-identity.js';
 import { acceptPlanFile } from '../state/plan-import.js';
 import { calibrationCommands } from '../state/plan-calibration-commands.js';
 import { computeCalibration } from '../domain/plan-calibration.js';
+import type { PlanPoint } from '../domain/plan-calibration.js';
 import { PlanCalibrationScreen } from '../screens/PlanCalibrationScreen.js';
-import { EMPTY_DRAFT, stepOf } from '../state/use-plan-calibration.js';
+import type { PartialPoint } from '../screens/PlanCalibrationScreen.js';
+import { EMPTY_DRAFT, stepOf } from '../state/plan-calibration-steps.js';
 import { judgeReplacement } from '../state/plan-import.js';
 import type { ReplacementVerdict } from '../state/plan-import.js';
 
@@ -28,6 +30,10 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   readonly levelId: string;
 }): JSX.Element {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
+  // Les deux points sont tenus coordonnée par coordonnée : une abscisse saisie
+  // avant son ordonnée doit rester affichée, et ne fait pas encore un point.
+  const [pointA, setPointA] = useState<PartialPoint>(NO_POINT);
+  const [pointB, setPointB] = useState<PartialPoint>(NO_POINT);
   const [pending, setPending] = useState<ReplacementVerdict | null>(null);
   const [findings, setFindings] = useState<readonly Finding[]>([]);
   const [calibrated, setCalibrated] = useState(false);
@@ -52,12 +58,40 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
         setPending(judgeReplacement({ widthPx: 0, heightPx: 0 }, { widthPx: 1, heightPx: 1 }));
       }}
       pendingReplacement={pending ?? undefined}
-      onConfirmReplacement={() => { setPending(null); setDraft(EMPTY_DRAFT); setCalibrated(false); }}
+      onConfirmReplacement={() => {
+        setPending(null);
+        setDraft(EMPTY_DRAFT);
+        setPointA(NO_POINT);
+        setPointB(NO_POINT);
+        setCalibrated(false);
+      }}
       onCancelReplacement={() => { setPending(null); }}
+      pointA={pointA}
+      pointB={pointB}
+      onPointA={(coordinate, value) => {
+        setPointA(previous => {
+          const next = { ...previous, [coordinate]: value };
+          setDraft(p => ({ ...p, a: planPoint(next) }));
+          return next;
+        });
+        setFindings([]);
+      }}
+      onPointB={(coordinate, value) => {
+        setPointB(previous => {
+          const next = { ...previous, [coordinate]: value };
+          setDraft(p => ({ ...p, b: planPoint(next) }));
+          return next;
+        });
+        setFindings([]);
+      }}
       onDistance={metres => { setDraft(p => ({ ...p, realDistanceM: metres ?? 0 })); setFindings([]); }}
       onAzimuth={degrees => { setDraft(p => ({ ...p, northAzimuthDeg: degrees })); setFindings([]); }}
       onRecalibrate={() => {
+        // M2 (partie M) : « Recaler | Reprend à l'étape 2, conserve le fond. »
+        // Les points saisis partent avec l'étape qu'ils servaient.
         setDraft(previous => ({ ...EMPTY_DRAFT, plan: previous.plan }));
+        setPointA(NO_POINT);
+        setPointB(NO_POINT);
         setFindings([]);
         setCalibrated(false);
       }}
@@ -65,12 +99,13 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
         void (async () => {
           if (draft.plan === null) return;
           setBusy(true);
+          // Les deux points sont ceux que l'opérateur a saisis, et rien
+          // d'autre. L'écran en posait deux d'office quand ils manquaient —
+          // c'était écrire en base un calage que personne n'avait fait, et
+          // `CALIB.POINT_REQUIRED` existe précisément pour le refuser.
           const measured = computeCalibration({
-            // Deux points posés par défaut : la zone de travail n'est pas
-            // encore construite, et M2 (partie M) veut que le calage manuel
-            // reste possible. Ils sont distants de plus des 40 pixels exigés.
-            a: draft.a ?? { x_px: 0, y_px: 0 },
-            b: draft.b ?? { x_px: 200, y_px: 0 },
+            a: draft.a,
+            b: draft.b,
             real_distance_m: draft.realDistanceM,
             north_azimuth_deg: draft.northAzimuthDeg,
           });
@@ -87,8 +122,8 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
             storagePath: `plans/${siteId}/${levelId}`,
             // A5.2 — les deux points de la mesure, dans l'ordre de pose.
             points: [
-              { id: session.newId(), point: draft.a ?? { x_px: 0, y_px: 0 } },
-              { id: session.newId(), point: draft.b ?? { x_px: 200, y_px: 0 } },
+              ...(draft.a !== null ? [{ id: session.newId(), point: draft.a }] : []),
+              ...(draft.b !== null ? [{ id: session.newId(), point: draft.b }] : []),
             ],
             referenceDistanceM: draft.realDistanceM,
             timestamp: session.now(),
@@ -103,4 +138,18 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
       }}
     />
   );
+}
+
+const NO_POINT: PartialPoint = { x_px: null, y_px: null };
+
+/**
+ * Un point de calage à partir de deux coordonnées saisies séparément.
+ *
+ * Tant qu'une des deux manque, le point n'existe pas : le compléter par un
+ * zéro poserait un point sur le bord de l'image sans que personne l'ait
+ * demandé, et le calage en dépend au pixel près.
+ */
+function planPoint(partial: PartialPoint): PlanPoint | null {
+  const { x_px, y_px } = partial;
+  return x_px === null || y_px === null ? null : { x_px, y_px };
 }

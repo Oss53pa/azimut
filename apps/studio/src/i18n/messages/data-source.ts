@@ -111,6 +111,11 @@ export const DATA_SOURCE_FR = {
   'calib.plan.loaded': 'Fond {format} chargé',
   'calib.scale.hint': 'Posez deux points sur une distance connue du plan, puis saisissez cette distance.',
   'calib.scale.distance': 'Distance réelle',
+  'calib.scale.point_a_x': 'Point A · X',
+  'calib.scale.point_a_y': 'Point A · Y',
+  'calib.scale.point_b_x': 'Point B · X',
+  'calib.scale.point_b_y': 'Point B · Y',
+  'calib.scale.points.hint': 'Coordonnées dans l’image du fond. Les deux points se posent aussi dans la zone de travail.',
   'calib.orientation.azimuth': 'Azimut du nord',
   'calib.orientation.hint': 'Convention compas, de 0 inclus à 360 exclu. Zéro est le nord franc.',
   'calib.action.validate': 'Valider le calage',
@@ -127,6 +132,7 @@ export const DATA_SOURCE_FR = {
   // F6.1 rend l'unité obligatoire sur un champ numérique. Un nombre de copies
   // en a une : des copies. Écrire une chaîne vide serait un contournement.
   'unit.copies': 'copies',
+  'unit.pixel': 'px',
   // M3 (partie M) — l'écran lui-même.
   'fp.toolbar': 'Outils de tracé',
   'fp.properties': 'Propriétés',
@@ -329,6 +335,11 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'calib.plan.loaded': '{format} plan loaded',
   'calib.scale.hint': 'Place two points on a known distance of the plan, then enter that distance.',
   'calib.scale.distance': 'Real distance',
+  'calib.scale.point_a_x': 'Point A · X',
+  'calib.scale.point_a_y': 'Point A · Y',
+  'calib.scale.point_b_x': 'Point B · X',
+  'calib.scale.point_b_y': 'Point B · Y',
+  'calib.scale.points.hint': 'Coordinates in the base plan image. Both points can also be placed in the work area.',
   'calib.orientation.azimuth': 'North azimuth',
   'calib.orientation.hint': 'Compass convention, from 0 inclusive to 360 exclusive. Zero is true north.',
   'calib.action.validate': 'Validate calibration',
@@ -345,6 +356,7 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   // F6.1 rend l'unité obligatoire sur un champ numérique. Un nombre de copies
   // en a une : des copies. Écrire une chaîne vide serait un contournement.
   'unit.copies': 'copies',
+  'unit.pixel': 'px',
   'fp.toolbar': 'Drawing tools',
   'fp.properties': 'Properties',
   'fp.status.count': 'Footprints',
