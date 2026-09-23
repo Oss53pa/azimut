@@ -22,23 +22,30 @@ import { allUpSql } from '../migration-corpus.js';
 const COORDINATE_IN_PIXELS = /(^|_)[xy]_px$/;
 
 /**
- * Infraction constatée, déclarée, et non corrigée ici.
+ * Infraction constatée, déclarée, et réduite à sa seule cause restante.
  *
- * `control_point` vient de la migration `0018_atelier_m1_4_measured_calibration`,
- * écrite d'après le complément « atelier ». Ce document ne fait plus foi
- * depuis la consolidation, et M01.S2 ne souffre aucune exception : « Aucune
- * coordonnée en pixels n'est stockée. »
+ * Les colonnes portent désormais le nom d'A5.2, `image_x_px` et `image_y_px`,
+ * par la migration 0041. Ce qui reste tient au nom de la table : M01.S2
+ * nomme `plan_calibration` et `plan_calibration_point` comme seules tables
+ * autorisées à porter des pixels, et `control_point` n'en est pas.
  *
- * La retirer est une migration destructrice, donc un cas d'arrêt de A2.2,
- * point 7. Elle est donc nommée ici plutôt que corrigée en silence : le garde
+ * Elle ne peut pas être renommée en `plan_calibration_point` : la migration
+ * 0033 a créé ce nom pour la table conforme à A5.2, qui porte `ordinal` et
+ * deux colonnes de pixels, là où `control_point` porte en plus `target_x_m`,
+ * `target_y_m` et `residual_m`, que A5.2 ne définit nulle part. Fusionner
+ * perdrait ces trois colonnes ; supprimer la table est une migration
+ * destructrice. Les deux relèvent de A2.2, la première par son point 2, la
+ * seconde par son point 7.
+ *
+ * L'infraction est donc nommée plutôt que corrigée en silence : le garde
  * refuse toute occurrence nouvelle, et celle-ci reste visible jusqu'à
  * l'arbitrage.
  */
 const DECLARED_BREACHES: Readonly<Record<string, string>> = {
-  'control_point.source_x_px':
-    'Migration 0018, complément « atelier », document sans autorité depuis la consolidation. Retrait destructeur : A2.2 point 7.',
-  'control_point.source_y_px':
-    'Migration 0018, même origine et même motif que `source_x_px`.',
+  'control_point.image_x_px':
+    'Migration 0018, complément « atelier », document sans autorité depuis la consolidation. Table hors des deux que M01.S2 autorise ; le nom `plan_calibration_point` est pris par la table conforme de la migration 0033.',
+  'control_point.image_y_px':
+    'Migration 0018, même origine et même motif que `image_x_px`.',
 };
 
 /**
@@ -76,6 +83,15 @@ function migratedColumns(): ReadonlyMap<string, readonly string[]> {
     const table = out.get(altered[1] ?? '') ?? [];
     for (const added of (altered[2] ?? '').matchAll(/ADD COLUMN ([a-z_][a-z0-9_]*)/g)) {
       table.push(added[1] ?? '');
+    }
+    // Un renommage change le nom sans créer de colonne. L'ignorer laisserait
+    // le garde juger le schéma d'après le nom d'origine, donc d'après un état
+    // que la base n'a plus — et une colonne renommée en pixels passerait.
+    for (const renamed of (altered[2] ?? '').matchAll(
+      /RENAME COLUMN ([a-z_][a-z0-9_]*) TO ([a-z_][a-z0-9_]*)/g,
+    )) {
+      const at = table.indexOf(renamed[1] ?? '');
+      if (at >= 0) table[at] = renamed[2] ?? '';
     }
     out.set(altered[1] ?? '', table);
   }

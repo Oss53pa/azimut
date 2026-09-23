@@ -84,6 +84,7 @@ non plus — elle n'en retire que les clés étrangères.
 0038_a5_11_audit_log_no_cascade
 0039_a5_11_no_cascade_to_org_or_site
 0040_q9_country
+0041_m01_s2_control_point_image_px
 ```
 
 ## Règle pour la suite
