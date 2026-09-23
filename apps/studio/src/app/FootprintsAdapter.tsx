@@ -6,7 +6,7 @@ import { acceptFootprint } from '../state/footprint-input.js';
 import type { FootprintKind } from '../state/footprint-input.js';
 import { acceptSeries } from '../state/footprint-series.js';
 import { createFootprintCommands } from '../state/footprint-commands.js';
-import { actionForKey } from '../state/footprint-shortcuts.js';
+import { actionForKey, toolForKey } from '../state/footprint-shortcuts.js';
 import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { countOf } from '../state/session-store.js';
 import type { StoredRow } from '../state/session-store.js';
@@ -143,6 +143,21 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       const target = event.target;
       const typing = target instanceof HTMLInputElement
         || target instanceof HTMLTextAreaElement;
+      // M3 (partie M) donne une touche à chacun des cinq outils. La table
+      // existait en donnée et n'était liée à rien : presser `C` ne faisait
+      // rien alors que l'écran annonçait le contraire.
+      //
+      // Une touche nue ne s'applique pas dans un champ de saisie, où elle est
+      // un caractère. C'est la seule raison pour laquelle elle est écartée là.
+      const tool = event.ctrlKey || event.metaKey || event.altKey
+        ? null
+        : toolForKey(event.key);
+      if (tool !== null && !typing) {
+        event.preventDefault();
+        setTool(tool);
+        return;
+      }
+
       const action = actionForKey(event.key, {
         ctrl: event.ctrlKey || event.metaKey,
         shift: event.shiftKey,

@@ -55,6 +55,33 @@ test.describe('M3 (partie M) critère 4 — la duplication en série', () => {
   });
 
   /**
+   * M3 (partie M) donne une touche à chacun de ses cinq outils. La table
+   * existait en donnée, affichée par la barre d'outils, et n'était liée à
+   * rien : presser `C` ne faisait rien.
+   */
+  test('les touches d’outil changent l’outil actif', async ({ page }) => {
+    const toolbar = page.getByRole('toolbar');
+    // L'outil cellule est actif à l'ouverture, M3 (partie M) le veut ainsi.
+    await expect(toolbar.getByRole('button', { name: /^Cellule C$|^Cell C$/ }))
+      .toHaveAttribute('aria-pressed', 'true');
+
+    await page.keyboard.press('r');
+    await expect(toolbar.getByRole('button', { name: /^Rectangle R$/ }))
+      .toHaveAttribute('aria-pressed', 'true');
+
+    await page.keyboard.press('v');
+    await expect(toolbar.getByRole('button', { name: /^Sélection V$|^Select V$/ }))
+      .toHaveAttribute('aria-pressed', 'true');
+
+    // Dans un champ de saisie, la même touche est un caractère.
+    await page.getByLabel(/Code de cellule|Unit code/).fill('');
+    await page.getByLabel(/Code de cellule|Unit code/).press('c');
+    await expect(toolbar.getByRole('button', { name: /^Sélection V$|^Select V$/ }))
+      .toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByLabel(/Code de cellule|Unit code/)).toHaveValue('c');
+  });
+
+  /**
    * M3 (partie M) annonce `Ctrl+D` dans sa table des raccourcis. La table
    * était affichée et liée à rien.
    */
