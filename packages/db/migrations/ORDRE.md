@@ -79,6 +79,7 @@ non plus — elle n'en retire que les clés étrangères.
 0033_a5_2_plan_calibration_point
 0034_m01_s3_unit_code_required
 0035_a5_3_graph_validation
+0036_a5_11_graph_validation_no_cascade
 ```
 
 ## Règle pour la suite
