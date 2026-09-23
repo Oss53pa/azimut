@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
 import { buildCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
+import { deleteOrgFixture } from '../fixture-cleanup.js';
 
 /**
  * A6.1, second test obligatoire — « un utilisateur de l'organisation A ne peut
@@ -37,13 +38,18 @@ beforeAll(async () => {
   // Le nettoyage porte sur les deux organisations de cette suite, et sur elles
   // seules. Il vidait les cinq tables entières, ce qui emportait les fixtures
   // des autres suites : une suite qui nettoie au-delà de ce qu'elle a écrit
-  // fait échouer ses voisines selon l'ordre d'exécution. La cascade des clés
-  // étrangères suffit ici, en partant de l'organisation.
-  const seeded = ['level', 'building', 'site', 'membership', 'organization'];
+  // fait échouer ses voisines selon l'ordre d'exécution.
+  //
+  // A5.11, version 7 : la cascade depuis l'organisation n'existe plus, et
+  // partir d'elle se heurterait maintenant à un refus. Le décor se retire dans
+  // l'ordre de dépendance, que `deleteOrgFixture` calcule depuis le schéma.
+  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text),
+    [ORG_A, ORG_B]);
+
+  const seeded = ['membership', 'organization'];
   for (const table of seeded) {
     await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
   }
-  await db.execute(sql`delete from azimut.organization where id in (${ORG_A}, ${ORG_B})`);
   await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG_A},'A','a'),(${ORG_B},'B','b')`);
   await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${ALICE},'admin'),(${ORG_B},${BOB},'admin')`);
   for (const table of seeded) {

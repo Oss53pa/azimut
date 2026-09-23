@@ -6,6 +6,7 @@ import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { loadSiteData } from '../load-site-data.js';
+import { deleteOrgFixture } from '../fixture-cleanup.js';
 
 /**
  * N1.7, critère 1 : « Un site modélisé se recharge à l'identique, géométrie et
@@ -92,15 +93,16 @@ beforeAll(async () => {
   // La suite se rejoue : elle part d'un état connu. L'amorçage de
   // l'organisation contourne les politiques, comme le ferait un import
   // d'administration, et les rétablit aussitôt.
-  // `site` entre dans la liste : sous `FORCE ROW LEVEL SECURITY`, même le
-  // propriétaire de la table ne supprime rien sans identité, et le nettoyage
-  // échouerait en silence — laissant la suite buter sur une clé en double au
-  // second passage.
-  const seeded = ['site', 'membership', 'organization'];
+  //
+  // A5.11, version 7 : supprimer le site n'emporte plus ce qu'il porte — la
+  // cascade a disparu, et le refus prendrait sa place. Le décor se retire
+  // dans l'ordre de dépendance, calculé depuis le schéma.
+  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
+
+  const seeded = ['membership', 'organization'];
   for (const table of seeded) {
     await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
   }
-  await db.execute(sql`delete from azimut.site where id = ${SITE}`);
   await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG},'A','a') on conflict (id) do nothing`);
   await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG},${USER},'admin') on conflict do nothing`);
   for (const table of seeded) {
@@ -109,9 +111,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await db.execute(sql`alter table azimut.site no force row level security`);
-  await db.execute(sql`delete from azimut.site where id = ${SITE}`);
-  await db.execute(sql`alter table azimut.site force row level security`);
+  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
   await client.end();
 });
 

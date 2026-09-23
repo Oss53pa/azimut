@@ -9,3 +9,5 @@ export type { DeliveryPackageInsert } from './delivery-package-repo.js';
 export type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 export { applyCommands } from './write-path.js';
 export type { WriteSession, AppliedCommand, Executor, TransactionalDb } from './write-path.js';
+export { deleteOrgFixture, dependencyOrder } from './fixture-cleanup.js';
+export type { SqlRunner, SqlReader } from './fixture-cleanup.js';

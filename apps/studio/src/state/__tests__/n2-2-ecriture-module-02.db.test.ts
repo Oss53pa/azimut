@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, applyCommands } from '@azimut/db';
+import { createConnection, createDb, applyCommands, deleteOrgFixture } from '@azimut/db';
 import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
 import type { MessageLine, MessageSchedule } from '@azimut/engine-graph';
@@ -41,6 +41,8 @@ const ABSENT = 'a2000000-0000-0000-0000-0000000002ff';
 const T = '2026-09-22T10:00:00.000Z';
 const WRITE = { orgId: ORG, siteId: SITE, timestamp: T };
 
+/** La chaîne validée en `beforeAll`, pour les connexions ouvertes ensuite. */
+let dsn = '';
 let client: ReturnType<typeof createConnection>;
 let db: ReturnType<typeof createDb>;
 let alice: Awaited<ReturnType<typeof client.reserve>>;
@@ -81,8 +83,16 @@ beforeAll(async () => {
       'AZIMUT_TEST_DATABASE_URL absente. Voir packages/db/migrations/ORDRE.md.',
     );
   }
-  client = createConnection(URL);
-  db = createDb(URL);
+  dsn = URL;
+  client = createConnection(dsn);
+  db = createDb(dsn);
+
+  // Un passage antérieur a pu laisser ses lignes. A5.11, version 7 : plus
+  // aucune cascade vers l'organisation ni vers le site, le décor se retire
+  // donc dans l'ordre de dépendance, que `deleteOrgFixture` calcule depuis le
+  // schéma. La typologie porte `org_id` : elle part avec le reste.
+  await deleteOrgFixture(
+    text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
 
   // L'organisation et l'adhésion s'amorcent hors politique, comme le ferait un
   // import d'administration : sans adhésion, personne n'a d'identité à poser.
@@ -101,12 +111,6 @@ beforeAll(async () => {
 
   alice = await reserveAs(ALICE);
   bob = await reserveAs(BOB);
-
-  // Un passage antérieur a pu laisser ses lignes. La suppression du site
-  // emporte en cascade tout ce qui s'y rattache, module 02 compris ; la
-  // typologie, qui ne porte pas de site, se supprime à part.
-  await alice`delete from azimut.site where id = ${SITE}`;
-  await alice`delete from azimut.support_typology where id = ${TYPOLOGY}`;
 
   // Le décor : il appartient aux modules 01, 03 et 04, et s'écrit par leurs
   // commandes. `support` fait exception — L0 le scinde colonne par colonne, et
@@ -141,10 +145,17 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await alice`delete from azimut.site where id = ${SITE}`;
-  await alice`delete from azimut.support_typology where id = ${TYPOLOGY}`;
   await alice.release();
   await bob.release();
+
+  // Le retrait passe par une connexion neuve : celles du groupe ont pris le
+  // rôle `authenticated` pour la durée de la suite, et le rendu d'une
+  // connexion au groupe ne le défait pas. Le décor se retire sous le rôle
+  // propriétaire, comme le ferait un import d'administration.
+  const cleaner = createConnection(dsn);
+  await deleteOrgFixture(
+    text => cleaner.unsafe(text), text => cleaner.unsafe(text), [ORG, ORG_B]);
+  await cleaner.end();
   await client.end();
   await db.$client.end();
 });

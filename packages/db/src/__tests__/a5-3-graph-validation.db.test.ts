@@ -187,22 +187,27 @@ describe('A12.3 — graph_validation est en insertion seule', () => {
   });
 
   /**
-   * Conséquence de l'insertion seule, constatée en écrivant cet essai et non
-   * prévue par A12.3 : la suppression en cascade est elle aussi une
-   * suppression. Un site ou une organisation qui porte un passage de
-   * validation ne se supprime plus, et la cascade d'A5.3 ne s'exécute jamais.
+   * A5.11, version 7 — la clé étrangère refuse la suppression du parent.
    *
-   * L'essai fige le comportement réel plutôt qu'une intention. Le point est
-   * porté au rapport : il oppose A12.3 à la suppression effective que
-   * l'article O15 exige à la fin d'un contrat, et il touche déjà `approval`
-   * de la même façon.
+   * La table a d'abord porté `ON DELETE CASCADE` vers `site` et vers
+   * `organization`, ce qui opposait A5.3 à l'insertion seule d'A12.3 : la
+   * cascade est une suppression, le déclencheur la refusait, et le refus
+   * paraissait venir de la table fille pour une raison que la clé ne disait
+   * pas. A5.11 tranche — aucune cascade vers `organization` ni vers `site`,
+   * et les tables en insertion seule refusent la suppression de leur parent.
+   *
+   * L'essai vérifie donc d'où vient le refus, et pas seulement qu'il a lieu :
+   * c'est la clé qui parle, avant que le déclencheur n'ait à le faire. La
+   * suppression reste possible par la seule voie qu'A12.3 nomme, la purge de
+   * fin de contrat d'O15, qui vide les tables dans l'ordre de dépendance.
    */
-  it('empêche aussi la suppression en cascade de son site', async () => {
+  it('refuse la suppression de son site, par la clé étrangère', async () => {
     await db.execute(sql`alter table azimut.site no force row level security`);
     try {
       const motif = await refusalOf(
         () => db.execute(sql`delete from azimut.site where id = ${SITE}`));
-      expect(motif).toMatch(/insert-only/);
+      expect(motif).toMatch(/graph_validation_site_id_fkey/);
+      expect(motif).toMatch(/violates foreign key constraint/);
     } finally {
       await db.execute(sql`alter table azimut.site force row level security`);
     }
