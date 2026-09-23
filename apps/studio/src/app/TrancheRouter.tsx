@@ -12,9 +12,8 @@ import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
 import { sessionFromSite } from '../state/session-from-site.js';
 import { appRepository, isRepositoryError } from '../data/index.js';
-import {
-  PlanScreenAdapter, FootprintsScreenAdapter, GraphScreenAdapter,
-} from './workshop-adapters.js';
+import { PlanScreenAdapter, GraphScreenAdapter } from './workshop-adapters.js';
+import { FootprintsScreenAdapter } from './FootprintsAdapter.js';
 import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 

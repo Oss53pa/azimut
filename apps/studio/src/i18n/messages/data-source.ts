@@ -124,6 +124,9 @@ export const DATA_SOURCE_FR = {
   'unit.metre': 'm',
   'unit.square_metre': 'm²',
   'unit.percent': '%',
+  // F6.1 rend l'unité obligatoire sur un champ numérique. Un nombre de copies
+  // en a une : des copies. Écrire une chaîne vide serait un contournement.
+  'unit.copies': 'copies',
   // M3 (partie M) — l'écran lui-même.
   'fp.toolbar': 'Outils de tracé',
   'fp.properties': 'Propriétés',
@@ -145,6 +148,13 @@ export const DATA_SOURCE_FR = {
   'fp.kind.vertical_core': 'Noyau vertical',
   'fp.action.close': 'Fermer le polygone',
   'fp.action.abandon': 'Abandonner le tracé',
+  'fp.series.title': 'Duplication en série',
+  'fp.series.dx': 'Pas en X',
+  'fp.series.dy': 'Pas en Y',
+  'fp.series.count': 'Nombre de copies',
+  'fp.series.action': 'Dupliquer en série',
+  'fp.series.reference': 'Série à partir de {code}.',
+  'fp.series.none': 'Fermez une empreinte : la série part de la dernière tracée.',
   // M4 (partie M) — l'écran de saisie du graphe.
   'graph.toolbar': 'Outils du graphe',
   'graph.properties': 'Propriétés',
@@ -324,6 +334,9 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'unit.metre': 'm',
   'unit.square_metre': 'm²',
   'unit.percent': '%',
+  // F6.1 rend l'unité obligatoire sur un champ numérique. Un nombre de copies
+  // en a une : des copies. Écrire une chaîne vide serait un contournement.
+  'unit.copies': 'copies',
   'fp.toolbar': 'Drawing tools',
   'fp.properties': 'Properties',
   'fp.status.count': 'Footprints',
@@ -344,6 +357,13 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'fp.kind.vertical_core': 'Vertical core',
   'fp.action.close': 'Close polygon',
   'fp.action.abandon': 'Abandon drawing',
+  'fp.series.title': 'Series duplication',
+  'fp.series.dx': 'Step in X',
+  'fp.series.dy': 'Step in Y',
+  'fp.series.count': 'Number of copies',
+  'fp.series.action': 'Duplicate in series',
+  'fp.series.reference': 'Series from {code}.',
+  'fp.series.none': 'Close a footprint: the series starts from the last one drawn.',
   'graph.toolbar': 'Graph tools',
   'graph.properties': 'Properties',
   'graph.no_selection': 'Select a node or an edge.',

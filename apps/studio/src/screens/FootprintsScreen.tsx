@@ -42,7 +42,32 @@ export type FootprintsScreenProps = {
   readonly footprintCount: number;
   readonly onClose: () => void;
   readonly onAbandon: () => void;
+  /**
+   * M3 (partie M), « Actions en série » : « La duplication en série est
+   * l'action qui fait gagner le plus de temps sur une galerie à trame
+   * régulière, elle est en évidence et non enfouie. »
+   *
+   * Elle est donc dans le panneau, sous les propriétés, et non derrière un
+   * menu. Le pas et le nombre de copies s'y saisissent, ce qui la rend
+   * accessible au clavier au même titre que les sommets.
+   */
+  readonly series: SeriesDraft;
+  readonly onSeries: (field: keyof SeriesDraft, value: number | null) => void;
+  /**
+   * Le code de l'empreinte dont la série part, ou `null` si aucune n'a encore
+   * été fermée. L'écran nomme ce sujet : une duplication dont on ne sait pas
+   * ce qu'elle duplique est une action au hasard.
+   */
+  readonly seriesReference: string | null;
+  readonly onDuplicate: () => void;
   readonly children?: JSX.Element;
+};
+
+/** Les trois nombres d'une série : le pas, et le nombre de copies. */
+export type SeriesDraft = {
+  readonly dx_m: number;
+  readonly dy_m: number;
+  readonly count: number;
 };
 
 export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
@@ -129,6 +154,13 @@ export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
               />
 
               <VertexTable vertices={vertices} onVertex={props.onVertex} />
+
+              <SeriesFields
+                series={props.series}
+                onSeries={props.onSeries}
+                reference={props.seriesReference}
+                onDuplicate={props.onDuplicate}
+              />
             </div>
           </Panel>
         </div>
@@ -220,4 +252,59 @@ function kindKey(kind: FootprintKind):
     : kind === 'circulation' ? 'fp.kind.circulation'
       : kind === 'technical' ? 'fp.kind.technical'
         : 'fp.kind.vertical_core';
+}
+
+/**
+ * M3 (partie M) — la duplication en série, en évidence dans le panneau.
+ *
+ * Le bouton est refusé tant qu'aucune empreinte n'a été fermée : la série
+ * part de la dernière tracée, et l'écran le dit plutôt que de laisser presser
+ * une action sans sujet. Un pas nul n'est pas refusé — deux copies au même
+ * endroit se recouvrent, et M3 fait du recouvrement un avertissement.
+ */
+function SeriesFields({ series, onSeries, reference, onDuplicate }: {
+  readonly series: SeriesDraft;
+  readonly onSeries: (field: keyof SeriesDraft, value: number | null) => void;
+  readonly reference: string | null;
+  readonly onDuplicate: () => void;
+}): JSX.Element {
+  const { t } = useI18n();
+  return (
+    <fieldset style={{ border: 'none', margin: 0, padding: 0 }}>
+      <legend style={{ padding: 0, marginBottom: SPACE.sm }}>{t('fp.series.title')}</legend>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm }}>
+        <NumericField
+          label={t('fp.series.dx')}
+          unit={t('unit.metre')}
+          value={series.dx_m}
+          step={0.001}
+          onChange={value => { onSeries('dx_m', value); }}
+        />
+        <NumericField
+          label={t('fp.series.dy')}
+          unit={t('unit.metre')}
+          value={series.dy_m}
+          step={0.001}
+          onChange={value => { onSeries('dy_m', value); }}
+        />
+        <NumericField
+          label={t('fp.series.count')}
+          unit={t('unit.copies')}
+          value={series.count}
+          step={1}
+          min={1}
+          onChange={value => { onSeries('count', value); }}
+        />
+        <StateBanner
+          severity="info"
+          message={reference === null
+            ? t('fp.series.none')
+            : `${t('fp.series.reference', { code: reference })} ${t('fp.series.hint')}`}
+        />
+        <Button rank="secondary" onClick={onDuplicate} disabled={reference === null}>
+          {t('fp.series.action')}
+        </Button>
+      </div>
+    </fieldset>
+  );
 }
