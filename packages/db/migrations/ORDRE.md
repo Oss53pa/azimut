@@ -80,6 +80,7 @@ non plus — elle n'en retire que les clés étrangères.
 0034_m01_s3_unit_code_required
 0035_a5_3_graph_validation
 0036_a5_11_graph_validation_no_cascade
+0037_a5_11_approval_no_cascade
 ```
 
 ## Règle pour la suite
