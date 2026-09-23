@@ -49,6 +49,14 @@ export type EdgeSelection = {
   readonly lengthM: number;
 };
 
+/** Ce qu'une passe d'axe a produit, tel que l'écran le rapporte. */
+export type AxisReport = {
+  readonly nodes: number;
+  readonly edges: number;
+  readonly reused: number;
+  readonly skipped: number;
+};
+
 export type GraphScreenProps = {
   readonly state: ScreenState;
   readonly tool: GraphTool;
@@ -87,6 +95,21 @@ export type GraphScreenProps = {
   readonly onPlaceNode: () => void;
   /** Outil « Arête » : relie les nœuds posés, deux à deux. */
   readonly onDrawEdges: () => void;
+  /**
+   * M4 (partie M), outil « Axe de circulation » : « Tracé continu produisant
+   * nœuds et arêtes en une passe. »
+   *
+   * Les points se saisissent numériquement, comme les sommets d'une empreinte
+   * dans M3 (partie M) : c'est le moyen le plus précis, et le seul accessible
+   * au clavier tant que la zone de travail n'est pas construite.
+   */
+  readonly axis: readonly Point[];
+  readonly onAxisPoint: (index: number, coordinate: 'x_m' | 'y_m', value: number | null) => void;
+  readonly onAxisAdd: () => void;
+  readonly onAxisRemove: () => void;
+  readonly onAxisDraw: () => void;
+  /** Ce que la dernière passe a produit, ou `null` si aucune n'a eu lieu. */
+  readonly axisReport: AxisReport | null;
   readonly children?: JSX.Element;
 };
 
@@ -256,6 +279,15 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
           </Button>
         </div>
 
+        <AxisFields
+          axis={props.axis}
+          onPoint={props.onAxisPoint}
+          onAdd={props.onAxisAdd}
+          onRemove={props.onAxisRemove}
+          onDraw={props.onAxisDraw}
+          report={props.axisReport}
+        />
+
         <StatusBar items={status} />
       </div>
     </ScreenStates>
@@ -268,4 +300,72 @@ function nodeKindKey(kind: NodeKind): `graph.node.kind.${NodeKind}` {
 
 function directionKey(direction: EdgeDirection): `graph.edge.direction.${EdgeDirection}` {
   return `graph.edge.direction.${direction}`;
+}
+
+/**
+ * M4 (partie M) — l'axe de circulation, saisi point par point.
+ *
+ * L'action est refusée sous deux points : un axe sans segment ne trace rien,
+ * et laisser presser un bouton qui ne fera rien est pire que de le refuser en
+ * le disant. Le compte rendu nomme ce que la passe a repris et ce qu'elle a
+ * passé — « sans doublon » ne se voit pas autrement, le graphe ayant la même
+ * allure qu'il ait doublé un nœud ou non.
+ */
+function AxisFields({ axis, onPoint, onAdd, onRemove, onDraw, report }: {
+  readonly axis: readonly Point[];
+  readonly onPoint: (index: number, coordinate: 'x_m' | 'y_m', value: number | null) => void;
+  readonly onAdd: () => void;
+  readonly onRemove: () => void;
+  readonly onDraw: () => void;
+  readonly report: AxisReport | null;
+}): JSX.Element {
+  const { t } = useI18n();
+  return (
+    <fieldset style={{ border: 'none', margin: 0, padding: 0 }}>
+      <legend style={{ padding: 0, marginBottom: SPACE.sm }}>{t('graph.axis.title')}</legend>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm, alignItems: 'flex-end' }}>
+        {axis.map((point, index) => (
+          <div key={`axis-${String(index)}`} style={{ display: 'flex', gap: SPACE.sm }}>
+            <NumericField
+              label={t('graph.axis.point_x', { n: index + 1 })}
+              unit={t('unit.metre')}
+              value={point.x_m}
+              step={0.001}
+              onChange={value => { onPoint(index, 'x_m', value); }}
+            />
+            <NumericField
+              label={t('graph.axis.point_y', { n: index + 1 })}
+              unit={t('unit.metre')}
+              value={point.y_m}
+              step={0.001}
+              onChange={value => { onPoint(index, 'y_m', value); }}
+            />
+          </div>
+        ))}
+      </div>
+      <p style={{ margin: `${SPACE.sm} 0 0`, color: 'var(--text-muted)' }}>
+        {t('graph.axis.hint')}
+      </p>
+      <div style={{ display: 'flex', gap: SPACE.sm, marginTop: SPACE.sm }}>
+        <Button rank="secondary" onClick={onAdd}>{t('graph.axis.add')}</Button>
+        <Button rank="secondary" onClick={onRemove} disabled={axis.length <= 2}>
+          {t('graph.axis.remove')}
+        </Button>
+        <Button rank="primary" onClick={onDraw} disabled={axis.length < 2}>
+          {t('graph.axis.draw')}
+        </Button>
+      </div>
+      {report !== null && (
+        <div style={{ marginTop: SPACE.sm }}>
+          <StateBanner
+            severity="info"
+            message={t('graph.axis.done', {
+              nodes: report.nodes, edges: report.edges,
+              reused: report.reused, skipped: report.skipped,
+            })}
+          />
+        </div>
+      )}
+    </fieldset>
+  );
 }

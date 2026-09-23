@@ -1,120 +1,46 @@
 import { type JSX, useState } from 'react';
+import type { Finding, NodeKind, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
-import { acceptPlanFile } from '../state/plan-import.js';
 import { acceptNode, acceptEdge } from '../state/graph-input.js';
+import { acceptAxis } from '../state/graph-axis.js';
 import { graphCommands } from '../state/graph-commands.js';
-import { calibrationCommands } from '../state/plan-calibration-commands.js';
-import { computeCalibration } from '../domain/plan-calibration.js';
 import { point, structured } from '../state/row-values.js';
 import type { StoredRow } from '../state/session-store.js';
-import { PlanCalibrationScreen } from '../screens/PlanCalibrationScreen.js';
 import { GraphScreen } from '../screens/GraphScreen.js';
-import { EMPTY_DRAFT, stepOf } from '../state/use-plan-calibration.js';
-import { judgeReplacement } from '../state/plan-import.js';
-import type { ReplacementVerdict } from '../state/plan-import.js';
-import type { Finding, NodeKind, Point } from '@azimut/core-model';
-import type { GraphTool, NodeSelection, EdgeSelection } from '../screens/GraphScreen.js';
+import type {
+  GraphTool, NodeSelection, EdgeSelection, AxisReport,
+} from '../screens/GraphScreen.js';
 
 /**
- * F15 — les adaptateurs des écrans de l'atelier.
+ * M4 (partie M) — l'adaptateur de la saisie du graphe.
  *
- * Séparés du routeur, qui décide quel écran paraît, alors qu'ils décident ce
- * que chaque écran reçoit. Les garder ensemble portait le fichier au-delà des
- * 400 lignes qu'A2.4 fixe.
+ * À part dans un fichier depuis que l'axe de circulation y est : l'écran tient
+ * trois gestes — poser un nœud, tracer les arêtes, tracer un axe — et
+ * `workshop-adapters.tsx` repassait au-delà des 400 lignes qu'A2.4 fixe.
  */
 
 /**
- * Les cinq adaptateurs.
+ * L'axe proposé à l'ouverture : deux points, le minimum d'un segment.
  *
- * Chacun tient l'état de son écran et le lui passe. Le contenu de la zone de
- * travail — le tracé au pointeur, la vue du fond — n'est pas encore construit :
- * les écrans reçoivent donc un panneau vide, et tout ce qui se saisit au
- * clavier fonctionne. C'est l'ordre voulu, puisque M8 (partie M) critère 2
- * exige le parcours au clavier seul.
+ * La zone de travail n'est pas construite, et un axe sans point de départ
+ * n'aurait rien à modifier au clavier. Même raison que le contour proposé par
+ * M3 (partie M).
  */
-export function PlanScreenAdapter({ session, siteId, levelId }: {
-  readonly session: TrancheSession;
-  readonly siteId: string;
-  readonly levelId: string;
-}): JSX.Element {
-  const [draft, setDraft] = useState(EMPTY_DRAFT);
-  const [pending, setPending] = useState<ReplacementVerdict | null>(null);
-  const [findings, setFindings] = useState<readonly Finding[]>([]);
-  const [calibrated, setCalibrated] = useState(false);
-  const [busy, setBusy] = useState(false);
+const DEFAULT_AXIS: readonly Point[] = [
+  { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
+];
 
-  return (
-    <PlanCalibrationScreen
-      state={{ kind: 'ready' }}
-      draft={draft}
-      step={stepOf(draft)}
-      findings={findings}
-      warnings={[]}
-      busy={busy}
-      calibrated={calibrated}
-      onPickFile={plan => {
-        const accepted = acceptPlanFile(plan);
-        if (!accepted.ok) { setFindings(accepted.findings); return; }
-        setFindings([]);
-        setDraft(previous => ({ ...previous, plan: accepted.value }));
-      }}
-      onReplaceFile={() => {
-        setPending(judgeReplacement({ widthPx: 0, heightPx: 0 }, { widthPx: 1, heightPx: 1 }));
-      }}
-      pendingReplacement={pending ?? undefined}
-      onConfirmReplacement={() => { setPending(null); setDraft(EMPTY_DRAFT); setCalibrated(false); }}
-      onCancelReplacement={() => { setPending(null); }}
-      onDistance={metres => { setDraft(p => ({ ...p, realDistanceM: metres ?? 0 })); setFindings([]); }}
-      onAzimuth={degrees => { setDraft(p => ({ ...p, northAzimuthDeg: degrees })); setFindings([]); }}
-      onRecalibrate={() => {
-        setDraft(previous => ({ ...EMPTY_DRAFT, plan: previous.plan }));
-        setFindings([]);
-        setCalibrated(false);
-      }}
-      onValidate={() => {
-        void (async () => {
-          if (draft.plan === null) return;
-          setBusy(true);
-          const measured = computeCalibration({
-            // Deux points posés par défaut : la zone de travail n'est pas
-            // encore construite, et M2 (partie M) veut que le calage manuel
-            // reste possible. Ils sont distants de plus des 40 pixels exigés.
-            a: draft.a ?? { x_px: 0, y_px: 0 },
-            b: draft.b ?? { x_px: 200, y_px: 0 },
-            real_distance_m: draft.realDistanceM,
-            north_azimuth_deg: draft.northAzimuthDeg,
-          });
-          if (!measured.ok) { setFindings(measured.findings); setBusy(false); return; }
-
-          const commands = calibrationCommands(draft.plan, measured.value, {
-            site: {}, proposed: { x_m: 0, y_m: 0 },
-          }, {
-            orgId: ORG_OF_SESSION,
-            siteId,
-            levelId,
-            planSourceId: session.newId(),
-            calibrationId: session.newId(),
-            storagePath: `plans/${siteId}/${levelId}`,
-            // A5.2 — les deux points de la mesure, dans l'ordre de pose.
-            points: [
-              { id: session.newId(), point: draft.a ?? { x_px: 0, y_px: 0 } },
-              { id: session.newId(), point: draft.b ?? { x_px: 200, y_px: 0 } },
-            ],
-            referenceDistanceM: draft.realDistanceM,
-            timestamp: session.now(),
-          });
-          if (!commands.ok) { setFindings(commands.findings); setBusy(false); return; }
-
-          await session.write(commands.value);
-          setFindings([]);
-          setCalibrated(true);
-          setBusy(false);
-        })();
-      }}
-    />
-  );
-}
+/**
+ * La largeur utile des arêtes tracées par l'écran.
+ *
+ * M4 (partie M) la veut « héritée du niveau », et `building.default_edge_width_m`
+ * la porte au modèle (N1.2). Le niveau n'est pas chargé dans cette session :
+ * l'écran pose donc une valeur d'ouverture, que l'opérateur modifie au panneau.
+ * Ce n'est pas une valeur d'origine normative — aucune norme ne fixe la
+ * largeur d'un cheminement dans le modèle, c'est un contrôle qui la juge.
+ */
+const DEFAULT_EDGE_WIDTH_M = 1.4;
 
 export function GraphScreenAdapter({ session, levelId }: {
   readonly session: TrancheSession;
@@ -127,6 +53,8 @@ export function GraphScreenAdapter({ session, levelId }: {
   // carrefour est le défaut parce que c'est le nœud le plus fréquent d'un
   // relevé, non parce que c'était le seul possible.
   const [nextNodeKind, setNextNodeKind] = useState<NodeKind>('junction');
+  const [axis, setAxis] = useState<readonly Point[]>(DEFAULT_AXIS);
+  const [axisReport, setAxisReport] = useState<AxisReport | null>(null);
 
   const nodes: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'node');
   const edges: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'edge');
@@ -158,6 +86,58 @@ export function GraphScreenAdapter({ session, levelId }: {
       edgeCount={edges.length}
       nextNodeKind={nextNodeKind}
       onNextNodeKind={setNextNodeKind}
+      axis={axis}
+      onAxisPoint={(index, coordinate, value) => {
+        setAxis(previous => previous.map((p, i) =>
+          i === index ? { ...p, [coordinate]: value ?? 0 } : p));
+      }}
+      onAxisAdd={() => {
+        setAxis(previous => {
+          const last = previous[previous.length - 1];
+          // Le point ajouté prolonge l'axe plutôt que de se poser sur le
+          // dernier : deux points confondus ne feraient aucun segment, et
+          // l'opérateur croirait avoir ajouté quelque chose.
+          return [...previous, { x_m: (last?.x_m ?? 0) + 10, y_m: last?.y_m ?? 0 }];
+        });
+      }}
+      onAxisRemove={() => { setAxis(previous => previous.slice(0, -1)); }}
+      axisReport={axisReport}
+      onAxisDraw={() => {
+        void (async () => {
+          const outcome = acceptAxis(axis, {
+            nodes: nodes.flatMap((row: StoredRow) => {
+              const position = positionOf(row);
+              return position === null ? [] : [{ id: row.id, position }];
+            }),
+            edges: edges.map((row: StoredRow) => ({
+              fromNodeId: String(row.values['from_node_id'] ?? ''),
+              toNodeId: String(row.values['to_node_id'] ?? ''),
+            })),
+            levelId,
+            kind: nextNodeKind,
+            widthM: DEFAULT_EDGE_WIDTH_M,
+            direction: 'both',
+            mintId: () => session.newId(),
+          });
+          if (!outcome.ok) { setFindings(outcome.findings); return; }
+
+          const { nodes: created, edges: drawn, reused, skipped } = outcome.value;
+          if (created.length > 0 || drawn.length > 0) {
+            const commands = graphCommands(
+              created, drawn, [],
+              { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+              `axis:${created[0]?.id ?? drawn[0]?.id ?? 'vide'}`,
+            );
+            if (!commands.ok) { setFindings(commands.findings); return; }
+            await session.write(commands.value);
+          }
+          setFindings([]);
+          setAxisReport({
+            nodes: created.length, edges: drawn.length,
+            reused: reused.length, skipped,
+          });
+        })();
+      }}
       onPlaceNode={() => {
         void (async () => {
           const index = nodes.length;
@@ -202,7 +182,7 @@ export function GraphScreenAdapter({ session, levelId }: {
               edge: acceptEdge({
                 from: { nodeId: from.id, levelId, position: a, elevation_m: 0 },
                 to: { nodeId: to.id, levelId, position: b, elevation_m: 0 },
-                widthM: 1.4, slopePct: 0, accessible: true, direction: 'both',
+                widthM: DEFAULT_EDGE_WIDTH_M, slopePct: 0, accessible: true, direction: 'both',
                 evacuationRoute: false, hasVerticalLink: false,
               }),
             });
