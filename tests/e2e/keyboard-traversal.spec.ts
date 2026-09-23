@@ -20,6 +20,25 @@ const SCREENS = [
   { name: 'M5 validation', path: `/sites/${SITE}/validation` },
 ] as const;
 
+/**
+ * Attend que l'application ait rendu quelque chose d'atteignable au clavier.
+ *
+ * `page.goto` rend la main à l'événement `load`, c'est-à-dire quand le script
+ * est exécuté. React 18 ne rend pas pour autant : `render` planifie le travail
+ * au lieu de l'accomplir. Tabuler aussitôt visait donc parfois un document
+ * encore vide, où le focus reste sur `body` — qui ne porte aucun contour, et
+ * qu'aucune tabulation ne quitte.
+ *
+ * L'essai échouait ainsi une fois sur une dizaine d'exécutions complètes,
+ * jamais isolément : sous deux fils, le rendu arrive plus tard. Ce n'était pas
+ * un flottement de la machine, c'était l'essai qui partait trop tôt.
+ */
+async function waitForInteractive(page: Page): Promise<void> {
+  await page.locator(
+    'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])',
+  ).first().waitFor({ state: 'attached' });
+}
+
 /** Ce que le focus désigne, tel qu'un lecteur d'écran l'annoncerait. */
 async function focused(page: Page): Promise<{ tag: string; name: string }> {
   return page.evaluate(() => {
@@ -50,6 +69,7 @@ for (const screen of SCREENS) {
   test.describe(screen.name, () => {
     test('se parcourt entièrement au clavier', async ({ page }) => {
       await page.goto(screen.path);
+      await waitForInteractive(page);
       const reached = await tabThrough(page);
 
       // Un écran sans aucune cible au clavier est inutilisable au clavier seul.
@@ -67,6 +87,7 @@ for (const screen of SCREENS) {
      */
     test('montre où est le focus', async ({ page }) => {
       await page.goto(screen.path);
+      await waitForInteractive(page);
       await page.keyboard.press('Tab');
       const outline = await page.evaluate(() => {
         const el = document.activeElement;
