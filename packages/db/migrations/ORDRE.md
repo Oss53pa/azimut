@@ -83,6 +83,7 @@ non plus — elle n'en retire que les clés étrangères.
 0037_a5_11_approval_no_cascade
 0038_a5_11_audit_log_no_cascade
 0039_a5_11_no_cascade_to_org_or_site
+0040_q9_country
 ```
 
 ## Règle pour la suite
