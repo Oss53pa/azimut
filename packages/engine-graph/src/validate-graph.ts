@@ -1,10 +1,10 @@
 import type {
-  SiteData,
   GraphNode,
   Edge,
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import type { GraphScope } from './graph-scope.js';
 import { destinationNodeMissingFindings } from './validate-directory.js';
 import { buildAdjacency, bfs } from './graph-traversal.js';
 import {
@@ -152,7 +152,7 @@ function unreachableFromEntranceFindings(
 }
 
 function unreachableDestinationFindings(
-  site: SiteData,
+  site: GraphScope,
   reachableFromEntrance: Set<string>,
 ): Finding[] {
   const findings: Finding[] = [];
@@ -211,7 +211,7 @@ function deadEndFindings(
 }
 
 export function validateGraph(
-  site: SiteData,
+  site: GraphScope,
 ): Outcome<ValidationResult> {
   const { nodes, edges } = site.graph;
 

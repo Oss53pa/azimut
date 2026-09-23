@@ -1,9 +1,10 @@
-import type { SiteData, Finding } from '@azimut/core-model';
+import type { Finding } from '@azimut/core-model';
+import type { GraphScope } from './graph-scope.js';
 import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
 import { buildDirectedAdjacency, bfs } from './graph-traversal.js';
 
 export function crossLevelWithoutVlFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const nodeLevelMap = new Map<string, string>();
   for (const n of site.graph.nodes) {
@@ -39,7 +40,7 @@ export function crossLevelWithoutVlFindings(
 }
 
 export function multiLevelWithoutAnyVlFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const buildingLevels = new Map<string, string[]>();
   for (const level of site.levels) {
@@ -92,7 +93,7 @@ export function multiLevelWithoutAnyVlFindings(
 }
 
 export function multiLevelWithoutAccessibleVlFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const buildingLevels = new Map<string, string[]>();
   for (const level of site.levels) {
@@ -151,7 +152,7 @@ export function multiLevelWithoutAccessibleVlFindings(
  * buildings) nor its own independent access. Warning per D2.2.
  */
 export function buildingIsolatedFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const levelBuilding = new Map<string, string>();
   for (const level of site.levels) {
@@ -194,7 +195,7 @@ export function buildingIsolatedFindings(
 }
 
 export function missingDestinationNameFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const langs = new Set<string>();
   for (const dn of site.destination_names) {
@@ -261,7 +262,7 @@ export function missingDestinationNameFindings(
  * pas tranché ici.
  */
 export function verticalLinkMisalignedFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const nodeById = new Map(site.graph.nodes.map((n) => [n.id, n]));
   const edgeById = new Map(site.graph.edges.map((e) => [e.id, e]));
@@ -336,7 +337,7 @@ export function verticalLinkMisalignedFindings(
  * paramètres.
  */
 export function destinationNotReachedFromEveryEntranceFindings(
-  site: SiteData,
+  site: GraphScope,
 ): Finding[] {
   const { nodes, edges } = site.graph;
   const entrances = nodes
