@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { allUpSql } from '../migration-corpus.js';
+import { allUpSql, createdTables } from '../migration-corpus.js';
 
 /**
  * M01.S2 : « Aucune coordonnée **de géométrie du site** n'est stockée en
@@ -22,31 +22,18 @@ import { allUpSql } from '../migration-corpus.js';
 const COORDINATE_IN_PIXELS = /(^|_)[xy]_px$/;
 
 /**
- * Infraction constatée, déclarée, et réduite à sa seule cause restante.
+ * Infractions constatées et déclarées : aucune.
  *
- * Les colonnes portent désormais le nom d'A5.2, `image_x_px` et `image_y_px`,
- * par la migration 0041. Ce qui reste tient au nom de la table : M01.S2
- * nomme `plan_calibration` et `plan_calibration_point` comme seules tables
- * autorisées à porter des pixels, et `control_point` n'en est pas.
+ * `control_point` était la dernière. Elle portait des pixels hors des deux
+ * tables que M01.S2 autorise, et la migration 0043 l'a supprimée : une seule
+ * table de points de calage subsiste, `plan_calibration_point`, celle de
+ * A5.2.
  *
- * Elle ne peut pas être renommée en `plan_calibration_point` : la migration
- * 0033 a créé ce nom pour la table conforme à A5.2, qui porte `ordinal` et
- * deux colonnes de pixels, là où `control_point` porte en plus `target_x_m`,
- * `target_y_m` et `residual_m`, que A5.2 ne définit nulle part. Fusionner
- * perdrait ces trois colonnes ; supprimer la table est une migration
- * destructrice. Les deux relèvent de A2.2, la première par son point 2, la
- * seconde par son point 7.
- *
- * L'infraction est donc nommée plutôt que corrigée en silence : le garde
- * refuse toute occurrence nouvelle, et celle-ci reste visible jusqu'à
- * l'arbitrage.
+ * Le registre reste, vide. Le supprimer avec sa dernière entrée ferait de la
+ * prochaine infraction une ligne à réinventer sous la pression d'un essai
+ * rouge, au lieu d'une déclaration motivée à écrire ici.
  */
-const DECLARED_BREACHES: Readonly<Record<string, string>> = {
-  'control_point.image_x_px':
-    'Migration 0018, complément « atelier », document sans autorité depuis la consolidation. Table hors des deux que M01.S2 autorise ; le nom `plan_calibration_point` est pris par la table conforme de la migration 0033.',
-  'control_point.image_y_px':
-    'Migration 0018, même origine et même motif que `image_x_px`.',
-};
+const DECLARED_BREACHES: Readonly<Record<string, string>> = {};
 
 /**
  * Les deux tables que A5.2 autorise nommément à porter des pixels.
@@ -95,6 +82,14 @@ function migratedColumns(): ReadonlyMap<string, readonly string[]> {
     }
     out.set(altered[1] ?? '', table);
   }
+
+  // Une table supprimée ne porte plus de colonne. Sans ce retrait, le garde
+  // jugerait le schéma sur des définitions que la base n'a plus, et une
+  // infraction refermée par suppression resterait à déclarer indéfiniment.
+  const alive = createdTables();
+  for (const table of [...out.keys()]) {
+    if (!alive.has(table)) out.delete(table);
+  }
   return out;
 }
 
@@ -138,6 +133,13 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
       expect(columns, `${declared} : déclarée en infraction mais absente du schéma`)
         .toContain(declared);
     }
+  });
+
+  it('le schéma ne porte plus qu’une table de points de calage', () => {
+    const tables = migratedColumns();
+    expect(tables.has('control_point'), 'supprimée par la migration 0043').toBe(false);
+    expect([...tables.get('plan_calibration_point') ?? []])
+      .toEqual(expect.arrayContaining(['ordinal', 'image_x_px', 'image_y_px']));
   });
 
   it('la mesure reconnaît une colonne fautive, sinon elle ne mesure rien', () => {

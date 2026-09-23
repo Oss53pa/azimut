@@ -17,7 +17,7 @@ après la remise de la version en cours du cahier des charges consolidé.
 | Règle | État | Preuve |
 | --- | --- | --- |
 | **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
-| **M01.S2** Aucune coordonnée en pixels stockée | **tenu avec une infraction déclarée** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Deux colonnes en infraction, voir §5 |
+| **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0043 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
 | **M01.S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
 | **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
 | **M01.S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
@@ -26,7 +26,7 @@ après la remise de la version en cours du cahier des charges consolidé.
 | **M01.S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
 | **M01.S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
 
-**Les neuf règles sont tenues.** M01.S2 porte une dette nommée, arbitrage au §5.
+**Les neuf règles sont tenues**, sans dette déclarée.
 
 Au 23 septembre, plus aucun critère numéroté de la partie M n'est porté
 absent. Ce qui reste est au §5 : deux contradictions du document en attente
@@ -143,7 +143,6 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 
 | Sujet | Nature | Ce qu'il faut |
 | --- | --- | --- |
-| `control_point`, nom de la table | Infraction résiduelle à M01.S2. Les colonnes portent le nom d'A5.2 depuis la migration 0041 ; la table n'est pas l'une des deux que la règle autorise, et le nom `plan_calibration_point` est pris par la table conforme de la migration 0033 | Arbitrage. Fusionner perdrait `target_x_m`, `target_y_m` et `residual_m`, que A5.2 ne définit pas ; supprimer est destructeur. A2.2 points 2 et 7 |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 | Outil de liaison verticale, M4 | Non construit, et non constructible en l'état : la liaison relie deux niveaux, la session de l'atelier n'en porte qu'un. Aucun geste de l'écran ne peut produire l'arête inter-niveaux qu'elle accompagne | Périmètre. Demande la session multi-niveaux, tâche T-1.5 |

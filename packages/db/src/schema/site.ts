@@ -161,26 +161,6 @@ export const planCalibration = azimut.table('plan_calibration', {
   uniqueIndex('uq_plan_calibration_plan_source').on(t.plan_source_id),
 ]);
 
-/**
- * Complément atelier M1.4 : les points homologues qui fondent le calage
- * mesuré. `residual_m` est calculé par l'ajustement, jamais saisi.
- */
-export const controlPoint = azimut.table('control_point', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  calibration_id: uuid('calibration_id').notNull().references(() => planCalibration.id, { onDelete: 'cascade' }),
-  image_x_px: numeric('image_x_px').notNull(),
-  image_y_px: numeric('image_y_px').notNull(),
-  target_x_m: numeric('target_x_m').notNull(),
-  target_y_m: numeric('target_y_m').notNull(),
-  residual_m: numeric('residual_m'),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_control_point_org').on(t.org_id),
-  index('idx_control_point_calibration').on(t.calibration_id),
-]);
-
 export const opening = azimut.table('opening', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
