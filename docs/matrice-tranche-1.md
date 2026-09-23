@@ -79,17 +79,22 @@ contrainte. Le manque était la lecture de l'historique, pas son stockage.
 | — Affichage : forme, trait interrompu, liseré | tenu | `viewport/GraphView.tsx` branche `graph-encoding`, qui portait l'encodage en donnée sans qu'aucun écran l'appelle ; `tests/e2e/greyscale.spec.ts` |
 | — Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` — le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
 | 2. Longueur jamais saisissable, recalculée | tenu | `graph-input.test.ts` ; M7.3 en bout en bout |
-| 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède |
+| 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` — la proposition ouvre l'outil qui crée la liaison |
+| — Outil « Liaison verticale », touche `L` | tenu | `state/__tests__/graph-vertical-link.test.ts` — 7 essais ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` — la touche, le passage d'un niveau à l'autre, l'arête et la liaison en un geste annulable |
 | 4. Graphe saisissable au clavier seul | tenu | `m8-tranche.spec.ts`, critère 2 |
 
-Réserve sur la table des outils : trois des quatre outils de M4 sont
-construits — nœud, arête, axe de circulation. Le quatrième, la liaison
-verticale, ne l'est pas, et ne peut pas l'être en l'état : elle relie deux
-nœuds de niveaux différents, et la session de l'atelier porte un seul niveau,
-celui de sa route. Aucun geste de l'écran ne peut donc produire l'arête
-inter-niveaux que la liaison accompagne. `GRAPH.VERTICAL_LINK_MISSING` est levé
-avec son remède, et l'appliquer ne fait rien. L'outil demande la session
-multi-niveaux, c'est-à-dire la tâche T-1.5.
+Les quatre outils de M4 sont construits, et leurs quatre touches sont liées.
+La liaison verticale l'est par la tâche T-1.5 : la session porte désormais
+tous les niveaux du site, la barre de niveaux passe de l'un à l'autre, l'écran
+est tenu au sien, et l'outil écrit l'arête inter-niveaux et sa liaison en un
+seul geste annulable. `GRAPH.VERTICAL_LINK_MISSING` est levé avec son remède,
+et l'appliquer ouvre l'outil qui le corrige au lieu de ne rien faire.
+
+Ce qui reste hors de l'atelier : la **création** d'un niveau. M1 en crée un à
+la création du site, et aucun des cinq écrans de la tranche n'en ajoute. N1.5
+range la fiche de site parmi les écrans qui « restent à spécifier », et c'est
+là que la gestion des bâtiments et des niveaux appartient. Les niveaux d'un
+site viennent donc du dépôt. Voir §5.
 
 ### M1 et M5
 
@@ -132,7 +137,7 @@ et le graphe sans entrée que l'écran refuse en nommant le code.
 | 1. La chaîne fonctionne, site vide → graphe validé | tenu | `m8-tranche.spec.ts` |
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
-| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — protocole D13 : cinq exécutions, la première écartée, **médiane 1 966 ms**, machine déclarée dans le relevé. Les quatre exécutions retenues vont de 1 951 à 2 060 ms |
+| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. **Le relevé fait foi, et non ce tableau** : chaque passage de la suite le réécrit, et recopier ses chiffres ici les ferait vieillir en silence — c'est ce qui venait d'arriver. Au relevé du 23 septembre 2026, médiane **1 946 ms**, les quatre exécutions retenues allant de 1 879 à 2 139 ms |
 | 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` — 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
@@ -146,8 +151,9 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Intermittence de `tests/e2e/keyboard-traversal.spec.ts` | Essai vert. La cause est **probable et non prouvée** : l'attente du rendu ajoutée avant la tabulation corrige une course réelle — `page.goto` rend la main avant que React 18 n'ait rendu — mais l'échec n'a jamais été reproduit, ni par vingt-quatre sondes dédiées ni par six exécutions complètes. Rien ne prouve que c'était cette course-là | Rien tant que l'essai reste vert. Une garde bornée fait désormais échouer l'essai sur « l'application n'a rien rendu », avec le corps du document, pour qu'une régression se présente comme une erreur et non comme une intermittence. Si l'intermittence revient, le point se rouvre et la cause est à chercher ailleurs |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
-| Outil de liaison verticale, M4 | Non construit, et non constructible en l'état : la liaison relie deux niveaux, la session de l'atelier n'en porte qu'un. Aucun geste de l'écran ne peut produire l'arête inter-niveaux qu'elle accompagne | Périmètre. Demande la session multi-niveaux, tâche T-1.5 |
-| Étanchéité par PostgREST, en intégration continue | La suite existe et passe, mais elle est ignorée tant que `AZIMUT_TEST_POSTGREST` ne désigne aucun binaire. La chaîne d'A13.2 ne l'exécute donc pas encore | Installer PostgREST dans l'image d'intégration, ou déclarer explicitement que `test:rls` tourne sans elle |
+| Création d'un niveau | Aucun écran de la tranche n'en ajoute. M1 en crée un à la création du site ; N1.5 range la fiche de site, où la gestion des bâtiments et des niveaux appartient, parmi les écrans qui « restent à spécifier ». Un site à plusieurs niveaux s'ouvre donc depuis le dépôt, et l'atelier le parcourt | Périmètre. En inventer le formulaire dans l'atelier placerait là une structure que personne n'a spécifiée. À traiter avec la fiche de site |
+| Liaisons inter-bâtiments, table `building_link` | La table existe en base depuis la migration 0004, et rien ne l'écrit ni ne la lit. Le contrôle de connexité entre bâtiments se fonde sur le graphe — une arête dont les deux extrémités retombent sur deux bâtiments — et non sur elle. T-1.5 la nomme dans son objectif, ses deux critères d'acceptation portent sur la liaison verticale et sur le bâtiment isolé, tous deux tenus | Décider si `building_link` porte une donnée que le graphe ne porte pas déjà — abri, horaires propres — ou si elle est à retirer. Aucun écran de la tranche ne la demande |
+| Report de niveau, E7.2 | Copier les circulations et les noyaux verticaux d'un niveau à l'autre. Le registre de la partie K le range en « T-1.5, étendue » | Non construit. Il vient après l'outil de liaison, et demande le magnétisme et la duplication de E7.2, qui relèvent de T-1.2c et T-1.2d |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
 

@@ -11,6 +11,12 @@ import {
   NODE_KINDS, EDGE_DIRECTIONS, SLOPE_MIN_PCT, SLOPE_MAX_PCT,
 } from '../state/graph-input.js';
 import type { EdgeDirection, EdgeRemedy } from '../state/graph-input.js';
+import { GRAPH_TOOLS } from '../state/graph-shortcuts.js';
+import type { GraphTool } from '../state/graph-shortcuts.js';
+import { AxisFields } from './AxisFields.js';
+import type { AxisReport } from './AxisFields.js';
+import { VerticalLinkFields } from './VerticalLinkFields.js';
+import type { VerticalLinkFieldsProps } from './VerticalLinkFields.js';
 
 /**
  * M4 (partie M) — écran de saisie du graphe.
@@ -22,15 +28,6 @@ import type { EdgeDirection, EdgeRemedy } from '../state/graph-input.js';
  * (M7.3, partie M) : « Un champ de longueur saisissable serait une source
  * permanente d'incohérence. »
  */
-export const GRAPH_TOOLS = [
-  { tool: 'node', key: 'N', labelKey: 'graph.tool.node' },
-  { tool: 'edge', key: 'E', labelKey: 'graph.tool.edge' },
-  { tool: 'axis', key: 'X', labelKey: 'graph.tool.axis' },
-  { tool: 'vertical_link', key: 'L', labelKey: 'graph.tool.vertical_link' },
-] as const;
-
-export type GraphTool = (typeof GRAPH_TOOLS)[number]['tool'];
-
 export type NodeSelection = {
   readonly kind: 'node';
   readonly nodeKind: NodeKind;
@@ -47,14 +44,6 @@ export type EdgeSelection = {
   readonly evacuationRoute: boolean;
   /** Calculée, jamais saisissable (M4, partie M ; A5.3). */
   readonly lengthM: number;
-};
-
-/** Ce qu'une passe d'axe a produit, tel que l'écran le rapporte. */
-export type AxisReport = {
-  readonly nodes: number;
-  readonly edges: number;
-  readonly reused: number;
-  readonly skipped: number;
 };
 
 export type GraphScreenProps = {
@@ -76,6 +65,8 @@ export type GraphScreenProps = {
   readonly onApplyRemedy: () => void;
   readonly nodeCount: number;
   readonly edgeCount: number;
+  /** T-1.5 : les liaisons verticales qui touchent ce niveau. */
+  readonly linkCount: number;
   /**
    * M4 (partie M), outil « Nœud » : « Le type se choisit avant le geste,
    * jamais après. » Le type que portera le prochain nœud posé, et le moyen de
@@ -124,6 +115,16 @@ export type GraphScreenProps = {
    */
   readonly onApplyProperties: () => void;
   readonly propertiesDirty: boolean;
+  /**
+   * T-1.5 et M4 (partie M), outil « Liaison verticale ».
+   *
+   * Les champs ne s'affichent que sous cet outil : une liaison verticale se
+   * décide en la construisant, et un panneau permanent ferait croire qu'elle
+   * accompagne tout tracé.
+   */
+  readonly verticalLink: VerticalLinkFieldsProps;
+  /** Le niveau que l'écran édite, et ceux entre lesquels il navigue. */
+  readonly levelName: string;
   readonly children?: JSX.Element;
 };
 
@@ -137,8 +138,10 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
   }));
 
   const status: readonly StatusItem[] = [
+    { id: 'level', label: t('graph.level.current'), value: props.levelName },
     { id: 'nodes', label: t('graph.status.nodes'), value: String(props.nodeCount) },
     { id: 'edges', label: t('graph.status.edges'), value: String(props.edgeCount) },
+    { id: 'links', label: t('graph.status.links'), value: String(props.linkCount) },
   ];
 
   return (
@@ -302,14 +305,18 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
           </Button>
         </div>
 
-        <AxisFields
-          axis={props.axis}
-          onPoint={props.onAxisPoint}
-          onAdd={props.onAxisAdd}
-          onRemove={props.onAxisRemove}
-          onDraw={props.onAxisDraw}
-          report={props.axisReport}
-        />
+        {props.tool === 'axis' && (
+          <AxisFields
+            axis={props.axis}
+            onPoint={props.onAxisPoint}
+            onAdd={props.onAxisAdd}
+            onRemove={props.onAxisRemove}
+            onDraw={props.onAxisDraw}
+            report={props.axisReport}
+          />
+        )}
+
+        {props.tool === 'vertical_link' && <VerticalLinkFields {...props.verticalLink} />}
 
         <StatusBar items={status} />
       </div>
@@ -325,70 +332,6 @@ function directionKey(direction: EdgeDirection): `graph.edge.direction.${EdgeDir
   return `graph.edge.direction.${direction}`;
 }
 
-/**
- * M4 (partie M) — l'axe de circulation, saisi point par point.
- *
- * L'action est refusée sous deux points : un axe sans segment ne trace rien,
- * et laisser presser un bouton qui ne fera rien est pire que de le refuser en
- * le disant. Le compte rendu nomme ce que la passe a repris et ce qu'elle a
- * passé — « sans doublon » ne se voit pas autrement, le graphe ayant la même
- * allure qu'il ait doublé un nœud ou non.
- */
-function AxisFields({ axis, onPoint, onAdd, onRemove, onDraw, report }: {
-  readonly axis: readonly Point[];
-  readonly onPoint: (index: number, coordinate: 'x_m' | 'y_m', value: number | null) => void;
-  readonly onAdd: () => void;
-  readonly onRemove: () => void;
-  readonly onDraw: () => void;
-  readonly report: AxisReport | null;
-}): JSX.Element {
-  const { t } = useI18n();
-  return (
-    <fieldset style={{ border: 'none', margin: 0, padding: 0 }}>
-      <legend style={{ padding: 0, marginBottom: SPACE.sm }}>{t('graph.axis.title')}</legend>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm, alignItems: 'flex-end' }}>
-        {axis.map((point, index) => (
-          <div key={`axis-${String(index)}`} style={{ display: 'flex', gap: SPACE.sm }}>
-            <NumericField
-              label={t('graph.axis.point_x', { n: index + 1 })}
-              unit={t('unit.metre')}
-              value={point.x_m}
-              step={0.001}
-              onChange={value => { onPoint(index, 'x_m', value); }}
-            />
-            <NumericField
-              label={t('graph.axis.point_y', { n: index + 1 })}
-              unit={t('unit.metre')}
-              value={point.y_m}
-              step={0.001}
-              onChange={value => { onPoint(index, 'y_m', value); }}
-            />
-          </div>
-        ))}
-      </div>
-      <p style={{ margin: `${SPACE.sm} 0 0`, color: 'var(--text-muted)' }}>
-        {t('graph.axis.hint')}
-      </p>
-      <div style={{ display: 'flex', gap: SPACE.sm, marginTop: SPACE.sm }}>
-        <Button rank="secondary" onClick={onAdd}>{t('graph.axis.add')}</Button>
-        <Button rank="secondary" onClick={onRemove} disabled={axis.length <= 2}>
-          {t('graph.axis.remove')}
-        </Button>
-        <Button rank="primary" onClick={onDraw} disabled={axis.length < 2}>
-          {t('graph.axis.draw')}
-        </Button>
-      </div>
-      {report !== null && (
-        <div style={{ marginTop: SPACE.sm }}>
-          <StateBanner
-            severity="info"
-            message={t('graph.axis.done', {
-              nodes: report.nodes, edges: report.edges,
-              reused: report.reused, skipped: report.skipped,
-            })}
-          />
-        </div>
-      )}
-    </fieldset>
-  );
-}
+export type { GraphTool } from '../state/graph-shortcuts.js';
+export { GRAPH_TOOLS } from '../state/graph-shortcuts.js';
+export type { AxisReport } from './AxisFields.js';

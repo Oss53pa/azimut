@@ -19,6 +19,12 @@ export const ERROR_CATALOG = {
   'GRAPH.DISCONNECTED':                     { severity: 'blocking', description: 'Graphe non connexe' },
   'GRAPH.DEAD_END_UNJUSTIFIED':             { severity: 'warning',  description: 'Impasse sans destination ni justification' },
   'GRAPH.VERTICAL_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre niveaux sans liaison verticale' },
+  // M4 (partie M), outil « Liaison verticale » : « Relie deux nœuds de
+  // niveaux différents. » Deux nœuds d'un même niveau font une arête
+  // ordinaire, et la liaison qu'on lui adjoindrait n'est rattrapée par
+  // aucun contrôle : QC-12 écarte les liaisons dont les nœuds partagent
+  // un niveau.
+  'GRAPH.VERTICAL_LINK_SAME_LEVEL':         { severity: 'blocking', description: 'Liaison verticale entre deux nœuds d’un même niveau' },
   // Complément atelier, QC-12 : la liaison ne tombe pas au même point d'un
   // niveau à l'autre, quand P5 (complément atelier) veut qu'elle y tombe.
   'GRAPH.VERTICAL_LINK_MISALIGNED':         { severity: 'blocking', description: 'Liaison verticale décalée entre deux niveaux' },
@@ -26,6 +32,12 @@ export const ERROR_CATALOG = {
   // atteignable depuis toutes, et le sens de circulation y entre.
   'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'blocking', description: 'Destination que toutes les entrées n’atteignent pas' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
+  // T-1.5 : « Un bâtiment à accès indépendant sans liaison est signalé,
+  // pas refusé. » Distinct de `BUILDING_ISOLATED`, qui vise le bâtiment
+  // sans liaison *et* sans accès propre : celui-ci a une porte, il n'est
+  // pas inatteignable, et le signaler bloquant refuserait un site
+  // parfaitement réel.
+  'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY': { severity: 'warning',  description: 'Bâtiment relié au site par son seul accès indépendant' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
   'GRAPH.PROFILE_NOT_ACCESSIBLE':           { severity: 'blocking', description: 'Profil non accessible pour audit d’accessibilité' },
@@ -175,6 +187,7 @@ export const ERROR_CATALOG = {
   'DATA.COUNTRY_REQUIRED':                  { severity: 'blocking', description: 'Pays requis' },
   'DATA.LANG_REQUIRED':                     { severity: 'blocking', description: 'Au moins une langue active requise' },
   'DATA.CODE_DUPLICATE':                    { severity: 'blocking', description: 'Deux cellules portent le même code sur un niveau' },
+  'DATA.CAPACITY_INVALID':                  { severity: 'blocking', description: 'Capacité renseignée non entière ou inférieure à un' },
 
   // ── WAYFIND (H12) ─────────────────────────────────────────
   'WAYFIND.NAMING_COLLISION':               { severity: 'blocking', description: 'Deux entités portent le même nom d’orientation' },

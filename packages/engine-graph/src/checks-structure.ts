@@ -147,9 +147,23 @@ export function multiLevelWithoutAccessibleVlFindings(
 }
 
 /**
- * GRAPH.BUILDING_ISOLATED — a building that has neither a link to the rest
- * of the site (an edge whose two endpoints resolve to two different
- * buildings) nor its own independent access. Warning per D2.2.
+ * Un bâtiment que rien ne relie au reste du site, et ce qu'on en dit.
+ *
+ * « Relié » se lit sur le graphe : une arête dont les deux extrémités
+ * retombent, par leur niveau, sur deux bâtiments différents. Aucune ligne de
+ * `building_link` n'est requise pour cela — la table existe, rien ne l'écrit
+ * encore, et fonder le constat sur elle ferait passer tout site pour isolé.
+ *
+ * Deux codes selon ce que le bâtiment a par ailleurs :
+ *
+ *  · `GRAPH.BUILDING_ISOLATED` — ni liaison, ni accès indépendant. Le
+ *    bâtiment est inatteignable.
+ *  · `GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY` — pas de liaison, mais un
+ *    accès propre. T-1.5 : « signalé, pas refusé ». C'est un relevé possible,
+ *    pas une faute.
+ *
+ * Les deux sont des avertissements : ni l'un ni l'autre n'interdit de
+ * continuer.
  */
 export function buildingIsolatedFindings(
   site: GraphScope,
@@ -180,16 +194,40 @@ export function buildingIsolatedFindings(
   const sortedBuildings = [...site.buildings].sort((a, b) =>
     a.id.localeCompare(b.id),
   );
+  // Un site d'un seul bâtiment n'a pas de « reste du site » auquel se relier.
+  // Signaler son unique bâtiment ferait porter un avertissement à tout site
+  // simple, et un avertissement que tout site porte ne signale plus rien.
+  const severalBuildings = site.buildings.length > 1;
+
   for (const building of sortedBuildings) {
-    if (building.independent_access) continue;
     if (linkedBuildings.has(building.id)) continue;
-    findings.push({
-      code: 'GRAPH.BUILDING_ISOLATED',
-      severity: 'warning',
-      entity: { kind: 'building', id: building.id },
-      params: { name: building.name },
-      ruleRef: null,
-    });
+    if (building.independent_access && !severalBuildings) continue;
+    // T-1.5 : « Un bâtiment à accès indépendant sans liaison est signalé, pas
+    // refusé. » Il ne se taisait pas à demi, il se taisait tout court : le
+    // bâtiment à accès propre était écarté avant tout constat, et un site
+    // dont un bâtiment n'était relié à rien passait sans un mot dès lors que
+    // la case était cochée.
+    //
+    // Deux codes plutôt qu'un, parce que ce ne sont pas les mêmes faits. Sans
+    // accès propre et sans liaison, le bâtiment est inatteignable. Avec un
+    // accès propre, il est atteignable depuis la voie publique et l'absence
+    // de liaison peut être le relevé exact d'un site réel : le signaler dit
+    // « vérifiez », non « corrigez ».
+    findings.push(building.independent_access
+      ? {
+        code: 'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY',
+        severity: 'warning',
+        entity: { kind: 'building', id: building.id },
+        params: { name: building.name },
+        ruleRef: null,
+      }
+      : {
+        code: 'GRAPH.BUILDING_ISOLATED',
+        severity: 'warning',
+        entity: { kind: 'building', id: building.id },
+        params: { name: building.name },
+        ruleRef: null,
+      });
   }
   return findings;
 }

@@ -54,6 +54,30 @@ function readFootprint(row: StoredRow): Footprint | null {
   };
 }
 
+/**
+ * Les niveaux que la session porte, ordonnés.
+ *
+ * T-1.5 : une liaison verticale relie deux niveaux, et l'atelier n'en
+ * connaissait qu'un — celui du chemin. Le magasin en porte pourtant autant
+ * que le site en compte, la session chargeant le site entier. Ce lecteur les
+ * rend, pour que l'écran désigne l'autre extrémité au lieu de la supposer.
+ *
+ * L'ordre est celui du bâtiment puis du rang, l'identifiant départageant :
+ * deux lectures d'un même magasin doivent rendre la même liste (A9).
+ */
+export function levelsOfSession(session: SessionState): {
+  readonly levels: readonly Level[];
+  readonly unreadable: readonly string[];
+} {
+  const unreadable: string[] = [];
+  const levels = collect(session, 'level', readLevel, unreadable);
+  levels.sort((a, b) =>
+    a.building_id.localeCompare(b.building_id)
+    || a.ordinal - b.ordinal
+    || a.id.localeCompare(b.id));
+  return { levels, unreadable };
+}
+
 function readLevel(row: StoredRow): Level | null {
   const buildingId = text(row.values, 'building_id');
   const name = text(row.values, 'name');

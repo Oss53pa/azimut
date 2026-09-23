@@ -26,6 +26,15 @@ async function setPoint(page: Page, n: number, x: string, y: string): Promise<vo
 test.describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(GRAPH);
+    // M4 (partie M) donne une touche à chaque outil, et les champs de l'axe
+    // n'appartiennent qu'à l'outil « Axe de circulation ». La frappe vaut
+    // preuve que la table des touches est liée : elle ne l'était pas, et la
+    // barre annonçait `X` sans que rien ne l'écoute.
+    await page.locator('[role="toolbar"] button').first().waitFor({ state: 'attached' });
+    await page.keyboard.press('x');
+    await expect(
+      page.getByRole('button', { name: /Axe de circulation|Circulation axis/ }),
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 
   test('une passe produit les nœuds et les arêtes attendus', async ({ page }) => {

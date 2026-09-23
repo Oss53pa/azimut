@@ -1,5 +1,6 @@
 import { type JSX, useCallback, useEffect, useMemo } from 'react';
-import { useCurrentRoute } from './useCurrentRoute.js';
+import { useCurrentRoute, navigateTo } from './useCurrentRoute.js';
+import { buildPath } from './routes.js';
 import type { Route } from './routes.js';
 import { useTrancheSession } from './useTrancheSession.js';
 import type { TrancheSession } from './useTrancheSession.js';
@@ -7,6 +8,9 @@ import { Shell } from '../components/Shell.js';
 import { StateBanner } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
+import { LevelBar } from '../screens/LevelBar.js';
+import { levelsOfSession } from '../state/session-scope.js';
+import { buildingNames } from '../state/session-buildings.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
@@ -109,6 +113,21 @@ function TrancheWorkspace({ route }: {
       {session.loadFailed && (
         <StateBanner severity="blocking" message={t('session.load.failed')} />
       )}
+      {/*
+        T-1.5 — les niveaux du site, et le passage de l'un à l'autre. Posé ici
+        et non dans un écran : les quatre écrans d'atelier portent sur un
+        niveau, et une barre par écran en ferait quatre à tenir d'accord.
+        L'écran de validation porte sur le site entier et n'en reçoit pas.
+      */}
+      {route.screen !== 'validation' && (
+        <LevelBar
+          levels={levelChoices(session, levelId)}
+          currentId={levelId}
+          onSelect={id => {
+            navigateTo(buildPath({ ...route, levelId: id }));
+          }}
+        />
+      )}
       {screenOf(route, session, levelId)}
       {resume !== null && (
         <ResumeSessionDialog
@@ -144,5 +163,29 @@ function screenOf(
   }
 }
 
-
-
+/**
+ * Les niveaux que la barre propose.
+ *
+ * Le bâtiment n'est nommé que si le site en porte plusieurs : sur un site à
+ * un seul bâtiment, le répéter à chaque niveau n'ajoute rien et allonge la
+ * barre. Le niveau courant figure toujours, même quand la session ne le
+ * porte pas — l'adresse en nomme un, et une barre qui ne le montrerait pas
+ * laisserait croire qu'on est ailleurs.
+ */
+function levelChoices(
+  session: TrancheSession,
+  currentId: string,
+): readonly { id: string; name: string; buildingName: string | null }[] {
+  const { levels } = levelsOfSession(session.state);
+  if (levels.length === 0) return [];
+  const names = buildingNames(session.state);
+  const several = names.size > 1;
+  const choices = levels.map(level => ({
+    id: level.id,
+    name: level.name,
+    buildingName: several ? names.get(level.building_id) ?? null : null,
+  }));
+  return choices.some(choice => choice.id === currentId)
+    ? choices
+    : [...choices, { id: currentId, name: currentId, buildingName: null }];
+}

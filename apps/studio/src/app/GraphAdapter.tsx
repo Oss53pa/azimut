@@ -1,12 +1,16 @@
-import { type JSX, useState } from 'react';
+import { type JSX, useEffect, useState } from 'react';
 import type { Finding, NodeKind, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { acceptNode, acceptEdge } from '../state/graph-input.js';
+import type { EdgeRemedy } from '../state/graph-input.js';
 import { acceptAxis } from '../state/graph-axis.js';
 import { graphCommands } from '../state/graph-commands.js';
-import { point, structured } from '../state/row-values.js';
+import { point, structured, text } from '../state/row-values.js';
 import { readSessionGraph } from '../state/session-graph.js';
+import { levelsOfSession } from '../state/session-scope.js';
+import { graphToolForKey } from '../state/graph-shortcuts.js';
+import { useVerticalLinkTool } from './useVerticalLinkTool.js';
 import { updateNodeCommands, updateEdgeCommands } from '../state/graph-update-commands.js';
 import { GraphView } from '../viewport/GraphView.js';
 import type { GraphSelection } from '../viewport/GraphView.js';
@@ -64,8 +68,40 @@ export function GraphScreenAdapter({ session, levelId }: {
   // depuis le graphe à la sélection, puis vit sa vie jusqu'à l'application.
   const [chosen, setChosen] = useState<GraphSelection | null>(null);
   const [dirty, setDirty] = useState(false);
+  // M4 (partie M) : la correction que le refus propose. Elle était calculée
+  // par `acceptEdge` et jetée, l'écran recevant `null` en toute circonstance.
+  const [remedy, setRemedy] = useState<EdgeRemedy | null>(null);
 
   const graph = readSessionGraph(session.state);
+  // T-1.5 — la session porte tous les niveaux du site, et non le seul niveau
+  // du chemin. L'outil de liaison verticale a besoin de l'autre extrémité :
+  // sans cette lecture il n'aurait rien à relier, et il ne pouvait donc pas
+  // être construit.
+  const { levels } = levelsOfSession(session.state);
+  const level = levels.find(l => l.id === levelId);
+  const link = useVerticalLinkTool(session);
+
+  /**
+   * M4 (partie M) donne une touche à chacun des quatre outils. La table
+   * existait en donnée et n'était liée à rien : presser `L` ne faisait rien
+   * alors que la barre annonçait le contraire.
+   *
+   * Une touche nue ne s'applique pas dans un champ de saisie, où elle est un
+   * caractère.
+   */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
+      const picked = graphToolForKey(event.key);
+      if (picked === null) return;
+      event.preventDefault();
+      setTool(picked);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); };
+  }, []);
 
   function select(picked: GraphSelection): void {
     setChosen(picked);
@@ -125,8 +161,32 @@ export function GraphScreenAdapter({ session, levelId }: {
     })();
   }
 
-  const nodes: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'node');
-  const edges: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'edge');
+  /**
+   * M4 (partie M) porte sur un niveau : son chemin le nomme, et la zone de
+   * travail est un plan.
+   *
+   * Les lignes n'étaient pas filtrées. Tant que la session n'en portait qu'un,
+   * cela ne se voyait pas ; dès qu'elle en porte deux, l'écran mêlait les
+   * nœuds des deux étages, l'outil « Arête » les reliait deux à deux — donc
+   * entre niveaux, donc en refus — et le tracé d'axe reprenait comme
+   * coïncident un nœud situé un étage plus haut.
+   */
+  const nodes: readonly StoredRow[] = session.state.rows.filter(
+    r => r.table === 'node' && text(r.values, 'level_id') === levelId,
+  );
+  const onLevel = new Set(nodes.map(row => row.id));
+  // Une arête ne porte pas de niveau : elle en hérite de ses extrémités. Celle
+  // qui en relie deux ne se dessine dans le plan d'aucun des deux ; c'est la
+  // liaison verticale qui la porte, et la barre d'état la compte.
+  const edges: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'edge'
+    && onLevel.has(String(r.values['from_node_id'] ?? ''))
+    && onLevel.has(String(r.values['to_node_id'] ?? '')));
+  const levelNodes = graph.nodes.filter(node => node.level_id === levelId);
+  const levelEdges = graph.edges.filter(edge =>
+    onLevel.has(edge.from_node_id) && onLevel.has(edge.to_node_id));
+  const levelLinks = graph.vertical_links.filter(vlink =>
+    graph.edges.some(edge => edge.id === vlink.edge_id
+      && (onLevel.has(edge.from_node_id) || onLevel.has(edge.to_node_id))));
 
   return (
     <GraphScreen
@@ -150,11 +210,22 @@ export function GraphScreenAdapter({ session, levelId }: {
         setDirty(true);
         setSelection(s => (s?.kind === 'edge' ? { ...s, evacuationRoute } : s));
       }}
-      findings={findings}
-      remedy={null}
-      onApplyRemedy={() => { /* la liaison verticale entre avec le module 02 */ }}
+      findings={[...findings, ...link.findings]}
+      remedy={remedy}
+      // M4 (partie M) : « Refus, avec proposition de créer la liaison. » La
+      // proposition ouvre l'outil qui la crée, et ne se contente pas de la
+      // nommer.
+      onApplyRemedy={() => { setTool('vertical_link'); setRemedy(null); }}
+      verticalLink={link.fields({
+        levelId,
+        levels,
+        graph,
+        fromNodeId: chosen?.kind === 'node' ? chosen.id : null,
+      })}
+      levelName={level?.name ?? levelId}
       nodeCount={nodes.length}
       edgeCount={edges.length}
+      linkCount={levelLinks.length}
       nextNodeKind={nextNodeKind}
       onNextNodeKind={setNextNodeKind}
       axis={axis}
@@ -273,6 +344,7 @@ export function GraphScreenAdapter({ session, levelId }: {
           const refused = drawn.find(d => !d.edge.ok);
           if (refused !== undefined && !refused.edge.ok) {
             setFindings(refused.edge.findings);
+            setRemedy(refused.edge.remedy ?? null);
             return;
           }
           const commands = graphCommands(
@@ -295,8 +367,8 @@ export function GraphScreenAdapter({ session, levelId }: {
         rend, depuis l'encodage en donnée.
       */}
       <GraphView
-        nodes={graph.nodes}
-        edges={graph.edges}
+        nodes={levelNodes}
+        edges={levelEdges}
         selected={chosen}
         onSelect={select}
       />
