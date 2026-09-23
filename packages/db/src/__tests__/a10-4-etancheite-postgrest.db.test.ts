@@ -38,6 +38,22 @@ const dsn = process.env['AZIMUT_TEST_DATABASE_URL'];
 const binary = process.env['AZIMUT_TEST_POSTGREST'] ?? '';
 const runnable = dsn !== undefined && binary !== '' && existsSync(binary);
 
+/**
+ * La chaîne déclare qu'elle doit exécuter cette suite.
+ *
+ * Sans cette déclaration, la suite se saute quand PostgREST manque, et un
+ * essai qu'aucune chaîne n'exécute n'existe pas : la chaîne d'A13.2 rendait
+ * zéro, la suite comptait huit essais sautés, et le cloisonnement réel n'était
+ * éprouvé nulle part. Un saut est légitime sur un poste qui n'a pas le
+ * binaire ; il ne l'est pas dans une chaîne dont c'est le travail.
+ *
+ * La variable dit l'intention plutôt que de la deviner d'une variable
+ * d'environnement de l'hébergeur : `CI` est posée par des outils qui n'ont pas
+ * monté de base, et en faire le critère ferait échouer des chaînes qui n'ont
+ * jamais prétendu exécuter celle-ci.
+ */
+const required = (process.env['AZIMUT_REQUIRE_POSTGREST'] ?? '') !== '';
+
 const ORG_A = '0a000000-0000-4000-8000-000000000001';
 const ORG_B = '0b000000-0000-4000-8000-000000000001';
 const ALICE = '0a000000-0000-4000-8000-0000000000a1';
@@ -215,5 +231,24 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
     } else {
       expect(response.status).toBeGreaterThanOrEqual(400);
     }
+  });
+});
+
+/**
+ * Le garde de la chaîne. Il ne prouve rien du cloisonnement : il prouve que ce
+ * qui le prouve a bien été exécuté.
+ */
+describe.runIf(required)('A10.4 — la chaîne exécute bien cette suite', () => {
+  it('PostgREST est disponible là où la chaîne le déclare requis', () => {
+    expect(
+      runnable,
+      'AZIMUT_REQUIRE_POSTGREST est posée, mais la suite d’étanchéité ne peut '
+      + 'pas s’exécuter.\n'
+      + `AZIMUT_TEST_DATABASE_URL : ${dsn === undefined ? 'absente' : 'posée'}\n`
+      + `AZIMUT_TEST_POSTGREST : ${binary === '' ? 'absente' : binary}\n`
+      + `Binaire présent : ${binary !== '' && existsSync(binary) ? 'oui' : 'non'}\n`
+      + 'Sans elle, la chaîne rendrait vert sans avoir éprouvé le cloisonnement '
+      + 'par le chemin de l’application.',
+    ).toBe(true);
   });
 });

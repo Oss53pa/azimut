@@ -183,3 +183,10 @@ AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:5433/azimut' \
 AZIMUT_TEST_POSTGREST=/chemin/vers/postgrest \
 pnpm test:rls
 ```
+
+Sans `AZIMUT_TEST_POSTGREST`, la suite d'étanchéité se saute : c'est la
+tolérance d'un poste qui n'a pas le binaire, et elle s'arrête là. Une chaîne
+dont c'est le travail pose en plus `AZIMUT_REQUIRE_POSTGREST=1`, et un binaire
+manquant la fait alors échouer au lieu de la sauter — un essai qu'aucune chaîne
+n'exécute n'existe pas. La chaîne d'A13.2 le pose, et installe PostgREST
+12.2.3, version figée et empreinte vérifiée.
