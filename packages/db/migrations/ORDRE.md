@@ -132,8 +132,16 @@ for f in packages/db/migrations/0*.up.sql; do
   psql -p 54332 -U azimut -d azimut -v ON_ERROR_STOP=1 -q -f "$f"
 done
 
+DATABASE_URL='postgres://azimut@127.0.0.1:54332/azimut' pnpm seed:reference
+
 AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:54332/azimut' pnpm test:db
 ```
+
+`pnpm seed:reference` verse les référentiels globaux depuis leurs fichiers —
+aujourd'hui les pays de Q9. Il s'exécute dans tous les environnements, à chaque
+déploiement, à la différence de `db:reset` qui refuse hors du local : un
+référentiel absent en production ferait refuser des créations de site pour une
+raison qui n'a rien de métier.
 
 `pnpm test:rls` lance la même suite : c'est elle que ce script annonçait sans
 l'avoir.
