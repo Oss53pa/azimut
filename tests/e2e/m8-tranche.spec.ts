@@ -28,6 +28,43 @@ const PLAN_FILE = {
 };
 
 /**
+ * Les quatre nœuds du parcours, et leur type.
+ *
+ * Une entrée, deux carrefours, un accès à une destination. Ce n'est pas une
+ * décoration : sans entrée, `validateGraph` lève `GRAPH.NO_ENTRANCE`, et une
+ * extrémité de type carrefour lève `GRAPH.DEAD_END_UNJUSTIFIED`. Le parcours
+ * posait quatre carrefours parce que l'écran ne savait poser que cela ; il
+ * pose maintenant ce qu'un opérateur pose, et le graphe est cohérent.
+ */
+const CHAIN_NODE_KINDS = [
+  'entrance', 'junction', 'junction', 'destination_access',
+] as const;
+
+/**
+ * L'ordre des options, celui de `NODE_KINDS` (A5.3). Il est repris ici parce
+ * qu'un essai de bout en bout ne lit pas le code de l'application : il compte
+ * les crans que l'opérateur descend, et un décalage entre les deux listes est
+ * précisément ce que l'essai doit faire échouer.
+ */
+const NODE_KIND_ORDER = [
+  'entrance', 'junction', 'landing', 'elevator', 'stair', 'escalator',
+  'emergency_exit', 'restroom', 'security_post', 'information_point',
+  'destination_access',
+] as const;
+
+type NodeKindValue = (typeof NODE_KIND_ORDER)[number];
+
+/** Le sélecteur porte la valeur du modèle, identique dans les deux langues. */
+const NEXT_NODE_KIND = /Type du prochain nœud|Type of the next node/;
+
+async function placeChainNodes(page: Page): Promise<void> {
+  for (const kind of CHAIN_NODE_KINDS) {
+    await page.getByLabel(NEXT_NODE_KIND).selectOption(kind);
+    await page.getByRole('button', { name: /^Poser un nœud$|^Place a node$/ }).first().click();
+  }
+}
+
+/**
  * Le parcours de M8 (partie M) critère 1, au pointeur.
  *
  * « Un opérateur part d'un site vide, importe un plan, le cale, trace trois
@@ -53,9 +90,7 @@ async function runChain(page: Page): Promise<void> {
 
   // Poser quatre nœuds, puis tracer les arêtes.
   await page.goto(GRAPH);
-  for (let i = 0; i < 4; i += 1) {
-    await page.getByRole('button', { name: /^Poser un nœud$|^Place a node$/ }).first().click();
-  }
+  await placeChainNodes(page);
   await expect(page.getByText(/Nœuds\s*4|Nodes\s*4/)).toBeVisible();
   await page.getByRole('button', { name: /Tracer les arêtes|Draw the edges/ }).click();
   await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
@@ -69,6 +104,32 @@ async function runChain(page: Page): Promise<void> {
 test.describe('M8 (partie M) critère 1 — la chaîne fonctionne', () => {
   test('un site vide devient un graphe validé', async ({ page }) => {
     await runChain(page);
+  });
+
+  /**
+   * Le contre-exemple, qu'C1 exige de toute détection : une validation qui ne
+   * refuse rien ne prouve rien. L'écran a longtemps affiché « aucune anomalie »
+   * sur n'importe quel graphe, parce qu'il ne faisait pas tourner le moteur.
+   *
+   * Une seule altération du parcours : les quatre nœuds sont des carrefours,
+   * donc le graphe n'a pas d'entrée. `validateGraph` lève `GRAPH.NO_ENTRANCE`,
+   * et l'écran doit le montrer plutôt que de conclure au succès.
+   */
+  test('un graphe sans entrée est refusé, et l’écran le nomme', async ({ page }) => {
+    await page.goto(GRAPH);
+    for (let i = 0; i < CHAIN_NODE_KINDS.length; i += 1) {
+      await page.getByLabel(NEXT_NODE_KIND).selectOption('junction');
+      await page.getByRole('button', { name: /^Poser un nœud$|^Place a node$/ }).first().click();
+    }
+    await page.getByRole('button', { name: /Tracer les arêtes|Draw the edges/ }).click();
+    await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
+
+    await page.goto(VALIDATION);
+    await page.getByRole('button', { name: /Lancer la validation|Run validation/ }).first().click();
+    await expect(
+      page.getByText(/Aucune entrée dans le graphe|No entrance in the graph/),
+    ).toBeVisible();
+    await expect(page.getByText(/Aucune anomalie|No anomaly/)).toHaveCount(0);
   });
 });
 
@@ -93,7 +154,12 @@ test.describe('M8 (partie M) critère 2 — le même parcours au clavier seul', 
     await expect(page.getByText(/Plan calé|Plan calibrated/)).toBeVisible();
 
     await page.goto(GRAPH);
-    for (let i = 0; i < 4; i += 1) {
+    // M4 (partie M) critère 4 : « Le graphe complet est saisissable au clavier
+    // seul. » Le type du nœud en fait partie — un sélecteur qu'on ne pourrait
+    // atteindre qu'à la souris rendrait le parcours au clavier incomplet sans
+    // qu'aucun essai le dise.
+    for (const kind of CHAIN_NODE_KINDS) {
+      await chooseNodeKindByKeyboard(page, kind);
       await pressByKeyboard(page, /^Poser un nœud$|^Place a node$/);
     }
     await expect(page.getByText(/Nœuds\s*4|Nodes\s*4/)).toBeVisible();
@@ -102,6 +168,33 @@ test.describe('M8 (partie M) critère 2 — le même parcours au clavier seul', 
     await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
   });
 });
+
+/**
+ * Tabule jusqu'au sélecteur de type, puis le règle aux flèches.
+ *
+ * `Home` remonte à la première option, et chaque `ArrowDown` descend d'un
+ * cran : c'est le comportement natif d'une liste déroulante, et c'est ce
+ * qu'un opérateur au clavier fait. `selectOption` de Playwright ne passerait
+ * pas par le clavier, et prouverait autre chose.
+ */
+async function chooseNodeKindByKeyboard(page: Page, kind: NodeKindValue): Promise<void> {
+  for (let i = 0; i < 80; i += 1) {
+    const reached = await page.evaluate(() => {
+      const active = document.activeElement;
+      return active instanceof HTMLSelectElement
+        && (active.labels?.[0]?.textContent ?? '').includes('prochain');
+    });
+    if (reached) {
+      await page.keyboard.press('Home');
+      for (let step = 0; step < NODE_KIND_ORDER.indexOf(kind); step += 1) {
+        await page.keyboard.press('ArrowDown');
+      }
+      return;
+    }
+    await page.keyboard.press('Tab');
+  }
+  throw new Error('sélecteur de type non atteint au clavier');
+}
 
 /** Tabule jusqu'au bouton nommé, puis le presse à la barre d'espace. */
 async function pressByKeyboard(page: Page, name: RegExp): Promise<void> {
@@ -245,9 +338,7 @@ test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et 
 
     await timed('saisie du graphe', async () => {
       await page.goto(GRAPH);
-      for (let i = 0; i < 4; i += 1) {
-        await page.getByRole('button', { name: /^Poser un nœud$|^Place a node$/ }).first().click();
-      }
+      await placeChainNodes(page);
       await page.getByRole('button', { name: /Tracer les arêtes|Draw the edges/ }).click();
       await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
     });

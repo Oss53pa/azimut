@@ -70,9 +70,19 @@ export type GraphScreenProps = {
   readonly edgeCount: number;
   /**
    * M4 (partie M), outil « Nœud » : « Le type se choisit avant le geste,
-   * jamais après. » Le geste se fait au pointeur dans la zone de travail, et
-   * au clavier par cette action — E6.2 : « Toute opération réalisable au
-   * pointeur l'est au clavier, y compris le dessin. »
+   * jamais après. » Le type que portera le prochain nœud posé, et le moyen de
+   * le changer. Il était absent : l'écran posait des carrefours, et le type ne
+   * se choisissait qu'après coup dans le panneau de propriétés, c'est-à-dire
+   * exactement ce que la règle écarte. Un site entier pouvait ainsi être saisi
+   * sans une entrée, et la validation le refusait sans que l'écran ait jamais
+   * offert de faire autrement.
+   */
+  readonly nextNodeKind: NodeKind;
+  readonly onNextNodeKind: (kind: NodeKind) => void;
+  /**
+   * Le geste se fait au pointeur dans la zone de travail, et au clavier par
+   * cette action — E6.2 : « Toute opération réalisable au pointeur l'est au
+   * clavier, y compris le dessin. »
    */
   readonly onPlaceNode: () => void;
   /** Outil « Arête » : relie les nœuds posés, deux à deux. */
@@ -224,7 +234,15 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: SPACE.sm }}>
+        <div style={{ display: 'flex', gap: SPACE.sm, alignItems: 'flex-end' }}>
+          {/* M4 (partie M) : le type précède le geste, et se lit à côté de lui. */}
+          <SelectField
+            label={t('graph.node.kind.next')}
+            value={props.nextNodeKind}
+            options={NODE_KINDS.map(kind => ({ value: kind, label: t(nodeKindKey(kind)) }))}
+            onChange={value => { props.onNextNodeKind(value as NodeKind); }}
+            hint={t('graph.node.kind.next.hint')}
+          />
           <Button rank="primary" onClick={props.onPlaceNode}>
             {t('graph.action.place_node')}
           </Button>

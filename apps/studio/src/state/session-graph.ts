@@ -13,6 +13,7 @@
 import type { Edge, GraphNode, VerticalLink } from '@azimut/core-model';
 import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
+import { text, numeric, boolean, structured, point } from './row-values.js';
 
 export type SessionGraph = {
   readonly nodes: readonly GraphNode[];
@@ -22,54 +23,10 @@ export type SessionGraph = {
   readonly unreadable: readonly string[];
 };
 
-function text(values: Readonly<Record<string, unknown>>, key: string): string | null {
-  const value = values[key];
-  return typeof value === 'string' ? value : null;
-}
-
-function numeric(values: Readonly<Record<string, unknown>>, key: string): number | null {
-  const value = values[key];
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
-    return Number(value);
-  }
-  return null;
-}
-
-function boolean(values: Readonly<Record<string, unknown>>, key: string): boolean {
-  const value = values[key];
-  return value === true || value === 'true';
-}
-
-/**
- * Une position, quelle que soit la forme sous laquelle la ligne la porte.
- *
- * Deux origines écrivent dans ce magasin, et elles n'encodent pas de la même
- * façon : une commande porte la structure en JSON, parce que le chemin
- * d'écriture aplatit tout en texte ; un site rechargé depuis le dépôt la porte
- * déjà analysée. Refuser la seconde rendrait illisible tout nœud rouvert, et
- * l'empreinte du graphe porterait alors sur un graphe amputé.
- */
-function point(raw: unknown): { x_m: number; y_m: number } | null {
-  const parsed = typeof raw === 'string' ? parseJson(raw) : raw;
-  if (typeof parsed !== 'object' || parsed === null) return null;
-  const { x_m, y_m } = parsed as { x_m?: unknown; y_m?: unknown };
-  if (typeof x_m !== 'number' || typeof y_m !== 'number') return null;
-  return { x_m, y_m };
-}
-
-function parseJson(raw: string): unknown {
-  try {
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
-}
-
 function readNode(row: StoredRow): GraphNode | null {
   const kind = text(row.values, 'kind');
   const levelId = text(row.values, 'level_id');
-  const position = point(row.values['position']);
+  const position = point(structured(row.values, 'position'));
   if (kind === null || levelId === null || position === null) return null;
   return {
     id: row.id,

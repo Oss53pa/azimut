@@ -13,9 +13,9 @@ import { appSink } from '../state/app-sink.js';
 import { sessionFromSite } from '../state/session-from-site.js';
 import { appRepository, isRepositoryError } from '../data/index.js';
 import {
-  PlanScreenAdapter, FootprintsScreenAdapter,
-  GraphScreenAdapter, ValidationScreenAdapter,
+  PlanScreenAdapter, FootprintsScreenAdapter, GraphScreenAdapter,
 } from './workshop-adapters.js';
+import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 
 /**
