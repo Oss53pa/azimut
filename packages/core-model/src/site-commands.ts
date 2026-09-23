@@ -31,6 +31,38 @@ export type CommandOperation = (typeof COMMAND_OPERATIONS)[number];
 /** Une valeur de colonne telle qu'elle voyage dans une commande. */
 export type ColumnValue = string | number | boolean | null;
 
+/**
+ * Rend une liste sous la forme qu'attend une colonne de tableau.
+ *
+ * Une commande ne transporte que des valeurs simples, et les deux chemins
+ * d'écriture — la fonction `apply_commands` pour le poste, `applyCommands`
+ * pour le service — aplatissent tout en texte avant d'atteindre la base. Une
+ * liste doit donc voyager dans l'encodage de sa colonne, comme une structure
+ * voyage déjà en JSON pour une colonne `jsonb`.
+ *
+ * Le défaut que cette fonction ferme : `site.active_langs` est une colonne de
+ * tableau, et la création d'un site y écrivait du JSON. La base refusait
+ * chaque création — « malformed array literal » — et rien ne le voyait, faute
+ * d'essai qui applique les commandes du formulaire contre une base réelle.
+ *
+ * Les éléments sont rendus dans l'ordre reçu. Le tri, quand il compte, est la
+ * décision de l'appelant et non de l'encodage.
+ */
+export function listValue(values: readonly string[]): string {
+  return `{${values.map(quoteElement).join(',')}}`;
+}
+
+/**
+ * Un élément se cite dès qu'il pourrait être relu autrement : séparateur,
+ * accolade, guillemet, contre-oblique, espace de bord, chaîne vide, ou le mot
+ * `NULL` que la base lirait comme une absence.
+ */
+function quoteElement(value: string): string {
+  const plain = /^[^{}",\\\s]+$/.test(value) && value.toUpperCase() !== 'NULL';
+  if (plain) return value;
+  return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+}
+
 /** Les colonnes d'une ligne, par nom. */
 export type RowValues = Readonly<Record<string, ColumnValue>>;
 

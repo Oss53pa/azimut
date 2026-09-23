@@ -12,7 +12,7 @@
  * ensemble, sous un même groupe : un seul geste, une seule annulation.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand } from '@azimut/core-model';
+import { buildCommand, listValue } from '@azimut/core-model';
 
 /** M1 (partie M) : « requis, 2 à 120 caractères ». */
 export const SITE_NAME_MIN = 2;
@@ -141,7 +141,10 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         timezone: draft.timezone,
         rules_pack_id: draft.rulesPackId,
         legal_entity_id: draft.legalEntityId,
-        active_langs: JSON.stringify([...draft.activeLangs].sort()),
+        // `active_langs` est une colonne de tableau, pas une colonne `jsonb` :
+        // elle veut un littéral de tableau. Le JSON qui figurait ici faisait
+        // refuser chaque création par la base.
+        active_langs: listValue([...draft.activeLangs].sort()),
       },
     },
     {

@@ -205,6 +205,7 @@ export {
 export type { ModuleKey } from './module-ownership.js';
 export {
   COMMAND_OPERATIONS,
+  listValue,
   buildCommand,
   ownsTable,
   inverseCommand,
