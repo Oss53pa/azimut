@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { cpus, platform, release, totalmem } from 'node:os';
 
 /**
  * M8 (partie M) — critères d'acceptation de la tranche entière.
@@ -331,65 +332,146 @@ test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () =>
  * affiché puis perdu. Le relevé porte la date, la durée de chaque étape et le
  * total.
  */
-test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et consigné', () => {
-  test('le parcours est chronométré, étape par étape', async ({ page }) => {
-    const steps: { step: string; ms: number }[] = [];
 
-    async function timed(step: string, run: () => Promise<void>): Promise<void> {
-      const started = Date.now();
-      await run();
-      steps.push({ step, ms: Date.now() - started });
+/** D13 : « 5 exécutions, mesure retenue = médiane. » */
+const D13_RUNS = 5;
+
+const STEP_NAMES = [
+  'import et calage', 'tracé de trois cellules', 'saisie du graphe', 'validation',
+] as const;
+
+type Step = { step: string; ms: number };
+type Run = { steps: Step[]; total_ms: number };
+
+/**
+ * La médiane d'un échantillon. Sur un nombre pair de valeurs, la moyenne des
+ * deux valeurs centrales : c'est la définition, et l'écarter au profit de
+ * l'une des deux reviendrait à choisir.
+ */
+function median(values: readonly number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  if (sorted.length === 0) return 0;
+  if (sorted.length % 2 === 1) return sorted[middle] ?? 0;
+  return Math.round(((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2);
+}
+
+/**
+ * D13 : « caches vidés entre chaque exécution, condition déclarée dans le
+ * résultat. » Le travail du parcours vit dans le stockage local ; le laisser
+ * ferait démarrer l'exécution suivante sur un site déjà modélisé, et mesurer
+ * autre chose.
+ */
+async function clearBetweenRuns(page: Page): Promise<void> {
+  await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
+  await page.context().clearCookies();
+}
+
+/**
+ * D13 : « Machine de référence déclarée. » Relevée à l'exécution plutôt que
+ * saisie : une caractéristique écrite à la main cesse d'être vraie sans que
+ * personne le remarque.
+ */
+function machineOfRecord(): Record<string, string> {
+  return {
+    plateforme: `${platform()} ${release()}`,
+    processeur: cpus()[0]?.model ?? 'inconnu',
+    coeurs: String(cpus().length),
+    memoire_gio: (totalmem() / 1024 ** 3).toFixed(1),
+    node: process.version,
+  };
+}
+
+test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et consigné', () => {
+  test('le parcours est chronométré selon le protocole D13', async ({ page }) => {
+    const runs: Run[] = [];
+
+    for (let pass = 0; pass < D13_RUNS; pass += 1) {
+      const steps: Step[] = [];
+
+      async function timed(step: string, run: () => Promise<void>): Promise<void> {
+        const started = Date.now();
+        await run();
+        steps.push({ step, ms: Date.now() - started });
+      }
+
+      await timed('import et calage', async () => {
+        await page.goto(PLAN);
+        await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles(PLAN_FILE);
+        await placeCalibrationPoints(page);
+        await page.getByLabel(/Distance réelle|Real distance/).fill('20');
+        await page.getByLabel(/Azimut du nord|North azimuth/).fill('0');
+        await page.getByRole('button', { name: /^Valider le calage$|^Validate calibration$/ }).click();
+        await expect(page.getByText(/Plan calé|Plan calibrated/)).toBeVisible();
+      });
+
+      await timed('tracé de trois cellules', async () => {
+        await page.goto(FOOTPRINTS);
+        for (const code of ['B01', 'B02', 'B03']) {
+          await page.getByLabel(/Code de cellule|Unit code/).fill(code);
+          await page.getByRole('button', { name: /Fermer le polygone|Close polygon/ }).click();
+        }
+        await expect(page.getByText(/Empreintes\s*3|Footprints\s*3/)).toBeVisible();
+      });
+
+      await timed('saisie du graphe', async () => {
+        await page.goto(GRAPH);
+        await placeChainNodes(page);
+        await page.getByRole('button', { name: /Tracer les arêtes|Draw the edges/ }).click();
+        await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
+      });
+
+      await timed('validation', async () => {
+        await page.goto(VALIDATION);
+        await page.getByRole('button', { name: /Lancer la validation|Run validation/ }).first().click();
+        await expect(page.getByText(/Aucune anomalie|No anomaly/)).toBeVisible();
+      });
+
+      runs.push({ steps, total_ms: steps.reduce((sum, s) => sum + s.ms, 0) });
+      await clearBetweenRuns(page);
     }
 
-    await timed('import et calage', async () => {
-      await page.goto(PLAN);
-      await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles(PLAN_FILE);
-      await placeCalibrationPoints(page);
-      await page.getByLabel(/Distance réelle|Real distance/).fill('20');
-      await page.getByLabel(/Azimut du nord|North azimuth/).fill('0');
-      await page.getByRole('button', { name: /^Valider le calage$|^Validate calibration$/ }).click();
-      await expect(page.getByText(/Plan calé|Plan calibrated/)).toBeVisible();
-    });
-
-    await timed('tracé de trois cellules', async () => {
-      await page.goto(FOOTPRINTS);
-      for (const code of ['B01', 'B02', 'B03']) {
-        await page.getByLabel(/Code de cellule|Unit code/).fill(code);
-        await page.getByRole('button', { name: /Fermer le polygone|Close polygon/ }).click();
-      }
-      await expect(page.getByText(/Empreintes\s*3|Footprints\s*3/)).toBeVisible();
-    });
-
-    await timed('saisie du graphe', async () => {
-      await page.goto(GRAPH);
-      await placeChainNodes(page);
-      await page.getByRole('button', { name: /Tracer les arêtes|Draw the edges/ }).click();
-      await expect(page.getByText(/Arêtes\s*3|Edges\s*3/)).toBeVisible();
-    });
-
-    await timed('validation', async () => {
-      await page.goto(VALIDATION);
-      await page.getByRole('button', { name: /Lancer la validation|Run validation/ }).first().click();
-      await expect(page.getByText(/Aucune anomalie|No anomaly/)).toBeVisible();
-    });
-
-    const total = steps.reduce((sum, s) => sum + s.ms, 0);
+    // D13 : « 5 exécutions, mesure retenue = médiane. La première exécution
+    // est écartée. » L'écart porte sur la première, pas sur la plus lente :
+    // c'est la mise en température des caches qu'on retire, pas un résultat
+    // qui déplaît.
+    const retained = runs.slice(1);
     const record = {
-      mesure: 'M8 (partie M) critère 1 — parcours complet de la tranche',
+      mesure: 'M8 (partie M) critère 4 — temps du parcours complet de la tranche',
+      protocole: 'D13',
       releve_le: new Date().toISOString(),
-      etapes: steps,
-      total_ms: total,
+      machine: machineOfRecord(),
+      condition: 'Base amorcée. Entre deux exécutions : stockages local et de '
+        + 'session vidés, cache du navigateur vidé, contexte conservé. La '
+        + 'première exécution est écartée.',
+      site: 'site-m8, site vide. M8 critère 1 part d’un site vide : aucun site '
+        + 'de référence de C1 ne convient, ils portent tous une modélisation.',
+      executions: runs.map((run, index) => ({
+        rang: index + 1,
+        ecartee: index === 0,
+        total_ms: run.total_ms,
+        etapes: run.steps,
+      })),
+      mediane_ms: median(retained.map(r => r.total_ms)),
+      mediane_par_etape_ms: STEP_NAMES.map(step => ({
+        step,
+        ms: median(retained.map(r => r.steps.find(s => s.step === step)?.ms ?? 0)),
+      })),
       note: 'Parcours automatisé, non chronométré sur un opérateur réel. '
-        + 'K3.4 place cette seconde mesure dans les sessions d’essai sur usagers.',
+        + 'K3.4 place cette seconde mesure dans les sessions d’essai sur usagers. '
+        + 'Aucun seuil n’est révisé sur ce relevé : D13 réserve la révision au '
+        + 'premier site réel modélisé, et la trace.',
     };
 
     const path = resolve(HERE, '..', '..', 'docs', 'releve-m8-parcours.json');
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
 
-    // Le relevé existe, et chaque étape a duré quelque chose.
-    expect(steps.length).toBe(4);
-    for (const step of steps) expect(step.ms, step.step).toBeGreaterThan(0);
-    expect(total).toBeGreaterThan(0);
+    expect(runs).toHaveLength(D13_RUNS);
+    for (const run of runs) {
+      expect(run.steps).toHaveLength(STEP_NAMES.length);
+      for (const step of run.steps) expect(step.ms, step.step).toBeGreaterThan(0);
+    }
+    expect(record.mediane_ms).toBeGreaterThan(0);
   });
 });

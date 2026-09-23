@@ -1,8 +1,9 @@
 /**
  * M1 (partie M) — création d'un site.
  *
- * Le formulaire de M1 (partie M) porte quatre champs et quatre contrôles. Cette fonction
- * les tient, et rend les commandes à écrire — elle n'écrit pas elle-même :
+ * Le formulaire de M1 (partie M) porte six champs. Cette fonction tient les
+ * quatre contrôles bloquants — nom, pays, fuseau, langues — et rend les
+ * commandes à écrire — elle n'écrit pas elle-même :
  * M12.A2 veut que l'interface passe par les commandes du module
  * propriétaire, et le module 01 possède `site`, `building` et `level` (L3).
  *

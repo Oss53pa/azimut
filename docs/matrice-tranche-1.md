@@ -7,7 +7,8 @@ Règle de lecture : **une exigence sans preuve par un essai est absente**, même
 si du code paraît la couvrir. Un état « tenu » porte donc toujours le fichier
 d'essai qui le prouve.
 
-Établie le 22 septembre 2026. Révisée le 23 septembre 2026.
+Établie le 22 septembre 2026. Révisée le 23 septembre 2026, puis le même jour
+après la remise de la version en cours du cahier des charges consolidé.
 
 ---
 
@@ -89,9 +90,13 @@ module 02.
 ### M1 et M5
 
 M1 et M5 ne portent pas de critères numérotés. Leurs règles d'écran sont
-couvertes par M7 ci-dessous. Une réserve subsiste : le formulaire de création
-de M1 reste **bloqué** par la contradiction du §5 sur les champs requis ; il
-est monté et éprouvé, et lit le référentiel des pays de Q9.
+couvertes par M7 ci-dessous.
+
+Le formulaire de création de M1 n'est plus bloqué. La version en cours du
+cahier des charges lui donne six champs : nom, pays, fuseau requis, paquet de
+règles facultatif, langues actives, et entité juridique facultative affichée
+sous condition. C'est ce que l'écran porte, et ce que `site-creation.ts`
+contrôle. La contradiction sur les champs requis n'existe plus.
 
 L'écran M5 fait tourner `validateGraph`. Il portait auparavant, dans l'écran,
 une reprise à la main de deux des quatorze contrôles du moteur, et affichait
@@ -123,7 +128,7 @@ et le graphe sans entrée que l'écran refuse en nommant le code.
 | 1. La chaîne fonctionne, site vide → graphe validé | tenu | `m8-tranche.spec.ts` |
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
-| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — quatre étapes. Le parcours a coûté environ 200 ms de plus depuis que le type du nœud se choisit et que le moteur tourne réellement |
+| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — protocole D13 : cinq exécutions, la première écartée, **médiane 1 966 ms**, machine déclarée dans le relevé. Les quatre exécutions retenues vont de 1 951 à 2 060 ms |
 | 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` — 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
@@ -134,11 +139,9 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 
 | Sujet | Nature | Ce qu'il faut |
 | --- | --- | --- |
-| Rôle `marketing` | Contradiction du document : A5.1 énumère sept valeurs, sa phrase suivante en annonce six, A6.2 en définit six | Arbitrage. Ni ajouté, ni retiré |
-| Champs requis à la création d'un site | Contradiction du document : M1 donne quatre champs, Q5.2 et O4 en rendent deux autres obligatoires à la création, avec codes bloquants | Arbitrage. L'écran reste conforme à M1 |
-| `control_point.source_x_px`, `source_y_px` | Infraction à M01.S2, héritée d'une migration écrite d'après le complément « atelier » | Arbitrage : le retrait est une migration destructrice, A2.2 point 7 |
+| `control_point`, nom de la table | Infraction résiduelle à M01.S2. Les colonnes portent le nom d'A5.2 depuis la migration 0041 ; la table n'est pas l'une des deux que la règle autorise, et le nom `plan_calibration_point` est pris par la table conforme de la migration 0033 | Arbitrage. Fusionner perdrait `target_x_m`, `target_y_m` et `residual_m`, que A5.2 ne définit pas ; supprimer est destructeur. A2.2 points 2 et 7 |
+| Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
-| Fiabilité du relevé du critère 4 | Sept mesures du même parcours sur la machine de développement : 1651, 1868, 1990, 2075, 2206, 2340, 2804 ms, un rapport de 1 à 1,7. L'écart entre deux états du code est plus petit que celui de la machine à elle-même | Une mesure isolée ne vaut pas comme base de révision. K3.4 place la mesure sur opérateur réel dans les sessions d'essai sur usagers ; en attendant, ne rien conclure d'un relevé unique |
 | Panneau de propriétés de M4 | `selection` reste `null` : aucun geste ne le remplit. Libellé, position, largeur, pente, sens et cheminement d'évacuation sont spécifiés par M4 et inatteignables | Décision de périmètre : la sélection suppose la zone de travail, qui n'est pas construite |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
