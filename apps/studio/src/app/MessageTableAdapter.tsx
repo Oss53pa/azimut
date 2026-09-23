@@ -1,6 +1,7 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useTrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
+import { appSink } from '../state/app-sink.js';
 import { rowsOf } from '../state/session-store.js';
 import { readSchedule, scheduleVersions } from '../state/message-schedule-read.js';
 import {
@@ -37,7 +38,10 @@ export function MessageTableAdapter({ siteId, actor }: {
   /** R2 (partie R) — le rôle qui consulte. */
   readonly actor: ScheduleActor;
 }): JSX.Element {
-  const session = useTrancheSession({ orgId: ORG_OF_SESSION, siteId, levelId: '' });
+  // Même émetteur que l'atelier : réel si le dépôt est configuré, local sinon.
+  const remote = useMemo(() => appSink() ?? undefined, []);
+  const session = useTrancheSession(
+    { orgId: ORG_OF_SESSION, siteId, levelId: '' }, remote);
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);

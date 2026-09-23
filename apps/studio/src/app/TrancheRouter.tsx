@@ -1,4 +1,4 @@
-import { type JSX, useEffect } from 'react';
+import { type JSX, useEffect, useMemo } from 'react';
 import { useCurrentRoute } from './useCurrentRoute.js';
 import type { Route } from './routes.js';
 import { useTrancheSession } from './useTrancheSession.js';
@@ -7,6 +7,7 @@ import { Shell } from '../components/Shell.js';
 import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
+import { appSink } from '../state/app-sink.js';
 import {
   PlanScreenAdapter, FootprintsScreenAdapter,
   GraphScreenAdapter, ValidationScreenAdapter,
@@ -40,11 +41,15 @@ function TrancheWorkspace({ route }: {
   readonly route: WorkshopRoute;
 }): JSX.Element {
   const levelId = 'levelId' in route ? route.levelId : '';
+  // Le chemin d'écriture réel dès que le dépôt est configuré. Sans
+  // configuration, `appSink` rend `null` et la session retombe sur son
+  // émetteur local — le cas hors ligne de M8 (partie M) critère 3.
+  const remote = useMemo(() => appSink() ?? undefined, []);
   const session = useTrancheSession({
     orgId: ORG_OF_SESSION,
     siteId: route.siteId,
     levelId,
-  });
+  }, remote);
 
   // E5.4 — la reprise se pose par-dessus l'écran, qui reste visible derrière.
   // Cacher le travail pendant qu'on demande quoi en faire priverait
