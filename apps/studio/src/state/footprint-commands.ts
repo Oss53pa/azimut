@@ -51,8 +51,14 @@ export function createFootprintCommands(
         level_id: write.levelId,
         kind: row.footprint.kind,
         unit_code: row.footprint.unitCode,
-        category_id: row.footprint.categoryId,
         geometry: JSON.stringify({ vertices: row.footprint.vertices }),
+        // `category_id` n'est pas écrit : A5.2 ne donne aucune colonne de
+        // catégorie à `footprint`, et la base n'en a pas. La commande en
+        // portait une, et chaque création d'empreinte était refusée — « column
+        // category_id of relation footprint does not exist ». La catégorie
+        // d'une cellule est celle de sa destination (A5.4), que l'annuaire
+        // portera. Le champ du panneau de M3 (partie M) reste donc sans
+        // destinataire, et vaut null partout où il est construit.
       },
       timestamp: write.timestamp,
       groupKey,
