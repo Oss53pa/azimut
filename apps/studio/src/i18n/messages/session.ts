@@ -10,7 +10,8 @@ export const SESSION_FR = {
   'session.resume.count': '{rows} éléments enregistrés localement, dont {queued} en attente d’envoi.',
   'session.resume.warning': 'Les deux états ne sont pas fusionnés. Vous choisissez lequel garder.',
   'session.resume.accept': 'Reprendre le travail local',
-  'session.resume.discard': 'Repartir sans lui',
+  'session.resume.discard': 'Repartir de l’état enregistré',
+  'session.load.failed': 'Le site enregistré n’a pas pu être lu. L’atelier ne montre que ce qui vient de ce poste : ce qui est absent de l’écran peut exister en base.',
 } as const;
 
 export const SESSION_EN: Readonly<Record<keyof typeof SESSION_FR, string>> = {
@@ -19,5 +20,6 @@ export const SESSION_EN: Readonly<Record<keyof typeof SESSION_FR, string>> = {
   'session.resume.count': '{rows} items saved locally, {queued} of them waiting to be sent.',
   'session.resume.warning': 'The two states are not merged. You choose which one to keep.',
   'session.resume.accept': 'Resume local work',
-  'session.resume.discard': 'Start without it',
+  'session.resume.discard': 'Start from the stored state',
+  'session.load.failed': 'The stored site could not be read. The workshop shows only what comes from this workstation: what is missing from the screen may exist in the repository.',
 };

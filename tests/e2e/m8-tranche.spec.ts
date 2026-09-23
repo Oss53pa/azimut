@@ -179,8 +179,15 @@ test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () =>
     await expect(page.getByText(/Nœuds\s*1|Nodes\s*1/)).toBeVisible();
   });
 
-  /** L'autre branche du choix : écarter n'est jamais une fusion. */
-  test('écarter l’état local repart à zéro, sans rien fusionner', async ({ page }) => {
+  /**
+   * L'autre branche du choix : écarter n'est jamais une fusion.
+   *
+   * E5.4 veut le choix « entre l'état local et l'état serveur ». Le dépôt ne
+   * connaît pas ce site — il n'existe que sur ce poste —, l'état du dépôt est
+   * donc vide et écarter ramène à zéro. Le libellé, lui, dit ce que le bouton
+   * fait : repartir de l'état enregistré.
+   */
+  test('écarter l’état local repart de l’état enregistré, sans rien fusionner', async ({ page }) => {
     await page.goto(GRAPH);
     await page.getByRole('button', { name: /^Poser un nœud$|^Place a node$/ }).first().click();
     await expect(page.getByText(/Nœuds\s*1|Nodes\s*1/)).toBeVisible();
@@ -190,7 +197,7 @@ test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () =>
     await page.reload();
 
     await page.getByRole('dialog').getByRole('button', {
-      name: /Repartir sans lui|Start without it/,
+      name: /Repartir de l’état enregistré|Start from the stored state/,
     }).click();
 
     const kept = await page.evaluate(

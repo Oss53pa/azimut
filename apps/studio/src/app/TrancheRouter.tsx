@@ -1,13 +1,17 @@
-import { type JSX, useEffect, useMemo } from 'react';
+import { type JSX, useCallback, useEffect, useMemo } from 'react';
 import { useCurrentRoute } from './useCurrentRoute.js';
 import type { Route } from './routes.js';
 import { useTrancheSession } from './useTrancheSession.js';
 import type { TrancheSession } from './useTrancheSession.js';
 import { Shell } from '../components/Shell.js';
+import { StateBanner } from '../components/ui/index.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
+import { sessionFromSite } from '../state/session-from-site.js';
+import { appRepository, isRepositoryError } from '../data/index.js';
 import {
   PlanScreenAdapter, FootprintsScreenAdapter,
   GraphScreenAdapter, ValidationScreenAdapter,
@@ -40,16 +44,35 @@ export function TrancheRouter(): JSX.Element {
 function TrancheWorkspace({ route }: {
   readonly route: WorkshopRoute;
 }): JSX.Element {
+  const { t } = useI18n();
   const levelId = 'levelId' in route ? route.levelId : '';
   // Le chemin d'écriture réel dès que le dépôt est configuré. Sans
   // configuration, `appSink` rend `null` et la session retombe sur son
   // émetteur local — le cas hors ligne de M8 (partie M) critère 3.
   const remote = useMemo(() => appSink() ?? undefined, []);
+
+  /**
+   * E5.4 — le second terme du choix de reprise : ce que le dépôt porte.
+   *
+   * Un site que le dépôt ne connaît pas rend `null` plutôt qu'une défaillance :
+   * c'est le cas d'un site créé hors ligne, et l'atelier s'ouvre alors vide.
+   * Toute autre défaillance remonte, et la session la signale.
+   */
+  const repository = useMemo(() => appRepository(), []);
+  const load = useCallback(async () => {
+    try {
+      return sessionFromSite(await repository.loadSite(route.siteId));
+    } catch (cause: unknown) {
+      if (isRepositoryError(cause) && cause.failure === 'not_found') return null;
+      throw cause;
+    }
+  }, [repository, route.siteId]);
+
   const session = useTrancheSession({
     orgId: ORG_OF_SESSION,
     siteId: route.siteId,
     levelId,
-  }, remote);
+  }, remote, load);
 
   // E5.4 — la reprise se pose par-dessus l'écran, qui reste visible derrière.
   // Cacher le travail pendant qu'on demande quoi en faire priverait
@@ -78,6 +101,14 @@ function TrancheWorkspace({ route }: {
 
   return (
     <>
+      {/*
+        F7 (partie F) — un site vide et un site illisible ne se ressemblent
+        pas. Quand le dépôt n'a pas pu être lu, l'atelier le dit au lieu de
+        laisser croire que le site ne porte rien.
+      */}
+      {session.loadFailed && (
+        <StateBanner severity="blocking" message={t('session.load.failed')} />
+      )}
       {screenOf(route, session, levelId)}
       {resume !== null && (
         <ResumeSessionDialog
