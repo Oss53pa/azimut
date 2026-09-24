@@ -4,6 +4,7 @@ import type { TrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { acceptVerticalLink } from '../state/graph-vertical-link.js';
 import { graphCommands } from '../state/graph-commands.js';
+import { inheritedEdgeWidthM } from '../state/edge-width.js';
 import type { VerticalLinkKind } from '../state/graph-input.js';
 import type { SessionGraph } from '../state/session-graph.js';
 import type { VerticalLinkFieldsProps } from '../screens/VerticalLinkFields.js';
@@ -23,9 +24,6 @@ import type { VerticalLinkFieldsProps } from '../screens/VerticalLinkFields.js';
  * deux gestes laisserait, entre les deux, un état que la validation refuse —
  * et qu'une annulation pourrait figer.
  */
-
-/** Largeur utile par défaut d'une liaison, reprise de celle des arêtes. */
-const DEFAULT_LINK_WIDTH_M = 1.4;
 
 /**
  * La capacité proposée à l'ouverture.
@@ -138,7 +136,13 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       kind,
       accessible,
       capacity,
-      widthM: DEFAULT_LINK_WIDTH_M,
+      // M4 (partie M) : la largeur utile est héritée du bâtiment. Une liaison
+      // verticale est une arête, et elle hérite comme les autres — de son
+      // bâtiment de départ, celui du niveau où l'opérateur travaille. Une
+      // passerelle en relie deux, qui peuvent déclarer deux largeurs ; retenir
+      // celle du départ suit le geste, et la largeur reste modifiable au
+      // panneau de l'arête.
+      widthM: inheritedEdgeWidthM(session.state, context.levelId),
       direction: 'both',
       sheltered,
     });

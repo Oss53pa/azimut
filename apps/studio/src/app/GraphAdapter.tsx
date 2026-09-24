@@ -9,6 +9,7 @@ import { graphCommands } from '../state/graph-commands.js';
 import { point, structured, text } from '../state/row-values.js';
 import { readSessionGraph } from '../state/session-graph.js';
 import { levelsOfSession } from '../state/session-scope.js';
+import { inheritedEdgeWidthM } from '../state/edge-width.js';
 import { graphToolForKey } from '../state/graph-shortcuts.js';
 import { useVerticalLinkTool } from './useVerticalLinkTool.js';
 import { updateNodeCommands, updateEdgeCommands } from '../state/graph-update-commands.js';
@@ -39,17 +40,6 @@ const DEFAULT_AXIS: readonly Point[] = [
   { x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 },
 ];
 
-/**
- * La largeur utile des arêtes tracées par l'écran.
- *
- * M4 (partie M) la veut « héritée du niveau », et `building.default_edge_width_m`
- * la porte au modèle (N1.2). Le niveau n'est pas chargé dans cette session :
- * l'écran pose donc une valeur d'ouverture, que l'opérateur modifie au panneau.
- * Ce n'est pas une valeur d'origine normative — aucune norme ne fixe la
- * largeur d'un cheminement dans le modèle, c'est un contrôle qui la juge.
- */
-const DEFAULT_EDGE_WIDTH_M = 1.4;
-
 export function GraphScreenAdapter({ session, levelId }: {
   readonly session: TrancheSession;
   readonly levelId: string;
@@ -79,6 +69,11 @@ export function GraphScreenAdapter({ session, levelId }: {
   // être construit.
   const { levels } = levelsOfSession(session.state);
   const level = levels.find(l => l.id === levelId);
+  // M4 (partie M) : la largeur utile d'une arête est « héritée du bâtiment,
+  // `building.default_edge_width_m` ». L'écran ne la choisit plus : il la lit
+  // par le niveau courant, une fois, et les deux outils qui tracent des arêtes
+  // la reçoivent ensemble.
+  const inheritedWidthM = inheritedEdgeWidthM(session.state, levelId);
   const link = useVerticalLinkTool(session);
 
   /**
@@ -259,7 +254,7 @@ export function GraphScreenAdapter({ session, levelId }: {
             })),
             levelId,
             kind: nextNodeKind,
-            widthM: DEFAULT_EDGE_WIDTH_M,
+            widthM: inheritedWidthM,
             direction: 'both',
             mintId: () => session.newId(),
           });
@@ -326,7 +321,7 @@ export function GraphScreenAdapter({ session, levelId }: {
               edge: acceptEdge({
                 from: { nodeId: from.id, levelId, position: a, elevation_m: 0 },
                 to: { nodeId: to.id, levelId, position: b, elevation_m: 0 },
-                widthM: DEFAULT_EDGE_WIDTH_M, slopePct: 0, accessible: true, direction: 'both',
+                widthM: inheritedWidthM, slopePct: 0, accessible: true, direction: 'both',
                 evacuationRoute: false, hasVerticalLink: false,
               }),
             });
