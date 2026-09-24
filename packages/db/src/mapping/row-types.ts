@@ -134,6 +134,16 @@ export type VerticalLinkRow = {
   readonly accessible: boolean;
 };
 
+/** M01.S10 — le passage entre deux bâtiments, et s'il est couvert. */
+export type BuildingLinkRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly edge_id: string;
+  readonly from_building_id: string;
+  readonly to_building_id: string;
+  readonly sheltered: boolean;
+};
+
 export type CategoryRow = {
   readonly id: string;
   readonly org_id: string;
@@ -299,6 +309,7 @@ export type SiteRowSet = {
   readonly nodes: readonly NodeRow[];
   readonly edges: readonly EdgeRow[];
   readonly vertical_links: readonly VerticalLinkRow[];
+  readonly building_links: readonly BuildingLinkRow[];
   readonly categories: readonly CategoryRow[];
   readonly pictograms: readonly PictogramRow[];
   readonly destinations: readonly DestinationRow[];

@@ -52,6 +52,10 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
   const [targetNodeId, setTargetNodeId] = useState('');
   const [kind, setKind] = useState<VerticalLinkKind>('elevator');
   const [accessible, setAccessible] = useState(true);
+  // M01.S10 : « qui déclare si le passage est couvert ». Faux par défaut, comme
+  // la colonne (migration 0004) : un cheminement extérieur non couvert est le
+  // cas qui change le parcours réel, et le supposer couvert l'effacerait.
+  const [sheltered, setSheltered] = useState(false);
   const [capacity, setCapacity] = useState(SCHEMA_DEFAULT_CAPACITY);
   const [findings, setFindings] = useState<readonly Finding[]>([]);
 
@@ -70,6 +74,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       ? targetLevelId
       : others[0]?.id ?? '';
 
+    const to = context.graph.nodes.find(node => node.id === targetNodeId);
     const targetNodes = context.graph.nodes
       .filter(node => node.level_id === chosenLevel)
       .map(node => ({
@@ -100,6 +105,10 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       onAccessible: setAccessible,
       capacity,
       onCapacity: value => { setCapacity(value ?? SCHEMA_DEFAULT_CAPACITY); },
+      crossesBuildings: from !== undefined && to !== undefined
+        && buildingOf(from.level_id, context.levels) !== buildingOf(to.level_id, context.levels),
+      sheltered,
+      onSheltered: setSheltered,
       onCreate: () => {
         void create({
           levelId: context.levelId,
@@ -131,6 +140,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       capacity,
       widthM: DEFAULT_LINK_WIDTH_M,
       direction: 'both',
+      sheltered,
     });
     if (!outcome.ok) { setFindings(outcome.findings); return; }
 
@@ -147,6 +157,18 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       }],
       { orgId: ORG_OF_SESSION, levelId: context.levelId, timestamp: session.now() },
       `vertical-link:${edgeId}`,
+      // M01.S10 : l'arête qui franchit une limite de bâtiment part avec sa
+      // ligne, dans le même geste. Les écrire en deux temps laisserait entre
+      // les deux l'état que la validation refuse.
+      outcome.value.buildingLink === null
+        ? []
+        : [{
+          id: session.newId(),
+          edgeId,
+          fromBuildingId: outcome.value.buildingLink.fromBuildingId,
+          toBuildingId: outcome.value.buildingLink.toBuildingId,
+          sheltered: outcome.value.buildingLink.sheltered,
+        }],
     );
     if (!commands.ok) { setFindings(commands.findings); return; }
     await session.write(commands.value);
@@ -169,11 +191,26 @@ function end(
   levelId: string,
   position: Point,
   levels: readonly Level[],
-): { nodeId: string; levelId: string; position: Point; elevationM: number } {
+): {
+  nodeId: string; levelId: string; buildingId: string;
+  position: Point; elevationM: number;
+} {
   return {
     nodeId,
     levelId,
+    buildingId: buildingOf(levelId, levels),
     position,
     elevationM: levels.find(level => level.id === levelId)?.elevation_m ?? 0,
   };
+}
+
+/**
+ * Le bâtiment d'un niveau, ou la chaîne vide quand la session ne le porte pas.
+ *
+ * Deux extrémités de bâtiment inconnu se valent alors, donc ne franchissent
+ * aucune limite : c'est le comportement voulu, le moteur signalant par
+ * ailleurs le niveau manquant.
+ */
+function buildingOf(levelId: string, levels: readonly Level[]): string {
+  return levels.find(level => level.id === levelId)?.building_id ?? '';
 }

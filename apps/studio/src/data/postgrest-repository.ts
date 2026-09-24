@@ -11,7 +11,7 @@
  */
 import { assembleSiteData } from '@azimut/db/mapping';
 import type {
-  BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
+  BuildingLinkRow, BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
   FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
   PlanCalibrationRow, PlanSourceRow, SiteRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
@@ -234,9 +234,11 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
       const supportIds = supports.map(s => s.id);
 
-      const [verticalLinks, destinationNames, supportFaces, supportVersions] =
+      const [verticalLinks, buildingLinks, destinationNames, supportFaces, supportVersions] =
         await Promise.all([
           queryIn<VerticalLinkRow>(config, 'vertical_link', 'edge_id', edges.map(e => e.id)),
+          // M01.S10, même chemin que les liaisons verticales : par l'arête.
+          queryIn<BuildingLinkRow>(config, 'building_link', 'edge_id', edges.map(e => e.id)),
           queryIn<DestinationNameRow>(
             config, 'destination_name', 'destination_id', destinations.map(d => d.id),
           ),
@@ -275,6 +277,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         nodes,
         edges,
         vertical_links: verticalLinks,
+        building_links: buildingLinks,
         categories,
         pictograms,
         destinations,

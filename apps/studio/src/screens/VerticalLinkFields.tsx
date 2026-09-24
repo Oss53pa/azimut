@@ -53,6 +53,15 @@ export type VerticalLinkFieldsProps = {
   readonly onAccessible: (value: boolean) => void;
   readonly capacity: number;
   readonly onCapacity: (value: number | null) => void;
+  /**
+   * M01.S10 — les deux extrémités franchissent une limite de bâtiment, et la
+   * liaison inter-bâtiments part avec l'arête. Le champ n'apparaît que dans ce
+   * cas : une passerelle déclare si elle est couverte, un escalier interne n'a
+   * rien à déclarer.
+   */
+  readonly crossesBuildings: boolean;
+  readonly sheltered: boolean;
+  readonly onSheltered: (value: boolean) => void;
   readonly onCreate: () => void;
 };
 
@@ -131,6 +140,15 @@ export function VerticalLinkFields(props: VerticalLinkFieldsProps): JSX.Element 
           onChange={props.onCapacity}
           hint={t('graph.link.capacity.hint')}
         />
+
+        {props.crossesBuildings && (
+          <Toggle
+            label={t('graph.link.sheltered')}
+            checked={props.sheltered}
+            onChange={props.onSheltered}
+            hint={t('graph.link.sheltered.hint')}
+          />
+        )}
 
         <Button rank="primary" onClick={props.onCreate} disabled={!ready}>
           {t('graph.link.action')}

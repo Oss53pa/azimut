@@ -12,11 +12,12 @@ après la remise de la version en cours du cahier des charges consolidé.
 
 ---
 
-## 1. Module 01, règles M01.S1 à M01.S9 (N1.3)
+## 1. Module 01, règles M01.S1 à M01.S10 (N1.3)
 
 | Règle | État | Preuve |
 | --- | --- | --- |
 | **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
+| **M01.S10** Toute arête entre deux bâtiments porte sa ligne `building_link` | **tenu** | `engine-graph/__tests__/checks-structure.test.ts` — `GRAPH.BUILDING_LINK_MISSING`, son contre-exemple, et la remontée jusqu'à `validateGraph` ; `state/__tests__/graph-vertical-link.test.ts` — l'outil de liaison écrit l'arête et sa ligne en un geste. La table existait en base depuis la migration 0004 sans que rien ne la lise. Limite déclarée par la règle : aucun calcul ne lit encore l'attribut de passage couvert |
 | **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0043 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
 | **M01.S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
 | **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
@@ -26,7 +27,7 @@ après la remise de la version en cours du cahier des charges consolidé.
 | **M01.S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
 | **M01.S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
 
-**Les neuf règles sont tenues**, sans dette déclarée.
+**Les dix règles sont tenues**, sans dette déclarée.
 
 Au 23 septembre, plus aucun critère numéroté de la partie M n'est porté
 absent. Ce qui reste est au §5 : deux contradictions du document en attente
@@ -166,7 +167,6 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Intermittence de `tests/e2e/keyboard-traversal.spec.ts` | Essai vert. La cause est **probable et non prouvée** : l'attente du rendu ajoutée avant la tabulation corrige une course réelle — `page.goto` rend la main avant que React 18 n'ait rendu — mais l'échec n'a jamais été reproduit, ni par vingt-quatre sondes dédiées ni par six exécutions complètes. Rien ne prouve que c'était cette course-là | Rien tant que l'essai reste vert. Une garde bornée fait désormais échouer l'essai sur « l'application n'a rien rendu », avec le corps du document, pour qu'une régression se présente comme une erreur et non comme une intermittence. Si l'intermittence revient, le point se rouvre et la cause est à chercher ailleurs |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
-| Liaisons inter-bâtiments, table `building_link` | La table existe en base depuis la migration 0004, et rien ne l'écrit ni ne la lit. Le contrôle de connexité entre bâtiments se fonde sur le graphe — une arête dont les deux extrémités retombent sur deux bâtiments — et non sur elle. T-1.5 la nomme dans son objectif, ses deux critères d'acceptation portent sur la liaison verticale et sur le bâtiment isolé, tous deux tenus | Décider si `building_link` porte une donnée que le graphe ne porte pas déjà — abri, horaires propres — ou si elle est à retirer. Aucun écran de la tranche ne la demande |
 | Report de niveau, E7.2 | Copier les circulations et les noyaux verticaux d'un niveau à l'autre. Le registre de la partie K le range en « T-1.5, étendue » | Non construit. Il vient après l'outil de liaison, et demande le magnétisme et la duplication de E7.2, qui relèvent de T-1.2c et T-1.2d |
 
 ## 6. Divergences hors tranche, relevées à la consolidation

@@ -8,7 +8,13 @@
  * il rend l'arête et la liaison d'un seul tenant, ou il refuse.
  *
  * Il n'écrit rien. `graphCommands` s'en charge, et il sait déjà poser les
- * trois tables dans l'ordre de leurs dépendances.
+ * quatre tables dans l'ordre de leurs dépendances.
+ *
+ * Une passerelle entre deux bâtiments est à la fois une liaison verticale et
+ * une liaison inter-bâtiments : c'est le seul geste de l'atelier qui puisse
+ * produire une arête franchissant une limite de bâtiment, et M01.S10 exige
+ * alors la ligne. La produire ici évite que l'écran écrive une arête que la
+ * validation refusera.
  *
  * Ce qu'il ne refait pas : la boucle sur soi et la longueur sous tolérance
  * sont jugées par `acceptEdge`, qu'il appelle. Les réécrire ici donnerait deux
@@ -30,6 +36,8 @@ import type { AcceptedEdge, EdgeDirection, VerticalLinkKind } from './graph-inpu
 export type LinkEnd = {
   readonly nodeId: string;
   readonly levelId: string;
+  /** Le bâtiment du niveau. M01.S10 en dépend. */
+  readonly buildingId: string;
   readonly position: Point;
   /** Altitude du niveau, relative à `site.reference_elevation_m` (N1.2). */
   readonly elevationM: number;
@@ -49,6 +57,12 @@ export type VerticalLinkDraft = {
   readonly capacity: number;
   readonly widthM: number;
   readonly direction: EdgeDirection;
+  /**
+   * M01.S10 : « qui déclare si le passage est couvert ». Ignoré quand les deux
+   * extrémités sont dans le même bâtiment, où aucune liaison inter-bâtiments
+   * n'a lieu d'être.
+   */
+  readonly sheltered: boolean;
 };
 
 export type AcceptedVerticalLink = {
@@ -56,6 +70,17 @@ export type AcceptedVerticalLink = {
   readonly kind: VerticalLinkKind;
   readonly accessible: boolean;
   readonly capacity: number;
+  /**
+   * La liaison inter-bâtiments qui accompagne l'arête, quand elle en franchit
+   * une limite. `null` sinon : une passerelle entre deux bâtiments est une
+   * liaison verticale *et* inter-bâtiments, un escalier interne n'est que la
+   * première.
+   */
+  readonly buildingLink: {
+    readonly fromBuildingId: string;
+    readonly toBuildingId: string;
+    readonly sheltered: boolean;
+  } | null;
 };
 
 /** Une capacité compte des personnes : entière et au moins un. */
@@ -109,6 +134,8 @@ export function acceptVerticalLink(
   });
   if (!edge.ok) return { ok: false, findings: edge.findings };
 
+  const crossesBuildings = draft.from.buildingId !== draft.to.buildingId;
+
   return {
     ok: true,
     value: {
@@ -116,6 +143,13 @@ export function acceptVerticalLink(
       kind: draft.kind,
       accessible: draft.accessible,
       capacity: draft.capacity,
+      buildingLink: crossesBuildings
+        ? {
+          fromBuildingId: draft.from.buildingId,
+          toBuildingId: draft.to.buildingId,
+          sheltered: draft.sheltered,
+        }
+        : null,
     },
     warnings: edge.warnings,
   };

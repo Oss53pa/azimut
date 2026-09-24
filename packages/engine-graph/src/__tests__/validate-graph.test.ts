@@ -99,6 +99,7 @@ describe('validateGraph', () => {
           nodes: [mkNode('n-1', 'junction'), mkNode('n-2', 'junction')],
           edges: [mkEdge('e-1', 'n-1', 'n-2', 10)],
           vertical_links: [],
+          building_links: [],
         },
         destinations: [], destination_names: [],
       });
@@ -234,6 +235,7 @@ describe('validateGraph', () => {
         nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction'), mkNode('n-exit', 'emergency_exit')],
         edges: [mkEdge('e-1', 'n-entrance', 'n-j'), mkEdge('e-2', 'n-j', 'n-exit')],
         vertical_links: [],
+        building_links: [],
       },
       destinations: [], destination_names: [],
     });
@@ -262,6 +264,7 @@ describe('validateGraph', () => {
         nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction')],
         edges: [mkEdge('e-real', 'n-entrance', 'n-j'), mkEdge('e-self', 'n-j', 'n-j', 0)],
         vertical_links: [],
+        building_links: [],
       },
       destinations: [], destination_names: [],
     });
@@ -278,6 +281,7 @@ describe('validateGraph', () => {
         nodes: [mkNode('n-entrance', 'entrance'), mkNode('n-j', 'junction'), mkNode('n-da', 'destination_access')],
         edges: [mkEdge('e-1', 'n-entrance', 'n-j'), mkEdge('e-2', 'n-j', 'n-da')],
         vertical_links: [],
+        building_links: [],
       },
       destinations: [], destination_names: [],
     });
@@ -297,7 +301,7 @@ describe('validateGraph', () => {
   describe('empty graph', () => {
     it('handles site with no nodes and no edges', () => {
       const empty = makeSite({
-        graph: { nodes: [], edges: [], vertical_links: [] },
+        graph: { nodes: [], edges: [], vertical_links: [], building_links: [] },
         destinations: [],
         destination_names: [],
       });

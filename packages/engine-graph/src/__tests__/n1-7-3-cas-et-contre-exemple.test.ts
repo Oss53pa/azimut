@@ -122,7 +122,7 @@ describe('N1.7 critère 3 — les cas multiniveaux', () => {
   });
 
   it('GRAPH.VERTICAL_LINK_MISSING se déclenche quand la liaison disparaît', () => {
-    const without = withGraph(refMultilevel, { vertical_links: [] });
+    const without = withGraph(refMultilevel, { vertical_links: [], building_links: [] });
     expect(codesOf(without)).toContain('GRAPH.VERTICAL_LINK_MISSING');
   });
 

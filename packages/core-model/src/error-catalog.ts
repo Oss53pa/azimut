@@ -32,6 +32,13 @@ export const ERROR_CATALOG = {
   // atteignable depuis toutes, et le sens de circulation y entre.
   'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'blocking', description: 'Destination que toutes les entrées n’atteignent pas' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
+  // M01.S10 : « Toute arête dont les deux extrémités appartiennent à des
+  // bâtiments différents porte une ligne `building_link`, qui déclare si le
+  // passage est couvert. » Règle symétrique de celle des liaisons
+  // verticales : la connectivité est portée par l’arête, l’attribut de
+  // passage par la liaison. Limite que la règle déclare elle-même : aucun
+  // calcul ne lit encore `sheltered`.
+  'GRAPH.BUILDING_LINK_MISSING':            { severity: 'blocking', description: 'Arête entre deux bâtiments sans ligne building_link' },
   // T-1.5 : « Un bâtiment à accès indépendant sans liaison est signalé,
   // pas refusé. » Distinct de `BUILDING_ISOLATED`, qui vise le bâtiment
   // sans liaison *et* sans accès propre : celui-ci a une porte, il n'est

@@ -17,6 +17,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'GRAPH.VERTICAL_LINK_MISALIGNED': 'Vertical link offset between two levels',
   'GRAPH.DESTINATION_ENTRANCE_COVERAGE': 'Destination not reached from every entrance',
   'GRAPH.BUILDING_ISOLATED': 'Building with no link nor independent access',
+  'GRAPH.BUILDING_LINK_MISSING': 'Edge between two buildings without a building_link row',
   'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY': 'Building tied to the rest of the site by its independent access alone',
   'GRAPH.NO_ENTRANCE': 'No entrance in the graph',
   'GRAPH.NOT_VALIDATED': 'Audit requested before completeness validation',

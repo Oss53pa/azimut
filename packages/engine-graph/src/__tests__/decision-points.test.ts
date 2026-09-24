@@ -153,7 +153,7 @@ describe('deriveDecisionPoints', () => {
   it('handles empty graph', () => {
     const empty: SiteData = {
       ...refMinimal,
-      graph: { nodes: [], edges: [], vertical_links: [] },
+      graph: { nodes: [], edges: [], vertical_links: [], building_links: [] },
       destinations: [],
       destination_names: [],
     };
@@ -239,6 +239,7 @@ describe('deriveDecisionPoints', () => {
           { id: 'e-23', org_id: 'org-test-001', from_node_id: 'n-2', to_node_id: 'n-3', direction: 'both' as const, accessible: true, evacuation_route: false, length_m: 1, width_m: 1.5, slope_pct: 0 },
         ],
         vertical_links: [],
+        building_links: [],
       },
     };
     const result = deriveDecisionPoints(ySite, stdProfile, []);

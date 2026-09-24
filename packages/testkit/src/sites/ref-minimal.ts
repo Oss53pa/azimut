@@ -219,6 +219,7 @@ export const refMinimal: SiteData = {
       },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {

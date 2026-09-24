@@ -350,6 +350,7 @@ describe('auditCoverage — zero decision points', () => {
           },
         ],
         vertical_links: [],
+        building_links: [],
       },
     };
     const result = auditCoverage(linearSite, stdProfile, []);
@@ -460,7 +461,7 @@ describe('auditEvacuation', () => {
   it('handles empty graph without crashing', () => {
     const emptySite: SiteData = {
       ...refMinimal,
-      graph: { nodes: [], edges: [], vertical_links: [] },
+      graph: { nodes: [], edges: [], vertical_links: [], building_links: [] },
     };
     const result = auditEvacuation(emptySite);
     expect(result.ok).toBe(true);

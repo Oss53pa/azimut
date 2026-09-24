@@ -7,7 +7,7 @@ import {
   site, building, level, footprint, volume, planSource, planCalibration,
   parking, parkingSpace, parkingUncoveredArea, vehicleGate,
 } from './schema/site.js';
-import { node, edge, verticalLink } from './schema/graph.js';
+import { node, edge, verticalLink, buildingLink } from './schema/graph.js';
 import {
   category, pictogram, destination, destinationName,
   travelProfile,
@@ -89,9 +89,15 @@ export async function loadSiteData(
   const destIds = destRows.map((d) => d.id);
   const supportIds = supportRows.map((s) => s.id);
 
-  const [vlinkRows, dnameRows, faceRows, versionRows] = await Promise.all([
+  const [vlinkRows, blinkRows, dnameRows, faceRows, versionRows] = await Promise.all([
     edgeIds.length > 0
       ? db.select().from(verticalLink).where(inArray(verticalLink.edge_id, edgeIds))
+      : Promise.resolve([]),
+    // M01.S10 : les liaisons inter-bâtiments se lisent par leurs arêtes, comme
+    // les liaisons verticales. La table existait en base sans que rien ne la
+    // charge, et la règle qui la rend obligatoire n'avait donc rien à lire.
+    edgeIds.length > 0
+      ? db.select().from(buildingLink).where(inArray(buildingLink.edge_id, edgeIds))
       : Promise.resolve([]),
     destIds.length > 0
       ? db.select().from(destinationName).where(inArray(destinationName.destination_id, destIds))
@@ -142,6 +148,7 @@ export async function loadSiteData(
     nodes: nodeRows,
     edges: edgeRows,
     vertical_links: vlinkRows,
+    building_links: blinkRows,
     categories: catRows,
     pictograms: pictoRows,
     destinations: destRows,

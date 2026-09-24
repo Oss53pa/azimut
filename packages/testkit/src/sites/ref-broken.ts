@@ -237,6 +237,7 @@ export const refBroken: SiteData = {
       },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {

@@ -210,4 +210,5 @@ export const REF_MULTILEVEL_GRAPH: SiteData['graph'] = {
       accessible: false,
     },
   ],
+  building_links: [],
 };

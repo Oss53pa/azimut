@@ -9,6 +9,7 @@ import { destinationNodeMissingFindings } from './validate-directory.js';
 import { buildAdjacency, bfs } from './graph-traversal.js';
 import {
   crossLevelWithoutVlFindings,
+  crossBuildingWithoutLinkFindings,
   verticalLinkMisalignedFindings,
   destinationNotReachedFromEveryEntranceFindings,
   multiLevelWithoutAnyVlFindings,
@@ -223,6 +224,7 @@ export function validateGraph(
     ...unreachableFromEntranceFindings(nodes, edges),
     ...crossLevelWithoutVlFindings(site),
     ...verticalLinkMisalignedFindings(site),
+    ...crossBuildingWithoutLinkFindings(site),
     ...destinationNotReachedFromEveryEntranceFindings(site),
     ...deadEndFindings(nodes, edges),
     ...multiLevelWithoutAnyVlFindings(site),

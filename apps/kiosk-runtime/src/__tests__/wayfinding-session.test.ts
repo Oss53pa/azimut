@@ -168,6 +168,7 @@ describe('computeWayfinding', () => {
           { id: 'e4', org_id: 'org1', from_node_id: 'n-j3', to_node_id: 'n-dest', width_m: 2, slope_pct: 0, accessible: true, direction: 'both', evacuation_route: false, length_m: 10 },
         ],
         vertical_links: [],
+    building_links: [],
       },
       categories: [{ id: 'cat1', org_id: 'org1', sector_key: 'tertiary', code: 'office', parent_id: null }],
       pictograms: [],

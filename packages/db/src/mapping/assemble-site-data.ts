@@ -15,7 +15,7 @@ import type {
   FootprintKind,
   SiteData,
   Organization, Site, Building, Level, Footprint, Volume,
-  GraphNode, Edge, VerticalLink, Category, Pictogram,
+  GraphNode, Edge, VerticalLink, BuildingLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
   PlanSource, PlanCalibration,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
@@ -218,6 +218,15 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     accessible: v.accessible,
   }));
 
+  const buildingLinks: BuildingLink[] = rows.building_links.map(b => ({
+    id: b.id,
+    org_id: b.org_id,
+    edge_id: b.edge_id,
+    from_building_id: b.from_building_id,
+    to_building_id: b.to_building_id,
+    sheltered: b.sheltered,
+  }));
+
   const categories: Category[] = rows.categories.map(c => ({
     id: c.id,
     org_id: c.org_id,
@@ -324,7 +333,9 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     plan_calibrations: planCalibrations,
     footprints,
     volumes,
-    graph: { nodes, edges, vertical_links: verticalLinks },
+    graph: {
+      nodes, edges, vertical_links: verticalLinks, building_links: buildingLinks,
+    },
     categories,
     pictograms,
     destinations,

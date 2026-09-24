@@ -2,9 +2,9 @@
  * M4 (partie M) — écriture du graphe.
  *
  * Un axe tracé en une passe produit des nœuds, des arêtes, et parfois des
- * liaisons verticales. Les trois tables appartiennent au module 01 (L3), et
- * tout part sous un même groupe : « un tracé continu produisant nœuds et
- * arêtes en une passe » est un geste, donc une annulation.
+ * liaisons verticales ou inter-bâtiments. Les quatre tables appartiennent au
+ * module 01 (L3), et tout part sous un même groupe : « un tracé continu
+ * produisant nœuds et arêtes en une passe » est un geste, donc une annulation.
  */
 import type { EntityCommand, Outcome } from '@azimut/core-model';
 import { buildCommand } from '@azimut/core-model';
@@ -28,12 +28,28 @@ export type VerticalLinkRow = {
 };
 
 /**
+ * M01.S10 — la liaison inter-bâtiments qui accompagne une arête.
+ *
+ * `sheltered` déclare si le passage est couvert. Aucun calcul ne le lit
+ * aujourd'hui, la règle le dit elle-même ; il est écrit parce qu'un
+ * cheminement extérieur non couvert change le parcours réel d'un visiteur et
+ * qu'aucune autre donnée ne le porte.
+ */
+export type BuildingLinkRow = {
+  readonly id: string;
+  readonly edgeId: string;
+  readonly fromBuildingId: string;
+  readonly toBuildingId: string;
+  readonly sheltered: boolean;
+};
+
+/**
  * Les commandes d'un geste de saisie du graphe.
  *
  * L'ordre suit les dépendances : les nœuds, puis les arêtes qui les citent,
- * puis les liaisons verticales qui citent les arêtes. L'annulation les inverse
- * en ordre inverse, ce que le magasin fait déjà — c'est la seule façon de ne
- * pas heurter les clés étrangères.
+ * puis les liaisons — verticales et inter-bâtiments — qui citent les arêtes.
+ * L'annulation les inverse en ordre inverse, ce que le magasin fait déjà —
+ * c'est la seule façon de ne pas heurter les clés étrangères.
  */
 export function graphCommands(
   nodes: readonly NodeRow[],
@@ -41,6 +57,7 @@ export function graphCommands(
   links: readonly VerticalLinkRow[],
   write: GraphWrite,
   groupKey: string,
+  buildingLinks: readonly BuildingLinkRow[] = [],
 ): Outcome<readonly EntityCommand[]> {
   const common = {
     operation: 'create' as const,
@@ -105,6 +122,24 @@ export function graphCommands(
         kind: row.kind,
         accessible: row.accessible,
         capacity: row.capacity,
+      },
+    });
+    if (!built.ok) return { ok: false, findings: built.findings };
+    commands.push(built.value);
+  }
+
+  for (const row of buildingLinks) {
+    const built = buildCommand({
+      ...common,
+      table: 'building_link',
+      id: row.id,
+      after: {
+        id: row.id,
+        org_id: write.orgId,
+        edge_id: row.edgeId,
+        from_building_id: row.fromBuildingId,
+        to_building_id: row.toBuildingId,
+        sheltered: row.sheltered,
       },
     });
     if (!built.ok) return { ok: false, findings: built.findings };

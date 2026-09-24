@@ -271,6 +271,28 @@ export type VerticalLink = {
   readonly accessible: boolean;
 };
 
+/**
+ * A5.3 et M01.S10 — le passage entre deux bâtiments.
+ *
+ * « Toute arête dont les deux extrémités appartiennent à des bâtiments
+ * différents porte une ligne `building_link`, qui déclare si le passage est
+ * couvert. » Règle symétrique de celle des liaisons verticales : la
+ * connectivité est portée par l'arête, l'attribut de passage par la liaison.
+ *
+ * **Limite déclarée**, celle que la règle nomme elle-même : aucun calcul ne
+ * lit `sheltered` aujourd'hui. L'attribut est conservé parce qu'un cheminement
+ * extérieur non couvert change le parcours réel d'un visiteur, et qu'aucune
+ * autre donnée ne le porte.
+ */
+export type BuildingLink = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly edge_id: string;
+  readonly from_building_id: string;
+  readonly to_building_id: string;
+  readonly sheltered: boolean;
+};
+
 export type Category = {
   readonly id: string;
   readonly org_id: string;
@@ -343,6 +365,8 @@ export type SiteGraph = {
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly vertical_links: readonly VerticalLink[];
+  /** M01.S10. La table existait en base sans que rien ne la lise. */
+  readonly building_links: readonly BuildingLink[];
 };
 
 /** Complément atelier M2 — un portail ou un accès véhicule. */

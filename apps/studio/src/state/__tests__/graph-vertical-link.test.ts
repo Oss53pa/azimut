@@ -13,6 +13,7 @@ import { graphCommands } from '../graph-commands.js';
  * `vertical_link`. »
  */
 
+const BATIMENT = 'batiment-a';
 const RDC = 'niveau-rdc';
 const R1 = 'niveau-r1';
 
@@ -21,12 +22,14 @@ function draft(over: Partial<VerticalLinkDraft> = {}): VerticalLinkDraft {
     from: {
       nodeId: 'n-rdc',
       levelId: RDC,
+      buildingId: BATIMENT,
       position: { x_m: 10, y_m: 4 },
       elevationM: 0,
     },
     to: {
       nodeId: 'n-r1',
       levelId: R1,
+      buildingId: BATIMENT,
       position: { x_m: 10, y_m: 4 },
       elevationM: 3.2,
     },
@@ -35,6 +38,7 @@ function draft(over: Partial<VerticalLinkDraft> = {}): VerticalLinkDraft {
     capacity: 8,
     widthM: 1.4,
     direction: 'both',
+    sheltered: false,
     ...over,
   };
 }
@@ -66,7 +70,10 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
 
   it('refuse deux nœuds d’un même niveau', () => {
     const outcome = acceptVerticalLink(draft({
-      to: { nodeId: 'n-autre', levelId: RDC, position: { x_m: 20, y_m: 4 }, elevationM: 0 },
+      to: {
+        nodeId: 'n-autre', levelId: RDC, buildingId: BATIMENT,
+        position: { x_m: 20, y_m: 4 }, elevationM: 0,
+      },
     }));
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
@@ -75,7 +82,10 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
 
   it('refuse une arête sur elle-même, par le contrôle de l’arête', () => {
     const outcome = acceptVerticalLink(draft({
-      to: { nodeId: 'n-rdc', levelId: R1, position: { x_m: 10, y_m: 4 }, elevationM: 3.2 },
+      to: {
+        nodeId: 'n-rdc', levelId: R1, buildingId: BATIMENT,
+        position: { x_m: 10, y_m: 4 }, elevationM: 3.2,
+      },
     }));
     expect(outcome.ok).toBe(false);
     if (outcome.ok) return;
@@ -101,6 +111,72 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
       expect(outcome.findings.map(f => f.code)).toContain('DATA.CAPACITY_INVALID');
     }
     expect(CAPACITY_MIN).toBe(1);
+  });
+
+  /**
+   * M01.S10 — une passerelle entre deux bâtiments est à la fois une liaison
+   * verticale et une liaison inter-bâtiments. C'est le seul geste de l'atelier
+   * qui puisse produire une arête franchissant une limite de bâtiment, et la
+   * règle exige alors la ligne.
+   */
+  it('produit la liaison inter-bâtiments quand l’arête franchit une limite', () => {
+    const outcome = acceptVerticalLink(draft({
+      to: {
+        nodeId: 'n-r1', levelId: R1, buildingId: 'batiment-b',
+        position: { x_m: 10, y_m: 4 }, elevationM: 3.2,
+      },
+      sheltered: true,
+    }));
+    if (!outcome.ok) throw new Error(outcome.findings.map(f => f.code).join(', '));
+    expect(outcome.value.buildingLink).toEqual({
+      fromBuildingId: 'batiment-a',
+      toBuildingId: 'batiment-b',
+      sheltered: true,
+    });
+  });
+
+  /** Le contre-exemple : un escalier interne n'en produit aucune. */
+  it('n’en produit aucune à l’intérieur d’un bâtiment', () => {
+    const outcome = acceptVerticalLink(draft({ sheltered: true }));
+    if (!outcome.ok) throw new Error('refusé');
+    expect(outcome.value.buildingLink).toBeNull();
+  });
+
+  it('écrit l’arête, sa liaison verticale et sa liaison inter-bâtiments en un groupe', () => {
+    const outcome = acceptVerticalLink(draft({
+      to: {
+        nodeId: 'n-r1', levelId: R1, buildingId: 'batiment-b',
+        position: { x_m: 10, y_m: 4 }, elevationM: 3.2,
+      },
+    }));
+    if (!outcome.ok) throw new Error('refusé');
+    const link = outcome.value.buildingLink;
+    if (link === null) throw new Error('liaison inter-bâtiments attendue');
+
+    const commands = graphCommands(
+      [],
+      [{ id: 'e-1', edge: outcome.value.edge }],
+      [{
+        id: 'vl-1', edgeId: 'e-1', kind: outcome.value.kind,
+        accessible: outcome.value.accessible, capacity: outcome.value.capacity,
+      }],
+      { orgId: 'org-1', levelId: RDC, timestamp: '2026-01-01T00:00:00.000Z' },
+      'vertical-link:e-1',
+      [{
+        id: 'bl-1', edgeId: 'e-1',
+        fromBuildingId: link.fromBuildingId,
+        toBuildingId: link.toBuildingId,
+        sheltered: link.sheltered,
+      }],
+    );
+    if (!commands.ok) throw new Error('commandes refusées');
+
+    // L'ordre suit les dépendances : l'arête, puis les deux liaisons qui la
+    // citent. Le magasin annule en ordre inverse, ce qui ne heurte aucune clé.
+    expect(commands.value.map(c => c.table)).toEqual(['edge', 'vertical_link', 'building_link']);
+    expect(new Set(commands.value.map(c => c.groupKey)).size).toBe(1);
+    expect(commands.value[2]?.after?.['edge_id']).toBe('e-1');
+    expect(commands.value[2]?.after?.['sheltered']).toBe(false);
   });
 
   /**

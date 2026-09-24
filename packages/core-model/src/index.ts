@@ -139,6 +139,7 @@ export type {
   Edge,
   VerticalLinkKind,
   VerticalLink,
+  BuildingLink,
   Category,
   PictogramRegistry,
   Pictogram,

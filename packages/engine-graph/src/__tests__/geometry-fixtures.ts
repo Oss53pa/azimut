@@ -23,7 +23,7 @@ export function siteWith(
     plan_calibrations: [],
     footprints,
     volumes,
-    graph: { nodes: [], edges: [], vertical_links: [] },
+    graph: { nodes: [], edges: [], vertical_links: [], building_links: [] },
     categories: [],
     pictograms: [],
     destinations: [],

@@ -147,6 +147,53 @@ export function multiLevelWithoutAccessibleVlFindings(
 }
 
 /**
+ * M01.S10 — une arête entre deux bâtiments sans sa ligne `building_link`.
+ *
+ * « Toute arête dont les deux extrémités appartiennent à des bâtiments
+ * différents porte une ligne `building_link`, qui déclare si le passage est
+ * couvert. » Règle symétrique de celle des liaisons verticales, et le contrôle
+ * est bâti sur le même modèle que `crossLevelWithoutVlFindings` : la
+ * connectivité est portée par l'arête, l'attribut de passage par la liaison.
+ *
+ * Le bâtiment d'un nœud se déduit de son niveau. Une extrémité dont le niveau
+ * est inconnu ne compte pas comme franchissant une limite de bâtiment : c'est
+ * un nœud orphelin, que `orphanNodeFindings` signale pour ce qu'il est, et le
+ * signaler deux fois dirait deux fois le même fait.
+ *
+ * **Limite déclarée**, celle que la règle nomme : aucun calcul ne lit
+ * `sheltered` aujourd'hui. Le contrôle exige la ligne, il ne juge pas sa
+ * valeur.
+ */
+export function crossBuildingWithoutLinkFindings(site: GraphScope): Finding[] {
+  const levelBuilding = new Map<string, string>();
+  for (const level of site.levels) levelBuilding.set(level.id, level.building_id);
+
+  const nodeBuilding = new Map<string, string>();
+  for (const node of site.graph.nodes) {
+    const building = levelBuilding.get(node.level_id);
+    if (building !== undefined) nodeBuilding.set(node.id, building);
+  }
+
+  const linked = new Set(site.graph.building_links.map(link => link.edge_id));
+
+  const findings: Finding[] = [];
+  for (const edge of [...site.graph.edges].sort((a, b) => a.id.localeCompare(b.id))) {
+    const from = nodeBuilding.get(edge.from_node_id);
+    const to = nodeBuilding.get(edge.to_node_id);
+    if (from === undefined || to === undefined || from === to) continue;
+    if (linked.has(edge.id)) continue;
+    findings.push({
+      code: 'GRAPH.BUILDING_LINK_MISSING',
+      severity: 'blocking',
+      entity: { kind: 'edge', id: edge.id },
+      params: { from_building: from, to_building: to },
+      ruleRef: 'M01.S10',
+    });
+  }
+  return findings;
+}
+
+/**
  * Un bâtiment que rien ne relie au reste du site, et ce qu'on en dit.
  *
  * « Relié » se lit sur le graphe : une arête dont les deux extrémités

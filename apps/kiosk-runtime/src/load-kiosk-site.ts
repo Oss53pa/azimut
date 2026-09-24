@@ -9,6 +9,7 @@ import type {
   GraphNode,
   Edge,
   VerticalLink,
+  BuildingLink,
   Category,
   Pictogram,
   Destination,
@@ -108,6 +109,10 @@ export function loadKioskSite(
       'vertical_links',
       'data/graph.json',
     ) as VerticalLink[],
+    // M01.S10. Le paquet d'un site antérieur à la règle ne porte pas la clé :
+    // une liste vide vaut « aucune liaison inter-bâtiments », ce qui est exact
+    // pour un site à un seul bâtiment et détecté par la validation sinon.
+    building_links: (graphDoc['building_links'] ?? []) as BuildingLink[],
   };
 
   return {

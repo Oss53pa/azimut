@@ -10,7 +10,7 @@
  * empreinte calculée sur un graphe amputé vaudrait pour un graphe qui
  * n'existe pas, et validerait ce que personne n'a saisi.
  */
-import type { Edge, GraphNode, VerticalLink } from '@azimut/core-model';
+import type { BuildingLink, Edge, GraphNode, VerticalLink } from '@azimut/core-model';
 import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
 import { text, numeric, boolean, structured, point } from './row-values.js';
@@ -19,6 +19,8 @@ export type SessionGraph = {
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly vertical_links: readonly VerticalLink[];
+  /** M01.S10 — les passages entre bâtiments que la session porte. */
+  readonly building_links: readonly BuildingLink[];
   /** Identifiants des lignes que le magasin porte et qui n'ont pas pu être lues. */
   readonly unreadable: readonly string[];
 };
@@ -76,6 +78,21 @@ function readVerticalLink(row: StoredRow): VerticalLink | null {
   };
 }
 
+function readBuildingLink(row: StoredRow): BuildingLink | null {
+  const edgeId = text(row.values, 'edge_id');
+  const from = text(row.values, 'from_building_id');
+  const to = text(row.values, 'to_building_id');
+  if (edgeId === null || from === null || to === null) return null;
+  return {
+    id: row.id,
+    org_id: text(row.values, 'org_id') ?? '',
+    edge_id: edgeId,
+    from_building_id: from,
+    to_building_id: to,
+    sheltered: boolean(row.values, 'sheltered'),
+  };
+}
+
 export function readSessionGraph(session: SessionState): SessionGraph {
   const unreadable: string[] = [];
 
@@ -93,6 +110,7 @@ export function readSessionGraph(session: SessionState): SessionGraph {
     nodes: collect('node', readNode),
     edges: collect('edge', readEdge),
     vertical_links: collect('vertical_link', readVerticalLink),
+    building_links: collect('building_link', readBuildingLink),
     unreadable,
   };
 }

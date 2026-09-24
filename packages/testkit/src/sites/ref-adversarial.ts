@@ -193,6 +193,7 @@ export const refAdversarial: SiteData = {
       },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {

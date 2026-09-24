@@ -135,6 +135,7 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
         nodes: graph.nodes,
         edges: graph.edges,
         vertical_links: graph.vertical_links,
+        building_links: graph.building_links,
       },
       // L'annuaire entre avec le module 02. Tant qu'il n'est pas là, la
       // session n'en porte pas, et les contrôles de destination ne lèvent
