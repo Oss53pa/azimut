@@ -39,7 +39,7 @@ describe('QC-06 (complément atelier) — caractères interdits', () => {
       expect(report.findings[0]?.code).toBe('LAYOUT.FORBIDDEN_CHARACTER');
       expect(report.findings[0]?.severity).toBe('blocking');
       expect(report.findings[0]?.params['name']).toBe(nom);
-      expect(report.findings[0]?.ruleRef).toBe('atelier-QC-06');
+      expect(report.findings[0]?.ruleRef).toBe('A5.8');
     }
   });
 

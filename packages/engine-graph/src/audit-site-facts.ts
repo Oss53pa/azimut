@@ -3,7 +3,9 @@ import { findLexiconMatches } from '@azimut/core-model';
 import { checkableTexts } from './site-texts.js';
 
 /**
- * Contrôle des textes du site contre ses faits — complément atelier M3, QC-05.
+ * Contrôle des textes du site contre ses faits — A5.11, règle M01.S11.
+ *
+ * « Un texte de livrable qui contredit un fait déclaré est refusé. »
  *
  * Un fait vérifié bannit des mots : « parking gratuit » interdit paiement,
  * payant, tarif. L'anomalie nomme le fait, sa valeur et sa source, parce que la
@@ -47,7 +49,7 @@ export function auditSiteFacts(
             start: match.start,
             end: match.end,
           },
-          ruleRef: 'atelier-M3',
+          ruleRef: 'M01.S11',
         });
       }
     }

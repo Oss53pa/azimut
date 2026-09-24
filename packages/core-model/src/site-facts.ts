@@ -1,7 +1,12 @@
 /**
- * Faits du site et mots qu'ils interdisent — complément atelier, M3.
+ * Faits du site et mots qu'ils interdisent — A5.11, règle M01.S11.
  *
- * Un fait du site est une affirmation vérifiée qui conditionne ce qu'on écrit :
+ * « Un fait du site est une donnée déclarée qui n'appartient à aucune autre
+ * table : capacité annoncée d'un parking, surface commercialisable, nombre de
+ * places de livraison, tout chiffre qu'un livrable affiche et que la géométrie
+ * ne produit pas. Tout fait du site porte sa source et son statut. »
+ *
+ * Un fait du site est donc une affirmation déclarée qui conditionne ce qu'on écrit :
  * le parking est gratuit, le site compte deux niveaux de parking, il n'y a pas
  * de barrière. Chaque fait porte sa valeur, sa source et sa date, parce qu'une
  * affirmation sans provenance ne se conteste pas.

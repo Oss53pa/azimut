@@ -109,7 +109,7 @@ describe('auditParking (M2)', () => {
     }, true);
     const codes = report.findings.map(f => f.code);
     expect(codes.filter(c => c === 'PARK.PROPOSAL_AS_EXISTING')).toHaveLength(3);
-    expect(report.findings[0]?.ruleRef).toBe('atelier-P1');
+    expect(report.findings[0]?.ruleRef).toBe('M01.S11');
   });
 
   it('refuse aussi un objet à vérifier au livrable', () => {

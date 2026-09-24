@@ -160,8 +160,11 @@ describe('D2.1 — les domaines du dépôt et ceux du consolidé', () => {
   /** La phrase de D2.1 qui énumère les domaines, et elle seule. */
   function documentDomains(): ReadonlySet<string> {
     const line = /Domaines autorisés, et eux seuls\s*:([^\n]+)/.exec(DOCUMENT);
-    if (line === null) throw new Error('la phrase des domaines de D2.1 est introuvable');
-    return new Set([...line[1].matchAll(/`([A-Z_]+)`/g)].map(m => m[1] ?? ''));
+    const enumeration = line?.[1];
+    if (enumeration === undefined) {
+      throw new Error('la phrase des domaines de D2.1 est introuvable');
+    }
+    return new Set([...enumeration.matchAll(/`([A-Z_]+)`/g)].map(m => m[1] ?? ''));
   }
 
   it('la liste de D2.1 est lue', () => {

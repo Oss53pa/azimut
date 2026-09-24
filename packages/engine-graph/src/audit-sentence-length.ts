@@ -2,29 +2,31 @@ import type { Finding, SiteData } from '@azimut/core-model';
 import { templateFreeTexts } from './audit-typography.js';
 
 /**
- * QC-20 — « Rédaction trop longue : phrase de plus de 25 mots dans un cartouche
- * ou une note », signalant (complément atelier).
+ * Phrase plus longue que la limite portée par la charte — A5.8.
  *
- * Voisin de QC-06 et de la même moitié de P7 (complément atelier), la rédaction
- * propre. Il s'en distingue sur deux points, et les deux sont délibérés.
+ * `charter_rule` porte la nature `max_sentence_words`, et D2.2 nomme
+ * l'anomalie « Phrase plus longue que la limite portée par la charte ». La
+ * limite appartient donc à la charte d'un client.
  *
- * **Le corpus est plus étroit.** QC-06 juge toutes les dénominations du site ;
- * celui-ci ne juge que le texte libre d'un gabarit de face. Le modèle ne porte
+ * **Le corpus est plus étroit** que celui du contrôle des caractères
+ * interdits, qui juge toutes les dénominations du site : celui-ci ne juge que
+ * le texte libre d'un gabarit de face. Le modèle ne porte
  * ni cartouche ni note, et le texte libre est ce qui s'en approche le plus :
  * c'est le seul endroit où l'on écrit des phrases. Une dénomination de
  * destination n'est pas une phrase, et lui opposer une règle de phrase
  * signalerait une longueur là où il n'y a pas de rédaction.
  *
- * **Le seuil est un nombre, et il est écrit ici.** Ce n'est pas une valeur
- * d'origine normative : aucune norme ne décide qu'une phrase s'arrête à
- * vingt-cinq mots, c'est une règle de rédaction du produit, énoncée par le
- * document. Elle ne relève donc pas d'un paquet de règles (INV-5). Si la
- * maîtrise d'ouvrage la range un jour parmi les seuils à déclarer — le point
- * ouvert n° 2 du registre pose la question pour quatre autres —, cette
- * constante est le seul endroit à déplacer.
+ * **Le seuil est encore un nombre écrit ici, et c'est l'écart à déclarer.**
+ * Ce n'est pas une valeur d'origine normative — aucune norme ne décide qu'une
+ * phrase s'arrête à vingt-cinq mots — donc INV-5 ne la vise pas. Mais depuis
+ * qu'A5.8 la range parmi les règles de charte, sa place est dans la charte du
+ * site et non dans cette constante. La lire demanderait de faire entrer la
+ * charte dans la signature de ce contrôle et de ses appelants, ce qu'aucune
+ * tâche n'a encore demandé ; cette constante est alors le seul endroit à
+ * déplacer.
  */
 
-/** QC-20 (complément atelier) — au-delà, la phrase est signalée. */
+/** Valeur du produit, en attendant que la charte porte la limite. */
 export const MAX_WORDS_PER_SENTENCE = 25;
 
 /**
@@ -86,7 +88,7 @@ export function auditSentenceLength(site: SiteData): SentenceLengthReport {
           words,
           maximum: MAX_WORDS_PER_SENTENCE,
         },
-        ruleRef: 'atelier-QC-20',
+        ruleRef: 'A5.8',
       });
     });
   }

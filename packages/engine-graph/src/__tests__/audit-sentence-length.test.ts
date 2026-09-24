@@ -45,7 +45,7 @@ describe('QC-20 (complément atelier) — rédaction trop longue', () => {
     expect(r.findings[0]?.code).toBe('LAYOUT.SENTENCE_TOO_LONG');
     expect(r.findings[0]?.params['words']).toBe(MAX_WORDS_PER_SENTENCE + 1);
     expect(r.findings[0]?.params['maximum']).toBe(MAX_WORDS_PER_SENTENCE);
-    expect(r.findings[0]?.ruleRef).toBe('atelier-QC-20');
+    expect(r.findings[0]?.ruleRef).toBe('A5.8');
   });
 
   it('signale, sans bloquer : QC-20 est signalant', () => {

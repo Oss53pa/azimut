@@ -1,9 +1,13 @@
 /**
- * Calage mesuré d'un fond de plan — complément atelier, M1.4.
+ * Calage mesuré d'un fond de plan — M2 (partie M).
  *
- * Le calage à deux points (écran M2 de la tranche M, `plan-calibration` côté
- * atelier) donne une résolution et une orientation. Il ne dit rien de l'erreur
- * commise : un fond légèrement déformé, un scan de travers ou un plan
+ * « En complément du calage à deux points, qui reste le minimum, l'écran
+ * accepte un calage à n points homologues, ajusté et mesuré. Il produit un
+ * résidu, moyen et par point, qui donne la preuve chiffrée du critère 1 de
+ * cette section au lieu d'une vérification à la main. »
+ *
+ * Le calage à deux points donne une résolution et une orientation. Il ne dit
+ * rien de l'erreur commise : un fond légèrement déformé, un scan de travers ou un plan
  * d'architecte recomposé se calent sans que rien ne le signale.
  *
  * Le calage mesuré répond à cela. L'opérateur pose au moins trois paires de
@@ -22,15 +26,17 @@
  *
  * Cette séparation n'est pas de l'élégance. Un calage hors tolérance doit
  * rester affichable pour que l'opérateur voie *quel* point est en rouge et le
- * reprenne (M1.4). Un ajustement qui refuserait de rendre ses résidus ne
- * laisserait rien à corriger.
+ * reprenne. Un ajustement qui refuserait de rendre ses résidus ne laisserait
+ * rien à corriger.
  *
- * Aucun seuil n'est écrit ici. Les tolérances de résidu sont des arguments
- * obligatoires, sans valeur par défaut : la section 21 du complément en propose
- * (0,25 m en moyenne et 0,5 m par point, resserrées à 0,10 m et 0,20 m), mais
- * leur origine — norme opposable ou paramètre de produit — n'est pas tranchée.
- * Tant qu'elle ne l'est pas, INV-5 interdit de les inscrire dans le code, et un
- * défaut implicite trancherait en silence.
+ * **Nature des seuils, tranchée.** M2 (partie M) : « Les seuils de résidu sont
+ * des tolérances techniques, section D1.5, non des valeurs normatives. » INV-5
+ * ne les vise donc pas, et aucun paquet de règles n'a à les porter.
+ *
+ * Aucune valeur n'est pour autant écrite ici : le document n'en donne aucune,
+ * et les tolérances restent des arguments obligatoires, sans valeur par défaut.
+ * Un défaut implicite choisirait en silence un seuil de recette que personne
+ * n'a fixé.
  */
 import type { Point } from './geometry.js';
 import type { Finding, Outcome } from './outcome.js';
@@ -54,7 +60,7 @@ export type CalibrationPointPair = {
 };
 
 /**
- * Transformation affine du fond vers le repère métier, les six réels de M1.4 (complément atelier) :
+ * Transformation affine du fond vers le repère métier, six réels :
  *
  *   x_m = a·x_px + b·y_px + c
  *   y_m = d·x_px + e·y_px + f
@@ -94,7 +100,7 @@ export type ResidualTolerance = {
 };
 
 /**
- * Trois paires au minimum, comme M1.4 (complément atelier) le demande : en deçà, l'affine n'est pas
+ * Trois paires au minimum : en deçà, l'affine n'est pas
  * déterminée.
  *
  * Mais trois paires ne suffisent pas à *mesurer*. Chaque paire donne deux
@@ -180,7 +186,7 @@ export function fitMeasuredCalibration(
           severity: 'blocking',
           entity: null,
           params: { count: pairs.length, minimum: MIN_CALIBRATION_POINTS },
-          ruleRef: 'atelier-M1.4',
+          ruleRef: 'partieM-M2',
         },
       ],
     };
@@ -221,7 +227,7 @@ export function fitMeasuredCalibration(
           severity: 'blocking',
           entity: null,
           params: { count: pairs.length },
-          ruleRef: 'atelier-M1.4',
+          ruleRef: 'partieM-M2',
         },
       ],
     };
@@ -258,7 +264,7 @@ export function fitMeasuredCalibration(
       severity: 'warning',
       entity: null,
       params: { count: pairs.length, measuring_minimum: MEASURING_CALIBRATION_POINTS },
-      ruleRef: 'atelier-M1.4',
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -279,7 +285,7 @@ export function fitMeasuredCalibration(
  * Confronte un calage ajusté à ses tolérances de recette.
  *
  * Rend une anomalie par point hors tolérance, en plus de celle du résidu moyen,
- * pour que l'écran sache lesquels marquer (M1.4, complément atelier). Une liste vide vaut calage
+ * pour que l'écran sache lesquels marquer (M2, partie M). Une liste vide vaut calage
  * accepté. Les résidus sont rapportés en millimètres entiers, par D1.4 : un
  * résidu s'annonce au millimètre, pas avec quinze décimales.
  *
@@ -307,7 +313,7 @@ export function auditCalibrationResiduals(
         mean_residual_mm: roundMm(calibration.mean_residual_m * 1000),
         tolerance_mm: roundMm(tolerance.mean_m * 1000),
       },
-      ruleRef: 'atelier-M1.4',
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -325,7 +331,7 @@ export function auditCalibrationResiduals(
           residual_mm: roundMm(residual.residual_m * 1000),
           tolerance_mm: roundMm(tolerance.point_m * 1000),
         },
-        ruleRef: 'atelier-M1.4',
+        ruleRef: 'partieM-M2',
       });
     }
   }

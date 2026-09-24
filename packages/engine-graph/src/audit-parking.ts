@@ -4,11 +4,18 @@ import type {
 import { PUBLISHABLE_STATUSES, countsAsDigitised } from '@azimut/core-model';
 
 /**
- * Contrôle du stationnement — complément atelier, M2.
+ * Contrôle du stationnement — A5.11, règle M01.S11.
  *
- * M2 pose une règle qui n'a l'air de rien : « Les places se reprennent du plan
- * source, trait pour trait. Là où le plan source s'arrête, la zone est marquée
- * non couverte ; Azimut ne complète pas par extrapolation. »
+ * « Tout fait du site porte sa source et son statut. Un fait de statut
+ * `proposal` ne s'affiche jamais comme un existant. » La capacité annoncée
+ * d'un parking est un fait du site : un chiffre qu'un livrable affiche et que
+ * la géométrie ne produit pas. Les places, elles, se reprennent du plan
+ * source ; là où le plan s'arrête, la zone est marquée non couverte, et rien
+ * n'est complété par extrapolation.
+ *
+ * Le contrôle venait du complément atelier, qui a cessé de faire foi. La
+ * règle qu'il portait est reprise par A5.11, et c'est elle que les anomalies
+ * citent.
  *
  * Ce module la rend opposable. Un parking annoncé à 89 places dont 40 sont
  * numérisées est dans un de deux états : ou bien le plan s'arrête quelque part
@@ -41,7 +48,7 @@ function sourceFinding(kind: string, id: string, provenance: Provenance): Findin
     severity: 'blocking',
     entity: { kind, id },
     params: { status: provenance.status },
-    ruleRef: 'atelier-M2',
+    ruleRef: 'M01.S11',
   };
 }
 
@@ -85,7 +92,7 @@ export function auditParking(
         severity: 'blocking',
         entity: { kind: 'parking', id: parking.id },
         params: { digitised, declared: parking.declared_capacity },
-        ruleRef: 'atelier-M2',
+        ruleRef: 'M01.S11',
       });
     } else if (digitised < parking.declared_capacity && !uncoveredParkings.has(parking.id)) {
       findings.push({
@@ -97,7 +104,7 @@ export function auditParking(
           declared: parking.declared_capacity,
           missing: parking.declared_capacity - digitised,
         },
-        ruleRef: 'atelier-M2',
+        ruleRef: 'M01.S11',
       });
     }
   }
@@ -119,7 +126,7 @@ export function auditParking(
         severity: 'blocking',
         entity: { kind: object.kind, id: object.id },
         params: { status: object.provenance.status },
-        ruleRef: 'atelier-P1',
+        ruleRef: 'M01.S11',
       });
     }
   }

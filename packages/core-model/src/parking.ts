@@ -1,7 +1,7 @@
 import type { Polygon } from './geometry.js';
 
 /**
- * Stationnement — complément atelier, M2.
+ * Stationnement — A5.11, règle M01.S11.
  *
  * Le socle ne portait rien du stationnement : ni parking, ni place, ni portail.
  * Un plan d'accueil qui dit « parking Ouest, 89 places » lisait donc un chiffre

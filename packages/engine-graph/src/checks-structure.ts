@@ -323,18 +323,18 @@ export function missingDestinationNameFindings(
 }
 
 /**
- * QC-12 — une liaison verticale qui ne tombe pas au même endroit d'un niveau à
- * l'autre (complément atelier).
+ * `GRAPH.VERTICAL_LINK_MISALIGNED` — une liaison verticale qui ne tombe pas au
+ * même endroit d'un niveau à l'autre.
  *
- * P5 (complément atelier) : « Un ascenseur, un escalier ou une rampe occupe le
- * même point sur les deux niveaux qu'il relie. » Un visiteur qui monte par
+ * D2.2 : « Liaison verticale non alignée entre deux niveaux, ascenseurs et
+ * escaliers droits seulement, tolérance de la section D1.5. » Un visiteur qui monte par
  * l'ascenseur ressort au même endroit du plan ; si les deux nœuds ne
  * coïncident pas, le plan du niveau supérieur place la sortie ailleurs que là
  * où elle est, et aucun contrôle existant ne le voyait — `VERTICAL_LINK_MISSING`
  * ne juge que la présence de la liaison, pas sa position.
  *
- * **Le seuil n'est pas inventé et n'est pas normatif.** P5 dit « le même
- * point » ; D1.5 définit déjà `POINT_COINCIDENCE_M` comme la distance en deçà
+ * **Le seuil n'est pas inventé et n'est pas normatif.** D2.2 renvoie à D1.5,
+ * qui définit `POINT_COINCIDENCE_M` comme la distance en deçà
  * de laquelle deux points sont le même point, et la range explicitement parmi
  * les tolérances techniques. Le contrôle applique cette définition, il n'en
  * pose pas une nouvelle.
@@ -347,12 +347,10 @@ export function missingDestinationNameFindings(
  * verticale. Restent donc l'ascenseur et l'escalier, les deux natures qui en
  * occupent une, et pour lesquelles la coïncidence est le fait à vérifier.
  *
- * P5 énumère trois natures — ascenseur, escalier, rampe — et le contrôle en
- * retient deux. L'écart est assumé : la phrase « occupe le même point sur les
- * deux niveaux qu'il relie » décrit une gaine, et une rampe n'en est pas une.
- * Sans cette lecture, aucun passage entre deux bâtiments ne serait
- * représentable — il franchit toujours une limite de niveau (M01.S10), donc
- * porte une liaison, et ses deux têtes sont par construction distantes.
+ * Deux natures retenues sur quatre, et c'est D2.2 qui le dit désormais. Sans
+ * cette lecture, aucun passage entre deux bâtiments ne serait représentable —
+ * il franchit toujours une limite de niveau (M01.S10), donc porte une liaison,
+ * et ses deux têtes sont par construction distantes.
  */
 export function verticalLinkMisalignedFindings(
   site: GraphScope,
@@ -397,15 +395,15 @@ export function verticalLinkMisalignedFindings(
         // millimètre, pas avec quinze décimales.
         offset_mm: roundHalfAwayFromZero(offset * 1000),
       },
-      ruleRef: 'atelier-QC-12',
+      ruleRef: 'D1.5',
     });
   }
   return findings;
 }
 
 /**
- * QC-10 — une destination que toutes les entrées n'atteignent pas (complément
- * atelier).
+ * `GRAPH.DESTINATION_ENTRANCE_COVERAGE` — une destination que toutes les
+ * entrées empruntées n'atteignent pas.
  *
  * Le contrôle existant, `GRAPH.DESTINATION_UNREACHABLE`, réunit ce que toutes
  * les entrées atteignent et signale ce qui reste dehors. Il répond donc à
@@ -494,7 +492,7 @@ export function destinationNotReachedFromEveryEntranceFindings(
         entrances_total: entrances.length,
         unreached_entrance_ids: missing.join(','),
       },
-      ruleRef: 'atelier-QC-10',
+      ruleRef: null,
     });
   }
   return findings;

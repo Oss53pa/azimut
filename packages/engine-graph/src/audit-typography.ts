@@ -2,19 +2,23 @@ import type { Finding, SiteData } from '@azimut/core-model';
 import { checkableTexts } from './site-texts.js';
 
 /**
- * QC-06 — caractères interdits dans un livrable (complément atelier).
+ * Caractères interdits dans un texte de livrable — A5.8.
  *
- * Le principe P7 (complément atelier) dit « Rédaction propre. Aucun tiret
- * cadratin ou demi-cadratin, point médian, flèche, signe de multiplication,
- * points de suspension dans un livrable », et QC-06 en fait un contrôle
- * bloquant. Rien ne l'exerçait.
+ * `charter_rule` porte la nature `forbidden_character`, et D2.2 nomme
+ * l'anomalie « Caractère interdit **par la charte** dans un texte de
+ * livrable ». La règle appartient donc à la charte d'un client, et non au
+ * produit : c'est l'arbitrage de l'éditeur, et il renverse celui que ce module
+ * portait — il tenait la liste pour une règle de rédaction valant pour tout
+ * livrable Azimut.
  *
- * **Ce n'est pas une valeur d'origine normative.** Aucune norme ne décide
- * qu'un tiret cadratin est interdit : c'est une règle de rédaction du produit,
- * énoncée par le document lui-même, au même titre que la mention d'auteur ou
- * le présent de l'indicatif. Elle ne relève donc pas d'un paquet de règles
- * (INV-5), et elle ne relève pas non plus du lexique de charte (A5.8), qui est
- * propre à un client quand celle-ci vaut pour tout livrable Azimut.
+ * **Ce n'est toujours pas une valeur d'origine normative.** Aucune norme ne
+ * décide qu'un tiret cadratin est interdit. INV-5 ne la vise pas, et aucun
+ * paquet de règles n'a à la porter.
+ *
+ * **Écart déclaré** : la liste ci-dessous est encore celle du produit, écrite
+ * ici, et non celle que la charte du site déclare. Lire `charter_rule`
+ * demanderait de faire entrer la charte dans la signature de ce contrôle et de
+ * ses appelants, ce qu'aucune tâche n'a encore demandé.
  *
  * **Le contrôle porte sur la source, pas sur le rendu**, pour la raison que le
  * contrôle du lexique donne déjà : un caractère fautif dans une dénomination
@@ -33,7 +37,7 @@ export type ForbiddenCharacterRange = {
 };
 
 /**
- * La liste de QC-06, traduite en points de code.
+ * La liste des caractères interdits, traduite en points de code.
  *
  * Le document nomme les caractères en termes typographiques français ; les
  * ramener à des points de code est une traduction, et elle est écrite ici pour
@@ -140,7 +144,7 @@ export function auditTypography(site: SiteData): TypographyReport {
             name: range.name,
             position,
           },
-          ruleRef: 'atelier-QC-06',
+          ruleRef: 'A5.8',
         });
       }
       position += char.length;

@@ -100,7 +100,7 @@ describe('QC-10 (complément atelier) — toutes les entrées desservent-elles t
     expect(findings[0]?.params['reached_from']).toBe(1);
     expect(findings[0]?.params['entrances_total']).toBe(2);
     expect(findings[0]?.params['unreached_entrance_ids']).toBe('n-ml-entrance-sud');
-    expect(findings[0]?.ruleRef).toBe('atelier-QC-10');
+    expect(findings[0]?.ruleRef).toBeNull();
   });
 
   it('le contrôle de structure, lui, reste muet sur ce sens unique', () => {

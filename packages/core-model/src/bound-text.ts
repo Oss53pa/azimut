@@ -1,5 +1,8 @@
 /**
- * Texte lié — complément atelier, M15.
+ * Texte lié — A5.11, règle M01.S11.
+ *
+ * « Un nombre affiché dans un livrable provient d'un fait ou d'un calcul,
+ * jamais d'un littéral écrit dans un gabarit. »
  *
  * Le document de stratégie pose une exigence que la prose ne satisfait jamais
  * d'elle-même : « Les chiffres, noms et faits du document sont des champs liés :

@@ -22,14 +22,16 @@ export const ERROR_CATALOG = {
   // M4 (partie M), outil « Liaison verticale » : « Relie deux nœuds de
   // niveaux différents. » Deux nœuds d'un même niveau font une arête
   // ordinaire, et la liaison qu'on lui adjoindrait n'est rattrapée par
-  // aucun contrôle : QC-12 écarte les liaisons dont les nœuds partagent
-  // un niveau.
+  // aucun contrôle : le contrôle d'alignement écarte les liaisons dont les
+  // deux nœuds partagent un niveau.
   'GRAPH.VERTICAL_LINK_SAME_LEVEL':         { severity: 'blocking', description: 'Liaison verticale entre deux nœuds d’un même niveau' },
-  // Complément atelier, QC-12 : la liaison ne tombe pas au même point d'un
-  // niveau à l'autre, quand P5 (complément atelier) veut qu'elle y tombe.
+  // La liaison ne tombe pas au même point d'un niveau à l'autre. Ascenseurs et
+  // escaliers droits seulement : l'escalier mécanique et la rampe gagnent leur
+  // hauteur en avançant, leurs têtes ne peuvent pas coïncider.
   'GRAPH.VERTICAL_LINK_MISALIGNED':         { severity: 'blocking', description: 'Liaison verticale non alignée entre deux niveaux, ascenseurs et escaliers droits seulement, tolérance de la section D1.5' },
-  // Complément atelier, QC-10 : atteignable depuis une entrée ne vaut pas
-  // atteignable depuis toutes, et le sens de circulation y entre.
+  // Atteignable depuis une entrée ne vaut pas atteignable depuis toutes, et le
+  // sens de circulation y entre. Seules comptent les entrées qu'au moins un
+  // profil emprunte.
   'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'warning',  description: 'Destination non atteinte depuis toutes les entrées empruntées par un profil' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   // M01.S10 : « Toute arête dont les deux extrémités appartiennent à des
@@ -89,23 +91,23 @@ export const ERROR_CATALOG = {
   'LAYOUT.LANG_VARIANT_MISSING':            { severity: 'warning',  description: 'Dénomination absente dans une langue active' },
   'LAYOUT.LANG_VARIANT_LONGER':             { severity: 'info',     description: 'La variante non primaire est plus longue' },
   'LAYOUT.LEXICON_FORBIDDEN_TERM':          { severity: 'blocking', description: 'Terme interdit par la charte' },
-  // Complément atelier, QC-06 : caractère que la rédaction propre bannit.
+  // A5.8, `charter_rule` de nature `forbidden_character`.
   'LAYOUT.FORBIDDEN_CHARACTER':             { severity: 'blocking', description: 'Caractère interdit par la charte dans un texte de livrable' },
-  // Complément atelier, QC-20 : rédaction trop longue dans un texte libre.
+  // A5.8, `charter_rule` de nature `max_sentence_words`.
   'LAYOUT.SENTENCE_TOO_LONG':               { severity: 'warning',  description: 'Phrase plus longue que la limite portée par la charte' },
   'LAYOUT.LEXICON_DISCOURAGED_TERM':        { severity: 'warning',  description: 'Terme déconseillé par la charte' },
-  // Complément atelier, M3 et QC-05 : un texte qui contredit un fait du site.
+  // A5.11, règle M01.S11 : un texte qui contredit un fait déclaré du site.
   'LAYOUT.FACT_CONTRADICTED':               { severity: 'blocking', description: 'Texte de livrable contredisant un fait déclaré du site, règle M01.S11' },
-  // Complément atelier, M16 : deux sources donnent des valeurs différentes.
+  // A5.11, règle M01.S11 : deux sources donnent des valeurs différentes.
   'LAYOUT.SOURCE_DISCREPANCY_OPEN':         { severity: 'warning',  description: 'Écart entre deux sources resté ouvert, règle M01.S11' },
 
-  // ── PARK (complément atelier, M2) ─────────────────────────
+  // ── PARK (A5.11, règle M01.S11) ───────────────────────────
   'PARK.CAPACITY_UNEXPLAINED':              { severity: 'blocking', description: 'Écart entre places numérisées et capacité déclarée, sans explication' },
   'PARK.CAPACITY_EXCEEDED':                 { severity: 'blocking', description: 'Places numérisées au-delà de la capacité déclarée' },
   'PARK.SOURCE_MISSING':                    { severity: 'blocking', description: 'Fait du site sans source déclarée, règle M01.S11' },
   'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de statut proposition affiché comme existant, règle M01.S11' },
 
-  // ── DOC (complément atelier, M15) ─────────────────────────
+  // ── DOC (A5.11, règle M01.S11) ────────────────────────────
   'DOC.BINDING_UNKNOWN':                    { severity: 'blocking', description: 'Champ lié inconnu dans un texte de livrable' },
   'DOC.BINDING_UNRESOLVED':                 { severity: 'blocking', description: 'Champ lié non résolu au rendu' },
   'DOC.LITERAL_NUMBER':                     { severity: 'warning',  description: 'Nombre écrit en littéral dans un livrable, au lieu d’un champ lié' },

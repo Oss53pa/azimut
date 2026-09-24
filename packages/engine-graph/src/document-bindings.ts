@@ -2,7 +2,7 @@ import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimu
 import { PUBLISHABLE_STATUSES } from '@azimut/core-model';
 
 /**
- * Ce qu'un document de stratégie peut lier — complément atelier, M15.
+ * Ce qu'un document de stratégie peut lier — A5.11, règle M01.S11.
  *
  * Le catalogue et les valeurs se construisent ensemble et volontairement : le
  * catalogue dit ce que le modèle sait offrir, les valeurs disent ce que ce

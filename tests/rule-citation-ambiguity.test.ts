@@ -63,9 +63,12 @@ const RULE_REF = /ruleRef:\s*'([^']*)'/g;
 
 /**
  * Un `ruleRef` ne se qualifie pas en prose : il porte son document en préfixe.
- * `atelier-M1.4` et `partieM-M2` sont les deux formes en usage.
+ * `partieM-M2` en est la forme en usage.
+ *
+ * `atelier-` en est sorti : le complément atelier a cessé de faire foi, et
+ * plus aucun renvoi ne doit le citer. Voir l'essai dédié plus bas.
  */
-const REF_QUALIFIER = /^(?:atelier|partieM|partieN|partieL|partieR)-/;
+const REF_QUALIFIER = /^(?:partieM|partieN|partieL|partieR)-/;
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -130,7 +133,34 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     expect(
       offenders,
       'ruleRef ambigus :\n' + offenders.join('\n') +
-      '\n\nUn ruleRef porte son document en préfixe : `atelier-M2`, `partieM-M2`.',
+      '\n\nUn ruleRef porte son document en préfixe : `partieM-M2`.',
+    ).toHaveLength(0);
+  });
+
+  /**
+   * Le complément atelier a cessé de faire foi. Ce qu'il portait de vivant est
+   * repris par le consolidé : les faits du site en A5.11 avec la règle M01.S11,
+   * le calage à n points en section M2, les limites de rédaction par les règles
+   * de charte d'A5.8, la tolérance de coïncidence en D1.5. Un renvoi qui le
+   * citerait encore enverrait le lecteur à un document qu'on lui interdit
+   * d'ouvrir pour trancher.
+   */
+  it('aucun ruleRef ne cite le complément atelier', () => {
+    const offenders: string[] = [];
+    for (const file of sources()) {
+      const body = readFileSync(file, 'utf-8');
+      for (const match of body.matchAll(RULE_REF)) {
+        const ref = match[1] ?? '';
+        if (!ref.startsWith('atelier-')) continue;
+        const line = body.slice(0, match.index ?? 0).split('\n').length;
+        offenders.push(`${relative(ROOT, file)}:${line} ruleRef: '${ref}'`);
+      }
+    }
+    expect(
+      offenders,
+      'Renvois au complément atelier :\n' + offenders.join('\n')
+      + '\n\nLe complément ne fait plus foi. Le renvoi va à la section du '
+      + 'consolidé qui porte la règle.',
     ).toHaveLength(0);
   });
 
@@ -148,7 +178,7 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     expect(AMBIGUOUS.test('// le niveau R7')).toBe(false);
     // Même garde sur les ruleRef.
     expect(REF_QUALIFIER.test('M2')).toBe(false);
-    expect(REF_QUALIFIER.test('atelier-M2')).toBe(true);
+    expect(REF_QUALIFIER.test('atelier-M2')).toBe(false);
     expect(REF_QUALIFIER.test('partieM-M2')).toBe(true);
     expect(AMBIGUOUS.test('A5.8')).toBe(false);
   });

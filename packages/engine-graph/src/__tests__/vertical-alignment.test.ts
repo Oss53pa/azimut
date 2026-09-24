@@ -44,7 +44,7 @@ describe('QC-12 (complément atelier) — liaison verticale décalée', () => {
     expect(findings[0]?.severity).toBe('blocking');
     expect(findings[0]?.entity?.kind).toBe('vertical_link');
     expect(findings[0]?.params['offset_mm']).toBe(2500);
-    expect(findings[0]?.ruleRef).toBe('atelier-QC-12');
+    expect(findings[0]?.ruleRef).toBe('D1.5');
   });
 
   it('admet l’écart que D1.5 appelle « le même point »', () => {
