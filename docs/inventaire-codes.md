@@ -1,5 +1,29 @@
 # Inventaire des codes d'anomalie absents du cahier des charges consolidé
 
+> **Clos par la version 13 du consolidé.** Ce fichier est le relevé qui a servi
+> à l'arbitrage ; il n'est plus une liste à tenir. Ce que l'éditeur a décidé,
+> ligne par ligne :
+>
+> · **93 codes inscrits** au catalogue du consolidé, avec leur gravité et leur
+>   sens. Les libellés du dépôt sont alignés sur les leurs.
+> · **3 codes retirés** — `DATA.VOCABULARY_UNREADABLE`, `EDIT.NOTHING_TO_UNDO`,
+>   `EDIT.NOTHING_TO_REDO` — et réservés : ce sont des états d'écran de F7, non
+>   des anomalies de moteur. Leurs points d'appel ont disparu avec eux.
+> · **`PARK` et `DOC` admis en D2.1**, et fondés par les faits du site, A5.11,
+>   règle M01.S11. **`CHARTER` retiré** des domaines du dépôt, déclaré et vide.
+> · **`RULES.OVERLAY_NOT_COMPARABLE` passe en bloquant**, D3.6 tranchant qu'à
+>   défaut de preuve de durcissement, la surcouche pays est refusée.
+> · **Calage à n points adopté** et spécifié en section M2 ; les cinq codes
+>   `CALIB` restent, leurs seuils sont des tolérances techniques.
+> · Les deux contrôles déjà tranchés le restent : `GRAPH.VERTICAL_LINK_MISALIGNED`
+>   tel quel, `GRAPH.DESTINATION_ENTRANCE_COVERAGE` en avertissement et limité
+>   aux entrées empruntées par un profil.
+>
+> Le recoupement des deux catalogues est désormais tenu par un contrôle, et non
+> par un relevé : `tests/catalogue-consolide.test.ts` lit le consolidé lui-même
+> et échoue au premier écart, dans un sens comme dans l'autre. La colonne
+> « avis » ci-dessous est de l'histoire.
+
 **Le complément atelier `docs/complement-atelier-plans-parcours-signaletique.md` reste
 sous `docs/` pour l'historique, et cesse de faire foi dès cet inventaire trié.** Ce
 qu'il portait de vivant est ici, ligne par ligne, avec le fichier qui l'applique.

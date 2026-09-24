@@ -171,20 +171,31 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 | Liaisons entre bâtiments et `inputs_hash`, D7.1 | Décision retenue et écrite, avec sa réserve. Les liaisons entre bâtiments n'entrent pas dans `inputs_hash`, parce qu'aucun calcul de parcours ne lit aujourd'hui leur attribut de passage couvert : une empreinte d'invalidation ne porte que ce dont un résultat dépend. **Réserve :** le jour où un profil préférera les cheminements couverts, elles devront y entrer, faute de quoi un changement de passage laisserait des parcours faux en cache | Rien à construire. `engine-graph/__tests__/compute-hashes.test.ts` garde la réserve visible : deux essais, l'un montrant que retourner les deux `sheltered` ne bouge pas l'empreinte, l'autre que l'arête qui les porte, elle, la bouge. Le jour venu, c'est le premier qu'il faudra retourner, et `compute-hashes.ts` est le premier fichier à reprendre |
-| Desserte des entrées, QC-10 | Tranché par l'éditeur, et appliqué. `GRAPH.DESTINATION_ENTRANCE_COVERAGE` passe de bloquant à **avertissement** — une desserte partielle est un défaut de jalonnement à examiner, pas une donnée impossible — et sa portée se limite aux **entrées empruntées par au moins un profil de visiteur**, lu sur le graphe : une porte de service qu'aucun profil ne franchit n'a pas à desservir l'annuaire | Rien à construire. `engine-graph/__tests__/entrance-coverage.test.ts` — 13 essais, dont la porte qu'aucun profil ne franchit, celle qu'un seul franchit, et son contre-exemple. Conséquence déclarée : un site sans profil ne lève plus rien, ce qui est le cas de la session d'atelier de la tranche 1, `GraphScope` portant `travel_profiles: []` |
-| Alignement des liaisons verticales, QC-12 | Décision prise. Le contrôle `GRAPH.VERTICAL_LINK_MISALIGNED` exemptait l'escalier mécanique ; il exempte désormais aussi la rampe, pour la même raison écrite au même endroit — l'un comme l'autre gagne sa hauteur en avançant, et ses deux têtes ne peuvent pas coïncider en plan. Sans cette lecture, aucun passage entre deux bâtiments n'était représentable : il franchit toujours une limite de niveau, donc porte une liaison, et ses deux têtes sont par construction distantes | Rien à construire. À rouvrir si l'éditeur juge que P5 vise bien les trois natures, auquel cas c'est la représentation des passages entre bâtiments qui est à revoir |
-| Codes du dépôt hors du catalogue du consolidé | Relevé. `docs/inventaire-codes.md` porte les 96 codes d'`ERROR_CATALOG` qui n'apparaissent nulle part dans le consolidé, une ligne par code : gravité levée, fichier et fonction, renvoi de règle, règle d'origine, exigence équivalente dans le consolidé ou « aucune », et un avis — 52 `inscrire`, 41 `décider`, 3 `retirer`. Les domaines `PARK` et `DOC` sont hors de la liste fermée de D2.1. Les deux contrôles de QC-10 et QC-12 sont tranchés : le premier passe en avertissement et se limite aux entrées empruntées par au moins un profil, le second est retenu tel quel | Arbitrage de l'éditeur, colonne par colonne. Le dépôt n'inscrit ni ne retire rien de lui-même |
+| Desserte des entrées | **Clos.** Avertissement et non refus, et portée limitée aux entrées empruntées par au moins un profil de visiteur. La version 13 l'inscrit au catalogue sous cette forme. Le renvoi tombe à `null` : aucune règle numérotée ne porte ce contrôle, et un renvoi inventé vaudrait moins que pas de renvoi | Rien. Conséquence déclarée : un site sans profil ne lève rien, ce qui est le cas de la session d'atelier de la tranche 1 |
+| Alignement des liaisons verticales | **Clos.** Le contrôle exempte l'escalier mécanique et la rampe, qui gagnent leur hauteur en avançant : leurs deux têtes ne peuvent pas coïncider en plan. La version 13 l'inscrit au catalogue sous cette forme — « ascenseurs et escaliers droits seulement, tolérance de la section D1.5 » — et le renvoi de l'anomalie va désormais à D1.5 | Rien. Le contrôle est retenu tel quel par l'éditeur |
+| Codes du dépôt hors du catalogue du consolidé | **Clos par la version 13.** Les 93 codes du relevé sont inscrits au catalogue du consolidé, avec leur gravité et leur sens ; les libellés du dépôt sont alignés sur les leurs. Trois codes sont retirés et réservés — deux d'annulation et celui du vocabulaire illisible — parce que ce sont des états d'écran de F7 et non des anomalies de moteur ; leurs points d'appel ont disparu avec eux. `PARK` et `DOC` sont admis en D2.1 et fondés par la règle M01.S11 ; `CHARTER`, déclaré et vide, est retiré des domaines du dépôt | Rien à arbitrer. `tests/catalogue-consolide.test.ts` lit le consolidé lui-même et recoupe les deux catalogues dans les deux sens : gravités, libellés, codes, domaines, codes réservés. Vingt-trois codes du consolidé restent hors du dépôt, tous de modules non construits, nommés un par un avec leur section. `docs/inventaire-codes.md` garde le relevé qui a servi à l'arbitrage |
 | Report de niveau, E7.2 | Copier les circulations et les noyaux verticaux d'un niveau à l'autre. Le registre de la partie K le range en « T-1.5, étendue » | Non construit. Il vient après l'outil de liaison, et demande le magnétisme et la duplication de E7.2, qui relèvent de T-1.2c et T-1.2d |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
 
 Sans effet sur la tranche 1, à traiter avant les tranches qui les touchent :
 signature de `resolveFaceContent`, colonnes absentes de `pictogram` et de
-`charter_color`, domaines d'anomalie `CHARTER`, `PARK` et `DOC` hors de la
-liste autorisée de D2.1 — désormais relevés en détail dans
-`docs/inventaire-codes.md` —, douze modules au lieu de treize plus la plateforme
-dans `module-ownership.ts`, `delivery_package` divergente de O16, et trois
-codes `EDIT.*` absents du catalogue.
+`charter_color`, douze modules au lieu de treize plus la plateforme dans
+`module-ownership.ts`, et `delivery_package` divergente de O16.
+
+Ajout de la version 13 : la table `site_fact` du dépôt diverge de celle qu'A5.11
+déclare. Il lui manque `status` — « un fait de statut `proposal` ne s'affiche
+jamais comme un existant » —, `value` y est du texte et non du `jsonb`, et
+`source_ref`, `declared_by`, `declared_at` y portent d'autres noms. L'aligner
+est une migration. Deux limites du même ordre : `LAYOUT.FORBIDDEN_CHARACTER` et
+`LAYOUT.SENTENCE_TOO_LONG` renvoient à A5.8, qui range leurs limites parmi les
+règles de charte, alors que le dépôt les porte encore comme des valeurs du
+produit ; les lire depuis `charter_rule` demande de faire entrer la charte dans
+la signature de ces deux contrôles.
+
+Les domaines d'anomalie et les codes hors catalogue sont clos par la version 13
+du consolidé : `PARK` et `DOC` y sont admis, `CHARTER` est retiré du dépôt, et
+les codes `EDIT.*` qui manquaient sont inscrits ou retirés. Voir le §5.
 
 Ajouts de la version du 22 septembre, décisions 82 à 90 de l'annexe Z :
 `support.code` absent du schéma, `message_line.excluded` et

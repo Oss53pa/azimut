@@ -174,8 +174,16 @@ export const opening = azimut.table('opening', {
 ]);
 
 /**
- * Complément atelier M3 — un fait vérifié du site. `source` et `recorded_on`
+ * A5.11, règle M01.S11 — un fait déclaré du site. `source` et `recorded_on`
  * sont obligatoires : une affirmation sans provenance ne se conteste pas.
+ *
+ * **Écart déclaré avec A5.11**, qui donne à la table quatre colonnes que
+ * celle-ci n'a pas sous cette forme : `value` en `jsonb`, `status` parmi
+ * `existing`, `proposal` et `to_verify`, `source_ref`, `declared_by` et
+ * `declared_at`. Le statut est celui qui manque le plus : « un fait de statut
+ * `proposal` ne s'affiche jamais comme un existant », et seul le statut porté
+ * par les objets de stationnement le dit aujourd'hui. L'aligner est une
+ * migration, qu'aucune tâche n'a encore demandée.
  */
 export const siteFact = azimut.table('site_fact', {
   id: uuid('id').primaryKey().defaultRandom(),
