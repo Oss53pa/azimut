@@ -28,8 +28,32 @@ import type { ChildProcess } from 'node:child_process';
 import { createHmac } from 'node:crypto';
 import type { Sql } from 'postgres';
 
-/** Le secret de signature du banc. Sans valeur en production : il est jetable. */
-export const TEST_JWT_SECRET = 'banc-d-essai-azimut-secret-de-trente-deux-octets';
+/**
+ * Le secret de signature du banc, et pourquoi il n'est pas écrit ici.
+ *
+ * A6.3 : « Aucun secret dans le dépôt, variables d'environnement uniquement,
+ * fichier d'exemple sans valeur réelle. » A2.4 le redit en interdiction :
+ * « Committer un secret, une clé, une chaîne de connexion, un jeton. »
+ *
+ * Il portait une valeur en clair, au motif qu'elle était jetable. Le motif ne
+ * tient pas : la règle ne distingue pas les secrets selon leur portée, et
+ * c'est précisément ainsi qu'un secret d'essai finit par servir ailleurs.
+ *
+ * Aucune valeur de repli. Un secret par défaut ferait passer la chaîne au vert
+ * en signant avec une valeur connue de tout lecteur du dépôt, ce qui est le
+ * défaut qu'on retire.
+ */
+export function testJwtSecret(): string {
+  const secret = process.env['AZIMUT_TEST_JWT_SECRET'] ?? '';
+  if (secret === '') {
+    throw new Error(
+      'AZIMUT_TEST_JWT_SECRET est absente. Le banc d’essai signe ses jetons '
+      + 'avec elle, et aucune valeur n’est écrite dans le dépôt (A6.3). Voir la '
+      + 'mise en route de `packages/db/migrations/ORDRE.md`.',
+    );
+  }
+  return secret;
+}
 
 export type Harness = {
   readonly url: string;
@@ -46,7 +70,7 @@ export function signToken(userId: string, role = 'authenticated'): string {
     role,
     exp: Math.floor(Date.now() / 1000) + 3600,
   });
-  const signature = createHmac('sha256', TEST_JWT_SECRET)
+  const signature = createHmac('sha256', testJwtSecret())
     .update(`${head}.${body}`)
     .digest('base64url');
   return `${head}.${body}.${signature}`;
@@ -101,7 +125,7 @@ export async function startPostgrest(options: {
       PGRST_DB_URI: options.dbUri,
       PGRST_DB_SCHEMAS: 'azimut',
       PGRST_DB_ANON_ROLE: 'anon',
-      PGRST_JWT_SECRET: TEST_JWT_SECRET,
+      PGRST_JWT_SECRET: testJwtSecret(),
       PGRST_SERVER_PORT: String(options.port),
       PGRST_LOG_LEVEL: 'crit',
     },

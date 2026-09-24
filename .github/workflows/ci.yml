@@ -111,6 +111,20 @@ jobs:
           psql "$base" -v ON_ERROR_STOP=1 -q -c 'GRANT USAGE ON SCHEMA azimut TO anon'
           echo "Base montée : $(ls packages/db/migrations/0*.up.sql | wc -l) migrations appliquées."
 
+      # A6.3 : « Aucun secret dans le dépôt, variables d'environnement
+      # uniquement. » Le secret de signature du banc d'essai est donc tiré ici,
+      # à chaque exécution, et n'existe nulle part dans le dépôt. Il ne sert
+      # qu'à ce job, sur une base qui meurt avec lui.
+      #
+      # `::add-mask::` l'efface des journaux avant qu'il n'y paraisse : sans
+      # cela, une commande qui l'imprimerait le publierait.
+      - name: Tirer le secret du banc d'essai
+        run: |
+          set -euo pipefail
+          secret="$(openssl rand -hex 32)"
+          echo "::add-mask::$secret"
+          echo "AZIMUT_TEST_JWT_SECRET=$secret" >> "$GITHUB_ENV"
+
       # A10.4 nº 2 exige l'étanchéité « y compris par canal indirect ». La
       # suite qui l'éprouve passe par PostgREST, parce que c'est le chemin de
       # l'application : entre elle et PostgreSQL se trouvent l'exposition du
@@ -141,6 +155,10 @@ jobs:
         env:
           AZIMUT_TEST_DATABASE_URL: postgres://azimut@127.0.0.1:54332/azimut
           AZIMUT_TEST_POSTGREST: ${{ runner.temp }}/postgrest
+          # La chaîne du rôle auquel PostgREST se connecte. Aucun mot de passe :
+          # le service est monté en `trust`, et en écrire un ferait entrer une
+          # chaîne de connexion au dépôt, que A2.4 interdit.
+          AZIMUT_TEST_POSTGREST_DB_URI: postgres://authenticator@127.0.0.1:54332/azimut
           # Cette chaîne déclare qu'elle doit exécuter la suite d'étanchéité.
           # Sans la déclaration, un binaire manquant la ferait sauter en
           # silence ; avec elle, il la fait échouer.

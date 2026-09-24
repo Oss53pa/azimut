@@ -167,7 +167,7 @@ propriétaire de la base n'a pas le droit d'en créer :
 
 ```sql
 CREATE ROLE anon NOLOGIN NOINHERIT;
-CREATE ROLE authenticator LOGIN NOINHERIT PASSWORD '<mot de passe local>';
+CREATE ROLE authenticator LOGIN NOINHERIT;
 GRANT anon, authenticated TO authenticator;
 GRANT USAGE ON SCHEMA azimut TO anon;
 ```
@@ -178,11 +178,22 @@ n'a pas ; sa définition reproduit celle de Supabase, la revendication `sub` du
 jeton. Il n'entre dans aucune migration : la partie Q le range du côté de la
 plateforme, pas du produit.
 
+Le rôle n'a pas de mot de passe : la base de développement est jointe en
+`trust` depuis le bouclage. Sur une installation qui en demande un, il se pose
+localement et se porte dans `AZIMUT_TEST_POSTGREST_DB_URI` — jamais dans le
+dépôt, que A2.4 et A6.3 interdisent l'un et l'autre.
+
 ```
 AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:5433/azimut' \
+AZIMUT_TEST_POSTGREST_DB_URI='postgres://authenticator@127.0.0.1:5433/azimut' \
+AZIMUT_TEST_JWT_SECRET="$(openssl rand -hex 32)" \
 AZIMUT_TEST_POSTGREST=/chemin/vers/postgrest \
 pnpm test:rls
 ```
+
+`AZIMUT_TEST_JWT_SECRET` est le secret de signature des jetons du banc. Aucune
+valeur n'est écrite dans le dépôt et aucune valeur de repli n'existe : un
+secret par défaut signerait avec une valeur connue de tout lecteur du dépôt.
 
 Sans `AZIMUT_TEST_POSTGREST`, la suite d'étanchéité se saute : c'est la
 tolérance d'un poste qui n'a pas le binaire, et elle s'arrête là. Une chaîne

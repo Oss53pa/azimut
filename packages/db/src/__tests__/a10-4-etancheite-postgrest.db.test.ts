@@ -36,7 +36,21 @@ function only<T>(rows: readonly T[]): T {
  */
 const dsn = process.env['AZIMUT_TEST_DATABASE_URL'];
 const binary = process.env['AZIMUT_TEST_POSTGREST'] ?? '';
-const runnable = dsn !== undefined && binary !== '' && existsSync(binary);
+
+/**
+ * La chaîne de connexion que PostgREST emploie, celle du rôle
+ * `authenticator`.
+ *
+ * Elle était dérivée de celle des essais par une substitution qui injectait un
+ * mot de passe écrit dans le fichier. A2.4 interdit de committer une chaîne de
+ * connexion, et le mot de passe en était une : la variable le remplace, sans
+ * valeur de repli.
+ */
+const postgrestDbUri = process.env['AZIMUT_TEST_POSTGREST_DB_URI'] ?? '';
+const jwtSecret = process.env['AZIMUT_TEST_JWT_SECRET'] ?? '';
+
+const runnable = dsn !== undefined && binary !== '' && existsSync(binary)
+  && postgrestDbUri !== '' && jwtSecret !== '';
 
 /**
  * La chaîne déclare qu'elle doit exécuter cette suite.
@@ -126,7 +140,7 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
 
     harness = await startPostgrest({
       binary,
-      dbUri: (dsn ?? '').replace('//azimut@', '//authenticator:banc@'),
+      dbUri: postgrestDbUri,
       port: 3999,
     });
   }, 60_000);
@@ -247,6 +261,8 @@ describe.runIf(required)('A10.4 — la chaîne exécute bien cette suite', () =>
       + `AZIMUT_TEST_DATABASE_URL : ${dsn === undefined ? 'absente' : 'posée'}\n`
       + `AZIMUT_TEST_POSTGREST : ${binary === '' ? 'absente' : binary}\n`
       + `Binaire présent : ${binary !== '' && existsSync(binary) ? 'oui' : 'non'}\n`
+      + `AZIMUT_TEST_POSTGREST_DB_URI : ${postgrestDbUri === '' ? 'absente' : 'posée'}\n`
+      + `AZIMUT_TEST_JWT_SECRET : ${jwtSecret === '' ? 'absente' : 'posée'}\n`
       + 'Sans elle, la chaîne rendrait vert sans avoir éprouvé le cloisonnement '
       + 'par le chemin de l’application.',
     ).toBe(true);
