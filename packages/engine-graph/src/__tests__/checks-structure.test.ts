@@ -8,7 +8,7 @@ import {
   missingDestinationNameFindings,
 } from '../checks-structure.js';
 import { validateGraph } from '../validate-graph.js';
-import { refMinimal, refMultilevel, refBroken } from '@azimut/testkit';
+import { refMinimal, refMultilevel, refBroken, refRetail } from '@azimut/testkit';
 import type { SiteData } from '@azimut/core-model';
 
 describe('crossLevelWithoutVlFindings', () => {
@@ -294,6 +294,37 @@ describe('crossBuildingWithoutLinkFindings (M01.S10)', () => {
     const result = validateGraph(twoBuildings([]));
     const codes = (result.ok ? result.warnings : result.findings).map(f => f.code);
     expect(codes).toContain('GRAPH.BUILDING_LINK_MISSING');
+  });
+
+  /**
+   * Le cas et son contre-exemple sur donnée de référence.
+   *
+   * Le site construit ci-dessus prouve le contrôle ; il ne prouve pas que le
+   * dépôt porte une donnée où le cas se présente. C1 le demande : « Chaque cas
+   * de détection de `validateGraph` dispose d'un site qui le déclenche et d'un
+   * site voisin qui ne le déclenche pas. »
+   */
+  it('se lève sur ref-broken, qui porte l’arête sans sa ligne', () => {
+    const findings = crossBuildingWithoutLinkFindings(refBroken);
+    expect(findings.map(f => f.entity?.id)).toEqual(['e-brk-cross-building']);
+    expect(findings[0]?.code).toBe('GRAPH.BUILDING_LINK_MISSING');
+    expect(findings[0]?.severity).toBe('blocking');
+    expect(findings[0]?.ruleRef).toBe('M01.S10');
+  });
+
+  it('se tait sur ref-retail, dont les deux passages portent la leur', () => {
+    expect(crossBuildingWithoutLinkFindings(refRetail)).toEqual([]);
+  });
+
+  /**
+   * Un site de référence qui n'est pas valide ne sert plus de point de
+   * comparaison : le contre-exemple ne dirait plus « voici un site correct »,
+   * mais « voici un site fautif ailleurs ».
+   */
+  it('ref-retail ne porte aucune anomalie bloquante', () => {
+    const result = validateGraph(refRetail);
+    const blocking = result.ok ? [] : result.findings.filter(f => f.severity === 'blocking');
+    expect(blocking.map(f => `${f.code} ${f.entity?.id ?? ''}`)).toEqual([]);
   });
 });
 

@@ -338,13 +338,20 @@ export function missingDestinationNameFindings(
  * les tolérances techniques. Le contrôle applique cette définition, il n'en
  * pose pas une nouvelle.
  *
- * **L'escalier mécanique est hors du contrôle**, et c'est le seul choix que ce
- * module prend. P5 énumère trois natures et ne le cite pas ; un escalier
- * mécanique franchit d'ailleurs sa hauteur en avançant, ses deux extrémités ne
- * peuvent pas coïncider. Le retenir produirait une anomalie bloquante sur une
- * géométrie correcte. Le titre de QC-12, « liaison verticale non alignée », se
- * lirait plus largement : l'écart entre l'énumération de P5 et ce titre n'est
- * pas tranché ici.
+ * **L'escalier mécanique et la rampe sont hors du contrôle**, pour une seule et
+ * même raison : l'un comme l'autre gagne sa hauteur en avançant, et leurs deux
+ * extrémités ne peuvent donc pas coïncider en plan. Les retenir produirait une
+ * anomalie bloquante sur une géométrie correcte — et sur toute rampe réelle,
+ * la coïncidence exigée n'étant tenable que par ce qui occupe une gaine
+ * verticale. Restent donc l'ascenseur et l'escalier, les deux natures qui en
+ * occupent une, et pour lesquelles la coïncidence est le fait à vérifier.
+ *
+ * P5 énumère trois natures — ascenseur, escalier, rampe — et le contrôle en
+ * retient deux. L'écart est assumé : la phrase « occupe le même point sur les
+ * deux niveaux qu'il relie » décrit une gaine, et une rampe n'en est pas une.
+ * Sans cette lecture, aucun passage entre deux bâtiments ne serait
+ * représentable — il franchit toujours une limite de niveau (M01.S10), donc
+ * porte une liaison, et ses deux têtes sont par construction distantes.
  */
 export function verticalLinkMisalignedFindings(
   site: GraphScope,
@@ -357,7 +364,7 @@ export function verticalLinkMisalignedFindings(
     a.id.localeCompare(b.id),
   );
   for (const link of sorted) {
-    if (link.kind === 'escalator') continue;
+    if (link.kind === 'escalator' || link.kind === 'ramp') continue;
     const edge = edgeById.get(link.edge_id);
     if (edge === undefined) continue;
     const from = nodeById.get(edge.from_node_id);

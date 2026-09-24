@@ -55,16 +55,22 @@ describe('QC-12 (complément atelier) — liaison verticale décalée', () => {
     expect(verticalLinkMisalignedFindings(decale(0.0011))).toHaveLength(1);
   });
 
-  it('laisse l’escalier mécanique tranquille, même franchement décalé', () => {
-    // P5 (complément atelier) énumère l'ascenseur, l'escalier et la rampe, et
-    // ne le cite pas. Un escalier mécanique franchit sa hauteur en avançant :
-    // ses extrémités ne peuvent pas coïncider, et le retenir produirait une
-    // anomalie bloquante sur une géométrie correcte.
+  it('laisse tranquilles l’escalier mécanique et la rampe, même décalés', () => {
+    // L'un comme l'autre gagne sa hauteur en avançant : ses extrémités ne
+    // peuvent pas coïncider, et les retenir produirait une anomalie bloquante
+    // sur une géométrie correcte — sur toute rampe réelle, d'ailleurs, la
+    // coïncidence n'étant tenable que par ce qui occupe une gaine verticale.
     expect(verticalLinkMisalignedFindings(decale(8, 'escalator'))).toHaveLength(0);
+    expect(verticalLinkMisalignedFindings(decale(8, 'ramp'))).toHaveLength(0);
   });
 
-  it('retient les trois natures que P5 (complément atelier) énumère', () => {
-    for (const kind of ['elevator', 'stair', 'ramp'] as const) {
+  /**
+   * P5 (complément atelier) énumère trois natures, le contrôle en retient
+   * deux : celles qui occupent une gaine verticale, et pour lesquelles la
+   * coïncidence est le fait à vérifier.
+   */
+  it('retient l’ascenseur et l’escalier', () => {
+    for (const kind of ['elevator', 'stair'] as const) {
       const findings = verticalLinkMisalignedFindings(decale(3, kind));
       expect(findings, kind).toHaveLength(1);
       expect(findings[0]?.params['kind']).toBe(kind);

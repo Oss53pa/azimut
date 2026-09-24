@@ -27,6 +27,21 @@ export const refBroken: SiteData = {
       name: 'Bâtiment A',
       independent_access: true,
     },
+    /**
+     * M01.S10 — le second bâtiment, et le cas que ce site porte pour la règle :
+     * une arête le relie au bâtiment A, et aucune ligne `building_link` ne la
+     * double. `GRAPH.BUILDING_LINK_MISSING` se lève dessus.
+     *
+     * Le contre-exemple est `ref-retail`, qui porte deux arêtes entre
+     * bâtiments, chacune avec sa ligne, une couverte et une non couverte.
+     */
+    {
+      id: 'bldg-brk-002',
+      org_id: 'org-test-001',
+      site_id: 'site-broken-001',
+      name: 'Bâtiment B',
+      independent_access: false,
+    },
   ],
   levels: [
     {
@@ -44,6 +59,14 @@ export const refBroken: SiteData = {
       name: 'R+1',
       ordinal: 1,
       elevation_m: 3,
+    },
+    {
+      id: 'lvl-brk-b-rdc',
+      org_id: 'org-test-001',
+      building_id: 'bldg-brk-002',
+      name: 'Bâtiment B, RDC',
+      ordinal: 0,
+      elevation_m: 0,
     },
   ],
   /**
@@ -185,6 +208,14 @@ export const refBroken: SiteData = {
         position: { x_m: 0, y_m: 0 },
         label: 'Palier R+1',
       },
+      {
+        id: 'n-brk-b-hall',
+        org_id: 'org-test-001',
+        level_id: 'lvl-brk-b-rdc',
+        kind: 'junction',
+        position: { x_m: 200, y_m: 0 },
+        label: 'Hall du bâtiment B',
+      },
     ],
     edges: [
       {
@@ -234,6 +265,27 @@ export const refBroken: SiteData = {
         direction: 'both',
         evacuation_route: false,
         length_m: 3,
+      },
+      /**
+       * M01.S10 — l'arête entre deux bâtiments à laquelle la ligne manque.
+       *
+       * Elle franchit aussi une limite de niveau, et c'est inévitable : un
+       * niveau appartient à un bâtiment, donc deux nœuds de bâtiments
+       * différents sont toujours sur deux niveaux différents. Les deux
+       * anomalies se lèvent ensemble, ce qui est exact — il manque ici les
+       * deux lignes.
+       */
+      {
+        id: 'e-brk-cross-building',
+        org_id: 'org-test-001',
+        from_node_id: 'n-brk-entrance',
+        to_node_id: 'n-brk-b-hall',
+        width_m: 1.4,
+        slope_pct: 0,
+        accessible: true,
+        direction: 'both',
+        evacuation_route: false,
+        length_m: 200,
       },
     ],
     vertical_links: [],

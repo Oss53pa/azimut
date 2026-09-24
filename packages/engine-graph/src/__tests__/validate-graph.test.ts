@@ -51,12 +51,22 @@ describe('validateGraph', () => {
       ['GRAPH.VERTICAL_LINK_MISSING', 'e-brk-cross-level'],
       ['GRAPH.DEAD_END_UNJUSTIFIED', 'n-brk-deadend'],
       ['GRAPH.LEVEL_NO_ACCESSIBLE_LINK', 'bldg-brk-001'],
+      // M01.S10 — l'arête entre bâtiments à laquelle la ligne manque. Elle
+      // lève aussi `VERTICAL_LINK_MISSING`, un niveau appartenant à un
+      // bâtiment : les deux lignes manquent, et les deux sont dites.
+      ['GRAPH.BUILDING_LINK_MISSING', 'e-brk-cross-building'],
+      ['GRAPH.VERTICAL_LINK_MISSING', 'e-brk-cross-building'],
+      ['GRAPH.DEAD_END_UNJUSTIFIED', 'n-brk-b-hall'],
     ] as const)('detects %s on entity %s', (code, entityId) => {
       expect(brokenResult.ok).toBe(false);
       if (brokenResult.ok) return;
       const hits = findingsWithCode(brokenResult.findings, code);
       expect(hits.length).toBeGreaterThan(0);
-      expect(hits[0]?.entity?.id).toBe(entityId);
+      // L'entité est cherchée parmi les anomalies du code, et non à leur
+      // première place : l'ordre est celui des identifiants, et il est
+      // éprouvé pour lui-même ailleurs. Le lier ici ferait échouer ce
+      // contrôle au premier identifiant qui se glisse devant.
+      expect(hits.map(h => h.entity?.id)).toContain(entityId);
     });
 
     it('detects GRAPH.DISCONNECTED', () => {
