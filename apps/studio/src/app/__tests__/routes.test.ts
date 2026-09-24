@@ -3,11 +3,13 @@ import {
   parseRoute, buildPath, tranchePath, M_ROUTES, TRANCHE_ORDER,
 } from '../routes.js';
 
-/** F15 — les cinq chemins de la partie M, mot pour mot. */
+/** F15 — les chemins de la partie M, mot pour mot. */
 describe('routes de la tranche M (partie M)', () => {
-  it('les cinq motifs sont ceux de la partie M', () => {
+  it('les motifs sont ceux de la partie M', () => {
     expect(M_ROUTES.map(r => r.pattern)).toEqual([
       '/sites',
+      // M1bis (partie M) : « Chemin. `/sites/:siteId` ».
+      '/sites/:siteId',
       '/sites/:siteId/levels/:levelId/plan',
       '/sites/:siteId/levels/:levelId/footprints',
       '/sites/:siteId/levels/:levelId/graph',
@@ -17,6 +19,12 @@ describe('routes de la tranche M (partie M)', () => {
 
   it('analyse la liste des sites', () => {
     expect(parseRoute('/sites')).toEqual({ screen: 'sites' });
+  });
+
+  it('analyse la fiche de site, et la distingue de la liste', () => {
+    expect(parseRoute('/sites/site-1')).toEqual({ screen: 'record', siteId: 'site-1' });
+    expect(buildPath({ screen: 'record', siteId: 'site-1' })).toBe('/sites/site-1');
+    expect(tranchePath('record', 'site-1', 'lvl-1')).toBe('/sites/site-1');
   });
 
   it('analyse les trois écrans d’atelier', () => {

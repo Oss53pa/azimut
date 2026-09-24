@@ -21,6 +21,7 @@ import { FootprintsScreenAdapter } from './FootprintsAdapter.js';
 import { GraphScreenAdapter } from './GraphAdapter.js';
 import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
+import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 
 /**
  * F15 — `app/`, la composition des écrans.
@@ -119,13 +120,11 @@ function TrancheWorkspace({ route }: {
         niveau, et une barre par écran en ferait quatre à tenir d'accord.
         L'écran de validation porte sur le site entier et n'en reçoit pas.
       */}
-      {route.screen !== 'validation' && (
+      {route.screen !== 'validation' && route.screen !== 'record' && (
         <LevelBar
           levels={levelChoices(session, levelId)}
           currentId={levelId}
-          onSelect={id => {
-            navigateTo(buildPath({ ...route, levelId: id }));
-          }}
+          onSelect={id => { navigateTo(buildPath({ ...route, levelId: id })); }}
         />
       )}
       {screenOf(route, session, levelId)}
@@ -152,6 +151,8 @@ function screenOf(
   levelId: string,
 ): JSX.Element {
   switch (route.screen) {
+    case 'record':
+      return <SiteRecordScreenAdapter session={session} siteId={route.siteId} />;
     case 'plan':
       return <PlanScreenAdapter session={session} siteId={route.siteId} levelId={levelId} />;
     case 'footprints':

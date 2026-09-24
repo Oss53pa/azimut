@@ -191,6 +191,11 @@ export const ERROR_CATALOG = {
   // capacité fractionnaire, que « non positive » ne couvre pas : la colonne
   // est entière (migration 0004), et 2,5 personnes n’est pas une capacité.
   'DATA.CAPACITY_INVALID':                  { severity: 'blocking', description: 'Capacité d’une liaison verticale absente ou non positive' },
+  // M1bis (partie M), champs d'un niveau : le rang est « unique par
+  // bâtiment », et la suppression d'un niveau est « refusée s'il porte des
+  // empreintes ou des nœuds ».
+  'DATA.LEVEL_ORDINAL_DUPLICATE':           { severity: 'blocking', description: 'Deux niveaux de même rang dans un bâtiment' },
+  'DATA.LEVEL_NOT_EMPTY':                   { severity: 'blocking', description: 'Suppression d’un niveau portant des empreintes ou des nœuds' },
   // Levé depuis l’origine par le formulaire de création de M1 (partie M) et
   // absent du catalogue : l’écran affichait donc le code brut, faute d’entrée
   // de dictionnaire. Le sens qui manquait au garde de

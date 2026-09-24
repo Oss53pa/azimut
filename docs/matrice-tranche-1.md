@@ -96,6 +96,21 @@ range la fiche de site parmi les écrans qui « restent à spécifier », et c'e
 là que la gestion des bâtiments et des niveaux appartient. Les niveaux d'un
 site viennent donc du dépôt. Voir §5.
 
+### M1bis, fiche de site — 5 critères
+
+| Critère | État | Preuve |
+| --- | --- | --- |
+| 1. Deux bâtiments et quatre niveaux se créent par l'écran seul | tenu | `tests/e2e/m1bis-fiche-site.spec.ts` — sans intervention en base. C'est ce critère qui débloque T-1.5 : sans second niveau, l'outil de liaison verticale n'a rien à relier |
+| 2. Deux niveaux de même rang refusés | tenu | `state/__tests__/site-structure.test.ts` et l'essai de bout en bout — `DATA.LEVEL_ORDINAL_DUPLICATE` |
+| 3. Un niveau portant des empreintes ou des nœuds ne se supprime pas | tenu | même paire d'essais — `DATA.LEVEL_NOT_EMPTY`, et l'écran dit ce que le niveau porte au lieu de laisser presser puis refuser |
+| 4. L'altitude saisie est celle que lit la géométrie | tenu | essai de bout en bout, relu au magasin ; l'outil de liaison verticale en tire la longueur de l'arête |
+| 5. Parcours complet au clavier seul | tenu | essai de bout en bout, sans un clic |
+
+Rang et altitude sont requis sans code d'anomalie : M1bis en donne un au nom
+et au rang en double, aucun à leur absence. Le refus est donc préventif —
+l'action reste inactive tant que les trois champs ne sont pas saisis — plutôt
+que d'ajouter au catalogue que la version 11 vient de compléter.
+
 ### M1 et M5
 
 M1 et M5 ne portent pas de critères numérotés. Leurs règles d'écran sont
@@ -151,7 +166,6 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 | Intermittence de `tests/e2e/keyboard-traversal.spec.ts` | Essai vert. La cause est **probable et non prouvée** : l'attente du rendu ajoutée avant la tabulation corrige une course réelle — `page.goto` rend la main avant que React 18 n'ait rendu — mais l'échec n'a jamais été reproduit, ni par vingt-quatre sondes dédiées ni par six exécutions complètes. Rien ne prouve que c'était cette course-là | Rien tant que l'essai reste vert. Une garde bornée fait désormais échouer l'essai sur « l'application n'a rien rendu », avec le corps du document, pour qu'une régression se présente comme une erreur et non comme une intermittence. Si l'intermittence revient, le point se rouvre et la cause est à chercher ailleurs |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
-| Création d'un niveau | Aucun écran de la tranche n'en ajoute. M1 en crée un à la création du site ; N1.5 range la fiche de site, où la gestion des bâtiments et des niveaux appartient, parmi les écrans qui « restent à spécifier ». Un site à plusieurs niveaux s'ouvre donc depuis le dépôt, et l'atelier le parcourt | Périmètre. En inventer le formulaire dans l'atelier placerait là une structure que personne n'a spécifiée. À traiter avec la fiche de site |
 | Liaisons inter-bâtiments, table `building_link` | La table existe en base depuis la migration 0004, et rien ne l'écrit ni ne la lit. Le contrôle de connexité entre bâtiments se fonde sur le graphe — une arête dont les deux extrémités retombent sur deux bâtiments — et non sur elle. T-1.5 la nomme dans son objectif, ses deux critères d'acceptation portent sur la liaison verticale et sur le bâtiment isolé, tous deux tenus | Décider si `building_link` porte une donnée que le graphe ne porte pas déjà — abri, horaires propres — ou si elle est à retirer. Aucun écran de la tranche ne la demande |
 | Report de niveau, E7.2 | Copier les circulations et les noyaux verticaux d'un niveau à l'autre. Le registre de la partie K le range en « T-1.5, étendue » | Non construit. Il vient après l'outil de liaison, et demande le magnétisme et la duplication de E7.2, qui relèvent de T-1.2c et T-1.2d |
 

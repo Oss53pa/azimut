@@ -136,6 +136,8 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'DATA.TIMEZONE_REQUIRED': 'Fuseau horaire requis',
   'DATA.VOCABULARY_UNREADABLE': 'Vocabulaire du site illisible',
   'DATA.CAPACITY_INVALID': 'Capacité d’une liaison verticale absente ou non positive',
+  'DATA.LEVEL_ORDINAL_DUPLICATE': 'Deux niveaux de même rang dans un bâtiment',
+  'DATA.LEVEL_NOT_EMPTY': 'Suppression d’un niveau portant des empreintes ou des nœuds',
   'EDIT.CONTEXT_VIOLATION': 'Opération interdite dans ce contexte d\'édition',
   'EDIT.BOOLEAN_RESULT_INVALID': 'Opération booléenne produisant une géométrie invalide',
   'EDIT.CROSS_ORG_PASTE_DENIED': 'Collage entre organisations refusé',
