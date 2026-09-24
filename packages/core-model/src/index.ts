@@ -91,7 +91,7 @@ export {
   buildArchiveName,
 } from './file-naming.js';
 export type { FileNameParts, ArchiveNameParts } from './file-naming.js';
-export { ERROR_CATALOG } from './error-catalog.js';
+export { ERROR_CATALOG, ANOMALY_DOMAINS } from './error-catalog.js';
 export type { ErrorCode } from './error-catalog.js';
 export {
   ERROR_MESSAGES_FR,

@@ -37,7 +37,7 @@ export const ERROR_CATALOG = {
   // sans liaison *et* sans accès propre : celui-ci a une porte, il n'est
   // pas inatteignable, et le signaler bloquant refuserait un site
   // parfaitement réel.
-  'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY': { severity: 'warning',  description: 'Bâtiment relié au site par son seul accès indépendant' },
+  'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY': { severity: 'warning',  description: 'Bâtiment relié au reste du site par son seul accès indépendant. Ne se lève que sur un site à plusieurs bâtiments' },
   'GRAPH.NO_ENTRANCE':                      { severity: 'blocking', description: 'Aucune entrée dans le graphe' },
   'GRAPH.NOT_VALIDATED':                    { severity: 'blocking', description: 'Audit demandé avant validation de complétude' },
   'GRAPH.PROFILE_NOT_ACCESSIBLE':           { severity: 'blocking', description: 'Profil non accessible pour audit d’accessibilité' },
@@ -187,7 +187,18 @@ export const ERROR_CATALOG = {
   'DATA.COUNTRY_REQUIRED':                  { severity: 'blocking', description: 'Pays requis' },
   'DATA.LANG_REQUIRED':                     { severity: 'blocking', description: 'Au moins une langue active requise' },
   'DATA.CODE_DUPLICATE':                    { severity: 'blocking', description: 'Deux cellules portent le même code sur un niveau' },
-  'DATA.CAPACITY_INVALID':                  { severity: 'blocking', description: 'Capacité renseignée non entière ou inférieure à un' },
+  // Le libellé est celui du catalogue. Le contrôle refuse en outre une
+  // capacité fractionnaire, que « non positive » ne couvre pas : la colonne
+  // est entière (migration 0004), et 2,5 personnes n’est pas une capacité.
+  'DATA.CAPACITY_INVALID':                  { severity: 'blocking', description: 'Capacité d’une liaison verticale absente ou non positive' },
+  // Levé depuis l’origine par le formulaire de création de M1 (partie M) et
+  // absent du catalogue : l’écran affichait donc le code brut, faute d’entrée
+  // de dictionnaire. Le sens qui manquait au garde de
+  // `tests/error-code-reachability.test.ts` est ajouté avec lui.
+  'DATA.TIMEZONE_REQUIRED':                 { severity: 'blocking', description: 'Site sans fuseau horaire' },
+  // Même défaut, même commit : la lecture du vocabulaire d’un site la lève
+  // pour l’état d’écran de F7, et l’écran n’avait rien à afficher.
+  'DATA.VOCABULARY_UNREADABLE':             { severity: 'blocking', description: 'Vocabulaire du site illisible' },
 
   // ── WAYFIND (H12) ─────────────────────────────────────────
   'WAYFIND.NAMING_COLLISION':               { severity: 'blocking', description: 'Deux entités portent le même nom d’orientation' },
