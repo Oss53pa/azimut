@@ -440,7 +440,8 @@ charter_color       (id, org_id, charter_id, key, usage,
 charter_typeface    (id, org_id, charter_id, key, family, weight, min_size_mm)
 charter_rule        (id, org_id, charter_id, kind, params jsonb)
                     kind in ('adjacency_forbidden','min_logo_width','background_allowed',
-                             'proportion','signature_usage')
+                             'proportion','signature_usage','forbidden_character',
+                             'max_sentence_words')
 lexicon_term        (id, org_id, charter_id, lang, term, severity)
                     severity in ('forbidden','discouraged')
 
@@ -479,7 +480,21 @@ audit_log           (id, org_id, actor_id, action, entity, entity_id,
 
 `audit_log` est en insertion seule. Voir A12.3.
 
-### A5.11 Suppression
+### A5.11 Faits du site, source et statut
+
+```sql
+site_fact    (id, org_id, site_id, key, value jsonb, status, source_ref,
+              declared_by, declared_at)
+             status in ('existing','proposal','to_verify')
+```
+
+Un fait du site est une donnée déclarée qui n'appartient à aucune autre table : capacité annoncée d'un parking, surface commercialisable, nombre de places de livraison, tout chiffre qu'un livrable affiche et que la géométrie ne produit pas.
+
+**M01.S11.** Tout fait du site porte sa source et son statut. Un fait de statut `proposal` ne s'affiche jamais comme un existant. Un nombre affiché dans un livrable provient d'un fait ou d'un calcul, jamais d'un littéral écrit dans un gabarit. Un texte de livrable qui contredit un fait déclaré est refusé. Un écart entre deux sources reste ouvert et visible tant qu'il n'est pas tranché.
+
+C'est la même discipline que celle des paquets de règles : rien ne s'affiche sans sa source. Elle fonde les contrôles des domaines `PARK` et `DOC`.
+
+### A5.12 Suppression
 
 Règle transverse, valable pour tout le modèle.
 
@@ -546,6 +561,8 @@ type Finding = {
 ```
 
 Les messages destinés à l'utilisateur sont produits par la couche d'interface depuis `code` et `params`. Un moteur ne produit jamais de texte destiné à l'affichage.
+
+**Refus d'une entrée invalide.** Un moteur qui reçoit une entrée qu'il ne peut pas traiter, une référence introuvable, une dimension nulle ou négative, un fichier vide, une structure mal formée, refuse par une anomalie bloquante portant un code du catalogue. Il ne lève pas d'exception, ne retourne pas de résultat partiel et ne comble aucune valeur manquante. Cette règle vaut pour tous les moteurs, y compris ceux à venir, et fonde les codes de référence introuvable du catalogue.
 
 ### A7.1 engine-graph
 
@@ -1308,7 +1325,7 @@ Ces tolérances sont des constantes techniques, pas des valeurs normatives. Elle
 
 Format : `DOMAINE.SUJET_CONDITION`, en majuscules, un point de séparation, souligné dans les segments.
 
-Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `EDIT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
+Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `DOC`, `EDIT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PARK`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
 
 Un code est stable à vie. Il n'est jamais renommé, jamais traduit, jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et sa valeur reste réservée.
 
@@ -1424,6 +1441,164 @@ Toute anomalie produite par un moteur figure dans ce catalogue. Ajouter un code 
 | `RULES.SCOPE_AMBIGUOUS` | bloquant | Deux règles de même code et de même spécificité |
 | `RULES.TEST_PACK_OUTSIDE_TEST_ENV` | bloquant | Paquet de juridiction TEST chargé hors environnement de test |
 
+
+**Codes des moteurs et des contrôles construits**
+
+Inscrits au catalogue à partir de l'inventaire du dépôt. Trois codes de cet inventaire n'y figurent pas et sont retirés du dépôt : ils signalent un état d'écran de la section F7, non une anomalie produite par un moteur.
+
+CALIB
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `CALIB.CONTROL_POINTS_COLLINEAR` | bloquant | Points de calage colinéaires, l'ajustement est impossible |
+| `CALIB.CONTROL_POINTS_INSUFFICIENT` | bloquant | Points de calage en nombre insuffisant |
+| `CALIB.ORIGIN_LOCKED` | bloquant | Tentative de modification de l'origine du repère site, règle M01.S1 |
+| `CALIB.ORIGIN_MISMATCH` | bloquant | Origine du repère incohérente entre deux niveaux d'un même site |
+| `CALIB.RESIDUAL_MEAN_EXCEEDED` | bloquant | Résidu moyen de calage au-dessus du seuil |
+| `CALIB.RESIDUAL_NOT_MEASURED` | avertissement | Résidu non mesurable, trop peu de points homologues |
+| `CALIB.RESIDUAL_POINT_EXCEEDED` | bloquant | Résidu d'un point de calage au-dessus du seuil |
+
+DATA
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `DATA.APPROVED_VERSION_NOT_IMMUTABLE` | bloquant | Tentative de modification d'une version approuvée, règle M04.G7 |
+| `DATA.CATEGORY_CYCLE` | bloquant | Cycle dans la hiérarchie des catégories |
+| `DATA.CATEGORY_PARENT_NOT_FOUND` | bloquant | Catégorie parente inexistante |
+| `DATA.DEST_CATEGORY_NOT_FOUND` | avertissement | Catégorie d'une destination inexistante |
+| `DATA.EMPTY_SVG_PATH` | bloquant | Pictogramme sans tracé |
+| `DATA.FACE_CONTENT_UNSERIALIZABLE` | bloquant | Contenu de face non sérialisable en forme canonique, section D7.2 |
+| `DATA.FACE_DIMENSIONS_INVALID` | bloquant | Dimensions de face nulles ou négatives |
+| `DATA.KIOSK_CONFIG_INVALID` | bloquant | Configuration locale de borne invalide, section D10.3 |
+| `DATA.PICTOGRAM_CATEGORY_NOT_FOUND` | bloquant | Catégorie d'un pictogramme inexistante |
+| `DATA.PROOF_DUPLICATE_VERSION` | bloquant | Deux épreuves pour un même numéro de version |
+| `DATA.PROOF_PENDING_WITH_APPROVAL` | avertissement | Version restée en revue alors qu'une approbation existe |
+| `DATA.PROOF_STATUS_WITHOUT_APPROVAL` | bloquant | Version approuvée sans ligne d'approbation |
+| `DATA.SUPPORT_BLOCK_REGION_INVALID` | bloquant | Bloc débordant de la grille du gabarit, section D8.2 |
+| `DATA.SUPPORT_DUPLICATE_TYPE_KEY` | bloquant | Clé de typologie de support en double |
+| `DATA.SUPPORT_FACE_COUNT_MISMATCH` | bloquant | Nombre de faces différent de celui de la typologie |
+| `DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND` | avertissement | Face de gabarit sans face correspondante dans la typologie |
+| `DATA.SUPPORT_TEMPLATE_TYPE_NOT_FOUND` | bloquant | Gabarit d'une typologie inexistant |
+| `DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED` | bloquant | Rejet d'une version sans motif, section D9.1 |
+| `DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN` | bloquant | Transition d'état non prévue par la section D9.1 |
+
+DOC
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `DOC.BINDING_UNKNOWN` | bloquant | Champ lié inconnu dans un texte de livrable |
+| `DOC.BINDING_UNRESOLVED` | bloquant | Champ lié non résolu au rendu |
+| `DOC.LITERAL_NUMBER` | avertissement | Nombre écrit en littéral dans un livrable, au lieu d'un champ lié |
+
+EDIT
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `EDIT.COMMAND_SHAPE_INVALID` | bloquant | Commande d'édition mal formée, section E5.1 |
+| `EDIT.TABLE_NOT_OWNED` | bloquant | Écriture directe dans une table dont l'atelier n'est pas propriétaire, règle M12.A2 |
+| `EDIT.TIMESTAMP_REQUIRED` | bloquant | Commande sans horodatage fourni par l'appelant |
+| `EDIT.WRITE_REFUSED` | bloquant | Écriture refusée par le cloisonnement, section A6.1 |
+
+FLOW
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `FLOW.WEIGHT_INVALID` | bloquant | Pondération de profil négative ou non numérique |
+
+GRAPH
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `GRAPH.CATEGORY_ALL_VACANT` | avertissement | Catégorie dont toutes les destinations sont vacantes |
+| `GRAPH.DESTINATION_DUPLICATE_ON_NODE` | avertissement | Plusieurs destinations sur un même nœud d'accès |
+| `GRAPH.DESTINATION_ENTRANCE_COVERAGE` | avertissement | Destination non atteinte depuis toutes les entrées empruntées par un profil |
+| `GRAPH.DESTINATION_FOOTPRINT_NOT_FOUND` | bloquant | Empreinte d'une destination inexistante |
+| `GRAPH.DESTINATION_LANG_INCOMPLETE` | avertissement | Destination non dénommée dans toutes les langues actives |
+| `GRAPH.DESTINATION_NAME_DUPLICATE` | avertissement | Deux destinations de même dénomination |
+| `GRAPH.DESTINATION_NAME_MISSING` | avertissement | Destination sans dénomination |
+| `GRAPH.DESTINATION_NODE_WRONG_KIND` | avertissement | Nœud d'accès d'un type inattendu, règle M01.S4 |
+| `GRAPH.DESTINATION_UNREACHABLE` | bloquant | Destination inatteignable depuis une entrée |
+| `GRAPH.DIRECTORY_NAME_EMPTY` | bloquant | Dénomination vide dans l'annuaire |
+| `GRAPH.DIRECTORY_NAME_MISSING` | avertissement | Dénomination absente dans une langue active |
+| `GRAPH.DIRECTORY_NAME_ORPHAN` | avertissement | Dénomination rattachée à une destination inexistante |
+| `GRAPH.NO_ENTRANCE` | bloquant | Site sans aucune entrée |
+| `GRAPH.PROFILE_NOT_ACCESSIBLE` | bloquant | Audit d'accessibilité lancé sur un profil non accessible |
+| `GRAPH.QUANTITY_CROSS_CHECK_FAILED` | bloquant | Quantitatif ne recoupant pas la nomenclature, écart non nul |
+| `GRAPH.QUANTITY_NODE_NOT_FOUND` | avertissement | Support rattaché à un nœud inexistant |
+| `GRAPH.RESOLVE_NODE_NOT_FOUND` | bloquant | Nœud inexistant passé à la résolution de contenu |
+| `GRAPH.ROUTE_NODE_NOT_FOUND` | bloquant | Nœud inexistant passé au calcul de parcours |
+| `GRAPH.ROUTE_UNREACHABLE` | bloquant | Aucun chemin entre les deux nœuds demandés |
+| `GRAPH.VERTICAL_LINK_MISALIGNED` | bloquant | Liaison verticale non alignée entre deux niveaux, ascenseurs et escaliers droits seulement, tolérance de la section D1.5 |
+
+IMPORT
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `IMPORT.EMPTY_FILE` | bloquant | Fichier d'import sans aucune ligne |
+
+LAYOUT
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `LAYOUT.EVAC_EMPTY_LEVEL` | avertissement | Plan d'évacuation d'un niveau sans contenu |
+| `LAYOUT.EVAC_LEVEL_NOT_FOUND` | bloquant | Niveau inexistant passé au plan d'évacuation |
+| `LAYOUT.EVAC_NO_EXITS` | avertissement | Plan d'évacuation sans aucune sortie |
+| `LAYOUT.EVAC_NO_ROUTES` | avertissement | Plan d'évacuation sans aucun cheminement |
+| `LAYOUT.FACT_CONTRADICTED` | bloquant | Texte de livrable contredisant un fait déclaré du site, règle M01.S11 |
+| `LAYOUT.FLOOR_PLAN_EMPTY_LEVEL` | avertissement | Plan de niveau sans contenu |
+| `LAYOUT.FLOOR_PLAN_LEVEL_NOT_FOUND` | bloquant | Niveau inexistant passé au plan de niveau |
+| `LAYOUT.FORBIDDEN_CHARACTER` | bloquant | Caractère interdit par la charte dans un texte de livrable |
+| `LAYOUT.ISO_EMPTY_LEVELS` | avertissement | Vue isométrique sans aucun niveau |
+| `LAYOUT.ISO_LEVEL_NOT_FOUND` | bloquant | Niveau inexistant passé à la vue isométrique |
+| `LAYOUT.MOUNTING_OUT_OF_RANGE` | bloquant | Hauteur d'implantation hors de la plage du paquet de règles |
+| `LAYOUT.ORIENTED_PLAN_EMPTY_LEVEL` | avertissement | Plan orienté d'un niveau sans contenu |
+| `LAYOUT.ORIENTED_PLAN_LEVEL_NOT_FOUND` | bloquant | Niveau inexistant passé au plan orienté |
+| `LAYOUT.SENTENCE_TOO_LONG` | avertissement | Phrase plus longue que la limite portée par la charte |
+| `LAYOUT.SOURCE_DISCREPANCY_OPEN` | avertissement | Écart entre deux sources resté ouvert, règle M01.S11 |
+| `LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS` | bloquant | Rapport épaisseur de trait sur hauteur hors des bornes du paquet de règles |
+| `LAYOUT.TEMPLATE_BINDING_UNSUPPORTED` | bloquant | Liaison de bloc non prévue par le schéma de gabarit, section D8.2 |
+| `LAYOUT.TEMPLATE_INVALID` | bloquant | Gabarit non conforme à son schéma, section D8.1 |
+
+PACKAGE
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `PACKAGE.ABSOLUTE_PATH` | bloquant | Chemin absolu dans un paquet, section D10.1 |
+| `PACKAGE.DUPLICATE_ID` | bloquant | Deux artefacts de même identifiant dans un paquet |
+| `PACKAGE.DUPLICATE_PATH` | bloquant | Deux fichiers de même chemin dans un paquet |
+| `PACKAGE.EMPTY_ARTIFACT` | bloquant | Artefact vide dans un paquet |
+| `PACKAGE.FILE_MISSING` | bloquant | Fichier requis absent du paquet de borne, section D10.1 |
+| `PACKAGE.INTEGRITY_MISMATCH` | bloquant | Fichier non conforme au manifeste, section D10.4 |
+
+PARK
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `PARK.CAPACITY_EXCEEDED` | bloquant | Places numérisées au-delà de la capacité déclarée |
+| `PARK.CAPACITY_UNEXPLAINED` | bloquant | Écart entre places numérisées et capacité déclarée, sans explication |
+| `PARK.PROPOSAL_AS_EXISTING` | bloquant | Objet de statut proposition affiché comme existant, règle M01.S11 |
+| `PARK.SOURCE_MISSING` | bloquant | Fait du site sans source déclarée, règle M01.S11 |
+
+RULES
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `RULES.FILE_MISSING` | bloquant | Fichier de règles annoncé par le manifeste et introuvable |
+| `RULES.FILE_NOT_LISTED` | bloquant | Fichier de règles présent et non listé au manifeste |
+| `RULES.INVALID_JSON` | bloquant | Fichier de règles illisible |
+| `RULES.OVERLAY_LESS_RESTRICTIVE` | bloquant | Règle pays moins contraignante que le socle, section D3.6 |
+| `RULES.OVERLAY_NOT_COMPARABLE` | bloquant | Règle pays non comparable au socle : le durcissement ne peut pas être établi |
+| `RULES.VALIDATION_ERROR` | bloquant | Paquet de règles non conforme à son schéma, sections D3.3 et D3.4 |
+
+WAYFIND
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `WAYFIND.FACE_TEMPLATE_MISSING` | bloquant | Face de typologie sans gabarit |
+| `WAYFIND.LINE_MALFORMED` | bloquant | Ligne du tableau des messages incomplète, section H2.5 |
+| `WAYFIND.LINE_MISSING` | bloquant | Aucune ligne du tableau des messages pour ce bloc, section H2.5 |
+| `WAYFIND.SUPPORT_TYPE_UNKNOWN` | bloquant | Typologie de support inexistante |
+
 Les codes propres aux parties E à Q figurent dans le tableau de chaque partie. L'ensemble de ces tableaux forme le catalogue.
 
 ### D2.3 Règle de traduction
@@ -1495,7 +1670,7 @@ Quand plusieurs règles portent le même code, la plus spécifique gagne. Ordre 
 
 ### D3.6 Surcouche pays
 
-Un site peut être rattaché à un paquet international et à un paquet pays. La règle pays prime, mais **uniquement si elle est plus contraignante**. Une règle pays moins contraignante que le socle est rejetée au chargement avec un code dédié. C'est l'application du principe : la surcouche durcit, jamais l'inverse.
+Un site peut être rattaché à un paquet international et à un paquet pays. La règle pays prime, mais **uniquement si elle est plus contraignante**. Une règle pays dont on ne peut pas établir qu'elle durcit le socle est refusée elle aussi : à défaut de preuve, on ne présume pas. Une règle pays moins contraignante que le socle est rejetée au chargement avec un code dédié. C'est l'application du principe : la surcouche durcit, jamais l'inverse.
 
 ---
 
@@ -4488,7 +4663,6 @@ Points ouverts par les parties L à Q, qui n'avaient pas été inscrits ici.
 | Articulation du mode urgence avec le système de sécurité incendie | Bureau de contrôle du site | Avant tout déploiement de bornes | L |
 | Taux de taxe par pays et par nature de prestation | Conseil fiscal | Avant la première facture | V |
 | Correspondance des pays vers les devises, et exposant de chaque devise, avec leur source documentaire et ses conditions de réutilisation | Atlas Studio | Avant la première facture | V |
-| Calage à n points avec résidu mesuré, qui donnerait une preuve chiffrée du critère 1 de M2 au lieu d'une vérification à la main. Amélioration possible, non engagée | Atlas Studio | À l'examen des premiers sites réels modélisés | S |
 | Délais et formes de notification d'une violation de données, par pays | Conseil juridique | Avant la première donnée personnelle réelle | L |
 | Destinataires d'alerte et astreinte | Atlas Studio | Avant le premier client en production | L |
 
@@ -4497,6 +4671,7 @@ Points ouverts par les parties L à Q, qui n'avaient pas été inscrits ici.
 | Sujet | Fermé par |
 | --- | --- |
 | Spécification au champ près de l'écran du tableau des messages | Partie R, avec quatre décisions reportées en F5bis.3, N2.2, H11, A5.6, D11 et règle M02.W11 |
+| Calage à n points avec résidu mesuré | Adopté et spécifié en section M2 |
 
 ---
 
@@ -5060,6 +5235,8 @@ Pour un fichier de CAO, la qualification décrite en partie D s'exécute avant t
 | Point A | clic dans la zone de travail | requis | `CALIB.POINT_REQUIRED` |
 | Point B | clic dans la zone de travail | requis, distinct de A d'au moins 40 pixels | `CALIB.POINTS_TOO_CLOSE` |
 | Distance réelle | numérique, mètres | requis, supérieur à 0, 3 décimales | `CALIB.DISTANCE_INVALID` |
+
+**Calage à n points.** En complément du calage à deux points, qui reste le minimum, l'écran accepte un calage à n points homologues, ajusté et mesuré. Il produit un résidu, moyen et par point, qui donne la preuve chiffrée du critère 1 de cette section au lieu d'une vérification à la main. Les seuils de résidu sont des tolérances techniques, section D1.5, non des valeurs normatives. À moins de quatre points, le résidu ne mesure rien et l'écran le dit.
 
 Calculé et affiché en lecture seule : échelle en pixels par mètre, et son équivalent en échelle de plan arrondie à la valeur courante la plus proche, 1:100, 1:200, 1:500.
 
@@ -7013,6 +7190,7 @@ La règle de propriété unique interdit de créer une table sans propriétaire.
 | `support_request` | 00 Plateforme | Assistance |
 | `rules_pack`, `rules_pack_rule` | 00 Plateforme | Référentiel global |
 | `site_rules_binding` | 01 Socle | Rattachement d'un site à un paquet |
+| `site_fact` | 01 Socle | Faits déclarés du site, avec source et statut, section A5.11 |
 | `plan_calibration_point` | 01 Socle | Points de calage d'une source de plan, en pixels de l'image, règle M01.S2 |
 | `audit_log` | 00 Plateforme | Journal d'audit |
 | `job` | 00 Plateforme | File de travaux |
@@ -8028,3 +8206,14 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 236. M4 : largeur d'arête héritée du bâtiment
 237. C1 : site de référence portant des liaisons inter-bâtiments
 238. D7.1 : réserve sur les liaisons entre bâtiments dans l'empreinte
+239. D2.1 : domaine DOC ajouté
+240. D2.1 : domaine PARK ajouté
+241. A7 : règle de refus d'une entrée invalide par les moteurs
+242. A5.11 : faits du site avec source et statut
+243. Q2 : propriétaire de site_fact
+244. M2 : calage à n points adopté
+245. K3.8 : point du calage à n points fermé, adopté en section M2
+246. K3.9 : calage à n points consigné comme fermé
+247. A5.8 : règles de charte pour le style de texte
+248. D3.6 : règle pays non comparable refusée
+249. D2.2 : 93 codes inscrits au catalogue
