@@ -63,6 +63,20 @@ function pickProfileFields(
  * D7.1 ne fait qu'une différence entre les deux empreintes du graphe : le
  * profil. Le reste est identique, et l'écrire deux fois ferait deux empreintes
  * qui divergeraient au premier champ ajouté d'un seul côté.
+ *
+ * **Les liaisons entre bâtiments n'y entrent pas**, et D7.1 dit pourquoi :
+ * « aucun calcul de parcours ne lit aujourd'hui leur attribut de passage
+ * couvert ». Une empreinte d'invalidation ne porte que ce dont un résultat
+ * dépend ; y mettre une donnée qu'aucun calcul ne lit ferait recalculer tous
+ * les parcours d'un site à chaque fois qu'on déclare une passerelle couverte,
+ * sans qu'un seul change.
+ *
+ * **Réserve, et elle est du document :** « Le jour où un profil en tiendrait
+ * compte, elles devraient y entrer, faute de quoi un changement de passage
+ * laisserait des parcours faux en cache. » Le jour où un profil préférera les
+ * cheminements couverts — une option de `travel_profile`, un coût qui lit
+ * `sheltered` — ce module est le premier à reprendre, avant le profil
+ * lui-même. `compute-hashes.test.ts` garde cette réserve visible.
  */
 function graphParts(graph: SiteData['graph']): {
   nodes: Record<string, unknown>[];

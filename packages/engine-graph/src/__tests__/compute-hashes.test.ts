@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { refMinimal, refMultilevel } from '@azimut/testkit';
+import { refMinimal, refMultilevel, refRetail } from '@azimut/testkit';
 import type { SiteData, FaceTemplate } from '@azimut/core-model';
 import { computeInputsHash, computeContentHash } from '../compute-hashes.js';
 import { resolveFaceContent } from '../resolve-face.js';
@@ -122,6 +122,65 @@ describe('D7.1 — inputs_hash', () => {
     };
     const after = computeInputsHash(modified, mlProfile);
     expect(after).not.toBe(before);
+  });
+
+  /**
+   * D7.1 — « Les liaisons entre bâtiments n'y entrent pas, parce qu'aucun
+   * calcul de parcours ne lit aujourd'hui leur attribut de passage couvert. »
+   *
+   * Ce n'est pas un oubli, c'est la composition voulue : une empreinte
+   * d'invalidation ne porte que ce dont un résultat dépend. Y mettre une
+   * donnée qu'aucun calcul ne lit ferait recalculer tous les parcours d'un
+   * site chaque fois qu'on déclare une passerelle couverte, sans qu'un seul
+   * change.
+   *
+   * **La réserve, et elle est du document :** « Le jour où un profil en
+   * tiendrait compte, elles devraient y entrer, faute de quoi un changement de
+   * passage laisserait des parcours faux en cache. » Cet essai est là pour
+   * être *retourné* ce jour-là : quand un profil lira `sheltered`, c'est lui
+   * qu'il faudra réécrire en premier, et l'inverse qu'il faudra prouver.
+   */
+  it('ne bouge pas quand une liaison entre bâtiments change de passage', () => {
+    const retailProfile = refRetail.travel_profiles[0];
+    if (!retailProfile) throw new Error('missing profile');
+    const before = computeInputsHash(refRetail, retailProfile);
+
+    const modified: SiteData = {
+      ...refRetail,
+      graph: {
+        ...refRetail.graph,
+        // La passerelle couverte cesse de l'être, et le parvis découvert le
+        // devient : les deux valeurs changent, aucun calcul ne les lit.
+        building_links: refRetail.graph.building_links.map(link =>
+          ({ ...link, sheltered: !link.sheltered })),
+      },
+    };
+
+    expect(refRetail.graph.building_links.map(l => l.sheltered))
+      .not.toEqual(modified.graph.building_links.map(l => l.sheltered));
+    expect(computeInputsHash(modified, retailProfile)).toBe(before);
+  });
+
+  /**
+   * Le contre-exemple, sans lequel le précédent ne prouverait rien : l'arête
+   * qui porte la liaison, elle, entre bien dans l'empreinte. Une empreinte
+   * insensible à tout ne dirait pas que les liaisons en sont exclues, elle
+   * dirait qu'elle ne fonctionne pas.
+   */
+  it('bouge quand l’arête qui porte la liaison change', () => {
+    const retailProfile = refRetail.travel_profiles[0];
+    if (!retailProfile) throw new Error('missing profile');
+    const before = computeInputsHash(refRetail, retailProfile);
+
+    const modified: SiteData = {
+      ...refRetail,
+      graph: {
+        ...refRetail.graph,
+        edges: refRetail.graph.edges.map(edge =>
+          edge.id === 'e-rt-passerelle' ? { ...edge, width_m: 2.6 } : edge),
+      },
+    };
+    expect(computeInputsHash(modified, retailProfile)).not.toBe(before);
   });
 });
 
