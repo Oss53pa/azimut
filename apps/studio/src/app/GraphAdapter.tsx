@@ -298,7 +298,17 @@ export function GraphScreenAdapter({ session, levelId }: {
       }}
       onDrawEdges={() => {
         void (async () => {
-          const rows: readonly StoredRow[] = session.state.rows.filter(r => r.table === 'node');
+          // Les nœuds du niveau courant, et non ceux du site.
+          //
+          // Ce filtre relisait le magasin entier, alors que la portée était
+          // posée trente lignes plus haut et que le bouton compte déjà les
+          // seuls nœuds du niveau. L'outil appariait donc des nœuds d'étages
+          // différents, en les écrivant tous deux comme s'ils étaient sur le
+          // niveau courant : une arête entre deux étages sans sa liaison
+          // verticale, et posée au mauvais endroit. M1bis a rendu les sites
+          // multiniveaux atteignables par l'écran, ce qui a rendu le défaut
+          // atteignable avec eux.
+          const rows: readonly StoredRow[] = nodes;
           const drawn: { id: string; edge: ReturnType<typeof acceptEdge> }[] = [];
           const unreadable: string[] = [];
           for (let i = 1; i < rows.length; i += 1) {
