@@ -190,21 +190,18 @@ export function useSiteVocabularyLoad(
       return;
     }
     let cancelled = false;
-    setState({ vocabulary: EMPTY_VOCABULARY, status: 'loading', errorCode: null });
+    setState({ vocabulary: EMPTY_VOCABULARY, status: 'loading' });
     repository.loadVocabulary(siteId).then(
       value => {
-        if (!cancelled) setState({ vocabulary: value, status: 'ready', errorCode: null });
+        if (!cancelled) setState({ vocabulary: value, status: 'ready' });
       },
       () => {
         if (cancelled) return;
-        setState({
-          vocabulary: EMPTY_VOCABULARY,
-          status: 'failed',
-          // Quelle que soit la cause de transport, le fait que le domaine
-          // retient est que le vocabulaire n'a pas pu être lu. Le genre de
-          // défaillance sert l'état d'écran (F7), pas le registre d'anomalies.
-          errorCode: 'DATA.VOCABULARY_UNREADABLE',
-        });
+        // Quelle que soit la cause de transport, le fait que le domaine
+        // retient est que le vocabulaire n'a pas pu être lu. C'est un état
+        // d'écran (F7) et non une anomalie de moteur : `status` le porte, et
+        // aucun code de catalogue n'est emprunté pour le dire.
+        setState({ vocabulary: EMPTY_VOCABULARY, status: 'failed' });
       },
     );
     return () => { cancelled = true; };

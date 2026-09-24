@@ -258,14 +258,20 @@ export function useTrancheSession(
     const result = await undoLast(store.current, sink, new Date().toISOString());
     store.current = result.state;
     setStore(result.state);
-    return result.outcome.ok;
+    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
+    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
+    // si quelque chose a bougé.
+    return result.applied && result.outcome.ok;
   }, [sink]);
 
   const redo = useCallback(async (): Promise<boolean> => {
     const result = await redoLast(store.current, sink, new Date().toISOString());
     store.current = result.state;
     setStore(result.state);
-    return result.outcome.ok;
+    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
+    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
+    // si quelque chose a bougé.
+    return result.applied && result.outcome.ok;
   }, [sink]);
 
   const newId = useCallback((): string => {

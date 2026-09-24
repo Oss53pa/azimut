@@ -57,17 +57,19 @@ describe('ERROR_CATALOG', () => {
     }
   });
 
-  it('the allowlist holds the base/E17/H domains plus partie I (I6), partie J, partie M and the atelier complement', () => {
+  it('la liste des domaines est épinglée, et sans domaine vide', () => {
     // Liste épinglée volontairement : un domaine nouveau casse ce test, ce qui
-    // force à le déclarer plutôt qu'à le laisser apparaître. `PARK` et `DOC` viennent du
-    // complément atelier (M2, stationnement ; M15, document de stratégie).
+    // force à le déclarer plutôt qu'à le laisser apparaître. Qu'elle tienne
+    // dans celle de D2.1 se vérifie contre le consolidé lui-même, dans
+    // `tests/catalogue-consolide.test.ts`.
     //
-    // `NET` en est sorti : aucun des quatorze documents ne l'autorisait, et
-    // D2.2 réserve le catalogue aux anomalies produites par un moteur — or un
-    // moteur n'a ni réseau ni base (A4.1). Voir `RETIRED_CODES`.
+    // `CHARTER` en est sorti : déclaré pendant plusieurs versions sans porter
+    // un seul code, il annonçait un cloisonnement que rien n'appliquait.
+    // `NET` en était sorti avant lui, pour un autre motif — voir
+    // `RETIRED_CODES`.
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
-        'AD', 'ASSET', 'ASSIST', 'CALIB', 'CHARTER', 'COLOR', 'COST', 'DATA',
+        'AD', 'ASSET', 'ASSIST', 'CALIB', 'COLOR', 'COST', 'DATA',
         'DOC', 'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
         'LIBRARY', 'MODULE', 'PACKAGE', 'PARK', 'PICTO', 'RENDER',
@@ -75,6 +77,17 @@ describe('ERROR_CATALOG', () => {
         'SECURITY', 'SKETCH', 'SURVEY', 'TENANT', 'TYPO', 'WAYFIND',
       ],
     );
+  });
+
+  /**
+   * La leçon de `CHARTER` : un domaine déclaré et vide annonce un
+   * cloisonnement que rien n'applique. Il n'a pas lieu d'être, et ce contrôle
+   * est ce qui manquait pour le voir.
+   */
+  it('aucun domaine déclaré ne reste sans code', () => {
+    const porteurs = new Set(codes.map(code => code.split('.')[0]));
+    const vides = [...ANOMALY_DOMAINS].filter(domain => !porteurs.has(domain));
+    expect(vides, `Domaines déclarés et vides :\n${vides.join('\n')}`).toEqual([]);
   });
 
   it('no duplicate codes (type-level guarantee, runtime check)', () => {

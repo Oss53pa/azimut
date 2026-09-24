@@ -185,7 +185,6 @@ export function ChecksView(): JSX.Element {
         <div style={{ marginTop: SPACE.md }}>
           <StateBanner
             severity="blocking"
-            code={vocabulary.errorCode ?? undefined}
             message={t('validation.vocabfailed.message')}
             hint={t('validation.vocabfailed.hint')}
           />

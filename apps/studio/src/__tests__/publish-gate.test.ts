@@ -56,11 +56,7 @@ describe('porte de publication', () => {
     // Un registre illisible porte la même valeur qu'un registre vide et ne dit
     // pas la même chose. Publier sur cette valeur, c'est publier à l'aveugle :
     // la valeur inconnue tombe du côté qui ne publie pas.
-    const echec: VocabularyState = {
-      ...EMPTY_VOCABULARY_STATE,
-      status: 'failed',
-      errorCode: 'DATA.VOCABULARY_UNREADABLE',
-    };
+    const echec: VocabularyState = { ...EMPTY_VOCABULARY_STATE, status: 'failed' };
     const gate = evaluatePublishGate(refMultilevel, echec);
     expect(gate.vocabularyRefusal).toBe('failed');
     expect(gate.publishable).toBe(false);
