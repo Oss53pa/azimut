@@ -108,7 +108,10 @@ Pour tout le reste — modèle de données, contrats des moteurs, conventions,
 formats, algorithmes, écrans, modules, tâches, registre des points ouverts — le
 **cahier des charges de développement consolidé** fait seul foi. Il porte les
 parties A à Q et les annexes T et Z, et il se lit en commençant par sa section
-A0.
+A0. Il est dans le dépôt, à `docs/cahier-des-charges.md`, avec son empreinte
+déposée à côté, et il ne s'édite jamais depuis le code : il vient de l'éditeur,
+qui donne l'empreinte de chaque version. La chaîne d'intégration compare les
+deux au premier pas.
 
 Deux règles de ce document gouvernent la façon de s'en servir :
 

@@ -39,6 +39,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Le cahier des charges consolidé est le seul document de référence, il
+      # ne s'édite jamais depuis le code, et il est accompagné de son
+      # empreinte. Le pas vient avant l'installation : une divergence se voit
+      # alors en quelques secondes, et non après la compilation.
+      #
+      # `tests/cahier-des-charges-empreinte.test.ts` fait le même calcul et lit
+      # la même valeur déposée. Deux lecteurs, une seule définition.
+      - name: Vérifier l'empreinte du cahier des charges
+        run: sha256sum -c --strict docs/cahier-des-charges.sha256
+
       - name: Setup pnpm
         # La version vient du champ packageManager de package.json.
         # La redonner ici ferait échouer l'action sur une double
