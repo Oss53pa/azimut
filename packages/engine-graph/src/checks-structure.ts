@@ -1,7 +1,8 @@
-import type { Finding } from '@azimut/core-model';
+import type { Finding, GraphNode } from '@azimut/core-model';
 import type { GraphScope } from './graph-scope.js';
 import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
 import { buildDirectedAdjacency, bfs } from './graph-traversal.js';
+import { buildExcludedKindsSet, isEdgeTraversableFrom } from './edge-traversal.js';
 
 export function crossLevelWithoutVlFindings(
   site: GraphScope,
@@ -427,16 +428,34 @@ export function verticalLinkMisalignedFindings(
  * Une anomalie par destination, et non par couple entrée-destination : une aile
  * coupée est un défaut, pas cinq. Les entrées en défaut sont nommées dans les
  * paramètres.
+ *
+ * **Deux points tranchés par l'éditeur**, et non par ce module.
+ *
+ * L'anomalie est un **avertissement** et non un refus. QC-10 la donnait pour
+ * bloquante ; une desserte partielle est un défaut de jalonnement à examiner,
+ * pas une donnée impossible.
+ *
+ * Elle ne compte que les **entrées empruntées par au moins un profil de
+ * visiteur** : une entrée qu'aucun profil ne peut franchir — service,
+ * livraison, issue à sens unique qu'aucun profil n'emprunte — n'a pas à
+ * desservir l'annuaire, et l'exiger d'elle produisait une anomalie sur un
+ * relevé exact. « Empruntée » se lit sur le graphe : le profil peut franchir
+ * au moins une arête depuis cette entrée, au sens de `isEdgeTraversableFrom`.
+ *
+ * Conséquence à dire plutôt qu'à découvrir : **un site qui ne déclare aucun
+ * profil ne lève rien**. « Empruntée par au moins un profil » n'est pas
+ * décidable sans profil, et le supposer emprunté par tous rendrait la portée
+ * inopérante. C'est le cas de la session d'atelier de la tranche 1, qui n'en
+ * porte aucun.
  */
 export function destinationNotReachedFromEveryEntranceFindings(
   site: GraphScope,
 ): Finding[] {
   const { nodes, edges } = site.graph;
-  const entrances = nodes
-    .filter((n) => n.kind === 'entrance')
-    .sort((a, b) => a.id.localeCompare(b.id));
-  // Sans entrée, `GRAPH.NO_ENTRANCE` le dit déjà ; le redire ici n'ajouterait
-  // rien et masquerait le vrai manque derrière un bruit de destinations.
+  const entrances = entrancesUsedByAProfile(site);
+  // Sans entrée retenue, `GRAPH.NO_ENTRANCE` dit déjà le manque d'entrée ; le
+  // redire ici n'ajouterait rien et masquerait le vrai manque derrière un
+  // bruit de destinations. Sans profil, voir la note ci-dessus.
   if (entrances.length === 0) return [];
 
   const adj = buildDirectedAdjacency(nodes, edges);
@@ -467,7 +486,7 @@ export function destinationNotReachedFromEveryEntranceFindings(
       .filter((id) => !reached.includes(id));
     findings.push({
       code: 'GRAPH.DESTINATION_ENTRANCE_COVERAGE',
-      severity: 'blocking',
+      severity: 'warning',
       entity: { kind: 'destination', id: dest.id },
       params: {
         node_id: dest.node_id,
@@ -479,4 +498,33 @@ export function destinationNotReachedFromEveryEntranceFindings(
     });
   }
   return findings;
+}
+
+/**
+ * Les entrées qu'au moins un profil de visiteur peut emprunter, triées.
+ *
+ * « Emprunter » se lit sur le graphe et non sur une déclaration : le profil
+ * franchit au moins une arête depuis cette entrée. `isEdgeTraversableFrom`
+ * porte déjà cette lecture — sens de circulation, accessibilité requise,
+ * natures exclues — et la réécrire ici donnerait deux définitions de la même
+ * règle.
+ *
+ * Aucun profil, aucune entrée retenue : voir la note de
+ * `destinationNotReachedFromEveryEntranceFindings`.
+ */
+function entrancesUsedByAProfile(site: GraphScope): GraphNode[] {
+  if (site.travel_profiles.length === 0) return [];
+
+  const nodeKinds = new Map(site.graph.nodes.map(node => [node.id, node.kind]));
+  const excludedByProfile = site.travel_profiles.map(profile => ({
+    profile, excluded: buildExcludedKindsSet(profile),
+  }));
+
+  return site.graph.nodes
+    .filter(node => node.kind === 'entrance')
+    .filter(entrance => excludedByProfile.some(({ profile, excluded }) =>
+      site.graph.edges.some(edge =>
+        (edge.from_node_id === entrance.id || edge.to_node_id === entrance.id)
+        && isEdgeTraversableFrom(edge, entrance.id, profile, nodeKinds, excluded))))
+    .sort((a, b) => a.id.localeCompare(b.id));
 }

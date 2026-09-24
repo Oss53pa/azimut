@@ -22,9 +22,10 @@ describe('la validation du graphe ne demande que ce qu\'elle lit', () => {
     destinations: refMinimal.destinations,
     destination_names: refMinimal.destination_names,
     footprints: refMinimal.footprints,
+    travel_profiles: refMinimal.travel_profiles,
   };
 
-  it('accepte les six champs seuls, sans le reste du site', () => {
+  it('accepte les sept champs seuls, sans le reste du site', () => {
     const outcome = validateGraph(scope);
     expect(outcome.ok).toBe(true);
   });

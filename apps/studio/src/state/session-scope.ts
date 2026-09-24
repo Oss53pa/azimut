@@ -2,7 +2,7 @@
  * Ce que la validation du graphe lit, tel que la session le porte.
  *
  * M5 (partie M) fait tourner `validateGraph` sur le travail en cours. Le
- * moteur lit six champs — `GraphScope` les nomme — et ce module les assemble
+ * moteur lit sept champs — `GraphScope` les nomme — et ce module les assemble
  * depuis le magasin de session, par le chemin inverse de celui qui les a
  * écrits.
  *
@@ -142,6 +142,11 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
       // rien : un site sans destination n'a pas de destination non reliée.
       destinations: [],
       destination_names: [],
+      // Les profils de parcours viennent avec T-1.9. Sans eux,
+      // `GRAPH.DESTINATION_ENTRANCE_COVERAGE` ne retient aucune entrée et ne
+      // lève rien — l'éditeur a limité sa portée aux entrées qu'au moins un
+      // profil emprunte, et « empruntée » n'est pas décidable sans profil.
+      travel_profiles: [],
       footprints: collect(session, 'footprint', readFootprint, unreadable),
     },
     unreadable,

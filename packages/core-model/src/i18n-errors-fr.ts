@@ -15,7 +15,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'GRAPH.VERTICAL_LINK_MISSING': 'Arête entre niveaux sans liaison verticale',
   'GRAPH.VERTICAL_LINK_SAME_LEVEL': 'Liaison verticale entre deux nœuds d\'un même niveau',
   'GRAPH.VERTICAL_LINK_MISALIGNED': 'Liaison verticale décalée entre deux niveaux',
-  'GRAPH.DESTINATION_ENTRANCE_COVERAGE': 'Destination que toutes les entrées n’atteignent pas',
+  'GRAPH.DESTINATION_ENTRANCE_COVERAGE': 'Destination que toutes les entrées empruntées n’atteignent pas',
   'GRAPH.BUILDING_ISOLATED': 'Bâtiment sans liaison ni accès indépendant',
   'GRAPH.BUILDING_LINK_MISSING': 'Arête entre deux bâtiments sans ligne building_link',
   'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY': 'Bâtiment relié au reste du site par son seul accès indépendant',

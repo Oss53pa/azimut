@@ -30,7 +30,7 @@ export const ERROR_CATALOG = {
   'GRAPH.VERTICAL_LINK_MISALIGNED':         { severity: 'blocking', description: 'Liaison verticale décalée entre deux niveaux' },
   // Complément atelier, QC-10 : atteignable depuis une entrée ne vaut pas
   // atteignable depuis toutes, et le sens de circulation y entre.
-  'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'blocking', description: 'Destination que toutes les entrées n’atteignent pas' },
+  'GRAPH.DESTINATION_ENTRANCE_COVERAGE':    { severity: 'warning',  description: 'Destination que toutes les entrées empruntées n’atteignent pas' },
   'GRAPH.BUILDING_ISOLATED':                { severity: 'warning',  description: 'Bâtiment sans liaison ni accès indépendant' },
   // M01.S10 : « Toute arête dont les deux extrémités appartiennent à des
   // bâtiments différents porte une ligne `building_link`, qui déclare si le
