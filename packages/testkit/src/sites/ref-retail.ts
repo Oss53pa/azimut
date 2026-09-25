@@ -151,7 +151,9 @@ export const refRetail: SiteData = {
       svg_path: 'M5 5l10 10M15 5L5 15',
       registry: 'safety',
       function_key: null,
-      rules_pack_id: null,
+      // A5.4 : un pictogramme de sécurité vient d'un paquet de règles, contrainte
+      // en base (migration 0055). Rattaché au paquet d'essai du dépôt.
+      rules_pack_id: 'rp-test-0001',
     },
     {
       id: 'picto-rt-shop',
