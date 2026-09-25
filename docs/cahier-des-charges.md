@@ -1883,6 +1883,11 @@ Les deux rattachements entrent dans l'empreinte, et non le seul résultat de leu
 
 ### D7.2 Règles de calcul
 
+**Ces règles valent pour toutes les empreintes du produit**, sans exception : empreinte de contenu d'une face, empreinte des entrées d'un tableau des messages, empreinte du graphe enregistrée par une validation, empreinte d'un paquet de règles, empreinte d'un manifeste. Une seconde forme canonique, même implicite, en serait une de trop.
+
+Les empreintes déjà enregistrées sous une autre forme ne se convertissent pas : ce sont des valeurs dérivées. Un cache de parcours se recalcule, et un enregistrement de validation dont l'empreinte ne correspond plus au graphe actuel ne vaut plus, ce que la règle M02.W11 prévoit déjà.
+
+
 - Sérialisation canonique avant hachage : clés triées, aucun espace superflu, nombres au format fixe défini en D1.4.
 - **Chaînes normalisées en forme NFC** avant hachage. Deux textes identiques à l'écran mais composés différemment donneraient sinon deux empreintes.
 - **Un champ absent est omis, il n'est jamais écrit avec une valeur nulle.** Omission et valeur nulle ne doivent pas se confondre.
@@ -8599,3 +8604,4 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 287. A8 : portée de la limite de 400 lignes précisée
 288. D7.2 : forme canonique de l'empreinte précisée
 289. D10.0 : le paquet agrège les anomalies et bloque sur une marque de sécurité omise
+290. D7.2 : la forme canonique vaut pour toutes les empreintes
