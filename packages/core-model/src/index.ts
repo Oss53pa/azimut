@@ -183,6 +183,15 @@ export {
   SKETCH_COLLECTIONS,
 } from './sketch-export.js';
 export {
+  VIEW_LAYER_KEYS, SKETCH_LAYER_KEY, isViewLayerKey,
+  stackedLayers, screenLayerKeys, printLayerKeys, auditViewLayers,
+  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind,
+  workColoursOf, activeWorkColourCount,
+} from './view-layers.js';
+export type {
+  ViewLayer, ViewLayerKey, WorkColour, WorkColourTargetKind,
+} from './view-layers.js';
+export {
   meterToPixel,
   pixelToMeter,
   clampScale,
