@@ -9,7 +9,7 @@ import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
 import {
   EMPTY_CHARTER_REGISTRY, EMPTY_MAINTENANCE_REGISTRY, EMPTY_WAYFINDING_REGISTRY,
-  type BudgetRegistry, type CharterRegistry, type InspectionRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry,
+  type BudgetRegistry, type CharterRegistry, type InspectionRegistry, type TenantRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry,
 } from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
 import { REFERENCE_WORKSITE } from './reference-worksite.js';
@@ -17,6 +17,7 @@ import { REFERENCE_BUDGET } from './reference-budget.js';
 import { REFERENCE_INSPECTION } from './reference-inspection.js';
 import { REFERENCE_ADVERTISING } from './reference-advertising.js';
 import type { AdvertisingData } from './advertising-data.js';
+import { referenceTenant } from './reference-tenant.js';
 import {
   RepositoryError,
   type SiteRepository,
@@ -129,6 +130,15 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(REFERENCE_ADVERTISING);
+    },
+
+    /** Le jeu de démonstration du module 06, rattaché aux destinations du site. */
+    loadTenantRegistry(siteId: string): Promise<TenantRegistry> {
+      const site = allReferenceSites.get(siteId);
+      if (site === undefined) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(referenceTenant(site));
     },
 
     /**

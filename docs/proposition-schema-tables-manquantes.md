@@ -141,7 +141,8 @@ porte un bloc `map` ; son orientation est son azimut. Aucune table : l'écran
 ## 5. Famille C — tables nouvelles, modules 05 à 09
 
 Ni A5 ni la partie B ne définissent ces entités. Le studio les simule avec
-`domain/demo/*`. Les tables ci-dessous sont celles que les écrans et les gardes
+`domain/demo/*` (retiré depuis : les jeux de démonstration sont servis par le dépôt
+de référence, `apps/studio/src/data/reference-*.ts`). Les tables ci-dessous sont celles que les écrans et les gardes
 existants lisent déjà, sans plus : chaque colonne a un lecteur dans le code
 actuel.
 

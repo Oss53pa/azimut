@@ -1,45 +1,62 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
-import type { UiMessageKey } from '../i18n/messages.js';
-import { DEMO_SIGN_DOSSIERS, DEMO_SIGN_REGULATION } from '../domain/demo/commerce.js';
+import { EMPTY_TENANT_REGISTRY } from '@azimut/core-model';
+import { useSiteData } from '../context/useSiteData.js';
+import { loadTenant, useRegistry } from '../data/index.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner, SelectField, SPACE, TEXT,
   type Metric, type Column,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
 import { instructDossier, requested, type ArticleCheck } from './tenant/articles.js';
-import { AXIS_KEYS } from './tenant/labels.js';
+import { signDossiers } from './tenant/dossiers.js';
+import { AXIS_KEYS, partKey } from './tenant/labels.js';
 import { formatDay, formatNumber } from './register/format.js';
-
-const PART_KEYS: Readonly<Record<string, UiMessageKey>> = {
-  elevation: 'tenant.part.elevation',
-  section: 'tenant.part.section',
-  material_samples: 'tenant.part.samples',
-};
 
 /**
  * Module 06 — l'instruction d'un dossier d'enseigne (H5.2), article par
  * article. Chaque résultat vient du garde `guardSignProject` ; la lecture en
  * bas de page ne fait que résumer ses écarts et les pièces manquantes. La
- * décision reste humaine : aucun accord ni refus ne se prononce ici.
+ * décision reste humaine : aucun accord ni refus ne se prononce ici. Le
+ * dossier s'instruit contre la version du règlement en vigueur à son dépôt.
  */
-export function TenantInstructionView(): JSX.Element {
+type TenantInstructionViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function TenantInstructionView({ siteKey }: TenantInstructionViewProps): JSX.Element {
+  const site = useSiteData();
   const { t, lang } = useI18n();
-  const [dossierId, setDossierId] = useState(DEMO_SIGN_DOSSIERS[0]?.id ?? '');
-  const dossier = DEMO_SIGN_DOSSIERS.find(d => d.id === dossierId) ?? DEMO_SIGN_DOSSIERS[0];
+  const state = useRegistry(loadTenant, EMPTY_TENANT_REGISTRY, siteKey);
+  const dossiers = useMemo(() => signDossiers(site, state.registry), [site, state.registry]);
+  const [dossierId, setDossierId] = useState<string | null>(null);
+  const dossier = dossiers.find(d => d.id === dossierId) ?? dossiers[0];
   const instruction = useMemo(
-    () => (dossier === undefined ? null : instructDossier(dossier, DEMO_SIGN_REGULATION)),
+    () => (dossier === undefined || dossier.regulation === null ? null : instructDossier(dossier, dossier.regulation)),
     [dossier],
   );
 
-  const banner = <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />;
-  if (dossier === undefined || instruction === null) {
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
+  const banner = <RegistryStatus state={state} />;
+  if (dossier === undefined) {
     return <div>{banner}<Note>{t('tenant.empty')}</Note></div>;
+  }
+  const tenant = dossier.tenant ?? t('tenant.destination.missing');
+  const cell = dossier.cell_code ?? '—';
+  if (instruction === null) {
+    return (
+      <div>
+        {banner}
+        <StateBanner severity="warning" message={t('tenant.regulation.none')} hint={t('tenant.regulation.none.hint')} />
+      </div>
+    );
   }
 
   const gaps = instruction.checks.filter(c => c.findings.length > 0);
   const partLabel = (key: string): string => {
-    const k = PART_KEYS[key];
-    return k === undefined ? key : t(k);
+    const k = partKey(key);
+    return k === null ? key : t(k);
   };
   const mm = (v: number): string => `${formatNumber(v, lang, 0)} mm`;
   const requirement = (c: ArticleCheck): string => {
@@ -86,13 +103,13 @@ export function TenantInstructionView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>{banner}</div>
-      <ScreenHeader title={t('instruction.title', { dossier: dossier.id })} subtitle={t('instruction.subtitle', { tenant: dossier.tenant, cell: dossier.cell_code })}>
+      {banner}
+      <ScreenHeader title={t('instruction.title', { dossier: dossier.id })} subtitle={t('instruction.subtitle', { tenant, cell })}>
         <div style={{ width: 280 }}>
           <SelectField
             label={t('instruction.dossier')}
             value={dossier.id}
-            options={DEMO_SIGN_DOSSIERS.map(d => ({ value: d.id, label: `${d.id} · ${d.tenant}` }))}
+            options={dossiers.map(d => ({ value: d.id, label: `${d.id} · ${d.tenant ?? t('tenant.destination.missing')}` }))}
             onChange={setDossierId}
           />
         </div>
@@ -103,8 +120,8 @@ export function TenantInstructionView(): JSX.Element {
           <Panel title={t('instruction.panel.request')}>
             <dl style={{ margin: 0, display: 'grid', gap: SPACE.xs, fontSize: TEXT.small }}>
               {([
-                [t('tenant.col.tenant'), dossier.tenant],
-                [t('tenant.col.cell'), dossier.cell_code],
+                [t('tenant.col.tenant'), tenant],
+                [t('tenant.col.cell'), cell],
                 [t('tenant.col.state'), t(`tenant.state.${dossier.state}`)],
                 [t('tenant.col.submitted'), formatDay(dossier.submitted_on, lang) ?? dossier.submitted_on],
                 [t('tenant.axis.height'), mm(dossier.project.height_mm)],

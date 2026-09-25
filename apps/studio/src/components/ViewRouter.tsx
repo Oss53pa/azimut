@@ -98,9 +98,9 @@ export function ViewRouter(
     case 'advertising': return <AdvertisingView siteKey={siteKey} />;
     case 'ad-inventory': return <AdInventoryView siteKey={siteKey} />;
     case 'ad-creatives': return <AdCreativesView siteKey={siteKey} />;
-    case 'tenant-signs': return <TenantSignsView />;
-    case 'tenant-rules': return <TenantRulesView />;
-    case 'tenant-instruction': return <TenantInstructionView />;
+    case 'tenant-signs': return <TenantSignsView siteKey={siteKey} />;
+    case 'tenant-rules': return <TenantRulesView siteKey={siteKey} />;
+    case 'tenant-instruction': return <TenantInstructionView siteKey={siteKey} />;
     case 'worksite': return <WorksiteView siteKey={siteKey} />;
     case 'worksite-lots': return <WorksiteLotsView siteKey={siteKey} />;
     case 'worksite-slots': return <WorksiteSlotsView siteKey={siteKey} />;

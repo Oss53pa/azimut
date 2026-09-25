@@ -4,7 +4,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { guardAdRulesPack } from '@azimut/engine-graph';
 import { receiveCreatives } from '../../../domain/ad-creative-intake.js';
-import { DEMO_AD_RULES_PACK } from '../../../domain/demo/commerce.js';
+import { ATTACHED_AD_RULES_PACK as DEMO_AD_RULES_PACK } from '../../../domain/ad-rules-pack.js';
 import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
 
 // La file de réception et la fiche technique du jeu d'essai, servies par le

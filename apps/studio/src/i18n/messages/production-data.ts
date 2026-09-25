@@ -18,6 +18,11 @@ export const PRODUCTION_DATA_FR = {
   'adcreatives.col.origin': 'Origine',
   'adcreatives.origin.stored': 'Enregistré',
   'adcreatives.origin.received': 'En réception',
+
+  'tenant.regulation.none': 'Aucune version du règlement n’était en vigueur à ce dépôt : le dossier ne s’instruit contre rien.',
+  'tenant.regulation.none.hint': 'Une version du règlement s’applique aux dossiers déposés à partir de sa date d’effet.',
+  'tenant.regulation.version': 'Version en vigueur depuis le {date}',
+  'tenant.destination.missing': 'Destination introuvable',
 } as const;
 
 export const PRODUCTION_DATA_EN: Readonly<Record<keyof typeof PRODUCTION_DATA_FR, string>> = {
@@ -32,4 +37,9 @@ export const PRODUCTION_DATA_EN: Readonly<Record<keyof typeof PRODUCTION_DATA_FR
   'adcreatives.col.origin': 'Origin',
   'adcreatives.origin.stored': 'Stored',
   'adcreatives.origin.received': 'In intake',
+
+  'tenant.regulation.none': 'No version of the regulation was in force at this submission: the dossier is instructed against nothing.',
+  'tenant.regulation.none.hint': 'A version of the regulation applies to dossiers submitted from its effective date.',
+  'tenant.regulation.version': 'Version in force since {date}',
+  'tenant.destination.missing': 'Destination not found',
 };

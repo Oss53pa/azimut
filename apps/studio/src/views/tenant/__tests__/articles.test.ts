@@ -1,9 +1,26 @@
 import { describe, it, expect } from 'vitest';
-import { DEMO_SIGN_DOSSIERS, DEMO_SIGN_REGULATION } from '../../../domain/demo/commerce.js';
+import { refMultilevel } from '@azimut/testkit/sites';
+import { referenceTenant } from '../../../data/reference-tenant.js';
 import type { SignRegulation } from '../../../domain/tenant-regulation.js';
 import { instructDossier, regulationArticles } from '../articles.js';
+import { signDossiers } from '../dossiers.js';
+
+// Le jeu de démonstration du dépôt de référence, rattaché à un site de référence.
+const registry = referenceTenant(refMultilevel);
+const DEMO_SIGN_DOSSIERS = signDossiers(refMultilevel, registry);
+const [version] = registry.regulations;
+if (version === undefined) throw new Error('le jeu d’essai porte un règlement');
+const DEMO_SIGN_REGULATION: SignRegulation = version;
 
 describe('H5.2 — règlement d’enseigne article par article', () => {
+  it('rattache chaque dossier à une destination du site et à la version en vigueur à son dépôt', () => {
+    expect(DEMO_SIGN_DOSSIERS.length).toBeGreaterThan(0);
+    for (const d of DEMO_SIGN_DOSSIERS) {
+      expect(d.tenant).not.toBeNull();
+      expect(d.regulation?.id).toBe(version.id);
+    }
+  });
+
   it('numérote un article par axe borné, dans l’ordre du règlement', () => {
     const articles = regulationArticles(DEMO_SIGN_REGULATION);
     expect(articles.map(a => [a.code, a.axis])).toEqual([

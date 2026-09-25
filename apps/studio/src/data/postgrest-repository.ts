@@ -35,6 +35,7 @@ import { loadWorksiteRegistry } from './postgrest-worksite.js';
 import { loadBudgetRegistry } from './postgrest-budget.js';
 import { loadInspectionRegistry } from './postgrest-inspection.js';
 import { loadAdvertisingData } from './postgrest-advertising.js';
+import { loadTenantRegistry } from './postgrest-tenant.js';
 
 type SiteListRow = Pick<
   SiteRow,
@@ -346,6 +347,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
     loadAdvertisingData(siteId: string) {
       return loadAdvertisingData(config, siteId);
+    },
+
+    loadTenantRegistry(siteId: string) {
+      return loadTenantRegistry(config, siteId);
     },
 
     /**

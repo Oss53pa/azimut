@@ -1,10 +1,15 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
-import { DEMO_SIGN_DOSSIERS, DEMO_SIGN_REGULATION } from '../domain/demo/commerce.js';
+import { EMPTY_TENANT_REGISTRY, regulationInForce } from '@azimut/core-model';
+import { useSiteData } from '../context/useSiteData.js';
+import { loadTenant, useRegistry } from '../data/index.js';
 import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { signDossiers } from './tenant/dossiers.js';
+import { formatDay } from './register/format.js';
 import { instructDossier, regulationArticles, type Article } from './tenant/articles.js';
 import { AXIS_KEYS } from './tenant/labels.js';
 import { formatNumber } from './register/format.js';
@@ -22,22 +27,42 @@ type ArticleRow = {
  * Module 06 — le règlement d'enseigne du site (H5.2), article par article, au
  * gabarit « registre ». Un article est un axe que le règlement borne ; ses
  * dossiers non conformes sont ceux où le garde `guardSignProject` relève un
- * écart sur cet axe. Jeu de démonstration, comme le reste du module.
+ * écart sur cet axe. L'écran montre la version en vigueur aujourd'hui, et les
+ * dossiers déposés sous elle. Lu en base (0046), ou dans le jeu de
+ * démonstration du dépôt de référence.
  */
-export function TenantRulesView(): JSX.Element {
+type TenantRulesViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function TenantRulesView({ siteKey }: TenantRulesViewProps): JSX.Element {
+  const site = useSiteData();
   const { t, lang } = useI18n();
+  const state = useRegistry(loadTenant, EMPTY_TENANT_REGISTRY, siteKey);
   const [filter, setFilter] = useState(ALL);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const today = new Date().toISOString().slice(0, 10);
 
+  const regulation = useMemo(() => regulationInForce(state.registry.regulations, today), [state.registry, today]);
+  // Les dossiers déposés sous cette version : chacun s'instruit contre la
+  // version en vigueur à son dépôt, pas contre celle d'aujourd'hui.
+  const governed = useMemo(
+    () => signDossiers(site, state.registry).filter(d => regulation !== null && d.regulation?.id === regulation.id),
+    [site, state.registry, regulation],
+  );
   const rows = useMemo<readonly ArticleRow[]>(() => {
-    const instructions = DEMO_SIGN_DOSSIERS.map(d => instructDossier(d, DEMO_SIGN_REGULATION));
-    return regulationArticles(DEMO_SIGN_REGULATION).map(article => ({
+    if (regulation === null) return [];
+    const instructions = governed.map(d => instructDossier(d, regulation));
+    return regulationArticles(regulation).map(article => ({
       article,
       failing: instructions
         .filter(i => i.checks.some(c => c.article.axis === article.axis && c.findings.length > 0))
         .map(i => i.dossier.id),
     }));
-  }, []);
+  }, [governed, regulation]);
+
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
 
   const visible = filter === BREACHED ? rows.filter(r => r.failing.length > 0) : rows;
   const selected = rows.find(r => r.article.code === selectedCode) ?? visible[0] ?? null;
@@ -57,7 +82,7 @@ export function TenantRulesView(): JSX.Element {
     { id: 'code', header: t('tenantrules.col.article'), cell: r => r.article.code },
     { id: 'axis', header: t('tenantrules.col.object'), cell: r => t(AXIS_KEYS[r.article.axis]) },
     { id: 'requirement', header: t('tenantrules.col.requirement'), cell: r => requirement(r.article) },
-    { id: 'dossiers', header: t('tenantrules.col.dossiers'), numeric: true, cell: () => String(DEMO_SIGN_DOSSIERS.length) },
+    { id: 'dossiers', header: t('tenantrules.col.dossiers'), numeric: true, cell: () => String(governed.length) },
     {
       id: 'failing',
       header: t('tenantrules.col.failing'),
@@ -86,7 +111,7 @@ export function TenantRulesView(): JSX.Element {
             id: 'computed',
             title: t('sitesheet.section.computed'),
             rows: [
-              { id: 'dossiers', label: t('tenantrules.col.dossiers'), value: String(DEMO_SIGN_DOSSIERS.length), computed: true },
+              { id: 'dossiers', label: t('tenantrules.col.dossiers'), value: String(governed.length), computed: true },
               { id: 'failing', label: t('tenantrules.col.failing'), value: String(selected.failing.length), computed: true },
               ...selected.failing.map(id => ({ id: `f-${id}`, label: id, value: t('tenantrules.failing.gap'), computed: true })),
             ],
@@ -97,12 +122,19 @@ export function TenantRulesView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
+      {regulation === null && (
+        <div style={{ marginBottom: SPACE.lg }}>
+          <StateBanner severity="info" message={t('tenant.regulation.none')} hint={t('tenant.regulation.none.hint')} />
+        </div>
+      )}
       <RegisterLayout
         title={t('tenantrules.title')}
-        summary={t('tenantrules.summary', { count: rows.length })}
+        summary={regulation === null
+          ? t('tenantrules.summary', { count: 0 })
+          : `${t('tenantrules.summary', { count: rows.length })} · ${t('tenant.regulation.version', {
+            date: formatDay(regulation.effective_from, lang) ?? regulation.effective_from,
+          })}`}
         filtersLabel={t('register.filters')}
         filters={filters}
         filter={filter}

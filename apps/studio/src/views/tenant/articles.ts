@@ -9,7 +9,7 @@
  */
 import type { Finding } from '@azimut/core-model';
 import { guardSignProject, type SignProject, type SignRegulation } from '../../domain/tenant-regulation.js';
-import type { SignDossier } from '../../domain/demo/commerce.js';
+import type { SignDossier } from './dossiers.js';
 
 export const ARTICLE_AXES = ['height', 'overhang', 'material', 'lighting', 'forbidden_feature'] as const;
 export type ArticleAxis = (typeof ARTICLE_AXES)[number];

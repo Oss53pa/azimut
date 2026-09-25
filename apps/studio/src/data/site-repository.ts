@@ -10,7 +10,7 @@
  */
 import type { AdvertisingData } from './advertising-data.js';
 import type {
-  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
+  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, TenantRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
   WorksiteRegistry,
 } from '@azimut/core-model';
 
@@ -107,6 +107,11 @@ export type SiteRepository = {
    * pas encore. Le dépôt de référence sert un jeu de démonstration.
    */
   loadAdvertisingData(siteId: string): Promise<AdvertisingData>;
+  /**
+   * H5 — les enseignes locataires : versions du règlement, dossiers et
+   * pièces (0046). Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadTenantRegistry(siteId: string): Promise<TenantRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

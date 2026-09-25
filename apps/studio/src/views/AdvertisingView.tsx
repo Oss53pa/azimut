@@ -4,7 +4,7 @@ import type { Finding } from '@azimut/core-model';
 import { guardPlacementBookings, auditOptionExpiry, type BookingState } from '../domain/ad-planning.js';
 import { guardAdRulesPack } from '@azimut/engine-graph';
 import { receiveCreatives } from '../domain/ad-creative-intake.js';
-import { DEMO_AD_RULES_PACK } from '../domain/demo/commerce.js';
+import { ATTACHED_AD_RULES_PACK } from '../domain/ad-rules-pack.js';
 import { EMPTY_ADVERTISING_DATA, loadAdvertising, useRegistry } from '../data/index.js';
 import { RegistryStatus } from './register/RegistryStatus.js';
 import { creativeRows, type CreativeRow } from './advertising/creative-rows.js';
@@ -84,7 +84,7 @@ export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element 
    * puisqu'elles reposeraient sur un règlement que personne n'a versé.
    */
   const rulesPackFindings = useMemo<readonly Finding[]>(() => {
-    const result = guardAdRulesPack(DEMO_AD_RULES_PACK);
+    const result = guardAdRulesPack(ATTACHED_AD_RULES_PACK);
     return result.ok ? [] : result.findings;
   }, []);
 

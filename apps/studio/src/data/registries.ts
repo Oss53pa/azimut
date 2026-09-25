@@ -2,7 +2,9 @@
  * Les lecteurs de registre passés à `useRegistry`. Des constantes de module,
  * pour que le hook ne relise pas à chaque rendu.
  */
-import { EMPTY_AD_REGISTRY, type BudgetRegistry, type InspectionRegistry, type WorksiteRegistry } from '@azimut/core-model';
+import {
+  EMPTY_AD_REGISTRY, type BudgetRegistry, type InspectionRegistry, type TenantRegistry, type WorksiteRegistry,
+} from '@azimut/core-model';
 import type { RegistryLoader } from './use-registry.js';
 import type { AdvertisingData } from './advertising-data.js';
 
@@ -24,3 +26,6 @@ export const EMPTY_ADVERTISING_DATA: AdvertisingData = {
   reception: [],
   creative_spec: null,
 };
+
+export const loadTenant: RegistryLoader<TenantRegistry> = (repository, siteId) =>
+  repository.loadTenantRegistry(siteId);

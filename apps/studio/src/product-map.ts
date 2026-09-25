@@ -182,6 +182,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     // automatique. M06.T3 (refus motivé, réserves qui se lèvent), M06.T4 (historique
     // par cellule) et M06.T5 (constat de conformité avec photographie) n'ont aucun
     // moteur, et les pièces déposées ne passent par aucun assainissement.
+    // Règlement d'enseigne versionné, dossiers et pièces se lisent en base
+    // (0046) ; le dépôt de référence sert un jeu de démonstration rattaché
+    // aux destinations du site. Un dossier s'instruit contre la version du
+    // règlement en vigueur à son dépôt.
     engine: 'partial',
     source: 'studio/domain/tenant-regulation',
   },

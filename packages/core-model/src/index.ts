@@ -114,6 +114,12 @@ export type {
   AdRegistry, AdPlacement, AdBooking, AdBookingState, AdOption, AdCreative,
   AdSanitationState, AdCreativeVerdict,
 } from './ad-registry.js';
+export {
+  EMPTY_TENANT_REGISTRY, TENANT_DOSSIER_STATES, isTenantDossierState, regulationInForce,
+} from './tenant-registry.js';
+export type {
+  TenantRegistry, TenantSignRegulation, TenantSignDossier, TenantSignPart, TenantDossierState,
+} from './tenant-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

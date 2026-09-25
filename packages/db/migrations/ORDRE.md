@@ -89,6 +89,7 @@ non plus — elle n'en retire que les clés étrangères.
 0043_h8_budget_tables
 0044_i5_inspection_tables
 0045_h4_advertising_tables
+0046_h5_tenant_sign_tables
 ```
 
 ## Règle pour la suite

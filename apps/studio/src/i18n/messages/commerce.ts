@@ -5,7 +5,6 @@
 export const COMMERCE_FR = {
   // Mention commune aux écrans servis par un jeu de démonstration
   'demo.dataset.message': 'Jeu de démonstration.',
-  'demo.dataset.hint': "Les entités de ce module ne sont pas encore au modèle de données : les valeurs affichées sont synthétiques, les contrôles qui s'y appliquent sont réels.",
 
   // Module 05 — régie
   'ads.eyebrow': 'Module 05 · H4',
@@ -112,7 +111,6 @@ export const COMMERCE_FR = {
 
 export const COMMERCE_EN: Readonly<Record<keyof typeof COMMERCE_FR, string>> = {
   'demo.dataset.message': 'Demonstration dataset.',
-  'demo.dataset.hint': 'This module’s entities are not in the data model yet: the values shown are synthetic, the checks applied to them are real.',
 
   'ads.eyebrow': 'Module 05 · H4',
   'ads.title': 'Advertising',
