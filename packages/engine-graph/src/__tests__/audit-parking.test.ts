@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Footprint, SiteZone, SiteFact } from '@azimut/core-model';
 import {
-  PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY,
+  PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
 } from '@azimut/core-model';
 import { auditParking } from '../audit-parking.js';
 
@@ -44,7 +44,7 @@ function places(parkingId: string, count: number): Footprint[] {
   }));
 }
 
-function fait(key: string, value: number, kind: string, id: string): SiteFact {
+function fait(key: string, value: number | string, kind: string, id: string): SiteFact {
   return {
     key,
     value,
@@ -61,6 +61,10 @@ const capacite = (id: string, n: number): SiteFact =>
 
 const nonNumerisee = (footprintId: string, n: number): SiteFact =>
   fait(PARKING_UNDIGITIZED_SPACES_KEY, n, 'footprint', footprintId);
+
+/** S-37 — le motif qui accompagne la marque ; sans lui, un avertissement. */
+const motif = (footprintId: string): SiteFact =>
+  fait(PARKING_UNDIGITIZED_REASON_KEY, 'Calque absent du plan fourni', 'footprint', footprintId);
 
 describe('auditParking — capacité annoncée et places tracées (S-36)', () => {
   it('ne signale rien quand les places tracées couvrent la capacité', () => {
@@ -189,7 +193,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
     const report = auditParking({
       zones: [zone('souterrain', ['fp-surface', ...fps.map(f => f.id)])],
       footprints: [surface, ...fps],
-      facts: [capacite('souterrain', 89), nonNumerisee('fp-surface', 49)],
+      facts: [capacite('souterrain', 89), nonNumerisee('fp-surface', 49), motif('fp-surface')],
     });
     expect(report.findings).toEqual([]);
   });
@@ -240,7 +244,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
     const report = auditParking({
       zones: [zone('ouest', ['fp-surface'])],
       footprints: [surface],
-      facts: [capacite('ouest', 12), nonNumerisee('fp-surface', 12)],
+      facts: [capacite('ouest', 12), nonNumerisee('fp-surface', 12), motif('fp-surface')],
     });
     expect(report.findings).toEqual([]);
   });

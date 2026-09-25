@@ -179,3 +179,25 @@ export function declaredInteger(
   if (only === undefined) return null;
   return typeof only.value === 'number' && Number.isInteger(only.value) ? only.value : null;
 }
+
+/**
+ * La valeur textuelle déclarée pour une clé sur une cible, ou `null`.
+ *
+ * Mêmes règles que `declaredInteger` : `null` sans fait, `null` quand
+ * plusieurs faits concourent, `null` quand la valeur n'est pas une chaîne. Une
+ * chaîne vide est rendue telle quelle : c'est une valeur du bon type, et juger
+ * qu'elle ne dit rien revient à l'appelant.
+ */
+export function declaredText(
+  facts: readonly SiteFact[],
+  key: string,
+  target: FactTarget,
+): string | null {
+  const matching = facts.filter(fact =>
+    fact.key === key
+    && fact.target?.kind === target.kind
+    && fact.target?.id === target.id);
+  const only = matching.length === 1 ? matching[0] : undefined;
+  if (only === undefined) return null;
+  return typeof only.value === 'string' ? only.value : null;
+}

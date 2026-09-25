@@ -67,6 +67,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'PARK.CAPACITY_EXCEEDED': 'Places numérisées au-delà de la capacité annoncée',
   'PARK.SOURCE_MISSING': 'Objet de stationnement sans source',
   'PARK.PROPOSAL_AS_EXISTING': 'Objet de stationnement non existant porté à un livrable',
+  'PARK.UNDIGITIZED_REASON_MISSING': 'Surface non numérisée sans motif déclaré',
   'DOC.BINDING_UNKNOWN': 'Champ lié que le modèle n’offre pas : faute du document',
   'DOC.BINDING_UNRESOLVED': 'Champ lié sans valeur : le paragraphe ne se rend pas',
   'DOC.LITERAL_NUMBER': 'Nombre écrit en littéral là où un champ lié est attendu',

@@ -3,7 +3,7 @@ import {
   DECLARED_FACT_KEYS, PARKING_CAPACITY_KEY, PARKING_FREE_KEY,
   PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
   isFactKeyShape, factKeyDeclaration,
-  factValueMatchesType, factValueFault, declaredInteger,
+  factValueMatchesType, factValueFault, declaredInteger, declaredText,
 } from '../fact-keys.js';
 import { buildCommand } from '../site-commands.js';
 import type { CommandDraft } from '../site-commands.js';
@@ -206,5 +206,28 @@ describe('A5.11 — lire une valeur entière déclarée sur une cible', () => {
   it('rend null quand la valeur trouvée n’est pas un entier', () => {
     expect(declaredInteger([fait({ value: 'cent vingt' })], PARKING_CAPACITY_KEY, zoneP1))
       .toBe(null);
+  });
+});
+
+describe('S-37 — lire un motif déclaré sur une empreinte', () => {
+  const surface = { kind: 'footprint', id: 'fp-surface' };
+  const motif = (value: string | number, id = 'fp-surface'): SiteFact => fait({
+    key: PARKING_UNDIGITIZED_REASON_KEY, value, target: { kind: 'footprint', id },
+  });
+
+  it('rend le texte du fait qui porte sur cette empreinte', () => {
+    expect(declaredText([motif('Bord de page'), motif('Autre', 'fp-b')],
+      PARKING_UNDIGITIZED_REASON_KEY, surface)).toBe('Bord de page');
+  });
+
+  it('rend une chaîne vide telle quelle : juger qu’elle ne dit rien revient à l’appelant', () => {
+    expect(declaredText([motif('')], PARKING_UNDIGITIZED_REASON_KEY, surface)).toBe('');
+  });
+
+  it('rend null sans fait, avec deux faits concurrents, ou pour une valeur qui n’est pas un texte', () => {
+    expect(declaredText([], PARKING_UNDIGITIZED_REASON_KEY, surface)).toBe(null);
+    expect(declaredText([motif('a'), motif('b')], PARKING_UNDIGITIZED_REASON_KEY, surface))
+      .toBe(null);
+    expect(declaredText([motif(3)], PARKING_UNDIGITIZED_REASON_KEY, surface)).toBe(null);
   });
 });

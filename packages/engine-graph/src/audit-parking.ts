@@ -2,8 +2,8 @@ import type {
   Finding, Footprint, SiteZone, SiteFact,
 } from '@azimut/core-model';
 import {
-  isParkingZone, isParkingSpaceFootprint, declaredInteger,
-  PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY,
+  isParkingZone, isParkingSpaceFootprint, declaredInteger, declaredText,
+  PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
   PUBLISHABLE_FACT_STATUSES,
 } from '@azimut/core-model';
 
@@ -193,6 +193,8 @@ export function auditParking(
     }
   }
 
+  findings.push(...unexplainedSurfaces(spaces, input.facts));
+
   if (forDeliverable) {
     findings.push(...unpublishableFacts(parkings, spaces, input.facts));
   }
@@ -203,6 +205,48 @@ export function auditParking(
     counted_spaces: countedSpaces,
     findings,
   };
+}
+
+/**
+ * Les surfaces non numérisées dont le motif manque ou est vide — S-37.
+ *
+ * « Une empreinte de nature `parking_space` peut être marquée non numérisée,
+ * avec le nombre de places qu'elle est censée porter, le motif pour lequel
+ * elle ne l'est pas, et sa source. » `PARK.UNDIGITIZED_REASON_MISSING`,
+ * avertissement : « déclarer des places sans dire pourquoi elles ne sont pas
+ * numérisées contredit la règle M01.S11 ».
+ *
+ * Une surface est marquée quand le fait `parking.undigitized_spaces` la
+ * désigne, comme au comptage de S-38 : la marque et le compte se lisent de la
+ * même façon. Toute empreinte de place est examinée, qu'une zone de parking la
+ * déclare ou non : le fait vise l'empreinte, pas la zone.
+ *
+ * Un motif vide est valide au regard du type — A5.11 refuse une valeur mal
+ * typée, non une valeur pauvre — mais il ne dit pas pourquoi : il est signalé
+ * comme un motif absent. Un motif fait de seuls blancs est vide. Le paramètre
+ * `reason` distingue les deux cas, pour que la correction soit évidente :
+ * déclarer le fait, ou le remplir.
+ */
+function unexplainedSurfaces(
+  spaces: ReadonlyMap<string, Footprint>,
+  facts: readonly SiteFact[],
+): readonly Finding[] {
+  const findings: Finding[] = [];
+  for (const id of [...spaces.keys()].sort((l, r) => l.localeCompare(r))) {
+    const target = { kind: 'footprint', id };
+    const declared = declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY, target);
+    if (declared === null) continue;
+    const reason = declaredText(facts, PARKING_UNDIGITIZED_REASON_KEY, target);
+    if (reason !== null && reason.trim() !== '') continue;
+    findings.push({
+      code: 'PARK.UNDIGITIZED_REASON_MISSING',
+      severity: 'warning',
+      entity: target,
+      params: { declared, reason: reason === null ? 'missing' : 'empty' },
+      ruleRef: 'S-37',
+    });
+  }
+  return findings;
 }
 
 /**

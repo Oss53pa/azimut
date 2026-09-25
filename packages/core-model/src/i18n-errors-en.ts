@@ -67,6 +67,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'PARK.CAPACITY_EXCEEDED': 'Digitised spaces above the declared capacity',
   'PARK.SOURCE_MISSING': 'Parking object without a source',
   'PARK.PROPOSAL_AS_EXISTING': 'Non-existing parking object carried to a deliverable',
+  'PARK.UNDIGITIZED_REASON_MISSING': 'Undigitised area with no declared reason',
   'DOC.BINDING_UNKNOWN': 'Bound field the model does not offer: a document error',
   'DOC.BINDING_UNRESOLVED': 'Bound field with no value: the paragraph does not render',
   'DOC.LITERAL_NUMBER': 'Number written as a literal where a bound field is expected',

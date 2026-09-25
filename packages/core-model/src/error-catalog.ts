@@ -106,6 +106,9 @@ export const ERROR_CATALOG = {
   'PARK.CAPACITY_EXCEEDED':                 { severity: 'blocking', description: 'Places numérisées au-delà de la capacité déclarée' },
   'PARK.SOURCE_MISSING':                    { severity: 'blocking', description: 'Fait du site sans source déclarée, règle M01.S11' },
   'PARK.PROPOSAL_AS_EXISTING':              { severity: 'blocking', description: 'Objet de statut proposition affiché comme existant, règle M01.S11' },
+  // S-37 : le motif est un fait valide au regard du type, même vide ; son
+  // absence se signale sans bloquer.
+  'PARK.UNDIGITIZED_REASON_MISSING':        { severity: 'warning',  description: 'Surface non numérisée dont le motif manque ou est vide. Déclarer des places sans dire pourquoi elles ne sont pas numérisées contredit la règle M01.S11' },
 
   // ── DOC (A5.11, règle M01.S11) ────────────────────────────
   'DOC.BINDING_UNKNOWN':                    { severity: 'blocking', description: 'Champ lié inconnu dans un texte de livrable' },

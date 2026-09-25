@@ -79,7 +79,7 @@ export {
   DECLARED_FACT_KEYS, PARKING_CAPACITY_KEY, PARKING_FREE_KEY,
   PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
   isFactKeyShape, factKeyDeclaration,
-  factValueMatchesType, factValueFault, declaredInteger,
+  factValueMatchesType, factValueFault, declaredInteger, declaredText,
 } from './fact-keys.js';
 export type { FactValueType, FactKeyDeclaration, FactValueFault } from './fact-keys.js';
 export {
