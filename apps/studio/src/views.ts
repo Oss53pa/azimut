@@ -21,6 +21,9 @@ export type ViewId =
   | 'site-sheet'
   // 02 — Wayfinding
   | 'message-schedule'
+  | 'staggering'
+  | 'placement'
+  | 'coverage-audit'
   // 03 — Parcours
   | 'customer-flows'
   // 04 — Signalétique

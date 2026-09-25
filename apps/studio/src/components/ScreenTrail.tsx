@@ -18,7 +18,10 @@ export function ScreenTrail({ view, onNavigate }: ScreenTrailProps): JSX.Element
   const { t } = useI18n();
   const module = moduleOfView(view);
   if (module === undefined) return null;
-  const screen = module.screens.find(s => s.view === view);
+  const screen = module.screens.find(s => s.view === view)
+    ?? (view === module.entry && module.entryLabelKey !== undefined
+      ? { view, labelKey: module.entryLabelKey }
+      : undefined);
 
   return (
     <nav

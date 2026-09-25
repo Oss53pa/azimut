@@ -46,6 +46,8 @@ export type ProductModule = {
   readonly summaryKey: UiMessageKey;
   /** Où pointe le module dans l'application. */
   readonly entry: ViewId;
+  /** Libellé de l'écran d'entrée dans la liste dépliée ; « Vue d'ensemble » à défaut. */
+  readonly entryLabelKey?: UiMessageKey;
   /** Écrans supplémentaires du module, dépliés quand il est actif. */
   readonly screens: readonly { readonly view: ViewId; readonly labelKey: UiMessageKey }[];
   readonly engine: EngineState;
@@ -87,7 +89,12 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.02.name',
     summaryKey: 'module.02.summary',
     entry: 'message-schedule',
-    screens: [],
+    entryLabelKey: 'nav.item.messages',
+    screens: [
+      { view: 'staggering', labelKey: 'nav.item.staggering' },
+      { view: 'placement', labelKey: 'nav.item.placement' },
+      { view: 'coverage-audit', labelKey: 'nav.item.coverage' },
+    ],
     // Partiel : M02.W1, M02.W3 à M02.W6, M02.W8 et M02.W10 tiennent. M02.W2 ne détecte que les
     // collisions — l'entité `naming_rule` n'existe pas, donc « une règle de
     // nommage déclarée est vérifiée à toute création » n'a aucune règle à

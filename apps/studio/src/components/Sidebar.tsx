@@ -137,7 +137,7 @@ export function Sidebar(
         {expanded && (
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             <li style={{ display: 'flex', margin: '2px 8px' }}>
-              {row(module.entry, 'shell.nav.overview', null, currentView === module.entry)}
+              {row(module.entry, module.entryLabelKey ?? 'shell.nav.overview', null, currentView === module.entry)}
             </li>
             {module.screens.map(s => (
               <li key={s.view} style={{ display: 'flex', margin: '2px 8px' }}>

@@ -27,6 +27,7 @@ import { SESSION_FR, SESSION_EN } from './messages/session.js';
 import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
 import { SHELL_FR, SHELL_EN } from './messages/shell.js';
 import { REGISTER_FR, REGISTER_EN } from './messages/register.js';
+import { WAYFINDING_REGISTER_FR, WAYFINDING_REGISTER_EN } from './messages/wayfinding-register.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -45,6 +46,7 @@ export const MESSAGES_FR = {
   ...MESSAGE_TABLE_FR,
   ...SHELL_FR,
   ...REGISTER_FR,
+  ...WAYFINDING_REGISTER_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -66,6 +68,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...MESSAGE_TABLE_EN,
   ...SHELL_EN,
   ...REGISTER_EN,
+  ...WAYFINDING_REGISTER_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {
