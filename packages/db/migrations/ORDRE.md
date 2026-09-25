@@ -97,6 +97,7 @@ non plus — elle n'en retire que les clés étrangères.
 0051_s_35_drop_parking
 0052_drop_vehicle_gate
 0053_a5_4_pictogram_function_key
+0054_a5_4_function_scope_by_registry
 ```
 
 ## Règle pour la suite
