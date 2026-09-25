@@ -1,0 +1,89 @@
+/**
+ * Module 04 aux écrans de la maquette : plans muraux orientés et plans
+ * d'évacuation.
+ *
+ * Fragment du catalogue. La table française porte le jeu de clés ;
+ * la table anglaise est typée contre elle, une traduction manquante
+ * ne compile pas.
+ */
+export const SIGNAGE_REGISTER_FR = {
+  'nav.item.wallplans': 'Plans muraux',
+  'nav.item.evacuation': 'Évacuation',
+
+  'wallplans.title': 'Plans muraux orientés',
+  'wallplans.summary': '{count} emplacement(s) · un par support implanté',
+  'wallplans.col.rotation': 'Rotation du plan, °',
+  'wallplans.state.oriented': 'Orienté',
+  'wallplans.state.orphan': 'Nœud introuvable',
+  'wallplans.inspector.empty': 'Choisissez un support pour voir son plan orienté.',
+  'wallplans.inspector.subtitle': 'Vous êtes ici : {node}',
+  'wallplans.section.plan': 'Orientation',
+  'wallplans.field.azimuth': 'Regard du lecteur (azimut)',
+  'wallplans.preview.aria': 'Aperçu du plan mural orienté du support {support}',
+  'wallplans.preview.none': 'Aucun aperçu : le support ne se rattache à aucun niveau.',
+  'wallplans.preview.note': "Aperçu de contrôle dans les couleurs de l'interface. Le plan émis prend celles de la charte du site.",
+  'wallplans.note': "Un plan mural se tourne comme le regard du lecteur : ce qui est devant lui est en haut (D6). La rotation se calcule depuis l'azimut du support ; elle ne se saisit pas.",
+
+  'evacuation.title': "Plans d'évacuation",
+  'evacuation.subtitle': 'Un plan par niveau, tiré du graphe.',
+  'evacuation.action.graph': 'Ouvrir le graphe',
+  'evacuation.metric.plans': 'Plans',
+  'evacuation.metric.tofix': 'À reprendre',
+  'evacuation.metric.exits': 'Sorties figurées',
+  'evacuation.metric.length': "Cheminements d'évacuation",
+  'evacuation.metric.uncovered': 'Nœuds hors cheminement',
+  'evacuation.col.routes': 'Tronçons',
+  'evacuation.col.length': 'Longueur, m',
+  'evacuation.panel.levels': 'Plans par niveau',
+  'evacuation.panel.preview': 'Aperçu · {level}',
+  'evacuation.panel.findings': 'Anomalies du rendu',
+  'evacuation.preview.aria': "Aperçu du plan d'évacuation du niveau {level}",
+  'evacuation.preview.note': "Aperçu de contrôle dans les couleurs de l'interface. Le plan émis prend les couleurs du registre de sécurité, qu'aucune charte ne modifie (INV-3).",
+  'evacuation.state.ok': 'Conforme au graphe',
+  'evacuation.state.warnings': 'Avec réserves',
+  'evacuation.state.noexit': 'Aucune sortie sur le niveau',
+  'evacuation.state.failed': 'Rendu refusé',
+  'evacuation.none': 'Rien à signaler.',
+  'evacuation.note': "Les cheminements et les sorties ne se dessinent pas : ils viennent des arêtes marquées d'évacuation et des nœuds de sortie du graphe. Corriger un plan, c'est corriger le graphe.",
+} as const;
+
+export const SIGNAGE_REGISTER_EN: Readonly<Record<keyof typeof SIGNAGE_REGISTER_FR, string>> = {
+  'nav.item.wallplans': 'Wall plans',
+  'nav.item.evacuation': 'Evacuation',
+
+  'wallplans.title': 'Oriented wall plans',
+  'wallplans.summary': '{count} location(s) · one per placed support',
+  'wallplans.col.rotation': 'Plan rotation, °',
+  'wallplans.state.oriented': 'Oriented',
+  'wallplans.state.orphan': 'Node not found',
+  'wallplans.inspector.empty': 'Choose a support to see its oriented plan.',
+  'wallplans.inspector.subtitle': 'You are here: {node}',
+  'wallplans.section.plan': 'Orientation',
+  'wallplans.field.azimuth': 'Reader facing (azimuth)',
+  'wallplans.preview.aria': 'Preview of the oriented wall plan of support {support}',
+  'wallplans.preview.none': 'No preview: the support belongs to no level.',
+  'wallplans.preview.note': 'Check preview in interface colours. The issued plan uses the site charter.',
+  'wallplans.note': 'A wall plan turns like the reader: what is in front of them is at the top (D6). The rotation is computed from the support azimuth; it is not entered.',
+
+  'evacuation.title': 'Evacuation plans',
+  'evacuation.subtitle': 'One plan per level, drawn from the graph.',
+  'evacuation.action.graph': 'Open the graph',
+  'evacuation.metric.plans': 'Plans',
+  'evacuation.metric.tofix': 'To rework',
+  'evacuation.metric.exits': 'Exits shown',
+  'evacuation.metric.length': 'Evacuation routes',
+  'evacuation.metric.uncovered': 'Nodes off route',
+  'evacuation.col.routes': 'Segments',
+  'evacuation.col.length': 'Length, m',
+  'evacuation.panel.levels': 'Plans by level',
+  'evacuation.panel.preview': 'Preview · {level}',
+  'evacuation.panel.findings': 'Rendering anomalies',
+  'evacuation.preview.aria': 'Preview of the evacuation plan of level {level}',
+  'evacuation.preview.note': 'Check preview in interface colours. The issued plan uses the safety registry colours, which no charter modifies (INV-3).',
+  'evacuation.state.ok': 'Matches the graph',
+  'evacuation.state.warnings': 'With reservations',
+  'evacuation.state.noexit': 'No exit on this level',
+  'evacuation.state.failed': 'Rendering refused',
+  'evacuation.none': 'Nothing to report.',
+  'evacuation.note': 'Routes and exits are not drawn: they come from the graph edges marked for evacuation and its exit nodes. Fixing a plan means fixing the graph.',
+} as const;

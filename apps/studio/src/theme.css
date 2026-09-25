@@ -98,3 +98,10 @@ a {
   white-space: nowrap;
 }
 
+
+/* Un rendu SVG de moteur tient dans son panneau, proportions gardées. */
+.az-svg-fit svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}

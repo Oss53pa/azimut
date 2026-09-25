@@ -128,6 +128,8 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     screens: [
       { view: 'templates', labelKey: 'nav.item.templates' },
       { view: 'faces', labelKey: 'nav.item.faces' },
+      { view: 'wall-plans', labelKey: 'nav.item.wallplans' },
+      { view: 'evacuation', labelKey: 'nav.item.evacuation' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
     // Partiel : M04.G1, M04.G2, M04.G4, M04.G5, M04.G6, M04.G8 et M04.G10 tiennent. M04.G3 et M04.G7 ont leur

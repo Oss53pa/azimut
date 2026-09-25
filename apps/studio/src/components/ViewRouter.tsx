@@ -28,6 +28,8 @@ import { EditorView } from '../editor/EditorView.js';
 import { SiteSheetView } from '../views/SiteSheetView.js';
 import { StaggeringView } from '../views/StaggeringView.js';
 import { ProfilesView } from '../views/ProfilesView.js';
+import { WallPlansView } from '../views/WallPlansView.js';
+import { EvacuationView } from '../views/EvacuationView.js';
 import { PlacementView } from '../views/PlacementView.js';
 import { CoverageAuditView } from '../views/CoverageAuditView.js';
 import { KioskAppView } from '../views/KioskAppView.js';
@@ -70,6 +72,8 @@ export function ViewRouter(
     case 'signage': return <SignageView onNavigate={onNavigate} />;
     case 'templates': return <TemplatesView onNavigate={onNavigate} />;
     case 'faces': return <FacesView />;
+    case 'wall-plans': return <WallPlansView />;
+    case 'evacuation': return <EvacuationView onNavigate={onNavigate} />;
     case 'proofs': return <ProofsView onNavigate={onNavigate} />;
     case 'advertising': return <AdvertisingView />;
     case 'tenant-signs': return <TenantSignsView />;

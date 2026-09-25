@@ -31,6 +31,8 @@ export type ViewId =
   | 'signage'
   | 'templates'
   | 'faces'
+  | 'wall-plans'
+  | 'evacuation'
   | 'proofs'
   // 05 — Régie publicitaire
   | 'advertising'
