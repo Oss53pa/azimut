@@ -1,9 +1,11 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
-import { auditSurveySync } from '../domain/survey-sync.js';
-import { DEMO_OBSERVATIONS, DEMO_ROUNDS, type InspectionRound } from '../domain/demo/production.js';
+import { EMPTY_INSPECTION_REGISTRY, type InspectionRound } from '@azimut/core-model';
+import { loadInspection, useRegistry } from '../data/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { findingCounts, syncFindings } from './operations/rounds.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
@@ -15,20 +17,29 @@ const ALL = 'all';
 /**
  * Module 08 — les tournées d'inspection (H7), au gabarit « registre ». Une
  * tournée relevée hors ligne reste visible tant qu'elle n'est pas
- * réconciliée : le garde `auditSurveySync` la signale. Jeu de démonstration.
+ * réconciliée : le garde `auditSurveySync` la signale. Lu en base (0044), ou
+ * dans le jeu de démonstration du dépôt de référence.
  */
-export function OpsRoundsView(): JSX.Element {
+type OpsRoundsViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function OpsRoundsView({ siteKey }: OpsRoundsViewProps): JSX.Element {
   const { t, lang } = useI18n();
+  const state = useRegistry(loadInspection, EMPTY_INSPECTION_REGISTRY, siteKey);
+  const { rounds, findings: observationsAll } = state.registry;
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const findings = useMemo(() => {
-    const result = auditSurveySync(DEMO_ROUNDS.map(r => r.survey));
-    return result.ok ? result.warnings : result.findings;
-  }, []);
-  const rows = [...DEMO_ROUNDS].sort((a, b) => a.survey.id.localeCompare(b.survey.id));
-  const visible = filter === ALL ? rows : rows.filter(r => r.survey.sync_state === filter);
-  const selected = rows.find(r => r.survey.id === selectedId) ?? visible[0] ?? null;
+  const findings = useMemo(() => syncFindings(rounds), [rounds]);
+  const counts = useMemo(() => findingCounts(observationsAll), [observationsAll]);
+
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
+  const nature = (k: string): string => { const key = natureKey(k); return key === null ? k : t(key); };
+  const rows = rounds;
+  const visible = filter === ALL ? rows : rows.filter(r => r.sync_state === filter);
+  const selected = rows.find(r => r.id === selectedId) ?? visible[0] ?? null;
 
   const filters: readonly RegisterFilter[] = [
     { id: ALL, label: t('opsrounds.filter.all') },
@@ -37,51 +48,51 @@ export function OpsRoundsView(): JSX.Element {
   ];
   const syncTag = (r: InspectionRound): JSX.Element => (
     <Tag
-      label={r.survey.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending')}
-      severity={r.survey.sync_state === 'synced' ? 'valid' : 'warning'}
+      label={r.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending')}
+      severity={r.sync_state === 'synced' ? 'valid' : 'warning'}
     />
   );
 
   const columns: readonly Column<InspectionRound>[] = [
-    { id: 'id', header: t('operations.col.round'), cell: r => r.survey.id },
-    { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone },
-    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor ?? '—' },
-    { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(r.observation_count) },
+    { id: 'id', header: t('operations.col.round'), cell: r => r.id },
+    { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone_label },
+    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '—' },
+    { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(counts.get(r.id) ?? 0) },
     { id: 'sync', header: t('operations.col.sync'), cell: syncTag },
     { id: 'date', header: t('operations.col.surveyed'), cell: r => formatDay(r.surveyed_on ?? undefined, lang) ?? t('operations.round.planned') },
   ];
 
-  const observations = selected === null ? [] : DEMO_OBSERVATIONS.filter(o => o.round_id === selected.survey.id);
+  const observations = selected === null ? [] : observationsAll.filter(o => o.round_id === selected.id);
   const inspector = selected === null
     ? <InspectorEmpty text={t('opsrounds.inspector.empty')} />
     : (
       <Inspector
-        title={selected.survey.id}
+        title={selected.id}
         subtitle={t('opsrounds.inspector.subtitle', {
-          zone: selected.zone,
-          sync: selected.survey.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending'),
+          zone: selected.zone_label,
+          sync: selected.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending'),
         })}
         sections={[
           {
             id: 'round',
             title: t('opsrounds.section.round'),
             rows: [
-              { id: 'surveyor', label: t('operations.col.surveyor'), value: selected.surveyor ?? '—' },
+              { id: 'surveyor', label: t('operations.col.surveyor'), value: selected.surveyor_id ?? '—' },
               { id: 'date', label: t('operations.col.surveyed'), value: formatDay(selected.surveyed_on ?? undefined, lang) ?? t('operations.round.planned') },
-              { id: 'count', label: t('operations.col.observations'), value: String(selected.observation_count) },
+              { id: 'count', label: t('operations.col.observations'), value: String(counts.get(selected.id) ?? 0) },
             ],
           },
           {
             id: 'observations',
             title: t('opsrounds.section.observations'),
             note: t('opsrounds.section.observations.note'),
-            rows: observations.map(o => ({ id: o.id, label: o.support_id, value: t(natureKey(o.nature_key)) })),
+            rows: observations.map(o => ({ id: o.id, label: o.support_id, value: nature(o.nature_key) })),
           },
         ]}
       >
         <section style={{ padding: '12px 16px' }}>
           <FindingList
-            findings={findings.filter(f => f.entity?.id === selected.survey.id)}
+            findings={findings.filter(f => f.entity?.id === selected.id)}
             empty={t('operations.sync.empty')}
           />
         </section>
@@ -90,9 +101,7 @@ export function OpsRoundsView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
       <RegisterLayout
         title={t('operations.panel.rounds')}
         summary={t('opsrounds.summary', { count: rows.length, pending: findings.length })}
@@ -107,10 +116,10 @@ export function OpsRoundsView(): JSX.Element {
         <DataTable
           columns={columns}
           rows={visible}
-          rowKey={r => r.survey.id}
+          rowKey={r => r.id}
           empty={t('operations.rounds.empty')}
-          onSelect={r => { setSelectedId(r.survey.id); }}
-          selectedKey={selected?.survey.id}
+          onSelect={r => { setSelectedId(r.id); }}
+          selectedKey={selected?.id}
         />
       </RegisterLayout>
     </div>

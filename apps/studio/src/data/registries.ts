@@ -2,7 +2,7 @@
  * Les lecteurs de registre passés à `useRegistry`. Des constantes de module,
  * pour que le hook ne relise pas à chaque rendu.
  */
-import type { BudgetRegistry, WorksiteRegistry } from '@azimut/core-model';
+import type { BudgetRegistry, InspectionRegistry, WorksiteRegistry } from '@azimut/core-model';
 import type { RegistryLoader } from './use-registry.js';
 
 export const loadWorksite: RegistryLoader<WorksiteRegistry> = (repository, siteId) =>
@@ -10,3 +10,6 @@ export const loadWorksite: RegistryLoader<WorksiteRegistry> = (repository, siteI
 
 export const loadBudget: RegistryLoader<BudgetRegistry> = (repository, siteId) =>
   repository.loadBudgetRegistry(siteId);
+
+export const loadInspection: RegistryLoader<InspectionRegistry> = (repository, siteId) =>
+  repository.loadInspectionRegistry(siteId);

@@ -217,8 +217,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     // machine à états qui porte cette règle n'est appelée par personne. E3
     // (ordre de travaux né d'une décision humaine), E4 (tournée hors ligne) et
     // E5 (relevé avec photographie et position) n'ont aucun moteur. Les poses,
-    // divergences enregistrées et ordres de travaux se lisent en base (0006),
-    // tels qu'elle les porte ; aucun écran ne les écrit.
+    // divergences enregistrées et ordres de travaux se lisent en base (0006,
+    // 0041), les tournées et leurs constats aussi (0044) ; le dépôt de
+    // référence sert un jeu de démonstration des tournées. Aucun écran ne les
+    // écrit.
     engine: 'partial',
     source: 'studio/domain/survey-sync · engine-graph/reconciliation',
   },

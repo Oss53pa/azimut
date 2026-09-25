@@ -6,11 +6,10 @@ import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
-import { auditSurveySync } from '../domain/survey-sync.js';
 import { DEMO_BOOKINGS, DEMO_OPTIONS } from '../domain/demo/commerce.js';
-import { DEMO_ROUNDS } from '../domain/demo/production.js';
-import { EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
-import { loadWorksite, useRegistry } from '../data/index.js';
+import { EMPTY_INSPECTION_REGISTRY, EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
+import { loadInspection, loadWorksite, useRegistry } from '../data/index.js';
+import { syncFindings } from './operations/rounds.js';
 import { openReserveFindings } from './worksite/rows.js';
 import { PRODUCT_MODULES } from '../product-map.js';
 import {
@@ -58,6 +57,8 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
   // montre que ce qui attend une action, et une lecture en cours n'en est pas.
   const worksite = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
   const worksiteReserves = worksite.registry.reserves;
+  const inspection = useRegistry(loadInspection, EMPTY_INSPECTION_REGISTRY, siteKey);
+  const rounds = inspection.registry.rounds;
 
   const gate = useMemo(
     () => evaluatePublishGate(site, vocabulary),
@@ -68,7 +69,6 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
   const queues = useMemo<readonly QueueEntry[]>(() => {
     const bookings = guardPlacementBookings(DEMO_BOOKINGS);
     const options = auditOptionExpiry(DEMO_OPTIONS, today);
-    const surveys = auditSurveySync(DEMO_ROUNDS.map(r => r.survey));
 
     return [
       { id: 'foundation', findings: siteFindings, labelKey: 'dashboard.queue.foundation', view: 'foundation' },
@@ -79,9 +79,9 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
         view: 'advertising',
       },
       { id: 'worksite', findings: openReserveFindings(worksiteReserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
-      { id: 'operations', findings: findingsOf(surveys), labelKey: 'dashboard.queue.operations', view: 'operations' },
+      { id: 'operations', findings: syncFindings(rounds), labelKey: 'dashboard.queue.operations', view: 'operations' },
     ];
-  }, [siteFindings, today, worksiteReserves]);
+  }, [siteFindings, today, worksiteReserves, rounds]);
 
   const all = queues.flatMap(q => q.findings);
   const blocking = all.filter(f => f.severity === 'blocking');

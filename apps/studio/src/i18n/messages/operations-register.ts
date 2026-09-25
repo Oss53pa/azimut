@@ -17,7 +17,7 @@ export const OPERATIONS_REGISTER_FR = {
   'opsrounds.inspector.subtitle': '{zone} · {sync}',
   'opsrounds.section.round': 'Tournée',
   'opsrounds.section.observations': 'Constats rattachés',
-  'opsrounds.section.observations.note': "Le jeu de démonstration n'en détaille qu'une partie : le compte de la tournée peut dépasser la liste.",
+  'opsrounds.section.observations.note': 'Le nombre de constats d’une tournée se compte sur cette liste ; il ne se saisit pas.',
 
   'opsincidents.title': 'Incidents sur support',
   'opsincidents.summary': '{count} constat(s) · {blocking} bloquant(s)',
@@ -66,7 +66,7 @@ export const OPERATIONS_REGISTER_EN: Readonly<Record<keyof typeof OPERATIONS_REG
   'opsrounds.inspector.subtitle': '{zone} · {sync}',
   'opsrounds.section.round': 'Round',
   'opsrounds.section.observations': 'Attached observations',
-  'opsrounds.section.observations.note': 'The demonstration dataset details only some of them: the round count may exceed the list.',
+  'opsrounds.section.observations.note': 'A round’s finding count is counted from this list; it is not entered.',
 
   'opsincidents.title': 'Support incidents',
   'opsincidents.summary': '{count} observation(s) · {blocking} blocking',

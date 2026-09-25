@@ -9,7 +9,7 @@
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
 import type {
-  BudgetRegistry, CharterRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
+  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
   WorksiteRegistry,
 } from '@azimut/core-model';
 
@@ -95,6 +95,11 @@ export type SiteRepository = {
    * (0043). Le dépôt de référence sert un jeu de démonstration.
    */
   loadBudgetRegistry(siteId: string): Promise<BudgetRegistry>;
+  /**
+   * I5.6 — les tournées d'inspection et leurs constats (0044). Le dépôt de
+   * référence sert un jeu de démonstration.
+   */
+  loadInspectionRegistry(siteId: string): Promise<InspectionRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

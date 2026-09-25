@@ -105,9 +105,9 @@ export function ViewRouter(
     case 'worksite-lots': return <WorksiteLotsView siteKey={siteKey} />;
     case 'worksite-slots': return <WorksiteSlotsView siteKey={siteKey} />;
     case 'worksite-reserves': return <WorksiteReservesView siteKey={siteKey} />;
-    case 'operations': return <OperationsView />;
-    case 'ops-rounds': return <OpsRoundsView />;
-    case 'ops-incidents': return <OpsIncidentsView />;
+    case 'operations': return <OperationsView siteKey={siteKey} />;
+    case 'ops-rounds': return <OpsRoundsView siteKey={siteKey} />;
+    case 'ops-incidents': return <OpsIncidentsView siteKey={siteKey} />;
     case 'ops-divergences': return <OpsDivergencesView siteKey={siteKey} />;
     case 'ops-work-orders': return <OpsWorkOrdersView siteKey={siteKey} />;
     case 'ops-fleet': return <OpsFleetView siteKey={siteKey} />;

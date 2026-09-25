@@ -9,7 +9,11 @@ const NATURE_KEYS = {
 
 type NatureKey = keyof typeof NATURE_KEYS;
 
-/** La clé de libellé d'une nature de constat ; une nature inconnue retombe sur « fixation ». */
-export function natureKey(key: string): NatureKey {
-  return key in NATURE_KEYS ? (key as NatureKey) : 'operations.nature.fixing';
+/**
+ * La clé de libellé d'une nature de constat, ou `null` : une nature que
+ * l'interface ne connaît pas s'affiche telle quelle, elle ne prend pas le nom
+ * d'une autre.
+ */
+export function natureKey(key: string): NatureKey | null {
+  return key in NATURE_KEYS ? (key as NatureKey) : null;
 }

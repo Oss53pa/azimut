@@ -33,6 +33,7 @@ import { loadCharterRegistry } from './postgrest-charter.js';
 import { loadMaintenanceRegistry } from './postgrest-maintenance.js';
 import { loadWorksiteRegistry } from './postgrest-worksite.js';
 import { loadBudgetRegistry } from './postgrest-budget.js';
+import { loadInspectionRegistry } from './postgrest-inspection.js';
 
 type SiteListRow = Pick<
   SiteRow,
@@ -336,6 +337,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
     loadBudgetRegistry(siteId: string) {
       return loadBudgetRegistry(config, siteId);
+    },
+
+    loadInspectionRegistry(siteId: string) {
+      return loadInspectionRegistry(config, siteId);
     },
 
     /**
