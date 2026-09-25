@@ -213,6 +213,7 @@ export const refAdversarial: SiteData = {
       standard_ref: 'WF-002',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
     },
   ],
   destinations: [

@@ -150,6 +150,7 @@ export const refRetail: SiteData = {
       standard_ref: 'SF-001',
       svg_path: 'M5 5l10 10M15 5L5 15',
       registry: 'safety',
+      function_key: null,
     },
     {
       id: 'picto-rt-shop',
@@ -159,6 +160,7 @@ export const refRetail: SiteData = {
       standard_ref: 'WF-002',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
     },
   ],
   destinations: [

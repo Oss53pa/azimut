@@ -117,6 +117,24 @@ describe('INV-3 — le registre de sécurité refuse chaque voie de contournemen
     }
   });
 
+  it('voie 7 bis : saisir la désignation de fonction d’un pictogramme de sécurité', () => {
+    // A5.4 : « Pour le registre de sécurité, la désignation vient du paquet de
+    // règles et n'est jamais saisie. » Aucun garde neuf n'est posé pour cela —
+    // une désignation saisie est une modification, et INV-3 les refuse toutes.
+    // L'essai le tient quand même : c'est la règle d'A5.4 qui compte, non le
+    // chemin par lequel elle se trouve tenue.
+    expect(codes(buildCommand(commande({
+      before: { registry: 'safety', svg_path: 'M0 0', function_key: null },
+      after: { registry: 'safety', svg_path: 'M0 0', function_key: 'access.accessible' },
+    })))).toContain('SECURITY.REGISTRY_WRITE_DENIED');
+
+    // Et par la création, qui serait l'autre façon de la saisir.
+    expect(codes(buildCommand(commande({
+      operation: 'create',
+      after: { registry: 'safety', svg_path: 'M0 0', function_key: 'access.accessible' },
+    })))).toContain('SECURITY.REGISTRY_WRITE_DENIED');
+  });
+
   it('voie 8 : passer par une charte, sur chacune des quatre natures', () => {
     // La seule voie qui était déjà fermée. Elle reste éprouvée ici pour que
     // les huit tiennent au même endroit : c'est la liste qui fait la preuve,

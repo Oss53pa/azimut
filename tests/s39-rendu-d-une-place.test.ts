@@ -8,7 +8,8 @@ import type {
 } from '@azimut/engine-layout';
 import { renderIsoView } from '@azimut/engine-iso';
 import type { IsoTheme, IsoOptions } from '@azimut/engine-iso';
-import type { Pictogram, SiteData, Volume } from '@azimut/core-model';
+import { ACCESSIBLE_FUNCTION_KEY } from '@azimut/core-model';
+import type { Outcome, Pictogram, SiteData, Volume } from '@azimut/core-model';
 
 /**
  * S-39 — « Rendu d'une place de stationnement, dans toutes les vues :
@@ -16,8 +17,11 @@ import type { Pictogram, SiteData, Volume } from '@azimut/core-model';
  * - Plan de niveau et plan orienté : contour léger, sans libellé. Une place ne
  *   porte ni occupant ni catégorie, et ne doit pas concurrencer visuellement
  *   les cellules commerciales.
- * - Place accessible : elle porte le pictogramme normalisé du registre de
- *   sécurité, jamais un symbole maison, section A1.2, invariant 3.
+ * - Place accessible : elle porte le pictogramme du registre de sécurité
+ *   désigné par la fonction d'accessibilité, section A5.4, jamais un symbole
+ *   maison, section A1.2, invariant 3. Si aucune fonction n'est désignée, la
+ *   marque est omise et signalée par `PICTO.FUNCTION_NOT_DESIGNATED` : le
+ *   rendu ne dessine jamais un pictogramme de remplacement.
  * - Vue isométrique : la place reste au sol, sans volume.
  * - Plan d'évacuation : elle n'y apparaît pas, sauf si elle porte un
  *   cheminement d'évacuation. »
@@ -45,7 +49,18 @@ const pictoSecurite: Pictogram = {
   standard_ref: 'à renseigner par l’expert normatif',
   svg_path: TRACE,
   registry: 'safety',
+  function_key: ACCESSIBLE_FUNCTION_KEY,
 };
+
+/** Le site de référence, augmenté des pictogrammes que l'essai lui donne. */
+function avec(...pictogrammes: readonly Pictogram[]): SiteData {
+  return { ...refMultilevel, pictograms: [...refMultilevel.pictograms, ...pictogrammes] };
+}
+
+/** Les codes que porte un rendu réussi, ou ceux de son refus. */
+function codes(out: Outcome<string>): readonly string[] {
+  return (out.ok ? out.warnings : out.findings).map(f => f.code);
+}
 
 const floorTheme: FloorPlanTheme = {
   background: 'tok-bg',
@@ -137,40 +152,73 @@ describe('S-39 — plan orienté : le même traitement', () => {
 });
 
 describe('S-39 — la marque d’une place accessible', () => {
-  const avec = { accessible_space_pictogram: pictoSecurite };
-
-  it('pose le pictogramme fourni sur la seule place accessible', () => {
-    const svg = svgOf(renderFloorPlan(refMultilevel, RDC, floorOpts, avec));
+  it('pose sur la seule place accessible le pictogramme désigné par la fonction', () => {
+    // Le moteur ne connaît pas le code du pictogramme, et n'a pas à le
+    // connaître : il nomme la fonction, A5.4, et la donnée nomme celui qui la
+    // porte. C'est ce qu'INV-5 lui interdisait d'écrire.
+    const svg = svgOf(renderFloorPlan(avec(pictoSecurite), RDC, floorOpts));
     const tracés = [...svg.matchAll(new RegExp(`<path d="${TRACE}"`, 'g'))];
     expect(tracés).toHaveLength(1);
   });
 
   it('le pose aussi au plan orienté', () => {
-    const svg = svgOf(renderOrientedPlan(refMultilevel, RDC, orientedOpts, avec));
+    const svg = svgOf(renderOrientedPlan(avec(pictoSecurite), RDC, orientedOpts));
     expect(svg).toContain(`<path d="${TRACE}"`);
   });
 
-  it('ne dessine rien quand aucun pictogramme n’est fourni', () => {
-    // « Jamais un symbole maison » : s'abstenir est le seul repli que la règle
-    // laisse. Un moteur qui dessinerait ici une silhouette de son cru
-    // violerait l'invariant 3 aussi sûrement qu'en redessinant le vrai.
-    const svg = svgOf(renderFloorPlan(refMultilevel, RDC, floorOpts));
-    expect(svg).not.toContain('<path d=');
+  it('omet la marque et le signale quand aucune fonction n’est désignée', () => {
+    // « La marque est omise et signalée. » Omettre sans rien dire ferait d'un
+    // plan incomplet un plan d'apparence complète.
+    const out = renderFloorPlan(refMultilevel, RDC, floorOpts);
+    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+    expect(svgOf(out)).not.toContain('<path d=');
   });
 
-  it('refuse un pictogramme qui n’est pas du registre de sécurité', () => {
-    // Un pictogramme d'orientation, fût-il bien dessiné, n'est pas celui que
-    // la règle demande. INV-3 cloisonne, S-39 y renvoie.
-    const maison: Pictogram = { ...pictoSecurite, registry: 'wayfinding' };
-    const svg = svgOf(renderFloorPlan(
-      refMultilevel, RDC, floorOpts, { accessible_space_pictogram: maison },
-    ));
-    expect(svg).not.toContain(`<path d="${TRACE}"`);
+  it('ne dessine jamais un pictogramme de remplacement', () => {
+    // Le registre de sécurité porte ici un pictogramme, mais aucun ne porte la
+    // fonction demandée. Prendre le premier venu violerait l'invariant 3 aussi
+    // sûrement qu'inventer une silhouette.
+    const autre: Pictogram = { ...pictoSecurite, id: 'picto-autre', function_key: null };
+    const out = renderFloorPlan(avec(autre), RDC, floorOpts);
+    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+    expect(svgOf(out)).not.toContain(`<path d="${TRACE}"`);
+  });
+
+  it('ne voit pas la même fonction portée par le registre d’orientation', () => {
+    // Un pictogramme d'orientation, fût-il bien dessiné et bien désigné, n'est
+    // pas celui que la règle demande. INV-3 cloisonne, S-39 y renvoie.
+    const maison: Pictogram = { ...pictoSecurite, id: 'picto-maison', registry: 'wayfinding' };
+    const out = renderFloorPlan(avec(maison), RDC, floorOpts);
+    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+    expect(svgOf(out)).not.toContain(`<path d="${TRACE}"`);
+  });
+
+  it('refuse le plan quand deux pictogrammes de sécurité portent la fonction', () => {
+    // « Une fonction est désignée au plus une fois par registre et par site. »
+    // En départager deux serait décider à la place de celui qui a désigné, et
+    // A7 l'interdit — un moteur qui ne peut pas traiter son entrée refuse.
+    const second: Pictogram = { ...pictoSecurite, id: 'picto-pmr-bis' };
+    for (const out of [
+      renderFloorPlan(avec(pictoSecurite, second), RDC, floorOpts),
+      renderOrientedPlan(avec(pictoSecurite, second), RDC, orientedOpts),
+    ]) {
+      expect(out.ok).toBe(false);
+      expect(codes(out)).toEqual(['PICTO.FUNCTION_AMBIGUOUS']);
+    }
+  });
+
+  it('ne réclame aucune fonction sur un niveau sans place accessible', () => {
+    // La fonction ne manque pas là où personne ne la demande. Signaler ici
+    // ferait du code un bruit de fond, et un code qu'on apprend à ignorer ne
+    // signale plus rien.
+    const sansExtension: SiteData = { ...refMultilevel, parking_spaces: [] };
+    const out = renderFloorPlan(sansExtension, RDC, floorOpts);
+    expect(codes(out)).not.toContain('PICTO.FUNCTION_NOT_DESIGNATED');
   });
 
   it('ne marque pas une place dont l’extension ne dit pas qu’elle est accessible', () => {
-    const sansExtension: SiteData = { ...refMultilevel, parking_spaces: [] };
-    const svg = svgOf(renderFloorPlan(sansExtension, RDC, floorOpts, avec));
+    const site: SiteData = { ...avec(pictoSecurite), parking_spaces: [] };
+    const svg = svgOf(renderFloorPlan(site, RDC, floorOpts));
     expect(svg).not.toContain(`<path d="${TRACE}"`);
   });
 });

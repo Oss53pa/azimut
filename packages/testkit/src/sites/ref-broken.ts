@@ -309,6 +309,7 @@ export const refBroken: SiteData = {
       standard_ref: 'WF-001',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
     },
   ],
   destinations: [

@@ -2,6 +2,10 @@ import type { SiteData, Footprint, Pictogram } from './site.js';
 import { isParkingZone, isParkingSpaceFootprint } from './site.js';
 import type { SiteFact } from './site-facts.js';
 import { declaredInteger, PARKING_UNDIGITIZED_SPACES_KEY } from './fact-keys.js';
+import {
+  ACCESSIBLE_FUNCTION_KEY, resolvePictogramFunction, pictogramFunctionFinding,
+} from './pictogram-functions.js';
+import type { Finding } from './outcome.js';
 
 /**
  * Ce qu'un rendu doit savoir des places de stationnement d'un niveau — S-39.
@@ -71,38 +75,64 @@ export function parkingSpacesOfLevel(
  * Ce qu'un rendu de plan lit en plus de `SiteData`.
  *
  * Les faits d'A5.11 vivent dans le vocabulaire du site, non dans la scène : un
- * moteur qui les veut les reçoit. Le pictogramme normalisé suit la même voie,
- * et pour une raison plus forte — voir ci-dessous.
+ * moteur qui les veut les reçoit.
+ *
+ * Le pictogramme d'une place accessible, lui, n'y figure plus. Il y a figuré
+ * tant qu'INV-5 empêchait le moteur de le nommer : désigner le pictogramme
+ * normalisé était une valeur d'origine normative, et le moteur dessinait ce
+ * qu'on lui donnait sans pouvoir en répondre. A5.4 a tranché autrement — le
+ * moteur nomme la fonction, la donnée nomme le pictogramme — et le passer en
+ * contexte rouvrirait la porte que la désignation ferme : un appelant y
+ * glisserait le symbole de son choix, que S-39 refuse en toutes lettres.
  */
 export type PlanContext = {
   readonly facts?: readonly SiteFact[];
-  /**
-   * Le pictogramme normalisé d'une place accessible — S-39.
-   *
-   * Passé en donnée, et non choisi par le moteur. S-39 exige « le pictogramme
-   * normalisé du registre de sécurité, jamais un symbole maison » ; désigner
-   * lequel est une valeur d'origine normative, que INV-5 interdit d'écrire
-   * dans le code et qui doit venir d'un paquet de règles. Le moteur dessine ce
-   * qu'on lui donne, et l'appelant répond de sa provenance.
-   *
-   * Absent, aucune marque n'est dessinée. C'est le seul repli que S-39 laisse :
-   * inventer un symbole est expressément interdit, et un symbole approchant le
-   * serait tout autant.
-   */
-  readonly accessible_space_pictogram?: Pictogram;
 };
 
 /**
- * Le tracé du pictogramme à employer pour une place accessible, ou `null`.
+ * Ce qu'un rendu tire de la demande de marque d'une place accessible — S-39.
  *
- * Rend `null` pour un pictogramme d'un autre registre : INV-3 cloisonne le
- * registre de sécurité, et S-39 y renvoie explicitement. Un pictogramme
- * d'orientation, fût-il bien dessiné, n'est pas celui que la règle demande.
+ * Deux champs plutôt qu'un : le pictogramme quand la fonction est désignée, et
+ * ce que la résolution oppose sinon. Les deux sont utiles ensemble — la règle
+ * veut que la marque soit omise **et signalée**, donc qu'un rendu sans marque
+ * ne soit pas un rendu silencieux.
  */
-export function accessibleSpaceMark(context: PlanContext): Pictogram | null {
-  const picto = context.accessible_space_pictogram;
-  if (picto === undefined || picto.registry !== 'safety') return null;
-  return picto.svg_path.trim() === '' ? null : picto;
+export type AccessibleMark = {
+  /** Le pictogramme à dessiner, ou `null` : la marque est alors omise. */
+  readonly pictogram: Pictogram | null;
+  /** L'anomalie à porter au rendu, ou `null` si la fonction est désignée. */
+  readonly finding: Finding | null;
+};
+
+/**
+ * Le pictogramme de la fonction d'accessibilité, dans le registre de sécurité.
+ *
+ * « Place accessible : elle porte le pictogramme du registre de sécurité
+ * désigné par la fonction d'accessibilité, section A5.4, jamais un symbole
+ * maison, section A1.2, invariant 3. Si aucune fonction n'est désignée, la
+ * marque est omise et signalée par `PICTO.FUNCTION_NOT_DESIGNATED` : le rendu
+ * ne dessine jamais un pictogramme de remplacement. »
+ *
+ * Le registre est celui de la sécurité, et il n'est pas négociable : INV-3 le
+ * cloisonne et S-39 y renvoie. Un pictogramme d'orientation qui porterait la
+ * même fonction, fût-il bien dessiné, n'est pas celui que la règle demande, et
+ * la résolution ne le voit même pas.
+ *
+ * **À n'appeler que lorsqu'une marque est demandée.** Un niveau sans place
+ * accessible ne demande rien, et ne doit donc rien signaler : la fonction n'y
+ * manque pas, personne ne l'a réclamée.
+ */
+export function accessibleSpaceMark(site: SiteData): AccessibleMark {
+  const resolution = resolvePictogramFunction(
+    site.pictograms, 'safety', ACCESSIBLE_FUNCTION_KEY,
+  );
+  const finding = pictogramFunctionFinding(
+    resolution, 'safety', ACCESSIBLE_FUNCTION_KEY, 'S-39',
+  );
+  return {
+    pictogram: resolution.kind === 'designated' ? resolution.pictogram : null,
+    finding,
+  };
 }
 
 /**

@@ -180,6 +180,8 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'REVIEW.ANNOTATION_OPEN': 'Annotation de révision non traitée à la clôture',
   'PICTO.SAFETY_EDIT_DENIED': 'Modification d’un pictogramme du registre de sécurité',
   'PICTO.UNTESTED': 'Pictogramme d’orientation non soumis à essai de compréhension',
+  'PICTO.FUNCTION_NOT_DESIGNATED': 'Aucun pictogramme ne porte la fonction demandée. La marque est omise, aucune autre n’est dessinée',
+  'PICTO.FUNCTION_AMBIGUOUS': 'Deux pictogrammes d’un même registre portent la même fonction',
   'PICTO.RASTER_CONTENT': 'Image en mode point dans un pictogramme',
   'PICTO.FAMILY_INCONSISTENT': 'Épaisseur ou grille incohérente avec la famille',
   'LIBRARY.DUPLICATE_ON_IMPORT': 'Symbole déjà présent dans la bibliothèque',

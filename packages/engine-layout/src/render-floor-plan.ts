@@ -347,19 +347,30 @@ export function renderFloorPlan(
   }
 
   // S-39 — la marque d'une place accessible, après les places et les surfaces,
-  // avant le bâti. Elle est dessinée par-dessus la place qu'elle qualifie, et
-  // ne l'est pas du tout quand l'appelant ne fournit pas le pictogramme
-  // normalisé : la règle interdit le symbole maison, et s'abstenir est le seul
-  // repli qu'elle laisse.
-  const mark = accessibleSpaceMark(context);
-  if (mark !== null) {
-    for (const space of [...data.accessible].sort(
-      (a, b) => a.id.localeCompare(b.id),
-    )) {
-      const projected = space.geometry.vertices.map((v) => tx(v, t));
-      parts.push(accessibleMarkSvg(
-        space, projected, mark, options.theme.text_primary,
-      ));
+  // avant le bâti. Elle est dessinée par-dessus la place qu'elle qualifie.
+  //
+  // La fonction n'est demandée que s'il y a une place à marquer : un niveau
+  // sans place accessible ne réclame rien, et n'a donc rien à signaler.
+  // Demandée et non désignée, la marque est omise et l'avertissement porté au
+  // rendu ; demandée et ambiguë, le plan refuse — choisir entre deux
+  // pictogrammes serait décider à la place de celui qui a désigné.
+  if (data.accessible.length > 0) {
+    const mark = accessibleSpaceMark(site);
+    if (mark.finding !== null) {
+      if (mark.finding.severity === 'blocking') {
+        return { ok: false, findings: [mark.finding] };
+      }
+      warnings.push(mark.finding);
+    }
+    if (mark.pictogram !== null) {
+      for (const space of [...data.accessible].sort(
+        (a, b) => a.id.localeCompare(b.id),
+      )) {
+        const projected = space.geometry.vertices.map((v) => tx(v, t));
+        parts.push(accessibleMarkSvg(
+          space, projected, mark.pictogram, options.theme.text_primary,
+        ));
+      }
     }
   }
 

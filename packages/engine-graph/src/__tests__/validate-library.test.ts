@@ -97,6 +97,7 @@ describe('T-1.8 validateLibrary', () => {
             standard_ref: 'ISO-7001',
             svg_path: 'M0 0',
             registry: 'wayfinding',
+            function_key: null,
           },
         ],
       });
@@ -142,6 +143,7 @@ describe('T-1.8 validateLibrary', () => {
             standard_ref: 'ISO-7001',
             svg_path: '  ',
             registry: 'wayfinding',
+            function_key: null,
           },
         ],
       });

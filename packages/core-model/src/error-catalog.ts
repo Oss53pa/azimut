@@ -314,6 +314,8 @@ export const ERROR_CATALOG = {
   'REVIEW.ANNOTATION_OPEN':                  { severity: 'blocking', description: 'Annotation de révision non traitée à la clôture' },
   'PICTO.SAFETY_EDIT_DENIED':                { severity: 'blocking', description: 'Modification d’un pictogramme du registre de sécurité' },
   'PICTO.UNTESTED':                          { severity: 'info',     description: 'Pictogramme d’orientation non soumis à essai de compréhension' },
+  'PICTO.FUNCTION_NOT_DESIGNATED':           { severity: 'warning',  description: 'Aucun pictogramme ne porte la fonction demandée. Le rendu omet la marque et le signale, il n’en dessine jamais une autre' },
+  'PICTO.FUNCTION_AMBIGUOUS':                { severity: 'blocking', description: 'Deux pictogrammes d’un même registre portent la même fonction sur un site' },
   'PICTO.RASTER_CONTENT':                    { severity: 'blocking', description: 'Image en mode point dans un pictogramme' },
   'PICTO.FAMILY_INCONSISTENT':               { severity: 'warning',  description: 'Épaisseur ou grille incohérente avec la famille' },
   'LIBRARY.DUPLICATE_ON_IMPORT':             { severity: 'warning',  description: 'Symbole déjà présent dans la bibliothèque' },

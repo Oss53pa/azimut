@@ -393,6 +393,15 @@ export type Pictogram = {
   readonly standard_ref: string;
   readonly svg_path: string;
   readonly registry: PictogramRegistry;
+  /**
+   * À quoi sert ce pictogramme, et non d'où il vient — A5.4.
+   *
+   * C'est par elle qu'un moteur demande « le pictogramme d'accessibilité »
+   * sans connaître son code. Voir `pictogram-functions.ts`, qui porte le
+   * vocabulaire et la résolution. `null` pour un pictogramme qui ne sert
+   * aucune fonction nommée, ce qui est le cas courant.
+   */
+  readonly function_key: string | null;
 };
 
 export type OccupancyStatus =

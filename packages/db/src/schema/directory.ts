@@ -2,6 +2,7 @@ import {
   uuid, text, timestamp, integer, jsonb, boolean, numeric, date,
   uniqueIndex, index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 import { site } from './site.js';
@@ -26,8 +27,14 @@ export const pictogram = azimut.table('pictogram', {
   standard_ref: text('standard_ref').notNull(),
   svg_path: text('svg_path').notNull(),
   registry: text('registry').notNull(),
+  function_key: text('function_key'),
 }, (t) => [
   index('idx_pictogram_org').on(t.org_id),
+  // A5.4 : « une fonction est désignée au plus une fois par registre et par
+  // site ». Partiel — une fonction non désignée ne se compare à rien.
+  uniqueIndex('uq_pictogram_function')
+    .on(t.org_id, t.registry, t.function_key)
+    .where(sql`function_key IS NOT NULL`),
 ]);
 
 export const destination = azimut.table('destination', {

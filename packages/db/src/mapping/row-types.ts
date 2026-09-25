@@ -160,6 +160,7 @@ export type PictogramRow = {
   readonly standard_ref: string;
   readonly svg_path: string;
   readonly registry: string;
+  readonly function_key: string | null;
 };
 
 export type DestinationRow = {

@@ -7,16 +7,19 @@ export type ScreenPoint = { readonly x: number; readonly y: number };
 /**
  * La marque d'une place accessible, posée sur le plan — S-39.
  *
- * « Place accessible : elle porte le pictogramme normalisé du registre de
- * sécurité, jamais un symbole maison, section A1.2, invariant 3. »
+ * « Place accessible : elle porte le pictogramme du registre de sécurité
+ * désigné par la fonction d'accessibilité, section A5.4, jamais un symbole
+ * maison, section A1.2, invariant 3. »
  *
  * Partagé par le plan de niveau et le plan orienté, qui doivent poser la même
  * marque de la même façon : deux tracés différents pour un même pictogramme
  * normalisé seraient déjà une dérive.
  *
- * Le moteur ne choisit pas le pictogramme — voir `PlanContext`. Il le dessine,
- * centré sur l'empreinte et mis à l'échelle de la place, et il ne dessine rien
- * du tout quand on ne lui en donne pas.
+ * Ce module ne choisit pas le pictogramme : `accessibleSpaceMark` le résout
+ * depuis la fonction désignée, A5.4, et le lui passe. Il le dessine, centré
+ * sur l'empreinte et mis à l'échelle de la place. Sans pictogramme il n'est
+ * pas appelé, et rien n'est dessiné — la règle interdit le symbole de
+ * remplacement, et s'abstenir est le seul repli qu'elle laisse.
  */
 
 /** La part du plus petit côté d'une place qu'occupe sa marque. */

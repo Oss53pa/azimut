@@ -276,16 +276,26 @@ export function renderOrientedPlan(
     );
   }
 
-  // S-39 — la marque d'une place accessible, après les empreintes. Rien n'est
-  // dessiné quand l'appelant ne fournit pas le pictogramme normalisé.
-  const mark = accessibleSpaceMark(context);
-  if (mark !== null) {
-    for (const fp of sortedFp) {
-      if (!fp.is_accessible) continue;
-      const projected = fp.vertices.map((v) => tx(v, t));
-      parts.push(accessibleMarkSvg(
-        fp.footprint, projected, mark, options.theme.text_primary,
-      ));
+  // S-39 — la marque d'une place accessible, après les empreintes. Même
+  // traitement qu'au plan de niveau : la fonction n'est demandée que s'il y a
+  // une place à marquer, non désignée la marque est omise et signalée,
+  // ambiguë le plan refuse.
+  const accessibleFp = sortedFp.filter((fp) => fp.is_accessible);
+  if (accessibleFp.length > 0) {
+    const mark = accessibleSpaceMark(site);
+    if (mark.finding !== null) {
+      if (mark.finding.severity === 'blocking') {
+        return { ok: false, findings: [mark.finding] };
+      }
+      warnings.push(mark.finding);
+    }
+    if (mark.pictogram !== null) {
+      for (const fp of accessibleFp) {
+        const projected = fp.vertices.map((v) => tx(v, t));
+        parts.push(accessibleMarkSvg(
+          fp.footprint, projected, mark.pictogram, options.theme.text_primary,
+        ));
+      }
     }
   }
 

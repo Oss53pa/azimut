@@ -180,6 +180,8 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'REVIEW.ANNOTATION_OPEN': 'Review annotation unresolved at closure',
   'PICTO.SAFETY_EDIT_DENIED': 'Editing a safety-registry pictogram',
   'PICTO.UNTESTED': 'Orientation pictogram not comprehension-tested',
+  'PICTO.FUNCTION_NOT_DESIGNATED': 'No pictogram carries the requested function. The mark is omitted, no other is drawn',
+  'PICTO.FUNCTION_AMBIGUOUS': 'Two pictograms of the same registry carry the same function',
   'PICTO.RASTER_CONTENT': 'Raster image inside a pictogram',
   'PICTO.FAMILY_INCONSISTENT': 'Stroke or grid inconsistent with the family',
   'LIBRARY.DUPLICATE_ON_IMPORT': 'Symbol already present in the library',

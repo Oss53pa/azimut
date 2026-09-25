@@ -85,7 +85,14 @@ export {
   parkingSpacesOfLevel, accessibleSpaceMark, footprintCentre,
   ACCESSIBLE_SPACE_KIND, NO_PARKING_SPACES, PICTOGRAM_GRID_UNITS,
 } from './parking-view.js';
-export type { ParkingSpaceView, PlanContext } from './parking-view.js';
+export type { ParkingSpaceView, PlanContext, AccessibleMark } from './parking-view.js';
+export {
+  ACCESSIBLE_FUNCTION_KEY, DECLARED_PICTOGRAM_FUNCTIONS, isFunctionKeyShape,
+  pictogramFunctionDeclaration, resolvePictogramFunction, pictogramFunctionFinding,
+} from './pictogram-functions.js';
+export type {
+  PictogramFunctionDeclaration, PictogramFunctionResolution,
+} from './pictogram-functions.js';
 export {
   FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText,
   PARKING_FACT_TARGET_KIND, factsFor,
