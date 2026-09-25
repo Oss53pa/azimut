@@ -26,6 +26,7 @@ export type ViewId =
   | 'coverage-audit'
   // 03 — Parcours
   | 'customer-flows'
+  | 'travel-profiles'
   // 04 — Signalétique
   | 'signage'
   | 'templates'

@@ -112,7 +112,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.03.name',
     summaryKey: 'module.03.summary',
     entry: 'customer-flows',
-    screens: [],
+    entryLabelKey: 'nav.item.hypotheses',
+    screens: [
+      { view: 'travel-profiles', labelKey: 'nav.item.profiles' },
+    ],
     engine: 'partial',
     source: 'engine-graph/exposure',
   },

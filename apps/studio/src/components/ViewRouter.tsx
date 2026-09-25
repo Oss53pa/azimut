@@ -27,6 +27,7 @@ import { CrossCuttingView } from '../views/CrossCuttingView.js';
 import { EditorView } from '../editor/EditorView.js';
 import { SiteSheetView } from '../views/SiteSheetView.js';
 import { StaggeringView } from '../views/StaggeringView.js';
+import { ProfilesView } from '../views/ProfilesView.js';
 import { PlacementView } from '../views/PlacementView.js';
 import { CoverageAuditView } from '../views/CoverageAuditView.js';
 import { KioskAppView } from '../views/KioskAppView.js';
@@ -65,6 +66,7 @@ export function ViewRouter(
     case 'placement': return <PlacementView />;
     case 'coverage-audit': return <CoverageAuditView onNavigate={onNavigate} />;
     case 'customer-flows': return <CustomerFlowsView />;
+    case 'travel-profiles': return <ProfilesView />;
     case 'signage': return <SignageView onNavigate={onNavigate} />;
     case 'templates': return <TemplatesView onNavigate={onNavigate} />;
     case 'faces': return <FacesView />;
