@@ -277,7 +277,10 @@ membership          (id, org_id, user_id, role, created_at)
 site                (id, org_id, legal_entity_id, name, country_code, timezone,
                      active_langs jsonb, origin_x_m numeric, origin_y_m numeric,
                      reference_elevation_m numeric,
-                     rules_pack_id, created_at, updated_at, deleted_at)
+                     created_at, updated_at, deleted_at)
+-- Le rattachement aux paquets de règles n'est pas une colonne du site : il est
+-- porté par site_rules_binding, qui admet un socle et une surcouche. Une colonne
+-- unique ici serait une seconde source pour la même chose.
 -- timezone : requis. legal_entity_id : facultatif à la création, requis avant la
 -- première facture (partie Q, section Q5). name : nom propre, non traduit.
 building            (id, org_id, site_id, name, independent_access boolean, opening_hours jsonb,
@@ -356,8 +359,10 @@ pictogram           (id, org_id, category_id, family_id, registry, code, svg_pat
 -- Vocabulaire à espace de noms, enrichi dans le même commit que son premier usage,
 -- par exemple access.accessible, access.hearing_loop, service.restroom.
 -- Pour le registre de sécurité, la désignation vient du paquet de règles et n'est
--- jamais saisie : c'est lui qui porte ces pictogrammes. Pour le registre
--- d'orientation, elle est libre.
+-- jamais saisie : c'est lui qui porte ces pictogrammes. rules_pack_id est alors
+-- obligatoire, contrainte posée en base : un pictogramme de sécurité sans paquet
+-- n'est vu par aucun site, c'est donc une donnée morte. Pour le registre
+-- d'orientation, la désignation est libre et le paquet reste vide.
 -- Portée d'unicité d'une fonction : le paquet de règles pour le registre de
 -- sécurité, l'organisation pour le registre d'orientation. Une organisation qui
 -- exploite deux sites rattachés à deux paquets différents porte légitimement deux
@@ -474,7 +479,13 @@ lexicon_term        (id, org_id, charter_id, lang, term, severity)
 
 rules_pack          (id, key, version, jurisdiction, effective_from, source_ref, checksum)
 rules_pack_rule     (id, rules_pack_id, code, scope, params jsonb, source_ref)
-site_rules_binding  (id, org_id, site_id, rules_pack_id, bound_at)
+site_rules_binding  (id, org_id, site_id, rules_pack_id, role, bound_at)
+                    role in ('base','overlay')
+-- Cette table fait foi pour le rattachement d'un site à ses paquets. Un site porte
+-- au plus un socle et au plus une surcouche pays, section D3.6.
+-- Précédence, pour une même fonction de pictogramme comme pour une règle : la
+-- surcouche l'emporte sur le socle. L'ambiguïté ne se juge qu'à l'intérieur d'un
+-- même paquet ; deux paquets qui désignent la même fonction ne sont pas ambigus.
 ```
 
 `rules_pack` et `rules_pack_rule` sont globales, non rattachées à une organisation, en lecture seule pour l'application. Elles sont alimentées par les fichiers de `rules-packs/` au déploiement. Chaque règle porte `source_ref`, référence documentaire de son origine. Une règle sans `source_ref` est rejetée au chargement.
@@ -1628,6 +1639,7 @@ PARK
 | `PARK.CAPACITY_UNEXPLAINED` | bloquant | Écart entre places numérisées et capacité déclarée, sans explication |
 | `PARK.PROPOSAL_AS_EXISTING` | bloquant | Objet de statut proposition affiché comme existant, règle M01.S11 |
 | `PARK.SOURCE_MISSING` | bloquant | Fait du site sans source déclarée, règle M01.S11 |
+| `PARK.UNDIGITIZED_REASON_MISSING` | avertissement | Surface non numérisée dont le motif manque ou est vide. Déclarer des places sans dire pourquoi elles ne sont pas numérisées contredit la règle M01.S11 |
 
 RULES
 
@@ -8568,3 +8580,7 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 278. A5.4 : portée d'unicité d'une fonction de pictogramme
 279. A5.11 : clé du motif d'une surface non numérisée
 280. S-37 : motif d'une surface non numérisée
+281. A5.4 : paquet obligatoire pour un pictogramme de sécurité
+282. A5.8 : rattachement à deux paquets, avec rôle et précédence
+283. A5.2 : rattachement aux paquets retiré de la table des sites
+284. D2.2 : avertissement sur le motif d'une surface non numérisée
