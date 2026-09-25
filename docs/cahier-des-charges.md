@@ -283,7 +283,9 @@ site                (id, org_id, legal_entity_id, name, country_code, timezone,
 building            (id, org_id, site_id, name, independent_access boolean, opening_hours jsonb,
                      default_edge_width_m numeric)
 level               (id, org_id, building_id, name, ordinal int, elevation_m numeric)
-zone                (id, org_id, level_id, name, kind)
+zone                (id, org_id, level_id, name, kind, footprint_ids jsonb)
+-- footprint_ids : empreintes couvertes par la zone, appartenance déclarée et non
+-- calculée, comme pour la zone d'orientation de la partie H.
                     kind in ('commercial','food','service','technical','parking','outdoor')
 
 plan_source         (id, org_id, level_id, storage_path, media_type, uploaded_at)
@@ -491,8 +493,12 @@ audit_log           (id, org_id, actor_id, action, entity, entity_id,
 
 ```sql
 site_fact    (id, org_id, site_id, key, value jsonb, status, source_ref,
-              declared_by, declared_at)
+              target_kind, target_id, declared_by, declared_at)
              status in ('existing','proposal','to_verify')
+-- target_kind et target_id sont facultatifs. Renseignés, le fait porte sur cet objet,
+-- par exemple la capacité annoncée d'un parking donné ; vides, il porte sur le site
+-- entier. L'unicité porte sur le site, la clé et la cible : un site à deux parkings
+-- déclare deux capacités.
 ```
 
 Un fait du site est une donnée déclarée qui n'appartient à aucune autre table : capacité annoncée d'un parking, surface commercialisable, nombre de places de livraison, tout chiffre qu'un livrable affiche et que la géométrie ne produit pas.
@@ -5348,7 +5354,7 @@ Remplacer un fond sans recaler est le geste qui décale silencieusement toute un
 | Champ | Type | Contrainte | Erreur |
 | --- | --- | --- | --- |
 | Code de cellule | texte | requis, unique par niveau, 1 à 20 caractères | `DATA.CODE_DUPLICATE` |
-| Nature | sélecteur | cellule, circulation, technique, noyau vertical | requis |
+| Nature | sélecteur | cellule, circulation, technique, noyau vertical, place de stationnement | requis |
 | Catégorie | sélecteur | facultative à ce stade | |
 | Surface | calculé | lecture seule, m2, 1 décimale | |
 | Coordonnées des sommets | numérique | saisissables individuellement, mètres, 3 décimales | |
@@ -7986,7 +7992,9 @@ Constat : l'objet `parking` et la géométrie d'une place n'étaient définis nu
 
 **S-36.** La capacité annoncée d'un parking est un fait du site, avec sa source et son statut, section A5.11. Les contrôles du domaine `PARK` comparent le compte des empreintes de nature `parking_space` à ce fait déclaré.
 
-**S-37.** Une place de stationnement n'est ni une destination, ni une cellule. Elle n'entre dans aucun quantitatif de signalétique et ne porte pas de code de cellule.
+**S-37.** Une surface de parking non numérisée se déclare comme telle : une empreinte de nature `parking_space` peut être marquée non numérisée, avec le nombre de places qu'elle est censée porter et sa source. C'est elle qui explique un écart entre la capacité annoncée et les places comptées. Sans explication déclarée, l'écart lève `PARK.CAPACITY_UNEXPLAINED` ; avec elle, l'écart est admis à concurrence des places déclarées.
+
+**S-38.** Une place de stationnement n'est ni une destination, ni une cellule. Elle n'entre dans aucun quantitatif de signalétique et ne porte pas de code de cellule.
 
 ---
 
@@ -8001,6 +8009,8 @@ view_layer          (id, org_id, site_id, key, name, visible boolean,
 
 work_color          (id, org_id, site_id, user_id, target_kind, target_id, hex)
 -- Coloration de travail, propre à un utilisateur, jamais exportée.
+-- hex : même notation que les jetons de la partie F, six chiffres hexadécimaux
+-- précédés d'un croisillon, en majuscules.
 
 dimension_note      (id, org_id, level_id, from_ref jsonb, to_ref jsonb,
                      style_role, created_by, created_at)
@@ -8490,3 +8500,8 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 260. Q2 : propriétaires des tables de la partie S
 261. K3.8 : quatre points ouverts de la partie S inscrits
 262. Partie S ajoutée : ateliers de conception, vues, couleurs, calques, cotation, exports, édition simultanée, assistant
+263. A5.11 : un fait du site peut désigner un objet
+264. A5.2 : une zone porte ses empreintes
+265. S8 : surface de parking non numérisée spécifiée
+266. M3 : nature place de stationnement ajoutée à l'écran
+267. S9 : notation de la couleur de travail fixée
