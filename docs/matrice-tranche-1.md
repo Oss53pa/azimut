@@ -651,3 +651,69 @@ littéral, hors périmètre.
 **Une seconde implantation de `pointInPolygon`.** `engine-graph` en porte une
 copie privée, dans `validate-geometry.ts`, écrite avant que `core-model` n'en
 expose une. Les deux donnent le même résultat ; les réunir est hors périmètre.
+
+## La désignation de fonction, ce que la version 20 ferme
+
+La question posée à la fin de la version 19 — **comment un paquet de règles
+désigne le pictogramme d'un usage** — est tranchée par A5.4 : le pictogramme
+porte une désignation de fonction, `function_key`. À quoi il sert, et non d'où
+il vient.
+
+C'était le bon manque. Le moteur ne pouvait pas nommer le pictogramme d'une
+place accessible sans écrire une valeur d'origine normative, qu'INV-5 lui
+interdit. Il le recevait donc de son appelant, sans pouvoir répondre de sa
+provenance. La désignation déplace la question : le moteur demande
+`access.accessible`, qui n'est la valeur d'aucune norme, et la donnée dit quel
+pictogramme y répond.
+
+| Ce qu'A5.4 pose | Où | État |
+| --- | --- | --- |
+| `pictogram.function_key`, facultative | Migration `0053`, `Pictogram`, schéma Drizzle, type de ligne | Fait |
+| Forme espace de noms + point + nom | Contrainte de base et `isFunctionKeyShape` | Fait |
+| Une fonction au plus une fois par registre et par site | Index unique partiel, et `PICTO.FUNCTION_AMBIGUOUS` au rendu | Fait |
+| Vocabulaire enrichi au commit de son premier usage | `core-model/pictogram-functions.ts`, une seule fonction déclarée | Fait |
+| Sécurité : la désignation vient du paquet de règles, jamais saisie | Refusée par INV-3 au passage obligé de l'écriture, essai dédié | Fait |
+| Orientation : désignation libre | Aucun garde, l'ensemble des fonctions n'est pas fermé | Fait |
+| `PICTO.FUNCTION_NOT_DESIGNATED`, `PICTO.FUNCTION_AMBIGUOUS` | Catalogue, libellés français et anglais | Fait |
+| S-39 : marque omise et signalée, jamais de remplacement | Les deux moteurs de plan | Fait |
+
+**L'unicité « par site » s'écrit « par organisation ».** La table `pictogram`
+est portée par l'organisation et ne porte pas de site. Un site voit exactement
+les pictogrammes de son organisation, tous et rien d'autre : sur ce modèle les
+deux formulations désignent le même ensemble de cas, et c'est celle qui a une
+colonne où s'accrocher qui est écrite.
+
+**La fonction n'est demandée que s'il y a une place à marquer.** Un niveau sans
+place accessible ne réclame rien et ne signale rien. La fonction n'y manque
+pas : personne ne l'a demandée. Signaler partout ferait du code un bruit de
+fond, et un code qu'on apprend à ignorer ne signale plus rien.
+
+**Ce que le rendu fait des deux cas.** Non désignée, la marque est omise et
+l'avertissement porté au rendu — omettre en silence ferait d'un plan incomplet
+un plan d'apparence complète. Ambiguë, le plan refuse : départager deux
+désignations serait décider à la place de celui qui a désigné, et A7 fait
+refuser une entrée qu'un moteur ne peut pas traiter.
+
+### Reste ouvert après la version 20
+
+**Le motif d'une surface non numérisée.** Inchangé depuis la version 19.
+`parking_uncovered_area.reason` disait pourquoi le plan s'arrête : bord de
+page, calque absent, zone illisible. S-37 nomme le compte et la source, pas le
+motif. Rien ne le porte plus, et rien ne dit qu'il doive l'être.
+
+**Deux constats passés au registre du cahier des charges, K3.8.** La grille de
+construction des pictogrammes présente à deux endroits, et le poids du paquet
+du studio. Ils ne sont plus à traiter ici : la version 20 les inscrit, avec
+leur porteur et leur échéance.
+
+**Une seconde implantation de `pointInPolygon`.** `engine-graph` en porte
+toujours une copie privée, dans `validate-geometry.ts`. Les deux donnent le
+même résultat ; les réunir reste hors périmètre.
+
+**Les sites de référence ne désignent aucune fonction.** `refMultilevel` porte
+une place accessible et aucun pictogramme désigné pour elle : tout rendu de son
+rez-de-chaussée porte désormais `PICTO.FUNCTION_NOT_DESIGNATED`. C'est exact —
+la donnée est incomplète et le code le dit — mais c'est un défaut de la donnée
+de référence, non du moteur. Le corriger demande d'ajouter un pictogramme de
+sécurité au site de référence, ce qui touche les instantanés visuels : hors du
+périmètre de cette tâche.
