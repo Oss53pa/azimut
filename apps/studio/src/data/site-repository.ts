@@ -8,6 +8,7 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
+import type { AdvertisingData } from './advertising-data.js';
 import type {
   BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
   WorksiteRegistry,
@@ -100,6 +101,12 @@ export type SiteRepository = {
    * référence sert un jeu de démonstration.
    */
   loadInspectionRegistry(siteId: string): Promise<InspectionRegistry>;
+  /**
+   * H4 — la régie : emplacements, réservations, options et visuels (0045),
+   * avec la file de réception et la fiche technique, que la base ne porte
+   * pas encore. Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadAdvertisingData(siteId: string): Promise<AdvertisingData>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

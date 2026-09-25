@@ -2,11 +2,14 @@ import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import type { BookingState } from '../domain/ad-planning.js';
-import { DEMO_BOOKINGS, DEMO_PLACEMENTS } from '../domain/demo/commerce.js';
+import { useSiteData } from '../context/useSiteData.js';
+import { EMPTY_ADVERTISING_DATA, loadAdvertising, useRegistry } from '../data/index.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter, type Severity,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { siteLabels } from './register/labels.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { inventoryRows, type InventoryRow } from './advertising/inventory-rows.js';
 import { formatDay, formatNumber } from './register/format.js';
@@ -25,20 +28,31 @@ const STATE_SEVERITY: Readonly<Record<BookingState, Severity>> = {
 
 /**
  * Module 05 — l'inventaire des emplacements publicitaires (H4.1), au gabarit
- * « registre ». Les emplacements ne sont pas encore au modèle de données :
- * l'écran tourne sur le jeu de démonstration, comme le planning, et le dit.
- * L'état, l'occupation et les conflits sont calculés depuis les réservations.
+ * « registre ». Les emplacements se lisent en base (0045), ou dans le jeu de
+ * démonstration du dépôt de référence. L'état, l'occupation, l'annonceur et
+ * les conflits sont calculés depuis les réservations.
  */
-export function AdInventoryView(): JSX.Element {
+type AdInventoryViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function AdInventoryView({ siteKey }: AdInventoryViewProps): JSX.Element {
+  const site = useSiteData();
   const { t, lang } = useI18n();
+  const state = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
+  const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
+  const { placements, bookings } = state.registry.registry;
   const today = new Date().toISOString().slice(0, 10);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const rows = useMemo(
-    () => inventoryRows(DEMO_PLACEMENTS, DEMO_BOOKINGS, today, WINDOW_MONTHS),
-    [today],
+    () => inventoryRows(placements, bookings, today, WINDOW_MONTHS),
+    [placements, bookings, today],
   );
+
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
   const visible = filter === ALL ? rows : rows.filter(r => r.state === filter);
   const selected = rows.find(r => r.placement.id === selectedId) ?? visible[0] ?? null;
 
@@ -52,11 +66,11 @@ export function AdInventoryView(): JSX.Element {
     `${formatNumber((r.heldMonths / r.windowMonths) * 100, lang, 1)} %`;
 
   const columns: readonly Column<InventoryRow>[] = [
-    { id: 'code', header: t('ads.col.placement'), cell: r => r.placement.id },
-    { id: 'typology', header: t('ads.col.typology'), cell: r => r.placement.typology },
-    { id: 'level', header: t('adinventory.col.level'), numeric: true, cell: r => String(r.placement.level_ordinal) },
+    { id: 'code', header: t('ads.col.placement'), cell: r => r.placement.code },
+    { id: 'typology', header: t('ads.col.typology'), cell: r => r.placement.typology_key },
+    { id: 'level', header: t('adinventory.col.level'), cell: r => labels.level(r.placement.level_id) },
     { id: 'area', header: t('ads.col.area'), numeric: true, cell: r => formatNumber(r.placement.area_m2, lang, 2) },
-    { id: 'advertiser', header: t('ads.col.advertiser'), cell: r => r.placement.advertiser ?? '—' },
+    { id: 'advertiser', header: t('ads.col.advertiser'), cell: r => r.advertiser ?? '—' },
     {
       id: 'state',
       header: t('sitesheet.col.state'),
@@ -71,9 +85,9 @@ export function AdInventoryView(): JSX.Element {
     ? <InspectorEmpty text={t('adinventory.inspector.empty')} />
     : (
       <Inspector
-        title={selected.placement.id}
+        title={selected.placement.code}
         subtitle={t('adinventory.inspector.subtitle', {
-          typology: selected.placement.typology,
+          typology: selected.placement.typology_key,
           state: stateLabel(selected.state),
         })}
         sections={[
@@ -81,10 +95,10 @@ export function AdInventoryView(): JSX.Element {
             id: 'placement',
             title: t('adinventory.section.placement'),
             rows: [
-              { id: 'typology', label: t('ads.col.typology'), value: selected.placement.typology },
-              { id: 'level', label: t('adinventory.col.level'), value: String(selected.placement.level_ordinal) },
+              { id: 'typology', label: t('ads.col.typology'), value: selected.placement.typology_key },
+              { id: 'level', label: t('adinventory.col.level'), value: labels.level(selected.placement.level_id) },
               { id: 'area', label: t('ads.col.area'), value: formatNumber(selected.placement.area_m2, lang, 2) },
-              { id: 'advertiser', label: t('ads.col.advertiser'), value: selected.placement.advertiser ?? '—' },
+              { id: 'advertiser', label: t('ads.col.advertiser'), value: selected.advertiser ?? '—' },
             ],
           },
           {
@@ -122,9 +136,7 @@ export function AdInventoryView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
       <RegisterLayout
         title={t('adinventory.title')}
         summary={t('adinventory.summary', { count: rows.length })}

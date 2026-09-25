@@ -95,9 +95,9 @@ export function ViewRouter(
     case 'wall-plans': return <WallPlansView />;
     case 'evacuation': return <EvacuationView onNavigate={onNavigate} />;
     case 'proofs': return <ProofsView onNavigate={onNavigate} />;
-    case 'advertising': return <AdvertisingView />;
-    case 'ad-inventory': return <AdInventoryView />;
-    case 'ad-creatives': return <AdCreativesView />;
+    case 'advertising': return <AdvertisingView siteKey={siteKey} />;
+    case 'ad-inventory': return <AdInventoryView siteKey={siteKey} />;
+    case 'ad-creatives': return <AdCreativesView siteKey={siteKey} />;
     case 'tenant-signs': return <TenantSignsView />;
     case 'tenant-rules': return <TenantRulesView />;
     case 'tenant-instruction': return <TenantInstructionView />;

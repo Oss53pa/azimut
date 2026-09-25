@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { DEMO_BOOKINGS, DEMO_PLACEMENTS } from '../../../domain/demo/commerce.js';
-import { inventoryRows } from '../inventory-rows.js';
+import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
+
+const { bookings: DEMO_BOOKINGS, placements: DEMO_PLACEMENTS } = REFERENCE_ADVERTISING.registry;
+import { currentAdvertiser, inventoryRows } from '../inventory-rows.js';
 
 const TODAY = '2026-09-25';
 
@@ -28,6 +30,13 @@ describe('H4.1 — inventaire des emplacements', () => {
     expect(row?.conflicts.length).toBeGreaterThan(0);
     expect(row?.conflicts.every(f => f.code === 'AD.PLACEMENT_DOUBLE_BOOKED')).toBe(true);
     expect(rows.find(r => r.placement.id === 'AP-N0-01')?.conflicts).toHaveLength(0);
+  });
+
+  it('lit l’annonceur dans la réservation ferme en cours ou à venir, pas sur l’emplacement', () => {
+    expect(rows.find(r => r.placement.id === 'AP-N0-01')?.advertiser).toBe('Groupe Vaudel');
+    expect(currentAdvertiser(DEMO_BOOKINGS, 'AP-N0-04', TODAY)).toBe('Studio Lampas');
+    // Une option ne tient pas l'emplacement : pas d'annonceur.
+    expect(currentAdvertiser(DEMO_BOOKINGS, 'AP-N2-07', TODAY)).toBeNull();
   });
 
   it('rend deux fois la même chose (INV-4)', () => {

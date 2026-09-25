@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { monthsFrom, stateAt, occupancyRate } from '../occupancy.js';
-import { DEMO_BOOKINGS, DEMO_PLACEMENTS } from '../../../domain/demo/commerce.js';
+import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
+
+const { bookings: DEMO_BOOKINGS, placements: DEMO_PLACEMENTS } = REFERENCE_ADVERTISING.registry;
 
 describe('H4.3 — planning d’occupation', () => {
   it('énumère les mois consécutifs en franchissant l’année', () => {

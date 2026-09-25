@@ -3,12 +3,12 @@ import { useI18n } from '../i18n/useI18n.js';
 import type { Finding } from '@azimut/core-model';
 import { guardPlacementBookings, auditOptionExpiry, type BookingState } from '../domain/ad-planning.js';
 import { guardAdRulesPack } from '@azimut/engine-graph';
-import { receiveCreatives, type CreativeIntake } from '../domain/ad-creative-intake.js';
-import {
-  DEMO_PLACEMENTS, DEMO_BOOKINGS, DEMO_OPTIONS,
-  DEMO_CREATIVES, DEMO_CREATIVE_SPEC, DEMO_AD_RULES_PACK,
-  type CreativeSubmission,
-} from '../domain/demo/commerce.js';
+import { receiveCreatives } from '../domain/ad-creative-intake.js';
+import { DEMO_AD_RULES_PACK } from '../domain/demo/commerce.js';
+import { EMPTY_ADVERTISING_DATA, loadAdvertising, useRegistry } from '../data/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { creativeRows, type CreativeRow } from './advertising/creative-rows.js';
+import { currentAdvertiser } from './advertising/inventory-rows.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner,
   SPACE, TEXT, type Metric, type Column, type Severity,
@@ -41,6 +41,7 @@ const STATE_KEYS = {
 
 type PlacementRow = {
   readonly id: string;
+  readonly code: string;
   readonly typology: string;
   readonly area_m2: number;
   readonly advertiser: string | null;
@@ -50,22 +51,31 @@ type PlacementRow = {
 /**
  * Module 05 — la régie publicitaire. Le planning d'occupation et le contrôle
  * automatique des visuels ; Azimut émet les états de vente, jamais le livre
- * comptable.
+ * comptable. Lu en base (0045), ou dans le jeu de démonstration du dépôt de
+ * référence.
  */
-export function AdvertisingView(): JSX.Element {
+type AdvertisingViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element {
   const { t } = useI18n();
   const today = observationDate();
   const months = useMemo(() => monthsFrom(today, 6), [today]);
+  const state = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
+  const { registry, reception, creative_spec: spec } = state.registry;
+  const { placements, bookings, options } = registry;
 
   const conflicts = useMemo<readonly Finding[]>(() => {
-    const result = guardPlacementBookings(DEMO_BOOKINGS);
+    const result = guardPlacementBookings(bookings);
     return result.ok ? [] : result.findings;
-  }, []);
+  }, [bookings]);
 
   const expiredOptions = useMemo<readonly Finding[]>(() => {
-    const result = auditOptionExpiry(DEMO_OPTIONS, today);
+    const result = auditOptionExpiry(options, today);
     return result.ok ? result.warnings : result.findings;
-  }, [today]);
+  }, [options, today]);
 
   /**
    * M05.R7 — les règles publicitaires viennent d'une extension du paquet de règles.
@@ -83,36 +93,40 @@ export function AdvertisingView(): JSX.Element {
    * par sa fiche technique. L'écran ne contrôle rien lui-même : il affiche le
    * constat de réception.
    */
+  // Sans fiche technique, rien ne se reçoit : aucune n'est inventée.
   const intakes = useMemo(
-    () => receiveCreatives(DEMO_CREATIVES, DEMO_CREATIVE_SPEC),
-    [],
+    () => (spec === null ? [] : receiveCreatives(reception, spec)),
+    [reception, spec],
   );
-  const intakeById = useMemo(() => {
-    const byId = new Map<string, CreativeIntake>();
-    for (const intake of intakes) byId.set(intake.creative_id, intake);
-    return byId;
-  }, [intakes]);
-  const unrenderable = intakes.filter(i => !i.renderable).length;
+  const creatives = useMemo(
+    () => creativeRows(registry.creatives, reception, intakes, spec),
+    [registry, reception, intakes, spec],
+  );
+  const unrenderable = creatives.filter(c => !c.renderable).length;
 
   const rows = useMemo<readonly PlacementRow[]>(() =>
-    DEMO_PLACEMENTS.map((placement): PlacementRow => ({
+    placements.map((placement): PlacementRow => ({
       id: placement.id,
-      typology: placement.typology,
+      code: placement.code,
+      typology: placement.typology_key,
       area_m2: placement.area_m2,
-      advertiser: placement.advertiser,
+      advertiser: currentAdvertiser(bookings, placement.id, today),
       states: months.map(month => ({
         month,
-        state: stateAt(DEMO_BOOKINGS, placement.id, month),
+        state: stateAt(bookings, placement.id, month),
       })),
-    })), [months]);
+    })), [placements, bookings, months, today]);
+
+  const header = <ScreenHeader eyebrow={t('ads.eyebrow')} title={t('ads.title')} subtitle={t('ads.subtitle')} />;
+  if (state.status !== 'ready') return <div>{header}<RegistryStatus state={state} /></div>;
 
   const firstMonth = months[0] ?? '';
-  const rate = occupancyRate(DEMO_BOOKINGS, DEMO_PLACEMENTS.map(p => p.id), firstMonth);
-  const toReview = DEMO_CREATIVES.filter(c => c.verdict === 'human_review').length;
+  const rate = occupancyRate(bookings, placements.map(p => p.id), firstMonth);
+  const toReview = creatives.filter(c => c.verdict === 'human_review').length;
 
   const metrics: readonly Metric[] = [
     { id: 'rate', label: t('ads.metric.rate'), value: `${String(rate)} %`, note: firstMonth },
-    { id: 'placements', label: t('ads.metric.placements'), value: String(DEMO_PLACEMENTS.length) },
+    { id: 'placements', label: t('ads.metric.placements'), value: String(placements.length) },
     {
       id: 'conflicts',
       label: t('ads.metric.conflicts'),
@@ -136,7 +150,7 @@ export function AdvertisingView(): JSX.Element {
   ];
 
   const columns: readonly Column<PlacementRow>[] = [
-    { id: 'id', header: t('ads.col.placement'), cell: r => r.id },
+    { id: 'id', header: t('ads.col.placement'), cell: r => r.code },
     { id: 'typology', header: t('ads.col.typology'), cell: r => r.typology },
     { id: 'area', header: t('ads.col.area'), numeric: true, cell: r => r.area_m2.toFixed(1) },
     ...months.map((month): Column<PlacementRow> => ({
@@ -155,30 +169,26 @@ export function AdvertisingView(): JSX.Element {
     },
   ];
 
-  const creativeColumns: readonly Column<CreativeSubmission>[] = [
-    { id: 'id', header: t('ads.creative.col.id'), cell: s => s.creative.id },
-    { id: 'placement', header: t('ads.creative.col.placement'), cell: s => s.placement_id },
+  const creativeColumns: readonly Column<CreativeRow>[] = [
+    { id: 'id', header: t('ads.creative.col.id'), cell: c => c.creative.id },
+    { id: 'placement', header: t('ads.creative.col.placement'), cell: c => c.placement_id },
     {
       id: 'intake',
       header: t('ads.creative.col.intake'),
-      cell: s => {
-        const intake = intakeById.get(s.creative.id);
-        if (intake === undefined) return t('ads.creative.conform');
-        return (
-          <Tag
-            label={t(SANITATION_KEYS[intake.sanitation])}
-            severity={intake.renderable ? 'valid' : intake.sanitation === 'failed' ? 'blocking' : 'warning'}
-          />
-        );
-      },
+      cell: c => (
+        <Tag
+          label={t(SANITATION_KEYS[c.sanitation])}
+          severity={c.sanitation === 'clean' ? 'valid' : c.sanitation === 'failed' ? 'blocking' : 'warning'}
+        />
+      ),
     },
     {
       id: 'checks',
       header: t('ads.creative.col.checks'),
-      cell: s => {
-        const findings = intakeById.get(s.creative.id)?.findings ?? [];
-        if (findings.length === 0) return t('ads.creative.conform');
-        return findings
+      cell: c => {
+        if (c.mismatches === null) return t('adcreatives.control.unchecked');
+        if (c.findings.length === 0) return t('ads.creative.conform');
+        return c.findings
           .map(f => String(f.params['axis'] ?? f.params['reason'] ?? ''))
           .join(' · ');
       },
@@ -186,10 +196,10 @@ export function AdvertisingView(): JSX.Element {
     {
       id: 'verdict',
       header: t('ads.creative.col.verdict'),
-      cell: s => (
+      cell: c => (
         <Tag
-          label={t(VERDICT_KEYS[s.verdict])}
-          severity={s.verdict === 'approved' ? 'valid' : s.verdict === 'refused' ? 'blocking' : 'warning'}
+          label={t(VERDICT_KEYS[c.verdict])}
+          severity={c.verdict === 'approved' ? 'valid' : c.verdict === 'refused' ? 'blocking' : 'warning'}
         />
       ),
     },
@@ -197,12 +207,8 @@ export function AdvertisingView(): JSX.Element {
 
   return (
     <div>
-      <ScreenHeader
-        eyebrow={t('ads.eyebrow')}
-        title={t('ads.title')}
-        subtitle={t('ads.subtitle')}
-      />
-
+      {header}
+      <RegistryStatus state={state} />
       <div style={{ display: 'grid', gap: SPACE.sm, marginBottom: SPACE.md }}>
         {rulesPackFindings.length > 0 && (
           <StateBanner
@@ -212,11 +218,7 @@ export function AdvertisingView(): JSX.Element {
             hint={t('ads.rulespack.hint')}
           />
         )}
-        <StateBanner
-          severity="info"
-          message={t('demo.dataset.message')}
-          hint={t('demo.dataset.hint')}
-        />
+        {spec === null && <StateBanner severity="info" message={t('ads.nospec')} hint={t('ads.nospec.hint')} />}
       </div>
 
       <MetricRow metrics={metrics} />
@@ -231,8 +233,8 @@ export function AdvertisingView(): JSX.Element {
         <Panel title={t('ads.panel.creatives')} note={t('ads.panel.creatives.note')} padded={false}>
           <DataTable
             columns={creativeColumns}
-            rows={DEMO_CREATIVES}
-            rowKey={s => s.creative.id}
+            rows={creatives}
+            rowKey={c => c.creative.id}
             empty={t('ads.creatives.empty')}
           />
         </Panel>
@@ -252,23 +254,27 @@ export function AdvertisingView(): JSX.Element {
           </Panel>
           <Panel title={t('ads.panel.intake')}>
             <FindingList
-              findings={intakes.flatMap(i => i.findings)}
+              findings={creatives.flatMap(c => c.findings)}
               empty={t('ads.intake.empty')}
               limit={8}
             />
             <Note>{t('ads.intake.note')}</Note>
           </Panel>
           <Panel title={t('ads.panel.spec')}>
-            <dl style={{ margin: 0, display: 'grid', gap: SPACE.xs, fontSize: TEXT.small }}>
-              <SpecRow label={t('ads.spec.format')} value={DEMO_CREATIVE_SPEC.format} />
-              <SpecRow label={t('ads.spec.resolution')} value={`${String(DEMO_CREATIVE_SPEC.min_resolution_dpi)} dpi`} />
-              <SpecRow label={t('ads.spec.safezone')} value={`${String(DEMO_CREATIVE_SPEC.safe_zone_mm)} mm`} />
-              <SpecRow label={t('ads.spec.profile')} value={DEMO_CREATIVE_SPEC.color_profile} />
-              <SpecRow
-                label={t('ads.spec.weight')}
-                value={`${String(Math.round(DEMO_CREATIVE_SPEC.max_weight_bytes / 1_048_576))} Mo`}
-              />
-            </dl>
+            {spec === null
+              ? <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('ads.nospec')}</p>
+              : (
+                <dl style={{ margin: 0, display: 'grid', gap: SPACE.xs, fontSize: TEXT.small }}>
+                  <SpecRow label={t('ads.spec.format')} value={spec.format} />
+                  <SpecRow label={t('ads.spec.resolution')} value={`${String(spec.min_resolution_dpi)} dpi`} />
+                  <SpecRow label={t('ads.spec.safezone')} value={`${String(spec.safe_zone_mm)} mm`} />
+                  <SpecRow label={t('ads.spec.profile')} value={spec.color_profile} />
+                  <SpecRow
+                    label={t('ads.spec.weight')}
+                    value={`${String(Math.round(spec.max_weight_bytes / 1_048_576))} Mo`}
+                  />
+                </dl>
+              )}
             <Note>{t('ads.spec.note')}</Note>
           </Panel>
         </PanelGrid>

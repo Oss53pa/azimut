@@ -106,6 +106,14 @@ export {
 export type {
   InspectionRegistry, InspectionRound, InspectionFinding, InspectionSyncState, InspectionSeverity,
 } from './inspection-registry.js';
+export {
+  EMPTY_AD_REGISTRY, AD_BOOKING_STATES, AD_SANITATION_STATES, AD_CREATIVE_VERDICTS,
+  isAdBookingState, isAdSanitationState, isAdCreativeVerdict,
+} from './ad-registry.js';
+export type {
+  AdRegistry, AdPlacement, AdBooking, AdBookingState, AdOption, AdCreative,
+  AdSanitationState, AdCreativeVerdict,
+} from './ad-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

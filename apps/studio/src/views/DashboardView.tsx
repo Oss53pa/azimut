@@ -6,9 +6,8 @@ import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
-import { DEMO_BOOKINGS, DEMO_OPTIONS } from '../domain/demo/commerce.js';
 import { EMPTY_INSPECTION_REGISTRY, EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
-import { loadInspection, loadWorksite, useRegistry } from '../data/index.js';
+import { EMPTY_ADVERTISING_DATA, loadAdvertising, loadInspection, loadWorksite, useRegistry } from '../data/index.js';
 import { syncFindings } from './operations/rounds.js';
 import { openReserveFindings } from './worksite/rows.js';
 import { PRODUCT_MODULES } from '../product-map.js';
@@ -59,6 +58,8 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
   const worksiteReserves = worksite.registry.reserves;
   const inspection = useRegistry(loadInspection, EMPTY_INSPECTION_REGISTRY, siteKey);
   const rounds = inspection.registry.rounds;
+  const advertising = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
+  const { bookings: adBookings, options: adOptions } = advertising.registry.registry;
 
   const gate = useMemo(
     () => evaluatePublishGate(site, vocabulary),
@@ -67,8 +68,8 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
   const siteFindings = gate.findings;
 
   const queues = useMemo<readonly QueueEntry[]>(() => {
-    const bookings = guardPlacementBookings(DEMO_BOOKINGS);
-    const options = auditOptionExpiry(DEMO_OPTIONS, today);
+    const bookings = guardPlacementBookings(adBookings);
+    const options = auditOptionExpiry(adOptions, today);
 
     return [
       { id: 'foundation', findings: siteFindings, labelKey: 'dashboard.queue.foundation', view: 'foundation' },
@@ -81,7 +82,7 @@ export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.
       { id: 'worksite', findings: openReserveFindings(worksiteReserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
       { id: 'operations', findings: syncFindings(rounds), labelKey: 'dashboard.queue.operations', view: 'operations' },
     ];
-  }, [siteFindings, today, worksiteReserves, rounds]);
+  }, [siteFindings, today, worksiteReserves, rounds, adBookings, adOptions]);
 
   const all = queues.flatMap(q => q.findings);
   const blocking = all.filter(f => f.severity === 'blocking');

@@ -4,9 +4,15 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { guardAdRulesPack } from '@azimut/engine-graph';
 import { receiveCreatives } from '../../../domain/ad-creative-intake.js';
-import {
-  DEMO_AD_RULES_PACK, DEMO_CREATIVES, DEMO_CREATIVE_SPEC,
-} from '../../../domain/demo/commerce.js';
+import { DEMO_AD_RULES_PACK } from '../../../domain/demo/commerce.js';
+import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
+
+// La file de réception et la fiche technique du jeu d'essai, servies par le
+// dépôt de référence : la base n'a encore ni canal de dépôt ni générateur.
+const DEMO_CREATIVES = REFERENCE_ADVERTISING.reception;
+const spec = REFERENCE_ADVERTISING.creative_spec;
+if (spec === null) throw new Error('le jeu d’essai porte une fiche technique');
+const DEMO_CREATIVE_SPEC = spec;
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const VIEW = readFileSync(resolve(HERE, '..', '..', 'AdvertisingView.tsx'), 'utf8');

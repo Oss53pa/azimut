@@ -90,7 +90,7 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     'support_typology', 'support_face', 'support_content_block',
     'support_version', 'proof', 'approval', 'pictogram',
   ],
-  '05-regie': [],
+  '05-regie': ['ad_placement', 'ad_booking', 'ad_option', 'ad_creative'],
   '06-enseignes': [],
   '07-chantier': ['fabrication_lot', 'lot_support', 'install_slot', 'slot_support', 'install_reserve'],
   '08-exploitation': [

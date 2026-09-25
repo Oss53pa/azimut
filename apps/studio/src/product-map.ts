@@ -158,6 +158,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     // mais M05.R2 (partie N) (indexation de la grille sur l'exposition du module 03), M05.R8
     // (rendu en situation) et M05.R9 (facture née d'une décision humaine) n'ont
     // aucun moteur. Un module qui ne facture pas n'a pas un moteur complet.
+    // Emplacements, réservations, options et visuels enregistrés se lisent
+    // en base (0045) ; le dépôt de référence sert un jeu de démonstration et
+    // simule la file de réception. Le chevauchement de réservations n'est pas
+    // interdit en base (décision 7.7) : le garde le relève. Aucune fiche
+    // technique n'est générée côté base (H4.2).
     engine: 'partial',
     source: 'studio/domain/ad-planning · ad-creative-intake · rules/ad-rules',
   },

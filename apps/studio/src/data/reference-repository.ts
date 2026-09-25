@@ -15,6 +15,8 @@ import { referenceVocabulary } from './reference-vocabulary.js';
 import { REFERENCE_WORKSITE } from './reference-worksite.js';
 import { REFERENCE_BUDGET } from './reference-budget.js';
 import { REFERENCE_INSPECTION } from './reference-inspection.js';
+import { REFERENCE_ADVERTISING } from './reference-advertising.js';
+import type { AdvertisingData } from './advertising-data.js';
 import {
   RepositoryError,
   type SiteRepository,
@@ -119,6 +121,14 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(REFERENCE_INSPECTION);
+    },
+
+    /** Le jeu de démonstration du module 05 ; les écrans le signalent. */
+    loadAdvertisingData(siteId: string): Promise<AdvertisingData> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_ADVERTISING);
     },
 
     /**
