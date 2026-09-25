@@ -89,6 +89,7 @@ non plus — elle n'en retire que les clés étrangères.
 0043_m01_s2_drop_control_point
 0044_a5_11_site_fact_status
 0045_a5_8_charter_rule_text_kinds
+0046_a5_2_footprint_parking_space
 ```
 
 ## Règle pour la suite
