@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   DECLARED_FACT_KEYS, PARKING_CAPACITY_KEY, PARKING_FREE_KEY,
-  PARKING_UNDIGITIZED_SPACES_KEY, isFactKeyShape, factKeyDeclaration,
+  PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
+  isFactKeyShape, factKeyDeclaration,
   factValueMatchesType, factValueFault, declaredInteger,
 } from '../fact-keys.js';
 import { buildCommand } from '../site-commands.js';
@@ -41,12 +42,13 @@ function commandeDeFait(after: Record<string, string | number | boolean>): Comma
 }
 
 describe('A5.11 — la table des clés déclarées', () => {
-  it('porte les trois clés du document, avec leur type et leur cible', () => {
+  it('porte les quatre clés du document, avec leur type et leur cible', () => {
     expect(DECLARED_FACT_KEYS.map(d => [d.key, d.value_type, d.target_kind, d.target_object_kind]))
       .toEqual([
         ['parking.capacity', 'integer', 'zone', 'parking'],
         ['parking.free', 'boolean', 'zone', 'parking'],
         ['parking.undigitized_spaces', 'integer', 'footprint', 'parking_space'],
+        ['parking.undigitized_reason', 'text', 'footprint', 'parking_space'],
       ]);
   });
 
@@ -134,6 +136,43 @@ describe('A5.11 — le refus s’applique au passage obligé de l’écriture', 
       before: { key: PARKING_FREE_KEY, value: 'oui' },
     });
     expect(suppression.ok).toBe(true);
+  });
+});
+
+describe('S-37 — le motif d’une surface non numérisée', () => {
+  // « Le nombre et le motif sont deux faits ciblant cette empreinte, clés
+  // parking.undigitized_spaces et parking.undigitized_reason. »
+  const motif = (value: string | number | boolean): CommandDraft => commandeDeFait({
+    key: PARKING_UNDIGITIZED_REASON_KEY, value,
+    target_kind: 'footprint', target_id: 'fp-surface',
+  });
+
+  it('cible la même empreinte que le nombre de places', () => {
+    const nombre = factKeyDeclaration(PARKING_UNDIGITIZED_SPACES_KEY);
+    const raison = factKeyDeclaration(PARKING_UNDIGITIZED_REASON_KEY);
+    expect([raison?.target_kind, raison?.target_object_kind])
+      .toEqual([nombre?.target_kind, nombre?.target_object_kind]);
+  });
+
+  it('accepte un texte au passage obligé de l’écriture', () => {
+    expect(buildCommand(motif('Bord de page du plan source')).ok).toBe(true);
+  });
+
+  it('refuse un nombre ou un booléen là où un motif est attendu', () => {
+    // Le cas symétrique de « oui » écrit pour un booléen : un compte écrit à
+    // la place de son motif.
+    for (const valeur of [12, true]) {
+      const outcome = buildCommand(motif(valeur));
+      expect(outcome.ok, `valeur ${String(valeur)} acceptée`).toBe(false);
+      if (!outcome.ok) {
+        expect(outcome.findings[0]?.params['expected']).toBe('text');
+      }
+    }
+  });
+
+  it('ne confond pas les deux faits : un texte reste refusé pour le nombre', () => {
+    expect(factValueFault(PARKING_UNDIGITIZED_SPACES_KEY, 'douze')?.expected).toBe('integer');
+    expect(factValueFault(PARKING_UNDIGITIZED_REASON_KEY, 'douze')).toBeNull();
   });
 });
 

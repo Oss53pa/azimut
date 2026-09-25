@@ -77,7 +77,8 @@ export {
 export type { SiteFact, ForbiddenWord, FactStatus, FactValue, FactTarget } from './site-facts.js';
 export {
   DECLARED_FACT_KEYS, PARKING_CAPACITY_KEY, PARKING_FREE_KEY,
-  PARKING_UNDIGITIZED_SPACES_KEY, isFactKeyShape, factKeyDeclaration,
+  PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
+  isFactKeyShape, factKeyDeclaration,
   factValueMatchesType, factValueFault, declaredInteger,
 } from './fact-keys.js';
 export type { FactValueType, FactKeyDeclaration, FactValueFault } from './fact-keys.js';

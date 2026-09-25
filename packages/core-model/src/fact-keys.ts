@@ -29,12 +29,12 @@ import type { FactValue, SiteFact, FactTarget } from './site-facts.js';
 /**
  * Le type attendu d'une valeur de fait.
  *
- * Deux valeurs, parce que la table d'A5.11 en déclare deux. Un troisième type
- * s'ajoute avec la première clé qui le demande, comme la clé elle-même
- * s'ajoute avec son premier usage : un vocabulaire de types plus large que la
- * table qu'il sert ne décrirait rien de réel.
+ * Trois valeurs, parce que la table d'A5.11 en déclare trois. Le texte est
+ * entré avec `parking.undigitized_reason`, la première clé qui le demandait,
+ * comme la clé elle-même entre avec son premier usage : un vocabulaire de
+ * types plus large que la table qu'il sert ne décrirait rien de réel.
  */
-export type FactValueType = 'integer' | 'boolean';
+export type FactValueType = 'integer' | 'boolean' | 'text';
 
 /** Une ligne de la table d'A5.11 : la clé, son type attendu, sa cible. */
 export type FactKeyDeclaration = {
@@ -62,6 +62,17 @@ export type FactKeyDeclaration = {
 export const PARKING_CAPACITY_KEY = 'parking.capacity';
 export const PARKING_FREE_KEY = 'parking.free';
 export const PARKING_UNDIGITIZED_SPACES_KEY = 'parking.undigitized_spaces';
+/**
+ * Le motif pour lequel une surface de parking n'est pas numérisée — S-37.
+ *
+ * « Une empreinte de nature `parking_space` peut être marquée non numérisée,
+ * avec le nombre de places qu'elle est censée porter, le motif pour lequel
+ * elle ne l'est pas, et sa source. Le nombre et le motif sont deux faits
+ * ciblant cette empreinte. » Bord de page, calque absent, zone illisible :
+ * ce que `parking_uncovered_area.reason` portait avant son retrait, et que
+ * rien ne portait plus depuis.
+ */
+export const PARKING_UNDIGITIZED_REASON_KEY = 'parking.undigitized_reason';
 
 /** La table d'A5.11, dans son ordre. */
 export const DECLARED_FACT_KEYS: readonly FactKeyDeclaration[] = [
@@ -80,6 +91,12 @@ export const DECLARED_FACT_KEYS: readonly FactKeyDeclaration[] = [
   {
     key: PARKING_UNDIGITIZED_SPACES_KEY,
     value_type: 'integer',
+    target_kind: 'footprint',
+    target_object_kind: 'parking_space',
+  },
+  {
+    key: PARKING_UNDIGITIZED_REASON_KEY,
+    value_type: 'text',
     target_kind: 'footprint',
     target_object_kind: 'parking_space',
   },
@@ -108,10 +125,14 @@ export function factKeyDeclaration(key: string): FactKeyDeclaration | null {
  *
  * `integer` exige un nombre entier fini : `3.5` n'est pas un compte de places,
  * et `NaN` ne se compare à rien. `boolean` exige un booléen, et rejette donc
- * « oui », ce que la convention nomme comme le cas à prévenir.
+ * « oui », ce que la convention nomme comme le cas à prévenir. `text` exige une
+ * chaîne, et rejette donc un nombre écrit là où un motif est attendu. Une
+ * chaîne vide reste une chaîne : A5.11 refuse une valeur mal typée, non une
+ * valeur pauvre, et juger qu'un motif en est un n'est pas l'affaire du type.
  */
 export function factValueMatchesType(value: FactValue, type: FactValueType): boolean {
   if (type === 'boolean') return typeof value === 'boolean';
+  if (type === 'text') return typeof value === 'string';
   return typeof value === 'number' && Number.isInteger(value);
 }
 
