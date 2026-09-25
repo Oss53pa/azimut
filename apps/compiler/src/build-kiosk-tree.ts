@@ -1,4 +1,4 @@
-import type { SiteData } from '@azimut/core-model';
+import type { Finding, Outcome, SiteData } from '@azimut/core-model';
 import { canonicalSerialize } from '@azimut/core-model';
 import { renderFloorPlan } from '@azimut/engine-layout';
 import type { FloorPlanOptions, FloorPlanTheme } from '@azimut/engine-layout';
@@ -101,37 +101,74 @@ export function buildKioskDataFiles(site: SiteData): Map<string, Uint8Array> {
 }
 
 /**
- * One `maps/level-<ordinal>.svg` per level, rendered deterministically with
- * design-token colours. Fails if a level cannot be rendered.
+ * D10.0 — une marque de sécurité omise faute de fonction désignée.
+ *
+ * `PICTO.FUNCTION_NOT_DESIGNATED` est un avertissement au catalogue : un plan
+ * d'atelier se rend sans la marque et le dit. Sur une borne, personne ne lit
+ * l'avertissement, et « la borne est le dernier endroit où une information de
+ * sécurité peut manquer sans que personne le voie ». L'assemblage refuse donc.
  */
-export function buildKioskMapFiles(site: SiteData): Map<string, Uint8Array> {
+function isOmittedSafetyMark(finding: Finding): boolean {
+  return finding.code === 'PICTO.FUNCTION_NOT_DESIGNATED'
+    && finding.params['registry'] === 'safety';
+}
+
+/**
+ * One `maps/level-<ordinal>.svg` per level, rendered deterministically with
+ * design-token colours.
+ *
+ * D10.0 — « l'assemblage d'un paquet agrège les anomalies de chaque rendu
+ * qu'il embarque, et ne lit jamais le seul succès ». Chaque niveau est rendu,
+ * et ses anomalies sont rassemblées, dans l'ordre des niveaux, avec le niveau
+ * qui les porte (`level_id`) : la même marque manquante sur deux niveaux fait
+ * deux anomalies, pas une. Le paquet est refusé si un rendu échoue ou si une
+ * marque de sécurité manque ; sinon les avertissements voyagent avec lui.
+ */
+export function buildKioskMapFiles(site: SiteData): Outcome<Map<string, Uint8Array>> {
   const files = new Map<string, Uint8Array>();
-  const levels = [...site.levels].sort((a, b) => a.ordinal - b.ordinal);
+  const findings: Finding[] = [];
+  let refused = false;
+  const levels = [...site.levels]
+    .sort((a, b) => a.ordinal - b.ordinal || a.id.localeCompare(b.id));
   for (const level of levels) {
     const rendered = renderFloorPlan(site, level.id, {
       ...FLOOR_OPTS,
       theme: KIOSK_FLOOR_THEME,
     });
+    const raised = rendered.ok ? rendered.warnings : rendered.findings;
+    for (const finding of raised) {
+      findings.push({ ...finding, params: { ...finding.params, level_id: level.id } });
+      if (isOmittedSafetyMark(finding)) refused = true;
+    }
     if (!rendered.ok) {
-      const codes = rendered.findings.map((f) => f.code).join(', ');
-      throw new Error(`Floor plan render failed for level ${level.id}: ${codes}`);
+      refused = true;
+      continue;
     }
     files.set(`maps/level-${level.ordinal}.svg`, utf8(rendered.value));
   }
-  return files;
+  return refused ? { ok: false, findings } : { ok: true, value: files, warnings: findings };
 }
 
-/** Add the generated data and map files for the site to a tree in place. */
-function addGeneratedFiles(tree: Map<string, Uint8Array>, site: SiteData): void {
+/**
+ * Add the generated data and map files for the site to a tree in place, or
+ * refuse with the anomalies of the map renders (D10.0).
+ */
+function addGeneratedFiles(
+  tree: Map<string, Uint8Array>,
+  site: SiteData,
+): Outcome<ReadonlyMap<string, Uint8Array>> {
+  const maps = buildKioskMapFiles(site);
+  if (!maps.ok) return maps;
   for (const [path, bytes] of buildKioskDataFiles(site)) tree.set(path, bytes);
-  for (const [path, bytes] of buildKioskMapFiles(site)) tree.set(path, bytes);
+  for (const [path, bytes] of maps.value) tree.set(path, bytes);
+  return { ok: true, value: tree, warnings: maps.warnings };
 }
 
 /** Assemble the full kiosk tree: app assets + generated data + maps. */
 export function buildKioskTree(
   site: SiteData,
   appAssets: KioskAppAssets,
-): ReadonlyMap<string, Uint8Array> {
+): Outcome<ReadonlyMap<string, Uint8Array>> {
   const tree = new Map<string, Uint8Array>();
   tree.set('index.html', appAssets.indexHtml);
   tree.set('assets/app.js', appAssets.appJs);
@@ -139,8 +176,7 @@ export function buildKioskTree(
   for (const [path, bytes] of appAssets.extra ?? new Map()) {
     tree.set(path, bytes);
   }
-  addGeneratedFiles(tree, site);
-  return tree;
+  return addGeneratedFiles(tree, site);
 }
 
 /**
@@ -152,12 +188,11 @@ export function buildKioskTree(
 export async function buildKioskTreeFromStore(
   site: SiteData,
   store: AssetStore,
-): Promise<ReadonlyMap<string, Uint8Array>> {
+): Promise<Outcome<ReadonlyMap<string, Uint8Array>>> {
   const tree = new Map<string, Uint8Array>();
   const bundlePaths = ['index.html', ...(await store.list('assets/'))];
   for (const path of bundlePaths) {
     tree.set(path, await store.read(path));
   }
-  addGeneratedFiles(tree, site);
-  return tree;
+  return addGeneratedFiles(tree, site);
 }
