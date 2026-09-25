@@ -91,6 +91,12 @@ export {
 export type {
   MaintenanceRegistry, InstalledSupport, RecordedDivergence, DivergenceKind, WorkOrder, WorkOrderState,
 } from './maintenance-registry.js';
+export {
+  EMPTY_WORKSITE_REGISTRY, FABRICATION_LOT_STATES, isFabricationLotState,
+} from './worksite-registry.js';
+export type {
+  WorksiteRegistry, FabricationLot, FabricationLotState, InstallSlot, RecordedReserve,
+} from './worksite-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

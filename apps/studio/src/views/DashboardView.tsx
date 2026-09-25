@@ -6,10 +6,12 @@ import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
-import { auditInstallReserves } from '../domain/install-reserves.js';
 import { auditSurveySync } from '../domain/survey-sync.js';
 import { DEMO_BOOKINGS, DEMO_OPTIONS } from '../domain/demo/commerce.js';
-import { DEMO_RESERVES, DEMO_ROUNDS } from '../domain/demo/production.js';
+import { DEMO_ROUNDS } from '../domain/demo/production.js';
+import { EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
+import { loadWorksite, useRegistry } from '../data/index.js';
+import { openReserveFindings } from './worksite/rows.js';
 import { PRODUCT_MODULES } from '../product-map.js';
 import {
   Button, MetricRow, Panel, PanelGrid, Note, Tag,
@@ -19,6 +21,8 @@ import { FindingList } from './message-schedule/FindingList.js';
 
 type DashboardViewProps = {
   readonly onNavigate: (view: ViewId) => void;
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
 };
 
 function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
@@ -40,7 +44,7 @@ type QueueEntry = {
  * socle, pas ici : ce qui figure sur cet écran est ce qu'un utilisateur doit
  * traiter, chaque ligne menant à l'écran qui permet de le faire.
  */
-export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
+export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.Element {
   const site = useSiteData();
   const vocabulary = useSiteVocabulary();
   const { t, lang } = useI18n();
@@ -49,6 +53,11 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const longDate = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
   });
+
+  // Une file vide tant que la lecture n'a pas abouti : le tableau de bord ne
+  // montre que ce qui attend une action, et une lecture en cours n'en est pas.
+  const worksite = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
+  const worksiteReserves = worksite.registry.reserves;
 
   const gate = useMemo(
     () => evaluatePublishGate(site, vocabulary),
@@ -59,7 +68,6 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const queues = useMemo<readonly QueueEntry[]>(() => {
     const bookings = guardPlacementBookings(DEMO_BOOKINGS);
     const options = auditOptionExpiry(DEMO_OPTIONS, today);
-    const reserves = auditInstallReserves(DEMO_RESERVES.map(r => r.reserve));
     const surveys = auditSurveySync(DEMO_ROUNDS.map(r => r.survey));
 
     return [
@@ -70,10 +78,10 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
         labelKey: 'dashboard.queue.ads',
         view: 'advertising',
       },
-      { id: 'worksite', findings: findingsOf(reserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
+      { id: 'worksite', findings: openReserveFindings(worksiteReserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
       { id: 'operations', findings: findingsOf(surveys), labelKey: 'dashboard.queue.operations', view: 'operations' },
     ];
-  }, [siteFindings, today]);
+  }, [siteFindings, today, worksiteReserves]);
 
   const all = queues.flatMap(q => q.findings);
   const blocking = all.filter(f => f.severity === 'blocking');

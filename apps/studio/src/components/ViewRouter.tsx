@@ -68,7 +68,7 @@ export function ViewRouter(
   { view, siteKey, onNavigate, onOpenSite }: ViewRouterProps,
 ): JSX.Element {
   switch (view) {
-    case 'dashboard': return <DashboardView onNavigate={onNavigate} />;
+    case 'dashboard': return <DashboardView onNavigate={onNavigate} siteKey={siteKey} />;
     case 'product-map': return <ProductMapView onNavigate={onNavigate} />;
     case 'sites': return <SitesView currentKey={siteKey} onOpenSite={onOpenSite} />;
     case 'foundation': return <FoundationView onNavigate={onNavigate} />;
@@ -101,10 +101,10 @@ export function ViewRouter(
     case 'tenant-signs': return <TenantSignsView />;
     case 'tenant-rules': return <TenantRulesView />;
     case 'tenant-instruction': return <TenantInstructionView />;
-    case 'worksite': return <WorksiteView />;
-    case 'worksite-lots': return <WorksiteLotsView />;
-    case 'worksite-slots': return <WorksiteSlotsView />;
-    case 'worksite-reserves': return <WorksiteReservesView />;
+    case 'worksite': return <WorksiteView siteKey={siteKey} />;
+    case 'worksite-lots': return <WorksiteLotsView siteKey={siteKey} />;
+    case 'worksite-slots': return <WorksiteSlotsView siteKey={siteKey} />;
+    case 'worksite-reserves': return <WorksiteReservesView siteKey={siteKey} />;
     case 'operations': return <OperationsView />;
     case 'ops-rounds': return <OpsRoundsView />;
     case 'ops-incidents': return <OpsIncidentsView />;

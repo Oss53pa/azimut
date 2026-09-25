@@ -9,7 +9,7 @@
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
 import type {
-  CharterRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
+  CharterRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry, WorksiteRegistry,
 } from '@azimut/core-model';
 
 export type SiteSummary = {
@@ -84,6 +84,11 @@ export type SiteRepository = {
    * module 08 ; un dépôt qui n'en porte pas rend un registre vide.
    */
   loadMaintenanceRegistry(siteId: string): Promise<MaintenanceRegistry>;
+  /**
+   * H6 — le chantier : lots, créneaux et réserves de pose (0042). Le dépôt de
+   * référence sert un jeu de démonstration, que les écrans signalent.
+   */
+  loadWorksiteRegistry(siteId: string): Promise<WorksiteRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

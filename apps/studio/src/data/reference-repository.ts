@@ -9,9 +9,10 @@ import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
 import {
   EMPTY_CHARTER_REGISTRY, EMPTY_MAINTENANCE_REGISTRY, EMPTY_WAYFINDING_REGISTRY,
-  type CharterRegistry, type MaintenanceRegistry, type SiteData, type SiteVocabulary, type WayfindingRegistry,
+  type CharterRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry,
 } from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
+import { REFERENCE_WORKSITE } from './reference-worksite.js';
 import {
   RepositoryError,
   type SiteRepository,
@@ -92,6 +93,14 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(EMPTY_MAINTENANCE_REGISTRY);
+    },
+
+    /** Le jeu de démonstration du module 07 ; les écrans le signalent. */
+    loadWorksiteRegistry(siteId: string): Promise<WorksiteRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_WORKSITE);
     },
 
     /**

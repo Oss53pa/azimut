@@ -1,5 +1,6 @@
 /**
- * Jeu de démonstration — modules 07 (chantier), 08 (exploitation), 09 (budget).
+ * Jeu de démonstration — modules 08 (exploitation) et 09 (budget). Celui du
+ * module 07 est servi par le dépôt de référence (`data/reference-worksite.ts`).
  *
  * Données synthétiques : aucun fabricant, aucun relevé, aucun coût réel. Les
  * contrôles employés sont ceux de `domain/install-reserves`, `domain/survey-sync`
@@ -8,75 +9,7 @@
  * Les montants sont stockés en unité mineure avec leur devise (H8) : jamais un
  * flottant d'euros, jamais une conversion implicite à l'affichage.
  */
-import type { InstallReserve } from '../install-reserves.js';
 import type { SurveyRecord } from '../survey-sync.js';
-
-// ---------------------------------------------------------------------------
-// Module 07 — chantier et pose
-// ---------------------------------------------------------------------------
-
-export const LOT_STATES = ['ordered', 'in_production', 'delivered', 'installed'] as const;
-export type LotState = (typeof LOT_STATES)[number];
-
-export type ProductionLot = {
-  readonly id: string;
-  readonly manufacturer: string;
-  readonly support_count: number;
-  readonly state: LotState;
-};
-
-/** Une réserve de pose, avec le constat qui l'a ouverte. */
-export type ReserveRecord = {
-  readonly reserve: InstallReserve;
-  readonly lot_id: string;
-  readonly observed_by: string;
-  readonly observation_key: string;
-  readonly lifted_on: string | null;
-};
-
-export type InstallSlot = {
-  readonly id: string;
-  readonly date: string | null;
-  readonly zone: string;
-  readonly support_count: number;
-  readonly night_work: boolean;
-};
-
-export const DEMO_LOTS: readonly ProductionLot[] = [
-  { id: 'LOT-01', manufacturer: 'Métalier Sud', support_count: 62, state: 'in_production' },
-  { id: 'LOT-02', manufacturer: 'Sérigraphie Valmont', support_count: 54, state: 'delivered' },
-  { id: 'LOT-03', manufacturer: 'Métalier Sud', support_count: 32, state: 'ordered' },
-];
-
-export const DEMO_RESERVES: readonly ReserveRecord[] = [
-  {
-    reserve: { id: 'rs-0031', support_id: 'S-N0-14', lifted: false },
-    lot_id: 'LOT-01', observed_by: 'a.dieng',
-    observation_key: 'worksite.observation.fixing', lifted_on: null,
-  },
-  {
-    reserve: { id: 'rs-0032', support_id: 'S-N1-07', lifted: false },
-    lot_id: 'LOT-01', observed_by: 'a.dieng',
-    observation_key: 'worksite.observation.scratch', lifted_on: null,
-  },
-  {
-    reserve: { id: 'rs-0028', support_id: 'S-N2-03', lifted: true },
-    lot_id: 'LOT-02', observed_by: 'l.marchand',
-    observation_key: 'worksite.observation.plumb', lifted_on: '2026-09-13',
-  },
-  {
-    reserve: { id: 'rs-0035', support_id: 'S-N-1-02', lifted: false },
-    lot_id: 'LOT-02', observed_by: 'l.marchand',
-    observation_key: 'worksite.observation.lamp', lifted_on: null,
-  },
-];
-
-export const DEMO_INSTALL_SLOTS: readonly InstallSlot[] = [
-  { id: 'sl-01', date: '2026-09-16', zone: 'N0 galerie sud', support_count: 18, night_work: true },
-  { id: 'sl-02', date: '2026-09-18', zone: 'N1 noyau B', support_count: 12, night_work: true },
-  { id: 'sl-03', date: '2026-09-22', zone: 'N-1 parking', support_count: 9, night_work: false },
-  { id: 'sl-04', date: null, zone: 'N2 restauration', support_count: 12, night_work: false },
-];
 
 // ---------------------------------------------------------------------------
 // Module 08 — exploitation

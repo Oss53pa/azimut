@@ -85,6 +85,7 @@ non plus — elle n'en retire que les clés étrangères.
 0039_a5_11_no_cascade_to_org_or_site
 0040_q9_country
 0041_a5_7_divergence_support_node
+0042_h6_worksite_tables
 ```
 
 ## Règle pour la suite

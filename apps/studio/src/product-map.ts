@@ -191,6 +191,9 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'worksite-slots', labelKey: 'nav.item.worksiteslots' },
       { view: 'worksite-reserves', labelKey: 'nav.item.worksitereserves' },
     ],
+    // Partiel : lots, créneaux et réserves se lisent en base (0042) ; le dépôt
+    // de référence sert un jeu de démonstration, que les écrans signalent.
+    // Aucun écran ne les écrit encore.
     engine: 'partial',
     source: 'studio/domain/install-reserves',
   },

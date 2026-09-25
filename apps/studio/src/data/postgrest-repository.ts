@@ -31,6 +31,7 @@ import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
 import { loadWayfindingRegistry } from './postgrest-wayfinding.js';
 import { loadCharterRegistry } from './postgrest-charter.js';
 import { loadMaintenanceRegistry } from './postgrest-maintenance.js';
+import { loadWorksiteRegistry } from './postgrest-worksite.js';
 
 type SiteListRow = Pick<
   SiteRow,
@@ -326,6 +327,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
     loadMaintenanceRegistry(siteId: string) {
       return loadMaintenanceRegistry(config, siteId);
+    },
+
+    loadWorksiteRegistry(siteId: string) {
+      return loadWorksiteRegistry(config, siteId);
     },
 
     /**

@@ -1,35 +1,48 @@
 import { type JSX, useState } from 'react';
+import { EMPTY_WORKSITE_REGISTRY, type InstallSlot } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
-import { DEMO_INSTALL_SLOTS, type InstallSlot } from '../domain/demo/production.js';
+import { loadWorksite, useRegistry } from '../data/index.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
 import { formatDay } from './register/format.js';
 
 const ALL = 'all';
 const PLANNED = 'planned';
 const UNPLANNED = 'unplanned';
+/** Référence affichée d'un créneau : le début de son identifiant, faute de code en base. */
+const SLOT_REF_LENGTH = 8;
 
 /**
  * Module 07 — le planning de pose (H6.2), au gabarit « registre » : un
  * créneau par ligne, sa zone, ses supports, jour ou nuit, et les poses qui
- * attendent encore une date. Jeu de démonstration.
+ * attendent encore une date. Lu en base (0042), ou dans le jeu de
+ * démonstration du dépôt de référence.
  */
-export function WorksiteSlotsView(): JSX.Element {
+type WorksiteSlotsViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Element {
   const { t, lang } = useI18n();
+  const state = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const rows = [...DEMO_INSTALL_SLOTS].sort((a, b) =>
-    (a.date ?? '9999').localeCompare(b.date ?? '9999') || a.id.localeCompare(b.id));
+
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
+  // Le dépôt rend les créneaux déjà triés : datés d'abord, par date.
+  const rows = state.registry.slots;
 
   const visible = rows.filter(s => {
-    if (filter === PLANNED) return s.date !== null;
-    if (filter === UNPLANNED) return s.date === null;
+    if (filter === PLANNED) return s.planned_on !== null;
+    if (filter === UNPLANNED) return s.planned_on === null;
     return true;
   });
   const selected = rows.find(s => s.id === selectedId) ?? visible[0] ?? null;
-  const planned = rows.filter(s => s.date !== null);
+  const planned = rows.filter(s => s.planned_on !== null);
 
   const filters: readonly RegisterFilter[] = [
     { id: ALL, label: t('worksiteslots.filter.all') },
@@ -39,33 +52,33 @@ export function WorksiteSlotsView(): JSX.Element {
   const shift = (s: InstallSlot): string => (s.night_work ? t('worksite.shift.night') : t('worksite.shift.day'));
 
   const columns: readonly Column<InstallSlot>[] = [
-    { id: 'slot', header: t('worksiteslots.col.slot'), cell: s => s.id },
-    { id: 'zone', header: t('worksite.col.zone'), cell: s => s.zone },
-    { id: 'supports', header: t('worksite.col.supports'), numeric: true, cell: s => String(s.support_count) },
+    { id: 'slot', header: t('worksiteslots.col.slot'), cell: s => s.id.slice(0, SLOT_REF_LENGTH) },
+    { id: 'zone', header: t('worksite.col.zone'), cell: s => s.zone_label },
+    { id: 'supports', header: t('worksite.col.supports'), numeric: true, cell: s => String(s.support_ids.length) },
     { id: 'shift', header: t('worksite.col.shift'), cell: shift },
     {
       id: 'state',
       header: t('worksite.col.state'),
-      cell: s => (s.date === null
+      cell: s => (s.planned_on === null
         ? <Tag label={t('worksite.slot.unplanned')} severity="warning" />
         : <Tag label={t('worksiteslots.state.planned')} severity="valid" />),
     },
-    { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.date ?? undefined, lang) ?? '—' },
+    { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.planned_on ?? undefined, lang) ?? '—' },
   ];
 
   const inspector = selected === null
     ? <InspectorEmpty text={t('worksiteslots.inspector.empty')} />
     : (
       <Inspector
-        title={selected.id}
-        subtitle={t('worksiteslots.inspector.subtitle', { zone: selected.zone, shift: shift(selected) })}
+        title={selected.id.slice(0, SLOT_REF_LENGTH)}
+        subtitle={t('worksiteslots.inspector.subtitle', { zone: selected.zone_label, shift: shift(selected) })}
         sections={[
           {
             id: 'slot',
             title: t('worksiteslots.section.slot'),
             rows: [
-              { id: 'zone', label: t('worksite.col.zone'), value: selected.zone },
-              { id: 'date', label: t('worksite.col.date'), value: formatDay(selected.date ?? undefined, lang) ?? t('worksite.slot.unplanned') },
+              { id: 'zone', label: t('worksite.col.zone'), value: selected.zone_label },
+              { id: 'date', label: t('worksite.col.date'), value: formatDay(selected.planned_on ?? undefined, lang) ?? t('worksite.slot.unplanned') },
               { id: 'shift', label: t('worksite.col.shift'), value: shift(selected) },
             ],
           },
@@ -73,7 +86,7 @@ export function WorksiteSlotsView(): JSX.Element {
             id: 'computed',
             title: t('sitesheet.section.computed'),
             rows: [
-              { id: 'supports', label: t('worksite.col.supports'), value: String(selected.support_count), computed: true },
+              { id: 'supports', label: t('worksite.col.supports'), value: String(selected.support_ids.length), computed: true },
             ],
           },
         ]}
@@ -82,15 +95,13 @@ export function WorksiteSlotsView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
       <RegisterLayout
         title={t('worksite.panel.slots')}
         summary={t('worksiteslots.summary', {
           count: rows.length,
-          planned: planned.reduce((n, s) => n + s.support_count, 0),
-          unplanned: rows.filter(s => s.date === null).reduce((n, s) => n + s.support_count, 0),
+          planned: planned.reduce((n, s) => n + s.support_ids.length, 0),
+          unplanned: rows.filter(s => s.planned_on === null).reduce((n, s) => n + s.support_ids.length, 0),
         })}
         filtersLabel={t('register.filters')}
         filters={filters}
