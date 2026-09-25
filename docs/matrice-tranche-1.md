@@ -417,13 +417,12 @@ l'une des trois tables tranchées. Son retrait est entraîné — elle pend à
 de places qu'elle est censée porter et sa source ». La source d'un fait porte
 la seconde ; le motif libre n'a pas de place déclarée, et n'en a pas été créé.
 
-**Constaté, non traité.** Les rendus d'évacuation, de plan orienté et
-isométrique dessinent les empreintes de nature `parking_space` comme des
-empreintes de bâti, faute de distinguer les natures. C'était déjà le cas avant
-ce lot ; seul le jeu de référence, qui porte désormais quatre places, le rend
-visible. Le plan de niveau, lui, les distingue : il lit la zone et le fait de
-non-numérisation. Aucune section ne dit ce qu'un plan d'évacuation fait d'une
-place de stationnement.
+**Constaté à la version 18, tranché à la version 19.** Les rendus
+d'évacuation, de plan orienté et isométrique dessinaient les empreintes de
+nature `parking_space` comme des empreintes de bâti, faute de distinguer les
+natures, et aucune section ne disait ce qu'ils auraient dû en faire. S-39 le
+dit désormais, et les quatre vues s'y conforment : voir « Le stationnement, ce
+que la version 19 ferme » plus bas.
 
 **Q2 gagne un propriétaire.** `parking_space` quitte les tables sans
 propriétaire déclaré pour le module 01, comme la version 18 l'y range. Elle y
@@ -579,14 +578,76 @@ ne disaient où — est tranchée : la marque est l'existence du fait
 `parking.undigitized_spaces` qui cible l'empreinte. La clé manquait, la
 convention d'A5.11 la donne.
 
-### Reste ouvert après la version 18
+### Le stationnement, ce que la version 19 ferme
 
-**Ce qu'un plan d'évacuation, un plan orienté et une vue isométrique font d'une
-place de stationnement.** Ils la dessinent comme une empreinte de bâti. Aucune
-section ne dit ce qu'ils devraient en faire, et le plan de niveau est le seul
-des quatre à distinguer les natures. Relevé ci-dessus.
+**Le comptage, S-38.** Le retrait de la table des surfaces non couvertes a
+révélé que S-37 était incomplète : elle disait que l'écart était admis « à
+concurrence des places déclarées », sans dire ce que valait l'empreinte
+porteuse. S-38 le dit — elle vaut le nombre déclaré, et jamais ce nombre plus
+un.
+
+Le calcul du dépôt était déjà juste. Ce qui ne l'était pas, c'est ce que le
+contrôle en disait : `space_count` comptait les empreintes sous un nom qui se
+lisait comme un nombre de places, et le paramètre `digitised` des deux
+anomalies portait le total, places non dessinées comprises. Les deux comptes
+sont maintenant nommés et rendus séparément, `counted_spaces` et
+`digitised_count`, et les anomalies portent les deux.
+
+**Le rendu, S-39.** La question ouverte à la version 18 — ce que les trois
+autres vues font d'une place — est tranchée, et faite.
+
+| Vue | Ce que S-39 impose | État |
+| --- | --- | --- |
+| Plan de niveau | Contour léger, sans libellé | Fait |
+| Plan orienté | Le même traitement | Fait, il ne distinguait pas les places |
+| Vue isométrique | Au sol, sans volume | Fait, un volume rattaché à une place est écarté du rendu |
+| Plan d'évacuation | Absente, sauf cheminement | Fait, sept polygones au RDC de référence, trois désormais |
+| Place accessible | Pictogramme normalisé, jamais un symbole maison | Câblé, voir ci-dessous |
+
+La lecture des données est commune aux quatre vues, en
+`core-model/parking-view.ts`. C'est la cohérence des quatre qui fait la règle :
+trois vues conformes et une quatrième qui dresse un parking en relief la
+laisseraient violée sans qu'aucun essai de moteur ne le voie. L'essai est donc
+au niveau du dépôt, `tests/s39-rendu-d-une-place.test.ts`.
+
+**Le pictogramme d'une place accessible : câblé, non résolu.** Le moteur ne
+choisit pas le pictogramme, et ne peut pas le choisir : désigner lequel du
+registre de sécurité est celui de la place accessible est une valeur d'origine
+normative, qu'INV-5 interdit d'écrire dans le code et qui doit venir d'un
+paquet de règles. Il est passé en donnée, par `PlanContext`, le moteur le
+dessine, et l'appelant répond de sa provenance.
+
+Sans pictogramme, rien n'est dessiné. C'est le seul repli que S-39 laisse :
+« jamais un symbole maison » interdit d'en inventer un, et un symbole
+approchant serait une violation au même titre. Un pictogramme d'un autre
+registre est refusé, INV-3.
+
+Reste donc à dire **comment un paquet de règles désigne ce pictogramme**. Rien
+dans le modèle ne relie un pictogramme à un usage : `pictogram` porte une
+catégorie et une référence normative, pas une fonction. La question est posée
+ci-dessous.
+
+### Reste ouvert après la version 19
+
+**Comment un paquet de règles désigne le pictogramme d'un usage.** S-39 exige
+« le pictogramme normalisé du registre de sécurité » pour une place accessible.
+Aucune table ne dit lequel : ni `pictogram`, qui porte une catégorie et une
+référence normative, ni `rules_pack_rule`, dont la portée ne nomme pas
+d'usage. Le câblage attend cette réponse, et ne dessine rien d'ici là, ce qui
+est le comportement correct. A2.2, point 2.
 
 **Le motif d'une surface non numérisée.** `parking_uncovered_area.reason`
 disait pourquoi le plan s'arrête : bord de page, calque absent, zone illisible.
 S-37 nomme le compte et la source, pas le motif. Rien ne le porte plus, et rien
 ne dit qu'il doive l'être.
+
+**La grille de construction d'un pictogramme.** Les tracés du dépôt sont écrits
+dans un carré de trente unités, et `render-face.ts` comme le marquage des
+places les mettent à l'échelle sur cette base. A5.4 et J5.4 posent pourtant la
+vraie grille sur la famille de pictogrammes, que le modèle ne porte pas. La
+constante est nommée une fois en `core-model` ; `render-face.ts` garde son
+littéral, hors périmètre.
+
+**Une seconde implantation de `pointInPolygon`.** `engine-graph` en porte une
+copie privée, dans `validate-geometry.ts`, écrite avant que `core-model` n'en
+expose une. Les deux donnent le même résultat ; les réunir est hors périmètre.
