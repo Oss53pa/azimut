@@ -366,9 +366,9 @@ Mesuré, et porté ici à la demande de l'éditeur. `tests/check-wiring.test.ts`
 tient qu'un contrôle est branché dès qu'un autre fichier le nomme. Un
 `index.ts` de baril le nomme, donc tout contrôle ré-exporté passe.
 
-Sur 86 contrôles exportés, le garde voit 9 orphelins. Si le baril ne comptait
-pas, et en comptant un appel fait dans le fichier déclarant, il en verrait
-**31**. Les 22 de l'écart, vérifiés un par un — aucun n'est appelé dans son
+Sur 86 contrôles exportés, le garde voyait 9 orphelins. Si le baril ne comptait
+pas, et en comptant un appel fait dans le fichier déclarant, il en aurait vu
+**31**. Les 22 de l'écart, vérifiés un par un — aucun n'était appelé dans son
 propre fichier non plus :
 
 | Contrôle | Fichier |
@@ -388,20 +388,19 @@ propre fichier non plus :
 | `guardLibraryImport` | packages/engine-graph/src/guard-library-import.ts |
 | `guardPictogramsVector` | packages/engine-graph/src/detect-raster.ts |
 | `guardReviewClosure` | packages/engine-graph/src/guard-review-closure.ts |
-| `guardSafetyCreation` | packages/engine-graph/src/validate-library.ts |
-| `guardSafetyDeletion` | packages/engine-graph/src/validate-library.ts |
-| `guardSafetyRegistry` | packages/engine-graph/src/validate-library.ts |
 | `guardTextFit` | packages/core-model/src/typography-fit.ts |
 | `textExpansionFindings` | packages/core-model/src/text-expansion.ts |
 | `validateLibrary` | packages/engine-graph/src/validate-library.ts |
 | `validateProofs` | packages/engine-graph/src/validate-proofs.ts |
 
-Trois de cette liste méritent d'être nommés à part : `guardSafetyRegistry`,
-`guardSafetyCreation` et `guardSafetyDeletion` gardent l'invariant 3, et rien ne
-les appelle. L'invariant tient sur le chemin de la charte, par
-`guardCharterOnSafety`, mais pas sur celui de la bibliothèque. C'est le défaut
-le plus coûteux de la liste, et c'est celui qu'un baril comptant pour appelant
-cachait.
+Trois de cette liste en sont sortis à la version 18. `guardSafetyRegistry`,
+`guardSafetyCreation` et `guardSafetyDeletion` gardent l'invariant 3 et rien ne
+les appelait : l'invariant tenait sur le chemin de la charte, par
+`guardCharterOnSafety`, et pas du tout sur celui de la bibliothèque. C'était le
+défaut le plus coûteux de la liste, et celui qu'un baril comptant pour appelant
+cachait. Ils sont désormais branchés à `buildCommand`, et la liste ci-dessus en
+compte donc dix-neuf, non vingt-deux. Voir « L'invariant 3, à moitié appliqué »
+plus bas.
 
 `auditViewLayers` est de la même famille, et il vient d'être écrit : aucun écran
 de calques ne le consomme encore. Il n'a pas pu être inscrit à
@@ -410,6 +409,74 @@ inscription qu'il croit périmée.
 
 Non corrigé ici, à la demande de l'éditeur : le garde sera traité par une tâche
 qui possède ce code.
+
+### L'invariant 3, à moitié appliqué — corrigé à la version 18
+
+**Ce qui manquait.** INV-3 cloisonne le registre de sécurité. Deux chemins y
+mènent : celui de la charte, où une application de charte prétend modifier un
+objet normalisé, et celui de la bibliothèque, où une écriture ordinaire crée,
+modifie ou supprime un pictogramme. Le premier était gardé par
+`guardCharterOnSafety`, appelé et éprouvé. Le second avait ses trois gardes,
+écrits et éprouvés un par un, et **aucun appelant**. Le registre était donc
+ouvert à toute écriture passant par la voie normale — la voie que l'atelier
+emprunte.
+
+**Où le brancher.** M12.A2 : « L'atelier n'écrit jamais directement en base. Il
+appelle les commandes du module propriétaire. » Toute écriture passe donc par
+`buildCommand`, en `packages/core-model/src/site-commands.ts`. C'est le seul
+point où un garde ferme la voie une fois pour toutes, au lieu de la fermer
+écran par écran.
+
+**Pourquoi les gardes ont changé de paquet.** Ils vivaient dans
+`engine-graph/src/validate-library.ts`, et A4.1 interdit à `core-model` de lire
+un moteur. Un garde appelé depuis `buildCommand` doit donc vivre dans
+`core-model`. Ils sont descendus dans `packages/core-model/src/safety-registry.ts`
+et `validate-library.ts` les réexporte : aucun appelant existant ne change.
+
+**Ce que la descente a resserré.** Ils prenaient un `SiteData` entier pour n'y
+lire qu'un registre de pictogramme. Une commande ne porte pas de site, elle
+porte une ligne. Leur premier paramètre est donc devenu
+`readonly PictogramRegistryEntry[]`, soit `{ id, registry }` — la seule chose
+qu'ils lisaient. `SiteData.pictograms` le satisfait sans conversion, ce qui
+explique que les onze appels d'essai existants n'aient eu qu'à passer
+`refMinimal.pictograms` au lieu de `refMinimal`.
+
+**La règle de décision retenue.** `safetyRegistryFaults` refuse dès que l'un des
+deux états — avant ou après — déclare `safety`. Lire le seul état antérieur
+laisserait entrer un pictogramme d'orientation promu au registre de sécurité ;
+lire le seul état postérieur laisserait déclasser un pictogramme normalisé pour
+le modifier au coup suivant. Les deux voies se ferment ensemble.
+
+Une commande sur `pictogram` qui ne déclare pas la colonne `registry`, ou qui y
+met une valeur que le modèle ne connaît pas, est refusée avec
+`fault: 'registry_undeclared'`. A7 le veut ainsi : un moteur qui reçoit une
+entrée qu'il ne peut pas traiter refuse. Le contraire ouvrirait la voie la plus
+simple de toutes — omettre la colonne.
+
+**Ce qui l'éprouve.** `tests/inv3-registre-securite-cloisonne.test.ts`, huit
+voies de contournement et deux contre-exemples, comme N4.7 critère 3 l'exige
+(« un test par voie de contournement ») :
+
+| Voie | Ce qu'elle tente |
+| --- | --- |
+| 1 | Créer un pictogramme dans le registre de sécurité |
+| 2 | Modifier un pictogramme qui s'y trouve |
+| 3 | Y faire entrer un pictogramme d'orientation |
+| 4 | L'en faire sortir pour le modifier ensuite |
+| 5 | Supprimer un pictogramme qui s'y trouve |
+| 6 | Ne pas déclarer le registre du tout |
+| 7 | Déclarer un registre que le modèle ne connaît pas |
+| 8 | Passer par une charte, sur chacune des quatre natures d'INV-3 |
+
+Les deux contre-exemples disent ce que le garde ne doit **pas** fermer : le
+registre d'orientation, que J5.1 ouvre à l'éditeur, et les tables qu'INV-3 ne
+protège pas — une colonne `registry` existe aussi sur `support` et
+`support_typology`, et bloquer l'implantation d'un support de sécurité
+n'interdirait rien que le cahier interdise.
+
+Hors périmètre de la tranche, et assumé comme tel à la demande de l'éditeur :
+« C'est l'invariant le plus important du produit, à moitié appliqué. Corrige-le
+tout de suite. »
 
 ### Reste ouvert après la version 17
 

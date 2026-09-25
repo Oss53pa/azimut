@@ -182,6 +182,12 @@ export type {
 export { longestVariant, textExpansionFindings } from './text-expansion.js';
 export type { LongestVariantResult } from './text-expansion.js';
 export {
+  guardSafetyRegistry, guardSafetyCreation, guardSafetyDeletion,
+} from './safety-registry.js';
+export type {
+  PictogramRegistryEntry, PictogramMutation, PictogramCreation,
+} from './safety-registry.js';
+export {
   guardExportExcludesSketch,
   isSketchCollection,
   SKETCH_COLLECTIONS,

@@ -18,6 +18,11 @@ import type { ModuleKey } from './module-ownership.js';
 import {
   OWNED_TABLES, SPLIT_OWNERSHIP_TABLE, ownsSupportColumn,
 } from './module-ownership.js';
+import {
+  guardSafetyRegistry, guardSafetyCreation, guardSafetyDeletion,
+} from './safety-registry.js';
+import type { PictogramRegistryEntry, PictogramMutation } from './safety-registry.js';
+import type { PictogramRegistry } from './site.js';
 import type { Outcome, Finding } from './outcome.js';
 
 // ---------------------------------------------------------------------------
@@ -139,6 +144,8 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
     }, draft.id));
   }
 
+  findings.push(...safetyRegistryFaults(draft, before, after));
+
   if (findings.length > 0) return { ok: false, findings };
 
   return {
@@ -161,6 +168,95 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
 /** INT-1 et INT-2 : un module n'écrit que ce qu'il possède. */
 export function ownsTable(module: ModuleKey, table: string): boolean {
   return OWNED_TABLES[module].includes(table);
+}
+
+// ---------------------------------------------------------------------------
+// Registre de sécurité (INV-3)
+// ---------------------------------------------------------------------------
+
+/** La table qu'INV-3 protège. Nommée, pour que le littéral ne se disperse pas. */
+const SAFETY_GUARDED_TABLE = 'pictogram';
+
+/** La colonne qui dit de quel registre relève un pictogramme, section A5.4. */
+const REGISTRY_COLUMN = 'registry';
+
+/**
+ * Ce qu'INV-3 refuse dans cette commande.
+ *
+ * **C'est ici que l'invariant 3 s'applique à la bibliothèque**, et c'est le
+ * seul endroit qui le puisse : `buildCommand` est le passage obligé de toute
+ * écriture, M12.A2, donc de toute voie de contournement présente ou à venir.
+ * Le brancher sur un écran d'édition de pictogrammes protégerait cet écran ;
+ * le brancher ici protège le modèle.
+ *
+ * Quatre refus :
+ *
+ *  · créer un pictogramme dans le registre de sécurité ;
+ *  · modifier un pictogramme qui s'y trouve ;
+ *  · **y faire entrer** un pictogramme d'orientation, en écrivant `safety`
+ *    dans sa colonne de registre. C'est la voie la moins évidente, et celle
+ *    qu'un garde lisant le seul état antérieur laisserait passer ;
+ *  · supprimer un pictogramme qui s'y trouve.
+ *
+ * Et un cinquième, qui n'est pas une voie mais une absence : une commande sur
+ * cette table dont les lignes ne déclarent pas le registre. On ne peut alors
+ * pas savoir ce qu'elle touche, et A7 tranche — « un moteur qui reçoit une
+ * entrée qu'il ne peut pas traiter refuse ». Laisser passer ferait du champ
+ * omis la voie de contournement la plus simple de toutes.
+ */
+function safetyRegistryFaults(
+  draft: CommandDraft,
+  before: RowValues | null,
+  after: RowValues | null,
+): readonly Finding[] {
+  if (draft.table !== SAFETY_GUARDED_TABLE) return [];
+
+  const declared = [before, after]
+    .filter((row): row is RowValues => row !== null)
+    .map(row => registryOf(row));
+
+  if (declared.some(registry => registry === null)) {
+    return [finding('SECURITY.REGISTRY_WRITE_DENIED', {
+      operation: draft.operation,
+      fault: 'registry_undeclared',
+    }, draft.id)];
+  }
+
+  // Le registre effectif de la ligne : de sécurité si l'un des deux états le
+  // dit. Retenir le seul état antérieur laisserait entrer un pictogramme dans
+  // le registre ; retenir le seul état postérieur laisserait en sortir un.
+  const entry: PictogramRegistryEntry = {
+    id: draft.id,
+    registry: declared.includes('safety') ? 'safety' : 'wayfinding',
+  };
+
+  const outcome = draft.operation === 'create'
+    ? guardSafetyCreation([{ id: draft.id, registry: entry.registry }])
+    : draft.operation === 'delete'
+      ? guardSafetyDeletion([entry], [draft.id])
+      : guardSafetyRegistry([entry], mutationsOf(draft.id, before, after));
+
+  return outcome.ok ? [] : outcome.findings;
+}
+
+/** Le registre déclaré par une ligne, ou `null` si elle ne le déclare pas. */
+function registryOf(row: RowValues): PictogramRegistry | null {
+  const raw = row[REGISTRY_COLUMN];
+  return raw === 'safety' || raw === 'wayfinding' ? raw : null;
+}
+
+/** Les colonnes qu'une modification change, sous la forme qu'attend le garde. */
+function mutationsOf(
+  id: string,
+  before: RowValues | null,
+  after: RowValues | null,
+): readonly PictogramMutation[] {
+  return touchedColumns(before, after).map(field => ({
+    pictogram_id: id,
+    field,
+    old_value: String(before?.[field] ?? ''),
+    new_value: String(after?.[field] ?? ''),
+  }));
 }
 
 /**
