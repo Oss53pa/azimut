@@ -147,7 +147,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.05.name',
     summaryKey: 'module.05.summary',
     entry: 'advertising',
-    screens: [],
+    entryLabelKey: 'nav.item.adplanning',
+    screens: [
+      { view: 'ad-inventory', labelKey: 'nav.item.adinventory' },
+      { view: 'ad-creatives', labelKey: 'nav.item.adcreatives' },
+    ],
     // Partiel, et non complet : M05.R3 (partie N), M05.R4, M05.R5, M05.R6 côté technique et M05.R7 tiennent,
     // mais M05.R2 (partie N) (indexation de la grille sur l'exposition du module 03), M05.R8
     // (rendu en situation) et M05.R9 (facture née d'une décision humaine) n'ont

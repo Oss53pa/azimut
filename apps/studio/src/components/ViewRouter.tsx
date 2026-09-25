@@ -29,6 +29,8 @@ import { SiteSheetView } from '../views/SiteSheetView.js';
 import { StaggeringView } from '../views/StaggeringView.js';
 import { ProfilesView } from '../views/ProfilesView.js';
 import { WallPlansView } from '../views/WallPlansView.js';
+import { AdInventoryView } from '../views/AdInventoryView.js';
+import { AdCreativesView } from '../views/AdCreativesView.js';
 import { EvacuationView } from '../views/EvacuationView.js';
 import { PlacementView } from '../views/PlacementView.js';
 import { CoverageAuditView } from '../views/CoverageAuditView.js';
@@ -76,6 +78,8 @@ export function ViewRouter(
     case 'evacuation': return <EvacuationView onNavigate={onNavigate} />;
     case 'proofs': return <ProofsView onNavigate={onNavigate} />;
     case 'advertising': return <AdvertisingView />;
+    case 'ad-inventory': return <AdInventoryView />;
+    case 'ad-creatives': return <AdCreativesView />;
     case 'tenant-signs': return <TenantSignsView />;
     case 'worksite': return <WorksiteView />;
     case 'operations': return <OperationsView />;

@@ -36,6 +36,8 @@ export type ViewId =
   | 'proofs'
   // 05 — Régie publicitaire
   | 'advertising'
+  | 'ad-inventory'
+  | 'ad-creatives'
   // 06 — Enseignes
   | 'tenant-signs'
   // 07 — Chantier
