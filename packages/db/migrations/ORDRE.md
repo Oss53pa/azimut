@@ -96,6 +96,7 @@ non plus — elle n'en retire que les clés étrangères.
 0050_s_37_drop_parking_uncovered_area
 0051_s_35_drop_parking
 0052_drop_vehicle_gate
+0053_a5_4_pictogram_function_key
 ```
 
 ## Règle pour la suite
