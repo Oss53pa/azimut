@@ -184,7 +184,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.07.name',
     summaryKey: 'module.07.summary',
     entry: 'worksite',
-    screens: [],
+    screens: [
+      { view: 'worksite-lots', labelKey: 'nav.item.worksitelots' },
+      { view: 'worksite-slots', labelKey: 'nav.item.worksiteslots' },
+      { view: 'worksite-reserves', labelKey: 'nav.item.worksitereserves' },
+    ],
     engine: 'partial',
     source: 'studio/domain/install-reserves',
   },

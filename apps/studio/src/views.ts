@@ -44,6 +44,9 @@ export type ViewId =
   | 'tenant-instruction'
   // 07 — Chantier
   | 'worksite'
+  | 'worksite-lots'
+  | 'worksite-slots'
+  | 'worksite-reserves'
   // 08 — Maintenance
   | 'operations'
   // 09 — Budget
