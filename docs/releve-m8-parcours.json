@@ -1,7 +1,7 @@
 {
   "mesure": "M8 (partie M) critère 4 — temps du parcours complet de la tranche",
   "protocole": "D13",
-  "releve_le": "2026-09-25T14:29:34.329Z",
+  "releve_le": "2026-09-25T15:03:56.122Z",
   "machine": {
     "plateforme": "linux 6.18.44-fc-v37",
     "processeur": "Intel(R) Xeon(R) Processor @ 2.80GHz",
@@ -15,103 +15,80 @@
     {
       "rang": 1,
       "ecartee": true,
-      "total_ms": 2187,
+      "total_ms": 1932,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 563
+          "ms": 473
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 528
+          "ms": 512
         },
         {
           "step": "saisie du graphe",
-          "ms": 617
+          "ms": 664
         },
         {
           "step": "validation",
-          "ms": 479
+          "ms": 283
         }
       ]
     },
     {
       "rang": 2,
       "ecartee": false,
-      "total_ms": 2074,
+      "total_ms": 2165,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 417
+          "ms": 468
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 495
+          "ms": 757
         },
         {
           "step": "saisie du graphe",
-          "ms": 734
+          "ms": 648
         },
         {
           "step": "validation",
-          "ms": 428
+          "ms": 292
         }
       ]
     },
     {
       "rang": 3,
       "ecartee": false,
-      "total_ms": 2322,
+      "total_ms": 2017,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 393
+          "ms": 550
         },
         {
           "step": "tracé de trois cellules",
-          "ms": 700
+          "ms": 631
         },
         {
           "step": "saisie du graphe",
-          "ms": 725
+          "ms": 539
         },
         {
           "step": "validation",
-          "ms": 504
+          "ms": 297
         }
       ]
     },
     {
       "rang": 4,
       "ecartee": false,
-      "total_ms": 2164,
+      "total_ms": 1852,
       "etapes": [
         {
           "step": "import et calage",
-          "ms": 561
-        },
-        {
-          "step": "tracé de trois cellules",
-          "ms": 465
-        },
-        {
-          "step": "saisie du graphe",
-          "ms": 688
-        },
-        {
-          "step": "validation",
-          "ms": 450
-        }
-      ]
-    },
-    {
-      "rang": 5,
-      "ecartee": false,
-      "total_ms": 1970,
-      "etapes": [
-        {
-          "step": "import et calage",
-          "ms": 425
+          "ms": 536
         },
         {
           "step": "tracé de trois cellules",
@@ -119,32 +96,55 @@
         },
         {
           "step": "saisie du graphe",
-          "ms": 625
+          "ms": 534
         },
         {
           "step": "validation",
-          "ms": 440
+          "ms": 302
+        }
+      ]
+    },
+    {
+      "rang": 5,
+      "ecartee": false,
+      "total_ms": 2052,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 497
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 482
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 687
+        },
+        {
+          "step": "validation",
+          "ms": 386
         }
       ]
     }
   ],
-  "mediane_ms": 2119,
+  "mediane_ms": 2035,
   "mediane_par_etape_ms": [
     {
       "step": "import et calage",
-      "ms": 421
+      "ms": 517
     },
     {
       "step": "tracé de trois cellules",
-      "ms": 488
+      "ms": 557
     },
     {
       "step": "saisie du graphe",
-      "ms": 707
+      "ms": 594
     },
     {
       "step": "validation",
-      "ms": 445
+      "ms": 300
     }
   ],
   "note": "Parcours automatisé, non chronométré sur un opérateur réel. K3.4 place cette seconde mesure dans les sessions d’essai sur usagers. Aucun seuil n’est révisé sur ce relevé : D13 réserve la révision au premier site réel modélisé, et la trace."
