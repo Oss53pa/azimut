@@ -36,6 +36,7 @@ Version consolidée. Document unique destiné à l'agent de développement et à
 | P | Module 13, application visiteur |
 | Q | Plateforme, propriété des tables, devises, entité juridique, taxes, incidents |
 | R | Écran du tableau des messages, spécification au champ près |
+| S | Ateliers de conception : vues, couleurs, calques, cotation, exports, édition simultanée, assistant |
 | Annexe T | Consigne de la tâche T-2.14a |
 | Annexe Z | Journal de consolidation |
 
@@ -296,7 +297,8 @@ plan_calibration_point (id, org_id, calibration_id, ordinal int,
 -- du repère site. Les points de calage permettent de rejouer le calage à l'identique.
 
 footprint           (id, org_id, level_id, unit_code, geometry jsonb, kind)
-                    kind in ('cell','circulation','technical','vertical_core','outdoor')
+                    kind in ('cell','circulation','technical','vertical_core','outdoor',
+                             'parking_space')
                     geometry = polygone en coordonnées métier, mètres
                     unit_code : requis si kind = 'cell', unique par niveau
 volume              (id, org_id, footprint_id, base_elevation_m numeric,
@@ -1332,7 +1334,7 @@ Ces tolérances sont des constantes techniques, pas des valeurs normatives. Elle
 
 Format : `DOMAINE.SUJET_CONDITION`, en majuscules, un point de séparation, souligné dans les segments.
 
-Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CHARTER`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `DOC`, `EDIT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PARK`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
+Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CHARTER`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `DOC`, `EDIT`, `EXPORT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PARK`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
 
 Un code est stable à vie. Il n'est jamais renommé, jamais traduit, jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et sa valeur reste réservée.
 
@@ -3360,7 +3362,7 @@ Quand un pointeur grossier est détecté, les cibles interactives passent à 44 
 
 ### G4.1 Décision de périmètre
 
-L'édition simultanée en temps réel sur un même niveau est **exclue définitivement du produit**, et non reportée.
+L'édition simultanée en temps réel sur un même niveau était **exclue définitivement du produit**. **Cette exclusion est levée par la partie S, section S6**, au profit d'une propagation de commandes validées, avec verrou ferme sur l'objet en cours d'édition. Les motifs ci-dessous restent valables et expliquent pourquoi l'édition simultanée n'est pas une fusion continue.
 
 Motifs : la fusion en temps réel d'un graphe dont la cohérence topologique est une exigence bloquante est un problème d'un autre ordre de difficulté que la synchronisation différée. Elle exposerait à des états intermédiaires incohérents, et elle est sans rapport avec le besoin réel, où une à deux personnes modélisent un site.
 
@@ -4676,6 +4678,10 @@ Points ouverts par les parties L à Q, qui n'avaient pas été inscrits ici.
 | Articulation du mode urgence avec le système de sécurité incendie | Bureau de contrôle du site | Avant tout déploiement de bornes | L |
 | Taux de taxe par pays et par nature de prestation | Conseil fiscal | Avant la première facture | V |
 | Correspondance des pays vers les devises, et exposant de chaque devise, avec leur source documentaire et ses conditions de réutilisation | Atlas Studio | Avant la première facture | V |
+| Format d'export de géométrie vers les outils de conception assistée, section S5 | Développement, procédure d'arrêt et de demande | Avant le premier export de géométrie | S |
+| Fournisseur et nature du modèle de l'assistant, compatibles avec la traçabilité de la section S7.2 | Atlas Studio | Avant l'incrément 5 | S |
+| Régime juridique des données transmises à l'assistant : sous-traitance, localisation, conservation | Conseil juridique | Avant toute activation réelle de l'assistant | L |
+| Coût d'usage de l'assistant et modèle de facturation associé | Atlas Studio | Avant la mise en marché de l'option | S |
 | Délais et formes de notification d'une violation de données, par pays | Conseil juridique | Avant la première donnée personnelle réelle | L |
 | Destinataires d'alerte et astreinte | Atlas Studio | Avant le premier client en production | L |
 
@@ -4797,7 +4803,7 @@ Cette correction est reportée dans la section A5.6.
 | 0. Socle | 01 Socle du site | plateforme |
 | 1. Stratégie | 02 Wayfinding, 03 Parcours clients | couche 0 |
 | 2. Production et commerce | 04 Signalétique, 05 Régie, 06 Enseignes locataires, 13 Application visiteur | couches 0 et 1, lectures intra-couche déclarées |
-| 3. Aval | 07 Chantier, 08 Exploitation, 09 Budget | couches 0 à 2 |
+| 3. Aval | 07 Chantier, 08 Exploitation, 09 Budget, 14 Assistant | couches 0 à 2 |
 | 4. Transverse | 10 Portefeuille, 11 Fonctions transverses | toutes |
 | Surface | 12 Atelier de dessin | sert les couches 0 à 2, ne possède aucune donnée métier |
 
@@ -7205,6 +7211,8 @@ La règle de propriété unique interdit de créer une table sans propriétaire.
 | `site_rules_binding` | 01 Socle | Rattachement d'un site à un paquet |
 | `site_fact` | 01 Socle | Faits déclarés du site, avec source et statut, section A5.11 |
 | `plan_calibration_point` | 01 Socle | Points de calage d'une source de plan, en pixels de l'image, règle M01.S2 |
+| `view_layer`, `work_color`, `dimension_note` | 01 Socle | Calques, coloration de travail, cotations, partie S |
+| `assistant_setting`, `assistant_suggestion` | 14 Assistant | Assistant de conception, section S7 |
 | `audit_log` | 00 Plateforme | Journal d'audit |
 | `job` | 00 Plateforme | File de travaux |
 | `charter`, `charter_version`, `charter_color`, `charter_typeface`, `charter_rule`, `lexicon_term` | 04 Signalétique | Voir Q3 |
@@ -7811,6 +7819,245 @@ Les points encore ouverts relèvent du registre de la partie K. Cette partie se 
 
 ---
 
+# PARTIE S. Ateliers de conception
+
+Cette partie répond à sept demandes portant sur les ateliers : les vues du plan, les couleurs, les calques, la cotation, les exports, l'édition simultanée et l'assistant. Trois d'entre elles heurtaient des décisions antérieures ; la résolution retenue figure à chaque fois.
+
+---
+
+## S1. Vues du plan
+
+### S1.1 Ce que les termes désignent ici
+
+| Terme | Ce qu'il désigne dans ce document |
+| --- | --- |
+| Vue en plan, 2D | Projection orthogonale du niveau, vue de dessus, section D5 et vue simplifiée de la section E9.2 |
+| Axonométrie | Famille de projections parallèles. L'isométrie en est une |
+| Isométrie, 2,5D | Projection à angle fixe des volumes extrudés, section D5.1. C'est ce que le marché appelle 2,5D : un rendu en relief sans navigation |
+| 3D | Scène navigable, avec rotation libre du point de vue |
+
+**S-1.** Ces quatre vues dérivent du même modèle : empreintes, altitudes de base et hauteurs. Aucune n'est un fichier à part, aucune ne se dessine à la main.
+
+**S-2.** La projection est automatique, la donnée ne l'est pas. Un plan importé ne produit pas seul une vue en relief : les hauteurs des volumes se saisissent, ou s'héritent d'une valeur par niveau. Ce qui est automatique, c'est le passage du modèle à la vue, et la régénération de toutes les vues à chaque modification.
+
+**S-3.** L'angle de l'isométrie est fixé par site et figé à la publication, section D5.1. La mémoire spatiale de l'usager repose sur la stabilité de l'image.
+
+### S1.2 La 3D, outil de revue et non livrable
+
+**Décision, qui lève en partie celle de la section E3.** L'argument qui écartait la 3D visait le visiteur devant une borne, dont la mémoire spatiale se perd si la vue tourne. Il ne vaut pas pour un concepteur qui vérifie son travail.
+
+**S-4.** La 3D et l'aperçu immersif sont des outils de revue dans l'atelier. Ils servent à contrôler des masques, des hauteurs, une covisibilité, la lisibilité d'un support depuis un point donné.
+
+**S-5.** Ils ne sont jamais une surface visiteur, jamais un livrable, et aucun contrôle normatif ne s'y exécute. Le jugement d'un support se fait sur son exécution, à plat, dans les conditions de lecture du support réel, section F1.2.
+
+**S-6.** La vue 3D ne modifie aucune donnée. Toute édition se fait dans les vues 2D et isométrique.
+
+---
+
+## S2. Couleurs
+
+### S2.1 Le conflit et sa résolution
+
+Repeindre un bloc à la main casse la régénération : la couleur d'une cellule vient de sa catégorie et de la charte, et se recalcule à chaque changement d'occupant. Le besoin, lui, est réel : distinguer des zones en cours de conception, et ajuster les couleurs d'un site.
+
+Deux mécanismes distincts y répondent, et aucun ne casse la régénération.
+
+### S2.2 Palette de catégorie, dans la charte
+
+**S-7.** La couleur d'une catégorie se modifie dans la charte du site, section A5.8. Le changement se propage à tous les plans, toutes les vues et tous les supports qui emploient cette catégorie, et marque périmés ceux qui étaient approuvés, selon l'empreinte de contenu.
+
+C'est la façon prévue de changer la couleur des blocs. Elle est versionnée, traçable, et cohérente d'un livrable à l'autre.
+
+### S2.3 Coloration de travail
+
+**S-8.** Un concepteur peut colorer librement des empreintes, des zones ou des calques pour son propre travail. Cette coloration est propre à l'utilisateur, n'est jamais partagée, n'entre dans aucun livrable, dans aucun export destiné à un tiers et dans aucun paquet de borne.
+
+**S-9.** L'interface indique en permanence qu'une coloration de travail est active, et permet de la retirer d'un geste. Sans cela, un concepteur jugerait un plan sur des couleurs qui n'existent pas.
+
+---
+
+## S3. Calques thématiques
+
+**S-10.** Les objets affichés se répartissent en calques thématiques : plan de fond, empreintes, circulation et parcours, signalétique, publicité, mobilier et habillage, pictogrammes, annotations, esquisse, cotations.
+
+**S-11.** Chaque calque porte sa visibilité à l'écran et sa visibilité à l'impression, qui sont deux réglages distincts. Un calque d'esquisse visible à l'écran ne s'imprime jamais, section E9.
+
+**S-12.** Un calque ne change pas la propriété des données. Il ne fait qu'organiser l'affichage : une empreinte appartient au module 01 qu'elle soit affichée ou non.
+
+---
+
+## S4. Cotation et échelle
+
+**S-13.** L'atelier produit des cotations entre deux éléments désignés, exprimées en mètres, recalculées à toute modification de la géométrie. Une cotation n'est jamais saisie à la main.
+
+**S-14.** Les cotations sont un calque, elles se masquent et s'impriment indépendamment.
+
+**S-15.** Tout plan destiné à l'impression porte une échelle graphique générée, et non une mention d'échelle saisie. Une échelle écrite à la main devient fausse dès qu'une page est redimensionnée.
+
+---
+
+## S5. Exports
+
+**S-16.** Formats de sortie, et ce à quoi chacun sert :
+
+| Format | Usage | Limite |
+| --- | --- | --- |
+| PDF/X | Fabrication | Le seul format de fabrication, sections A4.7 et D10 |
+| PDF/A | Archivage | Versions approuvées et dossiers de livraison |
+| SVG | Échange vectoriel, intégration | |
+| PNG | Partage rapide, courriel, présentation | **Jamais un livrable de fabrication** |
+| Géométrie vers outils de conception assistée | Rendre la géométrie à un architecte ou à un bureau d'études | Format à trancher, section S9 |
+
+**S-17.** Un export en mode point présenté comme un fichier de fabrication est refusé, `EXPORT.RASTER_FOR_FABRICATION`. Un support imprimé depuis une image en mode point est illisible au format d'un totem.
+
+**S-18.** L'export de géométrie porte les empreintes, les volumes et le graphe, avec leurs identifiants stables, dans le repère métier en mètres. Il ne porte ni charte, ni contenu de support, ni donnée personnelle.
+
+---
+
+## S6. Édition simultanée
+
+### S6.1 Ce qui change
+
+**Décision, qui lève l'exclusion de la section G4.1.** L'édition simultanée était écartée parce que fusionner un graphe en temps réel expose à des états topologiquement incohérents. Elle est admise, mais encadrée : ce n'est pas une fusion continue, c'est une propagation de commandes validées.
+
+### S6.2 Règles
+
+**S-19.** Ce qui se propage, ce sont les commandes validées de la section E5.1, jamais un geste en cours ni une saisie caractère par caractère.
+
+**S-20.** Un objet en cours d'édition est verrouillé fermement pour les autres pendant la session, et non plus seulement à titre consultatif, section G4.2. Le verrou tombe à la fin du geste ou à l'expiration.
+
+**S-21.** La validation de complétude du graphe est rejouée après chaque propagation. Un état incohérent bloque la publication et nomme les commandes en cause.
+
+**S-22.** La présence des utilisateurs, leur sélection et leur zone de travail sont visibles. Un concepteur doit voir où travaille un autre avant de s'y heurter.
+
+**S-23.** Le travail hors ligne de la section G8 reste possible. Une session hors ligne ne participe pas à la propagation ; elle se synchronise au retour, avec l'arbitrage des conflits déjà spécifié.
+
+**Charge.** C'est un lot de taille XL, qui ne peut pas entrer en développement sans être découpé, selon la règle de la partie G.
+
+---
+
+## S7. Module 14, assistant de conception
+
+### S7.1 Rôle et frontière
+
+L'assistant propose. Il ne décide jamais, n'écrit jamais directement, et ne se substitue à aucun contrôle.
+
+Ce qu'il fait : proposer l'implantation de supports à partir des points de décision, nommer et catégoriser des repères d'après l'annuaire et la nomenclature, repérer des incohérences que les contrôles ne couvrent pas, suggérer un gabarit, proposer un ordre de lecture pour une face trop chargée.
+
+**Il ne fait jamais**, et la liste est fermée :
+
+**S-24.** Il ne touche pas au registre de sécurité, section A1.2.
+
+**S-25.** Il ne produit aucune valeur d'origine normative. Une hauteur de caractère, un contraste, une dimension de pictogramme viennent du paquet de règles, jamais de lui, section A1.2, invariant 5.
+
+**S-26.** Il n'écrit aucune donnée. Une proposition acceptée est appliquée par la commande du module propriétaire, exactement comme une action humaine, section E5.
+
+**S-27.** Il ne remplace aucun contrôle. Une proposition acceptée passe les mêmes contrôles que toute autre modification, et peut être refusée par eux.
+
+### S7.2 Traçabilité
+
+**S-28.** Chaque proposition est enregistrée avec ce sur quoi elle s'appuie, la date, l'utilisateur à qui elle a été faite, et ce qu'il en a fait. Une proposition refusée n'est pas représentée pour le même geste.
+
+**S-29.** Tout objet issu d'une proposition acceptée porte cette origine. Un audit doit pouvoir dire ce qui a été proposé et ce qui a été décidé par un humain.
+
+**S-30.** L'assistant ne modifie jamais silencieusement son comportement d'une version à l'autre pour un même site : un changement de version est journalisé et visible.
+
+### S7.3 Données, confidentialité, disponibilité
+
+**S-31.** L'assistant s'active par organisation, avec un consentement explicite et révocable. Il est éteint par défaut.
+
+**S-32.** Les plans d'un établissement recevant du public sont des données sensibles. Ce qui lui est transmis est limité au strict nécessaire de la proposition demandée, ne contient aucune donnée personnelle, et n'est jamais employé pour entraîner quoi que ce soit. Cet engagement figure au contrat.
+
+**S-33.** L'assistant exige le réseau. Sans réseau, il s'éteint et le dit ; l'atelier continue de fonctionner sans lui, conformément à la contrainte de connectivité irrégulière des marchés visés. Aucune fonction de l'atelier ne dépend de lui.
+
+**S-34.** Une organisation qui ne le souscrit pas ne voit rien de lui, jamais un bouton grisé.
+
+### S7.4 Place dans l'architecture
+
+Couche 3. Il lit le socle, le wayfinding, les parcours et la signalétique. Aucun module ne le lit. Optionnel, souscrit séparément.
+
+---
+
+## S8. Stationnement
+
+Constat : l'objet `parking` et la géométrie d'une place n'étaient définis nulle part, alors que les contrôles du domaine `PARK` les supposent.
+
+**S-35.** Une place de stationnement est une empreinte de nature `parking_space`. Un parking est une zone de nature `parking`. Aucune table nouvelle : ce sont les objets du socle, module 01.
+
+**S-36.** La capacité annoncée d'un parking est un fait du site, avec sa source et son statut, section A5.11. Les contrôles du domaine `PARK` comparent le compte des empreintes de nature `parking_space` à ce fait déclaré.
+
+**S-37.** Une place de stationnement n'est ni une destination, ni une cellule. Elle n'entre dans aucun quantitatif de signalétique et ne porte pas de code de cellule.
+
+---
+
+## S9. Modèle de données
+
+```sql
+view_layer          (id, org_id, site_id, key, name, visible boolean,
+                     print_visible boolean, z_order int)
+                    key in ('base_plan','footprints','circulation','signage',
+                            'advertising','furnishing','pictograms','annotations',
+                            'sketch','dimensions')
+
+work_color          (id, org_id, site_id, user_id, target_kind, target_id, hex)
+-- Coloration de travail, propre à un utilisateur, jamais exportée.
+
+dimension_note      (id, org_id, level_id, from_ref jsonb, to_ref jsonb,
+                     style_role, created_by, created_at)
+-- La longueur est calculée, jamais stockée.
+
+assistant_setting   (id, org_id, enabled boolean, scope jsonb,
+                     consented_by, consented_at, revoked_at)
+
+assistant_suggestion (id, org_id, site_id, kind, inputs_digest, payload jsonb,
+                     state, created_at, decided_by, decided_at, applied_command_id)
+                    state in ('proposed','accepted','rejected','expired')
+```
+
+Propriétaires : `view_layer`, `work_color` et `dimension_note` au module 01 ; `assistant_setting` et `assistant_suggestion` au module 14.
+
+---
+
+## S10. Codes d'anomalie ajoutés
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `EXPORT.RASTER_FOR_FABRICATION` | bloquant | Export en mode point présenté comme fichier de fabrication |
+| `EXPORT.GEOMETRY_FORMAT_UNSET` | bloquant | Export de géométrie demandé sans format arrêté |
+| `ASSIST.UNAVAILABLE` | information | Assistant indisponible, réseau absent ou option non souscrite |
+| `ASSIST.OUT_OF_SCOPE` | bloquant | Proposition touchant le registre de sécurité ou une valeur normative, refusée |
+| `DATA.PARKING_SPACE_WITHOUT_ZONE` | avertissement | Place de stationnement hors de toute zone de nature `parking` |
+
+---
+
+## S11. Rattachement
+
+| Élément | Incrément | Taille |
+| --- | --- | --- |
+| Calques thématiques | 1, avec l'atelier | M |
+| Coloration de travail | 1 | S |
+| Palette de catégorie dans la charte | 2, avec la charte | S |
+| Cotation et échelle générée | 2 | M |
+| Exports PNG et géométrie | 2, avec les exécutions | M |
+| Vue 3D de revue | 4 | L |
+| Édition simultanée | 5 | XL, à découper |
+| Module 14, assistant | 5, vendu séparément | XL, à découper |
+| Stationnement | 1, avec les empreintes | S |
+
+---
+
+## S12. Ce que cette partie ne couvre pas
+
+Inscrit au registre, section K3.8.
+
+1. **Le format d'export de géométrie.** Le choix entre un format ouvert et un format propriétaire dépend de ce que lisent réellement les outils des clients, et de la bibliothèque disponible. Relève de la procédure d'arrêt et de demande.
+2. **Le fournisseur et la nature du modèle de l'assistant.** Un modèle qui change de comportement d'une version à l'autre est incompatible avec la traçabilité exigée en section S7.2 ; le choix doit en tenir compte.
+3. **Le régime juridique des données transmises à l'assistant.** Sous-traitance, localisation, durée de conservation, à traiter avec le conseil juridique déjà saisi pour la fidélité.
+4. **Le coût d'usage de l'assistant**, qui conditionne son modèle de facturation.
+5. **La visite virtuelle.** L'aperçu immersif de la section S1.2 est un outil de revue, pas un produit de visite destiné au public.
+
+---
+
 # ANNEXE T. Consigne T-2.14a, empreinte de contenu et versions de support
 
 Cette consigne suit le format de la partie B du cahier des charges. Les règles de conduite de la section A2 s'appliquent intégralement.
@@ -8164,73 +8411,82 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 181. Renvois W renommés en M02.W
 182. Renvois S renommés en M01.S
 183. Renvoi PL renommé en M00.PL
-184. Renvoi V1 à V9 renommé
-185. Renvoi V2 renommé, section P6.2
-186. Renvoi V6 renommé
-187. Renvoi V7 renommé
-188. Renvoi V2 et V3 renommé, section P8.4
-189. Renvoi assistance A5 renommé
-190. Renvoi assistances A1 à A5 renommé
-191. Renvoi assistances A1 et A4 renommé
-192. Renvoi F1 renommé
-193. Renvoi G1 renommé
-194. Renvoi R2 d'intégration renommé
-195. Renvoi R3 d'intégration renommé
-196. Renvoi R3 d'intégration renommé, second
-197. D2.2 : sens de RULES.PACK_NOT_BOUND précisé
-198. M1 : gravité unique de RULES.PACK_NOT_BOUND, plus d'avertissement à la création
-199. R12 : génération alignée sur la section N2.8
-200. R14 : RULES.PACK_NOT_BOUND bloque l'émission pour revue
-201. H11 : table message_schedule_approval ajoutée
-202. L3 : module 02 propriétaire de message_schedule_approval
-203. R12 : motif de rejet enregistré
-204. R12 : ligne d'approbation dans la table du module 02
-205. A5.3 : table graph_validation ajoutée
-206. L3 : module 01 propriétaire de graph_validation
-207. M5 : passage de validation enregistré
-208. N2.3 : règle M02.W11 fondée sur graph_validation
-209. A12.3 : insertion seule étendue aux deux nouvelles tables
-210. N2.3 : règle M02.W12, appartenance calculée à une zone
-211. R6.2 : filtre Bâtiment dérivé du nœud
-212. R6.2 : filtre Zone d'orientation fondé sur M02.W12
-213. Q9 : référentiel des pays ajouté
-214. Q2 : propriétaire de la table country
-215. M1 : pays issus du référentiel
-216. M1 : fuseaux issus du référentiel
-217. M1 : entité juridique affichée sous condition
-218. A12.3 : insertion seule définie, avec l'unique exception de la purge
-219. A5.11 : règle de suppression ajoutée
-220. O15 : purge explicite et ordonnée
-221. Q9.2 : colonne default_currency_code en attente de son fichier
-222. K3.8 : correspondance pays vers devises inscrite au registre
-223. A6.2 : rôle marketing ajouté au tableau des droits
-224. A5.1 : sept rôles
-225. T-0.5 : sept rôles
-226. L7 : sept rôles
-227. N13 : sept rôles
-228. O3 : sept rôles
-229. M8 : critère 4 rattaché au protocole de mesure D13
-230. K3.8 : calage à n points avec résidu inscrit comme amélioration possible
-231. N1.3 : règle M01.S10 sur les liaisons entre bâtiments
-232. D2.2 : quatre codes de graphe ajoutés
-233. D2.2 : trois codes de données ajoutés
-234. M1bis : écran de fiche de site spécifié
-235. N1.5 : fiche de site renvoyée vers M1bis
-236. M4 : largeur d'arête héritée du bâtiment
-237. C1 : site de référence portant des liaisons inter-bâtiments
-238. D7.1 : réserve sur les liaisons entre bâtiments dans l'empreinte
-239. D2.1 : domaine DOC ajouté
-240. D2.1 : domaine PARK ajouté
-241. A7 : règle de refus d'une entrée invalide par les moteurs
-242. A5.11 : faits du site avec source et statut
-243. Q2 : propriétaire de site_fact
-244. M2 : calage à n points adopté
-245. K3.8 : point du calage à n points fermé, adopté en section M2
-246. K3.9 : calage à n points consigné comme fermé
-247. A5.8 : règles de charte pour le style de texte
-248. D3.6 : règle pays non comparable refusée
-249. D2.2 : 93 codes inscrits au catalogue
-250. A5.8 : contrôle non exécuté quand la charte ne porte pas la règle
-251. D2.1 : domaine CHARTER rétabli
-252. D2.2 : code CHARTER.RULE_MALFORMED inscrit
-253. A5.11 : distinction entre statut d'un fait et statut d'un objet
+184. Partie S réinsérée après le renommage des règles
+185. Renvoi V1 à V9 renommé
+186. Renvoi V2 renommé, section P6.2
+187. Renvoi V6 renommé
+188. Renvoi V7 renommé
+189. Renvoi V2 et V3 renommé, section P8.4
+190. Renvoi assistance A5 renommé
+191. Renvoi assistances A1 à A5 renommé
+192. Renvoi assistances A1 et A4 renommé
+193. Renvoi F1 renommé
+194. Renvoi G1 renommé
+195. Renvoi R2 d'intégration renommé
+196. Renvoi R3 d'intégration renommé
+197. Renvoi R3 d'intégration renommé, second
+198. D2.2 : sens de RULES.PACK_NOT_BOUND précisé
+199. M1 : gravité unique de RULES.PACK_NOT_BOUND, plus d'avertissement à la création
+200. R12 : génération alignée sur la section N2.8
+201. R14 : RULES.PACK_NOT_BOUND bloque l'émission pour revue
+202. H11 : table message_schedule_approval ajoutée
+203. L3 : module 02 propriétaire de message_schedule_approval
+204. R12 : motif de rejet enregistré
+205. R12 : ligne d'approbation dans la table du module 02
+206. A5.3 : table graph_validation ajoutée
+207. L3 : module 01 propriétaire de graph_validation
+208. M5 : passage de validation enregistré
+209. N2.3 : règle M02.W11 fondée sur graph_validation
+210. A12.3 : insertion seule étendue aux deux nouvelles tables
+211. N2.3 : règle M02.W12, appartenance calculée à une zone
+212. R6.2 : filtre Bâtiment dérivé du nœud
+213. R6.2 : filtre Zone d'orientation fondé sur M02.W12
+214. Q9 : référentiel des pays ajouté
+215. Q2 : propriétaire de la table country
+216. M1 : pays issus du référentiel
+217. M1 : fuseaux issus du référentiel
+218. M1 : entité juridique affichée sous condition
+219. A12.3 : insertion seule définie, avec l'unique exception de la purge
+220. A5.11 : règle de suppression ajoutée
+221. O15 : purge explicite et ordonnée
+222. Q9.2 : colonne default_currency_code en attente de son fichier
+223. K3.8 : correspondance pays vers devises inscrite au registre
+224. A6.2 : rôle marketing ajouté au tableau des droits
+225. A5.1 : sept rôles
+226. T-0.5 : sept rôles
+227. L7 : sept rôles
+228. N13 : sept rôles
+229. O3 : sept rôles
+230. M8 : critère 4 rattaché au protocole de mesure D13
+231. K3.8 : calage à n points avec résidu inscrit comme amélioration possible
+232. N1.3 : règle M01.S10 sur les liaisons entre bâtiments
+233. D2.2 : quatre codes de graphe ajoutés
+234. D2.2 : trois codes de données ajoutés
+235. M1bis : écran de fiche de site spécifié
+236. N1.5 : fiche de site renvoyée vers M1bis
+237. M4 : largeur d'arête héritée du bâtiment
+238. C1 : site de référence portant des liaisons inter-bâtiments
+239. D7.1 : réserve sur les liaisons entre bâtiments dans l'empreinte
+240. D2.1 : domaine DOC ajouté
+241. D2.1 : domaine EXPORT ajouté
+242. D2.1 : domaine PARK ajouté
+243. A7 : règle de refus d'une entrée invalide par les moteurs
+244. A5.11 : faits du site avec source et statut
+245. Q2 : propriétaire de site_fact
+246. M2 : calage à n points adopté
+247. K3.8 : point du calage à n points fermé, adopté en section M2
+248. K3.9 : calage à n points consigné comme fermé
+249. A5.8 : règles de charte pour le style de texte
+250. D3.6 : règle pays non comparable refusée
+251. D2.2 : 93 codes inscrits au catalogue
+252. A5.8 : contrôle non exécuté quand la charte ne porte pas la règle
+253. D2.1 : domaine CHARTER rétabli
+254. D2.2 : code CHARTER.RULE_MALFORMED inscrit
+255. A5.11 : distinction entre statut d'un fait et statut d'un objet
+256. G4.1 : exclusion de l'édition simultanée levée par la partie S
+257. A5.2 : nature parking_space ajoutée aux empreintes
+258. L2 : module 14 placé en couche 3
+259. A0 : partie S au sommaire
+260. Q2 : propriétaires des tables de la partie S
+261. K3.8 : quatre points ouverts de la partie S inscrits
+262. Partie S ajoutée : ateliers de conception, vues, couleurs, calques, cotation, exports, édition simultanée, assistant
