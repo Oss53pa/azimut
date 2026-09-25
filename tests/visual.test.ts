@@ -41,6 +41,8 @@ const floorOpts: FloorPlanOptions = {
 
 const orientedTheme: OrientedPlanTheme = {
   background: '#ffffff',
+  parking_fill: '#e8e4dc',
+  parking_stroke: '#b9b2a6',
   footprint_fill: '#f0f0f0',
   footprint_stroke: '#cccccc',
   edge_stroke: '#999999',

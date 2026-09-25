@@ -82,6 +82,11 @@ export {
 } from './fact-keys.js';
 export type { FactValueType, FactKeyDeclaration, FactValueFault } from './fact-keys.js';
 export {
+  parkingSpacesOfLevel, accessibleSpaceMark, footprintCentre,
+  ACCESSIBLE_SPACE_KIND, NO_PARKING_SPACES, PICTOGRAM_GRID_UNITS,
+} from './parking-view.js';
+export type { ParkingSpaceView, PlanContext } from './parking-view.js';
+export {
   FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText,
   PARKING_FACT_TARGET_KIND, factsFor,
 } from './site-facts.js';
@@ -251,7 +256,7 @@ export type {
   CommandDraft,
 } from './site-commands.js';
 export { RETIRED_CODES } from './error-catalog.js';
-export { segmentsProperlyIntersect, isSelfIntersecting } from './geometry.js';
+export { segmentsProperlyIntersect, isSelfIntersecting, pointInPolygon } from './geometry.js';
 export {
   occupancyHistory, occupantsOn, isInForceOn, previousOccupancy,
 } from './occupancy.js';

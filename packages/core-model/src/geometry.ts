@@ -105,3 +105,32 @@ export function isSelfIntersecting(vertices: readonly Point[]): boolean {
   }
   return false;
 }
+
+/**
+ * Un point est-il dans un polygone.
+ *
+ * Algorithme du lancer de rayon, le plus simple qui soit exact pour un
+ * polygone simple — et A5.2 n'en admet pas d'autre. Un point exactement sur un
+ * bord n'a pas de réponse stable par cette méthode, et la question ne se pose
+ * pas pour les usages qui l'appellent : ils cherchent ce qu'une surface
+ * contient, non ce qu'elle borde.
+ *
+ * Déterministe : aucune tolérance, aucun tri, aucune dépendance à l'ordre des
+ * sommets.
+ */
+export function pointInPolygon(
+  point: Point,
+  vertices: readonly Point[],
+): boolean {
+  if (vertices.length < 3) return false;
+  let inside = false;
+  for (let i = 0, j = vertices.length - 1; i < vertices.length; j = i, i += 1) {
+    const a = vertices[i] as Point;
+    const b = vertices[j] as Point;
+    const straddles = (a.y_m > point.y_m) !== (b.y_m > point.y_m);
+    if (!straddles) continue;
+    const x = (b.x_m - a.x_m) * (point.y_m - a.y_m) / (b.y_m - a.y_m) + a.x_m;
+    if (point.x_m < x) inside = !inside;
+  }
+  return inside;
+}

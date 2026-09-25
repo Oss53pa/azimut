@@ -11,6 +11,8 @@ import type { Job } from '../job.js';
 
 const theme: OrientedPlanTheme = {
   background: 'tok-bg',
+  parking_fill: 'tok-park-fill',
+  parking_stroke: 'tok-park-stroke',
   footprint_fill: 'tok-fp',
   footprint_stroke: 'tok-fps',
   edge_stroke: 'tok-edge',

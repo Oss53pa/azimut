@@ -192,7 +192,7 @@ describe('la surface non numérisée (S-37)', () => {
 
   it('la dessine par-dessus les places et sous le bâti', () => {
     const r = renderFloorPlan(
-      avecLesDeux(), RDC, defaultOptions, [marque('fp-surface')],
+      avecLesDeux(), RDC, defaultOptions, { facts: [marque('fp-surface')] },
     );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -206,7 +206,7 @@ describe('la surface non numérisée (S-37)', () => {
 
   it('sans le fait qui la marque, elle est une place comme une autre', () => {
     // C'est l'existence du fait qui fait la marque, et rien d'autre.
-    const r = renderFloorPlan(avecLesDeux(), RDC, defaultOptions, []);
+    const r = renderFloorPlan(avecLesDeux(), RDC, defaultOptions, { facts: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value).not.toContain('tok-unc-fill');
@@ -215,7 +215,7 @@ describe('la surface non numérisée (S-37)', () => {
 
   it('ne lit pas la marque d’une autre empreinte', () => {
     const r = renderFloorPlan(
-      avecLesDeux(), RDC, defaultOptions, [marque('fp-ailleurs')],
+      avecLesDeux(), RDC, defaultOptions, { facts: [marque('fp-ailleurs')] },
     );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -234,7 +234,7 @@ describe('la surface non numérisée (S-37)', () => {
           p1, loin,
         ],
       }),
-      RDC, defaultOptions, [marque('fp-surface')],
+      RDC, defaultOptions, { facts: [marque('fp-surface')] },
     );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
