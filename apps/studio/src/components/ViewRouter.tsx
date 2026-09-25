@@ -15,6 +15,7 @@ import { MessageScheduleView } from '../views/MessageScheduleView.js';
 import { OrientationZonesView } from '../views/OrientationZonesView.js';
 import { InformationLevelsView } from '../views/InformationLevelsView.js';
 import { SignageView } from '../views/SignageView.js';
+import { CharterView } from '../views/CharterView.js';
 import { CustomerFlowsView } from '../views/CustomerFlowsView.js';
 import { TemplatesView } from '../views/TemplatesView.js';
 import { FacesView } from '../views/FacesView.js';
@@ -86,6 +87,7 @@ export function ViewRouter(
     case 'customer-flows': return <CustomerFlowsView />;
     case 'travel-profiles': return <ProfilesView />;
     case 'signage': return <SignageView onNavigate={onNavigate} />;
+    case 'charter': return <CharterView siteKey={siteKey} />;
     case 'templates': return <TemplatesView onNavigate={onNavigate} />;
     case 'faces': return <FacesView />;
     case 'wall-plans': return <WallPlansView />;

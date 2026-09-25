@@ -77,6 +77,14 @@ export type {
   WayfindingRegistry, OrientationZone, OrientationZoneKind, NamingRule, NamingTarget, NamingScope,
   InformationLevelBinding, InformationLevelRank,
 } from './wayfinding-registry.js';
+export {
+  EMPTY_CHARTER_REGISTRY, CHARTER_RULE_KINDS, LEXICON_LANGS, LEXICON_SEVERITIES,
+  isCharterRuleKind, isLexiconLang, isLexiconSeverity,
+} from './charter-registry.js';
+export type {
+  CharterRegistry, SiteCharter, CharterColorEntry, CharterTypeface, CharterRule, CharterRuleKind,
+  CharterLexiconEntry, LexiconLang,
+} from './charter-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

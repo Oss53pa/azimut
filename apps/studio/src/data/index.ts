@@ -16,3 +16,4 @@ export {
   useCountries, useLegalEntities,
 } from './use-site-repository.js';
 export type { AsyncState } from './use-site-repository.js';
+export { useCharterRegistryLoad, type CharterRegistryState } from './use-charter-registry.js';

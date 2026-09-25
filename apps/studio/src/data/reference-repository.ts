@@ -7,7 +7,10 @@
  */
 import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
-import { EMPTY_WAYFINDING_REGISTRY, type SiteData, type SiteVocabulary, type WayfindingRegistry } from '@azimut/core-model';
+import {
+  EMPTY_CHARTER_REGISTRY, EMPTY_WAYFINDING_REGISTRY,
+  type CharterRegistry, type SiteData, type SiteVocabulary, type WayfindingRegistry,
+} from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
 import {
   RepositoryError,
@@ -66,6 +69,17 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(EMPTY_WAYFINDING_REGISTRY);
+    },
+
+    /**
+     * Aucun site de référence ne porte de charte : une charte est une donnée
+     * client, et le dépôt n'en contient aucune. Le registre est vide.
+     */
+    loadCharterRegistry(siteId: string): Promise<CharterRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(EMPTY_CHARTER_REGISTRY);
     },
 
     /**

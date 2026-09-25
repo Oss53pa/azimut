@@ -8,7 +8,7 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
-import type { SiteData, SiteVocabulary, WayfindingRegistry } from '@azimut/core-model';
+import type { CharterRegistry, SiteData, SiteVocabulary, WayfindingRegistry } from '@azimut/core-model';
 
 export type SiteSummary = {
   readonly id: string;
@@ -70,6 +70,12 @@ export type SiteRepository = {
    * rend un registre vide.
    */
   loadWayfindingRegistry(siteId: string): Promise<WayfindingRegistry>;
+  /**
+   * A5.8 — les chartes du site, avec leurs couleurs, caractères, règles et
+   * lexique. Lues à part, par l'écran qui les montre ; un dépôt qui n'en
+   * porte pas rend un registre vide.
+   */
+  loadCharterRegistry(siteId: string): Promise<CharterRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

@@ -31,6 +31,7 @@ export type ViewId =
   | 'travel-profiles'
   // 04 — Signalétique
   | 'signage'
+  | 'charter'
   | 'templates'
   | 'faces'
   | 'wall-plans'

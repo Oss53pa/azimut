@@ -127,6 +127,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     summaryKey: 'module.04.summary',
     entry: 'signage',
     screens: [
+      { view: 'charter', labelKey: 'nav.item.charter' },
       { view: 'templates', labelKey: 'nav.item.templates' },
       { view: 'faces', labelKey: 'nav.item.faces' },
       { view: 'wall-plans', labelKey: 'nav.item.wallplans' },
