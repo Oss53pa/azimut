@@ -13,6 +13,7 @@ import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
  * caractère n'est plus écrit dans le code du contrôle.
  */
 const CARACTERES: CharterRule = {
+  id: 'cr-caracteres',
   kind: 'forbidden_character',
   params: {
     characters: [
@@ -153,6 +154,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
    */
   it('ne s’exécute pas quand la charte ne porte pas la règle', () => {
     const report = auditTypography(siteAvecDenomination('A — B'), []);
+    expect(report.declared).toBe(false);
     expect(report.applied).toBe(false);
     expect(report.findings).toEqual([]);
     // Les textes sont bien là : c'est la règle qui manque, pas la matière.
@@ -177,7 +179,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
   it('une charte qui porte la règle sans rien interdire n’est pas une charte absente', () => {
     // `null` et le tableau vide ne disent pas la même chose : l'un veut dire
     // « pas de règle », l'autre « une règle qui n'interdit rien ».
-    const vide: CharterRule = { kind: 'forbidden_character', params: { characters: [] } };
+    const vide: CharterRule = { id: 'cr-vide', kind: 'forbidden_character', params: { characters: [] } };
     const report = auditTypography(siteAvecDenomination('A — B'), [vide]);
     expect(report.applied).toBe(true);
     expect(report.findings).toEqual([]);
@@ -188,10 +190,12 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
     // une autre. Refuser l'une des deux au motif qu'il y en a deux serait
     // arbitraire.
     const tirets: CharterRule = {
+      id: 'cr-a-tirets',
       kind: 'forbidden_character',
       params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
     };
     const fleches: CharterRule = {
+      id: 'cr-b-fleches',
       kind: 'forbidden_character',
       params: { characters: [{ from: 0x2190, to: 0x21ff, name: 'flèche' }] },
     };
@@ -209,5 +213,79 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
       expect(r.value.checks_run).toContain('forbidden_characters');
       expect(r.value.findings.map(f => f.code)).toContain('LAYOUT.FORBIDDEN_CHARACTER');
     }
+  });
+
+  /**
+   * D2.2, `CHARTER.RULE_MALFORMED` — « une règle déclarée et cassée bloque,
+   * parce qu'elle a été voulue ». Trois états, et non deux : absente, lisible,
+   * déclarée et cassée. C'est le troisième que la version 15 nomme.
+   */
+  describe('CHARTER.RULE_MALFORMED — une règle déclarée qui ne se lit pas', () => {
+    const cassee = (id: string, params: Record<string, unknown>): CharterRule =>
+      ({ id, kind: 'forbidden_character', params });
+
+    it('refuse une règle dont les caractères ne sont pas une liste', () => {
+      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-x', {})]);
+      expect(report.declared).toBe(true);
+      expect(report.applied).toBe(false);
+      const [finding] = report.findings;
+      expect(finding?.code).toBe('CHARTER.RULE_MALFORMED');
+      expect(finding?.severity).toBe('blocking');
+      expect(finding?.entity).toEqual({ kind: 'charter_rule', id: 'cr-x' });
+      expect(finding?.params['rule_kind']).toBe('forbidden_character');
+      expect(finding?.params['reason']).toBe('characters_not_array');
+      expect(finding?.ruleRef).toBe('A5.8');
+    });
+
+    it('refuse un intervalle dont une borne manque ou s’inverse', () => {
+      const cas: readonly [string, unknown][] = [
+        ['borne absente', [{ from: 0x2014, name: 'tiret cadratin' }]],
+        ['nom vide', [{ from: 0x2014, to: 0x2014, name: '  ' }]],
+        ['bornes inversées', [{ from: 0x2014, to: 0x2013, name: 'tiret' }]],
+        ['entrée non objet', ['tiret']],
+      ];
+      for (const [libelle, characters] of cas) {
+        const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-y', { characters })]);
+        expect(report.findings.map(f => f.code), libelle).toEqual(['CHARTER.RULE_MALFORMED']);
+        expect(report.findings[0]?.params['reason'], libelle).toBe('character_range_invalid');
+      }
+    });
+
+    it('n’applique aucune liste par défaut quand la règle est cassée', () => {
+      // Le cas décisif, comme pour la règle absente : le tiret cadratin passe,
+      // parce qu'aucune charte lisible ne l'interdit.
+      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-x', {})]);
+      expect(report.findings.map(f => f.code)).not.toContain('LAYOUT.FORBIDDEN_CHARACTER');
+    });
+
+    it('une règle cassée parmi deux ne fait pas tomber la lisible', () => {
+      const lisible: CharterRule = {
+        id: 'cr-z-lisible',
+        kind: 'forbidden_character',
+        params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
+      };
+      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-a', {}), lisible]);
+      expect(report.applied).toBe(true);
+      const codes = report.findings.map(f => f.code);
+      expect(codes).toContain('CHARTER.RULE_MALFORMED');
+      expect(codes).toContain('LAYOUT.FORBIDDEN_CHARACTER');
+    });
+
+    it('rend ses anomalies par identifiant de règle, pour un ordre stable (A9)', () => {
+      const rules = [cassee('cr-b', {}), cassee('cr-a', {})];
+      const ids = auditTypography(siteAvecDenomination('AB'), rules).findings.map(f => f.entity?.id);
+      expect(ids).toEqual(['cr-a', 'cr-b']);
+      expect(JSON.stringify(auditTypography(siteAvecDenomination('AB'), [...rules].reverse())))
+        .toBe(JSON.stringify(auditTypography(siteAvecDenomination('AB'), rules)));
+    });
+
+    it('remonte à runChecks en contrôle exercé, non en contrôle non exercé', () => {
+      const r = runChecks(siteAvecDenomination('A — B'), { charter_rules: [cassee('cr-x', {})] });
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      expect(r.value.checks_run).toContain('forbidden_characters');
+      expect(r.value.checks_undeclared).not.toContain('forbidden_characters');
+      expect(r.value.findings.map(f => f.code)).toContain('CHARTER.RULE_MALFORMED');
+    });
   });
 });

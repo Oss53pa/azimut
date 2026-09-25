@@ -20,10 +20,10 @@ import type {
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
-  CharterRule, ForbiddenCharacterRange,
+  CharterRule, CharterRuleKind,
   SiteFact, FactStatus, FactValue, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
-import { canonicalSerialize } from '@azimut/core-model';
+import { canonicalSerialize, CHARTER_RULE_KINDS } from '@azimut/core-model';
 import {
   RepositoryError, failureForStatus,
   type SiteRepository, type SiteSummary,
@@ -61,6 +61,7 @@ type CountryRow = {
 type LegalEntityRow = { readonly id: string; readonly legal_name: string };
 
 type CharterRuleRow = {
+  readonly id: string;
   readonly kind: string;
   readonly params: unknown;
 };
@@ -117,45 +118,28 @@ function toSeverity(raw: string): LexiconSeverity {
 /**
  * Une règle de charte, lue depuis `charter_rule` — A5.8.
  *
- * `params` est du `jsonb` : la forme n'est garantie par rien, et une règle dont
- * les paramètres ne se lisent pas est écartée plutôt que devinée. C'est la même
- * discipline qu'un paquet de règles, D3.4 : aucune valeur de repli. Une règle
- * écartée fait retomber son contrôle parmi les non exercés, ce qui se voit dans
- * le rapport ; lui inventer des paramètres signalerait au nom d'une charte qui
- * n'a rien demandé.
+ * **Ce dépôt ne valide pas les paramètres, et c'est délibéré.** Une règle dont
+ * les paramètres ne se lisent pas était écartée ici, ce qui faisait retomber
+ * son contrôle parmi les non exercés : un site dont la charte est cassée se
+ * lisait alors comme un site sans charte. D2.2 tranche autrement en inscrivant
+ * `CHARTER.RULE_MALFORMED` — « une règle déclarée et cassée bloque, parce
+ * qu'elle a été voulue ». La règle traverse donc telle quelle, et ce sont les
+ * résolveurs de `core-model` qui la refusent, avec une anomalie qui la nomme.
  *
- * Seules les deux natures que le dépôt sait opposer sont lues. Les six autres
- * d'A5.8 n'ont pas de forme de paramètres déclarée, et aucun contrôle ne les
- * consomme : les charger sans les comprendre ne servirait rien.
+ * Deux choses sont tout de même vérifiées, parce qu'elles ne relèvent pas des
+ * paramètres : la nature doit être l'une des sept d'A5.8, ce que la contrainte
+ * de la base garantit depuis la migration 0045 ; et `params` doit être un
+ * objet, la colonne pouvant porter n'importe quel `jsonb`. Un `params` qui n'en
+ * est pas un devient l'objet vide, que le résolveur signalera comme illisible
+ * plutôt que de le taire.
  */
 function toCharterRule(row: CharterRuleRow): CharterRule | null {
-  const params: unknown = row.params;
-  if (typeof params !== 'object' || params === null) return null;
-  const record = params as Readonly<Record<string, unknown>>;
-
-  if (row.kind === 'forbidden_character') {
-    const raw = record['characters'];
-    if (!Array.isArray(raw)) return null;
-    const characters: ForbiddenCharacterRange[] = [];
-    for (const entry of raw) {
-      if (typeof entry !== 'object' || entry === null) return null;
-      const range = entry as Readonly<Record<string, unknown>>;
-      const from = range['from'];
-      const to = range['to'];
-      const name = range['name'];
-      if (!Number.isInteger(from) || !Number.isInteger(to) || typeof name !== 'string') return null;
-      characters.push({ from: from as number, to: to as number, name });
-    }
-    return { kind: 'forbidden_character', params: { characters } };
-  }
-
-  if (row.kind === 'max_sentence_words') {
-    const maximum = record['maximum'];
-    if (!Number.isInteger(maximum)) return null;
-    return { kind: 'max_sentence_words', params: { maximum: maximum as number } };
-  }
-
-  return null;
+  if (!CHARTER_RULE_KINDS.includes(row.kind as CharterRuleKind)) return null;
+  const raw: unknown = row.params;
+  const params = typeof raw === 'object' && raw !== null && !Array.isArray(raw)
+    ? raw as Readonly<Record<string, unknown>>
+    : {};
+  return { id: row.id, kind: row.kind as CharterRuleKind, params };
 }
 
 /**

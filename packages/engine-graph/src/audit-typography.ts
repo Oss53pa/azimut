@@ -13,11 +13,15 @@ import { checkableTexts } from './site-texts.js';
  * livrable Azimut.
  *
  * **La liste vient désormais de la charte du site**, qui entre dans la
- * signature de ce contrôle. Aucun caractère n'est écrit ici. Quand la charte
- * ne porte pas la règle, le contrôle ne s'exécute pas et le dit — `applied`
- * porte le fait, et l'appelant le range parmi les contrôles non exercés. Il
- * n'applique aucune valeur par défaut : « une règle absente n'est pas une
- * règle permissive ».
+ * signature de ce contrôle. Aucun caractère n'est écrit ici.
+ *
+ * Trois issues, et le rapport les distingue. La charte ne porte pas la règle :
+ * le contrôle ne s'exécute pas, `declared` est faux, l'appelant le range parmi
+ * les non exercés, et aucune valeur par défaut n'est appliquée — « une règle
+ * absente n'est pas une règle permissive ». La charte la porte et elle se lit :
+ * le contrôle juge. La charte la porte et elle ne se lit pas : le contrôle
+ * lève `CHARTER.RULE_MALFORMED`, bloquant, et **n'est pas rangé parmi les non
+ * exercés** : il a lu la charte et l'a refusée.
  *
  * **Ce n'est pas une valeur d'origine normative.** Aucune norme ne décide
  * qu'un tiret cadratin est interdit. INV-5 ne la vise pas, et aucun paquet de
@@ -39,7 +43,15 @@ export type TypographyReport = {
    */
   readonly checked_texts: number;
   /**
-   * Faux quand la charte ne porte pas la règle.
+   * Vrai dès que la charte porte une règle de cette nature, lisible ou non.
+   *
+   * C'est lui qui décide du rangement chez l'appelant. Une règle cassée est
+   * déclarée : la ranger parmi les non exercés cacherait qu'un site a une
+   * charte et qu'elle ne produit rien.
+   */
+  readonly declared: boolean;
+  /**
+   * Vrai quand le contrôle a réellement jugé les textes.
    *
    * Un rapport non appliqué n'est pas un rapport vert. C'est la distinction
    * qu'A5.8 exige et que `checked_texts` seul ne rend pas : un site sans
@@ -109,12 +121,18 @@ export function auditTypography(
   }));
   const texts = [...named, ...free];
 
-  const ranges = resolveForbiddenCharacters(charterRules);
+  const resolved = resolveForbiddenCharacters(charterRules);
+  const findings: Finding[] = [...resolved.findings];
+  const ranges = resolved.value;
   if (ranges === null) {
-    return { checked_texts: texts.length, applied: false, findings: [] };
+    return {
+      checked_texts: texts.length,
+      declared: resolved.declared,
+      applied: false,
+      findings,
+    };
   }
 
-  const findings: Finding[] = [];
   for (const text of texts) {
     let position = 0;
     for (const char of text.value) {
@@ -138,5 +156,5 @@ export function auditTypography(
     }
   }
 
-  return { checked_texts: texts.length, applied: true, findings };
+  return { checked_texts: texts.length, declared: true, applied: true, findings };
 }

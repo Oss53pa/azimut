@@ -25,6 +25,7 @@ const MULTILEVEL: SiteVocabulary = {
    */
   charter_rules: [
     {
+      id: 'cr-ref-multilevel-forbidden-character',
       kind: 'forbidden_character',
       params: {
         characters: [
@@ -37,7 +38,7 @@ const MULTILEVEL: SiteVocabulary = {
         ],
       },
     },
-    { kind: 'max_sentence_words', params: { maximum: 25 } },
+    { id: 'cr-ref-multilevel-max-sentence-words', kind: 'max_sentence_words', params: { maximum: 25 } },
   ],
   lexicon: [
     { lang: 'fr', term: 'client', severity: 'forbidden' },

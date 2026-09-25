@@ -67,7 +67,7 @@ export {
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
 export type {
-  CharterRule, CharterRuleKind, ForbiddenCharacterRange,
+  CharterRule, CharterRuleKind, CharterRuleResolution, ForbiddenCharacterRange,
 } from './charter-rules.js';
 export {
   CHARTER_RULE_KINDS, resolveForbiddenCharacters, resolveMaxSentenceWords,

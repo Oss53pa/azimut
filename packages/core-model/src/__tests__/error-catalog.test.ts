@@ -63,13 +63,15 @@ describe('ERROR_CATALOG', () => {
     // dans celle de D2.1 se vérifie contre le consolidé lui-même, dans
     // `tests/catalogue-consolide.test.ts`.
     //
-    // `CHARTER` en est sorti : déclaré pendant plusieurs versions sans porter
-    // un seul code, il annonçait un cloisonnement que rien n'appliquait.
-    // `NET` en était sorti avant lui, pour un autre motif — voir
+    // `CHARTER` était sorti en version 13 : déclaré pendant plusieurs versions
+    // sans porter un seul code, il annonçait un cloisonnement que rien
+    // n'appliquait. La version 15 le rétablit avec son premier code,
+    // `CHARTER.RULE_MALFORMED`, et un domaine qui porte un code n'est plus
+    // vide. `NET` en était sorti avant lui, pour un autre motif — voir
     // `RETIRED_CODES`.
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [
-        'AD', 'ASSET', 'ASSIST', 'CALIB', 'COLOR', 'COST', 'DATA',
+        'AD', 'ASSET', 'ASSIST', 'CALIB', 'CHARTER', 'COLOR', 'COST', 'DATA',
         'DOC', 'EDIT',
         'FLOW', 'FONT', 'GEOM', 'GRAPH', 'IMPORT', 'INK', 'INSTALL', 'LAYOUT',
         'LIBRARY', 'MODULE', 'PACKAGE', 'PARK', 'PICTO', 'RENDER',

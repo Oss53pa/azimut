@@ -13,8 +13,12 @@ import { templateFreeTexts } from './audit-typography.js';
  * ce contrôle. Aucun nombre n'est écrit ici. Quand la charte ne porte pas la
  * règle, le contrôle ne s'exécute pas et le dit, et il n'applique aucune
  * valeur par défaut : « une règle absente n'est pas une règle permissive ».
- * Une limite par défaut serait la pire des trois issues possibles — elle
+ * Une limite par défaut serait la pire des issues possibles — elle
  * signalerait au nom d'une charte qui n'a rien demandé.
+ *
+ * Une limite déclarée mais illisible, elle, lève `CHARTER.RULE_MALFORMED` en
+ * bloquant, et ne range pas le contrôle parmi les non exercés : voir
+ * `audit-typography.ts`, qui porte le même partage en trois.
  *
  * **Le corpus est plus étroit** que celui du contrôle des caractères
  * interdits, qui juge toutes les dénominations du site : celui-ci ne juge que
@@ -55,7 +59,9 @@ export function countWords(sentence: string): number {
 export type SentenceLengthReport = {
   /** Nombre de textes parcourus, pour qu'un rapport vide se distingue d'un rapport sans matière. */
   readonly checked_texts: number;
-  /** Faux quand la charte ne porte pas la limite. Même motif qu'en typographie. */
+  /** Vrai dès que la charte porte une limite, lisible ou non. Même motif qu'en typographie. */
+  readonly declared: boolean;
+  /** Vrai quand le contrôle a réellement jugé les textes. */
   readonly applied: boolean;
   readonly findings: readonly Finding[];
 };
@@ -73,12 +79,18 @@ export function auditSentenceLength(
   charterRules: readonly CharterRule[],
 ): SentenceLengthReport {
   const texts = templateFreeTexts(site);
-  const maximum = resolveMaxSentenceWords(charterRules);
+  const resolved = resolveMaxSentenceWords(charterRules);
+  const findings: Finding[] = [...resolved.findings];
+  const maximum = resolved.value;
   if (maximum === null) {
-    return { checked_texts: texts.length, applied: false, findings: [] };
+    return {
+      checked_texts: texts.length,
+      declared: resolved.declared,
+      applied: false,
+      findings,
+    };
   }
 
-  const findings: Finding[] = [];
   for (const text of texts) {
     const sentences = splitSentences(text.value);
     sentences.forEach((sentence, index) => {
@@ -98,5 +110,5 @@ export function auditSentenceLength(
     });
   }
 
-  return { checked_texts: texts.length, applied: true, findings };
+  return { checked_texts: texts.length, declared: true, applied: true, findings };
 }

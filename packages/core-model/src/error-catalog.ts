@@ -240,6 +240,8 @@ export const ERROR_CATALOG = {
   'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Résidu non mesurable, trop peu de points homologues' },
   'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus du seuil' },
   'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point de calage au-dessus du seuil' },
+  // A5.8 — « une règle déclarée et cassée bloque, parce qu'elle a été voulue ».
+  'CHARTER.RULE_MALFORMED':                 { severity: 'blocking', description: 'Règle de charte déclarée dont les paramètres sont illisibles ou ne correspondent pas à sa nature. À distinguer d’une règle absente, qui ne s’exécute pas et le signale, section A5.8 : une règle déclarée et cassée bloque, parce qu’elle a été voulue' },
   // N1.3 — règle M01.S1 : le repère site est fixé au premier calage.
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Tentative de modification de l’origine du repère site, règle M01.S1' },
   'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Origine du repère incohérente entre deux niveaux d’un même site' },
@@ -339,6 +341,10 @@ export const ANOMALY_DOMAINS = [
   'ASSIST', 'MODULE', 'FLOW', 'AD', 'SURVEY',
   // Partie M, section M2 : calage d'un fond de plan.
   'CALIB',
+  // A5.8 et D2.2 : une règle de charte déclarée dont les paramètres ne se
+  // lisent pas. Le domaine avait été retiré en version 13, déclaré et vide ;
+  // la version 15 le rétablit avec son premier code.
+  'CHARTER',
   // A5.11, règle M01.S11 : les faits du site fondent les deux domaines.
   'PARK', 'DOC',
   // Partie J : encre, esquisse, révision, pictogrammes, bibliothèques.

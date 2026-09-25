@@ -216,5 +216,6 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'CALIB.RESIDUAL_NOT_MEASURED': 'Three homologous points: the fit is exact by construction, the residual measures nothing',
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Mean calibration residual above tolerance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Homologous point residual above tolerance',
+  'CHARTER.RULE_MALFORMED': 'Declared charter rule whose parameters cannot be read',
 
 };

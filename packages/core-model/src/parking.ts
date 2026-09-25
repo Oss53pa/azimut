@@ -11,19 +11,28 @@ import type { Polygon } from './geometry.js';
  * fait aujourd'hui. Le retrofit de A5 est un autre sujet ; ici la place était
  * libre, et la prendre coûtait moins que de la laisser.
  *
- * **Écart déclaré.** A5.11 porte les faits du stationnement, et nomme la
- * capacité annoncée d'un parking comme l'exemple même d'un fait du site. Elle
- * ne décrit ni `parking`, ni `parking_space`, ni leurs statuts : ces objets
- * restent hors du cahier des charges, et Q2 ne les attribue à aucun module.
+ * **Le statut d'un objet n'est pas celui d'un fait, et A5.11 le dit.** « Un
+ * fait déclaré, par exemple la capacité annoncée d'un parking, porte son
+ * statut sur `site_fact`. Un objet dessiné qui n'existe pas encore, par
+ * exemple une place de stationnement en projet, porte le sien sur l'objet, là
+ * où le modèle le déclare. Les deux obéissent à la même règle, un objet ou un
+ * fait de statut `proposal` ne s'affiche jamais comme un existant, et ils ne
+ * se confondent pas : rassembler les deux sur une seule table ne gagnerait
+ * rien. » Ce module porte donc le second des deux, et c'est sa place.
+ *
+ * Écart qui subsiste, et qui est d'une autre nature : A5.11 ne décrit ni
+ * `parking`, ni `parking_space`, ni leur géométrie. Ces objets restent hors du
+ * cahier des charges, et Q2 ne les attribue à aucun module.
  */
 
 /**
  * D'où vient l'objet, et ce qu'il vaut.
  *
  * Quatre valeurs, là où le statut d'un fait d'A5.11 en compte trois. La
- * quatrième, `retire`, n'a pas d'équivalent : A5.11 dit ce qu'une déclaration
- * vaut, non ce qu'un objet devient quand il disparaît du plan. Replier l'un
- * sur l'autre rendrait ce cas inexprimable.
+ * quatrième, `retire`, n'a pas d'équivalent, et n'a pas à en avoir un : A5.11
+ * dit ce qu'une déclaration vaut, non ce qu'un objet devient quand il
+ * disparaît du plan. C'est l'une des raisons pour lesquelles la section refuse
+ * de rassembler les deux statuts sur une seule table.
  *
  * `proposition` désigne ce qu'une détection assistée a suggéré et que personne
  * n'a validé. `a_verifier` désigne ce qu'on a relevé sans pouvoir le confirmer.

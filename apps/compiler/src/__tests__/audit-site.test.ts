@@ -269,10 +269,11 @@ describe('mode d’audit — A5.11, règle M01.S11', () => {
 describe('A5.8 — la charte entre dans la signature de l’appelant', () => {
   const CHARTE: readonly CharterRule[] = [
     {
+      id: 'cr-compilateur-caracteres',
       kind: 'forbidden_character',
       params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
     },
-    { kind: 'max_sentence_words', params: { maximum: 25 } },
+    { id: 'cr-compilateur-phrases', kind: 'max_sentence_words', params: { maximum: 25 } },
   ];
 
   function avecDenomination(value: string): SiteData {

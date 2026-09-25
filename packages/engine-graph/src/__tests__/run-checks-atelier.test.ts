@@ -29,10 +29,11 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
   // A5.8 — les deux règles de rédaction, portées par la charte du site.
   const charterRules: readonly CharterRule[] = [
     {
+      id: 'cr-ref-caracteres',
       kind: 'forbidden_character',
       params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
     },
-    { kind: 'max_sentence_words', params: { maximum: 25 } },
+    { id: 'cr-ref-phrases', kind: 'max_sentence_words', params: { maximum: 25 } },
   ];
 
   it('range les cinq contrôles en non exercés quand le site ne déclare rien', () => {

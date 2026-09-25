@@ -216,5 +216,6 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'CALIB.RESIDUAL_NOT_MEASURED': 'Trois points homologues : l’ajustement est exact par construction, le résidu ne mesure rien',
   'CALIB.RESIDUAL_MEAN_EXCEEDED': 'Résidu moyen de calage au-dessus de la tolérance',
   'CALIB.RESIDUAL_POINT_EXCEEDED': 'Résidu d’un point homologue au-dessus de la tolérance',
+  'CHARTER.RULE_MALFORMED': 'Règle de charte déclarée dont les paramètres ne se lisent pas',
 
 };

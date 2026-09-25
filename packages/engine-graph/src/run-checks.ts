@@ -102,17 +102,23 @@ export function runChecks(
 
   // A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
   // ne s'exécute pas et le signale, comme pour un paquet de règles absent. »
-  // Les deux contrôles de rédaction lisent la charte du site ; le rapport dit
-  // lequel a tourné, et aucune limite n'est appliquée par défaut.
+  // Les deux contrôles de rédaction lisent la charte du site, et aucune limite
+  // n'est appliquée par défaut.
+  //
+  // Le rangement suit `declared`, et non `applied` : une règle déclarée dont
+  // les paramètres ne se lisent pas lève `CHARTER.RULE_MALFORMED` en bloquant
+  // et reste parmi les contrôles exercés. Le contrôle a bien tourné — il a lu
+  // la charte et l'a refusée. Le ranger parmi les non exercés cacherait qu'un
+  // site a une charte et qu'elle ne produit rien.
   const charterRules = vocabulary.charter_rules ?? [];
 
   const typography = auditTypography(site, charterRules);
   findings.push(...typography.findings);
-  (typography.applied ? run : undeclared).push('forbidden_characters');
+  (typography.declared ? run : undeclared).push('forbidden_characters');
 
   const sentences = auditSentenceLength(site, charterRules);
   findings.push(...sentences.findings);
-  (sentences.applied ? run : undeclared).push('sentence_length');
+  (sentences.declared ? run : undeclared).push('sentence_length');
 
   const lexicon = vocabulary.lexicon ?? [];
   if (lexicon.length === 0) {
