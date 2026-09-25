@@ -21,6 +21,8 @@ export type ViewId =
   | 'site-sheet'
   // 02 — Wayfinding
   | 'message-schedule'
+  | 'orientation-zones'
+  | 'information-levels'
   | 'staggering'
   | 'placement'
   | 'coverage-audit'

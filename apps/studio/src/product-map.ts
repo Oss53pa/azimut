@@ -91,18 +91,19 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     entry: 'message-schedule',
     entryLabelKey: 'nav.item.messages',
     screens: [
+      { view: 'orientation-zones', labelKey: 'nav.item.zones' },
+      { view: 'information-levels', labelKey: 'nav.item.hierarchy' },
       { view: 'staggering', labelKey: 'nav.item.staggering' },
       { view: 'placement', labelKey: 'nav.item.placement' },
       { view: 'coverage-audit', labelKey: 'nav.item.coverage' },
     ],
     // Partiel : M02.W1, M02.W3 à M02.W6, M02.W8 et M02.W10 tiennent. M02.W2 ne détecte que les
-    // collisions — l'entité `naming_rule` n'existe pas, donc « une règle de
-    // nommage déclarée est vérifiée à toute création » n'a aucune règle à
-    // vérifier. M02.W7 tient sur la forme, le tableau portant version, état et
-    // empreinte, mais aucun circuit ne les fait transiter. M02.W9 a son contrôle et
-    // pas ses valeurs plafonds, ce que N2.8 pose. Enfin `orientation_zone`, une
-    // entité de N2.2, n'existe pas, alors que le zonage d'orientation est dans
-    // le périmètre du module et son premier écran.
+    // collisions — les règles `naming_rule` se lisent et s'affichent, mais
+    // aucune création ne se vérifie encore contre elles. M02.W7 tient sur la
+    // forme, le tableau portant version, état et empreinte, mais aucun circuit
+    // ne les fait transiter. M02.W9 a son contrôle et pas ses valeurs plafonds,
+    // ce que N2.8 pose. Le zonage `orientation_zone` (N2.2) se lit du registre
+    // du wayfinding ; il ne se saisit pas encore depuis le studio.
     engine: 'partial',
     source: 'engine-graph/message-schedule',
   },

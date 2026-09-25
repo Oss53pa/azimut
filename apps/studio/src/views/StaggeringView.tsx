@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteWayfinding } from '../context/useSiteWayfinding.js';
 import { useI18n } from '../i18n/useI18n.js';
 import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner,
@@ -35,6 +36,7 @@ const CONTINUITY_SEVERITY: Readonly<Record<Continuity, Severity>> = {
 export function StaggeringView(): JSX.Element {
   const site = useSiteData();
   const { t, lang } = useI18n();
+  const wayfinding = useSiteWayfinding();
   const profile = site.travel_profiles[0];
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -48,11 +50,11 @@ export function StaggeringView(): JSX.Element {
       supportTypeKey: site.support_types[0]?.key ?? '',
       version: 1,
       rules: NO_WAYFINDING_RULES,
-      informationLevels: declaredInformationLevels(site),
+      informationLevels: declaredInformationLevels(site, wayfinding.registry.information_levels),
       lang,
     });
     return staggeringPlan(site, profile, model.schedule);
-  }, [site, profile, lang]);
+  }, [site, profile, lang, wayfinding]);
 
   if (profile === undefined || plan === null) {
     return <StateBanner severity="warning" message={t('staggering.noprofile')} />;

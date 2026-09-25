@@ -8,10 +8,13 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { SiteData } from '@azimut/core-model';
-import { EMPTY_VOCABULARY } from '@azimut/core-model';
+import { EMPTY_VOCABULARY, EMPTY_WAYFINDING_REGISTRY } from '@azimut/core-model';
 import {
   EMPTY_VOCABULARY_STATE, type VocabularyState,
 } from '../context/site-vocabulary.js';
+import {
+  EMPTY_WAYFINDING_STATE, type WayfindingRegistryState,
+} from '../context/site-wayfinding.js';
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -214,4 +217,32 @@ export function useSiteVocabularyLoad(
   // dirait « non exercé » jusqu'au rechargement de la page.
   const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
   return { state, reload };
+}
+
+/**
+ * N2.2 — charge le registre du wayfinding d'un site, à part du site. Un échec
+ * se déclare `failed` et rend un registre vide que l'écran ne prend pas pour
+ * un fait.
+ */
+export function useWayfindingRegistryLoad(
+  repository: SiteRepository,
+  siteId: string,
+): { readonly state: WayfindingRegistryState } {
+  const [state, setState] = useState<WayfindingRegistryState>(EMPTY_WAYFINDING_STATE);
+
+  useEffect(() => {
+    if (siteId === '') {
+      setState(EMPTY_WAYFINDING_STATE);
+      return;
+    }
+    let cancelled = false;
+    setState({ registry: EMPTY_WAYFINDING_REGISTRY, status: 'loading' });
+    repository.loadWayfindingRegistry(siteId).then(
+      registry => { if (!cancelled) setState({ registry, status: 'ready' }); },
+      () => { if (!cancelled) setState({ registry: EMPTY_WAYFINDING_REGISTRY, status: 'failed' }); },
+    );
+    return () => { cancelled = true; };
+  }, [repository, siteId]);
+
+  return { state };
 }

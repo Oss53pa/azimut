@@ -35,6 +35,7 @@ import { TENANT_REGISTER_FR, TENANT_REGISTER_EN } from './messages/tenant-regist
 import { PRODUCTION_REGISTER_FR, PRODUCTION_REGISTER_EN } from './messages/production-register.js';
 import { OPERATIONS_REGISTER_FR, OPERATIONS_REGISTER_EN } from './messages/operations-register.js';
 import { BUDGET_REGISTER_FR, BUDGET_REGISTER_EN } from './messages/budget-register.js';
+import { WAYFINDING_REGISTRY_FR, WAYFINDING_REGISTRY_EN } from './messages/wayfinding-registry.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -61,6 +62,7 @@ export const MESSAGES_FR = {
   ...PRODUCTION_REGISTER_FR,
   ...OPERATIONS_REGISTER_FR,
   ...BUDGET_REGISTER_FR,
+  ...WAYFINDING_REGISTRY_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -90,6 +92,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...PRODUCTION_REGISTER_EN,
   ...OPERATIONS_REGISTER_EN,
   ...BUDGET_REGISTER_EN,
+  ...WAYFINDING_REGISTRY_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

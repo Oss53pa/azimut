@@ -2,7 +2,9 @@ import { type JSX, useEffect, useMemo, useState } from 'react';
 import type { ViewId } from '../views.js';
 import { SiteDataProvider } from '../context/SiteDataContext.js';
 import { I18nProvider } from '../i18n/index.js';
-import { appRepository, useSite, useSiteList, useSiteVocabularyLoad } from '../data/index.js';
+import {
+  appRepository, useSite, useSiteList, useSiteVocabularyLoad, useWayfindingRegistryLoad,
+} from '../data/index.js';
 import { Sidebar } from './Sidebar.js';
 import { HeaderBar } from './HeaderBar.js';
 import { SiteGate } from './SiteGate.js';
@@ -47,6 +49,7 @@ export function Shell(): JSX.Element {
   const list = useSiteList(repository);
   const site = useSite(repository, siteId);
   const vocabulary = useSiteVocabularyLoad(repository, siteId);
+  const wayfinding = useWayfindingRegistryLoad(repository, siteId);
 
   // Aucun site ouvert : le premier de la liste l'est, pour que l'application
   // s'ouvre sur du contenu plutôt que sur un choix vide.
@@ -102,7 +105,7 @@ export function Shell(): JSX.Element {
   }
 
   return (
-    <SiteDataProvider site={site.state.value} vocabulary={vocabulary.state}>
+    <SiteDataProvider site={site.state.value} vocabulary={vocabulary.state} wayfinding={wayfinding.state}>
       <I18nProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <HeaderBar

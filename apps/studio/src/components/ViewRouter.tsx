@@ -12,6 +12,8 @@ import { SupportsView } from '../views/SupportsView.js';
 import { FloorPlansView } from '../views/FloorPlansView.js';
 import { ChecksView } from '../views/ChecksView.js';
 import { MessageScheduleView } from '../views/MessageScheduleView.js';
+import { OrientationZonesView } from '../views/OrientationZonesView.js';
+import { InformationLevelsView } from '../views/InformationLevelsView.js';
 import { SignageView } from '../views/SignageView.js';
 import { CustomerFlowsView } from '../views/CustomerFlowsView.js';
 import { TemplatesView } from '../views/TemplatesView.js';
@@ -76,6 +78,8 @@ export function ViewRouter(
     case 'checks': return <ChecksView />;
     case 'site-sheet': return <SiteSheetView />;
     case 'message-schedule': return <MessageScheduleView />;
+    case 'orientation-zones': return <OrientationZonesView />;
+    case 'information-levels': return <InformationLevelsView />;
     case 'staggering': return <StaggeringView />;
     case 'placement': return <PlacementView />;
     case 'coverage-audit': return <CoverageAuditView onNavigate={onNavigate} />;

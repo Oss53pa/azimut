@@ -7,7 +7,7 @@
  */
 import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
-import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import { EMPTY_WAYFINDING_REGISTRY, type SiteData, type SiteVocabulary, type WayfindingRegistry } from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
 import {
   RepositoryError,
@@ -54,6 +54,18 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(referenceVocabulary(siteId));
+    },
+
+    /**
+     * Aucun site de référence ne déclare de zone, de règle de nommage ni de
+     * niveau d'information : le registre est vide, et les écrans le disent.
+     * En inventer ici ferait passer pour déclaré ce qui ne l'est pas.
+     */
+    loadWayfindingRegistry(siteId: string): Promise<WayfindingRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(EMPTY_WAYFINDING_REGISTRY);
     },
 
     /**

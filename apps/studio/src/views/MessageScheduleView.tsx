@@ -1,5 +1,6 @@
-import { type JSX, useMemo, useState } from 'react';
+import { type JSX, useEffect, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
+import { useSiteWayfinding } from '../context/useSiteWayfinding.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { messageScheduleToCsv, messageScheduleToMarkdown } from '@azimut/engine-graph';
 import type { TypologyInformationLevels } from '@azimut/engine-graph';
@@ -30,9 +31,16 @@ export function MessageScheduleView(): JSX.Element {
   const [supportTypeKey, setSupportTypeKey] = useState(firstType);
   const [levelFilter, setLevelFilter] = useState<number>(0);
   const [staleOnly, setStaleOnly] = useState(false);
+  const wayfinding = useSiteWayfinding();
   const [declarations, setDeclarations] = useState<readonly TypologyInformationLevels[]>(
-    () => declaredInformationLevels(site),
+    () => declaredInformationLevels(site, wayfinding.registry.information_levels),
   );
+  // Le registre arrive après le site : quand il est lu, les déclarations
+  // repartent de ce qu'il porte. Une modification faite avant reste locale.
+  useEffect(() => {
+    if (wayfinding.status !== 'ready') return;
+    setDeclarations(declaredInformationLevels(site, wayfinding.registry.information_levels));
+  }, [site, wayfinding]);
   const [maxDestinations, setMaxDestinations] = useState<number | null>(null);
 
   const profile = site.travel_profiles[0];

@@ -12,7 +12,7 @@ export type {
   CountrySummary, LegalEntitySummary,
 } from './site-repository.js';
 export {
-  useSite, useSiteList, useAllSites, useSiteVocabularyLoad,
+  useSite, useSiteList, useAllSites, useSiteVocabularyLoad, useWayfindingRegistryLoad,
   useCountries, useLegalEntities,
 } from './use-site-repository.js';
 export type { AsyncState } from './use-site-repository.js';

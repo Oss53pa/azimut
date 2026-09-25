@@ -8,7 +8,7 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
-import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import type { SiteData, SiteVocabulary, WayfindingRegistry } from '@azimut/core-model';
 
 export type SiteSummary = {
   readonly id: string;
@@ -63,6 +63,13 @@ export type SiteRepository = {
    * rangent alors parmi les non exercés — jamais parmi les réussis.
    */
   loadVocabulary(siteId: string): Promise<SiteVocabulary>;
+  /**
+   * N2.2 — le registre du wayfinding : zones d'orientation, règles de
+   * nommage, niveaux d'information par typologie. Lu à part comme le
+   * vocabulaire : un site se dessine sans lui, et un dépôt qui n'en porte pas
+   * rend un registre vide.
+   */
+  loadWayfindingRegistry(siteId: string): Promise<WayfindingRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

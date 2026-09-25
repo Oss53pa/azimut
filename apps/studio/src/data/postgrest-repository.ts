@@ -23,24 +23,19 @@ import type {
   SiteFact, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
 import {
-  RepositoryError, failureForStatus,
+  RepositoryError,
   type SiteRepository, type SiteSummary,
   type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
+import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { loadWayfindingRegistry } from './postgrest-wayfinding.js';
 
 type SiteListRow = Pick<
   SiteRow,
   'id' | 'org_id' | 'name' | 'country_code' | 'rules_pack_id'
 >;
 
-export type PostgrestConfig = {
-  /** Racine de l'API REST, sans barre oblique finale. */
-  readonly url: string;
-  /** Clé publiable. Elle n'ouvre rien par elle-même : le cloisonnement est en base. */
-  readonly apiKey: string;
-  /** Schéma interrogé. */
-  readonly schema: string;
-};
+export type { PostgrestConfig } from './postgrest-http.js';
 
 /**
  * Lignes des registres de vocabulaire. Elles ne passent pas par `@azimut/db` :
@@ -102,61 +97,6 @@ type DecisionRow = {
  */
 function toSeverity(raw: string): LexiconSeverity {
   return raw === 'discouraged' ? 'discouraged' : 'forbidden';
-}
-
-/** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
-function transportError(detail: string): RepositoryError {
-  const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-  return new RepositoryError(offline ? 'offline' : 'request_failed', detail);
-}
-
-async function query<Row>(
-  config: PostgrestConfig,
-  table: string,
-  search: string,
-): Promise<readonly Row[]> {
-  const url = `${config.url}/${table}?${search}`;
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      headers: {
-        apikey: config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
-        'Accept-Profile': config.schema,
-        Accept: 'application/json',
-      },
-    });
-  } catch (cause) {
-    throw transportError(`${table}: ${String(cause)}`);
-  }
-
-  if (!response.ok) {
-    throw new RepositoryError(
-      failureForStatus(response.status),
-      `${table}: ${String(response.status)} ${response.statusText}`,
-    );
-  }
-
-  try {
-    return await response.json() as readonly Row[];
-  } catch (cause) {
-    throw new RepositoryError('request_failed', `${table}: ${String(cause)}`);
-  }
-}
-
-/** Filtre `in.(a,b,c)` de PostgREST. Une liste vide ne déclenche aucune requête. */
-function inList(column: string, ids: readonly string[]): string {
-  return `${column}=in.(${ids.join(',')})`;
-}
-
-async function queryIn<Row>(
-  config: PostgrestConfig,
-  table: string,
-  column: string,
-  ids: readonly string[],
-): Promise<readonly Row[]> {
-  if (ids.length === 0) return [];
-  return query<Row>(config, table, inList(column, ids));
 }
 
 function firstOrThrow<Row>(rows: readonly Row[], table: string, id: string): Row {
@@ -372,6 +312,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       }
 
       return { lexicon, facts, claims, decisions };
+    },
+
+    loadWayfindingRegistry(siteId: string) {
+      return loadWayfindingRegistry(config, siteId);
     },
 
     /**

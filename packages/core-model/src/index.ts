@@ -69,6 +69,14 @@ export { findLexiconMatches } from './lexicon.js';
 export type { SiteFact, ForbiddenWord } from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
+export {
+  EMPTY_WAYFINDING_REGISTRY, ORIENTATION_ZONE_KINDS, NAMING_TARGETS, NAMING_SCOPES, INFORMATION_LEVELS,
+  isOrientationZoneKind, isNamingTarget, isNamingScope, isInformationLevelRank,
+} from './wayfinding-registry.js';
+export type {
+  WayfindingRegistry, OrientationZone, OrientationZoneKind, NamingRule, NamingTarget, NamingScope,
+  InformationLevelBinding, InformationLevelRank,
+} from './wayfinding-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
