@@ -40,8 +40,13 @@ export const refRetail: SiteData = {
     // D1.1 — altitude du niveau de référence, celui de la galerie.
     reference_elevation_m: 112,
   },
-  // A5.8 — aucun paquet rattaché.
-  rules_bindings: [],
+  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // rules-packs/test-fixture`. Le pictogramme de sécurité du site vient de ce
+  // paquet (A5.4) : sans rattachement, aucun site ne le verrait, et le site de
+  // référence ne porterait pas le cas qu'il éprouve.
+  rules_bindings: [
+    { id: 'rb-rt-base', rules_pack_id: 'rp-test-0001', role: 'base' },
+  ],
   /**
    * Deux bâtiments, deux accès propres, deux horaires : c'est ce que ce site
    * éprouve et qu'aucun autre ne porte. La galerie ouvre tard le samedi, et

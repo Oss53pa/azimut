@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { refMinimal, refMultilevel } from '@azimut/testkit';
+import { refBroken, refMinimal, refMultilevel } from '@azimut/testkit';
 import { sessionFromSite, sessionRowsFromSite } from '../session-from-site.js';
 import { readSessionGraph } from '../session-graph.js';
 import { rowsOf } from '../session-store.js';
@@ -79,6 +79,6 @@ describe('E5.4 — l’atelier repart de l’état du dépôt', () => {
       org_id: refMultilevel.organization.id,
       role: 'base',
     });
-    expect(rowsOf(sessionFromSite(refMinimal), 'site_rules_binding')).toEqual([]);
+    expect(rowsOf(sessionFromSite(refBroken), 'site_rules_binding')).toEqual([]);
   });
 });
