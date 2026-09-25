@@ -717,3 +717,60 @@ la donnée est incomplète et le code le dit — mais c'est un défaut de la don
 de référence, non du moteur. Le corriger demande d'ajouter un pictogramme de
 sécurité au site de référence, ce qui touche les instantanés visuels : hors du
 périmètre de cette tâche.
+
+## La portée d'une fonction, ce que la version 21 ferme
+
+La version 20 disait « une fonction est désignée au plus une fois par
+registre et par site », et je l'avais écrite « par organisation ». Les deux
+étaient fausses. A5.4 pose deux portées : le paquet de règles pour le
+registre de sécurité, l'organisation pour celui d'orientation. Une
+organisation qui exploite deux sites rattachés à deux paquets porte
+légitimement deux pictogrammes d'accessibilité, un par paquet.
+
+| Ce qu'A5.4 pose | Où | État |
+| --- | --- | --- |
+| `pictogram.rules_pack_id` | Migration `0054`, `Pictogram`, schéma Drizzle, type de ligne | Fait, nullable |
+| Orientation : une fonction par organisation | Index `uq_pictogram_function_wayfinding`, portée `wayfinding` | Fait |
+| Sécurité : une fonction par paquet | Index `uq_pictogram_function_safety`, portée du paquet du site | Fait |
+| Le cas des deux paquets, non ambigu | `tests/s39-rendu-d-une-place.test.ts`, essais du vocabulaire | Fait |
+
+**`org_id` reste dans la clé de sécurité.** Les pictogrammes d'un paquet
+sont portés par chaque organisation qui l'emploie, et un index qui
+franchirait la frontière d'organisation révélerait par son message de
+conflit une ligne d'une autre organisation, ce qu'A6.1 interdit.
+
+**Un site sans paquet n'a pas de registre de sécurité.** Aucune désignation
+de ce registre ne l'atteint, pas même celle d'un pictogramme qui ne déclare
+pas de paquet. La marque y est omise et signalée.
+
+**Le motif d'une surface non numérisée** a son porteur :
+`parking.undigitized_reason`, texte, à côté du nombre de places. Il entre
+dans la table d'A5.11 avec le type `text`, et le chemin d'écriture refuse un
+motif écrit sous une autre forme.
+
+**Le site de référence est complet.** `refMultilevel` est rattaché au paquet
+d'essai du dépôt et y désigne le pictogramme de sa place accessible. Cinq
+instantanés du RDC gagnent la marque, et rien d'autre. Le contre-exemple est
+dérivé dans l'essai S-39.
+
+### Reste ouvert après la version 21
+
+**`rules_pack_id` requis pour le registre de sécurité.** A5.4 : « standard_ref
+et rules_pack_id sont requis si registry = 'safety' ». La colonne est entrée
+nullable, et rien ne l'exige encore. `ref-minimal`, `ref-retail` et
+`ref-broken` portent chacun un pictogramme de sécurité sans paquet, sur des
+sites sans paquet : sans effet sur la marque, puisqu'aucun n'a de place
+accessible, mais c'est la donnée que la règle refuse.
+
+**Un site rattaché à deux paquets.** D3.6 permet un paquet international et
+un paquet pays. Le modèle n'en rattache qu'un, `Site.rules_pack_id`. Le jour
+où il en portera deux, une fonction désignée dans les deux se lira comme une
+ambiguïté, et le document ne dit pas lequel des deux pictogrammes prime : la
+préséance du paquet pays de D3.6 porte sur la contrainte, qui n'a pas de sens
+pour un pictogramme.
+
+**Le motif n'est lu par aucun livrable.** S-37 le compte parmi ce qu'une
+déclaration porte, sans dire où il s'affiche ni faire de son absence une
+anomalie.
+
+**Une seconde implantation de `pointInPolygon`.** Inchangé.
