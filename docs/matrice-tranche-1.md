@@ -826,3 +826,56 @@ ne coûte rien, et le retirer serait une migration.
 
 **Le motif n'est toujours lu par aucun livrable.** Son absence est
 maintenant signalée ; où il s'affiche reste non dit.
+
+## Empreinte, sites de référence et borne, ce que la version 23 ferme
+
+| Ce que la version 23 pose | Où | État |
+| --- | --- | --- |
+| D7.1 et annexe T, §3.1.4 — socle et surcouche dans l'empreinte, chacun avec sa clé et sa version | `BoundRulesPacks`, `rulesPacksInRoleOrder`, `computeContentHash`, `computeFaceContentHash` | Fait |
+| L'identité des paquets se lit sur les rattachements, jamais sur la fusion | `boundRulesPackIdentities` | Fait |
+| `ref-minimal` et `ref-retail` rattachés au paquet d'essai | Sites de référence, essai `safety-pictograms-bound` | Fait |
+| Libellés de `PARK.CAPACITY_UNEXPLAINED` alignés sur S8 | Libellés fr et en | Fait |
+| A8 — la limite de 400 lignes vise les fichiers source | Sans effet sur le code | Pris en compte |
+
+Deux constats de la section précédente sont fermés : l'empreinte d'une
+fusion de paquets, et les deux sites de référence dont le site ne voyait pas
+les pictogrammes.
+
+**La borne ne résout aucune fonction.** Les plans d'un paquet de borne sont
+dessinés à sa construction, sur le site entier. La marque d'une place
+accessible y entre à ce moment-là, résolue sur les rattachements réels. Le
+code de la borne n'emploie que `computeRoute`. Deux essais le gardent.
+L'écran d'évacuation du mode urgence (P10) n'existe pas encore.
+
+### Reste ouvert après la version 23
+
+**La construction d'un paquet de borne perd les avertissements du rendu.**
+`buildKioskMapFiles` ne lit que le succès de `renderFloorPlan`. Une marque
+omise faute de désignation (`PICTO.FUNCTION_NOT_DESIGNATED`) le serait donc
+en silence dans le paquet, alors que S-39 veut qu'elle soit signalée.
+
+**Deux calculs de l'empreinte de contenu.** Ce sont `computeContentHash`
+(engine-graph, D7.1, employé par `computeStaleFaces`) et
+`computeFaceContentHash` (engine-layout, T-2.14a). Ils diffèrent :
+- le premier accepte un site sans paquet ; le second le refuse, comme
+  l'annexe T, §8, le demande ;
+- le premier écrit `null` pour un champ absent là où le second l'omet ;
+- le premier ne normalise pas les chaînes en NFC.
+
+Les deux portent désormais le socle et la surcouche.
+
+**Le dépôt PostgREST du studio** fait 525 lignes. Son découpage est une tâche
+à déclarer avant la fin de la tranche 1.
+
+**Vocabulaire d'avant S8 resté dans le code.** Le thème du plan nomme
+`uncovered_fill` et `uncovered_stroke` ce qui dessine une surface non
+numérisée. Deux commentaires parlent encore de « zone non couverte »
+(`build-kiosk-tree.ts`, `render-floor-plan.ts`).
+
+**Un site de borne se lit comme un site sans paquet.** `loadKioskSite` rend
+`rules_bindings: []`, ce qui ne distingue pas un site sans paquet d'un site
+dont le paquet n'est pas transporté. L'essai d'exécution empêche d'en tirer
+une résolution ; le modèle, lui, ne le dit pas.
+
+**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
+du paquet du studio, sans correction au passage.
