@@ -672,7 +672,7 @@ Règle : `auditCoverage` refuse de produire un taux si `validateGraph` n'est pas
 - TypeScript strict, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` activés.
 - `any` interdit. `unknown` puis restriction.
 - Pas d'exception pour un cas métier prévu. Les exceptions signalent un bug.
-- Fichiers de 400 lignes maximum. Fonctions de 50 lignes maximum.
+- Fichiers de code de 400 lignes maximum. Fonctions de 50 lignes maximum. Cette limite vise les fichiers source, jamais les documents : une matrice de traçabilité ou un cahier des charges n'a pas à s'y plier.
 - Nommage : anglais dans le code, français dans l'interface. Le vocabulaire de A1.3 fait foi dans les deux.
 - Unités toujours dans le nom : `_m`, `_mm`, `_deg`, `_pct`. Une variable de dimension sans unité dans son nom est refusée en revue.
 - Aucun commentaire expliquant ce que fait le code. Commentaires réservés à ce que le code ne peut pas dire : origine d'une règle, raison d'un contournement, référence normative.
@@ -1877,7 +1877,9 @@ Deux empreintes distinctes, aux rôles différents.
 
 Les liaisons entre bâtiments n'y entrent pas, parce qu'aucun calcul de parcours ne lit aujourd'hui leur attribut de passage couvert. **Le jour où un profil en tiendrait compte, elles devraient y entrer**, faute de quoi un changement de passage laisserait des parcours faux en cache.
 
-`content_hash`, pour la détection de péremption d'une exécution : contenu résolu de la face, gabarit, charte et sa version, paquet de règles et sa version, langues actives, dimensions calculées. Ni l'identifiant du support, ni les horodatages, ni l'auteur.
+`content_hash`, pour la détection de péremption d'une exécution : contenu résolu de la face, gabarit, charte et sa version, **les paquets de règles rattachés au site, socle et surcouche, chacun avec sa clé et sa version**, langues actives, dimensions calculées.
+
+Les deux rattachements entrent dans l'empreinte, et non le seul résultat de leur fusion. Sans cela, deux sites partageant un même socle avec des surcouches différentes produiraient la même empreinte, et un changement de surcouche ne marquerait rien comme périmé. Ni l'identifiant du support, ni les horodatages, ni l'auteur.
 
 ### D7.2 Règles de calcul
 
@@ -8172,7 +8174,7 @@ Rien d'autre que ces sept éléments :
 1. Le contenu résolu de la face, bloc par bloc, dans l'ordre des blocs.
 2. La clé du gabarit et sa version.
 3. L'identifiant de la charte et sa version.
-4. La clé du paquet de règles et sa version.
+4. Les clés et versions des paquets de règles rattachés au site, socle et surcouche, dans l'ordre de leur rôle.
 5. Les langues actives de la face, triées.
 6. Les dimensions calculées, largeur et hauteur en millimètres entiers.
 7. Les identifiants des pictogrammes référencés, triés.
@@ -8584,3 +8586,6 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 282. A5.8 : rattachement à deux paquets, avec rôle et précédence
 283. A5.2 : rattachement aux paquets retiré de la table des sites
 284. D2.2 : avertissement sur le motif d'une surface non numérisée
+285. D7.1 : l'empreinte porte le socle et la surcouche
+286. Annexe T : composition de l'empreinte alignée sur D7.1
+287. A8 : portée de la limite de 400 lignes précisée
