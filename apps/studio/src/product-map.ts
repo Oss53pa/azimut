@@ -204,6 +204,8 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'ops-rounds', labelKey: 'nav.item.opsrounds' },
       { view: 'ops-incidents', labelKey: 'nav.item.opsincidents' },
       { view: 'ops-divergences', labelKey: 'nav.item.opsdivergences' },
+      { view: 'ops-work-orders', labelKey: 'nav.item.opsworkorders' },
+      { view: 'ops-fleet', labelKey: 'nav.item.opsfleet' },
     ],
     // Partiel, comme le tableau de la partie H le dit déjà. `reconcile` produit
     // trois des six types de divergence de A5.7 et un quatrième sous un autre
@@ -211,7 +213,9 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     // rapprochement n'est ni datée ni résoluble, alors que E2 l'exige, et la
     // machine à états qui porte cette règle n'est appelée par personne. E3
     // (ordre de travaux né d'une décision humaine), E4 (tournée hors ligne) et
-    // E5 (relevé avec photographie et position) n'ont aucun moteur.
+    // E5 (relevé avec photographie et position) n'ont aucun moteur. Les poses,
+    // divergences enregistrées et ordres de travaux se lisent en base (0006),
+    // tels qu'elle les porte ; aucun écran ne les écrit.
     engine: 'partial',
     source: 'studio/domain/survey-sync · engine-graph/reconciliation',
   },

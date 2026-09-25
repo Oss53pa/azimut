@@ -9,6 +9,7 @@ import {
 } from '../components/ui/index.js';
 import { divergenceReport } from './operations/divergence.js';
 import { siteLabels } from './register/labels.js';
+import { RecordedDivergencesPanel } from './operations/RecordedDivergencesPanel.js';
 
 const ALL = 'all';
 
@@ -34,7 +35,12 @@ const EXPLAIN_KEYS: Readonly<Record<Issue, UiMessageKey>> = {
  * les données du site : un support posé hors de tout point de décision, un
  * point de décision sans support. Ce ne sont pas des données de démonstration.
  */
-export function OpsDivergencesView(): JSX.Element {
+type OpsDivergencesViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function OpsDivergencesView({ siteKey }: OpsDivergencesViewProps): JSX.Element {
   const site = useSiteData();
   const { t, lang } = useI18n();
   const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
@@ -106,29 +112,32 @@ export function OpsDivergencesView(): JSX.Element {
     );
 
   return (
-    <RegisterLayout
-      title={t('opsdiv.title')}
-      summary={t('opsdiv.summary', {
-        count: rows.length,
-        superfluous: report.superfluous_count,
-        uncovered: report.uncovered_count,
-      })}
-      filtersLabel={t('register.filters')}
-      filters={filters}
-      filter={filter}
-      onFilter={id => { setFilter(id); setSelectedId(null); }}
-      shown={t('opsdiv.shown', { count: visible.length })}
-      inspector={inspector}
-      note={t('opsdiv.note')}
-    >
-      <DataTable
-        columns={columns}
-        rows={visible}
-        rowKey={lineId}
-        empty={t('opsdiv.empty')}
-        onSelect={l => { setSelectedId(lineId(l)); }}
-        selectedKey={selected === null ? undefined : lineId(selected)}
-      />
-    </RegisterLayout>
+    <div>
+      <RegisterLayout
+        title={t('opsdiv.title')}
+        summary={t('opsdiv.summary', {
+          count: rows.length,
+          superfluous: report.superfluous_count,
+          uncovered: report.uncovered_count,
+        })}
+        filtersLabel={t('register.filters')}
+        filters={filters}
+        filter={filter}
+        onFilter={id => { setFilter(id); setSelectedId(null); }}
+        shown={t('opsdiv.shown', { count: visible.length })}
+        inspector={inspector}
+        note={t('opsdiv.note')}
+      >
+        <DataTable
+          columns={columns}
+          rows={visible}
+          rowKey={lineId}
+          empty={t('opsdiv.empty')}
+          onSelect={l => { setSelectedId(lineId(l)); }}
+          selectedKey={selected === null ? undefined : lineId(selected)}
+        />
+      </RegisterLayout>
+      <RecordedDivergencesPanel siteKey={siteKey} />
+    </div>
   );
 }

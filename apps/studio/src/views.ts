@@ -55,6 +55,8 @@ export type ViewId =
   | 'ops-rounds'
   | 'ops-incidents'
   | 'ops-divergences'
+  | 'ops-work-orders'
+  | 'ops-fleet'
   // 09 — Budget
   | 'budget'
   | 'budget-references'

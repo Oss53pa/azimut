@@ -17,3 +17,4 @@ export {
 } from './use-site-repository.js';
 export type { AsyncState } from './use-site-repository.js';
 export { useCharterRegistryLoad, type CharterRegistryState } from './use-charter-registry.js';
+export { useMaintenanceRegistryLoad, type MaintenanceRegistryState } from './use-maintenance-registry.js';

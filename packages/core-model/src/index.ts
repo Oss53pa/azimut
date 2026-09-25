@@ -85,6 +85,12 @@ export type {
   CharterRegistry, SiteCharter, CharterColorEntry, CharterTypeface, CharterRule, CharterRuleKind,
   CharterLexiconEntry, LexiconLang,
 } from './charter-registry.js';
+export {
+  EMPTY_MAINTENANCE_REGISTRY, DIVERGENCE_KINDS, WORK_ORDER_STATES, isDivergenceKind, isWorkOrderState,
+} from './maintenance-registry.js';
+export type {
+  MaintenanceRegistry, InstalledSupport, RecordedDivergence, DivergenceKind, WorkOrder, WorkOrderState,
+} from './maintenance-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

@@ -38,6 +38,7 @@ import { BUDGET_REGISTER_FR, BUDGET_REGISTER_EN } from './messages/budget-regist
 import { WAYFINDING_REGISTRY_FR, WAYFINDING_REGISTRY_EN } from './messages/wayfinding-registry.js';
 import { SUPPORT_TYPOLOGY_FR, SUPPORT_TYPOLOGY_EN } from './messages/support-typology.js';
 import { SIGNAGE_CHARTER_FR, SIGNAGE_CHARTER_EN } from './messages/signage-charter.js';
+import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages/operations-maintenance.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -67,6 +68,7 @@ export const MESSAGES_FR = {
   ...WAYFINDING_REGISTRY_FR,
   ...SUPPORT_TYPOLOGY_FR,
   ...SIGNAGE_CHARTER_FR,
+  ...OPERATIONS_MAINTENANCE_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -99,6 +101,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...WAYFINDING_REGISTRY_EN,
   ...SUPPORT_TYPOLOGY_EN,
   ...SIGNAGE_CHARTER_EN,
+  ...OPERATIONS_MAINTENANCE_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {
