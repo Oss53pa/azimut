@@ -1,9 +1,11 @@
 /**
- * Contrôles issus du complément atelier : vocabulaire, stationnement, mode.
+ * Contrôles des registres déclarés : vocabulaire de charte (A5.8), faits du
+ * site et stationnement (A5.11), et le mode de rendu qui les durcit.
  *
  * Séparés des essais du socle parce que les deux réunis franchissaient les
  * quatre cents lignes (A2.4). La coupure suit la matière : d'un côté ce que
- * `runChecks` contrôlait déjà, de l'autre ce que le complément lui a ajouté.
+ * `runChecks` contrôle sans qu'un site déclare rien, de l'autre ce qui
+ * n'existe que si le site l'oppose.
  */
 import { describe, it, expect } from 'vitest';
 import { runChecks } from '../run-checks.js';
@@ -13,9 +15,10 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
   const terms = [{ lang: 'fr', term: 'client', severity: 'forbidden' as const }];
   const facts = [{
     key: 'parking_gratuit',
-    value: 'oui',
-    source: 'Direction',
-    recorded_on: '2026-03-12',
+    value: true,
+    status: 'existing' as const,
+    source_ref: 'Direction',
+    declared_at: '2026-03-12',
     forbidden: [{ lang: 'fr', term: 'paiement' }],
   }];
   const claims = [

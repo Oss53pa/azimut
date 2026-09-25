@@ -1,5 +1,5 @@
 import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimut/core-model';
-import { PUBLISHABLE_STATUSES } from '@azimut/core-model';
+import { PUBLISHABLE_STATUSES, factValueText } from '@azimut/core-model';
 
 /**
  * Ce qu'un document de stratégie peut lier — A5.11, règle M01.S11.
@@ -53,10 +53,10 @@ export function buildDocumentBindings(
   const parkings = [...site.parkings].sort((l, r) => l.id.localeCompare(r.id));
   const first = parkings[0];
   if (first !== undefined) {
-    // Un document est un livrable : il ne compte que l'existant (P1, complément atelier). Une
-    // proposition non validée s'y afficherait comme un fait, et le nombre de
-    // places d'un parking est précisément le genre de fait qu'on cite ensuite
-    // sans le revérifier.
+    // Un document est un livrable : il ne compte que l'existant (A5.11, règle
+    // M01.S11). Une proposition non validée s'y afficherait comme un fait, et
+    // le nombre de places d'un parking est précisément le genre de fait qu'on
+    // cite ensuite sans le revérifier.
     //
     // Ce compte diffère donc de celui de `auditParking`, qui mesure la
     // numérisation et retient aussi les propositions. Deux questions, deux
@@ -73,11 +73,17 @@ export function buildDocumentBindings(
     };
   }
 
+  // Le statut d'un fait n'est pas jugé ici, et c'est délibéré : ce module rend
+  // des valeurs, il ne décide pas ce qui a le droit de paraître. La règle
+  // M01.S11 — « un fait de statut `proposal` ne s'affiche jamais comme un
+  // existant » — est opposée par `auditSiteFacts` en mode livrable, qui lève
+  // `PARK.PROPOSAL_AS_EXISTING`. Deux gardes pour une règle finiraient par se
+  // contredire, et c'est l'anomalie qui nomme le fait à réviser.
   const factFields: string[] = [];
   const factValues: Record<string, string> = {};
   for (const fact of [...facts].sort((l, r) => l.key.localeCompare(r.key))) {
     factFields.push(fact.key);
-    factValues[fact.key] = fact.value;
+    factValues[fact.key] = factValueText(fact.value);
   }
   values['site_fact'] = factValues;
 

@@ -5,10 +5,10 @@ import { EMPTY_VOCABULARY } from '@azimut/core-model';
  * Vocabulaire des sites de référence.
  *
  * Aucune donnée client : ces registres sont inventés pour exercer les
- * contrôles, comme les sites de référence eux-mêmes. Ils suivent les exemples
- * du complément atelier — parking gratuit contre les mots du paiement, charte
- * qui impose visiteurs plutôt que clients, charte contre plans sur le nombre de
- * niveaux de parking.
+ * contrôles, comme les sites de référence eux-mêmes. Trois cas, un par
+ * registre d'A5.8 et d'A5.11 — parking gratuit contre les mots du paiement,
+ * charte qui impose visiteurs plutôt que clients, charte contre plans sur le
+ * nombre de niveaux de parking.
  *
  * Seul le site multi-niveaux en porte un. Les autres n'en déclarent pas, et
  * c'est délibéré : l'écran de validation doit montrer les deux cas, un site qui
@@ -24,9 +24,12 @@ const MULTILEVEL: SiteVocabulary = {
   facts: [
     {
       key: 'parking_gratuit',
-      value: 'oui',
-      source: 'Décision de la Direction',
-      recorded_on: '2026-03-12',
+      // Un fait arrêté, donc `existing` : c'est le seul statut qu'un livrable
+      // a le droit de montrer comme un fait (A5.11, règle M01.S11).
+      value: true,
+      status: 'existing',
+      source_ref: 'Décision de la Direction',
+      declared_at: '2026-03-12',
       forbidden: [
         { lang: 'fr', term: 'paiement' },
         { lang: 'fr', term: 'payant' },

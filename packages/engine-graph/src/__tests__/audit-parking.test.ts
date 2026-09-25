@@ -81,13 +81,23 @@ describe('auditParking (M2)', () => {
     expect(report.findings[0]?.params['digitised']).toBe(31);
   });
 
-  it('refuse un objet sans source, quel que soit son statut', () => {
+  /**
+   * `PARK.SOURCE_MISSING` a quitté ce contrôle.
+   *
+   * D2.2 le range au niveau du fait — « Fait du site sans source déclarée,
+   * règle M01.S11 » — et il se lève désormais sur `site_fact`, où la migration
+   * 0044 a porté `source_ref`. Cet essai garde l'ancien cas et vérifie qu'il
+   * ne rend plus ce code ici : sans lui, le déplacement passerait pour une
+   * disparition. La non-vacuité de la source d'un objet reste garantie, mais
+   * par la base, `CHECK (btrim(source) <> '')`, migration 0021.
+   */
+  it('ne juge plus la source d’un objet : le code est passé au fait', () => {
     const report = auditParking({
       parkings: [parking('ouest', 1, { status: 'existant', source: '   ' })],
       spaces: spaces('ouest', 1),
       uncovered: NONE,
     });
-    expect(report.findings.map(f => f.code)).toContain('PARK.SOURCE_MISSING');
+    expect(report.findings.map(f => f.code)).not.toContain('PARK.SOURCE_MISSING');
   });
 
   it('tolère une proposition à l’atelier', () => {

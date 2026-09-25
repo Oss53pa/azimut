@@ -13,9 +13,15 @@ import { PUBLISHABLE_STATUSES, countsAsDigitised } from '@azimut/core-model';
  * source ; là où le plan s'arrête, la zone est marquée non couverte, et rien
  * n'est complété par extrapolation.
  *
- * Le contrôle venait du complément atelier, qui a cessé de faire foi. La
- * règle qu'il portait est reprise par A5.11, et c'est elle que les anomalies
- * citent.
+ * La règle que ce contrôle oppose est celle d'A5.11, et c'est elle que les
+ * anomalies citent.
+ *
+ * **La source d'un fait ne se contrôle plus ici.** D2.2 range
+ * `PARK.SOURCE_MISSING` au niveau du fait, « Fait du site sans source
+ * déclarée » : il se lève désormais sur `site_fact`, où la migration 0044 a
+ * porté `source_ref`. La non-vacuité de la source d'un objet reste garantie,
+ * mais par la base — `CHECK (btrim(source) <> '')` sur les trois tables — et
+ * non par une anomalie du catalogue.
  *
  * Ce module la rend opposable. Un parking annoncé à 89 places dont 40 sont
  * numérisées est dans un de deux états : ou bien le plan s'arrête quelque part
@@ -41,24 +47,13 @@ export type ParkingInput = {
   readonly uncovered: readonly UncoveredArea[];
 };
 
-function sourceFinding(kind: string, id: string, provenance: Provenance): Finding | null {
-  if (provenance.source.trim() !== '') return null;
-  return {
-    code: 'PARK.SOURCE_MISSING',
-    severity: 'blocking',
-    entity: { kind, id },
-    params: { status: provenance.status },
-    ruleRef: 'M01.S11',
-  };
-}
-
 /**
  * Audite le stationnement d'un site.
  *
  * `forDeliverable` durcit le contrôle : hors livrable, une proposition est un
  * état de travail légitime ; portée à un livrable, elle s'afficherait comme un
- * fait, ce que refuse P1 du complément atelier. Le même jeu d'objets est donc acceptable à l'atelier
- * et refusé à l'impression, et c'est voulu.
+ * fait, ce que refuse la règle M01.S11. Le même jeu d'objets est donc
+ * acceptable à l'atelier et refusé à l'impression, et c'est voulu.
  */
 export function auditParking(
   input: ParkingInput,
@@ -71,8 +66,8 @@ export function auditParking(
 
   // Une place retirée ne compte pas : la compter ferait passer un parking
   // amputé pour complet, et pire, un parking où deux places ont été retirées
-  // pour un parking en dépassement. C'est exactement l'écart que M2 (complément atelier) demande de
-  // voir, inversé par une ligne d'historique.
+  // pour un parking en dépassement. C'est exactement l'écart que la capacité
+  // annoncée d'A5.11 demande de voir, inversé par une ligne d'historique.
   const spacesByParking = new Map<string, number>();
   for (const space of spaces) {
     if (!countsAsDigitised(space.provenance.status)) continue;
@@ -81,9 +76,6 @@ export function auditParking(
   const uncoveredParkings = new Set(input.uncovered.map((area) => area.parking_id));
 
   for (const parking of parkings) {
-    const found = sourceFinding('parking', parking.id, parking.provenance);
-    if (found !== null) findings.push(found);
-
     const digitised = spacesByParking.get(parking.id) ?? 0;
 
     if (digitised > parking.declared_capacity) {
@@ -107,11 +99,6 @@ export function auditParking(
         ruleRef: 'M01.S11',
       });
     }
-  }
-
-  for (const space of spaces) {
-    const found = sourceFinding('parking_space', space.id, space.provenance);
-    if (found !== null) findings.push(found);
   }
 
   if (forDeliverable) {

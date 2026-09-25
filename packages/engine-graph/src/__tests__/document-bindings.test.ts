@@ -7,8 +7,9 @@ import { buildDocumentBindings } from '../document-bindings.js';
 const PARKING_GRATUIT: SiteFact = {
   key: 'parking_gratuit',
   value: 'oui',
-  source: 'Direction',
-  recorded_on: '2026-03-12',
+  status: 'existing',
+  source_ref: 'Direction',
+  declared_at: '2026-03-12',
   forbidden: [],
 };
 

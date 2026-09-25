@@ -66,7 +66,8 @@ export {
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
-export type { SiteFact, ForbiddenWord } from './site-facts.js';
+export type { SiteFact, ForbiddenWord, FactStatus, FactValue } from './site-facts.js';
+export { FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText } from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';

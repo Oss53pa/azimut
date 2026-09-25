@@ -119,7 +119,7 @@ export function runChecks(
   if (facts.length === 0) {
     undeclared.push('site_facts');
   } else {
-    findings.push(...auditSiteFacts(site, facts).findings);
+    findings.push(...auditSiteFacts(site, facts, forDeliverable).findings);
     run.push('site_facts');
   }
 

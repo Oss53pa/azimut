@@ -174,27 +174,34 @@ export const opening = azimut.table('opening', {
 ]);
 
 /**
- * A5.11, règle M01.S11 — un fait déclaré du site. `source` et `recorded_on`
- * sont obligatoires : une affirmation sans provenance ne se conteste pas.
+ * A5.11, règle M01.S11 — un fait déclaré du site.
  *
- * **Écart déclaré avec A5.11**, qui donne à la table quatre colonnes que
- * celle-ci n'a pas sous cette forme : `value` en `jsonb`, `status` parmi
- * `existing`, `proposal` et `to_verify`, `source_ref`, `declared_by` et
- * `declared_at`. Le statut est celui qui manque le plus : « un fait de statut
- * `proposal` ne s'affiche jamais comme un existant », et seul le statut porté
- * par les objets de stationnement le dit aujourd'hui. L'aligner est une
- * migration, qu'aucune tâche n'a encore demandée.
+ * « site_fact (id, org_id, site_id, key, value jsonb, status, source_ref,
+ * declared_by, declared_at) », `status in ('existing','proposal','to_verify')`.
+ * La migration 0044 a aligné la table sur cette déclaration.
+ *
+ * `source_ref` et `declared_at` sont obligatoires : une affirmation sans
+ * provenance ne se conteste pas. `status` l'est aussi, et sans valeur par
+ * défaut : « un fait de statut `proposal` ne s'affiche jamais comme un
+ * existant », et un défaut à `existing` publierait toute proposition.
+ *
+ * Deux écarts assumés avec A5.11, qui ne les tranche pas : `declared_by` est
+ * nullable, un fait antérieur à la colonne n'ayant pas d'auteur connu ; et
+ * `declared_at` garde le type `date`, ce qui est consigné étant un jour de
+ * constatation et non un instant.
  */
 export const siteFact = azimut.table('site_fact', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
-  value: text('value').notNull(),
-  source: text('source').notNull(),
+  value: jsonb('value').notNull(),
+  status: text('status').notNull(),
+  source_ref: text('source_ref').notNull(),
   // Colonne `date` en base : la déclarer `text` rendrait un `Date` typé
   // `string`, et les comparaisons de chaînes qui la trient échoueraient.
-  recorded_on: date('recorded_on').notNull(),
+  declared_at: date('declared_at').notNull(),
+  declared_by: uuid('declared_by'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

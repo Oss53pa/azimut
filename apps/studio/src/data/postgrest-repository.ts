@@ -20,8 +20,9 @@ import type {
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
-  SiteFact, SourceClaim, DiscrepancyDecision,
+  SiteFact, FactStatus, FactValue, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
+import { canonicalSerialize } from '@azimut/core-model';
 import {
   RepositoryError, failureForStatus,
   type SiteRepository, type SiteSummary,
@@ -67,9 +68,12 @@ type LexiconTermRow = {
 type SiteFactRow = {
   readonly id: string;
   readonly key: string;
-  readonly value: string;
-  readonly source: string;
-  readonly recorded_on: string;
+  /** Colonne `jsonb` depuis la migration 0044 : ce qui arrive est du JSON, pas du texte. */
+  readonly value: unknown;
+  readonly status: string;
+  readonly source_ref: string;
+  readonly declared_at: string;
+  readonly declared_by: string | null;
 };
 
 type ForbiddenWordRow = {
@@ -102,6 +106,35 @@ type DecisionRow = {
  */
 function toSeverity(raw: string): LexiconSeverity {
   return raw === 'discouraged' ? 'discouraged' : 'forbidden';
+}
+
+/**
+ * Un statut de fait inconnu vaut `to_verify`.
+ *
+ * Même motif que la sévérité ci-dessus, et il est plus fort ici : `existing`
+ * est le seul statut qu'un livrable a le droit de montrer comme un fait
+ * (A5.11, règle M01.S11). Une valeur mal orthographiée en base, ou venue d'une
+ * version ultérieure du modèle, doit donc retomber sur le statut qui retient,
+ * jamais sur celui qui publie. `to_verify` dit exactement cela : on ne sait
+ * pas, quelqu'un doit regarder.
+ */
+function toFactStatus(raw: string): FactStatus {
+  return raw === 'existing' || raw === 'proposal' ? raw : 'to_verify';
+}
+
+/**
+ * Ce que `jsonb` rend, ramené aux trois scalaires du modèle.
+ *
+ * Une valeur structurée — tableau, objet — entre comme sa sérialisation
+ * canonique plutôt que d'être refusée : la refuser perdrait le fait entier, et
+ * avec lui les mots qu'il interdit. `null` n'arrive pas, la base l'interdit
+ * par contrainte, et s'il arrivait quand même il vaut la chaîne vide, que le
+ * contrôle de non-vacuité verra.
+ */
+function toFactValue(raw: unknown): FactValue {
+  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') return raw;
+  if (raw === null || raw === undefined) return '';
+  return canonicalSerialize(raw);
 }
 
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
@@ -315,7 +348,9 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         // étrangère est déjà le mode employé partout ailleurs dans ce fichier.
         query<CharterRow>(config, 'charter', `select=id&site_id=eq.${siteId}`),
         query<SiteFactRow>(
-          config, 'site_fact', `select=id,key,value,source,recorded_on&site_id=eq.${siteId}`,
+          config,
+          'site_fact',
+          `select=id,key,value,status,source_ref,declared_at,declared_by&site_id=eq.${siteId}`,
         ),
         query<SourceClaimRow>(
           config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
@@ -352,9 +387,11 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
       const facts: SiteFact[] = factRows.map(row => ({
         key: row.key,
-        value: row.value,
-        source: row.source,
-        recorded_on: row.recorded_on,
+        value: toFactValue(row.value),
+        status: toFactStatus(row.status),
+        source_ref: row.source_ref,
+        declared_at: row.declared_at,
+        ...(row.declared_by === null ? {} : { declared_by: row.declared_by }),
         forbidden: wordsByFact.get(row.id) ?? [],
       }));
 
