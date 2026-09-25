@@ -1884,6 +1884,10 @@ Les deux rattachements entrent dans l'empreinte, et non le seul résultat de leu
 ### D7.2 Règles de calcul
 
 - Sérialisation canonique avant hachage : clés triées, aucun espace superflu, nombres au format fixe défini en D1.4.
+- **Chaînes normalisées en forme NFC** avant hachage. Deux textes identiques à l'écran mais composés différemment donneraient sinon deux empreintes.
+- **Un champ absent est omis, il n'est jamais écrit avec une valeur nulle.** Omission et valeur nulle ne doivent pas se confondre.
+- **Un site sans paquet de règles rattaché n'a pas d'empreinte de contenu** : le calcul est refusé, il ne produit pas une empreinte partielle.
+- **Une seule implantation.** L'empreinte est calculée par une seule fonction, employée par tous les appelants. Deux implantations équivalentes aujourd'hui divergeront demain, et l'invariant 4 repose sur elles.
 - Algorithme SHA-256, en hexadécimal minuscule.
 - Aucun horodatage, aucun identifiant de session, aucune donnée d'utilisateur dans une empreinte.
 
@@ -1980,6 +1984,10 @@ Politique de reprise : 3 tentatives, temporisation exponentielle de 5, 30 puis 1
 ---
 
 ## D10. Paquet de borne
+
+### D10.0 Anomalies du rendu
+
+L'assemblage d'un paquet agrège les anomalies de chaque rendu qu'il embarque, et ne lit jamais le seul succès. Une marque de sécurité omise, faute de fonction désignée, **bloque la construction du paquet** au lieu de la traverser en silence, section S-39 : la borne est le dernier endroit où une information de sécurité peut manquer sans que personne le voie.
 
 ### D10.1 Arborescence
 
@@ -8589,3 +8597,5 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 285. D7.1 : l'empreinte porte le socle et la surcouche
 286. Annexe T : composition de l'empreinte alignée sur D7.1
 287. A8 : portée de la limite de 400 lignes précisée
+288. D7.2 : forme canonique de l'empreinte précisée
+289. D10.0 : le paquet agrège les anomalies et bloque sur une marque de sécurité omise
