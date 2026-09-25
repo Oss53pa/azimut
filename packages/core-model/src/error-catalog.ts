@@ -205,6 +205,10 @@ export const ERROR_CATALOG = {
   // empreintes ou des nœuds ».
   'DATA.LEVEL_ORDINAL_DUPLICATE':           { severity: 'blocking', description: 'Deux niveaux de même rang dans un bâtiment' },
   'DATA.LEVEL_NOT_EMPTY':                   { severity: 'blocking', description: 'Suppression d’un niveau portant des empreintes ou des nœuds' },
+  // S10, et calculable depuis la version 17 seulement : A5.2 ne donnait à
+  // `zone` ni géométrie ni liste d’empreintes, donc l’appartenance d’une place
+  // à un parking n’était pas exprimable. `footprint_ids` la porte désormais.
+  'DATA.PARKING_SPACE_WITHOUT_ZONE':        { severity: 'warning', description: 'Place de stationnement hors de toute zone de nature `parking`' },
   // Levé depuis l’origine par le formulaire de création de M1 (partie M) et
   // absent du catalogue : l’écran affichait donc le code brut, faute d’entrée
   // de dictionnaire. Le sens qui manquait au garde de

@@ -138,6 +138,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'DATA.CAPACITY_INVALID': 'Capacité d’une liaison verticale absente ou non positive',
   'DATA.LEVEL_ORDINAL_DUPLICATE': 'Deux niveaux de même rang dans un bâtiment',
   'DATA.LEVEL_NOT_EMPTY': 'Suppression d’un niveau portant des empreintes ou des nœuds',
+  'DATA.PARKING_SPACE_WITHOUT_ZONE': 'Place de stationnement hors de toute zone de parking',
   'EDIT.CONTEXT_VIOLATION': 'Opération interdite dans ce contexte d\'édition',
   'EDIT.BOOLEAN_RESULT_INVALID': 'Opération booléenne produisant une géométrie invalide',
   'EDIT.CROSS_ORG_PASTE_DENIED': 'Collage entre organisations refusé',

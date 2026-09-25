@@ -27,6 +27,8 @@ export type { CheckableText } from './site-texts.js';
 export { auditSourceClaims } from './audit-source-claims.js';
 export type { SourceDiscrepancyReport } from './audit-source-claims.js';
 export { auditParking } from './audit-parking.js';
+export { auditParkingZones } from './audit-parking-zones.js';
+export type { ParkingZoneReport } from './audit-parking-zones.js';
 export type { ParkingReport, ParkingInput } from './audit-parking.js';
 export { auditBoundText } from './audit-bound-text.js';
 export type { DocumentTextReport } from './audit-bound-text.js';

@@ -138,6 +138,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'DATA.CAPACITY_INVALID': 'Vertical link capacity missing or not positive',
   'DATA.LEVEL_ORDINAL_DUPLICATE': 'Two levels share the same ordinal in one building',
   'DATA.LEVEL_NOT_EMPTY': 'Deleting a level that still holds footprints or nodes',
+  'DATA.PARKING_SPACE_WITHOUT_ZONE': 'Parking space outside any parking zone',
   'EDIT.CONTEXT_VIOLATION': 'Operation forbidden in this editing context',
   'EDIT.BOOLEAN_RESULT_INVALID': 'Boolean operation producing invalid geometry',
   'EDIT.CROSS_ORG_PASTE_DENIED': 'Cross-organization paste denied',

@@ -67,16 +67,6 @@ const NON_CONSTRUITS: Readonly<Record<string, string>> = {
   'ASSIST.OUT_OF_SCOPE': 'S7, module 14, assistant de conception, incrément 5.',
   'ASSIST.UNAVAILABLE': 'S7, module 14, assistant de conception, incrément 5.',
   'CLOSURE.OVERLAP': 'O11, fermetures temporaires, incrément 3.',
-  // Le seul de cette liste qui ne soit pas en attente d'un module : il est en
-  // attente d'un arbitrage. S-35 fait de la place une empreinte et du parking
-  // une zone, mais A5.2 ne donne à `zone` ni géométrie ni liste d'empreintes,
-  // et la zone d'orientation d'H11, qui en porte une, est une autre table.
-  // « Hors de toute zone de nature `parking` » n'est donc pas calculable, et
-  // ajouter le lien qui le rendrait calculable est un choix de modèle non
-  // prévu en A5 : A2.2, point 2.
-  'DATA.PARKING_SPACE_WITHOUT_ZONE':
-    'S8, stationnement : l’appartenance d’une empreinte à une zone n’est pas '
-    + 'modélisée en A5.2. Arbitrage A2.2, point 2.',
   'DATA.CURRENCY_MIXED': 'Q4, devises, incrément 4.',
   'DATA.CURRENCY_REQUIRED': 'Q4, devises, incrément 4.',
   'DATA.LEGAL_ENTITY_REQUIRED': 'Q5, entité juridique émettrice, incrément 4.',

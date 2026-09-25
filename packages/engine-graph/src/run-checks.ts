@@ -14,6 +14,7 @@ import { auditSentenceLength } from './audit-sentence-length.js';
 import { auditSiteFacts } from './audit-site-facts.js';
 import { auditSourceClaims } from './audit-source-claims.js';
 import { auditParking } from './audit-parking.js';
+import { auditParkingZones } from './audit-parking-zones.js';
 
 /**
  * Réexport : le vocabulaire est un registre du modèle, pas une notion de
@@ -150,6 +151,22 @@ export function runChecks(
     // nomme, pour qu'un rapport d'atelier ne laisse pas croire qu'il a été
     // exercé.
     if (forDeliverable) run.push('parking_publication');
+  }
+
+  // S8 — le rattachement d'une place à un parking, sur les objets du socle.
+  // Distinct du contrôle ci-dessus, qui juge les objets d'un module que la
+  // section S8 rend redondant : celui-ci lit les empreintes de nature
+  // `parking_space` et les zones de nature `parking`, c'est-à-dire ce
+  // qu'A5.2 déclare.
+  //
+  // Exercé dès qu'une place est tracée, et non dès qu'une zone est déclarée :
+  // un site à places sans aucune zone de parking est exactement le cas que
+  // `DATA.PARKING_SPACE_WITHOUT_ZONE` doit signaler, et le taire faute de zone
+  // reviendrait à ne rien dire précisément quand tout manque.
+  const parkingZones = auditParkingZones(site);
+  if (parkingZones.space_count > 0) {
+    findings.push(...parkingZones.findings);
+    run.push('parking_space_zone');
   }
 
   const claims = vocabulary.claims ?? [];
