@@ -864,7 +864,7 @@ en silence dans le paquet, alors que S-39 veut qu'elle soit signalée.
 
 Les deux portent désormais le socle et la surcouche.
 
-**Le dépôt PostgREST du studio** fait 525 lignes. Son découpage est une tâche
+**Le dépôt PostgREST du studio** fait 515 lignes (513 avant la version 22). Son découpage est une tâche
 à déclarer avant la fin de la tranche 1.
 
 **Vocabulaire d'avant S8 resté dans le code.** Le thème du plan nomme
