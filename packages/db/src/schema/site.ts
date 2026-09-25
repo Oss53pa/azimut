@@ -320,19 +320,6 @@ export const parkingSpace = azimut.table('parking_space', {
   uniqueIndex('parking_space_footprint_unique').on(t.footprint_id),
 ]);
 
-/** Là où le plan source s'arrête : sans elle, aucune extrapolation n'est visible. */
-export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
-  geometry: jsonb('geometry'),
-  reason: text('reason').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_parking_uncovered_org').on(t.org_id),
-  index('idx_parking_uncovered_parking').on(t.parking_id),
-]);
-
 export const vehicleGate = azimut.table('vehicle_gate', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),

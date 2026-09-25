@@ -6,7 +6,7 @@ export {
   graphValidation,
   siteFact, siteFactForbiddenWord,
   sourceClaim, discrepancyDecision,
-  parking, parkingSpace, parkingUncoveredArea, vehicleGate,
+  parking, parkingSpace, vehicleGate,
 } from './site.js';
 export { node, edge, verticalLink, buildingLink } from './graph.js';
 export {

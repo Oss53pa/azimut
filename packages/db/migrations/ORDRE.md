@@ -93,6 +93,7 @@ non plus — elle n'en retire que les clés étrangères.
 0047_a5_11_site_fact_target
 0048_a5_2_zone_footprint_ids
 0049_a5_3_parking_space_extension
+0050_s_37_drop_parking_uncovered_area
 ```
 
 ## Règle pour la suite

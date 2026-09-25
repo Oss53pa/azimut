@@ -81,6 +81,11 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // statut, section A5.11 ». La table était rangée parmi celles sans
     // propriétaire, faute d'y avoir été inscrite ; elle l'est.
     'site_fact',
+    // Q2, version 18 : « parking_space | 01 Socle | Extension d'une empreinte
+    // de place, section A5.3 ». La table était rangée parmi celles sans
+    // propriétaire, quand elle portait une place autonome hors du cahier des
+    // charges ; redéfinie en extension d'empreinte, elle suit l'empreinte.
+    'parking_space',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
   // d'implantation de `support` — dont `code` — par la scission L0, déclarée
@@ -319,7 +324,5 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
   discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
   parking: 'A5.11 porte les faits du stationnement, dont la capacité annoncée d’un parking. Elle ne décrit pas l’objet, et Q2 ne l’attribue à aucun module.',
-  parking_space: 'Même motif que `parking`.',
-  parking_uncovered_area: 'Même motif que `parking`.',
   vehicle_gate: 'Même motif que `parking`.',
 };
