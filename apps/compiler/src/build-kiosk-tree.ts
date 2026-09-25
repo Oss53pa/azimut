@@ -39,9 +39,9 @@ const KIOSK_FLOOR_THEME: FloorPlanTheme = {
   // empreintes, avec un contour plus affirmé pour que la limite se lise.
   parking_fill: themePapier['surface-sunken'],
   parking_stroke: themePapier['border-strong'],
-  // Une zone non couverte se lit comme un avertissement, pas comme un objet.
-  uncovered_fill: themePapier['surface-canvas'],
-  uncovered_stroke: stateColorsPapier['state-warning'],
+  // Une surface non numérisée se lit comme un avertissement, pas comme un objet.
+  undigitised_fill: themePapier['surface-canvas'],
+  undigitised_stroke: stateColorsPapier['state-warning'],
   edge_stroke: themePapier['text-secondary'],
   edge_evacuation_stroke: stateColorsPapier['state-valid'],
   node_fill: themePapier['accent'],

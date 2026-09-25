@@ -41,8 +41,8 @@ import {
  * table, mais l'existence du fait `parking.undigitized_spaces` qui désigne
  * l'empreinte. Une empreinte marquée ne vaut donc pas une place : elle vaut le
  * nombre que le fait déclare. C'est ce qui rend l'écart quantitatif — « admis à
- * concurrence des places déclarées » — là où la zone non couverte le rendait
- * seulement excusable.
+ * concurrence des places déclarées » — là où l'ancienne table `parking_uncovered_area`
+ * le rendait seulement excusable.
  *
  * **Ce que la disparition du statut d'objet emporte.** `parking` et
  * `parking_space` portaient un statut et une source ; `zone` et `footprint`

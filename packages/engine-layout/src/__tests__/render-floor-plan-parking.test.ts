@@ -26,8 +26,8 @@ const theme: FloorPlanTheme = {
   footprint_stroke: 'tok-fp-stroke',
   parking_fill: 'tok-park-fill',
   parking_stroke: 'tok-park-stroke',
-  uncovered_fill: 'tok-unc-fill',
-  uncovered_stroke: 'tok-unc-stroke',
+  undigitised_fill: 'tok-undig-fill',
+  undigitised_stroke: 'tok-undig-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',
@@ -197,11 +197,11 @@ describe('la surface non numérisée (S-37)', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const park = r.value.indexOf('tok-park-fill');
-    const unc = r.value.indexOf('tok-unc-fill');
+    const undig = r.value.indexOf('tok-undig-fill');
     const fp = r.value.indexOf('tok-fp-fill');
     expect(park).toBeGreaterThan(-1);
-    expect(park).toBeLessThan(unc);
-    expect(unc).toBeLessThan(fp);
+    expect(park).toBeLessThan(undig);
+    expect(undig).toBeLessThan(fp);
   });
 
   it('sans le fait qui la marque, elle est une place comme une autre', () => {
@@ -209,7 +209,7 @@ describe('la surface non numérisée (S-37)', () => {
     const r = renderFloorPlan(avecLesDeux(), RDC, defaultOptions, { facts: [] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value).not.toContain('tok-unc-fill');
+    expect(r.value).not.toContain('tok-undig-fill');
     expect(r.value).toContain('tok-park-fill');
   });
 
@@ -219,7 +219,7 @@ describe('la surface non numérisée (S-37)', () => {
     );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.value).not.toContain('tok-unc-fill');
+    expect(r.value).not.toContain('tok-undig-fill');
   });
 
   it('cadre le plan sur une surface qui déborde des places', () => {
@@ -239,7 +239,7 @@ describe('la surface non numérisée (S-37)', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
 
-    const points = pointsDuPolygone(r.value, 'tok-unc-fill');
+    const points = pointsDuPolygone(r.value, 'tok-undig-fill');
     expect(points.length).toBe(4);
     for (const p of points) {
       expect(p.x).toBeGreaterThanOrEqual(0);

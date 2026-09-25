@@ -281,7 +281,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
  * elle-même. Sans cette règle, chaque surface non numérisée fausserait le
  * compte d'une unité. »
  *
- * La règle est venue après le retrait de la table des surfaces non couvertes,
+ * La règle est venue après le retrait de la table `parking_uncovered_area`,
  * qui l'avait rendue nécessaire. Ces essais l'éprouvent pour elle-même, et non
  * à travers un écart de capacité : c'est le compte qui est en cause, pas sa
  * comparaison.

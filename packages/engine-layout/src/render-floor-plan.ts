@@ -30,9 +30,9 @@ export type FloorPlanTheme = {
   /** Place de stationnement, distincte d'un bâtiment. */
   readonly parking_fill: string;
   readonly parking_stroke: string;
-  /** Surface que le plan source ne couvre pas : ni vide, ni relevée (S-37). */
-  readonly uncovered_fill: string;
-  readonly uncovered_stroke: string;
+  /** Surface non numérisée : ni vide, ni relevée place par place (S-37). */
+  readonly undigitised_fill: string;
+  readonly undigitised_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -67,7 +67,7 @@ export type FloorPlanData = {
    * telles, faute de quoi un parking à demi relevé se lit comme un parking à
    * demi vide.
    */
-  readonly uncovered: readonly Footprint[];
+  readonly undigitised: readonly Footprint[];
   /**
    * Celles de ces places que l'extension d'A5.3 dit accessibles — S-39. Elles
    * sont déjà dans l'une des deux listes ci-dessus ; celle-ci dit seulement
@@ -98,7 +98,7 @@ function computeBounds(
   let hasPoints = false;
 
   // Tout ce qui se dessine se cadre. Une emprise de parking déborde presque
-  // toujours du bâti, et une zone non couverte peut border la page : les
+  // toujours du bâti, et une surface non numérisée peut border la page : les
   // omettre du cadrage les ferait sortir du plan, silencieusement. La règle
   // tient parce qu'il n'y a plus qu'une liste, et non une boucle par famille
   // qu'on oublierait d'allonger.
@@ -199,7 +199,7 @@ function filterLevelData(
   const view = parkingSpacesOfLevel(site, levelId, context.facts ?? []);
 
   const parkings: Footprint[] = [];
-  const uncovered: Footprint[] = [];
+  const undigitised: Footprint[] = [];
   const accessible: Footprint[] = [];
   const plain: Footprint[] = [];
   for (const footprint of levelFootprints) {
@@ -207,13 +207,13 @@ function filterLevelData(
       plain.push(footprint);
       continue;
     }
-    if (view.undigitised.has(footprint.id)) uncovered.push(footprint);
+    if (view.undigitised.has(footprint.id)) undigitised.push(footprint);
     else parkings.push(footprint);
     if (view.accessible.has(footprint.id)) accessible.push(footprint);
   }
 
   return {
-    footprints: plain, parkings, uncovered, accessible,
+    footprints: plain, parkings, undigitised, accessible,
     nodes, edges, destinations,
   };
 }
@@ -247,7 +247,7 @@ export function renderFloorPlan(
   const outlines: (readonly Point[])[] = [
     ...data.footprints.map((f) => f.geometry.vertices),
     ...data.parkings.map((p) => p.geometry.vertices),
-    ...data.uncovered.map((a) => a.geometry.vertices),
+    ...data.undigitised.map((a) => a.geometry.vertices),
   ];
   const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
@@ -322,13 +322,13 @@ export function renderFloorPlan(
   //
   // Elles ont toujours un tracé, désormais : ce sont des empreintes, et A5.2
   // exige d'une empreinte un polygone fermé d'au moins trois sommets. La limite
-  // de l'ancien modèle — une zone non couverte pouvait n'avoir aucune
-  // géométrie, et le plan restait muet là où le contrôle savait — tombe avec
+  // de l'ancien modèle — une surface déclarée hors des empreintes pouvait
+  // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait — tombe avec
   // lui.
-  const sortedUncovered = [...data.uncovered].sort(
+  const sortedUndigitised = [...data.undigitised].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
-  for (const area of sortedUncovered) {
+  for (const area of sortedUndigitised) {
     const verts = area.geometry.vertices;
     if (verts.length < 3) continue;
     const points = verts
@@ -339,8 +339,8 @@ export function renderFloorPlan(
       .join(' ');
     parts.push(
       `<polygon points="${points}"` +
-      ` fill="${esc(options.theme.uncovered_fill)}"` +
-      ` stroke="${esc(options.theme.uncovered_stroke)}"` +
+      ` fill="${esc(options.theme.undigitised_fill)}"` +
+      ` stroke="${esc(options.theme.undigitised_stroke)}"` +
       ` stroke-width="${PARKING_STROKE_WIDTH}"` +
       ` stroke-dasharray="2 3" />`,
     );
