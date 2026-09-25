@@ -20,9 +20,30 @@ import type { Polygon } from './geometry.js';
  * se confondent pas : rassembler les deux sur une seule table ne gagnerait
  * rien. » Ce module porte donc le second des deux, et c'est sa place.
  *
- * Écart qui subsiste, et qui est d'une autre nature : A5.11 ne décrit ni
- * `parking`, ni `parking_space`, ni leur géométrie. Ces objets restent hors du
- * cahier des charges, et Q2 ne les attribue à aucun module.
+ * **La version 16 ferme l'écart, et en ouvre un autre.** La section S8 dit
+ * désormais ce qu'A5.11 ne disait pas : « Une place de stationnement est une
+ * empreinte de nature `parking_space`. Un parking est une zone de nature
+ * `parking`. Aucune table nouvelle : ce sont les objets du socle, module 01. »
+ * Les objets de ce module ne sont donc plus hors du cahier des charges : ils
+ * sont ce que le cahier des charges refuse. `parking` doublerait `zone`,
+ * `parking_space` doublerait `footprint`, et la nature d'empreinte qui les
+ * remplace existe depuis la migration 0046.
+ *
+ * Ce module et ses quatre tables — `parking`, `parking_space`,
+ * `parking_uncovered_area`, `vehicle_gate` — ne sont pas retirés ici. Leur
+ * retrait est une migration destructrice, cas d'arrêt A2.2, point 7, et le
+ * sort de `parking_uncovered_area` n'est pas seulement une suppression : la
+ * zone non couverte est ce qui distingue un parking à demi numérisé d'un
+ * parking en écart, et `PARK.CAPACITY_UNEXPLAINED` — « sans explication » —
+ * s'appuie sur elle. La section S8 ne lui donne aucun équivalent parmi les
+ * objets du socle. Il faut donc trancher avant de supprimer, pas après.
+ *
+ * Deux autres questions restent ouvertes et bloquent le rattachement des
+ * contrôles `PARK` aux objets du socle, toutes deux au titre d'A2.2, point 2 :
+ * comment un fait de capacité désigne son parking, quand `site_fact.key` est
+ * unique par site et qu'A5.11 ne donne au fait aucune référence d'objet ; et
+ * comment une empreinte appartient à une zone, quand A5.2 ne donne à `zone` ni
+ * géométrie ni liste d'empreintes. Voir `docs/matrice-tranche-1.md`.
  */
 
 /**
