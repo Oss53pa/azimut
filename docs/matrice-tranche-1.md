@@ -220,11 +220,64 @@ natures d'A5.8, celles de la migration 0006. Les deux natures que les contrôles
 de rédaction lisent — `forbidden_character` et `max_sentence_words` — n'étaient
 pas stockables. Le chemin existait sans que rien puisse l'emprunter.
 
-Reste hors du cahier des charges, et déclaré comme tel : l'objet `parking`
-lui-même, sa géométrie et celle d'une place. Q2 ne les attribue à aucun module.
 Les cinq natures de règle de charte qu'aucun contrôle ne consomme restent sans
 forme de paramètres déclarée, volontairement : chacune sera définie quand un
-contrôle la lira.
+contrôle la lira. Le compte est celui d'A5.8 : sept natures, deux consommées,
+cinq en attente. L'éditeur l'a confirmé en version 16.
+
+**Clos par la version 16.** L'objet `parking` cesse d'être hors du cahier des
+charges, et la façon dont il y entre défait ce que le dépôt en avait fait :
+
+- la migration 0045 est ratifiée. Elle était nécessaire à la version 15, mais
+  elle n'avait pas été demandée : l'éditeur la retient comme une extension de
+  périmètre, à soumettre avant et non après ;
+- la section S8 tranche le modèle du stationnement, sans table nouvelle. Une
+  place est une empreinte de nature `parking_space`, ajoutée à l'énumération
+  d'A5.2 et à la contrainte de base par la migration 0046 ; un parking est une
+  zone de nature `parking`, que la migration 0029 admettait déjà sans que rien
+  s'en serve ; la capacité annoncée reste un fait du site ;
+- l'exclusion définitive de l'édition simultanée, en G4.1, est levée par S6.
+  Aucun artefact vivant du dépôt ne la citait — les deux mentions qui
+  subsistent sont dans les documents antérieurs, conservés pour l'historique —
+  donc il n'y avait rien à retirer, seulement à le vérifier.
+
+**Ouvert par la version 16, et bloquant pour le rattachement des contrôles
+`PARK` aux objets du socle.** Trois questions, les deux premières au titre
+d'A2.2, point 2, la troisième au titre du point 7 :
+
+1. **Comment un fait de capacité désigne son parking.** S-36 dit que les
+   contrôles « comparent le compte des empreintes de nature `parking_space` à
+   ce fait déclaré », au singulier. Mais `site_fact.key` est unique par site et
+   A5.11 ne donne au fait aucune référence d'objet. Un site à deux parkings
+   exige donc soit une convention de clé qui nomme la zone, soit une colonne de
+   référence. Ni l'une ni l'autre n'est écrite, et les inventer serait un choix
+   de modèle non prévu en A5.
+2. **Comment une empreinte appartient à une zone.** Le code
+   `DATA.PARKING_SPACE_WITHOUT_ZONE` demande de voir une place « hors de toute
+   zone de nature `parking` ». A5.2 ne donne à `zone` ni géométrie ni liste
+   d'empreintes ; la zone d'orientation d'H11, qui porte `footprint_ids`, est
+   une autre table, avec ses propres natures, et M02.W12 ne parle que d'elle.
+   L'appartenance n'est donc pas calculable en l'état. Le code est inscrit aux
+   non construits avec ce motif.
+3. **Le sort des quatre tables du dépôt** — `parking`, `parking_space`,
+   `parking_uncovered_area`, `vehicle_gate` — que S-35 rend redondantes. Les
+   supprimer est une migration destructrice. Et `parking_uncovered_area` n'est
+   pas qu'une redondance : la zone non couverte est ce qui distingue un parking
+   à demi numérisé d'un parking en écart, et `PARK.CAPACITY_UNEXPLAINED` s'y
+   appuie. S8 ne lui donne aucun équivalent parmi les objets du socle.
+
+**Construit pour la tranche, sur les trois éléments de la partie S qui la
+concernent.** Les calques thématiques (S-10 à S-12) et la coloration de travail
+(S-8, S-9) entrent au modèle : dix clés de calque fermées, deux visibilités
+distinctes dont celle d'impression que l'esquisse ne peut pas porter — le refus
+emprunte `SKETCH.IN_DELIVERABLE`, que D2.2 portait déjà — et une coloration
+dont la lecture exige un identifiant d'utilisateur, ce qu'aucun moteur n'a à
+donner. La persistance attend les tables `view_layer` et `work_color` de S9.
+
+Reste non construit de la partie S, et inscrit comme tel : les quatre codes
+`EXPORT.*` et `ASSIST.*` du tableau S10, rattachés aux incréments 2 et 5 par
+S11. L'assistant et l'édition simultanée sont de taille XL, à découper avant
+tout développement.
 
 Les domaines d'anomalie et les codes hors catalogue sont clos par la version 13
 du consolidé : `PARK` et `DOC` y sont admis, `CHARTER` est retiré du dépôt, et
