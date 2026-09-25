@@ -2,6 +2,8 @@ export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
 export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
+  PARKING_SPACE_FOOTPRINT_KIND, isParkingSpaceFootprint,
+  PARKING_ZONE_KIND, isParkingZone,
   ZONE_KINDS, isSiteZoneKind, OPENING_KINDS, isOpeningKind,
 } from './site.js';
 export type { SiteZoneKind, OpeningKind } from './site.js';
