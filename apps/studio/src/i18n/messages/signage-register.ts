@@ -44,6 +44,8 @@ export const SIGNAGE_REGISTER_FR = {
   'evacuation.state.noexit': 'Aucune sortie sur le niveau',
   'evacuation.state.failed': 'Rendu refusé',
   'evacuation.none': 'Rien à signaler.',
+  'evacuation.refused': "Aucun plan d'évacuation n'est produit : le site n'a pas de paquet de règles rattaché.",
+  'evacuation.refused.hint': "Les règles d'orientation, de légende et de contenu d'un plan d'évacuation viennent du paquet de règles (T-2.10). Rattachez-en un au site.",
   'evacuation.note': "Les cheminements et les sorties ne se dessinent pas : ils viennent des arêtes marquées d'évacuation et des nœuds de sortie du graphe. Corriger un plan, c'est corriger le graphe.",
 } as const;
 
@@ -85,5 +87,7 @@ export const SIGNAGE_REGISTER_EN: Readonly<Record<keyof typeof SIGNAGE_REGISTER_
   'evacuation.state.noexit': 'No exit on this level',
   'evacuation.state.failed': 'Rendering refused',
   'evacuation.none': 'Nothing to report.',
+  'evacuation.refused': 'No evacuation plan is produced: the site has no rules pack attached.',
+  'evacuation.refused.hint': 'The orientation, legend and content rules of an evacuation plan come from the rules pack (T-2.10). Attach one to the site.',
   'evacuation.note': 'Routes and exits are not drawn: they come from the graph edges marked for evacuation and its exit nodes. Fixing a plan means fixing the graph.',
 } as const;

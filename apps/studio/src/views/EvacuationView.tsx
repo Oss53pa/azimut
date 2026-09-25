@@ -6,7 +6,7 @@ import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { ViewId } from '../views.js';
 import {
-  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, SPACE, TEXT,
+  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner, SPACE, TEXT,
   type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
@@ -47,7 +47,11 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
     return audit.ok ? audit.value.uncovered_nodes : [];
   }, [site]);
 
-  const plans = useMemo<readonly LevelPlan[]>(() => site.levels.map(level => {
+  // T-2.10 : un plan d'évacuation ne se produit que sous un paquet de règles
+  // rattaché. Sans lui, aucun rendu n'est tenté, pas même un aperçu.
+  const bound = site.site.rules_pack_id !== null;
+
+  const plans = useMemo<readonly LevelPlan[]>(() => (!bound ? [] : site.levels.map(level => {
     const rendered = renderEvacuationPlan(site, level.id, {
       width_px: PLAN_WIDTH,
       height_px: PLAN_HEIGHT,
@@ -64,7 +68,29 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
       findings: rendered.ok ? rendered.warnings : rendered.findings,
       uncovered: uncoveredNodes.filter(id => labels.nodeLevel(id) === level.id).length,
     };
-  }), [site, uncoveredNodes, labels]);
+  })), [site, uncoveredNodes, labels, bound]);
+
+  const header = (
+    <ScreenHeader
+      title={t('evacuation.title')}
+      subtitle={t('evacuation.subtitle')}
+      actions={[{ id: 'graph', label: t('evacuation.action.graph'), onSelect: () => { onNavigate('graph'); } }]}
+    />
+  );
+
+  if (!bound) {
+    return (
+      <div>
+        {header}
+        <StateBanner
+          severity="blocking"
+          message={t('evacuation.refused')}
+          hint={t('evacuation.refused.hint')}
+        />
+        <Note>{t('evacuation.note')}</Note>
+      </div>
+    );
+  }
 
   const selected = plans.find(p => p.levelId === levelId) ?? plans[0] ?? null;
   const exits = plans.reduce((n, p) => n + (p.stats?.exit_count ?? 0), 0);
@@ -104,11 +130,7 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
 
   return (
     <div>
-      <ScreenHeader
-        title={t('evacuation.title')}
-        subtitle={t('evacuation.subtitle')}
-        actions={[{ id: 'graph', label: t('evacuation.action.graph'), onSelect: () => { onNavigate('graph'); } }]}
-      />
+      {header}
       <MetricRow metrics={metrics} />
       <div style={{ marginTop: SPACE.lg }}>
         <Panel title={t('evacuation.panel.levels')} note={String(plans.length)} padded={false}>
