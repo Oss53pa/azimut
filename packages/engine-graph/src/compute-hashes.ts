@@ -2,7 +2,7 @@ import type {
   SiteData,
   TravelProfile,
 } from '@azimut/core-model';
-import { contentHash } from '@azimut/core-model';
+import { empreinte } from '@azimut/core-model';
 
 function pickNodeFields(
   node: SiteData['graph']['nodes'][number],
@@ -94,11 +94,19 @@ function graphParts(graph: SiteData['graph']): {
   };
 }
 
+/**
+ * D7.1 et D7.2 — l'empreinte des entrées d'un parcours, pour l'invalidation du
+ * cache. Elle suit la forme canonique commune à toutes les empreintes du
+ * produit : chaînes en NFC, champ absent omis, `sha256:` en tête.
+ *
+ * Une empreinte enregistrée sous l'ancienne forme ne se convertit pas : elle
+ * cesse de correspondre, et le parcours se recalcule (D7.2).
+ */
 export function computeInputsHash(
   site: SiteData,
   profile: TravelProfile,
 ): string {
-  return contentHash({
+  return empreinte({
     ...graphParts(site.graph),
     profile: pickProfileFields(profile),
   });
@@ -116,10 +124,14 @@ export function computeInputsHash(
  * Le profil en est exclu parce que la complétude n'en dépend pas : un graphe
  * n'est pas complet pour un profil et incomplet pour un autre.
  *
+ * Elle suit la forme canonique de D7.2, commune à toutes les empreintes. Un
+ * enregistrement fait sous l'ancienne forme ne se convertit pas : il ne
+ * correspond plus au graphe, et ne vaut plus, comme M02.W11 le prévoit.
+ *
  * Elle prend le graphe et non le site : c'est tout ce dont D7.2 a besoin, et
  * exiger un `SiteData` entier obligerait l'appelant à en fabriquer une coquille
  * là où il n'a qu'un graphe.
  */
 export function computeGraphHash(graph: SiteData['graph']): string {
-  return contentHash(graphParts(graph));
+  return empreinte(graphParts(graph));
 }

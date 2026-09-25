@@ -63,9 +63,9 @@ function resolveAtNode(
 }
 
 describe('D7.1 — inputs_hash', () => {
-  it('produces a 64-char lowercase hex hash', () => {
+  it('produces a sha256-prefixed lowercase hex hash (D7.2)', () => {
     const hash = computeInputsHash(refMinimal, profile);
-    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+    expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
   });
 
   it('is deterministic', () => {

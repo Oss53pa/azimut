@@ -154,7 +154,7 @@ describe('D7.2 — l’empreinte du graphe de la session', () => {
     const graph = readSessionGraph(store([{ id: 'n-1', x: 1, y: 2 }]));
     expect(graph.nodes).toHaveLength(1);
     expect(graph.unreadable).toEqual([]);
-    expect(computeGraphHash(graph)).toMatch(/^[0-9a-f]{64}$/);
+    expect(computeGraphHash(graph)).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 
   it('deux calculs sur le même graphe donnent la même empreinte', () => {
@@ -177,6 +177,17 @@ describe('D7.2 — l’empreinte du graphe de la session', () => {
       { id: 'n-2', x: 3, y: 4 }, { id: 'n-1', x: 1, y: 2 },
     ]));
     expect(computeGraphHash(forward)).toBe(computeGraphHash(backward));
+  });
+
+  it('D7.2 — un passage enregistré sous l’ancienne forme ne vaut plus, sans conversion', () => {
+    // L'ancienne forme n'avait pas de préfixe : aucun enregistrement fait avant
+    // l'alignement ne peut égaler une empreinte d'aujourd'hui. Il n'est pas
+    // converti ; la validation se rejoue, comme M02.W11 le prévoit.
+    const graph = readSessionGraph(store([{ id: 'n-1', x: 1, y: 2 }]));
+    const current = computeGraphHash(graph);
+    const former = current.slice('sha256:'.length);
+    expect(graphIsValidated([{ graphHash: former, ranAt: STAMP, passed: true }], current))
+      .toBe(false);
   });
 
   it('une ligne illisible est comptée, jamais devinée', () => {
