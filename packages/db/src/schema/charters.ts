@@ -86,7 +86,11 @@ export const siteRulesBinding = azimut.table('site_rules_binding', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   rules_pack_id: uuid('rules_pack_id').notNull().references(() => rulesPack.id, { onDelete: 'cascade' }),
+  // A5.8 : `base` ou `overlay`, contrainte en base (migration 0056).
+  role: text('role').notNull(),
   bound_at: timestamp('bound_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_site_rules_binding_org').on(t.org_id),
+  // « Au plus un socle et au plus une surcouche. »
+  uniqueIndex('uq_site_rules_binding_role').on(t.org_id, t.site_id, t.role),
 ]);

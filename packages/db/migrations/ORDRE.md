@@ -99,6 +99,7 @@ non plus — elle n'en retire que les clés étrangères.
 0053_a5_4_pictogram_function_key
 0054_a5_4_function_scope_by_registry
 0055_a5_4_safety_pictogram_requires_pack
+0056_a5_8_rules_binding_role
 ```
 
 ## Règle pour la suite
