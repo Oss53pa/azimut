@@ -9,6 +9,7 @@ import {
 import { staggeringPlan, type StaggeringSequence } from '../domain/staggering.js';
 import { buildScheduleModel, declaredInformationLevels, NO_WAYFINDING_RULES } from './message-schedule/schedule-model.js';
 import { siteLabels } from './register/labels.js';
+import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 import { formatNumber } from './register/format.js';
 
 const ALL = 'all';
@@ -124,25 +125,28 @@ export function StaggeringView(): JSX.Element {
     );
 
   return (
-    <RegisterLayout
-      title={t('staggering.title')}
-      summary={t('staggering.summary', { sequences: plan.sequences.length, points: plan.decisionPoints, broken })}
-      filtersLabel={t('register.filters')}
-      filters={filters}
-      filter={filter}
-      onFilter={id => { setFilter(id); setSelectedId(null); }}
-      shown={t('staggering.shown', { count: visible.length })}
-      inspector={inspector}
-      note={t('staggering.note')}
-    >
-      <DataTable
-        columns={columns}
-        rows={visible}
-        rowKey={s => s.id}
-        empty={t('staggering.empty')}
-        onSelect={s => { setSelectedId(s.id); }}
-        selectedKey={selected?.id}
-      />
-    </RegisterLayout>
+    <div>
+      <UntypedSupportsBanner assumedTypeKey={site.support_types[0]?.key ?? ''} />
+      <RegisterLayout
+        title={t('staggering.title')}
+        summary={t('staggering.summary', { sequences: plan.sequences.length, points: plan.decisionPoints, broken })}
+        filtersLabel={t('register.filters')}
+        filters={filters}
+        filter={filter}
+        onFilter={id => { setFilter(id); setSelectedId(null); }}
+        shown={t('staggering.shown', { count: visible.length })}
+        inspector={inspector}
+        note={t('staggering.note')}
+      >
+        <DataTable
+          columns={columns}
+          rows={visible}
+          rowKey={s => s.id}
+          empty={t('staggering.empty')}
+          onSelect={s => { setSelectedId(s.id); }}
+          selectedKey={selected?.id}
+        />
+      </RegisterLayout>
+    </div>
   );
 }

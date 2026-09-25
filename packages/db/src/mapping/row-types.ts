@@ -199,6 +199,8 @@ export type SupportRow = {
   readonly width_mm: number | null;
   readonly height_mm: number | null;
   readonly dimensions_source: string | null;
+  /** A5.6 — typologie du support (0015). Nullable : ON DELETE SET NULL. */
+  readonly typology_id: string | null;
 };
 
 export type SupportTypologyRow = {

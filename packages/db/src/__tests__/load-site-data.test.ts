@@ -31,6 +31,7 @@ function row(overrides: Partial<SupportRow>): SupportRow {
     width_mm: null,
     height_mm: null,
     dimensions_source: null,
+    typology_id: null,
     created_at: new Date('2026-01-01T00:00:00Z'),
     updated_at: new Date('2026-01-01T00:00:00Z'),
     deleted_at: null,
@@ -46,6 +47,14 @@ describe('mapSupportRow (A5.6)', () => {
       registry: 'wayfinding', context: 'interior',
       reading_distance_m: 4.5, azimuth_deg: 90,
     });
+  });
+
+  it('carries the typology link when the column is set (0015)', () => {
+    expect(mapSupportRow(row({ typology_id: 'typ-1' })).typology_id).toBe('typ-1');
+  });
+
+  it('omits the typology link when the column is null', () => {
+    expect('typology_id' in mapSupportRow(row({}))).toBe(false);
   });
 
   it('keeps the safety registry', () => {

@@ -32,6 +32,7 @@ export type {
 } from './site-signage.js';
 export {
   SUPPORT_VERSION_STATES,
+  supportTypologyOf,
 } from './site-signage.js';
 
 export type Organization = {

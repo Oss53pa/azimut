@@ -14,6 +14,7 @@ import { ScheduleTable } from './message-schedule/ScheduleTable.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { buildScheduleModel, declaredInformationLevels } from './message-schedule/schedule-model.js';
 import { InformationLevelDeclaration } from './message-schedule/InformationLevelDeclaration.js';
+import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 
 const LEVEL_FILTERS = [0, 1, 2, 3, 4] as const;
 
@@ -129,6 +130,7 @@ export function MessageScheduleView(): JSX.Element {
         actions={actions}
       />
 
+      <UntypedSupportsBanner assumedTypeKey={supportTypeKey} />
       <MetricRow metrics={metrics} />
 
       <div style={{ display: 'grid', gap: SPACE.md, marginTop: SPACE.lg }}>

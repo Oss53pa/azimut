@@ -13,7 +13,7 @@
  * Déterminisme : l'identifiant d'un support d'essai vient du nœud, jamais d'un
  * compteur, d'une horloge ou d'un tirage.
  */
-import type { SiteData, TravelProfile } from '@azimut/core-model';
+import { supportTypologyOf, type SiteData, type TravelProfile } from '@azimut/core-model';
 import { deriveDecisionPoints, type PlacedSupport } from '@azimut/engine-graph';
 
 export type TrialPlacement = {
@@ -60,20 +60,25 @@ export function trialPlacement(
 
 /**
  * Supports réellement implantés sur le site, convertis au format attendu par
- * les moteurs. Le lien vers la typologie n'est pas encore porté par le modèle
- * A5 (`support` n'a pas de colonne typologie en mémoire) : la typologie passée
- * en argument s'applique donc à tous. Dès que le modèle la portera, cette
- * fonction lira la colonne au lieu de recevoir la clé.
+ * les moteurs. Chaque support porte sa typologie (A5.6, `support.typology_id`)
+ * quand il en a une ; la clé passée en argument ne s'applique qu'aux supports
+ * qui n'en portent pas, ou qui en portent une inconnue du site. L'écran qui
+ * fait cette supposition la montre, par `untypedSupportCount`.
  */
 export function placedSupports(
   site: SiteData,
-  supportTypeKey: string,
+  fallbackTypeKey: string,
 ): readonly PlacedSupport[] {
   return [...site.supports]
     .sort((a, b) => a.id.localeCompare(b.id))
     .map((s): PlacedSupport => ({
       id: s.id,
       node_id: s.node_id,
-      support_type_key: supportTypeKey,
+      support_type_key: supportTypologyOf(site.support_types, s)?.key ?? fallbackTypeKey,
     }));
+}
+
+/** Supports sans typologie connue : ceux auxquels une typologie est supposée. */
+export function untypedSupportCount(site: SiteData): number {
+  return site.supports.filter(s => supportTypologyOf(site.support_types, s) === null).length;
 }

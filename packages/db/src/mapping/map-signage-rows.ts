@@ -102,5 +102,6 @@ export function mapSupportRow(row: SupportRow): Support {
     ...(row.width_mm !== null ? { width_mm: row.width_mm } : {}),
     ...(row.height_mm !== null ? { height_mm: row.height_mm } : {}),
     ...(dimensionsSource !== undefined ? { dimensions_source: dimensionsSource } : {}),
+    ...(row.typology_id !== null ? { typology_id: row.typology_id } : {}),
   };
 }

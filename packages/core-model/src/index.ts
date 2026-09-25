@@ -126,7 +126,7 @@ export { transitionSupportVersion, admittedEvents } from './support-version-stat
 export type {
   SupportVersionEvent, SupportVersionEffect, SupportVersionTransition,
 } from './support-version-state.js';
-export { SUPPORT_VERSION_STATES } from './site.js';
+export { SUPPORT_VERSION_STATES, supportTypologyOf } from './site.js';
 export {
   assertProofTransition,
   assertJobTransition,
