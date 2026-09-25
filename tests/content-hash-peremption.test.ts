@@ -25,7 +25,7 @@ function inputOf(template: FaceTemplate, face: ResolvedFace): FaceContentHashInp
   return {
     blocks: face.blocks.map((b) => b.content),
     template: { key: template.id, version: '1' },
-    rules_pack: { key: 'intl', version: '2026.1' },
+    rules_packs: { base: { key: 'intl', version: '2026.1' } },
     active_langs: ['fr', 'en'], width_mm: 600, height_mm: 400,
     pictogram_ids: [],
   };

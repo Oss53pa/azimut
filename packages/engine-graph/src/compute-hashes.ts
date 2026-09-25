@@ -3,7 +3,8 @@ import type {
   TravelProfile,
   FaceTemplate,
 } from '@azimut/core-model';
-import { contentHash } from '@azimut/core-model';
+import { contentHash, rulesPacksInRoleOrder } from '@azimut/core-model';
+import type { BoundRulesPacks } from '@azimut/core-model';
 import type { ResolvedFace } from './resolve-face.js';
 
 function pickNodeFields(
@@ -132,9 +133,12 @@ export type ContentHashInput = {
   /** Charter identity — the charter itself, per D7.1 "charte et sa version". */
   readonly charter_id: string | null;
   readonly charter_version: string | null;
-  /** Rules pack identity, per D7.1 "paquet de règles et sa version". */
-  readonly rules_pack_id: string | null;
-  readonly rules_pack_version: string | null;
+  /**
+   * D7.1 — « les paquets de règles rattachés au site, socle et surcouche,
+   * chacun avec sa clé et sa version ». Les deux rattachements, jamais le seul
+   * résultat de leur fusion.
+   */
+  readonly rules_packs: BoundRulesPacks;
   readonly active_langs: readonly string[];
   readonly dimensions: {
     readonly width_mm: number;
@@ -151,8 +155,7 @@ export function computeContentHash(
     template_blocks: input.template.blocks,
     charter_id: input.charter_id,
     charter_version: input.charter_version,
-    rules_pack_id: input.rules_pack_id,
-    rules_pack_version: input.rules_pack_version,
+    rules_packs: rulesPacksInRoleOrder(input.rules_packs),
     active_langs: [...input.active_langs].sort(),
     dimensions: input.dimensions,
   });

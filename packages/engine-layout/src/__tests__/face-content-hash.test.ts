@@ -13,7 +13,7 @@ function base(over: Partial<FaceContentHashInput> = {}): FaceContentHashInput {
     ],
     template: { key: 'ftpl-dir', version: '1' },
     charter: { id: 'ch-1', version: '2' },
-    rules_pack: { key: 'intl', version: '2026.1' },
+    rules_packs: { base: { key: 'intl', version: '2026.1' } },
     active_langs: ['fr', 'en'],
     width_mm: 600, height_mm: 400,
     pictogram_ids: ['p2', 'p1'],
@@ -28,13 +28,13 @@ function hash(over: Partial<FaceContentHashInput> = {}): string {
 
 // Inputs that OMIT an optional pair (exactOptionalPropertyTypes forbids
 // setting it to undefined explicitly), built from the base fields.
-function baseWithout(omit: 'charter' | 'rules_pack'): FaceContentHashInput {
+function baseWithout(omit: 'charter' | 'rules_packs'): FaceContentHashInput {
   const b = base();
   return {
     blocks: b.blocks,
     template: b.template,
     ...(omit === 'charter' ? {} : { charter: b.charter }),
-    ...(omit === 'rules_pack' ? {} : { rules_pack: b.rules_pack }),
+    rules_packs: omit === 'rules_packs' ? {} : b.rules_packs,
     active_langs: b.active_langs, width_mm: b.width_mm, height_mm: b.height_mm,
     pictogram_ids: b.pictogram_ids,
   };
@@ -62,7 +62,7 @@ describe('computeFaceContentHash — sensitivity (§6.4)', () => {
   });
   it('template version', () => expect(hash({ template: { key: 'ftpl-dir', version: '2' } })).not.toBe(b));
   it('charter version', () => expect(hash({ charter: { id: 'ch-1', version: '3' } })).not.toBe(b));
-  it('rules pack version', () => expect(hash({ rules_pack: { key: 'intl', version: '2026.2' } })).not.toBe(b));
+  it('rules pack version', () => expect(hash({ rules_packs: { base: { key: 'intl', version: '2026.2' } } })).not.toBe(b));
   it('active language added', () => expect(hash({ active_langs: ['fr', 'en', 'de'] })).not.toBe(b));
   it('computed dimension', () => expect(hash({ width_mm: 601 })).not.toBe(b));
   it('a referenced pictogram', () => expect(hash({ pictogram_ids: ['p1', 'p3'] })).not.toBe(b));
@@ -158,7 +158,7 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
   });
 
   it('refuses (blocking RULES.PACK_NOT_BOUND) when the rules pack is absent', () => {
-    const r = computeFaceContentHash(baseWithout('rules_pack'));
+    const r = computeFaceContentHash(baseWithout('rules_packs'));
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.findings[0]?.code).toBe('RULES.PACK_NOT_BOUND');
   });
@@ -172,5 +172,36 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
     // The input carries no support id, face id, timestamp, author, version or
     // state — they cannot affect the empreinte. Two identical inputs match.
     expect(hash()).toBe(hash());
+  });
+});
+
+/**
+ * D7.1 et annexe T, §3.1.4 — le socle et la surcouche, chacun avec sa clé et
+ * sa version, dans l'ordre de leur rôle ; jamais le seul résultat de leur fusion.
+ */
+describe('computeFaceContentHash — socle et surcouche (D7.1)', () => {
+  const SOCLE = { key: 'intl', version: '2026.1' };
+  it('distinguishes two sites sharing a base with different overlays', () => {
+    expect(hash({ rules_packs: { base: SOCLE, overlay: { key: 'ci', version: '1' } } }))
+      .not.toBe(hash({ rules_packs: { base: SOCLE, overlay: { key: 'sn', version: '1' } } }));
+  });
+
+  it('marks an overlay version change', () => {
+    expect(hash({ rules_packs: { base: SOCLE, overlay: { key: 'ci', version: '1' } } }))
+      .not.toBe(hash({ rules_packs: { base: SOCLE, overlay: { key: 'ci', version: '2' } } }));
+  });
+
+  it('distinguishes the same pack as base and as overlay', () => {
+    expect(hash({ rules_packs: { base: SOCLE } })).not.toBe(hash({ rules_packs: { overlay: SOCLE } }));
+  });
+
+  it('accepts an overlay alone, which A5.8 admits', () => {
+    expect(computeFaceContentHash(base({ rules_packs: { overlay: SOCLE } })).ok).toBe(true);
+  });
+
+  it('refuses a bound pack whose key is empty', () => {
+    const r = computeFaceContentHash(base({ rules_packs: { base: SOCLE, overlay: { key: '', version: '1' } } }));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.findings[0]?.code).toBe('RULES.PACK_NOT_BOUND');
   });
 });

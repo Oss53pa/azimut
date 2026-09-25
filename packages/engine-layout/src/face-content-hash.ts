@@ -1,12 +1,13 @@
-import { empreinte, roundMm } from '@azimut/core-model';
-import type { Finding, Outcome } from '@azimut/core-model';
+import { empreinte, roundMm, rulesPacksInRoleOrder } from '@azimut/core-model';
+import type { BoundRulesPacks, Finding, Outcome } from '@azimut/core-model';
 
 /**
  * T-2.14a §3 — Content empreinte of a resolved face.
  *
  * Exactly seven elements go into the hash (§3.1): the resolved content block by
  * block in order, the template key and version, the charter id and version, the
- * rules-pack key and version, the active languages (sorted), the computed
+ * rules packs bound to the site — base and overlay, each with its key and
+ * version, in role order (§3.1.4, D7.1) —, the active languages (sorted), the computed
  * dimensions in whole millimetres, and the referenced pictogram ids (sorted).
  *
  * Everything else is excluded (§3.2): support and face ids, any timestamp,
@@ -26,8 +27,12 @@ export type FaceContentHashInput = {
   readonly template: { readonly key: string; readonly version: string };
   /** Charter id and version (§3.1.3); the whole pair omitted from the hash when absent. */
   readonly charter?: { readonly id: string; readonly version: string };
-  /** Rules-pack key and version (§3.1.4); absence is a blocking anomaly (§8). */
-  readonly rules_pack?: { readonly key: string; readonly version: string };
+  /**
+   * §3.1.4 and D7.1 — the packs bound to the site, base and overlay, each with
+   * its key and version. Both bindings enter the hash, never the result of
+   * their merge. No pack at all is a blocking anomaly (§8).
+   */
+  readonly rules_packs: BoundRulesPacks;
   /** Active languages of the face (§3.1.5); sorted here. */
   readonly active_langs: readonly string[];
   /** Computed dimensions in millimetres (§3.1.6); rounded here, null/≤0 is an error (§8). */
@@ -71,7 +76,8 @@ function dimParam(value: number | null): string | number {
 export function computeFaceContentHash(
   input: FaceContentHashInput,
 ): Outcome<string> {
-  if (input.rules_pack === undefined || input.rules_pack.key === '') {
+  const packs = rulesPacksInRoleOrder(input.rules_packs);
+  if (packs.length === 0 || packs.some(pack => pack.key === '')) {
     return { ok: false, findings: [blocking('RULES.PACK_NOT_BOUND', {})] };
   }
   const width_mm = normDim(input.width_mm);
@@ -98,7 +104,7 @@ export function computeFaceContentHash(
     charter: input.charter !== undefined
       ? { id: input.charter.id, version: input.charter.version }
       : undefined,
-    rules_pack: { key: input.rules_pack.key, version: input.rules_pack.version },
+    rules_packs: packs,
     langs: [...input.active_langs].sort(),
     dimensions: { width_mm, height_mm },
     pictograms: [...input.pictogram_ids].sort(),

@@ -47,3 +47,42 @@ export function packsByPrecedence(bindings: readonly SiteRulesBinding[]): readon
 export function isBound(bindings: readonly SiteRulesBinding[]): boolean {
   return bindings.length > 0;
 }
+
+/** La clé et la version d'un paquet de règles, telles que D7.1 les nomme. */
+export type RulesPackIdentity = { readonly key: string; readonly version: string };
+
+/**
+ * Les paquets rattachés à un site, chacun à son rôle — D7.1 et annexe T, §3.1.
+ *
+ * « Les paquets de règles rattachés au site, socle et surcouche, chacun avec
+ * sa clé et sa version. » La forme tient la règle d'A5.8 — au plus un socle,
+ * au plus une surcouche — sans qu'aucun appelant ait à la vérifier.
+ */
+export type BoundRulesPacks = {
+  readonly base?: RulesPackIdentity;
+  readonly overlay?: RulesPackIdentity;
+};
+
+/** Un paquet rattaché, avec son rôle, tel qu'il entre dans une empreinte. */
+export type RoleTaggedRulesPack = RulesPackIdentity & { readonly role: RulesPackRole };
+
+/**
+ * Les paquets d'un site dans l'ordre de leur rôle, socle puis surcouche.
+ *
+ * C'est la forme sous laquelle ils entrent dans l'empreinte de contenu, et la
+ * seule : annexe T, §3.1, « dans l'ordre de leur rôle ». Les deux rattachements
+ * y entrent, et non le seul résultat de leur fusion. Sans cela, deux sites de
+ * même socle et de surcouches différentes auraient la même empreinte, et un
+ * changement de surcouche ne marquerait rien comme périmé.
+ *
+ * Le rôle entre avec le paquet : un même paquet n'est pas la même chose selon
+ * qu'il sert de socle ou de surcouche.
+ */
+export function rulesPacksInRoleOrder(
+  packs: BoundRulesPacks,
+): readonly RoleTaggedRulesPack[] {
+  return RULES_PACK_ROLES.flatMap(role => {
+    const pack = packs[role];
+    return pack === undefined ? [] : [{ role, key: pack.key, version: pack.version }];
+  });
+}

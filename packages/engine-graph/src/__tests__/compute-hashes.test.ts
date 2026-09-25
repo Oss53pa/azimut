@@ -26,8 +26,7 @@ function resolveAtNode(
     template: tpl,
     charter_id: null,
     charter_version: null,
-    rules_pack_id: null,
-    rules_pack_version: null,
+    rules_packs: {},
     active_langs: ['fr', 'en'],
     dimensions: { width_mm: 600, height_mm: 400 },
   };
@@ -214,8 +213,8 @@ describe('D7.1 — content_hash', () => {
 
   it('changes when rules pack identity changes (D7.1)', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash({ ...input, rules_pack_id: 'pack-fr', rules_pack_version: '1.0.0' });
-    const b = computeContentHash({ ...input, rules_pack_id: 'pack-be', rules_pack_version: '1.0.0' });
+    const a = computeContentHash({ ...input, rules_packs: { base: { key: 'pack-fr', version: '1.0.0' } } });
+    const b = computeContentHash({ ...input, rules_packs: { base: { key: 'pack-be', version: '1.0.0' } } });
     expect(a).not.toBe(b);
   });
 
@@ -236,10 +235,10 @@ describe('D7.1 — content_hash', () => {
     expect(a).not.toBe(b);
   });
 
-  it('changes when rules_pack_version changes', () => {
+  it('changes when the base pack version changes', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash(input);
-    const b = computeContentHash({ ...input, rules_pack_version: 'v1.2.0' });
+    const a = computeContentHash({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.1.0' } } });
+    const b = computeContentHash({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.2.0' } } });
     expect(a).not.toBe(b);
   });
 

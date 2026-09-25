@@ -1,4 +1,4 @@
-import type { SiteData, TravelProfile, FaceTemplate } from '@azimut/core-model';
+import type { BoundRulesPacks, SiteData, TravelProfile, FaceTemplate } from '@azimut/core-model';
 import { resolveFaceContent } from './resolve-face.js';
 import { computeContentHash } from './compute-hashes.js';
 
@@ -23,8 +23,8 @@ export type FaceHashDescriptor = {
   readonly profile: TravelProfile;
   readonly charter_id: string | null;
   readonly charter_version: string | null;
-  readonly rules_pack_id: string | null;
-  readonly rules_pack_version: string | null;
+  /** D7.1 — le socle et la surcouche du site, chacun avec sa clé et sa version. */
+  readonly rules_packs: BoundRulesPacks;
   readonly active_langs: readonly string[];
   readonly dimensions: { readonly width_mm: number; readonly height_mm: number };
   /** content_hash recorded at the last compilation of this face. */
@@ -68,8 +68,7 @@ export function computeStaleFaces(
         template: face.template,
         charter_id: face.charter_id,
         charter_version: face.charter_version,
-        rules_pack_id: face.rules_pack_id,
-        rules_pack_version: face.rules_pack_version,
+        rules_packs: face.rules_packs,
         active_langs: face.active_langs,
         dimensions: face.dimensions,
       });

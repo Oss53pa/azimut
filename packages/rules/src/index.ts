@@ -29,7 +29,7 @@ export {
   scopeSpecificity,
 } from './rule-resolution.js';
 export type { LoadedRulesPack, RuleScopeContext } from './rule-resolution.js';
-export { resolveSiteRulesPack } from './resolve-site-pack.js';
+export { resolveSiteRulesPack, boundRulesPackIdentities } from './resolve-site-pack.js';
 export type { RulesPackIndex, RulesPackSource } from './resolve-site-pack.js';
 export { loadPackDirectory } from './pack-directory.js';
 export { mergeCountryOverlay } from './overlay.js';
