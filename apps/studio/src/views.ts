@@ -40,6 +40,8 @@ export type ViewId =
   | 'ad-creatives'
   // 06 — Enseignes
   | 'tenant-signs'
+  | 'tenant-rules'
+  | 'tenant-instruction'
   // 07 — Chantier
   | 'worksite'
   // 08 — Maintenance

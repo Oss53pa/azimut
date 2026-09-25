@@ -165,7 +165,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.06.name',
     summaryKey: 'module.06.summary',
     entry: 'tenant-signs',
-    screens: [],
+    entryLabelKey: 'nav.item.tenantdossiers',
+    screens: [
+      { view: 'tenant-rules', labelKey: 'nav.item.tenantrules' },
+      { view: 'tenant-instruction', labelKey: 'nav.item.tenantinstruction' },
+    ],
     // Partiel : M06.T1 ne couvre pas les plages horaires, faute de modèle
     // temporel, et M06.T2 n'a aucun objet « avis humain » à opposer au contrôle
     // automatique. M06.T3 (refus motivé, réserves qui se lèvent), M06.T4 (historique

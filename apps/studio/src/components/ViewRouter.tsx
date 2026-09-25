@@ -30,6 +30,8 @@ import { StaggeringView } from '../views/StaggeringView.js';
 import { ProfilesView } from '../views/ProfilesView.js';
 import { WallPlansView } from '../views/WallPlansView.js';
 import { AdInventoryView } from '../views/AdInventoryView.js';
+import { TenantRulesView } from '../views/TenantRulesView.js';
+import { TenantInstructionView } from '../views/TenantInstructionView.js';
 import { AdCreativesView } from '../views/AdCreativesView.js';
 import { EvacuationView } from '../views/EvacuationView.js';
 import { PlacementView } from '../views/PlacementView.js';
@@ -81,6 +83,8 @@ export function ViewRouter(
     case 'ad-inventory': return <AdInventoryView />;
     case 'ad-creatives': return <AdCreativesView />;
     case 'tenant-signs': return <TenantSignsView />;
+    case 'tenant-rules': return <TenantRulesView />;
+    case 'tenant-instruction': return <TenantInstructionView />;
     case 'worksite': return <WorksiteView />;
     case 'operations': return <OperationsView />;
     case 'budget': return <BudgetView />;

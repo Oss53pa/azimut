@@ -31,6 +31,7 @@ import { WAYFINDING_REGISTER_FR, WAYFINDING_REGISTER_EN } from './messages/wayfi
 import { FLOWS_REGISTER_FR, FLOWS_REGISTER_EN } from './messages/flows-register.js';
 import { SIGNAGE_REGISTER_FR, SIGNAGE_REGISTER_EN } from './messages/signage-register.js';
 import { COMMERCE_REGISTER_FR, COMMERCE_REGISTER_EN } from './messages/commerce-register.js';
+import { TENANT_REGISTER_FR, TENANT_REGISTER_EN } from './messages/tenant-register.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -53,6 +54,7 @@ export const MESSAGES_FR = {
   ...FLOWS_REGISTER_FR,
   ...SIGNAGE_REGISTER_FR,
   ...COMMERCE_REGISTER_FR,
+  ...TENANT_REGISTER_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -78,6 +80,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...FLOWS_REGISTER_EN,
   ...SIGNAGE_REGISTER_EN,
   ...COMMERCE_REGISTER_EN,
+  ...TENANT_REGISTER_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {
