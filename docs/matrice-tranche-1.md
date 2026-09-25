@@ -879,3 +879,93 @@ une résolution ; le modèle, lui, ne le dit pas.
 
 **Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
 du paquet du studio, sans correction au passage.
+
+## Anomalies du paquet, empreinte unique et borne, ce que la version 24 ferme
+
+| Ce que la version 24 pose | Où | État |
+| --- | --- | --- |
+| D10.0 — l'assemblage agrège les anomalies de chaque rendu qu'il embarque | `buildKioskMapFiles`, `buildKioskTree`, `buildKioskPackage` | Fait |
+| D10.0 — une marque de sécurité omise faute de fonction désignée bloque la construction | `buildKioskMapFiles`, essai `kiosk-anomalies-d10-0` | Fait |
+| D7.2 — NFC, champ absent omis, site sans paquet refusé | `computeFaceContentHash` (core-model) | Fait |
+| D7.2 — une seule implantation | `computeFaceContentHash` seule ; `computeContentHash` retiré ; essai `d7-2-empreinte-unique` | Fait |
+| Vocabulaire d'avant S8 retiré du thème et des commentaires | `undigitised_fill`, `undigitised_stroke` | Fait |
+| A5.8 — le site de borne n'a pas de rattachement : le champ est absent | `KioskSite`, `loadKioskSite` | Fait |
+| Tâche de découpage du dépôt PostgREST | Déclarée ci-dessous | Déclarée |
+
+Les cinq premiers constats de la section précédente sont fermés : les
+avertissements perdus par le paquet de borne, les deux calculs de
+l'empreinte, le vocabulaire d'avant S8, le site de borne lu comme un site sans
+paquet, et le dépôt PostgREST, dont la tâche est déclarée.
+
+**Les anomalies du paquet.** Chaque plan de niveau est rendu dans l'ordre des
+ordinaux, et chaque anomalie reçoit l'identifiant du niveau qui l'a produite
+(`level_id`). Un rendu refusé refuse le paquet. Une marque de sécurité omise
+(`PICTO.FUNCTION_NOT_DESIGNATED` sur le registre de sécurité) le refuse
+aussi. Les autres avertissements traversent l'assemblage et figurent au
+résultat du travail (`findings`). L'anomalie de la marque omise garde la
+gravité du catalogue, avertissement. C'est le paquet qui la rend bloquante.
+
+**L'empreinte unique.** La fonction est passée du moteur de mise en page à
+core-model, pour deux raisons. A4.1 interdit au moteur de graphe d'importer un
+autre moteur. L'annexe T, §2, place la fonction d'empreinte dans core-model.
+`computeStaleFaces` rend désormais un `Outcome`. Une face dont l'empreinte ne
+peut être calculée est refusée et nommée, et non plus comparée sur une
+empreinte d'une autre forme. La version du gabarit est fournie par
+l'appelant, car `FaceTemplate` n'en porte pas. Aucun code de production
+n'appelle encore `computeStaleFaces` ni `computeFaceContentHash`. La fusion ne
+change donc aucune empreinte que le code enregistre.
+
+**La borne.** `computeRoute` ne lit que le graphe, comme A7.1 le décrit. Il
+prend désormais `Pick<SiteData, 'graph'>`, ce qui ne change aucun appelant.
+Un essai refuse toute mention de `rules_bindings` dans le code d'exécution,
+hors du chargeur.
+
+### Tâche déclarée : découpage du dépôt PostgREST
+
+**Objet.** `apps/studio/src/data/postgrest-repository.ts` fait 515 lignes. A8
+limite un fichier source à 400.
+
+**Portée.** Le fichier est découpé en modules par famille de collections,
+sans changer le comportement. L'interface exposée au studio reste la même.
+
+**Échéance.** Avant la fin de la tranche 1. La tâche se fait comme une
+tâche, pas au passage d'une autre.
+
+**Vérification.** Chaîne A13.2 complète, `test:rls` compris, puisque le
+dépôt est le chemin des lectures sous cloisonnement.
+
+**État.** Non commencée.
+
+### Consigné : un commit qui porte un fichier de trop
+
+Le commit `06d777b` (« docs(matrice): nombre de lignes du dépôt PostgREST
+corrigé ») porte deux fichiers : la matrice et `docs/releve-m8-parcours.json`.
+Son message ne mentionne que la matrice.
+
+Le relevé qu'il porte date de `2026-09-25T18:48:37.417Z`. Il a été écrit par
+une exécution des essais de bout en bout antérieure à la chaîne A13.2
+retenue pour la version 23. Le relevé qui fait foi pour cette version est
+celui de `5d4fda8`, daté de `2026-09-25T18:58:08.119Z`.
+
+Le commit a été fait avec `git commit -a`, qui a pris un fichier modifié hors
+de la tâche. L'historique n'est pas réécrit. Depuis, chaque commit nomme ses
+fichiers.
+
+### Reste ouvert après la version 24
+
+**Les empreintes d'entrée et de graphe ne suivent pas D7.2.** `inputs_hash` et
+`graph_hash` sont calculées par `contentHash` (`hash.ts`) :
+- le calcul écrit `null` pour un champ absent ;
+- il ne normalise pas les chaînes en NFC.
+
+`graph_hash` est enregistrée avec la validation du graphe (`graph_validation`).
+Aligner le calcul changerait les empreintes déjà enregistrées. D7.2 parle de
+l'empreinte de contenu, et ne dit pas si ces deux empreintes en relèvent. La
+question est posée.
+
+**L'écran d'évacuation (P10)** n'existe toujours pas. `renderEvacuationPlan`
+ne dessine aucun pictogramme de sécurité. La marque figée à la construction
+ne vaut donc, aujourd'hui, que pour les plans de niveau.
+
+**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
+du paquet du studio, sans correction au passage.
