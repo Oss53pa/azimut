@@ -308,11 +308,12 @@ Deux précisions de la même version touchent du code écrit : M3 (partie M) off
 désormais cinq natures d'empreinte, la place de stationnement comprise, et S9
 fixe la notation de `work_color.hex` sur celle des jetons de la partie F.
 
-### Ce que portent les trois tables de stationnement du dépôt
+### Ce que portaient les trois tables de stationnement du dépôt
 
-Relevé sur la base de développement et sur le code, non de mémoire. La section
-S8 ne retire pas ces tables et n'en parle pas ; elles restent donc telles
-quelles jusqu'à décision de l'éditeur.
+Relevé sur la base de développement et sur le code, non de mémoire. **Tranché à
+la version 18, et fait** : voir « Le stationnement passé aux objets du socle »
+plus bas. Ce relevé est conservé parce que c'est lui qui a servi à décider, et
+que le retrait d'une table se juge sur ce qu'elle portait.
 
 **`parking`** — 8 colonnes métier : `level_id`, `geometry` (polygone, mètres),
 `name`, `free` (booléen, le parking est-il gratuit), `declared_capacity`
@@ -355,10 +356,101 @@ zone, ni un nœud du graphe de circulation, qui porte des cheminements piétons.
 C'est la seule des trois dont la suppression ne perdrait aucune fonction
 existante — et la seule dont la donnée n'est reprise nulle part.
 
-La quatrième, `parking_uncovered_area`, est conservée par la règle S-37, qui lui
-donne enfin une place au cahier des charges. Elle porte `parking_id`,
-`geometry` facultative et `reason` non blanche ; S-37 lui ajoute le nombre de
-places censées être portées et sa source, ce que la table ne porte pas encore.
+La quatrième, `parking_uncovered_area`, portait `parking_id`, `geometry`
+facultative et `reason` non blanche. La version 18 a tranché autrement que ce
+paragraphe ne le prévoyait : la marque d'une empreinte non numérisée est
+l'existence du fait qui la cible, et la table part.
+
+### Le stationnement passé aux objets du socle — version 18
+
+L'éditeur a tranché les trois tables. Fait en six commits, un par migration,
+les lectures migrées avant toute suppression, comme demandé.
+
+**Ce que chaque chose est devenue.**
+
+| Ce qui était porté | Où c'est passé |
+| --- | --- |
+| `parking.geometry`, `parking.level_id` | Les empreintes que la zone déclare, `zone.footprint_ids` |
+| `parking.name` | `zone.name` |
+| `parking.declared_capacity` | Fait `parking.capacity`, entier, ciblant la zone |
+| `parking.free` | Fait `parking.free`, booléen, ciblant la zone |
+| `parking_space.geometry` | L'empreinte de nature `parking_space` |
+| `parking_space.parking_id` | La liste d'empreintes de la zone |
+| `parking_space.kind`, `.row_label` | `parking_space.space_kind` et `.row_label`, extension de l'empreinte |
+| `parking_uncovered_area` | Fait `parking.undigitized_spaces`, entier, ciblant l'empreinte |
+| `vehicle_gate` | Rien. Le besoin est au registre, il revient avec les accès de livraison |
+| `status` et `source` de tout objet | `site_fact.status` et `site_fact.source_ref` |
+
+Les trois manques relevés à la version 17 sont tous comblés : `free` est
+devenu un fait déclaré, `kind` et `row_label` sont ce qui reste de
+`parking_space`.
+
+**La géométrie d'un parking n'est pas passée à une colonne.** L'arbitrage dit
+« géométrie et nom passent à la zone », et A5.2 donne à `zone` un nom, une
+nature et `footprint_ids`, sans géométrie — « empreintes couvertes par la zone,
+appartenance déclarée et non calculée ». L'emprise d'un parking est donc celle
+de ses empreintes, place par place, et le sol lui-même une empreinte de nature
+`outdoor` si le plan la montre. Ajouter un polygone à `zone` aurait été un choix
+de modèle qu'A5.2 ne prévoit pas, donc un arrêt A2.2. La lecture retenue ne
+demande rien de neuf et se tient : elle est déclarée ici parce qu'elle est une
+lecture, non une évidence.
+
+**L'écart de capacité est devenu quantitatif.** S-37 admet l'écart « à
+concurrence des places déclarées ». Une empreinte marquée ne vaut donc pas une
+place mais le nombre que son fait déclare, et `PARK.CAPACITY_UNEXPLAINED` porte
+ce qui manque encore. L'ancienne zone non couverte excusait l'écart entier, quel
+qu'il fût.
+
+**Le statut d'objet a disparu avec les tables.** `parking` et l'ancienne
+`parking_space` portaient chacune un statut parmi quatre et une source. Ni
+`zone` ni `footprint` d'A5.2 n'en portent, et A5.11 pose le statut d'un objet
+« là où le modèle le déclare ». Les quatre codes du domaine `PARK` survivent :
+`CAPACITY_EXCEEDED` et `CAPACITY_UNEXPLAINED` comparent le compte au fait,
+`SOURCE_MISSING` était déjà passé au fait à la version 16, et
+`PROPOSAL_AS_EXISTING` se lève désormais sur un fait de statut non publiable,
+en désignant l'objet que le livrable montre.
+
+**Décision assumée, à confirmer : `parking_uncovered_area`.** Elle n'est pas
+l'une des trois tables tranchées. Son retrait est entraîné — elle pend à
+`parking` par une clé étrangère — et S-37 lui donne un remplaçant complet, sauf
+`reason`, le motif textuel, que la règle ne nomme pas : elle nomme « le nombre
+de places qu'elle est censée porter et sa source ». La source d'un fait porte
+la seconde ; le motif libre n'a pas de place déclarée, et n'en a pas été créé.
+
+**Constaté, non traité.** Les rendus d'évacuation, de plan orienté et
+isométrique dessinent les empreintes de nature `parking_space` comme des
+empreintes de bâti, faute de distinguer les natures. C'était déjà le cas avant
+ce lot ; seul le jeu de référence, qui porte désormais quatre places, le rend
+visible. Le plan de niveau, lui, les distingue : il lit la zone et le fait de
+non-numérisation. Aucune section ne dit ce qu'un plan d'évacuation fait d'une
+place de stationnement.
+
+**Q2 gagne un propriétaire.** `parking_space` quitte les tables sans
+propriétaire déclaré pour le module 01, comme la version 18 l'y range. Elle y
+entre parce qu'elle a changé de nature : extension d'une empreinte, elle suit
+l'empreinte.
+
+### La convention de clé des faits — A5.11, version 18
+
+Trois clés déclarées, chacune avec son type attendu et sa cible :
+`parking.capacity` (entier, zone de nature `parking`), `parking.free` (booléen,
+même cible), `parking.undigitized_spaces` (entier, empreinte de nature
+`parking_space`).
+
+Le refus — « une valeur qui ne correspond pas au type déclaré est refusée » —
+s'applique à `buildCommand`, par `EDIT.COMMAND_SHAPE_INVALID` : une écriture de
+fait mal typée est une commande mal formée, et le catalogue de D2.2 est clos.
+
+**L'ensemble des clés n'est pas fermé, et c'est une lecture.** A5.11 refuse une
+valeur mal typée, en toutes lettres ; elle ne refuse pas une clé inconnue. La
+fermer bannirait `parking_gratuit`, `niveaux_parking` et les autres faits
+déclarés avant que la convention existe, que le document n'a pas retirés. La
+discipline d'inscription — « une clé nouvelle s'ajoute à cette table dans le
+même commit que son premier usage » — porte sur l'auteur du commit, non sur
+l'exécution.
+
+Deux types déclarés, `integer` et `boolean`, parce que la table en déclare
+deux. Un troisième s'ajoutera avec la première clé qui le demande.
 
 ### Le garde de câblage prend un ré-export pour un appelant
 
@@ -478,16 +570,23 @@ Hors périmètre de la tranche, et assumé comme tel à la demande de l'éditeur
 « C'est l'invariant le plus important du produit, à moitié appliqué. Corrige-le
 tout de suite. »
 
-### Reste ouvert après la version 17
+### Tranché à la version 18
 
-**Où se stocke la déclaration de S-37.** La règle dit qu'une empreinte de place
-« peut être marquée non numérisée, avec le nombre de places qu'elle est censée
-porter et sa source ». La section S9 n'ajoute aucune table pour cela, et A5.2 ne
-donne à `footprint` ni marque ni compte ni source.
+**Où se stocke la déclaration de S-37.** La question posée à la version 17 —
+la règle dit qu'une empreinte de place « peut être marquée non numérisée, avec
+le nombre de places qu'elle est censée porter et sa source », et ni S9 ni A5.2
+ne disaient où — est tranchée : la marque est l'existence du fait
+`parking.undigitized_spaces` qui cible l'empreinte. La clé manquait, la
+convention d'A5.11 la donne.
 
-La lecture qui n'invente rien est celle que la version 17 vient justement
-ouvrir : un fait de site ciblant cette empreinte, portant le compte en valeur,
-sa source dans `source_ref` et son statut. Tout y est, sauf deux choses que
-la section ne dit pas — la clé du fait, et la façon dont l'empreinte est
-« marquée ». Les inventer serait un choix de modèle non prévu en A5, et le
-contrôle de S-37 attend donc cette réponse. A2.2, point 2.
+### Reste ouvert après la version 18
+
+**Ce qu'un plan d'évacuation, un plan orienté et une vue isométrique font d'une
+place de stationnement.** Ils la dessinent comme une empreinte de bâti. Aucune
+section ne dit ce qu'ils devraient en faire, et le plan de niveau est le seul
+des quatre à distinguer les natures. Relevé ci-dessus.
+
+**Le motif d'une surface non numérisée.** `parking_uncovered_area.reason`
+disait pourquoi le plan s'arrête : bord de page, calque absent, zone illisible.
+S-37 nomme le compte et la source, pas le motif. Rien ne le porte plus, et rien
+ne dit qu'il doive l'être.
