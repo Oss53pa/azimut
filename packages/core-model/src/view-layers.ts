@@ -167,12 +167,10 @@ export function isWorkColourTargetKind(value: string): value is WorkColourTarget
  * jetons — porte sur les couleurs du produit, pas sur celles qu'un concepteur
  * se donne pour lui-même.
  *
- * **Sa forme n'est pas contrainte ici, et c'est délibéré.** La section S9 nomme
- * la colonne `hex` et n'en dit rien de plus : ni la longueur, ni la casse, ni
- * si une valeur à trois chiffres vaut. Écrire un prédicat qui trancherait
- * inventerait une règle que la section ne porte pas, et le contrôle refuserait
- * des valeurs qu'aucune règle n'interdit. Ce module traite donc `hex` comme
- * une charge utile opaque, et la question part au registre.
+ * **Sa forme est celle des jetons de la partie F**, et la version 17 la fixe :
+ * « même notation que les jetons de la partie F, six chiffres hexadécimaux
+ * précédés d'un croisillon, en majuscules ». La version 16 n'en disait rien, et
+ * ce module transportait alors `hex` sans le lire, faute de règle à opposer.
  */
 export type WorkColour = {
   readonly id: string;
@@ -183,6 +181,27 @@ export type WorkColour = {
   readonly target_id: string;
   readonly hex: string;
 };
+
+/**
+ * La notation de S9 : croisillon, six chiffres hexadécimaux, majuscules.
+ *
+ * La casse compte, et c'est la section qui le veut. Admettre les minuscules
+ * ferait coexister deux écritures de la même couleur, donc deux valeurs
+ * distinctes pour un même objet coloré, et une comparaison de colorations
+ * cesserait d'être fiable. La forme à trois chiffres est refusée pour la même
+ * raison : elle désigne une couleur que la forme longue désigne aussi.
+ */
+const WORK_COLOUR_FORM = /^#[0-9A-F]{6}$/;
+
+/**
+ * Vrai pour une valeur que `work_color.hex` peut porter, section S9.
+ *
+ * À une frontière, comme les prédicats de nature : une chaîne venue de la base
+ * n'est pas une couleur parce que la colonne s'appelle `hex`.
+ */
+export function isWorkColourHex(value: string): boolean {
+  return WORK_COLOUR_FORM.test(value);
+}
 
 /**
  * Les colorations d'un utilisateur, et de lui seul.

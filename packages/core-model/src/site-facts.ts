@@ -84,10 +84,68 @@ export type SiteFact = {
    * confondre « personne ne l'a signé » avec « signé par la chaîne vide ».
    */
   readonly declared_by?: string;
+  /**
+   * A5.11 — l'objet sur lequel le fait porte, quand il en désigne un.
+   *
+   * « Renseignés, le fait porte sur cet objet, par exemple la capacité annoncée
+   * d'un parking donné ; vides, il porte sur le site entier. L'unicité porte
+   * sur le site, la clé et la cible : un site à deux parkings déclare deux
+   * capacités. »
+   *
+   * Entière ou absente, jamais à moitié : une nature sans identifiant ne
+   * désigne aucun objet, un identifiant sans nature ne dit pas où le chercher,
+   * et les deux moitiés se liraient comme un fait de site. Le type l'exprime
+   * par un seul champ facultatif portant les deux valeurs, ce qu'une paire de
+   * champs facultatifs ne permettrait pas — la base le tient par
+   * `site_fact_target_complete`.
+   */
+  readonly target?: FactTarget;
   readonly forbidden: readonly ForbiddenWord[];
 };
+
+/**
+ * La cible d'un fait : une nature et un identifiant.
+ *
+ * `kind` n'est pas un énuméré fermé, et A5.11 n'en donne pas la liste. Le
+ * document a déjà deux références polymorphes de cette forme,
+ * `audit_log.entity` et `attachment.entity_kind`, ni l'une ni l'autre
+ * contrainte en valeur. Les contrôles qui lisent une nature la nomment
+ * eux-mêmes, depuis la section qui la leur donne — voir
+ * `PARKING_FACT_TARGET_KIND`.
+ */
+export type FactTarget = {
+  readonly kind: string;
+  readonly id: string;
+};
+
+/**
+ * S-35 — la nature de cible qu'un fait de capacité de parking désigne.
+ *
+ * « Un parking est une zone de nature `parking`. » La capacité annoncée porte
+ * donc sur une zone, et c'est la section S8 qui le dit, non ce module.
+ */
+export const PARKING_FACT_TARGET_KIND = 'zone';
 
 /** Rend la valeur d'un fait sous la forme qu'attendent les paramètres d'anomalie. */
 export function factValueText(value: FactValue): string {
   return typeof value === 'string' ? value : String(value);
+}
+
+/**
+ * Les faits d'une clé donnée qui portent sur un objet précis.
+ *
+ * Existe parce que la lecture d'un fait ciblé est exactement ce que la version
+ * 17 vient rendre possible, et qu'elle se fait de travers si on l'écrit à
+ * chaque appel : un filtre sur la seule clé rendrait aussi le fait du site
+ * entier, et un parking se verrait attribuer la capacité d'un autre.
+ */
+export function factsFor(
+  facts: readonly SiteFact[],
+  key: string,
+  target: FactTarget,
+): readonly SiteFact[] {
+  return facts.filter(fact =>
+    fact.key === key
+    && fact.target?.kind === target.kind
+    && fact.target?.id === target.id);
 }

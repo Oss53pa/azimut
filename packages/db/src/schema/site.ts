@@ -106,6 +106,11 @@ export const zone = azimut.table('zone', {
   // A5.2 — `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
   // socle, à ne pas confondre avec la zone d'orientation du module 02.
   kind: text('kind').notNull(),
+  // A5.2, version 17 — « empreintes couvertes par la zone, appartenance
+  // déclarée et non calculée, comme pour la zone d'orientation de la partie H ».
+  // Migration 0048. La base garantit le type du contenant ; la forme des
+  // éléments se valide à la frontière, comme pour `footprint.geometry`.
+  footprint_ids: jsonb('footprint_ids').notNull().default([]),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -202,6 +207,15 @@ export const siteFact = azimut.table('site_fact', {
   // `string`, et les comparaisons de chaînes qui la trient échoueraient.
   declared_at: date('declared_at').notNull(),
   declared_by: uuid('declared_by'),
+  // A5.11 — l'objet sur lequel le fait porte, facultatif. Renseigné, le fait
+  // porte sur cet objet ; vide, sur le site entier. Les deux colonnes sont
+  // entières ou absentes ensemble : `site_fact_target_complete`, migration 0047.
+  //
+  // `target_kind` n'est pas un énuméré fermé, comme `audit_log.entity` et
+  // `attachment.entity_kind`. Aucune clé étrangère sur `target_id` : une
+  // référence polymorphe ne peut pas en porter.
+  target_kind: text('target_kind'),
+  target_id: uuid('target_id'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [

@@ -74,8 +74,11 @@ export type {
 export {
   CHARTER_RULE_KINDS, resolveForbiddenCharacters, resolveMaxSentenceWords,
 } from './charter-rules.js';
-export type { SiteFact, ForbiddenWord, FactStatus, FactValue } from './site-facts.js';
-export { FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText } from './site-facts.js';
+export type { SiteFact, ForbiddenWord, FactStatus, FactValue, FactTarget } from './site-facts.js';
+export {
+  FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText,
+  PARKING_FACT_TARGET_KIND, factsFor,
+} from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
@@ -173,6 +176,7 @@ export type {
   FaceTemplate,
   TravelProfile,
   SiteGraph,
+  SiteZone,
   SiteData,
 } from './site.js';
 export { longestVariant, textExpansionFindings } from './text-expansion.js';
@@ -185,7 +189,7 @@ export {
 export {
   VIEW_LAYER_KEYS, SKETCH_LAYER_KEY, isViewLayerKey,
   stackedLayers, screenLayerKeys, printLayerKeys, auditViewLayers,
-  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind,
+  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind, isWorkColourHex,
   workColoursOf, activeWorkColourCount,
 } from './view-layers.js';
 export type {

@@ -234,6 +234,41 @@ export function isParkingZone(kind: SiteZoneKind): boolean {
   return kind === PARKING_ZONE_KIND;
 }
 
+/**
+ * Une zone du socle — A5.2.
+ *
+ * Elle entre au modèle avec la version 17, qui lui donne `footprint_ids` :
+ * « empreintes couvertes par la zone, appartenance déclarée et non calculée,
+ * comme pour la zone d'orientation de la partie H ». Sans cette liste, une
+ * zone ne portait rien et n'avait aucune raison d'être chargée ; avec elle,
+ * elle porte ce qui rend `DATA.PARKING_SPACE_WITHOUT_ZONE` calculable.
+ *
+ * **Déclarée, non calculée.** C'est le choix inverse de celui de la règle
+ * M02.W12, où l'appartenance d'un support à une zone d'orientation se calcule
+ * depuis la position de son nœud. Les deux coexistent : un support est un
+ * point, une empreinte est une surface, et deux surfaces qui se recouvrent
+ * partiellement n'ont pas de réponse évidente. La déclarer évite d'inventer un
+ * seuil de recouvrement qu'aucune section ne donne.
+ *
+ * Ne se confond pas avec `orientation_zone` du module 02, qui a sa table et
+ * ses propres natures.
+ */
+export type SiteZone = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly level_id: string;
+  readonly name: string;
+  readonly kind: SiteZoneKind;
+  /**
+   * Les empreintes que la zone couvre, dans l'ordre déclaré.
+   *
+   * Aucune clé étrangère ne la garde : la colonne est un tableau `jsonb`. Un
+   * identifiant peut donc désigner une empreinte supprimée, et c'est aux
+   * contrôles de le voir, non au type de le promettre.
+   */
+  readonly footprint_ids: readonly string[];
+};
+
 export type Footprint = {
   readonly id: string;
   readonly org_id: string;
@@ -441,6 +476,20 @@ export type SiteData = {
    */
   readonly plan_sources: readonly PlanSource[];
   readonly plan_calibrations: readonly PlanCalibration[];
+  /**
+   * A5.2 — zones du socle, avec les empreintes qu'elles couvrent.
+   *
+   * Absentes de l'entrée des moteurs jusqu'à la version 17 : une zone ne
+   * portait alors qu'un nom et une nature, et aucun contrôle n'avait de raison
+   * de la lire. `footprint_ids` change cela, et `DATA.PARKING_SPACE_WITHOUT_ZONE`
+   * est le premier contrôle qui s'en sert.
+   *
+   * Facultatif au type, parce que tous les jeux d'essai antérieurs à la
+   * version 17 n'en portent pas, et qu'exiger le champ transformerait une
+   * absence de zone en erreur de compilation là où le modèle admet un site
+   * sans zone déclarée.
+   */
+  readonly zones?: readonly SiteZone[];
   readonly footprints: readonly Footprint[];
   readonly volumes: readonly Volume[];
   readonly graph: SiteGraph;

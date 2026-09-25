@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   VIEW_LAYER_KEYS, SKETCH_LAYER_KEY, isViewLayerKey,
   stackedLayers, screenLayerKeys, printLayerKeys, auditViewLayers,
-  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind,
+  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind, isWorkColourHex,
   workColoursOf, activeWorkColourCount,
 } from '../view-layers.js';
 import type { ViewLayer, ViewLayerKey, WorkColour } from '../view-layers.js';
@@ -186,10 +186,34 @@ describe('S-8 — la coloration de travail est propre à l’utilisateur', () =>
       .toEqual(['footprint:fp-1', 'footprint:fp-2', 'footprint:fp-3']);
   });
 
-  it('transporte `hex` sans le juger, parce que S9 n’en fixe pas la forme', () => {
-    // Une valeur que nul ne défendrait comme une couleur passe quand même :
-    // trancher la forme de `hex` serait inventer une règle absente de la
-    // section. La question est au registre, non dans le code.
+  /**
+   * S9, version 17 — « même notation que les jetons de la partie F, six
+   * chiffres hexadécimaux précédés d'un croisillon, en majuscules ».
+   *
+   * Les refus s'éprouvent ici, l'acceptation dans `tests/s9-notation-couleur-de-travail`.
+   * Le partage n'est pas un caprice : A2.4 interdit d'écrire une couleur en dur
+   * hors du fichier de jetons, et le garde de `no-hardcoded-colors` couvre
+   * `packages/` et `apps/`. Aucune des valeurs ci-dessous n'est une couleur —
+   * c'est précisément ce qui se vérifie — donc aucune n'enfreint
+   * l'interdiction. Une valeur conforme, elle, en serait une : elle est donc
+   * lue depuis un jeton de la partie F, qui est l'endroit où une couleur
+   * s'écrit, et l'essai qui le fait vit là où les jetons se lisent.
+   */
+  it('refuse ce qui n’est pas la notation de S9', () => {
+    expect(isWorkColourHex('123456')).toBe(false);   // sans croisillon
+    expect(isWorkColourHex('#12345')).toBe(false);   // cinq chiffres
+    expect(isWorkColourHex('#1234567')).toBe(false); // sept chiffres
+    expect(isWorkColourHex('#GHIJKL')).toBe(false);  // hors de l'hexadécimal
+    expect(isWorkColourHex('rouge')).toBe(false);
+    expect(isWorkColourHex('')).toBe(false);
+  });
+
+  it('transporte `hex` sans le juger : ce module colore, il ne valide pas', () => {
+    // `isWorkColourHex` est un prédicat de frontière, à employer là où une
+    // valeur entre. La lecture d'une coloration déjà enregistrée ne refait pas
+    // le contrôle : elle rendrait alors une coloration muette là où la base en
+    // porte une, et le concepteur jugerait un plan sur des couleurs absentes,
+    // ce que S-9 cherche justement à empêcher.
     const opaque = colour('wc-1', 'u-moi', 'fp-1', 'ce-que-la-base-portait');
     expect(workColoursOf([opaque], 'u-moi').get('footprint:fp-1'))
       .toBe('ce-que-la-base-portait');

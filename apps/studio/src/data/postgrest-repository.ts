@@ -21,7 +21,7 @@ import type {
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
   CharterRule, CharterRuleKind,
-  SiteFact, FactStatus, FactValue, SourceClaim, DiscrepancyDecision,
+  SiteFact, FactStatus, FactValue, FactTarget, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
 import { canonicalSerialize, CHARTER_RULE_KINDS } from '@azimut/core-model';
 import {
@@ -81,6 +81,15 @@ type SiteFactRow = {
   readonly source_ref: string;
   readonly declared_at: string;
   readonly declared_by: string | null;
+  /**
+   * A5.11, version 17 — la cible du fait. Les deux colonnes sont nulles
+   * ensemble ou renseignées ensemble, `site_fact_target_complete` le garantit
+   * en base. Le mappage ne s'y fie pas pour autant : une base antérieure à la
+   * migration 0047 rendrait `undefined`, et une moitié de cible se lit comme
+   * un fait de site plutôt que comme une cible incomplète.
+   */
+  readonly target_kind: string | null;
+  readonly target_id: string | null;
 };
 
 type ForbiddenWordRow = {
@@ -169,6 +178,28 @@ function toFactValue(raw: unknown): FactValue {
   if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') return raw;
   if (raw === null || raw === undefined) return '';
   return canonicalSerialize(raw);
+}
+
+/**
+ * La cible d'un fait, ou rien.
+ *
+ * Une cible est entière ou absente, et la base le garantit. Ce mappage ne s'y
+ * fie pas : il exige les deux valeurs, non nulles et non blanches, et rend
+ * `{}` autrement. Une moitié de cible se lit alors comme un fait du site
+ * entier, qui est le sens le plus prudent — l'autre lecture attribuerait un
+ * fait à un objet que rien ne nomme.
+ *
+ * Le champ est omis plutôt que rendu `undefined` : `exactOptionalPropertyTypes`
+ * distingue les deux, et `SiteFact.target` déclare l'absence, non la présence
+ * d'une valeur indéfinie.
+ */
+function toFactTarget(
+  row: { readonly target_kind: string | null; readonly target_id: string | null },
+): { readonly target?: FactTarget } {
+  const kind = row.target_kind ?? '';
+  const id = row.target_id ?? '';
+  if (kind.trim() === '' || id.trim() === '') return {};
+  return { target: { kind, id } };
 }
 
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
@@ -384,7 +415,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         query<SiteFactRow>(
           config,
           'site_fact',
-          `select=id,key,value,status,source_ref,declared_at,declared_by&site_id=eq.${siteId}`,
+          `select=id,key,value,status,source_ref,declared_at,declared_by,target_kind,target_id&site_id=eq.${siteId}`,
         ),
         query<SourceClaimRow>(
           config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
@@ -433,6 +464,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         source_ref: row.source_ref,
         declared_at: row.declared_at,
         ...(row.declared_by === null ? {} : { declared_by: row.declared_by }),
+        ...toFactTarget(row),
         forbidden: wordsByFact.get(row.id) ?? [],
       }));
 
