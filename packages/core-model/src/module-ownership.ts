@@ -323,5 +323,4 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   site_fact_forbidden_word: 'Les mots qu’un fait interdit. A5.11 porte `site_fact`, que Q2 range au module 01 ; elle ne décrit pas cette table fille, et aucune fiche de L3 ne la range.',
   source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
   discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
-  vehicle_gate: 'Portail ou accès véhicule. Aucune section ne décrit l’objet, et Q2 ne l’attribue à aucun module.',
 };

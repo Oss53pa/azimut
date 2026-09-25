@@ -295,22 +295,6 @@ export const parkingSpace = azimut.table('parking_space', {
   uniqueIndex('parking_space_footprint_unique').on(t.footprint_id),
 ]);
 
-export const vehicleGate = azimut.table('vehicle_gate', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
-  code: text('code').notNull(),
-  role: text('role').notNull(),
-  width_m: numeric('width_m').notNull(),
-  position: jsonb('position').notNull(),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_vehicle_gate_org').on(t.org_id),
-]);
-
 /**
  * A5.2 — les points de calage d'une source de plan.
  *
