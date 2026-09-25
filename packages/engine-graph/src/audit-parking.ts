@@ -18,6 +18,11 @@ import {
  * son statut, section A5.11. Les contrôles du domaine `PARK` comparent le
  * compte des empreintes de nature `parking_space` à ce fait déclaré. » (S-36)
  *
+ * « Le comptage des places obéit à une règle unique : une empreinte de place
+ * vaut une place, sauf si elle est marquée non numérisée, auquel cas elle vaut
+ * le nombre déclaré par son fait et ne compte jamais en plus pour elle-même. »
+ * (S-38)
+ *
  * « Une surface de parking non numérisée se déclare comme telle : une empreinte
  * de nature `parking_space` peut être marquée non numérisée, avec le nombre de
  * places qu'elle est censée porter et sa source. C'est elle qui explique un
@@ -55,7 +60,17 @@ import {
  */
 export type ParkingReport = {
   readonly parking_count: number;
-  readonly space_count: number;
+  /**
+   * Les empreintes de place tracées et déclarées par une zone de parking.
+   *
+   * Ce n'est pas le nombre de places : une empreinte marquée non numérisée est
+   * une empreinte, et vaut plusieurs places. S-38 impose une règle de comptage
+   * unique, et ce champ n'en est pas un — il dit combien de surfaces ont été
+   * dessinées, non combien de places elles portent.
+   */
+  readonly digitised_count: number;
+  /** Le comptage des places, au sens de S-38. C'est lui qu'on compare au fait. */
+  readonly counted_spaces: number;
   readonly findings: readonly Finding[];
 };
 
@@ -68,38 +83,48 @@ export type ParkingInput = {
   readonly facts: readonly SiteFact[];
 };
 
-/** Les places d'un parking, et ce qu'elles totalisent une fois les marques lues. */
+/** Ce que les empreintes d'un parking donnent : des surfaces, et des places. */
 type Counted = {
-  readonly spaces: number;
-  readonly total: number;
+  /** Le nombre d'empreintes retenues. */
+  readonly digitised: number;
+  /** Le comptage des places, au sens de S-38. */
+  readonly counted: number;
 };
 
 /**
- * Ce que les empreintes d'un parking totalisent.
+ * Le comptage des places d'un parking — S-38.
  *
- * Une empreinte ordinaire vaut une place. Une empreinte marquée non numérisée
- * vaut le nombre que son fait déclare, et non un : c'est une surface, pas un
- * emplacement. Un fait de valeur nulle ou négative ne peut pas venir de la
- * base — la clé déclare un entier, et rien n'écrit un compte négatif — mais le
- * total s'en protège, faute de quoi une marque mal saisie réduirait la
- * capacité expliquée au lieu de l'augmenter.
+ * « Une empreinte de place vaut une place, sauf si elle est marquée non
+ * numérisée, auquel cas elle vaut le nombre déclaré par son fait et ne compte
+ * jamais en plus pour elle-même. Sans cette règle, chaque surface non
+ * numérisée fausserait le compte d'une unité. »
+ *
+ * C'est le `n` du second cas qui compte, et non `n + 1` : une surface non
+ * numérisée n'est pas un emplacement qui porterait en plus d'autres places,
+ * c'est l'étendue où ces places se trouvent.
+ *
+ * Un fait de valeur négative ne peut pas venir de la base — la clé déclare un
+ * entier, et rien n'écrit un compte négatif — mais le total s'en protège,
+ * faute de quoi une marque mal saisie réduirait la capacité expliquée au lieu
+ * de l'augmenter. Une marque de valeur nulle est en revanche légitime : une
+ * surface relevée dont on sait qu'elle ne porte aucune place.
  */
 function countSpaces(
   ids: readonly string[],
   spaces: ReadonlyMap<string, Footprint>,
   facts: readonly SiteFact[],
 ): Counted {
-  let spaceCount = 0;
-  let total = 0;
+  let digitised = 0;
+  let counted = 0;
   for (const id of ids) {
     if (!spaces.has(id)) continue;
-    spaceCount += 1;
+    digitised += 1;
     const declared = declaredInteger(
       facts, PARKING_UNDIGITIZED_SPACES_KEY, { kind: 'footprint', id },
     );
-    total += declared === null ? 1 : Math.max(declared, 0);
+    counted += declared === null ? 1 : Math.max(declared, 0);
   }
-  return { spaces: spaceCount, total };
+  return { digitised, counted };
 }
 
 /**
@@ -123,11 +148,13 @@ export function auditParking(
     .filter(footprint => isParkingSpaceFootprint(footprint.kind))
     .map(footprint => [footprint.id, footprint]));
 
-  let spaceCount = 0;
+  let digitisedCount = 0;
+  let countedSpaces = 0;
 
   for (const parking of parkings) {
     const counted = countSpaces(parking.footprint_ids, spaces, input.facts);
-    spaceCount += counted.spaces;
+    digitisedCount += counted.digitised;
+    countedSpaces += counted.counted;
 
     const declared = declaredInteger(
       input.facts, PARKING_CAPACITY_KEY, { kind: 'zone', id: parking.id },
@@ -137,23 +164,29 @@ export function auditParking(
     // pas en écart — il est sans annonce.
     if (declared === null) continue;
 
-    if (counted.total > declared) {
+    // Les deux comptes voyagent avec l'anomalie. `counted` est celui que S-38
+    // définit et que la comparaison emploie ; `digitised` dit combien de
+    // surfaces ont été dessinées. Quand ils diffèrent, c'est qu'une marque de
+    // S-37 explique l'écart, et le lecteur de l'anomalie doit le voir sans
+    // avoir à rouvrir le plan.
+    if (counted.counted > declared) {
       findings.push({
         code: 'PARK.CAPACITY_EXCEEDED',
         severity: 'blocking',
         entity: { kind: 'zone', id: parking.id },
-        params: { digitised: counted.total, declared },
+        params: { counted: counted.counted, digitised: counted.digitised, declared },
         ruleRef: 'S-36',
       });
-    } else if (counted.total < declared) {
+    } else if (counted.counted < declared) {
       findings.push({
         code: 'PARK.CAPACITY_UNEXPLAINED',
         severity: 'blocking',
         entity: { kind: 'zone', id: parking.id },
         params: {
-          digitised: counted.total,
+          counted: counted.counted,
+          digitised: counted.digitised,
           declared,
-          missing: declared - counted.total,
+          missing: declared - counted.counted,
         },
         ruleRef: 'S-37',
       });
@@ -166,7 +199,8 @@ export function auditParking(
 
   return {
     parking_count: parkings.length,
-    space_count: spaceCount,
+    digitised_count: digitisedCount,
+    counted_spaces: countedSpaces,
     findings,
   };
 }

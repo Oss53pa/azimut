@@ -71,7 +71,8 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
       facts: [capacite('ouest', 40)],
     });
     expect(report.findings).toEqual([]);
-    expect(report.space_count).toBe(40);
+    expect(report.counted_spaces).toBe(40);
+    expect(report.digitised_count).toBe(40);
     expect(report.parking_count).toBe(1);
   });
 
@@ -91,6 +92,8 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
     expect(finding?.ruleRef).toBe('S-37');
     expect(finding?.entity).toEqual({ kind: 'zone', id: 'souterrain' });
     expect(finding?.params['missing']).toBe(49);
+    expect(finding?.params['counted']).toBe(40);
+    expect(finding?.params['digitised']).toBe(40);
   });
 
   it('ne contrôle rien quand aucune capacité n’est annoncée', () => {
@@ -103,7 +106,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
       facts: [],
     });
     expect(report.findings).toEqual([]);
-    expect(report.space_count).toBe(3);
+    expect(report.counted_spaces).toBe(3);
   });
 
   it('refuse un dépassement, que nulle surface non numérisée n’explique', () => {
@@ -116,7 +119,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
     });
     expect(report.findings[0]?.code).toBe('PARK.CAPACITY_EXCEEDED');
     expect(report.findings[0]?.ruleRef).toBe('S-36');
-    expect(report.findings[0]?.params['digitised']).toBe(31);
+    expect(report.findings[0]?.params['counted']).toBe(31);
   });
 
   it('compte un parking sans aucune place comme entièrement non numérisé', () => {
@@ -138,7 +141,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
       facts: [capacite('ouest', 1)],
     });
     expect(report.findings).toEqual([]);
-    expect(report.space_count).toBe(1);
+    expect(report.counted_spaces).toBe(1);
   });
 
   it('ignore une empreinte déclarée qui n’est pas une place', () => {
@@ -153,7 +156,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
       facts: [capacite('ouest', 1)],
     });
     expect(report.findings).toEqual([]);
-    expect(report.space_count).toBe(1);
+    expect(report.counted_spaces).toBe(1);
   });
 
   it('est déterministe, quel que soit l’ordre reçu', () => {
@@ -221,7 +224,10 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
       facts: [capacite('ouest', 50), nonNumerisee('fp-surface', 60)],
     });
     expect(report.findings[0]?.code).toBe('PARK.CAPACITY_EXCEEDED');
-    expect(report.findings[0]?.params['digitised']).toBe(60);
+    expect(report.findings[0]?.params['counted']).toBe(60);
+    // Une seule surface dessinée, soixante places déclarées : les deux comptes
+    // diffèrent, et l'anomalie les porte tous les deux.
+    expect(report.findings[0]?.params['digitised']).toBe(1);
   });
 
   it('une marque ne vaut pas une place en plus de ce qu’elle déclare', () => {
@@ -249,7 +255,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
       footprints: [surface],
       facts: [capacite('ouest', 1), nonNumerisee('fp-surface', -5)],
     });
-    expect(report.findings[0]?.params['digitised']).toBe(0);
+    expect(report.findings[0]?.params['counted']).toBe(0);
   });
 
   it('ne lit pas la marque d’une autre empreinte', () => {
@@ -261,6 +267,70 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
     });
     expect(report.findings[0]?.code).toBe('PARK.CAPACITY_UNEXPLAINED');
     expect(report.findings[0]?.params['missing']).toBe(49);
+  });
+});
+
+/**
+ * S-38 — « Le comptage des places obéit à une règle unique : une empreinte de
+ * place vaut une place, sauf si elle est marquée non numérisée, auquel cas
+ * elle vaut le nombre déclaré par son fait et ne compte jamais en plus pour
+ * elle-même. Sans cette règle, chaque surface non numérisée fausserait le
+ * compte d'une unité. »
+ *
+ * La règle est venue après le retrait de la table des surfaces non couvertes,
+ * qui l'avait rendue nécessaire. Ces essais l'éprouvent pour elle-même, et non
+ * à travers un écart de capacité : c'est le compte qui est en cause, pas sa
+ * comparaison.
+ */
+describe('S-38 — la règle de comptage, éprouvée pour elle-même', () => {
+  function compte(marques: readonly (number | null)[]): number {
+    const fps = places('ouest', marques.length);
+    return auditParking({
+      zones: [zone('ouest', fps.map(f => f.id))],
+      footprints: fps,
+      facts: fps.flatMap((f, i) => {
+        const marque = marques[i];
+        return marque === null || marque === undefined
+          ? [] : [nonNumerisee(f.id, marque)];
+      }),
+    }).counted_spaces;
+  }
+
+  it('compte une empreinte ordinaire pour une place', () => {
+    expect(compte([null, null, null])).toBe(3);
+  });
+
+  it('compte une empreinte marquée pour ce qu’elle déclare, et rien de plus', () => {
+    // C'est l'unité de l'écart que la règle nomme : 50, jamais 51.
+    expect(compte([50])).toBe(50);
+  });
+
+  it('ne fausse pas le compte d’une unité par surface marquée', () => {
+    // Trois surfaces marquées : sans la règle, le compte vaudrait 63 au lieu
+    // de 60. C'est exactement l'erreur que S-38 prévient.
+    expect(compte([20, 20, 20])).toBe(60);
+  });
+
+  it('mêle sans confusion les places tracées et les surfaces marquées', () => {
+    expect(compte([null, null, 20, null])).toBe(23);
+  });
+
+  it('admet une marque à zéro, surface relevée qui ne porte aucune place', () => {
+    // Distincte d'une empreinte sans marque, qui vaut une. C'est la seule
+    // façon de dire « cette étendue a été regardée, elle est vide ».
+    expect(compte([0])).toBe(0);
+    expect(compte([null])).toBe(1);
+  });
+
+  it('sépare le compte des places du compte des empreintes', () => {
+    const fps = places('ouest', 2);
+    const report = auditParking({
+      zones: [zone('ouest', fps.map(f => f.id))],
+      footprints: fps,
+      facts: [nonNumerisee(fps[0]?.id ?? '', 30)],
+    });
+    expect(report.digitised_count).toBe(2);
+    expect(report.counted_spaces).toBe(31);
   });
 });
 
