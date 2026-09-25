@@ -444,6 +444,11 @@ charter_rule        (id, org_id, charter_id, kind, params jsonb)
                              'max_sentence_words')
 lexicon_term        (id, org_id, charter_id, lang, term, severity)
                     severity in ('forbidden','discouraged')
+-- Aucune valeur de charte n'est écrite dans le code : caractères interdits, limite
+-- de phrase, largeurs et tailles minimales viennent tous de ces tables.
+-- Quand la charte ne porte pas une règle, le contrôle correspondant ne s'exécute
+-- pas et le signale, comme pour un paquet de règles absent. Il n'applique aucune
+-- valeur par défaut : une règle absente n'est pas une règle permissive.
 
 rules_pack          (id, key, version, jurisdiction, effective_from, source_ref, checksum)
 rules_pack_rule     (id, rules_pack_id, code, scope, params jsonb, source_ref)
@@ -8217,3 +8222,4 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 247. A5.8 : règles de charte pour le style de texte
 248. D3.6 : règle pays non comparable refusée
 249. D2.2 : 93 codes inscrits au catalogue
+250. A5.8 : contrôle non exécuté quand la charte ne porte pas la règle
