@@ -301,20 +301,23 @@ export const parking = azimut.table('parking', {
   index('idx_parking_org').on(t.org_id),
 ]);
 
+// A5.3, section S8 — extension d'une empreinte de nature `parking_space`, une
+// ligne par empreinte, sur le modèle de `vertical_link` qui étend une arête.
+// Ne porte que ce que l'empreinte générique n'a pas à porter : le type de place
+// et son repère de travée. Migration 0049.
 export const parkingSpace = azimut.table('parking_space', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
-  kind: text('kind').notNull(),
+  footprint_id: uuid('footprint_id').notNull()
+    .references(() => footprint.id, { onDelete: 'cascade' }),
+  space_kind: text('space_kind').notNull(),
   row_label: text('row_label').notNull(),
-  geometry: jsonb('geometry'),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_parking_space_org').on(t.org_id),
-  index('idx_parking_space_parking').on(t.parking_id),
+  index('idx_parking_space_footprint').on(t.footprint_id),
+  uniqueIndex('parking_space_footprint_unique').on(t.footprint_id),
 ]);
 
 /** Là où le plan source s'arrête : sans elle, aucune extrapolation n'est visible. */
