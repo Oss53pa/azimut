@@ -85,9 +85,9 @@ export const OPERATIONS_MAINTENANCE_FR = {
   'recorded.col.support': 'Support',
   'recorded.col.detected': 'Relevée le',
   'recorded.col.state': 'État',
-  'recorded.col.notes': 'Notes',
-  'recorded.support.unknown': 'Pose non lue',
-  'recorded.note': 'Relevées sur le terrain et enregistrées en base, à la différence de la liste ci-dessus que le rapprochement calcule. Elles pendent à une pose, pas à un nœud : un point non couvert ne s’y enregistre pas.',
+  'recorded.col.detail': 'Détail',
+  'recorded.point': 'Point non couvert · {node}',
+  'recorded.note': 'Relevées sur le terrain et enregistrées en base, à la différence de la liste ci-dessus que le rapprochement calcule. Une divergence désigne un support, ou le nœud d’un point non couvert, enregistré comme absent.',
 } as const;
 
 export const OPERATIONS_MAINTENANCE_EN: Readonly<Record<keyof typeof OPERATIONS_MAINTENANCE_FR, string>> = {
@@ -169,7 +169,7 @@ export const OPERATIONS_MAINTENANCE_EN: Readonly<Record<keyof typeof OPERATIONS_
   'recorded.col.support': 'Support',
   'recorded.col.detected': 'Detected',
   'recorded.col.state': 'State',
-  'recorded.col.notes': 'Notes',
-  'recorded.support.unknown': 'Installation not read',
-  'recorded.note': 'Surveyed in the field and recorded in the database, unlike the list above, which reconciliation computes. They hang off an installation, not a node: an uncovered point is not recorded here.',
+  'recorded.col.detail': 'Detail',
+  'recorded.point': 'Uncovered point · {node}',
+  'recorded.note': 'Surveyed in the field and recorded in the database, unlike the list above, which reconciliation computes. A divergence designates a support, or the node of an uncovered point, recorded as missing.',
 };

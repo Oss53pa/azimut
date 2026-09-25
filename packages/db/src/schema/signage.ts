@@ -143,13 +143,19 @@ export const installedSupport = azimut.table('installed_support', {
 export const divergence = azimut.table('divergence', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  installed_support_id: uuid('installed_support_id').notNull().references(() => installedSupport.id, { onDelete: 'cascade' }),
+  // 0041 : rattachée au support ou au nœud d'un point non couvert ; la pose
+  // devient facultative, et `detail` remplace `notes`.
+  installed_support_id: uuid('installed_support_id').references(() => installedSupport.id, { onDelete: 'cascade' }),
+  support_id: uuid('support_id').references(() => support.id, { onDelete: 'cascade' }),
+  node_id: uuid('node_id').references(() => node.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   detected_at: timestamp('detected_at', { withTimezone: true }).notNull().defaultNow(),
   resolved_at: timestamp('resolved_at', { withTimezone: true }),
-  notes: text('notes'),
+  detail: jsonb('detail'),
 }, (t) => [
   index('idx_divergence_org').on(t.org_id),
+  index('idx_divergence_support').on(t.support_id),
+  index('idx_divergence_node').on(t.node_id),
 ]);
 
 export const workOrder = azimut.table('work_order', {

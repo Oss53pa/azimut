@@ -3,7 +3,8 @@ import { useSiteData } from '../../context/useSiteData.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import { appRepository, useMaintenanceRegistryLoad } from '../../data/index.js';
 import { DataTable, Panel, Tag, Note, SPACE, type Column } from '../../components/ui/index.js';
-import { isOpen, recordedDivergenceRows, type RecordedDivergenceRow } from './fleet-rows.js';
+import { isOpen, jsonText, recordedDivergenceRows, type RecordedDivergenceRow } from './fleet-rows.js';
+import { siteLabels } from '../register/labels.js';
 import { MaintenanceBanner } from './MaintenanceBanner.js';
 import { formatDay } from '../register/format.js';
 
@@ -13,7 +14,8 @@ type RecordedDivergencesPanelProps = {
 };
 
 /**
- * A5.7 — les divergences enregistrées en base, relevées sur le terrain. À
+ * A5.7 — les divergences enregistrées en base, relevées sur le terrain, sur
+ * un support ou sur le nœud d'un point non couvert (0041). À
  * distinguer du rapprochement, qui les calcule : les deux listes ne se
  * fusionnent pas, elles ne disent pas la même chose.
  */
@@ -24,13 +26,18 @@ export function RecordedDivergencesPanel({ siteKey }: RecordedDivergencesPanelPr
   const state = useMaintenanceRegistryLoad(repository, siteKey);
   const rows = useMemo(() => recordedDivergenceRows(state.registry), [state.registry]);
   const codes = useMemo(() => new Map(site.supports.map(s => [s.id, s.code ?? s.id])), [site]);
+  const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
+  const target = (r: RecordedDivergenceRow): string => {
+    if (r.supportId !== null) return codes.get(r.supportId) ?? r.supportId;
+    return t('recorded.point', { node: r.nodeId === null ? '' : labels.node(r.nodeId) });
+  };
 
   const columns: readonly Column<RecordedDivergenceRow>[] = [
     { id: 'kind', header: t('recorded.col.kind'), cell: r => t(`maint.kind.${r.divergence.kind}`) },
     {
       id: 'support',
       header: t('recorded.col.support'),
-      cell: r => (r.supportId === null ? t('recorded.support.unknown') : codes.get(r.supportId) ?? r.supportId),
+      cell: target,
     },
     {
       id: 'detected',
@@ -44,7 +51,7 @@ export function RecordedDivergencesPanel({ siteKey }: RecordedDivergencesPanelPr
         ? <Tag label={t('maint.divergence.open')} severity="blocking" />
         : <Tag label={t('maint.divergence.resolved')} severity="valid" />),
     },
-    { id: 'notes', header: t('recorded.col.notes'), cell: r => r.divergence.notes ?? '' },
+    { id: 'detail', header: t('recorded.col.detail'), cell: r => jsonText(r.divergence.detail) },
   ];
 
   return (

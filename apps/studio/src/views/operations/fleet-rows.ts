@@ -17,8 +17,10 @@ export type FleetRow = {
 
 export type RecordedDivergenceRow = {
   readonly divergence: RecordedDivergence;
-  /** Support de la pose, ou `null` si la pose n'est pas lue. */
+  /** Le support visé, ou `null` pour un point non couvert. */
   readonly supportId: string | null;
+  /** Le nœud du point non couvert, quand la divergence n'a pas de support. */
+  readonly nodeId: string | null;
 };
 
 export function isOpen(d: RecordedDivergence): boolean {
@@ -36,28 +38,26 @@ export function fleetRows(site: SiteData, registry: MaintenanceRegistry): readon
     if (bucket === undefined) posesBySupport.set(pose.support_id, [pose]);
     else bucket.push(pose);
   }
-  const supportOfPose = new Map(registry.installed.map(p => [p.id, p.support_id]));
-
   return [...site.supports]
     .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id))
     .map((support): FleetRow => {
       const poses = [...(posesBySupport.get(support.id) ?? [])]
         .sort((a, b) => a.installed_at.localeCompare(b.installed_at) || a.id.localeCompare(b.id));
-      const divergences = registry.divergences.filter(d => supportOfPose.get(d.installed_support_id) === support.id);
+      const divergences = registry.divergences.filter(d => d.support_id === support.id);
       return { support, poses, divergences, openDivergences: divergences.filter(isOpen).length };
     });
 }
 
 export function recordedDivergenceRows(registry: MaintenanceRegistry): readonly RecordedDivergenceRow[] {
-  const supportOfPose = new Map(registry.installed.map(p => [p.id, p.support_id]));
   return registry.divergences.map(divergence => ({
     divergence,
-    supportId: supportOfPose.get(divergence.installed_support_id) ?? null,
+    supportId: divergence.support_id,
+    nodeId: divergence.support_id === null ? divergence.node_id : null,
   }));
 }
 
-/** Portée d'un ordre de travaux, citée en texte stable. */
-export function scopeText(scope: unknown): string {
+/** Un champ JSON libre (portée d'un ordre, détail d'une divergence), cité en texte stable. */
+export function jsonText(scope: unknown): string {
   if (scope === null || scope === undefined) return '';
   if (typeof scope === 'string') return scope;
   if (typeof scope === 'object' && !Array.isArray(scope)) {

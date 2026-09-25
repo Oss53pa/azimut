@@ -78,6 +78,17 @@ rapprochement du moteur (`reconcile`) produit aussi des lignes sur des
 La recommandation technique est 1 et 3 ensemble. Elle reste une recommandation :
 les lignes existantes seraient à rattacher à leur support par jointure.
 
+**Décidé le 25/09/2026 : options 1 et 3**, appliquées par la migration
+`0041_a5_7_divergence_support_node`, avec trois précisions tranchées au même
+moment :
+
+- `support_id` et `node_id` sont facultatifs, mais l'un des deux au moins est
+  renseigné (contrainte `divergence_designates_support_or_node`) : un point
+  non couvert s'enregistre par son nœud seul ;
+- `notes` est recopiée dans `detail` sous la clé `notes`, puis retirée ;
+- un point non couvert s'enregistre sous la nature `missing`, la liste A5.7
+  restant inchangée.
+
 ### 3.3 `information_level`
 
 La base porte un entier par typologie. La maquette montre une hiérarchie
@@ -257,7 +268,7 @@ Chaque migration ajoute son entrée à `migrations/ORDRE.md` et ses tables à
 
 1. Famille A : engager la mise en service, module par module ? (aucun risque de
    données)
-2. `divergence` : option 1, 2 ou 3 de 3.2 ?
+2. ~~`divergence` : option 1, 2 ou 3 de 3.2 ?~~ Décidé : 1 et 3 (migration 0041).
 3. `information_level` : colonnes de 3.3, sans valeur normative ?
 4. `work_order` : conversion en unité mineure de 3.4 ?
 5. Fermetures : format de `edge.availability` de 4.1 ?

@@ -1,9 +1,10 @@
 /**
  * A5.7 — lecture du parc posé par l'API REST : supports posés, divergences
- * enregistrées, ordres de travaux (migration 0006).
+ * enregistrées, ordres de travaux (migrations 0006 et 0041).
  *
- * Les tables sont lues telles que la base les porte, écarts à A5.7 compris :
- * rien n'est converti ni rattaché autrement. Une valeur hors liste ne peut
+ * Une divergence désigne un support du site, ou le nœud d'un point non
+ * couvert : elle se lit par l'un et par l'autre. Le coût estimé est lu tel que
+ * la base le porte, sans conversion. Une valeur hors liste ne peut
  * venir que d'un schéma qui a dérivé ; la lecture échoue alors, plutôt que
  * d'écarter la ligne en silence.
  */
@@ -23,11 +24,13 @@ type InstalledRow = {
 };
 type DivergenceRow = {
   readonly id: string;
-  readonly installed_support_id: string;
+  readonly support_id: string | null;
+  readonly node_id: string | null;
+  readonly installed_support_id: string | null;
   readonly kind: string;
   readonly detected_at: string;
   readonly resolved_at: string | null;
-  readonly notes: string | null;
+  readonly detail: unknown;
 };
 type WorkOrderRow = {
   readonly id: string;
@@ -48,6 +51,12 @@ function drift(table: string, detail: string): RepositoryError {
  * `numeric` en nombre JSON : sa forme décimale est gardée telle quelle, sans
  * arrondi ni conversion d'unité.
  */
+function detailOf(value: unknown): Readonly<Record<string, unknown>> | null {
+  if (value === null) return null;
+  if (typeof value !== 'object' || Array.isArray(value)) throw drift('divergence', 'detail n’est pas un objet JSON');
+  return value as Readonly<Record<string, unknown>>;
+}
+
 function decimalText(value: number | string | null): string | null {
   if (value === null) return null;
   const text = String(value);
@@ -71,12 +80,19 @@ export async function loadMaintenanceRegistry(
       `select=id,scope,estimated_cost,currency,state,created_at,closed_at&site_id=eq.${siteId}`,
     ),
   ]);
-  const installedRows = await queryIn<InstalledRow>(
-    config, 'installed_support', 'support_id', supports.map(s => s.id),
-  );
-  const divergenceRows = await queryIn<DivergenceRow>(
-    config, 'divergence', 'installed_support_id', installedRows.map(i => i.id),
-  );
+  const buildings = await query<{ readonly id: string }>(config, 'building', `select=id&site_id=eq.${siteId}`);
+  const levels = await queryIn<{ readonly id: string }>(config, 'level', 'building_id', buildings.map(b => b.id));
+  const supportIds = supports.map(s => s.id);
+  const [installedRows, nodes, bySupport] = await Promise.all([
+    queryIn<InstalledRow>(config, 'installed_support', 'support_id', supportIds),
+    queryIn<{ readonly id: string }>(config, 'node', 'level_id', levels.map(l => l.id)),
+    queryIn<DivergenceRow>(config, 'divergence', 'support_id', supportIds),
+  ]);
+  // Un point non couvert n'a que son nœud : il se lit par là. Une ligne qui
+  // porte support et nœud revient par les deux lectures ; elle n'est gardée
+  // qu'une fois.
+  const byNode = await queryIn<DivergenceRow>(config, 'divergence', 'node_id', nodes.map(n => n.id));
+  const divergenceRows = [...new Map([...bySupport, ...byNode].map(r => [r.id, r])).values()];
 
   const installed = installedRows
     .map((r): InstalledSupport => ({
@@ -93,11 +109,13 @@ export async function loadMaintenanceRegistry(
       if (!isDivergenceKind(r.kind)) throw drift('divergence', `kind « ${r.kind} »`);
       return {
         id: r.id,
+        support_id: r.support_id,
+        node_id: r.node_id,
         installed_support_id: r.installed_support_id,
         kind: r.kind,
         detected_at: r.detected_at,
         resolved_at: r.resolved_at,
-        notes: r.notes,
+        detail: detailOf(r.detail),
       };
     })
     .sort((a, b) => b.detected_at.localeCompare(a.detected_at) || a.id.localeCompare(b.id));

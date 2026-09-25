@@ -1,12 +1,12 @@
 /**
- * A5.7 — la couche de divergence telle que la base la porte (migration 0006) :
- * supports posés, divergences enregistrées, ordres de travaux.
+ * A5.7 — la couche de divergence telle que la base la porte : supports posés,
+ * divergences enregistrées, ordres de travaux (migrations 0006 et 0041).
  *
- * Ce registre suit la base, pas A5.7, là où les deux diffèrent : la
- * divergence pend au support posé et porte `notes`, le coût estimé d'un ordre
- * de travaux est un décimal d'unité majeure. Ces écarts attendent une
- * décision (proposition de schéma, 3.2 et 3.4) ; les lire tels quels ne
- * tranche rien et ne transforme aucune donnée.
+ * La divergence désigne un support, ou le nœud d'un point de décision non
+ * couvert (0041, décision sur la proposition de schéma 3.2, options 1 et 3) ;
+ * la pose n'y est plus qu'un rattachement facultatif. Le coût estimé d'un
+ * ordre de travaux reste un décimal d'unité majeure : cet écart à H8 attend
+ * sa décision (3.4), et le lire tel quel ne transforme rien.
  *
  * Comme le vocabulaire, ce registre ne rejoint pas `SiteData` : il se lit à
  * part, par les écrans du module 08. Les énumérés recopient les CHECK de 0006 ;
@@ -32,12 +32,21 @@ export type InstalledSupport = {
 
 export type RecordedDivergence = {
   readonly id: string;
-  readonly installed_support_id: string;
+  /**
+   * Le support visé, ou `null` pour un point non couvert. La base garantit
+   * qu'au moins l'un de `support_id` et `node_id` est renseigné (0041).
+   */
+  readonly support_id: string | null;
+  /** Le nœud d'un point de décision sans support, hors A5.7 (0041). */
+  readonly node_id: string | null;
+  /** La pose sur laquelle la divergence a été relevée, s'il y en a une. */
+  readonly installed_support_id: string | null;
   readonly kind: DivergenceKind;
   readonly detected_at: string;
   /** `null` tant que la divergence est ouverte. */
   readonly resolved_at: string | null;
-  readonly notes: string | null;
+  /** JSON libre (A5.7). Les anciennes notes y sont sous la clé `notes`. */
+  readonly detail: Readonly<Record<string, unknown>> | null;
 };
 
 export type WorkOrder = {

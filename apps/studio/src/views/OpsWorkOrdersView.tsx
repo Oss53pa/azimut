@@ -6,7 +6,7 @@ import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter, type Severity,
 } from '../components/ui/index.js';
-import { scopeText } from './operations/fleet-rows.js';
+import { jsonText } from './operations/fleet-rows.js';
 import { MaintenanceBanner } from './operations/MaintenanceBanner.js';
 import { formatDay, formatNumber } from './register/format.js';
 
@@ -68,7 +68,7 @@ export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Elem
     { id: 'created', header: t('workorders.col.created'), cell: o => day(o.created_at) },
     { id: 'closed', header: t('workorders.col.closed'), cell: o => day(o.closed_at) },
     { id: 'cost', header: t('workorders.col.cost'), numeric: true, cell: cost },
-    { id: 'scope', header: t('workorders.col.scope'), cell: o => scopeText(o.scope) || EMPTY },
+    { id: 'scope', header: t('workorders.col.scope'), cell: o => jsonText(o.scope) || EMPTY },
   ];
 
   const inspector = selected === null
@@ -85,7 +85,7 @@ export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Elem
               { id: 'state', label: t('workorders.col.state'), value: stateLabel(selected.state) },
               { id: 'created', label: t('workorders.col.created'), value: day(selected.created_at) },
               { id: 'closed', label: t('workorders.col.closed'), value: day(selected.closed_at) },
-              { id: 'scope', label: t('workorders.col.scope'), value: scopeText(selected.scope) || EMPTY },
+              { id: 'scope', label: t('workorders.col.scope'), value: jsonText(selected.scope) || EMPTY },
             ],
           },
           {
