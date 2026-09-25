@@ -200,15 +200,31 @@ traitées :
   celle de leurs appelants, et l'absence de règle laisse le contrôle non exercé
   sans valeur par défaut, comme A5.8 l'exige depuis la version 14.
 
-Écart ouvert par cette mise en conformité : une règle de charte déclarée mais
-dont les paramètres ne se lisent pas ne lève aucune anomalie, le catalogue n'en
-ayant pas de code et le domaine `CHARTER` ayant été retiré de D2.1. Elle est
-écartée, et son contrôle retombe parmi les non exercés.
+**Clos par la version 15.** Les deux écarts ouverts par la version 14 sont
+tranchés par l'éditeur :
 
-Le statut des objets de stationnement garde ses quatre valeurs, dont `retire`,
-qu'A5.11 ne donne pas : le replier sur les trois statuts d'un fait rendrait un
-objet retiré inexprimable. Les objets eux-mêmes restent hors du cahier des
-charges, et Q2 ne les attribue à aucun module.
+- une règle de charte déclarée dont les paramètres ne se lisent pas lève
+  `CHARTER.RULE_MALFORMED`, bloquant. Le domaine `CHARTER` est rétabli en D2.1,
+  et le catalogue écrit la distinction : une règle absente ne s'exécute pas et
+  le signale, une règle déclarée et cassée bloque, parce qu'elle a été voulue.
+  Le contrôle sort des non exercés : il a lu la charte et l'a refusée, ce qui
+  n'est pas la même chose que n'avoir rien à opposer ;
+- le statut d'un fait et celui d'un objet restent distincts, et A5.11 le dit
+  désormais en toutes lettres. Pas de seconde migration. Le statut des objets
+  de stationnement garde ses quatre valeurs, dont `retire`, qu'A5.11 ne donne
+  pas et n'a pas à donner.
+
+Défaut trouvé en appliquant le premier point, et corrigé par la migration
+0045 : la contrainte de `charter_rule.kind` n'admettait que cinq des sept
+natures d'A5.8, celles de la migration 0006. Les deux natures que les contrôles
+de rédaction lisent — `forbidden_character` et `max_sentence_words` — n'étaient
+pas stockables. Le chemin existait sans que rien puisse l'emprunter.
+
+Reste hors du cahier des charges, et déclaré comme tel : l'objet `parking`
+lui-même, sa géométrie et celle d'une place. Q2 ne les attribue à aucun module.
+Les cinq natures de règle de charte qu'aucun contrôle ne consomme restent sans
+forme de paramètres déclarée, volontairement : chacune sera définie quand un
+contrôle la lira.
 
 Les domaines d'anomalie et les codes hors catalogue sont clos par la version 13
 du consolidé : `PARK` et `DOC` y sont admis, `CHARTER` est retiré du dépôt, et

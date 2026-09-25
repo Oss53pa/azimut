@@ -266,8 +266,10 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
  * Un parking, avec sa capacité annoncée et sa source.
  *
  * « Capacité annoncée d'un parking » est l'exemple même d'un fait du site en
- * A5.11. L'objet, lui, n'y est pas décrit : voir l'écart déclaré dans
- * `core-model/parking.ts`.
+ * A5.11, et la section distingue explicitement le statut d'un fait, porté par
+ * `site_fact`, de celui d'un objet, porté par l'objet. Les colonnes `status`
+ * et `source` de cette table sont donc à leur place. L'objet lui-même n'est
+ * pas décrit par le cahier des charges : voir `core-model/parking.ts`.
  */
 export const parking = azimut.table('parking', {
   id: uuid('id').primaryKey().defaultRandom(),
