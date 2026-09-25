@@ -90,6 +90,8 @@ non plus — elle n'en retire que les clés étrangères.
 0044_a5_11_site_fact_status
 0045_a5_8_charter_rule_text_kinds
 0046_a5_2_footprint_parking_space
+0047_a5_11_site_fact_target
+0048_a5_2_zone_footprint_ids
 ```
 
 ## Règle pour la suite
