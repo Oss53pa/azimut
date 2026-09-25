@@ -98,6 +98,7 @@ non plus — elle n'en retire que les clés étrangères.
 0052_drop_vehicle_gate
 0053_a5_4_pictogram_function_key
 0054_a5_4_function_scope_by_registry
+0055_a5_4_safety_pictogram_requires_pack
 ```
 
 ## Règle pour la suite
