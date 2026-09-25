@@ -276,31 +276,6 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
   index('idx_discrepancy_decision_org').on(t.org_id),
 ]);
 
-/**
- * Un parking, avec sa capacité annoncée et sa source.
- *
- * « Capacité annoncée d'un parking » est l'exemple même d'un fait du site en
- * A5.11, et la section distingue explicitement le statut d'un fait, porté par
- * `site_fact`, de celui d'un objet, porté par l'objet. Les colonnes `status`
- * et `source` de cette table sont donc à leur place. L'objet lui-même n'est
- * pas décrit par le cahier des charges : voir `core-model/parking.ts`.
- */
-export const parking = azimut.table('parking', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
-  geometry: jsonb('geometry').notNull(),
-  name: text('name').notNull(),
-  free: boolean('free').notNull(),
-  declared_capacity: integer('declared_capacity').notNull(),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_parking_org').on(t.org_id),
-]);
-
 // A5.3, section S8 — extension d'une empreinte de nature `parking_space`, une
 // ligne par empreinte, sur le modèle de `vertical_link` qui étend une arête.
 // Ne porte que ce que l'empreinte générique n'a pas à porter : le type de place

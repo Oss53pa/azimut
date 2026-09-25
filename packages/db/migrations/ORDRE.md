@@ -94,6 +94,7 @@ non plus — elle n'en retire que les clés étrangères.
 0048_a5_2_zone_footprint_ids
 0049_a5_3_parking_space_extension
 0050_s_37_drop_parking_uncovered_area
+0051_s_35_drop_parking
 ```
 
 ## Règle pour la suite
