@@ -63,7 +63,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'LAYOUT.LEXICON_DISCOURAGED_TERM': 'Term discouraged by charter',
   'LAYOUT.FACT_CONTRADICTED': 'Text contradicting a site fact',
   'LAYOUT.SOURCE_DISCREPANCY_OPEN': 'Unsettled discrepancy between sources, retained value to be confirmed',
-  'PARK.CAPACITY_UNEXPLAINED': 'Digitised spaces below the declared capacity, with no uncovered area declared',
+  'PARK.CAPACITY_UNEXPLAINED': 'Digitised spaces below the declared capacity, with no undigitised area declared',
   'PARK.CAPACITY_EXCEEDED': 'Digitised spaces above the declared capacity',
   'PARK.SOURCE_MISSING': 'Parking object without a source',
   'PARK.PROPOSAL_AS_EXISTING': 'Non-existing parking object carried to a deliverable',

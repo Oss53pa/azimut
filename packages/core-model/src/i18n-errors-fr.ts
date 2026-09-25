@@ -63,7 +63,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'LAYOUT.LEXICON_DISCOURAGED_TERM': 'Terme déconseillé par la charte',
   'LAYOUT.FACT_CONTRADICTED': 'Texte contraire à un fait du site',
   'LAYOUT.SOURCE_DISCREPANCY_OPEN': 'Écart entre sources non arbitré, valeur retenue à confirmer',
-  'PARK.CAPACITY_UNEXPLAINED': 'Places numérisées en deçà de la capacité annoncée, sans zone non couverte déclarée',
+  'PARK.CAPACITY_UNEXPLAINED': 'Places numérisées en deçà de la capacité annoncée, sans surface non numérisée déclarée',
   'PARK.CAPACITY_EXCEEDED': 'Places numérisées au-delà de la capacité annoncée',
   'PARK.SOURCE_MISSING': 'Objet de stationnement sans source',
   'PARK.PROPOSAL_AS_EXISTING': 'Objet de stationnement non existant porté à un livrable',
