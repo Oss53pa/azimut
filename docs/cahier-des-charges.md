@@ -348,8 +348,17 @@ Contrainte : `edge.length_m` est calculé, jamais saisi. Une arête relie deux n
 ```sql
 category            (id, org_id, sector_key, code, parent_id)
 pictogram           (id, org_id, category_id, family_id, registry, code, svg_path,
-                     source, standard_ref, rules_pack_id, comprehension_state,
-                     comprehension_rate numeric, tested_at, created_by)
+                     source, standard_ref, rules_pack_id, function_key,
+                     comprehension_state, comprehension_rate numeric, tested_at,
+                     created_by)
+-- function_key : à quoi sert ce pictogramme, et non d'où il vient. C'est par elle
+-- qu'un moteur demande « le pictogramme d'accessibilité » sans connaître son code.
+-- Vocabulaire à espace de noms, enrichi dans le même commit que son premier usage,
+-- par exemple access.accessible, access.hearing_loop, service.restroom.
+-- Pour le registre de sécurité, la désignation vient du paquet de règles et n'est
+-- jamais saisie : c'est lui qui porte ces pictogrammes. Pour le registre
+-- d'orientation, elle est libre. Une fonction est désignée au plus une fois par
+-- registre et par site.
                     registry in ('safety','wayfinding')
                     source in ('rules_pack','library','custom')
                     comprehension_state in ('untested','tested','failed')
@@ -4460,6 +4469,8 @@ Aucune image photographique, aucune illustration décorative, aucun contenu sous
 | `REVIEW.ANNOTATION_OPEN` | bloquant | Annotation de révision non traitée à la clôture |
 | `PICTO.SAFETY_EDIT_DENIED` | bloquant | Modification d'un pictogramme du registre de sécurité |
 | `PICTO.UNTESTED` | information | Pictogramme d'orientation non soumis à essai de compréhension |
+| `PICTO.FUNCTION_NOT_DESIGNATED` | avertissement | Aucun pictogramme ne porte la fonction demandée. Le rendu omet la marque et le signale, il n'en dessine jamais une autre |
+| `PICTO.FUNCTION_AMBIGUOUS` | bloquant | Deux pictogrammes d'un même registre portent la même fonction sur un site |
 | `PICTO.RASTER_CONTENT` | bloquant | Image en mode point dans un pictogramme |
 | `PICTO.FAMILY_INCONSISTENT` | avertissement | Épaisseur ou grille incohérente avec la famille |
 | `LIBRARY.DUPLICATE_ON_IMPORT` | avertissement | Symbole déjà présent dans la bibliothèque |
@@ -4701,6 +4712,8 @@ Points ouverts par les parties L à Q, qui n'avaient pas été inscrits ici.
 | Correspondance des pays vers les devises, et exposant de chaque devise, avec leur source documentaire et ses conditions de réutilisation | Atlas Studio | Avant la première facture | V |
 | Format d'export de géométrie vers les outils de conception assistée, section S5 | Développement, procédure d'arrêt et de demande | Avant le premier export de géométrie | S |
 | Accès de livraison et portails véhicules : objets, attributs et usages. Retirés du modèle faute d'usage, à reprendre quand la livraison entrera au produit | Atlas Studio | À l'entrée des accès de livraison | S |
+| Grille de construction des pictogrammes présente à deux endroits, attribut déclaré de la famille et valeur écrite dans le moteur de composition. Deux sources pour une même valeur finissent par diverger | Développement | À la prochaine tâche touchant la composition de face | S |
+| Poids du paquet du studio, au-dessus du seuil d'avertissement de l'outil de construction. Sujet réel sur une connexion médiocre, qui est le cas courant des marchés visés | Développement | Avant la première mise en service chez un client | S |
 | Fournisseur et nature du modèle de l'assistant, compatibles avec la traçabilité de la section S7.2 | Atlas Studio | Avant l'incrément 5 | S |
 | Régime juridique des données transmises à l'assistant : sous-traitance, localisation, conservation | Conseil juridique | Avant toute activation réelle de l'assistant | L |
 | Coût d'usage de l'assistant et modèle de facturation associé | Atlas Studio | Avant la mise en marché de l'option | S |
@@ -8022,7 +8035,7 @@ Aucune table propre au stationnement n'existe en dehors de cette extension. En p
 **S-39.** Rendu d'une place de stationnement, dans toutes les vues :
 
 - Plan de niveau et plan orienté : contour léger, sans libellé. Une place ne porte ni occupant ni catégorie, et ne doit pas concurrencer visuellement les cellules commerciales.
-- Place accessible : elle porte le pictogramme normalisé du registre de sécurité, jamais un symbole maison, section A1.2, invariant 3.
+- Place accessible : elle porte le pictogramme du registre de sécurité désigné par la fonction d'accessibilité, section A5.4, jamais un symbole maison, section A1.2, invariant 3. Si aucune fonction n'est désignée, la marque est omise et signalée par `PICTO.FUNCTION_NOT_DESIGNATED` : le rendu ne dessine jamais un pictogramme de remplacement.
 - Vue isométrique : la place reste au sol, sans volume.
 - Plan d'évacuation : elle n'y apparaît pas, sauf si elle porte un cheminement d'évacuation.
 
@@ -8543,3 +8556,7 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 271. K3.8 : portails véhicules inscrits comme besoin possible
 272. Q2 : propriétaire de l'extension parking_space
 273. S8 : comptage des places non numérisées et rendu d'une place
+274. A5.4 : désignation de fonction d'un pictogramme
+275. D2.2 : deux codes de désignation de fonction
+276. S-39 : marque d'accessibilité fondée sur la désignation de fonction
+277. K3.8 : grille des pictogrammes et poids du paquet inscrits
