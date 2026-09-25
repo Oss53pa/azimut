@@ -20,6 +20,7 @@ import type {
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
+  CharterRule, ForbiddenCharacterRange,
   SiteFact, FactStatus, FactValue, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
 import { canonicalSerialize } from '@azimut/core-model';
@@ -58,6 +59,11 @@ type CountryRow = {
 };
 
 type LegalEntityRow = { readonly id: string; readonly legal_name: string };
+
+type CharterRuleRow = {
+  readonly kind: string;
+  readonly params: unknown;
+};
 
 type LexiconTermRow = {
   readonly lang: string;
@@ -106,6 +112,50 @@ type DecisionRow = {
  */
 function toSeverity(raw: string): LexiconSeverity {
   return raw === 'discouraged' ? 'discouraged' : 'forbidden';
+}
+
+/**
+ * Une règle de charte, lue depuis `charter_rule` — A5.8.
+ *
+ * `params` est du `jsonb` : la forme n'est garantie par rien, et une règle dont
+ * les paramètres ne se lisent pas est écartée plutôt que devinée. C'est la même
+ * discipline qu'un paquet de règles, D3.4 : aucune valeur de repli. Une règle
+ * écartée fait retomber son contrôle parmi les non exercés, ce qui se voit dans
+ * le rapport ; lui inventer des paramètres signalerait au nom d'une charte qui
+ * n'a rien demandé.
+ *
+ * Seules les deux natures que le dépôt sait opposer sont lues. Les six autres
+ * d'A5.8 n'ont pas de forme de paramètres déclarée, et aucun contrôle ne les
+ * consomme : les charger sans les comprendre ne servirait rien.
+ */
+function toCharterRule(row: CharterRuleRow): CharterRule | null {
+  const params: unknown = row.params;
+  if (typeof params !== 'object' || params === null) return null;
+  const record = params as Readonly<Record<string, unknown>>;
+
+  if (row.kind === 'forbidden_character') {
+    const raw = record['characters'];
+    if (!Array.isArray(raw)) return null;
+    const characters: ForbiddenCharacterRange[] = [];
+    for (const entry of raw) {
+      if (typeof entry !== 'object' || entry === null) return null;
+      const range = entry as Readonly<Record<string, unknown>>;
+      const from = range['from'];
+      const to = range['to'];
+      const name = range['name'];
+      if (!Number.isInteger(from) || !Number.isInteger(to) || typeof name !== 'string') return null;
+      characters.push({ from: from as number, to: to as number, name });
+    }
+    return { kind: 'forbidden_character', params: { characters } };
+  }
+
+  if (row.kind === 'max_sentence_words') {
+    const maximum = record['maximum'];
+    if (!Number.isInteger(maximum)) return null;
+    return { kind: 'max_sentence_words', params: { maximum: maximum as number } };
+  }
+
+  return null;
 }
 
 /**
@@ -362,7 +412,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         ),
       ]);
 
-      const [lexiconRows, wordRows] = await Promise.all([
+      const [charterRuleRows, lexiconRows, wordRows] = await Promise.all([
+        queryIn<CharterRuleRow>(
+          config, 'charter_rule', 'charter_id', charters.map(c => c.id),
+        ),
         queryIn<LexiconTermRow>(
           config, 'lexicon_term', 'charter_id', charters.map(c => c.id),
         ),
@@ -378,6 +431,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         if (bucket === undefined) wordsByFact.set(row.site_fact_id, [word]);
         else bucket.push(word);
       }
+
+      const charter_rules: CharterRule[] = charterRuleRows
+        .map(toCharterRule)
+        .filter((rule): rule is CharterRule => rule !== null);
 
       const lexicon: LexiconTerm[] = lexiconRows.map(row => ({
         lang: row.lang,
@@ -411,7 +468,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         };
       }
 
-      return { lexicon, facts, claims, decisions };
+      return { charter_rules, lexicon, facts, claims, decisions };
     },
 
     /**

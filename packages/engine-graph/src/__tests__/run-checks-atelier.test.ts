@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { runChecks } from '../run-checks.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
+import type { CharterRule } from '@azimut/core-model';
 
 describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
   const terms = [{ lang: 'fr', term: 'client', severity: 'forbidden' as const }];
@@ -25,13 +26,26 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
     { key: 'niveaux', source: 'Charte', value: '3', recorded_on: '2026-01-10' },
     { key: 'niveaux', source: 'Plans', value: '2', recorded_on: '2026-05-04' },
   ];
+  // A5.8 — les deux règles de rédaction, portées par la charte du site.
+  const charterRules: readonly CharterRule[] = [
+    {
+      kind: 'forbidden_character',
+      params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
+    },
+    { kind: 'max_sentence_words', params: { maximum: 25 } },
+  ];
 
-  it('range les trois contrôles en non exercés quand le site ne déclare rien', () => {
+  it('range les cinq contrôles en non exercés quand le site ne déclare rien', () => {
     const r = runChecks(refMinimal);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
+    // Les deux contrôles de rédaction ont rejoint la liste : A5.8 range leurs
+    // limites parmi les règles de charte, et un site sans charte n'a rien à
+    // leur opposer.
     expect(r.value.checks_undeclared).toEqual([
       'charter_lexicon',
+      'forbidden_characters',
+      'sentence_length',
       'site_facts',
       'source_discrepancies',
     ]);
@@ -58,7 +72,7 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
         value: 'Paiement et service client',
       }],
     };
-    const r = runChecks(site, { lexicon: terms, facts, claims });
+    const r = runChecks(site, { charter_rules: charterRules, lexicon: terms, facts, claims });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const codes = r.value.findings.map((f) => f.code);

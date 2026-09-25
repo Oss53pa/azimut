@@ -84,12 +84,12 @@ export type {
   PictogramCreation,
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
-export { auditTypography, FORBIDDEN_CHARACTERS } from './audit-typography.js';
+export { auditTypography } from './audit-typography.js';
 export {
-  auditSentenceLength, splitSentences, countWords, MAX_WORDS_PER_SENTENCE,
+  auditSentenceLength, splitSentences, countWords,
 } from './audit-sentence-length.js';
 export type { SentenceLengthReport } from './audit-sentence-length.js';
-export type { TypographyReport, ForbiddenCharacterRange } from './audit-typography.js';
+export type { TypographyReport } from './audit-typography.js';
 export { runChecks } from './run-checks.js';
 export type {
   CheckReport, SiteVocabulary, CheckMode, CheckOptions,

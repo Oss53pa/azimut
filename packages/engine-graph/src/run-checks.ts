@@ -56,13 +56,17 @@ export type CheckOptions = {
   readonly mode?: CheckMode;
 };
 
-/** Contrôles du socle, toujours exercés, quel que soit ce que le site déclare. */
+/**
+ * Contrôles du socle, toujours exercés, quel que soit ce que le site déclare.
+ *
+ * Les deux contrôles de rédaction en sont sortis : A5.8 range leurs limites
+ * parmi les règles de charte, et un site sans charte n'a rien à leur opposer.
+ * Ils rejoignent donc les contrôles qui dépendent d'une déclaration.
+ */
 const BASE_CHECKS: readonly string[] = [
   'all_vacant_category',
   'approved_version_immutable',
   'duplicate_display_name',
-  'forbidden_characters',
-  'sentence_length',
   'incomplete_lang_coverage',
   'level_calibrated',
   'naming_collision',
@@ -94,18 +98,22 @@ export function runChecks(
   findings.push(...checkSiteOriginCoherent(site));
   findings.push(...checkApprovedVersionImmutable(site));
 
-  // QC-06 (complément atelier) n'attend aucune déclaration : un caractère
-  // interdit l'est sans qu'une charte ait à le dire, et dans toutes les langues.
-  // Il tourne donc toujours, aux deux modes, puisque le contrôle est bloquant
-  // sans condition de destination — contrairement à QC-21.
-  findings.push(...auditTypography(site).findings);
-
-  // QC-20 (complément atelier), voisin du précédent et signalant : il n'attend
-  // aucune déclaration non plus, et ne juge que le texte libre d'un gabarit.
-  findings.push(...auditSentenceLength(site).findings);
-
   const run: string[] = [...BASE_CHECKS];
   const undeclared: string[] = [];
+
+  // A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
+  // ne s'exécute pas et le signale, comme pour un paquet de règles absent. »
+  // Les deux contrôles de rédaction lisent la charte du site ; le rapport dit
+  // lequel a tourné, et aucune limite n'est appliquée par défaut.
+  const charterRules = vocabulary.charter_rules ?? [];
+
+  const typography = auditTypography(site, charterRules);
+  findings.push(...typography.findings);
+  (typography.applied ? run : undeclared).push('forbidden_characters');
+
+  const sentences = auditSentenceLength(site, charterRules);
+  findings.push(...sentences.findings);
+  (sentences.applied ? run : undeclared).push('sentence_length');
 
   const lexicon = vocabulary.lexicon ?? [];
   if (lexicon.length === 0) {
@@ -156,7 +164,9 @@ export function runChecks(
         'contraste',
         'lisibilite',
       ],
-      checks_undeclared: undeclared,
+      // Trié, comme les exercés : l'ordre d'un rapport ne dit rien de l'ordre
+      // dans lequel le code a posé ses questions (A9).
+      checks_undeclared: undeclared.sort((a, b) => a.localeCompare(b)),
       findings,
     },
     warnings: [],

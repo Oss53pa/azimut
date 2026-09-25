@@ -3,6 +3,7 @@ import { createAuditSiteHandler } from '../audit-site.js';
 import type { AuditSiteContext } from '../audit-site.js';
 import type { Job } from '../job.js';
 import { refMinimal, refBroken, refMultilevel } from '@azimut/testkit';
+import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
 
 function makeJob(payload?: Record<string, unknown>): Job {
   return {
@@ -253,5 +254,51 @@ describe('mode d’audit (complément atelier, P1 et QC-21)', () => {
     const handler = createAuditSiteHandler({ site: avecProposition });
     const result = await handler(makeJob({ mode: 'production' }));
     expect(result['mode']).toBe('atelier');
+  });
+});
+
+/**
+ * A5.8 — la charte entre dans la signature des contrôles de rédaction, et donc
+ * dans celle de leurs appelants. Le service de compilation en est un.
+ *
+ * Sans charte rattachée, les deux contrôles ne s'exécutent pas et le rapport
+ * les nomme. C'est la différence entre un audit qui n'a rien trouvé et un
+ * audit qui n'avait rien à opposer, et elle doit se lire dans le résultat du
+ * travail, pas seulement dans le code.
+ */
+describe('A5.8 — la charte entre dans la signature de l’appelant', () => {
+  const CHARTE: readonly CharterRule[] = [
+    {
+      kind: 'forbidden_character',
+      params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
+    },
+    { kind: 'max_sentence_words', params: { maximum: 25 } },
+  ];
+
+  function avecDenomination(value: string): SiteData {
+    const first = refMultilevel.destination_names[0];
+    if (first === undefined) throw new Error('aucune dénomination de référence');
+    return { ...refMultilevel, destination_names: [{ ...first, value }] };
+  }
+
+  it('nomme les contrôles non exercés quand aucune charte n’est rattachée', async () => {
+    const handler = createAuditSiteHandler({ site: avecDenomination('Nord — Sud') });
+    const result = await handler(makeJob());
+    const undeclared = result['checks_undeclared'] as string[];
+    expect(undeclared).toContain('forbidden_characters');
+    expect(undeclared).toContain('sentence_length');
+    const findings = result['findings'] as { code: string }[];
+    expect(findings.some(f => f.code === 'LAYOUT.FORBIDDEN_CHARACTER')).toBe(false);
+  });
+
+  it('les exerce dès que la charte porte les règles', async () => {
+    const vocabulary: SiteVocabulary = { charter_rules: CHARTE };
+    const handler = createAuditSiteHandler({ site: avecDenomination('Nord — Sud'), vocabulary });
+    const result = await handler(makeJob());
+    const undeclared = result['checks_undeclared'] as string[];
+    expect(undeclared).not.toContain('forbidden_characters');
+    expect(result['checks_run'] as string[]).toContain('forbidden_characters');
+    const findings = result['findings'] as { code: string }[];
+    expect(findings.some(f => f.code === 'LAYOUT.FORBIDDEN_CHARACTER')).toBe(true);
   });
 });

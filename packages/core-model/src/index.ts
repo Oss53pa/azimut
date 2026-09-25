@@ -66,6 +66,12 @@ export {
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
+export type {
+  CharterRule, CharterRuleKind, ForbiddenCharacterRange,
+} from './charter-rules.js';
+export {
+  CHARTER_RULE_KINDS, resolveForbiddenCharacters, resolveMaxSentenceWords,
+} from './charter-rules.js';
 export type { SiteFact, ForbiddenWord, FactStatus, FactValue } from './site-facts.js';
 export { FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText } from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';

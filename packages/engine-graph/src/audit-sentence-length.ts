@@ -1,4 +1,5 @@
-import type { Finding, SiteData } from '@azimut/core-model';
+import type { CharterRule, Finding, SiteData } from '@azimut/core-model';
+import { resolveMaxSentenceWords } from '@azimut/core-model';
 import { templateFreeTexts } from './audit-typography.js';
 
 /**
@@ -8,6 +9,13 @@ import { templateFreeTexts } from './audit-typography.js';
  * l'anomalie « Phrase plus longue que la limite portée par la charte ». La
  * limite appartient donc à la charte d'un client.
  *
+ * **La limite vient désormais de la charte**, qui entre dans la signature de
+ * ce contrôle. Aucun nombre n'est écrit ici. Quand la charte ne porte pas la
+ * règle, le contrôle ne s'exécute pas et le dit, et il n'applique aucune
+ * valeur par défaut : « une règle absente n'est pas une règle permissive ».
+ * Une limite par défaut serait la pire des trois issues possibles — elle
+ * signalerait au nom d'une charte qui n'a rien demandé.
+ *
  * **Le corpus est plus étroit** que celui du contrôle des caractères
  * interdits, qui juge toutes les dénominations du site : celui-ci ne juge que
  * le texte libre d'un gabarit de face. Le modèle ne porte
@@ -15,19 +23,7 @@ import { templateFreeTexts } from './audit-typography.js';
  * c'est le seul endroit où l'on écrit des phrases. Une dénomination de
  * destination n'est pas une phrase, et lui opposer une règle de phrase
  * signalerait une longueur là où il n'y a pas de rédaction.
- *
- * **Le seuil est encore un nombre écrit ici, et c'est l'écart à déclarer.**
- * Ce n'est pas une valeur d'origine normative — aucune norme ne décide qu'une
- * phrase s'arrête à vingt-cinq mots — donc INV-5 ne la vise pas. Mais depuis
- * qu'A5.8 la range parmi les règles de charte, sa place est dans la charte du
- * site et non dans cette constante. La lire demanderait de faire entrer la
- * charte dans la signature de ce contrôle et de ses appelants, ce qu'aucune
- * tâche n'a encore demandé ; cette constante est alors le seul endroit à
- * déplacer.
  */
-
-/** Valeur du produit, en attendant que la charte porte la limite. */
-export const MAX_WORDS_PER_SENTENCE = 25;
 
 /**
  * Découpe un texte en phrases.
@@ -59,6 +55,8 @@ export function countWords(sentence: string): number {
 export type SentenceLengthReport = {
   /** Nombre de textes parcourus, pour qu'un rapport vide se distingue d'un rapport sans matière. */
   readonly checked_texts: number;
+  /** Faux quand la charte ne porte pas la limite. Même motif qu'en typographie. */
+  readonly applied: boolean;
   readonly findings: readonly Finding[];
 };
 
@@ -70,15 +68,22 @@ export type SentenceLengthReport = {
  * L'ordre suit celui de `templateFreeTexts` — par gabarit puis par rang de
  * bloc — puis le rang de la phrase dans le texte.
  */
-export function auditSentenceLength(site: SiteData): SentenceLengthReport {
+export function auditSentenceLength(
+  site: SiteData,
+  charterRules: readonly CharterRule[],
+): SentenceLengthReport {
   const texts = templateFreeTexts(site);
-  const findings: Finding[] = [];
+  const maximum = resolveMaxSentenceWords(charterRules);
+  if (maximum === null) {
+    return { checked_texts: texts.length, applied: false, findings: [] };
+  }
 
+  const findings: Finding[] = [];
   for (const text of texts) {
     const sentences = splitSentences(text.value);
     sentences.forEach((sentence, index) => {
       const words = countWords(sentence);
-      if (words <= MAX_WORDS_PER_SENTENCE) return;
+      if (words <= maximum) return;
       findings.push({
         code: 'LAYOUT.SENTENCE_TOO_LONG',
         severity: 'warning',
@@ -86,12 +91,12 @@ export function auditSentenceLength(site: SiteData): SentenceLengthReport {
         params: {
           sentence_index: index,
           words,
-          maximum: MAX_WORDS_PER_SENTENCE,
+          maximum,
         },
         ruleRef: 'A5.8',
       });
     });
   }
 
-  return { checked_texts: texts.length, findings };
+  return { checked_texts: texts.length, applied: true, findings };
 }
