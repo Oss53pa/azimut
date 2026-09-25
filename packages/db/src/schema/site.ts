@@ -17,7 +17,8 @@ export const site = azimut.table('site', {
   // Q5 — entité juridique émettrice. Facultative à la création, requise avant
   // l'émission de la première facture : elle ne sert qu'à facturer.
   legal_entity_id: uuid('legal_entity_id'),
-  rules_pack_id: uuid('rules_pack_id'),
+  // A5.8 — le paquet d'un site n'est plus une colonne : `site_rules_binding`
+  // fait foi, et la migration 0057 a retiré `rules_pack_id`.
   // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
   // repère n'est pas posé, et ce n'est pas l'origine (0, 0).

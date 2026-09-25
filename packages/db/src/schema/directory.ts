@@ -29,8 +29,8 @@ export const pictogram = azimut.table('pictogram', {
   registry: text('registry').notNull(),
   function_key: text('function_key'),
   // Référence à `rules_pack`, posée en base par la migration 0054. Déclarée
-  // sans `.references()`, comme `site.rules_pack_id`, pour ne pas faire
-  // dépendre ce fichier de celui des chartes.
+  // sans `.references()`, pour ne pas faire dépendre ce fichier de celui des
+  // chartes.
   rules_pack_id: uuid('rules_pack_id'),
 }, (t) => [
   index('idx_pictogram_org').on(t.org_id),
