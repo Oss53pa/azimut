@@ -288,3 +288,139 @@ Ajouts de la version du 22 septembre, décisions 82 à 90 de l'annexe Z :
 `exclusion_reason` absents du type comme de la base, règle M02.W11 sans code, et
 `FileNameParts.reference` qui nomme désormais autre chose que ce que D11
 décrit. Les migrations se font dans la tranche où leur table est concernée.
+
+**Clos par la version 17.** Les trois questions ouvertes par la version 16 sont
+tranchées, et chacune l'est en corrigeant le modèle plutôt qu'en contournant :
+
+1. **Un fait désigne son objet.** `site_fact` gagne `target_kind` et
+   `target_id`, facultatifs, et l'unicité passe du couple site et clé au
+   triplet site, clé et cible. Un site à deux parkings déclare donc deux
+   capacités. Migration 0047, éprouvée aux deux sens.
+2. **Une zone porte ses empreintes.** `zone.footprint_ids`, appartenance
+   déclarée et non calculée, comme la zone d'orientation d'H11.
+   `DATA.PARKING_SPACE_WITHOUT_ZONE` devient calculable, il est levé, et il
+   sort des non construits. Migration 0048.
+3. **La surface non numérisée est conservée**, et spécifiée en règle S-37.
+   C'est elle qui explique un écart de capacité, et l'écart est admis à
+   concurrence des places déclarées.
+
+Deux précisions de la même version touchent du code écrit : M3 (partie M) offre
+désormais cinq natures d'empreinte, la place de stationnement comprise, et S9
+fixe la notation de `work_color.hex` sur celle des jetons de la partie F.
+
+### Ce que portent les trois tables de stationnement du dépôt
+
+Relevé sur la base de développement et sur le code, non de mémoire. La section
+S8 ne retire pas ces tables et n'en parle pas ; elles restent donc telles
+quelles jusqu'à décision de l'éditeur.
+
+**`parking`** — 8 colonnes métier : `level_id`, `geometry` (polygone, mètres),
+`name`, `free` (booléen, le parking est-il gratuit), `declared_capacity`
+(entier positif ou nul), `status`, `source`. Contraintes : nom et source non
+blancs, capacité non négative, statut parmi les quatre valeurs d'objet.
+
+Ce que S8 remplace : `level_id`, `geometry` et `name` par `zone` ;
+`declared_capacity` par un fait ciblé, puisque S-36 fait de la capacité annoncée
+un fait du site. Ce qui n'a pas d'équivalent : **`free`**, qui n'est ni une
+nature de zone ni un fait déclaré aujourd'hui — un parking gratuit est pourtant
+ce qu'un plan d'accueil écrit, et `bound-text.ts` cite `parking.capacite` comme
+exemple de liaison de document. Il deviendrait naturellement un fait ciblé,
+mais aucune section ne le dit.
+
+Lu par : `audit-parking`, `validate-geometry` (le polygone du parking est
+validé comme les autres), `document-bindings` (qui compare capacité annoncée et
+places numérisées pour les textes liés), `render-floor-plan` (qui dessine les
+parkings d'un niveau).
+
+**`parking_space`** — 6 colonnes métier : `parking_id`, `kind`
+(`standard`, `pmr`, `livraison`), `row_label` (rangée ou travée du plan
+source), `geometry` (facultative), `status`, `source`.
+
+Ce que S8 remplace : `geometry` et l'appartenance par une empreinte de nature
+`parking_space` et la liste de la zone. Ce qui n'a pas d'équivalent : **`kind`**
+— une place PMR n'est pas une place ordinaire, et A5.2 ne donne à `footprint`
+aucune colonne pour le dire — et **`row_label`**, le repère de travée qui fait
+le lien avec le plan papier.
+
+Lu par : `audit-parking`, `document-bindings`, `render-floor-plan`.
+
+**`vehicle_gate`** — 6 colonnes métier : `level_id`, `code` (repère du plan
+source, V1 à V5 sur le site qui a servi de relevé), `role`, `width_m`
+(strictement positive), `position` (point), `status`, `source`.
+
+**Rien de cette table n'est lu.** Elle se charge dans `SiteData.vehicle_gates`,
+et aucun moteur, aucun rendu, aucun contrôle ne la consulte. Elle n'a pas non
+plus d'équivalent au socle : un portail véhicule n'est ni une empreinte, ni une
+zone, ni un nœud du graphe de circulation, qui porte des cheminements piétons.
+C'est la seule des trois dont la suppression ne perdrait aucune fonction
+existante — et la seule dont la donnée n'est reprise nulle part.
+
+La quatrième, `parking_uncovered_area`, est conservée par la règle S-37, qui lui
+donne enfin une place au cahier des charges. Elle porte `parking_id`,
+`geometry` facultative et `reason` non blanche ; S-37 lui ajoute le nombre de
+places censées être portées et sa source, ce que la table ne porte pas encore.
+
+### Le garde de câblage prend un ré-export pour un appelant
+
+Mesuré, et porté ici à la demande de l'éditeur. `tests/check-wiring.test.ts`
+tient qu'un contrôle est branché dès qu'un autre fichier le nomme. Un
+`index.ts` de baril le nomme, donc tout contrôle ré-exporté passe.
+
+Sur 86 contrôles exportés, le garde voit 9 orphelins. Si le baril ne comptait
+pas, et en comptant un appel fait dans le fichier déclarant, il en verrait
+**31**. Les 22 de l'écart, vérifiés un par un — aucun n'est appelé dans son
+propre fichier non plus :
+
+| Contrôle | Fichier |
+| --- | --- |
+| `auditBoundText` | packages/engine-graph/src/audit-bound-text.ts |
+| `auditColorReferences` | packages/core-model/src/color-chain.ts |
+| `auditFontLicences` | packages/core-model/src/font-registry.ts |
+| `auditPictogramComprehension` | packages/engine-graph/src/audit-pictograms.ts |
+| `auditViewLayers` | packages/core-model/src/view-layers.ts |
+| `checkMountingHeight` | packages/rules/src/rule-checks.ts |
+| `checkStrokeToHeight` | packages/rules/src/rule-checks.ts |
+| `guardExportExcludesSketch` | packages/core-model/src/sketch-export.ts |
+| `guardFamilyConsistency` | packages/engine-graph/src/guard-family-consistency.ts |
+| `guardFontEmbedding` | packages/core-model/src/font-embedding.ts |
+| `guardFontGlyphCoverage` | packages/core-model/src/font-glyphs.ts |
+| `guardFontMetrics` | packages/core-model/src/font-registry.ts |
+| `guardLibraryImport` | packages/engine-graph/src/guard-library-import.ts |
+| `guardPictogramsVector` | packages/engine-graph/src/detect-raster.ts |
+| `guardReviewClosure` | packages/engine-graph/src/guard-review-closure.ts |
+| `guardSafetyCreation` | packages/engine-graph/src/validate-library.ts |
+| `guardSafetyDeletion` | packages/engine-graph/src/validate-library.ts |
+| `guardSafetyRegistry` | packages/engine-graph/src/validate-library.ts |
+| `guardTextFit` | packages/core-model/src/typography-fit.ts |
+| `textExpansionFindings` | packages/core-model/src/text-expansion.ts |
+| `validateLibrary` | packages/engine-graph/src/validate-library.ts |
+| `validateProofs` | packages/engine-graph/src/validate-proofs.ts |
+
+Trois de cette liste méritent d'être nommés à part : `guardSafetyRegistry`,
+`guardSafetyCreation` et `guardSafetyDeletion` gardent l'invariant 3, et rien ne
+les appelle. L'invariant tient sur le chemin de la charte, par
+`guardCharterOnSafety`, mais pas sur celui de la bibliothèque. C'est le défaut
+le plus coûteux de la liste, et c'est celui qu'un baril comptant pour appelant
+cachait.
+
+`auditViewLayers` est de la même famille, et il vient d'être écrit : aucun écran
+de calques ne le consomme encore. Il n'a pas pu être inscrit à
+`DECLARED_NOT_WIRED`, parce que le garde ne le voit pas orphelin et refuse une
+inscription qu'il croit périmée.
+
+Non corrigé ici, à la demande de l'éditeur : le garde sera traité par une tâche
+qui possède ce code.
+
+### Reste ouvert après la version 17
+
+**Où se stocke la déclaration de S-37.** La règle dit qu'une empreinte de place
+« peut être marquée non numérisée, avec le nombre de places qu'elle est censée
+porter et sa source ». La section S9 n'ajoute aucune table pour cela, et A5.2 ne
+donne à `footprint` ni marque ni compte ni source.
+
+La lecture qui n'invente rien est celle que la version 17 vient justement
+ouvrir : un fait de site ciblant cette empreinte, portant le compte en valeur,
+sa source dans `source_ref` et son statut. Tout y est, sauf deux choses que
+la section ne dit pas — la clé du fait, et la façon dont l'empreinte est
+« marquée ». Les inventer serait un choix de modèle non prévu en A5, et le
+contrôle de S-37 attend donc cette réponse. A2.2, point 2.
