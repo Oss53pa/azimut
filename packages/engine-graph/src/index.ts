@@ -3,7 +3,7 @@ export type { ValidationResult } from './validate-graph.js';
 export type { GraphScope } from './graph-scope.js';
 export { buildAdjacency, buildDirectedAdjacency, bfs } from './graph-traversal.js';
 export { computeRoute } from './compute-route.js';
-export type { Route } from './compute-route.js';
+export type { Route, RouteSite } from './compute-route.js';
 export { RouteCache } from './route-cache.js';
 export { deriveDecisionPoints } from './decision-points.js';
 export type { DecisionPoint } from './decision-points.js';

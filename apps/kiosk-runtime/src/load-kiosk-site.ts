@@ -32,6 +32,17 @@ import type {
  * is the package manifest's responsibility (D10.2); this loader guards shape.
  */
 
+/**
+ * A5.8 — le site tel qu'une borne le connaît : sans rattachement aux paquets
+ * de règles. Le champ est absent, et non vide : une liste vide dirait « site
+ * sans paquet », ce qui est faux, alors que le paquet de borne ne transporte
+ * simplement pas les rattachements. Un code qui voudrait résoudre une fonction
+ * de pictogramme sur la borne n'a donc rien à lire, et le typage le refuse
+ * avant l'essai : tout ce qui s'y dessine a été composé à la construction du
+ * paquet, marques comprises.
+ */
+export type KioskSite = Omit<SiteData, 'rules_bindings'>;
+
 import { computeEdgeLengths } from '@azimut/core-model';
 
 const decoder = new TextDecoder();
@@ -82,7 +93,7 @@ function readObject(
 
 export function loadKioskSite(
   files: ReadonlyMap<string, Uint8Array>,
-): SiteData {
+): KioskSite {
   const graphDoc = readJson(files, 'data/graph.json');
   const directoryDoc = readJson(files, 'data/directory.json');
   const sceneDoc = readJson(files, 'data/scene.json');
@@ -122,11 +133,8 @@ export function loadKioskSite(
       'data/site.json',
     ) as unknown as Organization,
     site: readObject(identityDoc, 'site', 'data/site.json') as unknown as Site,
-    // A5.8 — le paquet de borne ne transporte pas les rattachements du site aux
-    // paquets de règles. Le terminal ne compose rien : les plans qu'il affiche
-    // ont été composés à la construction du paquet, marques comprises, avec
-    // les rattachements du site.
-    rules_bindings: [],
+    // A5.8 — pas de `rules_bindings` : voir KioskSite. Le champ manque, il
+    // n'est pas vide.
     buildings: readArray(sceneDoc, 'buildings', 'data/scene.json') as Building[],
     levels,
     footprints: readArray(

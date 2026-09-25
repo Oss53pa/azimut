@@ -6,10 +6,11 @@ import { join } from 'node:path';
  * A5.8 — la borne ne résout aucune fonction de pictogramme.
  *
  * Le paquet de borne ne transporte pas les rattachements du site à ses
- * paquets de règles, et `loadKioskSite` rend un site sans rattachement. Une
- * résolution faite ici ne trouverait donc jamais le registre de sécurité, et
- * omettrait la marque là où elle compte le plus : l'écran d'évacuation. Tout ce
- * qui se dessine sur une borne est composé à la construction du paquet.
+ * paquets de règles, et `loadKioskSite` rend un site où ce champ est absent,
+ * et non vide : `KioskSite`. Une résolution faite ici ne trouverait donc jamais
+ * le registre de sécurité, et omettrait la marque là où elle compte le plus :
+ * l'écran d'évacuation. Tout ce qui se dessine sur une borne est composé à la
+ * construction du paquet.
  *
  * L'essai lit les imports du code d'exécution et refuse ceux qui résolvent une
  * fonction ou dessinent un plan. Un import par espace de noms est refusé aussi :
@@ -51,6 +52,15 @@ describe('A5.8 — aucune résolution de fonction à l’exécution sur la borne
       .filter(({ text }) => /import\s+\*\s+as\s/.test(text))
       .map(({ file }) => file);
     expect(namespaced).toEqual([]);
+  });
+
+  it('le code d’exécution ne lit aucun rattachement aux paquets de règles', () => {
+    // Le typage l'interdit déjà sur `KioskSite` ; l'essai ferme la porte d'un
+    // `SiteData` réintroduit à la main.
+    const reading = runtimeSources()
+      .filter(({ file, text }) => file !== 'load-kiosk-site.ts' && text.includes('rules_bindings'))
+      .map(({ file }) => file);
+    expect(reading).toEqual([]);
   });
 
   it('la borne ne dépend d’aucun moteur de rendu ni du chargeur de règles', () => {

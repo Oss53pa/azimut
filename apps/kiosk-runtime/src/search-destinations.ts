@@ -1,4 +1,5 @@
-import type { SiteData, Destination, DestinationName } from '@azimut/core-model';
+import type { Destination, DestinationName } from '@azimut/core-model';
+import type { KioskSite } from './load-kiosk-site.js';
 
 export type SearchResult = {
   readonly destination: Destination;
@@ -78,7 +79,7 @@ function computeScore(query: string, value: string): number {
 }
 
 export function searchDestinations(
-  site: SiteData,
+  site: KioskSite,
   query: string,
   lang: 'fr' | 'en' | null,
   maxResults: number,

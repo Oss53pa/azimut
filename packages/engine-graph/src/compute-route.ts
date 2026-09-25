@@ -14,6 +14,13 @@ export type Route = {
   readonly cost: number;
 };
 
+/**
+ * Ce qu'un calcul d'itinéraire lit d'un site : son graphe, et rien d'autre
+ * (A7.1, `computeRoute(graph, profile, from, to)`). Un site de borne, qui ne
+ * porte pas les rattachements aux paquets de règles, s'y passe donc tel quel.
+ */
+export type RouteSite = Pick<SiteData, 'graph'>;
+
 type AdjEntry = {
   readonly neighbor: string;
   readonly edge_id: string;
@@ -25,7 +32,7 @@ function edgeCost(edge: Edge): number {
 }
 
 function buildWeightedAdj(
-  site: SiteData,
+  site: RouteSite,
   profile: TravelProfile,
 ): Map<string, AdjEntry[]> {
   const adj = new Map<string, AdjEntry[]>();
@@ -141,7 +148,7 @@ function dijkstra(
 }
 
 export function computeRoute(
-  site: SiteData,
+  site: RouteSite,
   profile: TravelProfile,
   from: string,
   to: string,
