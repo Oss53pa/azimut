@@ -8017,7 +8017,16 @@ Aucune table propre au stationnement n'existe en dehors de cette extension. En p
 
 **S-37.** Une surface de parking non numérisée se déclare comme telle : une empreinte de nature `parking_space` peut être marquée non numérisée, avec le nombre de places qu'elle est censée porter et sa source. C'est elle qui explique un écart entre la capacité annoncée et les places comptées. Sans explication déclarée, l'écart lève `PARK.CAPACITY_UNEXPLAINED` ; avec elle, l'écart est admis à concurrence des places déclarées.
 
-**S-38.** Une place de stationnement n'est ni une destination, ni une cellule. Elle n'entre dans aucun quantitatif de signalétique et ne porte pas de code de cellule.
+**S-38.** Le comptage des places obéit à une règle unique : une empreinte de place vaut une place, sauf si elle est marquée non numérisée, auquel cas elle vaut le nombre déclaré par son fait et ne compte jamais en plus pour elle-même. Sans cette règle, chaque surface non numérisée fausserait le compte d'une unité.
+
+**S-39.** Rendu d'une place de stationnement, dans toutes les vues :
+
+- Plan de niveau et plan orienté : contour léger, sans libellé. Une place ne porte ni occupant ni catégorie, et ne doit pas concurrencer visuellement les cellules commerciales.
+- Place accessible : elle porte le pictogramme normalisé du registre de sécurité, jamais un symbole maison, section A1.2, invariant 3.
+- Vue isométrique : la place reste au sol, sans volume.
+- Plan d'évacuation : elle n'y apparaît pas, sauf si elle porte un cheminement d'évacuation.
+
+**S-40.** Une place de stationnement n'est ni une destination, ni une cellule. Elle n'entre dans aucun quantitatif de signalétique et ne porte pas de code de cellule.
 
 ---
 
@@ -8533,3 +8542,4 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 270. S8 : extension, gratuité et retrait des portails
 271. K3.8 : portails véhicules inscrits comme besoin possible
 272. Q2 : propriétaire de l'extension parking_space
+273. S8 : comptage des places non numérisées et rendu d'une place

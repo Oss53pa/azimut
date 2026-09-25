@@ -147,7 +147,7 @@ describe('DATA.PARKING_SPACE_WITHOUT_ZONE — S8, règle S-35', () => {
 
   it('ne juge que les empreintes de nature `parking_space`', () => {
     // Une cellule hors de toute zone n'est pas une anomalie : la règle porte
-    // sur les places, et S-38 dit qu'une place n'est ni une destination ni une
+    // sur les places, et S-40 dit qu’une place n’est ni une destination ni une
     // cellule.
     const report = auditParkingZones(site([], [zone('z-ouest', 'parking', [])]));
     expect(refMultilevel.footprints.length).toBeGreaterThan(0);
