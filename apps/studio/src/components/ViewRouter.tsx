@@ -33,6 +33,8 @@ import { AdInventoryView } from '../views/AdInventoryView.js';
 import { TenantRulesView } from '../views/TenantRulesView.js';
 import { WorksiteLotsView } from '../views/WorksiteLotsView.js';
 import { OpsRoundsView } from '../views/OpsRoundsView.js';
+import { BudgetReferencesView } from '../views/BudgetReferencesView.js';
+import { BudgetTrackingView } from '../views/BudgetTrackingView.js';
 import { OpsIncidentsView } from '../views/OpsIncidentsView.js';
 import { OpsDivergencesView } from '../views/OpsDivergencesView.js';
 import { WorksiteSlotsView } from '../views/WorksiteSlotsView.js';
@@ -100,6 +102,8 @@ export function ViewRouter(
     case 'ops-incidents': return <OpsIncidentsView />;
     case 'ops-divergences': return <OpsDivergencesView />;
     case 'budget': return <BudgetView />;
+    case 'budget-references': return <BudgetReferencesView />;
+    case 'budget-tracking': return <BudgetTrackingView />;
     case 'portfolio': return <PortfolioView currentKey={siteKey} onOpenSite={onOpenSite} />;
     case 'cross-cutting': return <CrossCuttingView />;
     case 'editor': return <EditorView />;

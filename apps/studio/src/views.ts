@@ -54,6 +54,8 @@ export type ViewId =
   | 'ops-divergences'
   // 09 — Budget
   | 'budget'
+  | 'budget-references'
+  | 'budget-tracking'
   // 10 — Portefeuille
   | 'portfolio'
   // 11 — Fonctions transverses

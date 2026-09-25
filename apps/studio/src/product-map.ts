@@ -219,7 +219,10 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.09.name',
     summaryKey: 'module.09.summary',
     entry: 'budget',
-    screens: [],
+    screens: [
+      { view: 'budget-references', labelKey: 'nav.item.budgetrefs' },
+      { view: 'budget-tracking', labelKey: 'nav.item.budgettrack' },
+    ],
     engine: 'partial',
     source: 'studio/domain/cost-reference',
   },

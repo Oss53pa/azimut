@@ -10,46 +10,16 @@ import {
   SPACE, type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
-
-const PHASE_KEYS = {
-  'budget.phase.interior': 'budget.phase.interior',
-  'budget.phase.parking': 'budget.phase.parking',
-  'budget.phase.wall_plans': 'budget.phase.wall_plans',
-  'budget.phase.cell_turnover': 'budget.phase.cell_turnover',
-} as const;
-
-type PhaseKey = keyof typeof PHASE_KEYS;
-
-function phaseKey(key: string): PhaseKey {
-  return key in PHASE_KEYS ? (key as PhaseKey) : 'budget.phase.interior';
-}
-
-/**
- * H8 — un montant est stocké en unité mineure avec sa devise. L'affichage
- * n'applique aucun taux : deux devises restent deux colonnes, jamais une somme.
- */
-function formatMoney(money: Money | null, unpriced: string): string {
-  if (money === null) return unpriced;
-  const major = money.minor / 100;
-  return `${major.toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ${money.currency}`;
-}
-
-/** Écart relatif entre réalisé et estimation, en pour-cent, quand les deux existent. */
-function variance(line: BudgetLine): number | null {
-  const estimated = line.estimated;
-  const actual = line.actual;
-  if (estimated === null || actual === null) return null;
-  if (estimated.currency !== actual.currency) return null;
-  if (estimated.minor === 0) return null;
-  return ((actual.minor - estimated.minor) / estimated.minor) * 100;
-}
+import { formatMoney as formatMoneyIn, variance } from './budget/money.js';
+import { phaseKey } from './budget/labels.js';
 
 /**
  * Module 09 — budget et estimation. Une typologie sans coût de référence
  * n'est pas chiffrée au hasard : la ligne reste non chiffrée et le dit.
  */
 export function BudgetView(): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const formatMoney = (money: Money | null, unpriced: string): string => formatMoneyIn(money, lang, unpriced);
 
   const priced = useMemo(
     () => new Set(
