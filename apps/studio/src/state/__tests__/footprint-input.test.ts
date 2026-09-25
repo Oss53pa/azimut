@@ -47,8 +47,16 @@ describe('M3 (partie M) — contrôles du contour', () => {
     expect(codes({ vertices: sliver })).toContain('GEOM.POLYGON_DEGENERATE');
   });
 
-  it('les quatre natures sont celles de M3 (partie M)', () => {
-    expect([...FOOTPRINT_KINDS]).toEqual(['cell', 'circulation', 'technical', 'vertical_core']);
+  it('les cinq natures sont celles de M3 (partie M)', () => {
+    expect([...FOOTPRINT_KINDS])
+      .toEqual(['cell', 'circulation', 'technical', 'vertical_core', 'parking_space']);
+  });
+
+  it('n’offre pas `outdoor`, que le modèle admet et que l’écran ne propose pas', () => {
+    // La liste de l'écran et celle du modèle divergent d'une nature, et c'est
+    // M3 (partie M) qui en décide. Sans cette ligne, la première remonterait au
+    // modèle par inadvertance à la prochaine nature ajoutée.
+    expect([...FOOTPRINT_KINDS]).not.toContain('outdoor');
   });
 });
 
