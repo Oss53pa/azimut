@@ -14,7 +14,6 @@ function siteWithoutOrigin(): SiteData['site'] {
     name: site.name,
     country_code: site.country_code,
     timezone: site.timezone,
-    rules_pack_id: site.rules_pack_id,
     active_langs: site.active_langs,
     ...(site.reference_elevation_m !== undefined
       ? { reference_elevation_m: site.reference_elevation_m }

@@ -1,6 +1,8 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { isBound } from '@azimut/core-model';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import {
   auditCoverage, auditAccessibility, auditEvacuation,
   computeQuantities, computeInputsHash,
@@ -238,13 +240,13 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
               <CompletenessRow label={t('foundation.trace.country')} value={site.site.country_code} />
               <CompletenessRow
                 label={t('foundation.trace.rulespack')}
-                value={site.site.rules_pack_id ?? t('foundation.trace.nopack')}
+                value={rulesPackLabel(site.rules_bindings) ?? t('foundation.trace.nopack')}
               />
             </dl>
             <div style={{ marginTop: SPACE.sm }}>
               <Tag
-                label={site.site.rules_pack_id === null ? t('foundation.trace.unbound') : t('foundation.trace.bound')}
-                severity={site.site.rules_pack_id === null ? 'warning' : 'valid'}
+                label={isBound(site.rules_bindings) ? t('foundation.trace.bound') : t('foundation.trace.unbound')}
+                severity={isBound(site.rules_bindings) ? 'valid' : 'warning'}
               />
             </div>
           </Panel>

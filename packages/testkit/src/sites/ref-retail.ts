@@ -33,7 +33,6 @@ export const refRetail: SiteData = {
     name: 'Centre commercial de référence',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
     // M01.S1 — repère posé au premier calage, celui du RDC de la galerie.
     origin_x_m: -6,
     origin_y_m: -4,
@@ -41,6 +40,8 @@ export const refRetail: SiteData = {
     // D1.1 — altitude du niveau de référence, celui de la galerie.
     reference_elevation_m: 112,
   },
+  // A5.8 — aucun paquet rattaché.
+  rules_bindings: [],
   /**
    * Deux bâtiments, deux accès propres, deux horaires : c'est ce que ce site
    * éprouve et qu'aucun autre ne porte. La galerie ouvre tard le samedi, et

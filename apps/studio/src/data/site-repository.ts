@@ -8,14 +8,15 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
-import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import type { SiteData, SiteRulesBinding, SiteVocabulary } from '@azimut/core-model';
 
 export type SiteSummary = {
   readonly id: string;
   readonly org_id: string;
   readonly name: string;
   readonly country_code: string;
-  readonly rules_pack_id: string | null;
+  /** A5.8 — les paquets rattachés, socle et surcouche, depuis la table qui fait foi. */
+  readonly rules_bindings: readonly SiteRulesBinding[];
 };
 
 /**

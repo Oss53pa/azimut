@@ -122,6 +122,11 @@ export function loadKioskSite(
       'data/site.json',
     ) as unknown as Organization,
     site: readObject(identityDoc, 'site', 'data/site.json') as unknown as Site,
+    // A5.8 — le paquet de borne ne transporte pas les rattachements du site aux
+    // paquets de règles. Le terminal ne compose rien : les plans qu'il affiche
+    // ont été composés à la construction du paquet, marques comprises, avec
+    // les rattachements du site.
+    rules_bindings: [],
     buildings: readArray(sceneDoc, 'buildings', 'data/scene.json') as Building[],
     levels,
     footprints: readArray(

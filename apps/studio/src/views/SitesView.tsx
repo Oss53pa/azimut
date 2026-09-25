@@ -1,5 +1,7 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
+import { isBound } from '@azimut/core-model';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import { appRepository, useSiteList, type SiteSummary } from '../data/index.js';
 import {
   ScreenHeader, MetricRow, Panel, DataTable, Tag, Note, StateBanner,
@@ -37,7 +39,7 @@ export function SitesView({ currentKey, onOpenSite, onCreate }: SitesViewProps):
     query.length === 0 || site.name.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const bound = sites.filter(site => site.rules_pack_id !== null).length;
+  const bound = sites.filter(site => isBound(site.rules_bindings)).length;
   const countries = new Set(sites.map(site => site.country_code));
 
   const metrics: readonly Metric[] = [
@@ -70,11 +72,8 @@ export function SitesView({ currentKey, onOpenSite, onCreate }: SitesViewProps):
     {
       id: 'pack',
       header: t('sites.col.rulespack'),
-      cell: site => (
-        site.rules_pack_id === null
-          ? <Tag label={t('sites.pack.none')} severity="warning" />
-          : site.rules_pack_id
-      ),
+      cell: site => rulesPackLabel(site.rules_bindings)
+        ?? <Tag label={t('sites.pack.none')} severity="warning" />,
     },
     { id: 'org', header: t('sites.col.organization'), cell: site => site.org_id },
     {

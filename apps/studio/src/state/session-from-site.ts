@@ -40,6 +40,12 @@ function rowsFor(
 export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
   return [
     ...rowsFor('site', [site.site]),
+    // A5.8 — le rattachement aux paquets fait foi en table ; le modèle n'en
+    // garde que le paquet et le rôle, la ligne reprend son site et son
+    // organisation pour rester celle de la base.
+    ...rowsFor('site_rules_binding', site.rules_bindings.map(binding => ({
+      ...binding, org_id: site.organization.id, site_id: site.site.id,
+    }))),
     ...rowsFor('building', site.buildings),
     ...rowsFor('level', site.levels),
     ...rowsFor('plan_source', site.plan_sources),

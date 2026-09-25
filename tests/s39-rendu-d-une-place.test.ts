@@ -8,7 +8,7 @@ import type {
 } from '@azimut/engine-layout';
 import { renderIsoView } from '@azimut/engine-iso';
 import type { IsoTheme, IsoOptions } from '@azimut/engine-iso';
-import { ACCESSIBLE_FUNCTION_KEY } from '@azimut/core-model';
+import { ACCESSIBLE_FUNCTION_KEY, boundPackId } from '@azimut/core-model';
 import type { Outcome, Pictogram, SiteData, Volume } from '@azimut/core-model';
 
 /**
@@ -44,7 +44,7 @@ const ACCESSIBLE = 'fp-ml-a3';
 /** Le pictogramme que le site de référence désigne pour la place accessible. */
 const DESIGNE = refMultilevel.pictograms.find(p => p.function_key === ACCESSIBLE_FUNCTION_KEY);
 if (DESIGNE === undefined) throw new Error('refMultilevel ne désigne plus la fonction d’accessibilité');
-const PAQUET = refMultilevel.site.rules_pack_id;
+const PAQUET = boundPackId(refMultilevel.rules_bindings, 'base');
 
 /** Un autre tracé, pour distinguer à la sortie quel pictogramme a été posé. */
 const AUTRE_TRACE = 'M4 4 L26 4 L26 26 L4 26 Z';
@@ -266,7 +266,8 @@ describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
 
   it('pose celui de l’autre paquet sur le site qui y est rattaché', () => {
     const autreSite: SiteData = {
-      ...organisation, site: { ...organisation.site, rules_pack_id: AUTRE_PAQUET },
+      ...organisation,
+      rules_bindings: [{ id: 'rb-autre', rules_pack_id: AUTRE_PAQUET, role: 'base' }],
     };
     const svg = svgOf(renderFloorPlan(autreSite, RDC, floorOpts));
     expect(poses(svg, AUTRE_TRACE)).toBe(1);
@@ -274,9 +275,7 @@ describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
   });
 
   it('ne pose rien sur un site sans paquet : le registre de sécurité n’y a pas de source', () => {
-    const sansPaquet: SiteData = {
-      ...organisation, site: { ...organisation.site, rules_pack_id: null },
-    };
+    const sansPaquet: SiteData = { ...organisation, rules_bindings: [] };
     const out = renderFloorPlan(sansPaquet, RDC, floorOpts);
     expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
     expect(svgOf(out)).not.toContain('<path d=');
@@ -284,6 +283,42 @@ describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
 
   it('garde le paquet du site de référence comme portée', () => {
     expect(PAQUET).toBe(DESIGNE.rules_pack_id);
+  });
+});
+
+describe('S-39 et A5.8 — un socle et une surcouche qui désignent la même fonction', () => {
+  // « Précédence, pour une même fonction de pictogramme comme pour une
+  // règle : la surcouche l'emporte sur le socle. L'ambiguïté ne se juge qu'à
+  // l'intérieur d'un même paquet ; deux paquets qui désignent la même fonction
+  // ne sont pas ambigus. »
+  const SURCOUCHE = 'rp-surcouche-pays';
+  const deLaSurcouche: Pictogram = {
+    ...DESIGNE, id: 'picto-pmr-surcouche', rules_pack_id: SURCOUCHE, svg_path: AUTRE_TRACE,
+  };
+  const site: SiteData = {
+    ...avec(deLaSurcouche),
+    rules_bindings: [
+      ...refMultilevel.rules_bindings,
+      { id: 'rb-ml-surcouche', rules_pack_id: SURCOUCHE, role: 'overlay' },
+    ],
+  };
+
+  it('pose la marque de la surcouche, et elle seule', () => {
+    for (const out of [
+      renderFloorPlan(site, RDC, floorOpts),
+      renderOrientedPlan(site, RDC, orientedOpts),
+    ]) {
+      expect(out.ok).toBe(true);
+      expect(codes(out)).not.toContain('PICTO.FUNCTION_AMBIGUOUS');
+      expect(poses(svgOf(out), AUTRE_TRACE)).toBe(1);
+      expect(poses(svgOf(out), DESIGNE.svg_path)).toBe(0);
+    }
+  });
+
+  it('revient au socle quand la surcouche ne désigne pas la fonction', () => {
+    const sansDesignationPays: SiteData = { ...site, pictograms: refMultilevel.pictograms };
+    const svg = svgOf(renderFloorPlan(sansDesignationPays, RDC, floorOpts));
+    expect(poses(svg, DESIGNE.svg_path)).toBe(1);
   });
 });
 

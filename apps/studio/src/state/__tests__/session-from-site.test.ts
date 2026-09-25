@@ -64,4 +64,21 @@ describe('E5.4 — l’atelier repart de l’état du dépôt', () => {
     const readEdges = [...graph.edges].sort((a, b) => a.id.localeCompare(b.id));
     expect(readEdges).toEqual(expectedEdges);
   });
+
+  /**
+   * A5.8 — le rattachement fait foi en table, et l'atelier le lit dans ses
+   * lignes : le bandeau « aucun paquet » de M02.W9 en dépend. La ligne reprend
+   * le site et l'organisation, comme en base.
+   */
+  it('rend le rattachement du site à ses paquets, avec son site', () => {
+    const state = sessionFromSite(refMultilevel);
+    const bindings = rowsOf(state, 'site_rules_binding');
+    expect(bindings.map(r => r.id)).toEqual(refMultilevel.rules_bindings.map(b => b.id));
+    expect(bindings[0]?.values).toMatchObject({
+      site_id: refMultilevel.site.id,
+      org_id: refMultilevel.organization.id,
+      role: 'base',
+    });
+    expect(rowsOf(sessionFromSite(refMinimal), 'site_rules_binding')).toEqual([]);
+  });
 });

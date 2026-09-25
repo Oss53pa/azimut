@@ -73,6 +73,7 @@ export function useSiteCreation(
       siteId,
       buildingId: environment.newId(),
       levelId: environment.newId(),
+      bindingId: environment.newId(),
       existingNames: environment.existingNames,
       countries: environment.countries,
       defaultBuildingName: environment.defaultBuildingName,

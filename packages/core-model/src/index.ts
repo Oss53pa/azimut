@@ -88,6 +88,9 @@ export {
 } from './parking-view.js';
 export type { ParkingSpaceView, PlanContext, AccessibleMark } from './parking-view.js';
 export {
+  RULES_PACK_ROLES, boundPackId, packsByPrecedence, isBound,
+} from './rules-bindings.js';
+export {
   ACCESSIBLE_FUNCTION_KEY, DECLARED_PICTOGRAM_FUNCTIONS, isFunctionKeyShape,
   pictogramFunctionDeclaration, resolvePictogramFunction, pictogramFunctionFinding,
   siteScope,
@@ -172,6 +175,8 @@ export type {
   Category,
   PictogramRegistry,
   Pictogram,
+  RulesPackRole,
+  SiteRulesBinding,
   OccupancyStatus,
   Destination,
   DestinationName,

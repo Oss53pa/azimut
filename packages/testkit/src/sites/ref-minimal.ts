@@ -12,7 +12,6 @@ export const refMinimal: SiteData = {
     name: 'Site minimal',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
     // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
@@ -23,6 +22,8 @@ export const refMinimal: SiteData = {
     // D1.1 — altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
+  // A5.8 — aucun paquet rattaché.
+  rules_bindings: [],
   buildings: [
     {
       id: 'bldg-001',

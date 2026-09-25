@@ -7,6 +7,7 @@ import {
   site, building, level, footprint, volume, planSource, planCalibration,
   zone, parkingSpace,
 } from './schema/site.js';
+import { siteRulesBinding } from './schema/charters.js';
 import { node, edge, verticalLink, buildingLink } from './schema/graph.js';
 import {
   category, pictogram, destination, destinationName,
@@ -38,6 +39,12 @@ export async function loadSiteData(
     .select()
     .from(building)
     .where(eq(building.site_id, siteId));
+
+  // A5.8 — la table de rattachement fait foi pour les paquets du site.
+  const bindingRows = await db
+    .select()
+    .from(siteRulesBinding)
+    .where(eq(siteRulesBinding.site_id, siteId));
   const buildingIds = buildingRows.map((b) => b.id);
 
   const levelRows = buildingIds.length > 0
@@ -132,6 +139,7 @@ export async function loadSiteData(
   return assembleSiteData({
     organization: orgRow,
     site: siteRow,
+    rules_bindings: bindingRows,
     buildings: buildingRows,
     levels: levelRows,
     plan_sources: planSourceRows,

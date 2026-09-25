@@ -31,13 +31,26 @@ export type SiteRow = {
   readonly timezone: string;
   /** Q5 — entité juridique émettrice, NULL tant que rien n'est facturé. */
   readonly legal_entity_id: string | null;
-  readonly rules_pack_id: string | null;
   /** M01.S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
   readonly origin_x_m: string | null;
   readonly origin_y_m: string | null;
   /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
   readonly active_langs: readonly string[] | null;
   readonly reference_elevation_m: string | null;
+};
+
+/**
+ * A5.8 — le rattachement d'un site à un paquet de règles, socle ou surcouche.
+ * Cette table fait foi : le site ne porte plus de colonne de paquet.
+ */
+export type SiteRulesBindingRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly site_id: string;
+  readonly rules_pack_id: string;
+  /** `base` ou `overlay`, contrainte en base (migration 0056). */
+  readonly role: string;
+  readonly bound_at: TimestampValue;
 };
 
 export type BuildingRow = {
@@ -279,6 +292,7 @@ export type ZoneRow = {
 export type SiteRowSet = {
   readonly organization: OrganizationRow;
   readonly site: SiteRow;
+  readonly rules_bindings: readonly SiteRulesBindingRow[];
   readonly buildings: readonly BuildingRow[];
   readonly levels: readonly LevelRow[];
   readonly plan_sources: readonly PlanSourceRow[];

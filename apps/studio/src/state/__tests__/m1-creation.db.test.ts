@@ -29,6 +29,14 @@ const LEVEL = 'c1000000-0000-0000-0000-000000000103';
 const SITE_2 = 'c1000000-0000-0000-0000-000000000201';
 const BUILDING_2 = 'c1000000-0000-0000-0000-000000000202';
 const LEVEL_2 = 'c1000000-0000-0000-0000-000000000203';
+// Le troisième jeu porte un paquet choisi : A5.8, le rattachement en socle.
+const SITE_3 = 'c1000000-0000-0000-0000-000000000301';
+const BUILDING_3 = 'c1000000-0000-0000-0000-000000000302';
+const LEVEL_3 = 'c1000000-0000-0000-0000-000000000303';
+const BINDING_3 = 'c1000000-0000-0000-0000-000000000304';
+// Un paquet d'essai, sans valeur normative : le référentiel des paquets est
+// global, il s'amorce et se retire hors organisation.
+const PACK = 'c1000000-0000-0000-0000-0000000000a1';
 const T = '2026-09-23T10:00:00.000Z';
 
 /** La chaîne validée en `beforeAll`, pour les connexions ouvertes ensuite. */
@@ -51,6 +59,8 @@ const CONTEXT: CreationContext = {
   siteId: SITE,
   buildingId: BUILDING,
   levelId: LEVEL,
+  // Aucun paquet n'est choisi : l'identifiant du rattachement ne sert pas.
+  bindingId: '00000000-0000-0000-0000-00000000b1d0',
   existingNames: [],
   // Q9 — l'extrait du référentiel contre lequel pays et fuseau se jugent.
   countries: [{ code: 'FR', timezones: ['Europe/Paris'] }],
@@ -77,6 +87,10 @@ beforeAll(async () => {
   db = createDb(dsn);
 
   await cleanup();
+  await client`delete from azimut.rules_pack where id = ${PACK}`;
+  await client`insert into azimut.rules_pack
+    (id, key, version, jurisdiction, effective_from, source_ref, checksum)
+    values (${PACK}, 'essai-m1', '0.0.0', 'XX', '2026-01-01', 'essai', 'essai')`;
 
   // L'organisation et l'adhésion s'amorcent hors politique, comme le ferait un
   // import d'administration : sans adhésion, personne n'a d'identité à poser.
@@ -97,6 +111,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await alice.release();
   await cleanup();
+  await client`delete from azimut.rules_pack where id = ${PACK}`;
   await client.end();
   await db.$client.end();
 });
@@ -142,13 +157,20 @@ describe('M1 (partie M) — la création s’écrit réellement', () => {
 
   it('écrit le fuseau et le pays', async () => {
     const rows = await alice`
-      select name, country_code, timezone, legal_entity_id, rules_pack_id
+      select name, country_code, timezone, legal_entity_id
       from azimut.site where id = ${SITE}`;
     expect(rows[0]?.['name']).toBe('Gare de Lille Flandres');
     expect(rows[0]?.['country_code']).toBe('FR');
     expect(rows[0]?.['timezone']).toBe('Europe/Paris');
     expect(rows[0]?.['legal_entity_id']).toBeNull();
-    expect(rows[0]?.['rules_pack_id']).toBeNull();
+  });
+
+  it('n’écrit aucun rattachement de paquet quand aucun n’est choisi', async () => {
+    // A5.8 : le rattachement est porté par `site_rules_binding`, et M1 (partie M)
+    // le laisse facultatif à la création.
+    const rows = await alice`
+      select id from azimut.site_rules_binding where site_id = ${SITE}`;
+    expect(rows).toHaveLength(0);
   });
 
   /**
@@ -222,5 +244,35 @@ describe('M1 (partie M) — la même création par le chemin du poste', () => {
     const levels = await alice`
       select name from azimut.level where building_id = ${BUILDING_2}`;
     expect(levels.map(r => r['name'])).toEqual(['Niveau 0']);
+  });
+});
+
+/**
+ * A5.8 — « La table de rattachement fait foi. » Un paquet choisi à la création
+ * s'écrit en socle, dans la même transaction que le site qu'il rattache.
+ */
+describe('M1 (partie M) et A5.8 — le paquet choisi s’écrit en socle', () => {
+  it('écrit le rattachement avec le site, le paquet et le rôle', async () => {
+    const built = createSiteCommands(
+      { ...DRAFT, name: 'Gare de Lille Sud', rulesPackId: PACK },
+      {
+        ...CONTEXT, siteId: SITE_3, buildingId: BUILDING_3, levelId: LEVEL_3,
+        bindingId: BINDING_3,
+      },
+    );
+    expect(built.ok, built.ok ? '' : built.findings.map(f => f.code).join(', ')).toBe(true);
+    if (!built.ok) return;
+
+    const written = await applyCommands(db, { userId: ALICE }, built.value);
+    expect(
+      written.ok,
+      written.ok ? '' : written.findings.map(f => f.code).join(', '),
+    ).toBe(true);
+    if (written.ok) expect(written.value).toHaveLength(4);
+
+    const rows = await alice`
+      select id, org_id, rules_pack_id, role from azimut.site_rules_binding
+      where site_id = ${SITE_3}`;
+    expect(rows).toEqual([{ id: BINDING_3, org_id: ORG, rules_pack_id: PACK, role: 'base' }]);
   });
 });

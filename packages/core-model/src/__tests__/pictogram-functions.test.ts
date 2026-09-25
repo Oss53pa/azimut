@@ -4,7 +4,7 @@ import {
   pictogramFunctionDeclaration, resolvePictogramFunction, pictogramFunctionFinding,
   siteScope, ERROR_CATALOG,
 } from '../index.js';
-import type { Pictogram, PictogramScope, Site } from '../index.js';
+import type { Pictogram, PictogramScope, SiteRulesBinding } from '../index.js';
 
 /**
  * A5.4 — la désignation de fonction d'un pictogramme.
@@ -20,7 +20,7 @@ const PAQUET_A = 'paquet-a';
 const PAQUET_B = 'paquet-b';
 
 /** La portée de sécurité d'un site rattaché au paquet A. */
-const SECU_A: PictogramScope = { registry: 'safety', rules_pack_id: PAQUET_A };
+const SECU_A: PictogramScope = { registry: 'safety', rules_pack_ids: [PAQUET_A] };
 const ORIENTATION: PictogramScope = { registry: 'wayfinding' };
 
 function picto(partiel: Partial<Pictogram> & { readonly id: string }): Pictogram {
@@ -122,7 +122,7 @@ describe('A5.4 — la portée d’unicité : le paquet pour la sécurité, l’o
   });
 
   it('donne à chaque site le pictogramme de son propre paquet', () => {
-    const scopeB: PictogramScope = { registry: 'safety', rules_pack_id: PAQUET_B };
+    const scopeB: PictogramScope = { registry: 'safety', rules_pack_ids: [PAQUET_B] };
     expect(resolvePictogramFunction(organisation, scopeB, ACCESSIBLE_FUNCTION_KEY))
       .toEqual({ kind: 'designated', pictogram: duPaquetB });
   });
@@ -130,7 +130,7 @@ describe('A5.4 — la portée d’unicité : le paquet pour la sécurité, l’o
   it('ne donne rien au site d’un paquet qui ne désigne pas la fonction', () => {
     // Le pictogramme d'un autre paquet n'est pas un repli : il ne relève pas
     // des règles de ce site.
-    const scopeC: PictogramScope = { registry: 'safety', rules_pack_id: 'paquet-c' };
+    const scopeC: PictogramScope = { registry: 'safety', rules_pack_ids: ['paquet-c'] };
     expect(resolvePictogramFunction(organisation, scopeC, ACCESSIBLE_FUNCTION_KEY).kind)
       .toBe('not_designated');
   });
@@ -139,26 +139,73 @@ describe('A5.4 — la portée d’unicité : le paquet pour la sécurité, l’o
     // La désignation du registre de sécurité « vient du paquet de règles » :
     // sans paquet, elle ne vient de nulle part.
     const sansPaquet = picto({ id: 'p-orphelin', rules_pack_id: null });
-    const scope: PictogramScope = { registry: 'safety', rules_pack_id: null };
+    const scope: PictogramScope = { registry: 'safety', rules_pack_ids: [] };
     expect(resolvePictogramFunction([sansPaquet], scope, ACCESSIBLE_FUNCTION_KEY).kind)
       .toBe('not_designated');
   });
 
-  it('tient l’orientation à l’organisation, quel que soit le paquet', () => {
+  it('tient l’orientation à l’organisation', () => {
     // Deux pictogrammes d'orientation de même fonction dans une organisation
-    // se contredisent, même s'ils déclaraient deux paquets différents.
+    // se contredisent. Ils ne portent pas de paquet : A5.4, « le paquet reste
+    // vide ».
     const deux = [
-      picto({ id: 'o-1', registry: 'wayfinding', rules_pack_id: PAQUET_A }),
-      picto({ id: 'o-2', registry: 'wayfinding', rules_pack_id: PAQUET_B }),
+      picto({ id: 'o-1', registry: 'wayfinding', rules_pack_id: null }),
+      picto({ id: 'o-2', registry: 'wayfinding', rules_pack_id: null }),
     ];
-    expect(resolvePictogramFunction(deux, ORIENTATION, ACCESSIBLE_FUNCTION_KEY).kind)
-      .toBe('ambiguous');
+    const r = resolvePictogramFunction(deux, ORIENTATION, ACCESSIBLE_FUNCTION_KEY);
+    expect(r).toEqual({ kind: 'ambiguous', ids: ['o-1', 'o-2'], rules_pack_id: null });
+  });
+});
+
+describe('A5.8 — la surcouche l’emporte, l’ambiguïté se juge dans un paquet', () => {
+  // « Précédence, pour une même fonction de pictogramme comme pour une
+  // règle : la surcouche l'emporte sur le socle. L'ambiguïté ne se juge qu'à
+  // l'intérieur d'un même paquet ; deux paquets qui désignent la même
+  // fonction ne sont pas ambigus. »
+  const SOCLE = 'paquet-socle';
+  const SURCOUCHE = 'paquet-surcouche';
+  const scope: PictogramScope = { registry: 'safety', rules_pack_ids: [SURCOUCHE, SOCLE] };
+  const duSocle = picto({ id: 'p-socle', rules_pack_id: SOCLE });
+  const deLaSurcouche = picto({ id: 'p-surcouche', rules_pack_id: SURCOUCHE });
+
+  it('rend celui de la surcouche quand les deux paquets désignent la fonction', () => {
+    expect(resolvePictogramFunction([duSocle, deLaSurcouche], scope, ACCESSIBLE_FUNCTION_KEY))
+      .toEqual({ kind: 'designated', pictogram: deLaSurcouche });
   });
 
-  it('lit la portée de sécurité d’un site sur son paquet rattaché', () => {
-    const site = { rules_pack_id: PAQUET_B } as Pick<Site, 'rules_pack_id'> as Site;
-    expect(siteScope(site, 'safety')).toEqual({ registry: 'safety', rules_pack_id: PAQUET_B });
-    expect(siteScope(site, 'wayfinding')).toEqual({ registry: 'wayfinding' });
+  it('descend au socle quand la surcouche ne la désigne pas', () => {
+    expect(resolvePictogramFunction([duSocle], scope, ACCESSIBLE_FUNCTION_KEY))
+      .toEqual({ kind: 'designated', pictogram: duSocle });
+  });
+
+  it('ignore une ambiguïté du socle quand la surcouche répond', () => {
+    const second = picto({ id: 'p-socle-bis', rules_pack_id: SOCLE });
+    expect(resolvePictogramFunction(
+      [duSocle, second, deLaSurcouche], scope, ACCESSIBLE_FUNCTION_KEY,
+    )).toEqual({ kind: 'designated', pictogram: deLaSurcouche });
+  });
+
+  it('s’arrête sur une ambiguïté de la surcouche, sans descendre au socle', () => {
+    // Descendre masquerait une contradiction du paquet qui prime.
+    const second = picto({ id: 'p-surcouche-bis', rules_pack_id: SURCOUCHE });
+    expect(resolvePictogramFunction(
+      [duSocle, deLaSurcouche, second], scope, ACCESSIBLE_FUNCTION_KEY,
+    )).toEqual({
+      kind: 'ambiguous', ids: ['p-surcouche', 'p-surcouche-bis'], rules_pack_id: SURCOUCHE,
+    });
+  });
+
+  it('lit l’ordre des paquets sur les rattachements du site', () => {
+    const rattachements: readonly SiteRulesBinding[] = [
+      { id: 'rb-1', rules_pack_id: SOCLE, role: 'base' },
+      { id: 'rb-2', rules_pack_id: SURCOUCHE, role: 'overlay' },
+    ];
+    expect(siteScope({ rules_bindings: rattachements }, 'safety'))
+      .toEqual({ registry: 'safety', rules_pack_ids: [SURCOUCHE, SOCLE] });
+    expect(siteScope({ rules_bindings: [] }, 'safety'))
+      .toEqual({ registry: 'safety', rules_pack_ids: [] });
+    expect(siteScope({ rules_bindings: rattachements }, 'wayfinding'))
+      .toEqual({ registry: 'wayfinding' });
   });
 });
 
@@ -178,7 +225,7 @@ describe('A5.4 — ce que la résolution oppose au moteur', () => {
     expect(f?.code).toBe('PICTO.FUNCTION_NOT_DESIGNATED');
     expect(f?.severity).toBe('warning');
     expect(f?.params).toEqual({
-      function_key: ACCESSIBLE_FUNCTION_KEY, registry: 'safety', rules_pack_id: PAQUET_A,
+      function_key: ACCESSIBLE_FUNCTION_KEY, registry: 'safety', rules_pack_ids: PAQUET_A,
     });
   });
 
@@ -187,6 +234,7 @@ describe('A5.4 — ce que la résolution oppose au moteur', () => {
     expect(f?.code).toBe('PICTO.FUNCTION_AMBIGUOUS');
     expect(f?.severity).toBe('blocking');
     expect(f?.params['pictogram_ids']).toBe('p-a,p-b');
+    expect(f?.params['rules_pack_id']).toBe(PAQUET_A);
   });
 
   it('donne à chaque code la gravité que le catalogue lui donne', () => {

@@ -22,7 +22,6 @@ describe('zones du socle', () => {
     [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
     [site, [{
       id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
-      rules_pack_id: null,
     }]],
     [building, [{
       id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B', independent_access: true,
@@ -102,7 +101,6 @@ describe('extension des empreintes de place', () => {
       [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
       [site, [{
         id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
-        rules_pack_id: null,
       }]],
       [building, [{
         id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B',

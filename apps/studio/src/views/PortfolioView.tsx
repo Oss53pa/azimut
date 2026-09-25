@@ -2,6 +2,7 @@ import { type JSX, useMemo } from 'react';
 import { runChecks, validateGraph, validateGeometry, validateDirectory } from '@azimut/engine-graph';
 import type { SiteData, Finding } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import { appRepository, useAllSites } from '../data/index.js';
 import {
   ScreenHeader, MetricRow, Panel, DataTable, Tag, Note, StateBanner,
@@ -75,7 +76,7 @@ export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): J
         conformity: checkedEntities === 0
           ? 0
           : Math.max(0, Math.round((1 - blocking / checkedEntities) * 100)),
-        rulesPack: site.site.rules_pack_id,
+        rulesPack: rulesPackLabel(site.rules_bindings),
       });
     }
     return out.sort((a, b) => a.name.localeCompare(b.name));

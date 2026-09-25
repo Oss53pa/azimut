@@ -67,19 +67,44 @@ describe('Dépôt lu par l’API REST', () => {
   const config = { url: 'https://exemple.test/rest/v1', apiKey: 'clef', schema: 'azimut' };
 
   it('nomme le schéma et porte la clé sur chaque requête', async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
+    const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(
       new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } }),
-    );
+    ));
     vi.stubGlobal('fetch', fetchMock);
 
     await createPostgrestRepository(config).listSites();
 
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
-    expect(url).toContain('https://exemple.test/rest/v1/site?');
-    const headers = init.headers as Record<string, string>;
-    expect(headers['Accept-Profile']).toBe('azimut');
-    expect(headers.apikey).toBe('clef');
+    // A5.8 — la liste lit les sites, puis leurs paquets dans la table de
+    // rattachement qui fait foi.
+    const calls = fetchMock.mock.calls as [string, RequestInit][];
+    expect(calls.map(([url]) => url.split('?')[0])).toEqual([
+      'https://exemple.test/rest/v1/site',
+      'https://exemple.test/rest/v1/site_rules_binding',
+    ]);
+    for (const [, init] of calls) {
+      const headers = init.headers as Record<string, string>;
+      expect(headers['Accept-Profile']).toBe('azimut');
+      expect(headers.apikey).toBe('clef');
+    }
+  });
+
+  it('rend les paquets de chaque site depuis la table de rattachement', async () => {
+    const answers: Record<string, unknown[]> = {
+      site: [{ id: 's1', org_id: 'o1', name: 'Un', country_code: 'FR' },
+        { id: 's2', org_id: 'o1', name: 'Deux', country_code: 'FR' }],
+      site_rules_binding: [
+        { id: 'b1', org_id: 'o1', site_id: 's1', rules_pack_id: 'p-socle', role: 'base' },
+        { id: 'b2', org_id: 'o1', site_id: 's1', rules_pack_id: 'p-pays', role: 'overlay' },
+      ],
+    };
+    vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
+      const table = url.split('/').pop()?.split('?')[0] ?? '';
+      return Promise.resolve(new Response(JSON.stringify(answers[table] ?? []), { status: 200 }));
+    }));
+
+    const sites = await createPostgrestRepository(config).listSites();
+    expect(sites.map(s => [s.id, s.rules_bindings.map(b => `${b.role}:${b.rules_pack_id}`)]))
+      .toEqual([['s1', ['base:p-socle', 'overlay:p-pays']], ['s2', []]]);
   });
 
   it('remonte un droit refusé en NET.FORBIDDEN', async () => {

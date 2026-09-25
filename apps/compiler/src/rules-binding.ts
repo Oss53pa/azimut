@@ -4,8 +4,8 @@ import { resolveSiteRulesPack } from '@azimut/engine-graph';
 
 /**
  * The rules pack in effect for a site, resolved once per render batch. An
- * explicit pack wins; otherwise the site's binding (A5.8 `Site.rules_pack_id`)
- * is resolved through the supplied corpus index. Resolution findings
+ * explicit pack wins; otherwise the site's bindings (A5.8 `site_rules_binding`,
+ * socle and overlay) are resolved through the supplied corpus index. Resolution findings
  * (RULES.PACK_NOT_BOUND) are returned, never thrown — a missing pack skips the
  * quality checks, it does not stop artwork production. Shared by the single-face
  * and delivery-archive handlers so both bind a pack the same way.
@@ -17,7 +17,7 @@ export function resolveEffectivePack(
 ): { readonly pack: LoadedRulesPack | undefined; readonly findings: readonly Finding[] } {
   if (explicit !== undefined) return { pack: explicit, findings: [] };
   if (index === undefined) return { pack: undefined, findings: [] };
-  const resolved = resolveSiteRulesPack(site.site.rules_pack_id, index);
+  const resolved = resolveSiteRulesPack(site.rules_bindings, index);
   return resolved.ok
     ? { pack: resolved.value, findings: [] }
     : { pack: undefined, findings: resolved.findings };

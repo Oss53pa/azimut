@@ -13,11 +13,6 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // A5.8 — rattaché au paquet d'essai du dépôt, `testkit/fixtures/rules-packs/
-    // test-fixture`. Sans paquet, le site n'aurait pas de registre de sécurité,
-    // et sa place accessible ne pourrait porter aucune marque : A5.4 fait du
-    // paquet la portée de toute désignation de ce registre.
-    rules_pack_id: 'rp-test-0001',
     // M01.S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
     // de l'image du premier fond.
@@ -29,6 +24,13 @@ export const refMultilevel: SiteData = {
     // D1.1 — altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
+  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // rules-packs/test-fixture`. Sans paquet, le site n'aurait pas de registre de
+  // sécurité, et sa place accessible ne pourrait porter aucune marque : A5.4
+  // fait du paquet la portée de toute désignation de ce registre.
+  rules_bindings: [
+    { id: 'rb-ml-base', rules_pack_id: 'rp-test-0001', role: 'base' },
+  ],
   buildings: [
     {
       id: 'bldg-ml-001',

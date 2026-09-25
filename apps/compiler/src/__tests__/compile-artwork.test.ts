@@ -30,7 +30,7 @@ const context: CompileContext = {
  * le cas du site sans paquet le dit donc ici, au lieu de le tenir d'un état du
  * site de référence qui n'est plus le sien.
  */
-const unboundSite = { ...refMultilevel, site: { ...refMultilevel.site, rules_pack_id: null } };
+const unboundSite = { ...refMultilevel, rules_bindings: [] };
 
 function makeJob(payload: Record<string, unknown>): Job {
   return {
@@ -371,7 +371,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     const boundSite = {
       ...refMultilevel,
-      site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+      rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
     };
 
     const job = makeJob({
@@ -436,7 +436,7 @@ describe('T-2.12 createArtworkHandler', () => {
     function siteWithSupportRegistry(registry: 'safety' | 'wayfinding'): typeof refMultilevel {
       return {
         ...refMultilevel,
-        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
         supports: refMultilevel.supports.map((s) =>
           s.id === 'sup-001' ? { ...s, registry } : s,
         ),
@@ -495,7 +495,7 @@ describe('T-2.12 createArtworkHandler', () => {
     function tallFaceSite(ctx: 'interior' | 'exterior'): typeof refMultilevel {
       return {
         ...refMultilevel,
-        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
         support_types: refMultilevel.support_types.map((st) => ({
           ...st,
           faces: st.faces.map((f) => ({ ...f, default_height_mm: 560 })),
@@ -515,7 +515,7 @@ describe('T-2.12 createArtworkHandler', () => {
       // The 400 mm face renders ~28.8 mm text, under the interior floor (33).
       const boundSite = {
         ...refMultilevel,
-        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
       };
       const ctx: CompileContext = {
         ...context, site: boundSite, rules_pack_index: index,
@@ -545,7 +545,7 @@ describe('T-2.12 createArtworkHandler', () => {
     ): typeof refMultilevel {
       return {
         ...refMultilevel,
-        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
         supports: refMultilevel.supports.map((s) =>
           s.id === 'sup-001'
             ? { ...s, width_mm: 600, height_mm: heightMm, dimensions_source: source }

@@ -34,6 +34,8 @@ const AUDIT_COLUMNS = new Set(['created_at', 'updated_at']);
  * A5.6, que `schema/signage.ts` signale déjà une à une en commentaire.
  */
 const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
+  'site.rules_pack_id':
+    'Colonne en cours de retrait, A5.2 de la version 22 : le rattachement est porté par `site_rules_binding`, qui fait foi. Les lectures n’y passent plus ; la migration 0057 la retire, et cette ligne avec elle.',
   'site.deleted_at':
     'Suppression logique : le chargeur filtre dessus et n’a pas à la rendre au modèle.',
   'support.deleted_at':

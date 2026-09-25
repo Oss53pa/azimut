@@ -21,10 +21,12 @@ import type {
   PlanSource, PlanCalibration,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
   PictogramRegistry, SiteZone, SiteZoneKind, ParkingSpace, ParkingSpaceKind,
+  SiteRulesBinding,
 } from '@azimut/core-model';
 import type {
   SiteRowSet, } from './row-types.js';
 import { num, isoString, asStringArray } from './row-scalars.js';
+import { mapRulesBindingRows } from './map-rules-bindings.js';
 import {
   mapSupportTypologyRow, mapSupportFaceRow, mapContentBlockRow,
   mapSupportVersionRow, mapSupportRow,
@@ -80,7 +82,6 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     ...(rows.site.legal_entity_id !== null
       ? { legal_entity_id: rows.site.legal_entity_id }
       : {}),
-    rules_pack_id: rows.site.rules_pack_id,
     // M01.S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
     // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
     ...(rows.site.origin_x_m !== null && rows.site.origin_y_m !== null
@@ -301,9 +302,13 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     footprint_ids: asStringArray(z.footprint_ids) ?? [],
   }));
 
+  // A5.8 — les paquets du site, depuis la table qui fait foi.
+  const rulesBindings: SiteRulesBinding[] = mapRulesBindingRows(rows.rules_bindings);
+
   return {
     organization,
     site,
+    rules_bindings: rulesBindings,
     buildings,
     levels,
     plan_sources: planSources,

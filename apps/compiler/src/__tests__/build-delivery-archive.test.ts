@@ -199,7 +199,7 @@ describe('D11 — createBuildDeliveryArchiveHandler', () => {
     function boundContext(sink: MutableAssetStore): BuildDeliveryArchiveContext {
       return {
         ...context(sink),
-        site: { ...refMultilevel, site: { ...refMultilevel.site, rules_pack_id: PACK_ID } },
+        site: { ...refMultilevel, rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }] },
         theme: hexTheme,
         rules_pack_index: index,
       };

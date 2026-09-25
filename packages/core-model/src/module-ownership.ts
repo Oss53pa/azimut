@@ -86,6 +86,11 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // propriétaire, quand elle portait une place autonome hors du cahier des
     // charges ; redéfinie en extension d'empreinte, elle suit l'empreinte.
     'parking_space',
+    // Q2 : « site_rules_binding | 01 Socle | Rattachement d'un site à un
+    // paquet ». La table était rangée parmi celles sans propriétaire, faute
+    // d'y avoir été inscrite. Depuis la version 22 elle fait foi pour le
+    // rattachement, A5.8, et la création d'un site l'écrit : elle suit le site.
+    'site_rules_binding',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
   // d'implantation de `support` — dont `code` — par la scission L0, déclarée
@@ -307,7 +312,6 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',
   rules_pack_rule: 'A5.9 et D3, même motif que `rules_pack`.',
-  site_rules_binding: 'Rattachement d’un site à un paquet de règles. Aucune fiche de L3 ne le range.',
   charter: 'A5.7, charte de site. L3 ne donne les chartes qu’au module 10, et seulement « de groupe ».',
   charter_color: 'A5.7, même motif que `charter`.',
   charter_typeface: 'A5.7, même motif que `charter`.',

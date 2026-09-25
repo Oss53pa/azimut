@@ -119,16 +119,17 @@ export type AccessibleMark = {
  * même fonction, fût-il bien dessiné, n'est pas celui que la règle demande, et
  * la résolution ne le voit même pas.
  *
- * La portée est le paquet de règles du site, A5.4 : le pictogramme d'un autre
- * paquet de la même organisation, désigné pour un autre site, n'est ni celui
- * de ce site ni un concurrent qui le rendrait ambigu.
+ * La portée est faite des paquets rattachés au site, la surcouche avant le
+ * socle, A5.4 et A5.8 : le pictogramme d'un paquet que le site ne porte pas,
+ * désigné pour un autre site de la même organisation, n'est ni celui de ce
+ * site ni un concurrent qui le rendrait ambigu.
  *
  * **À n'appeler que lorsqu'une marque est demandée.** Un niveau sans place
  * accessible ne demande rien, et ne doit donc rien signaler : la fonction n'y
  * manque pas, personne ne l'a réclamée.
  */
 export function accessibleSpaceMark(site: SiteData): AccessibleMark {
-  const scope = siteScope(site.site, 'safety');
+  const scope = siteScope(site, 'safety');
   const resolution = resolvePictogramFunction(
     site.pictograms, scope, ACCESSIBLE_FUNCTION_KEY,
   );

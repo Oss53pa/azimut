@@ -58,7 +58,6 @@ export type Site = {
    * avant l'émission de la première facture. Elle ne sert qu'à facturer.
    */
   readonly legal_entity_id?: string;
-  readonly rules_pack_id: string | null;
   /**
    * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que
    * rien n'est déclaré, et non que le français s'applique. Voir `lang.ts`.
@@ -469,9 +468,32 @@ export type SiteGraph = {
   readonly building_links: readonly BuildingLink[];
 };
 
+/** A5.8 — le rôle d'un paquet rattaché à un site. */
+export type RulesPackRole = 'base' | 'overlay';
+
+/**
+ * A5.8 — le rattachement d'un site à un paquet de règles.
+ *
+ * « Cette table fait foi pour le rattachement d'un site à ses paquets. Un site
+ * porte au plus un socle et au plus une surcouche pays. » Le site ne porte plus
+ * de colonne de paquet : A5.2 la retire, « une colonne unique ici serait une
+ * seconde source pour la même chose ». Voir `rules-bindings.ts`.
+ */
+export type SiteRulesBinding = {
+  readonly id: string;
+  readonly rules_pack_id: string;
+  readonly role: RulesPackRole;
+};
+
 export type SiteData = {
   readonly organization: Organization;
   readonly site: Site;
+  /**
+   * A5.8 — les paquets rattachés au site, zéro, un ou deux. Requis au type :
+   * un site sans rattachement le dit par une liste vide, et un jeu d'essai
+   * qui l'oublierait ne compilerait pas au lieu de passer pour non rattaché.
+   */
+  readonly rules_bindings: readonly SiteRulesBinding[];
   readonly buildings: readonly Building[];
   readonly levels: readonly Level[];
   /**

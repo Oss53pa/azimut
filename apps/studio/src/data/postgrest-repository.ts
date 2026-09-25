@@ -9,11 +9,11 @@
  * Le schéma n'est pas `public` : chaque requête le nomme par l'en-tête
  * `Accept-Profile`, ce qui évite de dépendre du schéma par défaut du service.
  */
-import { assembleSiteData } from '@azimut/db/mapping';
+import { assembleSiteData, mapRulesBindingRows } from '@azimut/db/mapping';
 import type {
   BuildingLinkRow, BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
   FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
-  PlanCalibrationRow, PlanSourceRow, SiteRow,
+  PlanCalibrationRow, PlanSourceRow, SiteRow, SiteRulesBindingRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
   ZoneRow, ParkingSpaceRow,
@@ -30,10 +30,7 @@ import {
   type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
 
-type SiteListRow = Pick<
-  SiteRow,
-  'id' | 'org_id' | 'name' | 'country_code' | 'rules_pack_id'
->;
+type SiteListRow = Pick<SiteRow, 'id' | 'org_id' | 'name' | 'country_code'>;
 
 export type PostgrestConfig = {
   /** Racine de l'API REST, sans barre oblique finale. */
@@ -274,17 +271,18 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // La projection est plus étroite que `SiteRow` : la liste n'a besoin que
       // de quoi nommer un site. Le type dit exactement les colonnes demandées,
       // sinon il promettrait des champs que la réponse ne porte pas.
-      const rows = await query<SiteListRow>(
-        config,
-        'site',
-        'select=id,org_id,name,country_code,rules_pack_id&order=name.asc',
-      );
+      // A5.8 — les paquets viennent de la table de rattachement, qui fait foi,
+      // en une seule requête : le cloisonnement de la base en borne la portée.
+      const [rows, bindings] = await Promise.all([
+        query<SiteListRow>(config, 'site', 'select=id,org_id,name,country_code&order=name.asc'),
+        query<SiteRulesBindingRow>(config, 'site_rules_binding', 'order=site_id.asc,role.asc'),
+      ]);
       return rows.map((row): SiteSummary => ({
         id: row.id,
         org_id: row.org_id,
         name: row.name,
         country_code: row.country_code,
-        rules_pack_id: row.rules_pack_id,
+        rules_bindings: mapRulesBindingRows(bindings.filter(b => b.site_id === row.id)),
       }));
     },
 
@@ -297,7 +295,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       );
       const organization = firstOrThrow(orgRows, 'organization', site.org_id);
 
-      const buildings = await query<BuildingRow>(config, 'building', `site_id=eq.${siteId}`);
+      const [buildings, rulesBindings] = await Promise.all([
+        query<BuildingRow>(config, 'building', `site_id=eq.${siteId}`),
+        query<SiteRulesBindingRow>(config, 'site_rules_binding', `site_id=eq.${siteId}`),
+      ]);
       const levels = await queryIn<LevelRow>(
         config, 'level', 'building_id', buildings.map(b => b.id),
       );
@@ -361,6 +362,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       return assembleSiteData({
         organization,
         site,
+        rules_bindings: rulesBindings,
         buildings,
         levels,
         plan_sources: planSources,
