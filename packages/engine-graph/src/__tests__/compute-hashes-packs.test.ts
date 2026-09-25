@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { refMinimal } from '@azimut/testkit';
 import type { BoundRulesPacks } from '@azimut/core-model';
-import { computeContentHash } from '../compute-hashes.js';
+import { resolvedFaceContentHash } from '../compute-staleness.js';
 import { resolveFaceContent } from '../resolve-face.js';
 
 /**
@@ -20,15 +20,15 @@ function hashWith(rules_packs: BoundRulesPacks): string {
   if (profile === undefined || template === undefined) throw new Error('fixture');
   const resolved = resolveFaceContent(refMinimal, template, 'n-junction', profile);
   if (!resolved.ok) throw new Error('resolve failed');
-  return computeContentHash({
-    resolved: resolved.value,
-    template,
-    charter_id: null,
-    charter_version: null,
+  const hash = resolvedFaceContentHash(resolved.value, template, {
+    template_version: '1',
     rules_packs,
     active_langs: ['fr', 'en'],
     dimensions: { width_mm: 600, height_mm: 400 },
+    pictogram_ids: [],
   });
+  if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+  return hash.value;
 }
 
 const SOCLE = { key: 'international', version: '2026.1' };

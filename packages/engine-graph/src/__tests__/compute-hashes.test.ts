@@ -1,9 +1,39 @@
 import { describe, it, expect } from 'vitest';
 import { refMinimal, refMultilevel, refRetail } from '@azimut/testkit';
-import type { SiteData, FaceTemplate } from '@azimut/core-model';
-import { computeInputsHash, computeContentHash } from '../compute-hashes.js';
+import type { BoundRulesPacks, SiteData, FaceTemplate } from '@azimut/core-model';
+import { computeInputsHash } from '../compute-hashes.js';
+import { resolvedFaceContentHash } from '../compute-staleness.js';
 import { resolveFaceContent } from '../resolve-face.js';
-import type { ContentHashInput } from '../compute-hashes.js';
+import type { ResolvedFace } from '../resolve-face.js';
+
+/**
+ * D7.2 — l'empreinte de contenu n'a qu'une implantation, dans core-model ;
+ * ces essais la prennent par le chemin d'engine-graph, `resolvedFaceContentHash`.
+ */
+type ContentHashInput = {
+  readonly resolved: ResolvedFace;
+  readonly template: FaceTemplate;
+  readonly charter_id: string | null;
+  readonly charter_version: string | null;
+  readonly rules_packs: BoundRulesPacks;
+  readonly active_langs: readonly string[];
+  readonly dimensions: { readonly width_mm: number; readonly height_mm: number };
+};
+
+function hashOf(input: ContentHashInput): string {
+  const charter = input.charter_id !== null && input.charter_version !== null
+    ? { charter: { id: input.charter_id, version: input.charter_version } } : {};
+  const hash = resolvedFaceContentHash(input.resolved, input.template, {
+    template_version: '1',
+    ...charter,
+    rules_packs: input.rules_packs,
+    active_langs: input.active_langs,
+    dimensions: input.dimensions,
+    pictogram_ids: [],
+  });
+  if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+  return hash.value;
+}
 
 function first<T>(arr: readonly T[], label: string): T {
   const v = arr[0];
@@ -24,9 +54,9 @@ function resolveAtNode(
   return {
     resolved: result.value,
     template: tpl,
-    charter_id: null,
-    charter_version: null,
-    rules_packs: {},
+    charter_id: 'ch-essai',
+    charter_version: 'v1',
+    rules_packs: { base: { key: 'intl', version: '2026.1' } },
     active_langs: ['fr', 'en'],
     dimensions: { width_mm: 600, height_mm: 400 },
   };
@@ -184,51 +214,51 @@ describe('D7.1 — inputs_hash', () => {
 });
 
 describe('D7.1 — content_hash', () => {
-  it('produces a 64-char lowercase hex hash', () => {
+  it('produces a sha256-prefixed lowercase hex hash (T-2.14a §4.9)', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const hash = computeContentHash(input);
-    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+    const hash = hashOf(input);
+    expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
   });
 
   it('is deterministic', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash(input);
-    const b = computeContentHash(input);
+    const a = hashOf(input);
+    const b = hashOf(input);
     expect(a).toBe(b);
   });
 
   it('changes when charter version changes', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash(input);
-    const b = computeContentHash({ ...input, charter_version: 'v2' });
+    const a = hashOf(input);
+    const b = hashOf({ ...input, charter_version: 'v2' });
     expect(a).not.toBe(b);
   });
 
   it('changes when charter identity changes (D7.1 "charte et sa version")', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash({ ...input, charter_id: 'charter-a', charter_version: 'v1' });
-    const b = computeContentHash({ ...input, charter_id: 'charter-b', charter_version: 'v1' });
+    const a = hashOf({ ...input, charter_id: 'charter-a', charter_version: 'v1' });
+    const b = hashOf({ ...input, charter_id: 'charter-b', charter_version: 'v1' });
     expect(a).not.toBe(b);
   });
 
   it('changes when rules pack identity changes (D7.1)', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash({ ...input, rules_packs: { base: { key: 'pack-fr', version: '1.0.0' } } });
-    const b = computeContentHash({ ...input, rules_packs: { base: { key: 'pack-be', version: '1.0.0' } } });
+    const a = hashOf({ ...input, rules_packs: { base: { key: 'pack-fr', version: '1.0.0' } } });
+    const b = hashOf({ ...input, rules_packs: { base: { key: 'pack-be', version: '1.0.0' } } });
     expect(a).not.toBe(b);
   });
 
   it('changes when active languages change', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash(input);
-    const b = computeContentHash({ ...input, active_langs: ['fr'] });
+    const a = hashOf(input);
+    const b = hashOf({ ...input, active_langs: ['fr'] });
     expect(a).not.toBe(b);
   });
 
   it('changes when dimensions change', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash(input);
-    const b = computeContentHash({
+    const a = hashOf(input);
+    const b = hashOf({
       ...input,
       dimensions: { width_mm: 800, height_mm: 600 },
     });
@@ -237,15 +267,15 @@ describe('D7.1 — content_hash', () => {
 
   it('changes when the base pack version changes', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.1.0' } } });
-    const b = computeContentHash({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.2.0' } } });
+    const a = hashOf({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.1.0' } } });
+    const b = hashOf({ ...input, rules_packs: { base: { key: 'intl', version: 'v1.2.0' } } });
     expect(a).not.toBe(b);
   });
 
   it('active_langs order does not affect hash (sorted before hashing)', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const a = computeContentHash({ ...input, active_langs: ['en', 'fr'] });
-    const b = computeContentHash({ ...input, active_langs: ['fr', 'en'] });
+    const a = hashOf({ ...input, active_langs: ['en', 'fr'] });
+    const b = hashOf({ ...input, active_langs: ['fr', 'en'] });
     expect(a).toBe(b);
   });
   it('excluded_edge_kinds order does not affect hash', () => {
@@ -299,7 +329,7 @@ const headerOnlyTemplate: FaceTemplate = {
 describe('D7.3 — staleness precision', () => {
   it('destination change affects face with destination_list', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
-    const before = computeContentHash(input);
+    const before = hashOf(input);
 
     const modified: SiteData = {
       ...refMinimal,
@@ -310,7 +340,7 @@ describe('D7.3 — staleness precision', () => {
       ),
     };
 
-    const after = computeContentHash(
+    const after = hashOf(
       resolveAtNode(modified, template, 'n-junction'),
     );
     expect(after).not.toBe(before);
@@ -318,7 +348,7 @@ describe('D7.3 — staleness precision', () => {
 
   it('destination change does NOT affect face without destination_list', () => {
     const input = resolveAtNode(refMinimal, headerOnlyTemplate, 'n-junction');
-    const before = computeContentHash(input);
+    const before = hashOf(input);
 
     const modified: SiteData = {
       ...refMinimal,
@@ -329,7 +359,7 @@ describe('D7.3 — staleness precision', () => {
       ),
     };
 
-    const after = computeContentHash(
+    const after = hashOf(
       resolveAtNode(modified, headerOnlyTemplate, 'n-junction'),
     );
     expect(after).toBe(before);
@@ -340,7 +370,7 @@ describe('D7.3 — staleness precision', () => {
     const templates = [template, headerOnlyTemplate];
 
     const hashes_before = templates.map((tpl) =>
-      computeContentHash(resolveAtNode(refMinimal, tpl, nodeId)),
+      hashOf(resolveAtNode(refMinimal, tpl, nodeId)),
     );
 
     const modified: SiteData = {
@@ -353,7 +383,7 @@ describe('D7.3 — staleness precision', () => {
     };
 
     const hashes_after = templates.map((tpl) =>
-      computeContentHash(resolveAtNode(modified, tpl, nodeId)),
+      hashOf(resolveAtNode(modified, tpl, nodeId)),
     );
 
     let staleCount = 0;

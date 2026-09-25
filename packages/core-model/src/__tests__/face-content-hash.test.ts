@@ -195,6 +195,17 @@ describe('computeFaceContentHash — socle et surcouche (D7.1)', () => {
     expect(hash({ rules_packs: { base: SOCLE } })).not.toBe(hash({ rules_packs: { overlay: SOCLE } }));
   });
 
+  it('distinguishes the base alone from the base under an overlay', () => {
+    expect(hash({ rules_packs: { base: SOCLE } }))
+      .not.toBe(hash({ rules_packs: { base: SOCLE, overlay: { key: 'ci', version: '1' } } }));
+  });
+
+  it('does not depend on the order the roles are given in', () => {
+    const overlay = { key: 'ci', version: '1' };
+    expect(hash({ rules_packs: { overlay, base: SOCLE } }))
+      .toBe(hash({ rules_packs: { base: SOCLE, overlay } }));
+  });
+
   it('accepts an overlay alone, which A5.8 admits', () => {
     expect(computeFaceContentHash(base({ rules_packs: { overlay: SOCLE } })).ok).toBe(true);
   });

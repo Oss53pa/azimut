@@ -12,8 +12,6 @@ export type {
   OrientedPlanTheme,
   OrientedPlanOptions,
 } from './render-oriented-plan.js';
-export { computeFaceContentHash } from './face-content-hash.js';
-export type { FaceContentHashInput } from './face-content-hash.js';
 export { renderEvacuationPlan } from './render-evacuation-plan.js';
 export type {
   EvacuationTheme,

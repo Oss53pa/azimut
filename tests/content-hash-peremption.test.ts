@@ -2,9 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { refMultilevel } from '@azimut/testkit';
 import { resolveFaceContent } from '@azimut/engine-graph';
 import type { ResolvedFace } from '@azimut/engine-graph';
-import { computeFaceContentHash } from '@azimut/engine-layout';
-import type { FaceContentHashInput } from '@azimut/engine-layout';
-import type { FaceTemplate, SiteData, TravelProfile } from '@azimut/core-model';
+import { computeFaceContentHash } from '@azimut/core-model';
+import type { FaceContentHashInput, FaceTemplate, SiteData, TravelProfile } from '@azimut/core-model';
 
 const profile = refMultilevel.travel_profiles.find((p) => p.key === 'standard') as TravelProfile;
 

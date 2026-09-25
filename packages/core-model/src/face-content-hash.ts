@@ -1,7 +1,19 @@
-import { empreinte, roundMm, rulesPacksInRoleOrder } from '@azimut/core-model';
-import type { BoundRulesPacks, Finding, Outcome } from '@azimut/core-model';
+import { empreinte } from './empreinte.js';
+import { roundMm } from './round.js';
+import { rulesPacksInRoleOrder } from './rules-bindings.js';
+import type { BoundRulesPacks } from './rules-bindings.js';
+import type { Finding, Outcome } from './outcome.js';
 
 /**
+ * T-2.14a §3 et D7.2 — l'empreinte de contenu d'une face résolue, et la seule.
+ *
+ * D7.2 : « Une seule implantation. L'empreinte est calculée par une seule
+ * fonction, employée par tous les appelants. Deux implantations équivalentes
+ * aujourd'hui divergeront demain, et l'invariant 4 repose sur elles. » Elle vit
+ * ici, dans `core-model`, parce que deux moteurs l'emploient — la composition
+ * et la péremption — et qu'aucun moteur ne dépend d'un autre (A4.1). L'annexe
+ * T, §2, y range déjà la fonction d'empreinte.
+ *
  * T-2.14a §3 — Content empreinte of a resolved face.
  *
  * Exactly seven elements go into the hash (§3.1): the resolved content block by
@@ -15,10 +27,9 @@ import type { BoundRulesPacks, Finding, Outcome } from '@azimut/core-model';
  * and the placement inputs (render order, azimuth, reading distance) — these
  * only influence the computed dimensions, which are already in the hash.
  *
- * The input is self-contained on purpose: engine-layout must not depend on
- * engine-graph, so the caller maps a resolved face into this shape (one entry
- * per block, in block order, carrying that block's resolved content as plain
- * data).
+ * The input is self-contained on purpose: the caller maps its resolved face
+ * into this shape (one entry per block, in block order, carrying that block's
+ * resolved content as plain data).
  */
 export type FaceContentHashInput = {
   /** Resolved content of each block, in block order (§3.1.1). */

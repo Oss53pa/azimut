@@ -119,6 +119,8 @@ export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-cla
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
 export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
 export { canonicalContentJson, empreinte } from './empreinte.js';
+export { computeFaceContentHash } from './face-content-hash.js';
+export type { FaceContentHashInput } from './face-content-hash.js';
 export {
   transliterate,
   sanitizeSegment,
