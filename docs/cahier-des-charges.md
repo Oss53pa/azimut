@@ -357,8 +357,12 @@ pictogram           (id, org_id, category_id, family_id, registry, code, svg_pat
 -- par exemple access.accessible, access.hearing_loop, service.restroom.
 -- Pour le registre de sécurité, la désignation vient du paquet de règles et n'est
 -- jamais saisie : c'est lui qui porte ces pictogrammes. Pour le registre
--- d'orientation, elle est libre. Une fonction est désignée au plus une fois par
--- registre et par site.
+-- d'orientation, elle est libre.
+-- Portée d'unicité d'une fonction : le paquet de règles pour le registre de
+-- sécurité, l'organisation pour le registre d'orientation. Une organisation qui
+-- exploite deux sites rattachés à deux paquets différents porte légitimement deux
+-- pictogrammes de même fonction, un par paquet : l'unicité par organisation les
+-- déclarerait ambigus à tort.
                     registry in ('safety','wayfinding')
                     source in ('rules_pack','library','custom')
                     comprehension_state in ('untested','tested','failed')
@@ -522,6 +526,7 @@ site_fact    (id, org_id, site_id, key, value jsonb, status, source_ref,
 | `parking.capacity` | entier | zone de nature `parking` |
 | `parking.free` | booléen | zone de nature `parking` |
 | `parking.undigitized_spaces` | entier | empreinte de nature `parking_space` |
+| `parking.undigitized_reason` | texte | empreinte de nature `parking_space` |
 
 Une clé nouvelle s'ajoute à cette table, avec son type et sa cible, dans le même commit que son premier usage. Une valeur qui ne correspond pas au type déclaré est refusée.
 
@@ -8028,7 +8033,7 @@ Aucune table propre au stationnement n'existe en dehors de cette extension. En p
 
 **S-36.** La capacité annoncée d'un parking est un fait du site, avec sa source et son statut, section A5.11. Les contrôles du domaine `PARK` comparent le compte des empreintes de nature `parking_space` à ce fait déclaré.
 
-**S-37.** Une surface de parking non numérisée se déclare comme telle : une empreinte de nature `parking_space` peut être marquée non numérisée, avec le nombre de places qu'elle est censée porter et sa source. C'est elle qui explique un écart entre la capacité annoncée et les places comptées. Sans explication déclarée, l'écart lève `PARK.CAPACITY_UNEXPLAINED` ; avec elle, l'écart est admis à concurrence des places déclarées.
+**S-37.** Une surface de parking non numérisée se déclare comme telle : une empreinte de nature `parking_space` peut être marquée non numérisée, avec le nombre de places qu'elle est censée porter, le motif pour lequel elle ne l'est pas, et sa source. Le nombre et le motif sont deux faits ciblant cette empreinte, clés `parking.undigitized_spaces` et `parking.undigitized_reason`. C'est elle qui explique un écart entre la capacité annoncée et les places comptées. Sans explication déclarée, l'écart lève `PARK.CAPACITY_UNEXPLAINED` ; avec elle, l'écart est admis à concurrence des places déclarées.
 
 **S-38.** Le comptage des places obéit à une règle unique : une empreinte de place vaut une place, sauf si elle est marquée non numérisée, auquel cas elle vaut le nombre déclaré par son fait et ne compte jamais en plus pour elle-même. Sans cette règle, chaque surface non numérisée fausserait le compte d'une unité.
 
@@ -8560,3 +8565,6 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 275. D2.2 : deux codes de désignation de fonction
 276. S-39 : marque d'accessibilité fondée sur la désignation de fonction
 277. K3.8 : grille des pictogrammes et poids du paquet inscrits
+278. A5.4 : portée d'unicité d'une fonction de pictogramme
+279. A5.11 : clé du motif d'une surface non numérisée
+280. S-37 : motif d'une surface non numérisée
