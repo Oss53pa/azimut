@@ -297,7 +297,7 @@ export const refMultilevel: SiteData = {
       ],
     },
   ],
-  // Complément atelier M2 — stationnement. Le seul site de référence qui en
+  // Stationnement. Le seul site de référence qui en
   // porte, comme il est le seul à porter un vocabulaire : les autres montrent
   // le cas d'un site qui n'en déclare pas.
   //

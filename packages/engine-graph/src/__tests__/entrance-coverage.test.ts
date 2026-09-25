@@ -76,7 +76,7 @@ function sansProfil(site: SiteData): SiteData {
   return { ...site, travel_profiles: [] };
 }
 
-describe('QC-10 (complément atelier) — toutes les entrées desservent-elles tout', () => {
+describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE — toutes les entrées desservent-elles tout', () => {
   it('ne signale rien sur le site de référence', () => {
     expect(destinationNotReachedFromEveryEntranceFindings(refMultilevel)).toHaveLength(0);
   });

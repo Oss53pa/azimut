@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { resolveBoundParagraph, literalNumbers } from '../bound-text.js';
 import type { BoundParagraph, BindingValues } from '../bound-text.js';
 
-/** Le paragraphe Stationnement du complément, en champs liés. */
+/** Un paragraphe Stationnement, en champs liés. */
 const STATIONNEMENT: BoundParagraph = {
   id: 'p-stationnement',
   segments: [
@@ -30,7 +30,7 @@ describe('resolveBoundParagraph (M15)', () => {
   });
 
   it('suit un changement de valeur sans que le texte change', () => {
-    // C'est l'exigence de M15 (complément atelier) : le relevé passe de 89 à 93, la phrase suit.
+    // C'est l'exigence de la règle M01.S11 : le relevé passe de 89 à 93, la phrase suit.
     const r = resolveBoundParagraph(STATIONNEMENT, {
       ...VALEURS,
       parking: { name: 'parking Ouest', capacity: '93' },

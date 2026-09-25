@@ -369,7 +369,7 @@ export type SiteGraph = {
   readonly building_links: readonly BuildingLink[];
 };
 
-/** Complément atelier M2 — un portail ou un accès véhicule. */
+/** Un portail ou un accès véhicule. Objet hors d'A5 : voir l'en-tête de `parking.ts`. */
 export type VehicleGate = {
   readonly id: string;
   readonly org_id: string;
@@ -409,10 +409,14 @@ export type SiteData = {
   readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
   /**
-   * Complément atelier M2 — le stationnement fait partie de la géométrie du
-   * site, au même titre que les empreintes : un parking se dessine sur un plan
-   * et se compte. Il entre donc ici, et non dans un registre à part comme le
-   * vocabulaire, qui lui n'est pas de la géométrie.
+   * Le stationnement fait partie de la géométrie du site, au même titre que
+   * les empreintes : un parking se dessine sur un plan et se compte. Il entre
+   * donc ici, et non dans un registre à part comme le vocabulaire, qui lui
+   * n'est pas de la géométrie.
+   *
+   * A5.11 porte les **faits** du stationnement — « capacité annoncée d'un
+   * parking » y est l'exemple même d'un fait du site. Elle ne porte pas les
+   * objets, et c'est l'écart déclaré dans `parking.ts`.
    */
   readonly parkings: readonly Parking[];
   readonly parking_spaces: readonly ParkingSpace[];

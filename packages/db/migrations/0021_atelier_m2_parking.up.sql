@@ -1,10 +1,16 @@
--- Complément atelier, M2 : stationnement.
+-- Stationnement.
+--
+-- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
+-- foi. A5.11 porte les faits du stationnement — « capacité annoncée d'un
+-- parking » y est l'exemple même d'un fait du site — et ne décrit pas ces
+-- objets. Le nom du fichier garde sa forme d'origine, pour la raison exposée
+-- dans ORDRE.md.
 --
 -- Le socle ne portait rien du stationnement. Un plan d'accueil qui annonce
 -- « parking Ouest, 89 places » lisait un chiffre sans rien pour le rattacher au
 -- plan qui le fonde.
 --
--- Ces tables portent un statut et une source par objet (P1), ce qu'aucune
+-- Ces tables portent un statut et une source par objet, ce qu'aucune
 -- entité antérieure ne fait. Le retrofit de A5 est un autre sujet ; ici la
 -- place était libre.
 --
@@ -41,9 +47,10 @@ CREATE TABLE azimut.parking_space (
   parking_id uuid NOT NULL REFERENCES azimut.parking(id) ON DELETE CASCADE,
   kind text NOT NULL,
   row_label text NOT NULL,
-  -- Tracé de la place, facultatif : M2 la décrit « segment ou polygone » et le
-  -- modèle ne porte que le polygone. Non nul tant que la forme n'est pas
-  -- tranchée aurait rendu toute insertion impossible.
+  -- Tracé de la place, facultatif : le cahier des charges ne décrit pas la
+  -- géométrie d'une place, et le modèle ne porte que le polygone. Non nul
+  -- tant que la forme n'est pas tranchée aurait rendu toute insertion
+  -- impossible.
   geometry jsonb,
   status text NOT NULL,
   source text NOT NULL,

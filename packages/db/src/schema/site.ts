@@ -138,7 +138,7 @@ export const planCalibration = azimut.table('plan_calibration', {
   // tirée. Nullable : le calage par points mesurés n'en produit pas.
   reference_distance_m: numeric('reference_distance_m'),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
-  // Complément atelier M1.4 : transformation affine ajustée par moindres
+  // Section M2 (partie M), calage à n points : transformation affine ajustée par moindres
   // carrés. Nulles tant que le plan n'est calé qu'à deux points.
   affine_a: numeric('affine_a'),
   affine_b: numeric('affine_b'),
@@ -221,8 +221,12 @@ export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
 ]);
 
 /**
- * Complément atelier M16 — ce qu'une source affirme d'un objet, à une date.
- * Deux affirmations divergentes sur la même clé font un écart, pas un fait.
+ * Ce qu'une source affirme d'un objet, à une date. Deux affirmations
+ * divergentes sur la même clé font un écart, pas un fait.
+ *
+ * A5.11, règle M01.S11 : « Un écart entre deux sources reste ouvert et visible
+ * tant qu'il n'est pas tranché. » La règle est au cahier des charges, la table
+ * n'y est pas — voir `TABLES_WITHOUT_DECLARED_OWNER`.
  */
 export const sourceClaim = azimut.table('source_claim', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -258,7 +262,13 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
   index('idx_discrepancy_decision_org').on(t.org_id),
 ]);
 
-/** Complément atelier M2 — un parking, avec sa capacité annoncée et sa source. */
+/**
+ * Un parking, avec sa capacité annoncée et sa source.
+ *
+ * « Capacité annoncée d'un parking » est l'exemple même d'un fait du site en
+ * A5.11. L'objet, lui, n'y est pas décrit : voir l'écart déclaré dans
+ * `core-model/parking.ts`.
+ */
 export const parking = azimut.table('parking', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),

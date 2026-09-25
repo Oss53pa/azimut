@@ -20,7 +20,7 @@ import { createdTables, allUpSql } from '../migration-corpus.js';
  * Une règle numérotée est opposable et se cite dans une revue et dans un test
  * (N0). Elles s'appellent désormais `INT-1` à `INT-4` : le jeton `R1` seul
  * désignait aussi bien ces règles que celles du module 05 ou celles du
- * complément « atelier », et la collision disparaît avec le préfixe.
+ * un document antérieur à la consolidation, et la collision disparaît avec le préfixe.
  */
 describe('L1 — règles d’intégration', () => {
   const schemaTables = [...createdTables().keys()].sort();

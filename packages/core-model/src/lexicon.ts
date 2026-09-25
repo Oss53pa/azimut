@@ -76,8 +76,8 @@ function isWordChar(ch: string | undefined): boolean {
  * prévisible : un rédacteur peut la vérifier de tête, là où un appariement par
  * préfixe produirait des signalements qu'il ne pourrait ni prévoir ni faire
  * taire. La conséquence est qu'une charte énumère ses formes — « client » et
- * « clients » sont deux entrées — et le complément atelier procède déjà ainsi
- * quand il liste « paiement » et « payant » côte à côte.
+ * « clients » sont deux entrées. A5.8 le prévoit en donnant au lexique une
+ * ligne par terme et par langue, et non une règle de forme.
  *
  * Un terme de plusieurs mots est apparié tel quel, ses frontières étant celles
  * de ses extrémités.

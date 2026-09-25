@@ -1,5 +1,5 @@
 /**
- * Emprise de parking et validation géométrique — complément atelier, M2.
+ * Emprise de parking et validation géométrique.
  *
  * Séparé des essais du socle : réunis, ils franchissaient les quatre cents
  * lignes (A2.4).
@@ -8,7 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { validateGeometry } from '../validate-geometry.js';
 import { siteWith, GOOD_FP } from './geometry-fixtures.js';
 
-describe('emprise de parking (complément atelier M2)', () => {
+describe('emprise de parking', () => {
   it('refuse un contour de parking à moins de trois sommets', () => {
     // Le contrôle ne regardait que les empreintes : une emprise de parking
     // dégénérée passait sans que rien ne le dise.

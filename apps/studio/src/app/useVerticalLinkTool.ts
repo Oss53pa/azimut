@@ -188,7 +188,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
  * `edgeLengthBetween` est tridimensionnelle : deux nœuds superposés à
  * l'aplomb l'un de l'autre, tous deux posés à l'altitude zéro, donneraient une
  * longueur nulle et la liaison serait refusée — alors que c'est exactement la
- * liaison que P5 (complément atelier) et QC-12 veulent voir.
+ * liaison que `GRAPH.VERTICAL_LINK_MISALIGNED` (D2.2) veut voir.
  */
 function end(
   nodeId: string,

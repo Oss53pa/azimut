@@ -77,6 +77,10 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // A5.3 et Q2 : la trace des passages de la validation de complétude
     // appartient au module qui possède le graphe.
     'graph_validation',
+    // Q2 : « site_fact | 01 Socle | Faits déclarés du site, avec source et
+    // statut, section A5.11 ». La table était rangée parmi celles sans
+    // propriétaire, faute d'y avoir été inscrite ; elle l'est.
+    'site_fact',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
   // d'implantation de `support` — dont `code` — par la scission L0, déclarée
@@ -311,12 +315,11 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   job: 'A5.10, file de travaux. Infrastructure, non métier.',
   audit_log: 'A5.10 et A12.3, journal d’audit en insertion seule. X4 le distingue du journal d’activité du module 11, sans l’y ranger.',
   support: 'Scindée entre les modules 02 et 04, colonne par colonne (L0). Voir `SUPPORT_COLUMN_OWNER` : elle a deux propriétaires, pas aucun.',
-  site_fact: 'Complément « atelier », hors des quatorze documents. Son vocabulaire n’est pas celui de L.',
-  site_fact_forbidden_word: 'Complément « atelier », même motif.',
-  source_claim: 'Complément « atelier », même motif.',
-  discrepancy_decision: 'Complément « atelier », même motif.',
-  parking: 'Complément « atelier », même motif.',
-  parking_space: 'Complément « atelier », même motif.',
-  parking_uncovered_area: 'Complément « atelier », même motif.',
-  vehicle_gate: 'Complément « atelier », même motif.',
+  site_fact_forbidden_word: 'Les mots qu’un fait interdit. A5.11 porte `site_fact`, que Q2 range au module 01 ; elle ne décrit pas cette table fille, et aucune fiche de L3 ne la range.',
+  source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
+  discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
+  parking: 'A5.11 porte les faits du stationnement, dont la capacité annoncée d’un parking. Elle ne décrit pas l’objet, et Q2 ne l’attribue à aucun module.',
+  parking_space: 'Même motif que `parking`.',
+  parking_uncovered_area: 'Même motif que `parking`.',
+  vehicle_gate: 'Même motif que `parking`.',
 };

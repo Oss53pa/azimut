@@ -253,7 +253,7 @@ export type SupportVersionRow = {
 };
 
 /** Toutes les lignes d'un site, telles qu'un chemin de lecture les rassemble. */
-/** Complément atelier M2 — lignes du stationnement. */
+/** Lignes du stationnement. */
 export type ParkingRow = {
   readonly id: string;
   readonly org_id: string;

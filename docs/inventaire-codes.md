@@ -24,9 +24,16 @@
 > et échoue au premier écart, dans un sens comme dans l'autre. La colonne
 > « avis » ci-dessous est de l'histoire.
 
-**Le complément atelier `docs/complement-atelier-plans-parcours-signaletique.md` reste
-sous `docs/` pour l'historique, et cesse de faire foi dès cet inventaire trié.** Ce
-qu'il portait de vivant est ici, ligne par ligne, avec le fichier qui l'applique.
+**Le document antérieur `docs/complement-atelier-plans-parcours-signaletique.md`
+reste sous `docs/` pour l'historique, et a cessé de faire foi.** Ce qu'il
+portait de vivant est ici, ligne par ligne, avec le fichier qui l'applique.
+
+**Les mentions qu'il garde dans ce fichier sont de l'histoire, pas des renvois.**
+Le code du dépôt n'en porte plus aucune : plus un commentaire, plus un
+`ruleRef`, plus un en-tête de migration ne le désigne, et
+`tests/rule-citation-ambiguity.test.ts` échoue si l'un reparaît. Les colonnes
+ci-dessous disent d'où venait chaque code au moment du relevé ; les corriger
+falsifierait le relevé qu'on a demandé.
 
 Ce fichier est un relevé, pas une décision. Il ne retire rien, n'inscrit rien et ne
 modifie aucun contrôle. Le catalogue qui fait foi est celui du consolidé : la table

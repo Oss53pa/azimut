@@ -234,7 +234,7 @@ export const ERROR_CATALOG = {
   'CALIB.SCALE_IMPLAUSIBLE':                { severity: 'warning',  description: 'Échelle hors de la plage vraisemblable' },
   // Partie N, module 01 (N1.4) : niveau sans plan calé.
   'CALIB.LEVEL_NOT_CALIBRATED':             { severity: 'blocking', description: 'Niveau sans plan calé' },
-  // Complément atelier, M1.4 : calage mesuré sur points homologues.
+  // Section M2 (partie M) : calage à n points, avec son résidu mesuré.
   'CALIB.CONTROL_POINTS_INSUFFICIENT':      { severity: 'blocking', description: 'Points de calage en nombre insuffisant' },
   'CALIB.CONTROL_POINTS_COLLINEAR':         { severity: 'blocking', description: 'Points de calage colinéaires, l’ajustement est impossible' },
   'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Résidu non mesurable, trop peu de points homologues' },

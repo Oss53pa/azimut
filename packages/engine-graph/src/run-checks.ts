@@ -41,14 +41,13 @@ export type CheckReport = {
  * Ce pour quoi les contrôles tournent.
  *
  * `atelier` est le travail en cours : une proposition y est un état légitime.
- * `livrable` est ce qui part à l'impression ou à la publication, et P1 du
- * complément atelier y devient opposable — une proposition affichée s'y lirait
- * comme un fait.
+ * `livrable` est ce qui part à l'impression ou à la publication, et la règle
+ * M01.S11 y devient opposable — « un fait de statut `proposal` ne s'affiche
+ * jamais comme un existant », et une proposition affichée s'y lirait comme un
+ * fait.
  *
- * La notion n'est pas inventée : QC-21 du complément décrit exactement une
- * anomalie « signalante, bloquante à l'impression ». Un contrôle dont la
- * sévérité dépend de la destination du rendu a besoin de connaître cette
- * destination.
+ * Un contrôle dont la portée dépend de la destination du rendu a besoin de
+ * connaître cette destination : c'est tout ce que ce type porte.
  */
 export type CheckMode = 'atelier' | 'livrable';
 
@@ -141,9 +140,9 @@ export function runChecks(
       uncovered: site.parking_uncovered,
     }, forDeliverable).findings);
     run.push('parking_coverage');
-    // Le contrôle de P1 (complément atelier) ne tourne qu'en mode livrable, et
-    // il se nomme, pour qu'un rapport d'atelier ne laisse pas croire qu'il a
-    // été exercé.
+    // Le contrôle de publication ne tourne qu'en mode livrable, et il se
+    // nomme, pour qu'un rapport d'atelier ne laisse pas croire qu'il a été
+    // exercé.
     if (forDeliverable) run.push('parking_publication');
   }
 

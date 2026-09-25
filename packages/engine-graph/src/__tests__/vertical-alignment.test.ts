@@ -28,14 +28,14 @@ function decale(dx: number, kind?: VerticalLinkKind): SiteData {
   };
 }
 
-describe('QC-12 (complément atelier) — liaison verticale décalée', () => {
+describe('GRAPH.VERTICAL_LINK_MISALIGNED — liaison verticale décalée', () => {
   it('ne signale rien sur le site de référence, dont les liaisons coïncident', () => {
     // Sans cette vérification, un contrôle en panne aurait l'air vertueux.
     expect(verticalLinkMisalignedFindings(refMultilevel)).toHaveLength(0);
   });
 
   it('signale un ascenseur qui ne ressort pas au même endroit', () => {
-    // P5 (complément atelier) : la liaison occupe le même point sur les deux
+    // D2.2 : la liaison occupe le même point sur les deux
     // niveaux. Sinon le plan du niveau supérieur place la sortie ailleurs
     // qu'elle n'est, et rien ne le voyait.
     const findings = verticalLinkMisalignedFindings(decale(2.5));
@@ -49,7 +49,7 @@ describe('QC-12 (complément atelier) — liaison verticale décalée', () => {
 
   it('admet l’écart que D1.5 appelle « le même point »', () => {
     // POINT_COINCIDENCE_M vaut un millimètre. Le seuil n'est pas posé ici :
-    // P5 (complément atelier) dit « le même point », D1.5 dit à partir de
+    // « Non alignée » se mesure : D1.5 dit à partir de
     // quand deux points n'en sont plus qu'un.
     expect(verticalLinkMisalignedFindings(decale(0.0009))).toHaveLength(0);
     expect(verticalLinkMisalignedFindings(decale(0.0011))).toHaveLength(1);
@@ -65,7 +65,7 @@ describe('QC-12 (complément atelier) — liaison verticale décalée', () => {
   });
 
   /**
-   * P5 (complément atelier) énumère trois natures, le contrôle en retient
+   * D2.2 nomme les natures visées, le contrôle en retient
    * deux : celles qui occupent une gaine verticale, et pour lesquelles la
    * coïncidence est le fait à vérifier.
    */

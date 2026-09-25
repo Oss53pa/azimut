@@ -1,4 +1,9 @@
--- Complément atelier, M16 : écarts entre sources.
+-- Écarts entre sources — A5.11, règle M01.S11 : « Un écart entre deux sources
+-- reste ouvert et visible tant qu'il n'est pas tranché. »
+--
+-- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
+-- foi ; la règle est depuis au cahier des charges, la table n'y est pas. Le nom
+-- du fichier garde sa forme d'origine, pour la raison exposée dans ORDRE.md.
 --
 -- `site_fact` porte une clé unique par site (migration 0019), volontairement :
 -- deux valeurs pour « parking gratuit » ne se départagent pas toutes seules, et

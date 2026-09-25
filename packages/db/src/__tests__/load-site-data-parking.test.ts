@@ -1,5 +1,5 @@
 /**
- * Stationnement lu depuis la base — complément atelier, M2.
+ * Stationnement lu depuis la base.
  *
  * Séparé des essais de `loadSiteData` sur le socle : les deux réunis
  * franchissaient les quatre cents lignes (A2.4). Le `stubDb` qu'ils partagent
@@ -14,7 +14,7 @@ import {
   parking, parkingSpace, parkingUncoveredArea, vehicleGate,
 } from '../schema/site.js';
 
-describe('stationnement (complément atelier M2)', () => {
+describe('stationnement', () => {
   const baseTables = (): Map<object, unknown[]> => new Map<object, unknown[]>([
     [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
     [site, [{
@@ -69,7 +69,7 @@ describe('stationnement (complément atelier M2)', () => {
   });
 
   it('ne lit jamais un statut inconnu comme existant', async () => {
-    // `existant` est le seul statut qui publie (P1, complément atelier). Une valeur mal
+    // `existant` est le seul statut qui publie (A5.11, règle M01.S11). Une valeur mal
     // orthographiée doit retenir l'objet, pas le laisser passer.
     const byTable = baseTables();
     byTable.set(parking, [{

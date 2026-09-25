@@ -217,7 +217,7 @@ describe('createAuditSiteHandler', () => {
   });
 });
 
-describe('mode d’audit (complément atelier, P1 et QC-21)', () => {
+describe('mode d’audit — A5.11, règle M01.S11', () => {
   const avecProposition = {
     ...refMultilevel,
     parking_spaces: refMultilevel.parking_spaces.map((s, i) =>

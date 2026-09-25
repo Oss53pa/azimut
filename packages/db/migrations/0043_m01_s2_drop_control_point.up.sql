@@ -3,10 +3,9 @@
 -- « Seule exception, le calage d'une source de plan […] : ses points sont
 -- conservés en pixels de l'image, suffixe `_px`, dans les tables
 -- `plan_calibration` et `plan_calibration_point`. » `control_point` n'est
--- aucune des deux. Elle vient de la migration 0018, écrite d'après le
--- complément « atelier », document qui ne fait plus foi depuis la
--- consolidation, et la migration 0033 a depuis créé `plan_calibration_point`,
--- conforme à A5.2.
+-- aucune des deux. Elle vient de la migration 0018, écrite d'après un document
+-- antérieur qui ne fait plus foi depuis la consolidation, et la migration 0033
+-- a depuis créé `plan_calibration_point`, conforme à A5.2.
 --
 -- Elle n'est pas fusionnée dans celle-ci. Ses colonnes `target_x_m`,
 -- `target_y_m` et `residual_m` relèvent d'un calage à n points avec résidu,

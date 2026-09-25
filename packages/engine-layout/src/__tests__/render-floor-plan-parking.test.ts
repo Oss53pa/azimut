@@ -1,5 +1,5 @@
 /**
- * Stationnement au plan de niveau — complément atelier, M2.
+ * Stationnement au plan de niveau.
  *
  * Fichier distinct du reste des essais de `renderFloorPlan` : les deux réunis
  * dépassaient les quatre cents lignes qu'un fichier du dépôt ne franchit pas
@@ -38,7 +38,7 @@ const defaultOptions: FloorPlanOptions = {
   padding_px: 20,
 };
 
-describe('emprise de parking (complément atelier M2)', () => {
+describe('emprise de parking', () => {
   const parking = (status: 'existant' | 'proposition') => ({
     id: 'park-1',
     org_id: 'org1',
@@ -76,7 +76,7 @@ describe('emprise de parking (complément atelier M2)', () => {
   });
 
   it('trait plein pour un existant, pointillé pour une proposition', () => {
-    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que P1 (complément atelier)
+    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que la règle M01.S11
     // demande d'une proposition.
     const existant = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
     const propose = renderFloorPlan({ ...refMultilevel, parkings: [parking('proposition')] }, 'lvl-ml-rdc', defaultOptions);
@@ -98,7 +98,7 @@ describe('emprise de parking (complément atelier M2)', () => {
   });
 });
 
-describe('zone non couverte (complément atelier M2)', () => {
+describe('zone non couverte', () => {
   const parkingExistant = {
     id: 'park-1',
     org_id: 'org-test-001',
@@ -238,7 +238,7 @@ describe('revue : ce que le plan dessine, il le cadre', () => {
   });
 
   it('ne dessine pas un parking retiré, et ne le cadre pas non plus', () => {
-    // P1 (complément atelier) : le retiré reste en base pour l'historique et sort des livrables. Le
+    // M01.S11 : le retiré reste en base pour l'historique et sort des livrables. Le
     // montrer en pointillé le confondrait avec une proposition — l'inverse même
     // d'un retrait, puisqu'une proposition n'existe pas encore.
     const retire = {

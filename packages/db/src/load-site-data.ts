@@ -115,7 +115,7 @@ export async function loadSiteData(
     ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
     : [];
 
-  // Complément atelier M2 — stationnement. Les places et les zones non
+  // Stationnement. Les places et les zones non
   // couvertes pendent aux parkings : sans parking, aucune requête.
   const [parkingRows, gateRows] = await Promise.all([
     levelIds.length > 0

@@ -329,7 +329,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<SupportVersionRow>(config, 'support_version', 'support_id', supportIds),
         ]);
 
-      // Complément atelier M2 — stationnement. Les portails et les parkings
+      // Stationnement. Les portails et les parkings
       // pendent aux niveaux, les places et les zones non couvertes aux
       // parkings : deux vagues, comme pour les faces et leurs blocs.
       const [contentBlocks, parkings, vehicleGates] = await Promise.all([

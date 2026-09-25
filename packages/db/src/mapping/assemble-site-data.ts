@@ -38,10 +38,10 @@ export {
  * Un statut que le code ne reconnaît pas ne devient jamais `existant`.
  *
  * `existant` est le seul statut qui autorise un objet à paraître dans un
- * livrable (P1, complément atelier). Une valeur mal orthographiée en base, ou venue d'une version
- * ultérieure du modèle, doit donc retomber sur un statut qui retient l'objet,
- * pas sur celui qui le publie. `a_verifier` dit exactement cela : on ne sait
- * pas, quelqu'un doit regarder.
+ * livrable (A5.11, règle M01.S11). Une valeur mal orthographiée en base, ou
+ * venue d'une version ultérieure du modèle, doit donc retomber sur un statut
+ * qui retient l'objet, pas sur celui qui le publie. `a_verifier` dit exactement
+ * cela : on ne sait pas, quelqu'un doit regarder.
  */
 function toObjectStatus(raw: string): ObjectStatus {
   switch (raw) {
@@ -277,7 +277,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     honor_hours: p.honor_hours,
   }));
 
-  // Complément atelier M2 — stationnement.
+  // Stationnement.
   const parkings: Parking[] = rows.parkings.map(p => ({
     id: p.id,
     org_id: p.org_id,

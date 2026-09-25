@@ -48,7 +48,7 @@ describe('auditParking (M2)', () => {
   });
 
   it('refuse un parking numérisé à moitié sans zone non couverte déclarée', () => {
-    // Le cas que M2 (complément atelier) vise : 89 annoncées, 40 vues, et rien qui dise où le plan
+    // Le cas visé : 89 places annoncées, 40 vues, et rien qui dise où le plan
     // s'arrête. Un plan d'accueil annoncerait sinon une capacité inexistante.
     const report = auditParking({
       parkings: [parking('souterrain', 89)],
@@ -110,7 +110,7 @@ describe('auditParking (M2)', () => {
     expect(report.findings).toEqual([]);
   });
 
-  it('refuse la même proposition portée à un livrable (P1, complément atelier)', () => {
+  it('refuse la même proposition portée à un livrable (règle M01.S11)', () => {
     const proposition: Provenance = { status: 'proposition', source: 'Détection assistée' };
     const report = auditParking({
       parkings: [parking('ouest', 2, proposition)],
@@ -174,7 +174,7 @@ describe('une place retirée ne compte plus', () => {
 
   it('voit le trou que deux places retirées laissent', () => {
     // 40 annoncées, 38 existantes, 2 retirées : il manque bien deux places,
-    // et c'est exactement l'écart que M2 (complément atelier) demande de voir.
+    // et c'est exactement l'écart que la capacité annoncée d'A5.11 demande de voir.
     const report = auditParking({
       parkings: [parking('ouest', 40)],
       spaces: [...spaces('ouest', 38), ...spaces('ouest-r', 2, RETIRE).map(s => ({

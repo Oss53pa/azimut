@@ -28,7 +28,7 @@ type ResidualRow = {
 };
 
 /**
- * Calage mesuré — complément atelier M1.4, section de l'écran M2.
+ * Calage à n points — section M2 (partie M), et section de l'écran M2.
  *
  * L'opérateur arme un amer, le pose sur le fond, recommence. L'ajustement
  * tourne à chaque pose et rend ses résidus.

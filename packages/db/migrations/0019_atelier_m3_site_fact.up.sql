@@ -1,4 +1,9 @@
--- Complément atelier, M3 : faits du site et mots qu'ils interdisent.
+-- Faits du site et mots qu'ils interdisent — A5.11, règle M01.S11.
+--
+-- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
+-- foi ; les faits du site sont depuis inscrits en A5.11, et la migration 0044
+-- aligne cette table sur ce que la section déclare. Le nom du fichier garde sa
+-- forme d'origine, pour la raison exposée dans ORDRE.md.
 --
 -- Un fait est une affirmation vérifiée qui conditionne ce qu'on écrit sur un
 -- support : le parking est gratuit, il n'y a pas de barrière. Il porte sa
@@ -23,10 +28,11 @@ CREATE TABLE azimut.site_fact (
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   -- Une clé de fait est unique par site : deux valeurs pour « parking gratuit »
-  -- ne se départagent pas, et c'est un écart entre sources (M16), pas un fait.
+  -- ne se départagent pas, et c'est un écart entre sources, pas un fait : voir
+  -- la migration 0020.
   CONSTRAINT site_fact_key_unique UNIQUE (site_id, key),
   CONSTRAINT site_fact_source_not_blank CHECK (btrim(source) <> ''),
-  -- Une valeur vide se rendrait telle quelle dans un document lié (M15).
+  -- Une valeur vide se rendrait telle quelle dans un texte lié (`DOC.BINDING_*`).
   CONSTRAINT site_fact_value_not_blank CHECK (btrim(value) <> '')
 );
 CREATE INDEX idx_site_fact_org ON azimut.site_fact(org_id);

@@ -183,15 +183,32 @@ signature de `resolveFaceContent`, colonnes absentes de `pictogram` et de
 `charter_color`, douze modules au lieu de treize plus la plateforme dans
 `module-ownership.ts`, et `delivery_package` divergente de O16.
 
-Ajout de la version 13 : la table `site_fact` du dépôt diverge de celle qu'A5.11
-déclare. Il lui manque `status` — « un fait de statut `proposal` ne s'affiche
-jamais comme un existant » —, `value` y est du texte et non du `jsonb`, et
-`source_ref`, `declared_by`, `declared_at` y portent d'autres noms. L'aligner
-est une migration. Deux limites du même ordre : `LAYOUT.FORBIDDEN_CHARACTER` et
-`LAYOUT.SENTENCE_TOO_LONG` renvoient à A5.8, qui range leurs limites parmi les
-règles de charte, alors que le dépôt les porte encore comme des valeurs du
-produit ; les lire depuis `charter_rule` demande de faire entrer la charte dans
-la signature de ces deux contrôles.
+**Clos par la version 14.** Les deux divergences ouvertes par la version 13 sont
+traitées :
+
+- `site_fact` est alignée sur A5.11 par la migration 0044 — `status` avec ses
+  trois valeurs, `value` en `jsonb`, `source` renommée `source_ref` et
+  `recorded_on` renommée `declared_at`, `declared_by` ajoutée. Deux écarts
+  restent, déclarés : `declared_by` est un ajout et non un renommage, la table
+  n'ayant aucune colonne d'auteur, et `declared_at` garde le type `date`,
+  qu'A5.11 ne type pas. Les deux contrôles que D2.2 définit au niveau du fait,
+  `PARK.SOURCE_MISSING` et `PARK.PROPOSAL_AS_EXISTING`, se lèvent désormais sur
+  le fait et non plus sur les objets de stationnement ;
+- `LAYOUT.FORBIDDEN_CHARACTER` et `LAYOUT.SENTENCE_TOO_LONG` lisent
+  `charter_rule`. `FORBIDDEN_CHARACTERS` et `MAX_WORDS_PER_SENTENCE` sont
+  supprimées, la charte entre dans la signature des deux contrôles et dans
+  celle de leurs appelants, et l'absence de règle laisse le contrôle non exercé
+  sans valeur par défaut, comme A5.8 l'exige depuis la version 14.
+
+Écart ouvert par cette mise en conformité : une règle de charte déclarée mais
+dont les paramètres ne se lisent pas ne lève aucune anomalie, le catalogue n'en
+ayant pas de code et le domaine `CHARTER` ayant été retiré de D2.1. Elle est
+écartée, et son contrôle retombe parmi les non exercés.
+
+Le statut des objets de stationnement garde ses quatre valeurs, dont `retire`,
+qu'A5.11 ne donne pas : le replier sur les trois statuts d'un fait rendrait un
+objet retiré inexprimable. Les objets eux-mêmes restent hors du cahier des
+charges, et Q2 ne les attribue à aucun module.
 
 Les domaines d'anomalie et les codes hors catalogue sont clos par la version 13
 du consolidé : `PARK` et `DOC` y sont admis, `CHARTER` est retiré du dépôt, et

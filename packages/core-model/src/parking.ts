@@ -8,12 +8,22 @@ import type { Polygon } from './geometry.js';
  * saisi quelque part, sans rien pour le rattacher au plan qui le fonde.
  *
  * Ces objets portent un statut et une source, ce qu'aucune entité du socle ne
- * fait aujourd'hui (P1, complément atelier). Le retrofit de A5 est un autre sujet ; ici la place
- * était libre, et la prendre coûtait moins que de la laisser.
+ * fait aujourd'hui. Le retrofit de A5 est un autre sujet ; ici la place était
+ * libre, et la prendre coûtait moins que de la laisser.
+ *
+ * **Écart déclaré.** A5.11 porte les faits du stationnement, et nomme la
+ * capacité annoncée d'un parking comme l'exemple même d'un fait du site. Elle
+ * ne décrit ni `parking`, ni `parking_space`, ni leurs statuts : ces objets
+ * restent hors du cahier des charges, et Q2 ne les attribue à aucun module.
  */
 
 /**
- * P1 (complément atelier) — d'où vient l'objet, et ce qu'il vaut.
+ * D'où vient l'objet, et ce qu'il vaut.
+ *
+ * Quatre valeurs, là où le statut d'un fait d'A5.11 en compte trois. La
+ * quatrième, `retire`, n'a pas d'équivalent : A5.11 dit ce qu'une déclaration
+ * vaut, non ce qu'un objet devient quand il disparaît du plan. Replier l'un
+ * sur l'autre rendrait ce cas inexprimable.
  *
  * `proposition` désigne ce qu'une détection assistée a suggéré et que personne
  * n'a validé. `a_verifier` désigne ce qu'on a relevé sans pouvoir le confirmer.
@@ -37,7 +47,7 @@ export const PUBLISHABLE_STATUSES: readonly ObjectStatus[] = ['existant'];
  *   une proposition non validée : elle est sur le plan, quelqu'un l'a vue ;
  * - « combien de places ce parking a-t-il ? », posée par un livrable, ne compte
  *   que l'existant, parce que publier une proposition la transforme en fait
- *   (P1, complément atelier).
+ *   (A5.11, règle M01.S11).
  *
  * Seul le retiré tombe des deux côtés.
  */
@@ -47,7 +57,7 @@ export function countsAsDigitised(status: ObjectStatus): boolean {
 
 export type Provenance = {
   readonly status: ObjectStatus;
-  /** Le plan, le relevé ou la décision qui fonde l'objet. Jamais vide (P1, complément atelier). */
+  /** Le plan, le relevé ou la décision qui fonde l'objet. Jamais vide : contrainte en base. */
   readonly source: string;
 };
 
@@ -60,11 +70,11 @@ export type ParkingSpace = {
   /**
    * Tracé de la place sur le plan source, quand il est relevé.
    *
-   * Facultatif, et la raison est une question ouverte : M2 (complément atelier) décrit une place
-   * comme « segment ou polygone », et le modèle ne porte que `Polygon`. Un
-   * emplacement marqué d'un seul trait n'est pas un polygone, et le forcer à
-   * l'être inventerait une géométrie que le plan ne montre pas. Tant que la
-   * forme n'est pas tranchée, la place peut exister sans tracé.
+   * Facultatif, et la raison est une question ouverte : le cahier des charges
+   * ne décrit pas la géométrie d'une place, et le modèle ne porte que
+   * `Polygon`. Un emplacement marqué d'un seul trait n'est pas un polygone, et
+   * le forcer à l'être inventerait une géométrie que le plan ne montre pas.
+   * Tant que la forme n'est pas tranchée, la place peut exister sans tracé.
    */
   readonly geometry?: Polygon;
   readonly kind: ParkingSpaceKind;
@@ -93,10 +103,12 @@ export type Parking = {
 /**
  * Là où le plan source s'arrête.
  *
- * M2 (complément atelier) l'exige : « Là où le plan source s'arrête, la zone est marquée non
- * couverte ; Azimut ne complète pas par extrapolation. » Sans cette
- * déclaration, un parking à demi numérisé serait indiscernable d'un parking
- * numérisé en entier et à demi vide.
+ * Sans cette déclaration, un parking à demi numérisé serait indiscernable d'un
+ * parking numérisé en entier et à demi vide. Rien n'est complété par
+ * extrapolation : c'est la discipline de la règle M01.S11, « un nombre affiché
+ * dans un livrable provient d'un fait ou d'un calcul », appliquée à la limite
+ * du relevé. Le cahier des charges ne décrit pas cet objet ; il en donne la
+ * raison d'être.
  */
 export type UncoveredArea = {
   readonly id: string;
