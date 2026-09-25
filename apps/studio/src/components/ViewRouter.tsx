@@ -111,9 +111,9 @@ export function ViewRouter(
     case 'ops-divergences': return <OpsDivergencesView siteKey={siteKey} />;
     case 'ops-work-orders': return <OpsWorkOrdersView siteKey={siteKey} />;
     case 'ops-fleet': return <OpsFleetView siteKey={siteKey} />;
-    case 'budget': return <BudgetView />;
-    case 'budget-references': return <BudgetReferencesView />;
-    case 'budget-tracking': return <BudgetTrackingView />;
+    case 'budget': return <BudgetView siteKey={siteKey} />;
+    case 'budget-references': return <BudgetReferencesView siteKey={siteKey} />;
+    case 'budget-tracking': return <BudgetTrackingView siteKey={siteKey} />;
     case 'portfolio': return <PortfolioView currentKey={siteKey} onOpenSite={onOpenSite} />;
     case 'cross-cutting': return <CrossCuttingView />;
     case 'editor': return <EditorView />;

@@ -232,6 +232,9 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'budget-references', labelKey: 'nav.item.budgetrefs' },
       { view: 'budget-tracking', labelKey: 'nav.item.budgettrack' },
     ],
+    // Les coûts de référence et les lignes budgétaires se lisent en base
+    // (0043) ; le dépôt de référence sert un jeu de démonstration. Les
+    // typologies contrôlées sont celles que portent les supports du site.
     engine: 'partial',
     source: 'studio/domain/cost-reference',
   },

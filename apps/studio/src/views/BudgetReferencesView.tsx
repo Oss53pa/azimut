@@ -1,13 +1,14 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
-import { auditCostReferences } from '../domain/cost-reference.js';
+import { EMPTY_BUDGET_REGISTRY, type CostReference } from '@azimut/core-model';
+import { useSiteData } from '../context/useSiteData.js';
+import { loadBudget, useRegistry } from '../data/index.js';
 import {
-  DEMO_COST_REFERENCES, DEMO_REFERENCED_TYPOLOGIES, type CostReference,
-} from '../domain/demo/production.js';
-import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { citedTypologies, missingCostFindings } from './budget/cited.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { formatMoney } from './budget/money.js';
 
@@ -18,41 +19,48 @@ const UNPRICED = 'unpriced';
 /**
  * Module 09 — les coûts de référence (H8), au gabarit « registre ». Un coût
  * absent n'est pas estimé : la typologie reste non chiffrée, et le garde
- * `auditCostReferences` la signale si le carnet la cite. Jeu de démonstration.
+ * `auditCostReferences` la signale si un support du site la porte. Lu en base
+ * (0043), ou dans le jeu de démonstration du dépôt de référence.
  */
-export function BudgetReferencesView(): JSX.Element {
+type BudgetReferencesViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function BudgetReferencesView({ siteKey }: BudgetReferencesViewProps): JSX.Element {
+  const site = useSiteData();
   const { t, lang } = useI18n();
+  const state = useRegistry(loadBudget, EMPTY_BUDGET_REGISTRY, siteKey);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const findings = useMemo(() => {
-    const priced = new Set(DEMO_COST_REFERENCES.filter(r => r.unit_cost !== null).map(r => r.typology));
-    const result = auditCostReferences(DEMO_REFERENCED_TYPOLOGIES, priced);
-    return result.ok ? result.warnings : result.findings;
-  }, []);
-  const cited = new Set(DEMO_REFERENCED_TYPOLOGIES);
-  const rows = [...DEMO_COST_REFERENCES].sort((a, b) => a.typology.localeCompare(b.typology));
+  const references = state.registry.cost_references;
+  const findings = useMemo(() => missingCostFindings(site, references), [site, references]);
+  const cited = useMemo(() => new Set(citedTypologies(site)), [site]);
+
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
+  const rows = references;
   const visible = rows.filter(r => {
     if (filter === PRICED) return r.unit_cost !== null;
     if (filter === UNPRICED) return r.unit_cost === null;
     return true;
   });
-  const selected = rows.find(r => r.typology === selectedId) ?? visible[0] ?? null;
+  const selected = rows.find(r => r.id === selectedId) ?? visible[0] ?? null;
 
   const filters: readonly RegisterFilter[] = [
     { id: ALL, label: t('budgetrefs.filter.all') },
     { id: PRICED, label: t('budgetrefs.filter.priced') },
     { id: UNPRICED, label: t('budgetrefs.filter.unpriced') },
   ];
-  const state = (r: CostReference): JSX.Element => (r.unit_cost === null
+  const stateTag = (r: CostReference): JSX.Element => (r.unit_cost === null
     ? <Tag label={t('budgetrefs.state.unpriced')} severity="warning" />
     : <Tag label={t('budgetrefs.state.priced')} severity="valid" />);
 
   const columns: readonly Column<CostReference>[] = [
-    { id: 'typology', header: t('budget.col.typology'), cell: r => r.typology },
-    { id: 'substrate', header: t('budget.col.substrate'), cell: r => r.substrate },
-    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer ?? '—' },
-    { id: 'state', header: t('budgetrefs.col.state'), cell: state },
+    { id: 'typology', header: t('budget.col.typology'), cell: r => r.typology_key },
+    { id: 'substrate', header: t('budget.col.substrate'), cell: r => r.substrate_key },
+    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer_name ?? '—' },
+    { id: 'state', header: t('budgetrefs.col.state'), cell: stateTag },
     { id: 'cost', header: t('budget.col.unitcost'), numeric: true, cell: r => formatMoney(r.unit_cost, lang, t('budget.unpriced')) },
     { id: 'since', header: t('budget.col.since'), cell: r => r.since ?? '—' },
   ];
@@ -61,9 +69,9 @@ export function BudgetReferencesView(): JSX.Element {
     ? <InspectorEmpty text={t('budgetrefs.inspector.empty')} />
     : (
       <Inspector
-        title={selected.typology}
+        title={selected.typology_key}
         subtitle={t('budgetrefs.inspector.subtitle', {
-          substrate: selected.substrate,
+          substrate: selected.substrate_key,
           state: selected.unit_cost === null ? t('budgetrefs.state.unpriced') : t('budgetrefs.state.priced'),
         })}
         sections={[
@@ -71,7 +79,7 @@ export function BudgetReferencesView(): JSX.Element {
             id: 'reference',
             title: t('budgetrefs.section.reference'),
             rows: [
-              { id: 'manufacturer', label: t('budget.col.manufacturer'), value: selected.manufacturer ?? '—' },
+              { id: 'manufacturer', label: t('budget.col.manufacturer'), value: selected.manufacturer_name ?? '—' },
               { id: 'since', label: t('budget.col.since'), value: selected.since ?? '—' },
               { id: 'currency', label: t('budgetrefs.field.currency'), value: selected.unit_cost?.currency ?? '—' },
             ],
@@ -84,7 +92,7 @@ export function BudgetReferencesView(): JSX.Element {
               {
                 id: 'cited',
                 label: t('budgetrefs.field.cited'),
-                value: cited.has(selected.typology) ? t('placement.point.yes') : t('placement.point.no'),
+                value: cited.has(selected.typology_key) ? t('placement.point.yes') : t('placement.point.no'),
                 computed: true,
               },
             ],
@@ -93,7 +101,7 @@ export function BudgetReferencesView(): JSX.Element {
       >
         <section style={{ padding: '12px 16px' }}>
           <FindingList
-            findings={findings.filter(f => f.entity?.id === selected.typology)}
+            findings={findings.filter(f => f.entity?.id === selected.typology_key)}
             empty={t('budget.audit.empty')}
           />
         </section>
@@ -102,9 +110,7 @@ export function BudgetReferencesView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
       <RegisterLayout
         title={t('budget.panel.references')}
         summary={t('budgetrefs.summary', { count: rows.length, missing: findings.length })}
@@ -119,10 +125,10 @@ export function BudgetReferencesView(): JSX.Element {
         <DataTable
           columns={columns}
           rows={visible}
-          rowKey={r => r.typology}
+          rowKey={r => r.id}
           empty={t('budget.references.empty')}
-          onSelect={r => { setSelectedId(r.typology); }}
-          selectedKey={selected?.typology}
+          onSelect={r => { setSelectedId(r.id); }}
+          selectedKey={selected?.id}
         />
       </RegisterLayout>
     </div>

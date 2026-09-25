@@ -1,10 +1,12 @@
-import { type JSX, useState } from 'react';
+import { type JSX, useMemo, useState } from 'react';
+import { EMPTY_BUDGET_REGISTRY, EMPTY_WORKSITE_REGISTRY, type BudgetLine } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
-import { DEMO_BUDGET_LINES, type BudgetLine } from '../domain/demo/production.js';
+import { loadBudget, loadWorksite, useRegistry } from '../data/index.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
   type Column, type RegisterFilter, type Severity,
 } from '../components/ui/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
 import { formatMoney, share, variance } from './budget/money.js';
 import { phaseKey } from './budget/labels.js';
 import { formatNumber } from './register/format.js';
@@ -37,14 +39,25 @@ const STATE_SEVERITY: Readonly<Record<LineState, Severity>> = {
  * Module 09 — le suivi budgétaire (H8), au gabarit « registre » : une ligne
  * par phase, de l'estimation au devis et au réalisé. L'écart et la
  * consommation se calculent en unité mineure, dans une seule devise ; ils ne
- * se saisissent pas. Jeu de démonstration.
+ * se saisissent pas. Lu en base (0043), ou dans le jeu de démonstration du
+ * dépôt de référence.
  */
-export function BudgetTrackingView(): JSX.Element {
+type BudgetTrackingViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function BudgetTrackingView({ siteKey }: BudgetTrackingViewProps): JSX.Element {
   const { t, lang } = useI18n();
+  const state = useRegistry(loadBudget, EMPTY_BUDGET_REGISTRY, siteKey);
+  // Le lot d'une ligne se nomme par son code, qui vit au module 07.
+  const worksite = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
+  const lotCodes = useMemo(() => new Map(worksite.registry.lots.map(l => [l.id, l.code])), [worksite.registry]);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const rows = [...DEMO_BUDGET_LINES].sort((a, b) => a.id.localeCompare(b.id));
+  if (state.status !== 'ready') return <RegistryStatus state={state} />;
+  const rows = state.registry.budget_lines;
   const visible = filter === ALL ? rows : rows.filter(l => lineState(l) === filter);
   const selected = rows.find(l => l.id === selectedId) ?? visible[0] ?? null;
   const present = [...new Set(rows.map(lineState))];
@@ -53,6 +66,8 @@ export function BudgetTrackingView(): JSX.Element {
     if (v === null) return t('budget.novariance');
     return `${signed && v >= 0 ? '+' : ''}${formatNumber(v, lang, 1)} %`;
   };
+  const phase = (l: BudgetLine): string => { const key = phaseKey(l.phase_key); return key === null ? l.phase_key : t(key); };
+  const lot = (l: BudgetLine): string => (l.lot_id === null ? '—' : lotCodes.get(l.lot_id) ?? l.lot_id);
   const money = (l: BudgetLine, which: 'estimated' | 'quoted' | 'actual'): string =>
     formatMoney(l[which], lang, which === 'estimated' ? t('budget.unpriced') : '—');
 
@@ -62,8 +77,8 @@ export function BudgetTrackingView(): JSX.Element {
   ];
 
   const columns: readonly Column<BudgetLine>[] = [
-    { id: 'phase', header: t('budget.col.phase'), cell: l => t(phaseKey(l.phase_key)) },
-    { id: 'lot', header: t('budget.col.lot'), cell: l => l.lot_id ?? '—' },
+    { id: 'phase', header: t('budget.col.phase'), cell: phase },
+    { id: 'lot', header: t('budget.col.lot'), cell: lot },
     { id: 'estimated', header: t('budget.col.estimated'), numeric: true, cell: l => money(l, 'estimated') },
     { id: 'quoted', header: t('budget.col.quoted'), numeric: true, cell: l => money(l, 'quoted') },
     { id: 'actual', header: t('budget.col.actual'), numeric: true, cell: l => money(l, 'actual') },
@@ -79,9 +94,9 @@ export function BudgetTrackingView(): JSX.Element {
     ? <InspectorEmpty text={t('budgettrack.inspector.empty')} />
     : (
       <Inspector
-        title={t(phaseKey(selected.phase_key))}
+        title={phase(selected)}
         subtitle={t('budgettrack.inspector.subtitle', {
-          lot: selected.lot_id ?? '—',
+          lot: lot(selected),
           state: t(`budgettrack.state.${lineState(selected)}`),
         })}
         sections={[
@@ -115,9 +130,7 @@ export function BudgetTrackingView(): JSX.Element {
 
   return (
     <div>
-      <div style={{ marginBottom: SPACE.lg }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      <RegistryStatus state={state} />
       <RegisterLayout
         title={t('budgettrack.title')}
         summary={t('budgettrack.summary', { count: rows.length, unpriced: rows.filter(l => l.estimated === null).length })}

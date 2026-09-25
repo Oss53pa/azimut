@@ -94,7 +94,7 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   '06-enseignes': [],
   '07-chantier': ['fabrication_lot', 'lot_support', 'install_slot', 'slot_support', 'install_reserve'],
   '08-exploitation': ['installed_support', 'divergence', 'work_order'],
-  '09-budget': [],
+  '09-budget': ['cost_reference', 'budget_line'],
   '10-portefeuille': [],
   '11-transverse': [],
   '12-atelier': [],

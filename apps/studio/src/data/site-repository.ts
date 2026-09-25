@@ -9,7 +9,8 @@
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
 import type {
-  CharterRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry, WorksiteRegistry,
+  BudgetRegistry, CharterRegistry, MaintenanceRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
+  WorksiteRegistry,
 } from '@azimut/core-model';
 
 export type SiteSummary = {
@@ -89,6 +90,11 @@ export type SiteRepository = {
    * référence sert un jeu de démonstration, que les écrans signalent.
    */
   loadWorksiteRegistry(siteId: string): Promise<WorksiteRegistry>;
+  /**
+   * H8 — le budget : coûts de référence de l'organisation, lignes du site
+   * (0043). Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadBudgetRegistry(siteId: string): Promise<BudgetRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

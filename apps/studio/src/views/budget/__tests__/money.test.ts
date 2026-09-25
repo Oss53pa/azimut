@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { BudgetLine } from '../../../domain/demo/production.js';
+import type { BudgetLine } from '@azimut/core-model';
 import { formatMoney, share, variance } from '../money.js';
 
 function line(estimated: number | null, actual: number | null, currency = 'EUR'): BudgetLine {
@@ -15,6 +15,11 @@ describe('H8 — montants en unité mineure', () => {
   it('affiche l’unité majeure et la devise, sans conversion', () => {
     expect(formatMoney({ minor: 124_000, currency: 'EUR' }, 'en', '—')).toBe('1,240 EUR');
     expect(formatMoney(null, 'fr', 'non chiffré')).toBe('non chiffré');
+  });
+
+  it('lit l’exposant de la devise : le franc CFA n’a pas de sous-unité', () => {
+    expect(formatMoney({ minor: 124_000, currency: 'XOF' }, 'en', '—')).toBe('124,000 XOF');
+    expect(formatMoney({ minor: 1_240, currency: 'JPY' }, 'en', '—')).toBe('1,240 JPY');
   });
 
   it('calcule l’écart réalisé / estimation', () => {

@@ -97,6 +97,8 @@ export {
 export type {
   WorksiteRegistry, FabricationLot, FabricationLotState, InstallSlot, RecordedReserve,
 } from './worksite-registry.js';
+export { EMPTY_BUDGET_REGISTRY } from './budget-registry.js';
+export type { BudgetRegistry, CostReference, BudgetLine, Money } from './budget-registry.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

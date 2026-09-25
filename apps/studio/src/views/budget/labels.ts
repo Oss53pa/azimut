@@ -9,7 +9,11 @@ const PHASE_KEYS = {
 
 type PhaseKey = keyof typeof PHASE_KEYS;
 
-/** La clé de libellé d'une phase de budget ; une phase inconnue retombe sur l'intérieur. */
-export function phaseKey(key: string): PhaseKey {
-  return key in PHASE_KEYS ? (key as PhaseKey) : 'budget.phase.interior';
+/**
+ * La clé de libellé d'une phase de budget, ou `null` : une phase que
+ * l'interface ne connaît pas s'affiche telle quelle, elle ne prend pas le nom
+ * d'une autre.
+ */
+export function phaseKey(key: string): PhaseKey | null {
+  return key in PHASE_KEYS ? (key as PhaseKey) : null;
 }
