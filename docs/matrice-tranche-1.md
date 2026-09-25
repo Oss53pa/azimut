@@ -969,3 +969,60 @@ ne vaut donc, aujourd'hui, que pour les plans de niveau.
 
 **Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
 du paquet du studio, sans correction au passage.
+
+## Forme canonique pour toutes les empreintes, ce que la version 25 ferme
+
+| Ce que la version 25 pose | Où | État |
+| --- | --- | --- |
+| D7.2 — la forme canonique vaut pour toutes les empreintes | `inputs_hash`, `graph_hash` : `computeInputsHash`, `computeGraphHash` passent par `empreinte` | Fait pour les deux empreintes signalées |
+| D7.2 — une empreinte déjà enregistrée ne se convertit pas | Aucune migration ; essai du studio : un passage de validation sous l'ancienne forme ne vaut plus (M02.W11) | Fait |
+| Graphie de la surface non numérisée alignée sur les clés de faits | `undigitized_fill`, `undigitized_stroke`, `parkingSpacesOfLevel().undigitized`, libellés anglais | Fait |
+
+Le premier constat de la section précédente est fermé pour les deux
+empreintes signalées : `inputs_hash` et `graph_hash` sont écrits en NFC,
+sans champ nul, préfixés `sha256:`. L'essai de garde vérifie désormais que la
+forme canonique n'est définie qu'une fois, et que les empreintes alignées
+n'emploient plus `contentHash`.
+
+### Reste ouvert après la version 25
+
+**Les autres empreintes que D7.2 nomme ne suivent pas encore la forme
+canonique.** Elles passent toujours par `contentHash`, ou par un condensé
+d'octets :
+
+| Empreinte | Où | Ce qu'un alignement entraîne |
+| --- | --- | --- |
+| Entrées d'un tableau des messages | `computeScheduleInputsHash` | Tout tableau enregistré, approuvé compris, se lit périmé et doit être régénéré |
+| Manifeste d'un paquet de borne | `assembleKioskPackage`, et `recomputeContentHash` du protocole de mise à jour | Une borne mise à jour refuserait un paquet construit sous l'ancienne forme : compatibilité des paquets déployés (O14) |
+| Dossier de livraison | `build-delivery-archive.ts` | Le `checksum` enregistré ne se retrouve plus |
+| Paquet de règles | `pack-directory.ts` : condensé des fichiers concaténés, comparé au `checksum` du manifeste | Ce condensé porte sur des octets, pas sur une valeur sérialisée. L'aligner réécrit le `checksum` porté par chaque manifeste de paquet |
+
+Deux comparaisons emploient aussi `contentHash` sans rien enregistrer : la
+grille d'une famille de pictogrammes et la détection de doublons à
+l'import d'une bibliothèque. La question est posée au rapport.
+
+**La graphie de la place numérisée reste en -is-** : clé de liaison
+documentaire `parking.digitised_spaces`, paramètres d'anomalie `digitised`,
+champ `digitised_count`. La clé de liaison peut figurer dans des textes de
+livrable déjà saisis : la renommer les casserait. La question est posée au
+rapport.
+
+**Le journal d'audit n'est pas en insertion seule en base.** Relevé à la
+relecture des lignes partielles de la matrice de l'atelier :
+- le rôle `authenticated` détient `UPDATE` et `DELETE` sur `audit_log` ;
+- la table ne porte aucun déclencheur ;
+- sa politique est `FOR ALL`.
+
+A12.3 l'exige. La correction est une migration, et elle n'est pas demandée.
+
+**Tri des identifiants par `localeCompare`** dans les empreintes du graphe
+et du tableau des messages. A9 interdit une comparaison dépendante de la
+locale. Relevé, non corrigé.
+
+**Toujours au registre.**
+- Les empreintes non alignées, ci-dessus.
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
