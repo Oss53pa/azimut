@@ -18,6 +18,7 @@ export type ViewId =
   | 'supports'
   | 'floor-plans'
   | 'checks'
+  | 'site-sheet'
   // 02 — Wayfinding
   | 'message-schedule'
   // 03 — Parcours

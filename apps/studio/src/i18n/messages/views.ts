@@ -17,10 +17,8 @@ export const VIEWS_FR = {
   'templates.title': 'Gabarits de face',
 
   // Destinations
-  'destinations.title': 'Destinations',
+  'destinations.title': 'Occupants',
   'destinations.subtitle': "Points d'intérêt et occupants du site",
-  'destinations.col.namefr': 'Nom (fr)',
-  'destinations.col.nameen': 'Nom (en)',
   'destinations.col.level': 'Niveau',
   'destinations.col.node': 'Nœud',
   'destinations.col.status': 'Statut',
@@ -61,10 +59,8 @@ export const VIEWS_EN: Readonly<Record<keyof typeof VIEWS_FR, string>> = {
 
   'templates.title': 'Face templates',
 
-  'destinations.title': 'Destinations',
+  'destinations.title': 'Occupants',
   'destinations.subtitle': 'Points of interest and site occupants',
-  'destinations.col.namefr': 'Name (fr)',
-  'destinations.col.nameen': 'Name (en)',
   'destinations.col.level': 'Level',
   'destinations.col.node': 'Node',
   'destinations.col.status': 'Status',

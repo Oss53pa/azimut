@@ -78,6 +78,15 @@ export function DataTable<Row>(
               <tr
                 key={key}
                 onClick={onSelect === undefined ? undefined : () => { onSelect(row); }}
+                // Une ligne sélectionnable se choisit aussi au clavier.
+                tabIndex={onSelect === undefined ? undefined : 0}
+                aria-selected={onSelect === undefined ? undefined : selected}
+                onKeyDown={onSelect === undefined ? undefined : (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelect(row);
+                  }
+                }}
                 style={{
                   background: selected ? 'var(--surface-sunken)' : 'transparent',
                   cursor: onSelect === undefined ? 'default' : 'pointer',

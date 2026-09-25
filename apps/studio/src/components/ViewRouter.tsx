@@ -25,6 +25,7 @@ import { BudgetView } from '../views/BudgetView.js';
 import { PortfolioView } from '../views/PortfolioView.js';
 import { CrossCuttingView } from '../views/CrossCuttingView.js';
 import { EditorView } from '../editor/EditorView.js';
+import { SiteSheetView } from '../views/SiteSheetView.js';
 import { KioskAppView } from '../views/KioskAppView.js';
 import { DeliverablesView } from '../views/DeliverablesView.js';
 
@@ -55,6 +56,7 @@ export function ViewRouter(
     case 'supports': return <SupportsView onNavigate={onNavigate} />;
     case 'floor-plans': return <FloorPlansView />;
     case 'checks': return <ChecksView />;
+    case 'site-sheet': return <SiteSheetView />;
     case 'message-schedule': return <MessageScheduleView />;
     case 'customer-flows': return <CustomerFlowsView />;
     case 'signage': return <SignageView onNavigate={onNavigate} />;

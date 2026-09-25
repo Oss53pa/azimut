@@ -29,3 +29,5 @@ export { Toolbar, StatusBar } from './Toolbar.js';
 export type { ToolbarItem, StatusItem } from './Toolbar.js';
 export { ScreenStates, F7_STATES } from './ScreenStates.js';
 export type { ScreenState, EmptyInvitation } from './ScreenStates.js';
+export { RegisterLayout, Inspector, InspectorEmpty } from './Register.js';
+export type { RegisterFilter, InspectorRow, InspectorSection } from './Register.js';

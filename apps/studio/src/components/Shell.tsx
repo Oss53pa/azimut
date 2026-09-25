@@ -8,6 +8,7 @@ import { HeaderBar } from './HeaderBar.js';
 import { SiteGate } from './SiteGate.js';
 import { ViewRouter } from './ViewRouter.js';
 import { CommandPalette } from './CommandPalette.js';
+import { ScreenTrail } from './ScreenTrail.js';
 
 const COLLAPSED_KEY = 'azimut.studio.sidebar.collapsed';
 
@@ -127,6 +128,9 @@ export function Shell(): JSX.Element {
               overflow: 'auto',
               minWidth: 0,
             }}>
+              {!isAtelierView(currentView) && (
+                <ScreenTrail view={currentView} onNavigate={setCurrentView} />
+              )}
               <ViewRouter
                 view={currentView}
                 siteKey={siteId}

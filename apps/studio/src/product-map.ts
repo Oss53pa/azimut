@@ -65,10 +65,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'plan-calibration', labelKey: 'nav.item.calibration' },
       { view: 'footprints', labelKey: 'nav.item.footprints' },
       { view: 'graph', labelKey: 'nav.item.graph' },
+      { view: 'checks', labelKey: 'nav.item.checks' },
+      { view: 'site-sheet', labelKey: 'nav.item.sitesheet' },
       { view: 'destinations', labelKey: 'nav.item.destinations' },
       { view: 'supports', labelKey: 'nav.item.supports' },
       { view: 'floor-plans', labelKey: 'nav.item.floorplans' },
-      { view: 'checks', labelKey: 'nav.item.checks' },
     ],
     // Partiel : M01.S1 à M01.S4 et M01.S6 à M01.S8 tiennent, M01.S6 depuis qu'une longueur d'arête
     // se calcule au lieu d'être crue. M01.S5 ne l'est qu'à moitié — les champs de
