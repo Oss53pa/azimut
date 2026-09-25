@@ -7,13 +7,11 @@
  */
 export const CHROME_FR = {
   // Navigation chrome
-  'nav.title': 'Navigation',
   'nav.aria.main': 'Navigation principale',
   'nav.section.general': 'Général',
   'nav.section.data': 'Données',
   'nav.section.renders': 'Rendus',
   'nav.section.quality': 'Qualité',
-  'nav.item.dashboard': 'Tableau de bord',
   'nav.item.editor': 'Tracé',
   'nav.item.graph': 'Graphe',
   'nav.item.destinations': 'Destinations',
@@ -42,13 +40,11 @@ export const CHROME_FR = {
 } as const;
 
 export const CHROME_EN: Readonly<Record<keyof typeof CHROME_FR, string>> = {
-  'nav.title': 'Navigation',
   'nav.aria.main': 'Main navigation',
   'nav.section.general': 'General',
   'nav.section.data': 'Data',
   'nav.section.renders': 'Renders',
   'nav.section.quality': 'Quality',
-  'nav.item.dashboard': 'Dashboard',
   'nav.item.editor': 'Drawing',
   'nav.item.graph': 'Graph',
   'nav.item.destinations': 'Destinations',

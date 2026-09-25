@@ -25,6 +25,8 @@ import { BudgetView } from '../views/BudgetView.js';
 import { PortfolioView } from '../views/PortfolioView.js';
 import { CrossCuttingView } from '../views/CrossCuttingView.js';
 import { EditorView } from '../editor/EditorView.js';
+import { KioskAppView } from '../views/KioskAppView.js';
+import { DeliverablesView } from '../views/DeliverablesView.js';
 
 type ViewRouterProps = {
   readonly view: ViewId;
@@ -67,5 +69,7 @@ export function ViewRouter(
     case 'portfolio': return <PortfolioView currentKey={siteKey} onOpenSite={onOpenSite} />;
     case 'cross-cutting': return <CrossCuttingView />;
     case 'editor': return <EditorView />;
+    case 'kiosk-app': return <KioskAppView onNavigate={onNavigate} />;
+    case 'deliverables': return <DeliverablesView onNavigate={onNavigate} />;
   }
 }

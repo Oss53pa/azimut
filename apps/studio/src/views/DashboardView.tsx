@@ -12,7 +12,7 @@ import { DEMO_BOOKINGS, DEMO_OPTIONS } from '../domain/demo/commerce.js';
 import { DEMO_RESERVES, DEMO_ROUNDS } from '../domain/demo/production.js';
 import { PRODUCT_MODULES } from '../product-map.js';
 import {
-  ScreenHeader, MetricRow, Panel, PanelGrid, Note, Tag,
+  Button, MetricRow, Panel, PanelGrid, Note, Tag,
   SPACE, TEXT, severityColor, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
@@ -43,8 +43,12 @@ type QueueEntry = {
 export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const site = useSiteData();
   const vocabulary = useSiteVocabulary();
-  const { t } = useI18n();
-  const today = new Date().toISOString().slice(0, 10);
+  const { t, lang } = useI18n();
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const longDate = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
 
   const gate = useMemo(
     () => evaluatePublishGate(site, vocabulary),
@@ -118,15 +122,32 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
 
   return (
     <div>
-      <ScreenHeader
-        eyebrow={t('dashboard.eyebrow')}
-        title={t('dashboard.title')}
-        subtitle={t('dashboard.subtitle')}
-      >
-        <span style={{ fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
-          {`${site.site.name} — ${site.organization.name}`}
-        </span>
-      </ScreenHeader>
+      <div style={{
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: SPACE.lg, marginBottom: SPACE.xl,
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: TEXT.small, color: 'var(--text-muted)' }}>
+            {t('home.greeting', { date: longDate })}
+          </div>
+          <h1 style={{ margin: `${String(SPACE.xs)}px 0`, fontSize: TEXT.title, fontWeight: 500 }}>
+            {site.site.name}
+          </h1>
+          <div style={{ fontSize: TEXT.body, color: 'var(--text-secondary)' }}>
+            {t('home.subtitle', {
+              building: site.buildings[0]?.name ?? t('header.building.fallback'),
+              organization: site.organization.name,
+            })}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm }}>
+          <Button onClick={() => { onNavigate('editor'); }}>{t('home.action.plan')}</Button>
+          <Button onClick={() => { onNavigate('faces'); }}>{t('home.action.signage')}</Button>
+          <Button rank="primary" onClick={() => { onNavigate('deliverables'); }}>
+            {t('home.action.deliverables')}
+          </Button>
+        </div>
+      </div>
 
       <MetricRow metrics={metrics} />
 

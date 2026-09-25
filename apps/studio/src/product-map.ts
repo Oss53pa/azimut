@@ -1,7 +1,10 @@
 /**
  * Partie H — la carte du produit.
  *
- * Douze modules, quatre familles. Chaque module déclare l'état réel de sa
+ * Quatorze modules, rangés comme la maquette « logiciel autonome v2 » les
+ * range : conception, réalisation, exploitation, livrables, et le pilotage
+ * (portefeuille et fonctions transverses), qu'on atteint par l'en-tête plutôt
+ * que par la barre latérale. Chaque module déclare l'état réel de sa
  * construction : un écran qui existe, un moteur qui existe, ou l'absence de
  * l'un des deux. Cet état n'est pas décoratif — l'écran « Carte du produit »
  * le rend tel quel, et le tableau de bord s'en sert pour dire ce qui manque.
@@ -12,8 +15,24 @@
 import type { ViewId } from './views.js';
 import type { UiMessageKey } from './i18n/messages.js';
 
-export const MODULE_FAMILIES = ['design', 'commerce', 'production', 'direction'] as const;
+export const MODULE_FAMILIES = [
+  'conception', 'realisation', 'exploitation', 'deliverables', 'steering',
+] as const;
 export type ModuleFamily = (typeof MODULE_FAMILIES)[number];
+
+/**
+ * Les familles que la barre latérale déroule. Le pilotage n'y est pas : le
+ * portefeuille s'ouvre depuis le sélecteur de projet, les fonctions
+ * transverses depuis la recherche.
+ */
+export const SIDEBAR_FAMILIES: readonly ModuleFamily[] = [
+  'conception', 'realisation', 'exploitation', 'deliverables',
+];
+
+/** L'ordre de lecture des modules dans leur famille, celui de la maquette. */
+const MODULE_ORDER: readonly string[] = [
+  '01', '02', '03', '04', '12', '07', '09', '08', '06', '05', '13', '14', '10', '11',
+];
 
 /** Ce qui existe derrière l'écran : un moteur complet, partiel, ou rien. */
 export const ENGINE_STATES = ['complete', 'partial', 'absent'] as const;
@@ -37,7 +56,7 @@ export type ProductModule = {
 export const PRODUCT_MODULES: readonly ProductModule[] = [
   {
     number: '01',
-    family: 'design',
+    family: 'conception',
     nameKey: 'module.01.name',
     summaryKey: 'module.01.summary',
     entry: 'foundation',
@@ -63,7 +82,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '02',
-    family: 'design',
+    family: 'conception',
     nameKey: 'module.02.name',
     summaryKey: 'module.02.summary',
     entry: 'message-schedule',
@@ -81,7 +100,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '03',
-    family: 'commerce',
+    family: 'conception',
     nameKey: 'module.03.name',
     summaryKey: 'module.03.summary',
     entry: 'customer-flows',
@@ -91,7 +110,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '04',
-    family: 'design',
+    family: 'conception',
     nameKey: 'module.04.name',
     summaryKey: 'module.04.summary',
     entry: 'signage',
@@ -111,7 +130,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '05',
-    family: 'commerce',
+    family: 'exploitation',
     nameKey: 'module.05.name',
     summaryKey: 'module.05.summary',
     entry: 'advertising',
@@ -125,7 +144,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '06',
-    family: 'commerce',
+    family: 'exploitation',
     nameKey: 'module.06.name',
     summaryKey: 'module.06.summary',
     entry: 'tenant-signs',
@@ -140,7 +159,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '07',
-    family: 'production',
+    family: 'realisation',
     nameKey: 'module.07.name',
     summaryKey: 'module.07.summary',
     entry: 'worksite',
@@ -150,7 +169,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '08',
-    family: 'production',
+    family: 'exploitation',
     nameKey: 'module.08.name',
     summaryKey: 'module.08.summary',
     entry: 'operations',
@@ -167,7 +186,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '09',
-    family: 'production',
+    family: 'realisation',
     nameKey: 'module.09.name',
     summaryKey: 'module.09.summary',
     entry: 'budget',
@@ -177,7 +196,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '10',
-    family: 'direction',
+    family: 'steering',
     nameKey: 'module.10.name',
     summaryKey: 'module.10.summary',
     entry: 'portfolio',
@@ -189,7 +208,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '11',
-    family: 'direction',
+    family: 'steering',
     nameKey: 'module.11.name',
     summaryKey: 'module.11.summary',
     entry: 'cross-cutting',
@@ -199,13 +218,39 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
   },
   {
     number: '12',
-    family: 'design',
+    family: 'conception',
     nameKey: 'module.12.name',
     summaryKey: 'module.12.summary',
     entry: 'editor',
     screens: [],
     engine: 'complete',
     source: 'studio/editor',
+  },
+  {
+    number: '13',
+    family: 'exploitation',
+    nameKey: 'module.13.name',
+    summaryKey: 'module.13.summary',
+    entry: 'kiosk-app',
+    screens: [],
+    // Partiel : le paquet de borne se compile et se relit (engine-package),
+    // et l'exécutable de borne le joue (apps/kiosk-runtime). L'application
+    // mobile et l'écran de gestion du parc de bornes n'existent pas.
+    engine: 'partial',
+    source: 'engine-package · apps/kiosk-runtime',
+  },
+  {
+    number: '14',
+    family: 'deliverables',
+    nameKey: 'module.14.name',
+    summaryKey: 'module.14.summary',
+    entry: 'deliverables',
+    screens: [],
+    // Absent : aucun moteur ne compose un dossier client ou fabricant. Les
+    // exports existent module par module (épreuves, tableau des messages,
+    // relevé de contrôles), rien ne les assemble en une restitution.
+    engine: 'absent',
+    source: '\u2014',
   },
 ];
 
@@ -217,14 +262,17 @@ export function moduleOfView(view: ViewId): ProductModule | undefined {
 }
 
 export function modulesOfFamily(family: ModuleFamily): readonly ProductModule[] {
-  return PRODUCT_MODULES.filter(m => m.family === family);
+  return PRODUCT_MODULES
+    .filter(m => m.family === family)
+    .sort((a, b) => MODULE_ORDER.indexOf(a.number) - MODULE_ORDER.indexOf(b.number));
 }
 
 export const FAMILY_LABEL_KEYS: Readonly<Record<ModuleFamily, UiMessageKey>> = {
-  design: 'family.design',
-  commerce: 'family.commerce',
-  production: 'family.production',
-  direction: 'family.direction',
+  conception: 'family.conception',
+  realisation: 'family.realisation',
+  exploitation: 'family.exploitation',
+  deliverables: 'family.deliverables',
+  steering: 'family.steering',
 };
 
 export const ENGINE_LABEL_KEYS: Readonly<Record<EngineState, UiMessageKey>> = {

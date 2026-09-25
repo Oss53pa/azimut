@@ -85,3 +85,16 @@ a {
   from { transform: translateX(8px); }
   to { transform: translateX(0); }
 }
+
+/* Texte réservé aux technologies d'assistance : la barre repliée garde ainsi
+   le nom de chaque entrée, sans l'afficher. */
+.az-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+

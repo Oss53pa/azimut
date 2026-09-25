@@ -35,26 +35,6 @@
       ]
     },
     {
-      "ecran": "M2 import et calage",
-      "etat": "confirmation de remplacement",
-      "langue": "fr",
-      "regle": "color-contrast",
-      "aide": "Elements must meet minimum color contrast ratio thresholds",
-      "elements": [
-        "p[data-consequence=\"true\"]"
-      ]
-    },
-    {
-      "ecran": "M2 import et calage",
-      "etat": "confirmation de remplacement",
-      "langue": "en",
-      "regle": "color-contrast",
-      "aide": "Elements must meet minimum color contrast ratio thresholds",
-      "elements": [
-        "p[data-consequence=\"true\"]"
-      ]
-    },
-    {
       "ecran": "R tableau des messages",
       "etat": "nominal",
       "langue": "fr",

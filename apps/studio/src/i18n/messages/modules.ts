@@ -7,10 +7,11 @@
  */
 export const MODULES_FR = {
   // Familles de modules
-  'family.design': 'Conception',
-  'family.commerce': 'Commerce',
-  'family.production': 'Production',
-  'family.direction': 'Direction',
+  'family.conception': 'Conception',
+  'family.realisation': 'Réalisation',
+  'family.exploitation': 'Exploitation',
+  'family.deliverables': 'Livrables',
+  'family.steering': 'Pilotage',
 
   // Navigation — entrées ajoutées par la carte du produit
   'nav.item.productmap': 'Carte du produit',
@@ -21,16 +22,18 @@ export const MODULES_FR = {
   // Modules — noms
   'module.01.name': 'Socle du site',
   'module.02.name': 'Wayfinding',
-  'module.03.name': 'Parcours clients',
+  'module.03.name': 'Parcours',
   'module.04.name': 'Signalétique',
   'module.05.name': 'Régie publicitaire',
-  'module.06.name': 'Enseignes locataires',
-  'module.07.name': 'Chantier et pose',
-  'module.08.name': 'Exploitation',
-  'module.09.name': 'Budget et estimation',
-  'module.10.name': 'Portefeuille multi-sites',
+  'module.06.name': 'Enseignes',
+  'module.07.name': 'Chantier',
+  'module.08.name': 'Maintenance',
+  'module.09.name': 'Budget',
+  'module.10.name': 'Portefeuille',
   'module.11.name': 'Fonctions transverses',
   'module.12.name': 'Atelier de dessin',
+  'module.13.name': 'Bornes et appli',
+  'module.14.name': 'Restitutions',
 
   // Modules — résumés
   'module.01.summary': 'Graphe, destinations, supports, plans de niveaux, contrôles de complétude.',
@@ -45,6 +48,8 @@ export const MODULES_FR = {
   'module.10.summary': 'Vue de groupe, comparaison, héritage de chartes.',
   'module.11.summary': 'Droits par module, journal, internationalisation.',
   'module.12.summary': "Édition vectorielle : outils, magnétisme, commandes annulables, habillage.",
+  'module.13.summary': 'Paquet de borne compilé et vérifié, exécutable de borne. Application mobile et gestion du parc non construites.',
+  'module.14.summary': 'Dossiers client et fabricant, rapport client. Aucun moteur ne les compose encore.',
 
   // Modules — état du moteur
   'module.engine.complete': 'Moteur complet',
@@ -68,10 +73,11 @@ export const MODULES_FR = {
 } as const;
 
 export const MODULES_EN: Readonly<Record<keyof typeof MODULES_FR, string>> = {
-  'family.design': 'Design',
-  'family.commerce': 'Commerce',
-  'family.production': 'Production',
-  'family.direction': 'Management',
+  'family.conception': 'Design',
+  'family.realisation': 'Delivery',
+  'family.exploitation': 'Operations',
+  'family.deliverables': 'Deliverables',
+  'family.steering': 'Steering',
 
   'nav.item.productmap': 'Product map',
   'nav.item.sites': 'Sites',
@@ -85,11 +91,13 @@ export const MODULES_EN: Readonly<Record<keyof typeof MODULES_FR, string>> = {
   'module.05.name': 'Advertising',
   'module.06.name': 'Tenant signs',
   'module.07.name': 'Worksite',
-  'module.08.name': 'Operations',
+  'module.08.name': 'Maintenance',
   'module.09.name': 'Budget',
   'module.10.name': 'Portfolio',
   'module.11.name': 'Cross-cutting',
   'module.12.name': 'Drawing workshop',
+  'module.13.name': 'Kiosks and app',
+  'module.14.name': 'Deliverables',
 
   'module.01.summary': 'Graph, destinations, supports, floor plans, completeness checks.',
   'module.02.summary': 'Message schedule: generation, line-by-line staleness, spreadsheet and document exports.',
@@ -103,6 +111,8 @@ export const MODULES_EN: Readonly<Record<keyof typeof MODULES_FR, string>> = {
   'module.10.summary': 'Group view, comparison, charter inheritance.',
   'module.11.summary': 'Per-module rights, activity log, internationalisation.',
   'module.12.summary': 'Vector editing: tools, snapping, reversible commands, habillage.',
+  'module.13.summary': 'Compiled and verified kiosk package, kiosk runtime. Mobile app and fleet management not built.',
+  'module.14.summary': 'Client and manufacturer files, client report. No engine composes them yet.',
 
   'module.engine.complete': 'Engine complete',
   'module.engine.partial': 'Engine partial',

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  PRODUCT_MODULES, MODULE_FAMILIES, moduleOfView, modulesOfFamily,
+  PRODUCT_MODULES, MODULE_FAMILIES, SIDEBAR_FAMILIES, moduleOfView, modulesOfFamily,
 } from '../product-map.js';
 import { MESSAGES_FR } from '../i18n/messages.js';
 
@@ -20,11 +20,26 @@ function declaredViewIds(): readonly string[] {
 const CHROME_VIEWS = new Set(['dashboard', 'product-map']);
 
 describe('Partie H — la carte du produit', () => {
-  it('déclare les douze modules, numérotés sans trou', () => {
-    expect(PRODUCT_MODULES).toHaveLength(12);
+  it('déclare les quatorze modules, numérotés sans trou', () => {
+    expect(PRODUCT_MODULES).toHaveLength(14);
     expect(PRODUCT_MODULES.map(m => m.number)).toEqual([
-      '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12',
+      '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14',
     ]);
+  });
+
+  it('range la barre latérale comme la maquette', () => {
+    const order = SIDEBAR_FAMILIES.map(f => modulesOfFamily(f).map(m => m.number));
+    expect(order).toEqual([
+      ['01', '02', '03', '04', '12'],
+      ['07', '09'],
+      ['08', '06', '05', '13'],
+      ['14'],
+    ]);
+  });
+
+  it('laisse au pilotage le portefeuille et les fonctions transverses', () => {
+    expect(SIDEBAR_FAMILIES).not.toContain('steering');
+    expect(modulesOfFamily('steering').map(m => m.number)).toEqual(['10', '11']);
   });
 
   it('range chaque module dans une famille connue', () => {
