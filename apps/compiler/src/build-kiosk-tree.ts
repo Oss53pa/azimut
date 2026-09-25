@@ -40,8 +40,8 @@ const KIOSK_FLOOR_THEME: FloorPlanTheme = {
   parking_fill: themePapier['surface-sunken'],
   parking_stroke: themePapier['border-strong'],
   // Une surface non numérisée se lit comme un avertissement, pas comme un objet.
-  undigitised_fill: themePapier['surface-canvas'],
-  undigitised_stroke: stateColorsPapier['state-warning'],
+  undigitized_fill: themePapier['surface-canvas'],
+  undigitized_stroke: stateColorsPapier['state-warning'],
   edge_stroke: themePapier['text-secondary'],
   edge_evacuation_stroke: stateColorsPapier['state-valid'],
   node_fill: themePapier['accent'],

@@ -33,7 +33,7 @@ export type ParkingSpaceView = {
   /** Celles dont l'extension d'A5.3 dit qu'elles sont accessibles. */
   readonly accessible: ReadonlySet<string>;
   /** Celles qu'un fait `parking.undigitized_spaces` marque non numérisées (S-37). */
-  readonly undigitised: ReadonlySet<string>;
+  readonly undigitized: ReadonlySet<string>;
 };
 
 export const ACCESSIBLE_SPACE_KIND = 'accessible';
@@ -42,7 +42,7 @@ export const ACCESSIBLE_SPACE_KIND = 'accessible';
 export const NO_PARKING_SPACES: ParkingSpaceView = {
   spaces: new Set(),
   accessible: new Set(),
-  undigitised: new Set(),
+  undigitized: new Set(),
 };
 
 export function parkingSpacesOfLevel(
@@ -65,11 +65,11 @@ export function parkingSpacesOfLevel(
       && spaces.has(extension.footprint_id))
     .map(extension => extension.footprint_id));
 
-  const undigitised = new Set([...spaces].filter(id =>
+  const undigitized = new Set([...spaces].filter(id =>
     declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY,
       { kind: 'footprint', id }) !== null));
 
-  return { spaces, accessible, undigitised };
+  return { spaces, accessible, undigitized };
 }
 
 /**

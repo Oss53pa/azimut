@@ -74,7 +74,7 @@ const floorTheme: FloorPlanTheme = {
   background: 'tok-bg',
   footprint_fill: 'tok-fp-fill', footprint_stroke: 'tok-fp-stroke',
   parking_fill: 'tok-park-fill', parking_stroke: 'tok-park-stroke',
-  undigitised_fill: 'tok-undig-fill', undigitised_stroke: 'tok-undig-stroke',
+  undigitized_fill: 'tok-undig-fill', undigitized_stroke: 'tok-undig-stroke',
   edge_stroke: 'tok-edge', edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node', node_stroke: 'tok-node-stroke',
   node_safety_fill: 'tok-safety',

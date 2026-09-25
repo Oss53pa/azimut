@@ -31,8 +31,8 @@ export type FloorPlanTheme = {
   readonly parking_fill: string;
   readonly parking_stroke: string;
   /** Surface non numérisée : ni vide, ni relevée place par place (S-37). */
-  readonly undigitised_fill: string;
-  readonly undigitised_stroke: string;
+  readonly undigitized_fill: string;
+  readonly undigitized_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -67,7 +67,7 @@ export type FloorPlanData = {
    * telles, faute de quoi un parking à demi relevé se lit comme un parking à
    * demi vide.
    */
-  readonly undigitised: readonly Footprint[];
+  readonly undigitized: readonly Footprint[];
   /**
    * Celles de ces places que l'extension d'A5.3 dit accessibles — S-39. Elles
    * sont déjà dans l'une des deux listes ci-dessus ; celle-ci dit seulement
@@ -199,7 +199,7 @@ function filterLevelData(
   const view = parkingSpacesOfLevel(site, levelId, context.facts ?? []);
 
   const parkings: Footprint[] = [];
-  const undigitised: Footprint[] = [];
+  const undigitized: Footprint[] = [];
   const accessible: Footprint[] = [];
   const plain: Footprint[] = [];
   for (const footprint of levelFootprints) {
@@ -207,13 +207,13 @@ function filterLevelData(
       plain.push(footprint);
       continue;
     }
-    if (view.undigitised.has(footprint.id)) undigitised.push(footprint);
+    if (view.undigitized.has(footprint.id)) undigitized.push(footprint);
     else parkings.push(footprint);
     if (view.accessible.has(footprint.id)) accessible.push(footprint);
   }
 
   return {
-    footprints: plain, parkings, undigitised, accessible,
+    footprints: plain, parkings, undigitized, accessible,
     nodes, edges, destinations,
   };
 }
@@ -247,7 +247,7 @@ export function renderFloorPlan(
   const outlines: (readonly Point[])[] = [
     ...data.footprints.map((f) => f.geometry.vertices),
     ...data.parkings.map((p) => p.geometry.vertices),
-    ...data.undigitised.map((a) => a.geometry.vertices),
+    ...data.undigitized.map((a) => a.geometry.vertices),
   ];
   const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
@@ -325,10 +325,10 @@ export function renderFloorPlan(
   // de l'ancien modèle — une surface déclarée hors des empreintes pouvait
   // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait — tombe avec
   // lui.
-  const sortedUndigitised = [...data.undigitised].sort(
+  const sortedUndigitized = [...data.undigitized].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
-  for (const area of sortedUndigitised) {
+  for (const area of sortedUndigitized) {
     const verts = area.geometry.vertices;
     if (verts.length < 3) continue;
     const points = verts
@@ -339,8 +339,8 @@ export function renderFloorPlan(
       .join(' ');
     parts.push(
       `<polygon points="${points}"` +
-      ` fill="${esc(options.theme.undigitised_fill)}"` +
-      ` stroke="${esc(options.theme.undigitised_stroke)}"` +
+      ` fill="${esc(options.theme.undigitized_fill)}"` +
+      ` stroke="${esc(options.theme.undigitized_stroke)}"` +
       ` stroke-width="${PARKING_STROKE_WIDTH}"` +
       ` stroke-dasharray="2 3" />`,
     );
