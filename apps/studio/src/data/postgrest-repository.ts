@@ -16,7 +16,7 @@ import type {
   PlanCalibrationRow, PlanSourceRow, SiteRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
-  ZoneRow,
+  ZoneRow, ParkingSpaceRow,
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
@@ -347,11 +347,15 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // A5.2 — les zones du socle, qui pendent au niveau comme les empreintes
       // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et
       // c'est par ici que les contrôles du domaine `PARK` le voient.
-      const [contentBlocks, zones] = await Promise.all([
+      const [contentBlocks, zones, parkingSpaces] = await Promise.all([
         queryIn<SupportContentBlockRow>(
           config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
         ),
         queryIn<ZoneRow>(config, 'zone', 'level_id', levelIds),
+        // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+        queryIn<ParkingSpaceRow>(
+          config, 'parking_space', 'footprint_id', footprints.map(f => f.id),
+        ),
       ]);
 
       return assembleSiteData({
@@ -378,6 +382,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         content_blocks: contentBlocks,
         support_versions: supportVersions,
         zones,
+        parking_spaces: parkingSpaces,
       });
     },
 

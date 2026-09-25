@@ -5,7 +5,7 @@ import type { SiteData } from '@azimut/core-model';
 import { organization } from './schema/org.js';
 import {
   site, building, level, footprint, volume, planSource, planCalibration,
-  zone,
+  zone, parkingSpace,
 } from './schema/site.js';
 import { node, edge, verticalLink, buildingLink } from './schema/graph.js';
 import {
@@ -118,9 +118,16 @@ export async function loadSiteData(
   // A5.2 — les zones du socle. Elles pendent au niveau, comme les empreintes
   // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et c'est
   // par ici que les contrôles du domaine `PARK` le voient désormais.
-  const zoneRows = levelIds.length > 0
-    ? await db.select().from(zone).where(inArray(zone.level_id, levelIds))
-    : [];
+  const [zoneRows, parkingSpaceRows] = await Promise.all([
+    levelIds.length > 0
+      ? db.select().from(zone).where(inArray(zone.level_id, levelIds))
+      : Promise.resolve([]),
+    // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+    footprintIds.length > 0
+      ? db.select().from(parkingSpace)
+        .where(inArray(parkingSpace.footprint_id, footprintIds))
+      : Promise.resolve([]),
+  ]);
 
   return assembleSiteData({
     organization: orgRow,
@@ -146,5 +153,6 @@ export async function loadSiteData(
     content_blocks: blockRows,
     support_versions: versionRows,
     zones: zoneRows,
+    parking_spaces: parkingSpaceRows,
   });
 }

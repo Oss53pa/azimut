@@ -254,6 +254,15 @@ export type SupportVersionRow = {
 
 /** Toutes les lignes d'un site, telles qu'un chemin de lecture les rassemble. */
 
+/** A5.3 — l'extension d'une empreinte de place : une ligne par empreinte. */
+export type ParkingSpaceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly footprint_id: string;
+  readonly space_kind: string;
+  readonly row_label: string;
+};
+
 /** A5.2 — une zone du socle, avec les empreintes qu'elle déclare couvrir. */
 export type ZoneRow = {
   readonly id: string;
@@ -289,4 +298,5 @@ export type SiteRowSet = {
   readonly content_blocks: readonly SupportContentBlockRow[];
   readonly support_versions: readonly SupportVersionRow[];
   readonly zones: readonly ZoneRow[];
+  readonly parking_spaces: readonly ParkingSpaceRow[];
 };

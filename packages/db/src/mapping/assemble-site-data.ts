@@ -10,6 +10,7 @@
  */
 import {
   readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
+  isParkingSpaceKind,
 } from '@azimut/core-model';
 import type {
   FootprintKind,
@@ -19,7 +20,7 @@ import type {
   Destination, DestinationName, TravelProfile,
   PlanSource, PlanCalibration,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
-  PictogramRegistry, SiteZone, SiteZoneKind,
+  PictogramRegistry, SiteZone, SiteZoneKind, ParkingSpace, ParkingSpaceKind,
 } from '@azimut/core-model';
 import type {
   SiteRowSet, } from './row-types.js';
@@ -43,6 +44,17 @@ export {
  */
 function toZoneKind(raw: string): SiteZoneKind {
   return isSiteZoneKind(raw) ? raw : 'technical';
+}
+
+/**
+ * Le type d'une place, ou le plus neutre des cinq d'A5.3.
+ *
+ * `standard` est le défaut juste : une valeur inconnue lue comme `accessible`
+ * ferait compter une place réservée qui n'existe pas, ce qu'un plan d'accueil
+ * afficherait ensuite sans le revérifier.
+ */
+function toSpaceKind(raw: string): ParkingSpaceKind {
+  return isParkingSpaceKind(raw) ? raw : 'standard';
 }
 
 /**
@@ -267,6 +279,17 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
   // zone ne portait qu'un nom et une nature, et aucun moteur ne les lisait.
   // `footprint_ids` et la section S8 changent cela — un parking **est** une
   // zone, et les contrôles du domaine `PARK` n'ont plus d'autre source.
+  // A5.3 — ce que les empreintes de place portent en plus. Une ligne par
+  // empreinte ; une empreinte sans ligne reste une place standard sans repère
+  // de travée, comme une arête sans `vertical_link` reste une arête.
+  const parkingSpaces: ParkingSpace[] = rows.parking_spaces.map(s => ({
+    id: s.id,
+    org_id: s.org_id,
+    footprint_id: s.footprint_id,
+    space_kind: toSpaceKind(s.space_kind),
+    row_label: s.row_label,
+  }));
+
   const zones: SiteZone[] = rows.zones.map(z => ({
     id: z.id,
     org_id: z.org_id,
@@ -300,9 +323,6 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     support_versions: rows.support_versions.map(mapSupportVersionRow),
     face_templates: [],
     zones,
-    // A5.3 — l'extension des empreintes de place. Vide tant que la table n'a
-    // pas pris sa nouvelle forme : sa migration est séparée, et lire une
-    // colonne qui n'existe pas encore ferait échouer le chargement.
-    parking_spaces: [],
+    parking_spaces: parkingSpaces,
   };
 }

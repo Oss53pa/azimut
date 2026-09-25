@@ -15,7 +15,7 @@ import { describe, it, expect } from 'vitest';
 import { loadSiteData } from '../load-site-data.js';
 import { stubDb } from './stub-db.js';
 import { organization } from '../schema/org.js';
-import { site, building, level, zone } from '../schema/site.js';
+import { site, building, level, zone, footprint, parkingSpace } from '../schema/site.js';
 
 describe('zones du socle', () => {
   const baseTables = (): Map<object, unknown[]> => new Map<object, unknown[]>([
@@ -86,5 +86,88 @@ describe('zones du socle', () => {
     ]);
     const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
     expect(result.zones?.map(z => z.kind)).toEqual(['parking', 'commercial']);
+  });
+});
+
+/**
+ * A5.3 — l'extension des empreintes de place.
+ *
+ * Une ligne par empreinte, sur le modèle de `vertical_link` qui étend une
+ * arête. Elle n'était pas chargée sous sa forme antérieure non plus : ce qui
+ * la remplace l'est.
+ */
+describe('extension des empreintes de place', () => {
+  const tables = (): Map<object, unknown[]> => {
+    const byTable = new Map<object, unknown[]>([
+      [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
+      [site, [{
+        id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
+        rules_pack_id: null,
+      }]],
+      [building, [{
+        id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B',
+        independent_access: true,
+      }]],
+      [level, [{
+        id: 'l-1', org_id: 'org-1', building_id: 'b-1', name: 'RDC', ordinal: 0,
+        elevation_m: '0',
+      }]],
+      [footprint, [{
+        id: 'fp-1', org_id: 'org-1', level_id: 'l-1', kind: 'parking_space',
+        unit_code: null,
+        geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 0 }, { x_m: 2, y_m: 5 }] },
+      }]],
+    ]);
+    return byTable;
+  };
+
+  it('rend une liste vide quand aucune empreinte ne porte d’extension', async () => {
+    const result = await loadSiteData(stubDb(tables()), 'org-1', 'site-1');
+    expect(result.parking_spaces).toEqual([]);
+  });
+
+  it('charge le type de place et le repère de travée', async () => {
+    const byTable = tables();
+    byTable.set(parkingSpace, [{
+      id: 'ps-1', org_id: 'org-1', footprint_id: 'fp-1',
+      space_kind: 'accessible', row_label: 'A',
+    }]);
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.parking_spaces).toEqual([{
+      id: 'ps-1', org_id: 'org-1', footprint_id: 'fp-1',
+      space_kind: 'accessible', row_label: 'A',
+    }]);
+  });
+
+  it('ne lit jamais un type inconnu comme une place réservée', async () => {
+    // Une valeur inconnue lue comme `accessible` ferait compter une place
+    // réservée qui n'existe pas, et un plan d'accueil l'afficherait ensuite
+    // sans la revérifier.
+    const byTable = tables();
+    byTable.set(parkingSpace, [{
+      id: 'ps-1', org_id: 'org-1', footprint_id: 'fp-1',
+      space_kind: 'pmr', row_label: 'A',
+    }]);
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.parking_spaces[0]?.space_kind).toBe('standard');
+  });
+
+  it('accepte les cinq types d’A5.3', async () => {
+    const byTable = tables();
+    byTable.set(footprint, ['a', 'b', 'c', 'd', 'e'].map(n => ({
+      id: `fp-${n}`, org_id: 'org-1', level_id: 'l-1', kind: 'parking_space',
+      unit_code: null,
+      geometry: { vertices: [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 0 }, { x_m: 2, y_m: 5 }] },
+    })));
+    byTable.set(parkingSpace, [
+      'standard', 'accessible', 'family', 'electric', 'delivery',
+    ].map((kind, i) => ({
+      id: `ps-${i}`, org_id: 'org-1',
+      footprint_id: `fp-${['a', 'b', 'c', 'd', 'e'][i]}`,
+      space_kind: kind, row_label: 'A',
+    })));
+    const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.parking_spaces.map(p => p.space_kind))
+      .toEqual(['standard', 'accessible', 'family', 'electric', 'delivery']);
   });
 });
