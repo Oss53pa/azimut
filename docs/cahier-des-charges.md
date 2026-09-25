@@ -326,6 +326,11 @@ edge                (id, org_id, from_node_id, to_node_id,
                     direction in ('both','forward','backward')
 
 vertical_link       (id, org_id, edge_id, kind, capacity int, accessible boolean)
+parking_space       (id, org_id, footprint_id, space_kind, row_label)
+                    space_kind in ('standard','accessible','family','electric','delivery')
+-- Extension d'une empreinte de nature `parking_space`, une ligne par empreinte,
+-- sur le modèle de vertical_link qui étend une arête. Ne porte que ce que
+-- l'empreinte générique n'a pas à porter : le type de place et son repère de travée.
                     kind in ('elevator','stair','escalator','ramp')
 
 building_link       (id, org_id, edge_id, from_building_id, to_building_id, sheltered boolean)
@@ -500,6 +505,16 @@ site_fact    (id, org_id, site_id, key, value jsonb, status, source_ref,
 -- entier. L'unicité porte sur le site, la clé et la cible : un site à deux parkings
 -- déclare deux capacités.
 ```
+
+**Convention de clé.** Une clé de fait est composée d'un espace de noms et d'un nom, séparés par un point, et chaque clé déclare le type attendu de sa valeur. Sans ce type, un jour quelqu'un écrira « oui » là où un autre attend un booléen.
+
+| Clé | Type attendu | Cible |
+| --- | --- | --- |
+| `parking.capacity` | entier | zone de nature `parking` |
+| `parking.free` | booléen | zone de nature `parking` |
+| `parking.undigitized_spaces` | entier | empreinte de nature `parking_space` |
+
+Une clé nouvelle s'ajoute à cette table, avec son type et sa cible, dans le même commit que son premier usage. Une valeur qui ne correspond pas au type déclaré est refusée.
 
 Un fait du site est une donnée déclarée qui n'appartient à aucune autre table : capacité annoncée d'un parking, surface commercialisable, nombre de places de livraison, tout chiffre qu'un livrable affiche et que la géométrie ne produit pas.
 
@@ -4685,6 +4700,7 @@ Points ouverts par les parties L à Q, qui n'avaient pas été inscrits ici.
 | Taux de taxe par pays et par nature de prestation | Conseil fiscal | Avant la première facture | V |
 | Correspondance des pays vers les devises, et exposant de chaque devise, avec leur source documentaire et ses conditions de réutilisation | Atlas Studio | Avant la première facture | V |
 | Format d'export de géométrie vers les outils de conception assistée, section S5 | Développement, procédure d'arrêt et de demande | Avant le premier export de géométrie | S |
+| Accès de livraison et portails véhicules : objets, attributs et usages. Retirés du modèle faute d'usage, à reprendre quand la livraison entrera au produit | Atlas Studio | À l'entrée des accès de livraison | S |
 | Fournisseur et nature du modèle de l'assistant, compatibles avec la traçabilité de la section S7.2 | Atlas Studio | Avant l'incrément 5 | S |
 | Régime juridique des données transmises à l'assistant : sous-traitance, localisation, conservation | Conseil juridique | Avant toute activation réelle de l'assistant | L |
 | Coût d'usage de l'assistant et modèle de facturation associé | Atlas Studio | Avant la mise en marché de l'option | S |
@@ -7217,6 +7233,7 @@ La règle de propriété unique interdit de créer une table sans propriétaire.
 | `site_rules_binding` | 01 Socle | Rattachement d'un site à un paquet |
 | `site_fact` | 01 Socle | Faits déclarés du site, avec source et statut, section A5.11 |
 | `plan_calibration_point` | 01 Socle | Points de calage d'une source de plan, en pixels de l'image, règle M01.S2 |
+| `parking_space` | 01 Socle | Extension d'une empreinte de place, section A5.3 |
 | `view_layer`, `work_color`, `dimension_note` | 01 Socle | Calques, coloration de travail, cotations, partie S |
 | `assistant_setting`, `assistant_suggestion` | 14 Assistant | Assistant de conception, section S7 |
 | `audit_log` | 00 Plateforme | Journal d'audit |
@@ -7988,7 +8005,13 @@ Couche 3. Il lit le socle, le wayfinding, les parcours et la signalétique. Aucu
 
 Constat : l'objet `parking` et la géométrie d'une place n'étaient définis nulle part, alors que les contrôles du domaine `PARK` les supposent.
 
-**S-35.** Une place de stationnement est une empreinte de nature `parking_space`. Un parking est une zone de nature `parking`. Aucune table nouvelle : ce sont les objets du socle, module 01.
+**S-35.** Une place de stationnement est une empreinte de nature `parking_space`. Un parking est une zone de nature `parking`. Ce sont les objets du socle, module 01.
+
+Le type d'une place, accessible ou non, et son repère de travée sont portés par l'extension `parking_space` de la section A5.3, qui étend l'empreinte comme la liaison verticale étend l'arête. Ils ne sont pas des colonnes de l'empreinte générique : ils ne concernent qu'une seule de ses natures.
+
+Le caractère gratuit ou payant d'un parking est un fait déclaré, clé `parking.free`, et non un attribut de la zone : c'est une affirmation qu'un plan d'accueil publie, elle doit donc porter sa source et son statut.
+
+Aucune table propre au stationnement n'existe en dehors de cette extension. En particulier, les portails véhicules ne sont pas modélisés : ils relèveront des accès de livraison, inscrits au registre.
 
 **S-36.** La capacité annoncée d'un parking est un fait du site, avec sa source et son statut, section A5.11. Les contrôles du domaine `PARK` comparent le compte des empreintes de nature `parking_space` à ce fait déclaré.
 
@@ -8505,3 +8528,8 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 265. S8 : surface de parking non numérisée spécifiée
 266. M3 : nature place de stationnement ajoutée à l'écran
 267. S9 : notation de la couleur de travail fixée
+268. A5.11 : convention de clé des faits, avec type attendu et cible
+269. A5.3 : extension parking_space d'une empreinte
+270. S8 : extension, gratuité et retrait des portails
+271. K3.8 : portails véhicules inscrits comme besoin possible
+272. Q2 : propriétaire de l'extension parking_space
