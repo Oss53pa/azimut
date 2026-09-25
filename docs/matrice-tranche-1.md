@@ -774,3 +774,55 @@ déclaration porte, sans dire où il s'affiche ni faire de son absence une
 anomalie.
 
 **Une seconde implantation de `pointInPolygon`.** Inchangé.
+
+## Paquets d'un site et motif d'une surface, ce que la version 22 ferme
+
+| Ce que la version 22 pose | Où | État |
+| --- | --- | --- |
+| A5.4 — paquet requis pour un pictogramme de sécurité, vide pour l'orientation | Migration `0055`, contrainte `pictogram_pack_by_registry` | Fait |
+| Pictogrammes de sécurité des sites de référence rattachés | `ref-minimal`, `ref-retail` : `rp-test-0001` | Fait |
+| A5.8 — `site_rules_binding.role`, socle ou surcouche, au plus un de chaque | Migration `0056`, index `uq_site_rules_binding_role`, schéma Drizzle | Fait |
+| La table de rattachement fait foi : lectures migrées | `SiteData.rules_bindings`, chargeur, API REST, studio, compilateur | Fait |
+| Précédence : la surcouche l'emporte, l'ambiguïté se juge dans un paquet | `packsByPrecedence`, `resolvePictogramFunction`, `resolveSiteRulesPack` | Fait |
+| La colonne de paquet disparaît de la table des sites | Migration `0057`, gardée ; Drizzle et liste de dérive dans le même commit | Fait |
+| `PARK.UNDIGITIZED_REASON_MISSING`, avertissement | `auditParking`, catalogue, libellés fr et en | Fait |
+
+**Le chemin de la migration.** Elle s'est faite en quatre temps, un commit
+chacun : le rôle et le report de la colonne dans la table (`0056`), puis les
+lectures, puis le retrait de la colonne (`0057`). `0057` s'arrête si une
+valeur de la colonne n'est pas reprise en socle. Sur la base de
+développement, la colonne était vide.
+
+**Une surcouche seule répond.** A5.8 dit « au plus un socle », non « au
+moins un ». Une surcouche sans socle est donc le paquet effectif du site.
+
+**Une ambiguïté dans la surcouche arrête la recherche.** Descendre au socle
+masquerait une contradiction du paquet qui prime.
+
+**Un paquet choisi à la création devient le socle.** Le formulaire M1
+(partie M) ne propose qu'un paquet, et un paquet seul n'est la surcouche de
+rien.
+
+**Correction de la section précédente.** « Reste ouvert après la version
+21 » compte `ref-broken` parmi les sites qui portent un pictogramme de
+sécurité. C'est faux : il ne porte qu'un pictogramme d'orientation. Seuls
+`ref-minimal` et `ref-retail` étaient concernés.
+
+### Reste ouvert après la version 22
+
+**Deux sites de référence ont des pictogrammes que leur site n'atteint
+pas.** `ref-minimal` et `ref-retail` rattachent leurs pictogrammes de
+sécurité au paquet d'essai, mais aucun des deux sites n'est rattaché à un
+paquet. Sans effet aujourd'hui, puisque ni l'un ni l'autre n'a de place
+accessible.
+
+**L'empreinte d'une fusion de paquets.** `mergeCountryOverlay` garde la clé
+et la version du socle, et l'empreinte de contenu ne dit donc pas qu'une
+surcouche est intervenue.
+
+**`NULLS NOT DISTINCT` dans l'index de sécurité de `0054`.** Il devient
+superflu maintenant que `0055` interdit un paquet nul dans ce registre. Il
+ne coûte rien, et le retirer serait une migration.
+
+**Le motif n'est toujours lu par aucun livrable.** Son absence est
+maintenant signalée ; où il s'affiche reste non dit.
