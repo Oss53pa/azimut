@@ -499,6 +499,8 @@ Un fait du site est une donnée déclarée qui n'appartient à aucune autre tabl
 
 C'est la même discipline que celle des paquets de règles : rien ne s'affiche sans sa source. Elle fonde les contrôles des domaines `PARK` et `DOC`.
 
+**Le statut d'un fait et celui d'un objet sont deux choses distinctes.** Un fait déclaré, par exemple la capacité annoncée d'un parking, porte son statut sur `site_fact`. Un objet dessiné qui n'existe pas encore, par exemple une place de stationnement en projet, porte le sien sur l'objet, là où le modèle le déclare. Les deux obéissent à la même règle, un objet ou un fait de statut `proposal` ne s'affiche jamais comme un existant, et ils ne se confondent pas : rassembler les deux sur une seule table ne gagnerait rien.
+
 ### A5.12 Suppression
 
 Règle transverse, valable pour tout le modèle.
@@ -1330,7 +1332,7 @@ Ces tolérances sont des constantes techniques, pas des valeurs normatives. Elle
 
 Format : `DOMAINE.SUJET_CONDITION`, en majuscules, un point de séparation, souligné dans les segments.
 
-Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `DOC`, `EDIT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PARK`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
+Domaines autorisés, et eux seuls : `ACCOUNT`, `AD`, `ASSET`, `ASSIST`, `CALIB`, `CHARTER`, `CLOSURE`, `COLOR`, `COST`, `DATA`, `DOC`, `EDIT`, `FLOW`, `FONT`, `GEOM`, `GRAPH`, `IMPORT`, `INK`, `INSTALL`, `KIOSK`, `LAYOUT`, `LIBRARY`, `MODULE`, `PACKAGE`, `PARK`, `PICTO`, `RENDER`, `REVIEW`, `RULES`, `SECURITY`, `SITE_STATE`, `SKETCH`, `SURVEY`, `TENANT`, `TERMINATION`, `TYPO`, `VENDOR`, `VISITOR`, `WAYFIND`. Un domaine nouveau s'ajoute ici, dans le même commit que son premier code.
 
 Un code est stable à vie. Il n'est jamais renommé, jamais traduit, jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et sa valeur reste réservée.
 
@@ -1462,6 +1464,12 @@ CALIB
 | `CALIB.RESIDUAL_MEAN_EXCEEDED` | bloquant | Résidu moyen de calage au-dessus du seuil |
 | `CALIB.RESIDUAL_NOT_MEASURED` | avertissement | Résidu non mesurable, trop peu de points homologues |
 | `CALIB.RESIDUAL_POINT_EXCEEDED` | bloquant | Résidu d'un point de calage au-dessus du seuil |
+
+CHARTER
+
+| Code | Gravité | Sens |
+| --- | --- | --- |
+| `CHARTER.RULE_MALFORMED` | bloquant | Règle de charte déclarée dont les paramètres sont illisibles ou ne correspondent pas à sa nature. À distinguer d'une règle absente, qui ne s'exécute pas et le signale, section A5.8 : une règle déclarée et cassée bloque, parce qu'elle a été voulue |
 
 DATA
 
@@ -8223,3 +8231,6 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 248. D3.6 : règle pays non comparable refusée
 249. D2.2 : 93 codes inscrits au catalogue
 250. A5.8 : contrôle non exécuté quand la charte ne porte pas la règle
+251. D2.1 : domaine CHARTER rétabli
+252. D2.2 : code CHARTER.RULE_MALFORMED inscrit
+253. A5.11 : distinction entre statut d'un fait et statut d'un objet
