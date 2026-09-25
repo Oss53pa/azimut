@@ -1,4 +1,4 @@
-import type { Pictogram, PictogramRegistry } from './site.js';
+import type { Pictogram, PictogramRegistry, Site } from './site.js';
 import type { Finding } from './outcome.js';
 
 /**
@@ -10,8 +10,9 @@ import type { Finding } from './outcome.js';
  * commit que son premier usage, par exemple `access.accessible`,
  * `access.hearing_loop`, `service.restroom`. Pour le registre de sécurité, la
  * désignation vient du paquet de règles et n'est jamais saisie : c'est lui qui
- * porte ces pictogrammes. Pour le registre d'orientation, elle est libre. Une
- * fonction est désignée au plus une fois par registre et par site. »
+ * porte ces pictogrammes. Pour le registre d'orientation, elle est libre.
+ * Portée d'unicité d'une fonction : le paquet de règles pour le registre de
+ * sécurité, l'organisation pour le registre d'orientation. »
  *
  * **Ce que ce module résout, et pourquoi il fallait l'inventer.** INV-5
  * interdit d'écrire dans le code une valeur d'origine normative, et le code
@@ -86,6 +87,48 @@ export function pictogramFunctionDeclaration(
 }
 
 /**
+ * Où une fonction se cherche : le registre, et pour la sécurité le paquet.
+ *
+ * A5.4 : « Portée d'unicité d'une fonction : le paquet de règles pour le
+ * registre de sécurité, l'organisation pour le registre d'orientation. Une
+ * organisation qui exploite deux sites rattachés à deux paquets différents
+ * porte légitimement deux pictogrammes de même fonction, un par paquet. »
+ *
+ * La portée d'orientation n'a pas de paramètre : les pictogrammes qu'un moteur
+ * reçoit sont ceux de l'organisation du site, tous et rien d'autre, et
+ * l'organisation est donc déjà la portée. Celle de sécurité nomme son paquet,
+ * sans quoi les deux pictogrammes légitimes de la règle se liraient comme une
+ * ambiguïté.
+ */
+export type PictogramScope =
+  | { readonly registry: 'wayfinding' }
+  | { readonly registry: 'safety'; readonly rules_pack_id: string | null };
+
+/**
+ * La portée d'un registre pour un site donné.
+ *
+ * Le paquet de sécurité d'un site est celui qui lui est rattaché, A5.8. Un site
+ * sans paquet n'a pas de registre de sécurité : aucune désignation n'y vient de
+ * nulle part, et toute demande y rendra `not_designated`. C'est exact — la
+ * marque manque, et le rendu le dira.
+ */
+export function siteScope(site: Site, registry: PictogramRegistry): PictogramScope {
+  return registry === 'safety'
+    ? { registry, rules_pack_id: site.rules_pack_id }
+    : { registry };
+}
+
+function inScope(picto: Pictogram, scope: PictogramScope): boolean {
+  if (picto.registry !== scope.registry) return false;
+  if (scope.registry === 'wayfinding') return true;
+  // Un site sans paquet ne voit aucun pictogramme de sécurité, pas même ceux
+  // qui n'en déclarent pas : un pictogramme de sécurité sans paquet ne
+  // provient de rien, et A5.4 dit que la désignation de ce registre « vient du
+  // paquet de règles ».
+  return scope.rules_pack_id !== null && picto.rules_pack_id === scope.rules_pack_id;
+}
+
+/**
  * Ce qu'une demande de fonction trouve dans un jeu de pictogrammes.
  *
  * Trois cas, et trois seulement : un pictogramme la porte, aucun ne la porte,
@@ -99,14 +142,18 @@ export type PictogramFunctionResolution =
   | { readonly kind: 'ambiguous'; readonly ids: readonly string[] };
 
 /**
- * Le pictogramme d'un registre qui porte une fonction, s'il est unique.
+ * Le pictogramme qui porte une fonction dans une portée, s'il est unique.
  *
- * **L'ambiguïté n'est pas départagée.** Deux pictogrammes d'un même registre
- * qui portent la même fonction sont une contradiction de la donnée, que
- * l'unicité tenue en base empêche d'écrire mais qu'un jeu assemblé hors du
- * chemin d'écriture peut porter. En choisir un serait décider à la place de
- * celui qui a désigné, et A7 tranche : « un moteur qui reçoit une entrée qu'il
- * ne peut pas traiter refuse. »
+ * **L'ambiguïté n'est pas départagée.** Deux pictogrammes de la même portée qui
+ * portent la même fonction sont une contradiction de la donnée, que l'unicité
+ * tenue en base empêche d'écrire mais qu'un jeu assemblé hors du chemin
+ * d'écriture peut porter. En choisir un serait décider à la place de celui qui
+ * a désigné, et A7 tranche : « un moteur qui reçoit une entrée qu'il ne peut
+ * pas traiter refuse. »
+ *
+ * Deux pictogrammes de même fonction dans deux portées différentes ne sont pas
+ * une ambiguïté : c'est le cas qu'A5.4 nomme comme légitime, et un seul des
+ * deux est dans la portée demandée.
  *
  * Un pictogramme dont le tracé est vide ne porte pas la fonction : il ne
  * dessine rien, et le retenir reviendrait à omettre la marque en silence là où
@@ -114,11 +161,11 @@ export type PictogramFunctionResolution =
  */
 export function resolvePictogramFunction(
   pictograms: readonly Pictogram[],
-  registry: PictogramRegistry,
+  scope: PictogramScope,
   functionKey: string,
 ): PictogramFunctionResolution {
   const carrying = pictograms
-    .filter(picto => picto.registry === registry
+    .filter(picto => inScope(picto, scope)
       && picto.function_key === functionKey
       && picto.svg_path.trim() !== '')
     .sort((a, b) => a.id.localeCompare(b.id));
@@ -144,17 +191,18 @@ export function resolvePictogramFunction(
  */
 export function pictogramFunctionFinding(
   resolution: PictogramFunctionResolution,
-  registry: PictogramRegistry,
+  scope: PictogramScope,
   functionKey: string,
   ruleRef: string,
 ): Finding | null {
   if (resolution.kind === 'designated') return null;
+  const where = scopeParams(scope, functionKey);
   if (resolution.kind === 'not_designated') {
     return {
       code: 'PICTO.FUNCTION_NOT_DESIGNATED',
       severity: 'warning',
       entity: { kind: 'pictogram_function', id: functionKey },
-      params: { function_key: functionKey, registry },
+      params: where,
       ruleRef,
     };
   }
@@ -162,11 +210,18 @@ export function pictogramFunctionFinding(
     code: 'PICTO.FUNCTION_AMBIGUOUS',
     severity: 'blocking',
     entity: { kind: 'pictogram_function', id: functionKey },
-    params: {
-      function_key: functionKey,
-      registry,
-      pictogram_ids: resolution.ids.join(','),
-    },
+    params: { ...where, pictogram_ids: resolution.ids.join(',') },
     ruleRef,
   };
+}
+
+/** La fonction et sa portée, telles qu'un message d'anomalie les nomme. */
+function scopeParams(
+  scope: PictogramScope,
+  functionKey: string,
+): Record<string, string> {
+  const base = { function_key: functionKey, registry: scope.registry };
+  return scope.registry === 'safety' && scope.rules_pack_id !== null
+    ? { ...base, rules_pack_id: scope.rules_pack_id }
+    : base;
 }

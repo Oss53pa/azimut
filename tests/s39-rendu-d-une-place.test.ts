@@ -31,30 +31,38 @@ import type { Outcome, Pictogram, SiteData, Volume } from '@azimut/core-model';
  * et une quatrième qui dresse un parking en relief laisseraient la règle
  * violée sans qu'aucun essai de moteur ne le voie.
  *
- * `refMultilevel` porte quatre places au RDC, dont une accessible, `fp-ml-a3`.
+ * `refMultilevel` porte quatre places au RDC, dont une accessible, `fp-ml-a3`,
+ * et désigne dans son paquet de règles le pictogramme de sécurité qui la
+ * marque. Le contre-exemple — la même place sans désignation — est dérivé ici,
+ * au plus près du cas qu'il contredit.
  */
 
 const RDC = 'lvl-ml-rdc';
 const PLACES = ['fp-ml-a1', 'fp-ml-a2', 'fp-ml-a3', 'fp-ml-b1'];
 const ACCESSIBLE = 'fp-ml-a3';
 
-/** Le tracé sert de marqueur : il n'a pas à ressembler au vrai pictogramme. */
-const TRACE = 'M4 4 L26 4 L26 26 L4 26 Z';
+/** Le pictogramme que le site de référence désigne pour la place accessible. */
+const DESIGNE = refMultilevel.pictograms.find(p => p.function_key === ACCESSIBLE_FUNCTION_KEY);
+if (DESIGNE === undefined) throw new Error('refMultilevel ne désigne plus la fonction d’accessibilité');
+const PAQUET = refMultilevel.site.rules_pack_id;
 
-const pictoSecurite: Pictogram = {
-  id: 'picto-pmr',
-  org_id: 'org-test-001',
-  category_id: 'cat-secu',
-  source: 'rules_pack',
-  standard_ref: 'à renseigner par l’expert normatif',
-  svg_path: TRACE,
-  registry: 'safety',
-  function_key: ACCESSIBLE_FUNCTION_KEY,
-};
+/** Un autre tracé, pour distinguer à la sortie quel pictogramme a été posé. */
+const AUTRE_TRACE = 'M4 4 L26 4 L26 26 L4 26 Z';
 
 /** Le site de référence, augmenté des pictogrammes que l'essai lui donne. */
 function avec(...pictogrammes: readonly Pictogram[]): SiteData {
   return { ...refMultilevel, pictograms: [...refMultilevel.pictograms, ...pictogrammes] };
+}
+
+/** Le contre-exemple : le même site, sans la désignation de la fonction. */
+const sansDesignation: SiteData = {
+  ...refMultilevel,
+  pictograms: refMultilevel.pictograms.filter(p => p.id !== DESIGNE.id),
+};
+
+/** Le nombre de fois qu'un tracé est posé dans un rendu. */
+function poses(svg: string, trace: string): number {
+  return svg.split(`<path d="${trace}"`).length - 1;
 }
 
 /** Les codes que porte un rendu réussi, ou ceux de son refus. */
@@ -152,55 +160,61 @@ describe('S-39 — plan orienté : le même traitement', () => {
 });
 
 describe('S-39 — la marque d’une place accessible', () => {
-  it('pose sur la seule place accessible le pictogramme désigné par la fonction', () => {
+  it('pose sur la seule place accessible le pictogramme que le site désigne', () => {
     // Le moteur ne connaît pas le code du pictogramme, et n'a pas à le
     // connaître : il nomme la fonction, A5.4, et la donnée nomme celui qui la
     // porte. C'est ce qu'INV-5 lui interdisait d'écrire.
-    const svg = svgOf(renderFloorPlan(avec(pictoSecurite), RDC, floorOpts));
-    const tracés = [...svg.matchAll(new RegExp(`<path d="${TRACE}"`, 'g'))];
-    expect(tracés).toHaveLength(1);
+    const out = renderFloorPlan(refMultilevel, RDC, floorOpts);
+    expect(poses(svgOf(out), DESIGNE.svg_path)).toBe(1);
+    expect(codes(out)).not.toContain('PICTO.FUNCTION_NOT_DESIGNATED');
   });
 
   it('le pose aussi au plan orienté', () => {
-    const svg = svgOf(renderOrientedPlan(avec(pictoSecurite), RDC, orientedOpts));
-    expect(svg).toContain(`<path d="${TRACE}"`);
+    const out = renderOrientedPlan(refMultilevel, RDC, orientedOpts);
+    expect(poses(svgOf(out), DESIGNE.svg_path)).toBe(1);
+    expect(codes(out)).not.toContain('PICTO.FUNCTION_NOT_DESIGNATED');
   });
 
-  it('omet la marque et le signale quand aucune fonction n’est désignée', () => {
+  it('contre-exemple : omet la marque et le signale quand rien ne la désigne', () => {
     // « La marque est omise et signalée. » Omettre sans rien dire ferait d'un
     // plan incomplet un plan d'apparence complète.
-    const out = renderFloorPlan(refMultilevel, RDC, floorOpts);
-    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
-    expect(svgOf(out)).not.toContain('<path d=');
+    for (const out of [
+      renderFloorPlan(sansDesignation, RDC, floorOpts),
+      renderOrientedPlan(sansDesignation, RDC, orientedOpts),
+    ]) {
+      expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+      expect(poses(svgOf(out), DESIGNE.svg_path)).toBe(0);
+    }
   });
 
   it('ne dessine jamais un pictogramme de remplacement', () => {
-    // Le registre de sécurité porte ici un pictogramme, mais aucun ne porte la
-    // fonction demandée. Prendre le premier venu violerait l'invariant 3 aussi
-    // sûrement qu'inventer une silhouette.
-    const autre: Pictogram = { ...pictoSecurite, id: 'picto-autre', function_key: null };
-    const out = renderFloorPlan(avec(autre), RDC, floorOpts);
-    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
-    expect(svgOf(out)).not.toContain(`<path d="${TRACE}"`);
+    // Le paquet du site porte encore un pictogramme de sécurité, celui de la
+    // sortie de secours, mais il ne porte pas la fonction. Prendre le premier
+    // venu violerait l'invariant 3 aussi sûrement qu'inventer une silhouette.
+    const svg = svgOf(renderFloorPlan(sansDesignation, RDC, floorOpts));
+    expect(svg).not.toContain('<path d=');
   });
 
   it('ne voit pas la même fonction portée par le registre d’orientation', () => {
-    // Un pictogramme d'orientation, fût-il bien dessiné et bien désigné, n'est
-    // pas celui que la règle demande. INV-3 cloisonne, S-39 y renvoie.
-    const maison: Pictogram = { ...pictoSecurite, id: 'picto-maison', registry: 'wayfinding' };
-    const out = renderFloorPlan(avec(maison), RDC, floorOpts);
-    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
-    expect(svgOf(out)).not.toContain(`<path d="${TRACE}"`);
+    // INV-3 cloisonne, S-39 y renvoie.
+    const maison: Pictogram = {
+      ...DESIGNE, id: 'picto-maison', registry: 'wayfinding', rules_pack_id: null,
+      svg_path: AUTRE_TRACE,
+    };
+    const svg = svgOf(renderFloorPlan(
+      { ...sansDesignation, pictograms: [...sansDesignation.pictograms, maison] },
+      RDC, floorOpts,
+    ));
+    expect(poses(svg, AUTRE_TRACE)).toBe(0);
   });
 
-  it('refuse le plan quand deux pictogrammes de sécurité portent la fonction', () => {
-    // « Une fonction est désignée au plus une fois par registre et par site. »
-    // En départager deux serait décider à la place de celui qui a désigné, et
-    // A7 l'interdit — un moteur qui ne peut pas traiter son entrée refuse.
-    const second: Pictogram = { ...pictoSecurite, id: 'picto-pmr-bis' };
+  it('refuse le plan quand deux pictogrammes du paquet portent la fonction', () => {
+    // Une fonction est désignée au plus une fois par paquet. En départager
+    // deux serait décider à la place de celui qui a désigné, et A7 l'interdit.
+    const second: Pictogram = { ...DESIGNE, id: 'picto-pmr-bis', svg_path: AUTRE_TRACE };
     for (const out of [
-      renderFloorPlan(avec(pictoSecurite, second), RDC, floorOpts),
-      renderOrientedPlan(avec(pictoSecurite, second), RDC, orientedOpts),
+      renderFloorPlan(avec(second), RDC, floorOpts),
+      renderOrientedPlan(avec(second), RDC, orientedOpts),
     ]) {
       expect(out.ok).toBe(false);
       expect(codes(out)).toEqual(['PICTO.FUNCTION_AMBIGUOUS']);
@@ -208,18 +222,68 @@ describe('S-39 — la marque d’une place accessible', () => {
   });
 
   it('ne réclame aucune fonction sur un niveau sans place accessible', () => {
-    // La fonction ne manque pas là où personne ne la demande. Signaler ici
-    // ferait du code un bruit de fond, et un code qu'on apprend à ignorer ne
-    // signale plus rien.
-    const sansExtension: SiteData = { ...refMultilevel, parking_spaces: [] };
-    const out = renderFloorPlan(sansExtension, RDC, floorOpts);
-    expect(codes(out)).not.toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+    // La fonction ne manque pas là où personne ne la demande.
+    const sansExtension: SiteData = { ...sansDesignation, parking_spaces: [] };
+    expect(codes(renderFloorPlan(sansExtension, RDC, floorOpts)))
+      .not.toContain('PICTO.FUNCTION_NOT_DESIGNATED');
   });
 
   it('ne marque pas une place dont l’extension ne dit pas qu’elle est accessible', () => {
-    const site: SiteData = { ...avec(pictoSecurite), parking_spaces: [] };
-    const svg = svgOf(renderFloorPlan(site, RDC, floorOpts));
-    expect(svg).not.toContain(`<path d="${TRACE}"`);
+    const site: SiteData = { ...refMultilevel, parking_spaces: [] };
+    expect(poses(svgOf(renderFloorPlan(site, RDC, floorOpts)), DESIGNE.svg_path)).toBe(0);
+  });
+});
+
+describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
+  // « Une organisation qui exploite deux sites rattachés à deux paquets
+  // différents porte légitimement deux pictogrammes de même fonction, un par
+  // paquet : l'unicité par organisation les déclarerait ambigus à tort. »
+  //
+  // L'organisation du site de référence porte ici, en plus, le pictogramme
+  // d'accessibilité d'un second paquet, celui de son autre site.
+  const AUTRE_PAQUET = 'rp-autre-site';
+  const duSecondPaquet: Pictogram = {
+    ...DESIGNE, id: 'picto-pmr-autre-paquet', rules_pack_id: AUTRE_PAQUET,
+    svg_path: AUTRE_TRACE,
+  };
+  const organisation = avec(duSecondPaquet);
+
+  it('ne déclare pas le plan ambigu', () => {
+    for (const out of [
+      renderFloorPlan(organisation, RDC, floorOpts),
+      renderOrientedPlan(organisation, RDC, orientedOpts),
+    ]) {
+      expect(out.ok).toBe(true);
+      expect(codes(out)).not.toContain('PICTO.FUNCTION_AMBIGUOUS');
+    }
+  });
+
+  it('pose le pictogramme du paquet de ce site, et non celui de l’autre', () => {
+    const svg = svgOf(renderFloorPlan(organisation, RDC, floorOpts));
+    expect(poses(svg, DESIGNE.svg_path)).toBe(1);
+    expect(poses(svg, AUTRE_TRACE)).toBe(0);
+  });
+
+  it('pose celui de l’autre paquet sur le site qui y est rattaché', () => {
+    const autreSite: SiteData = {
+      ...organisation, site: { ...organisation.site, rules_pack_id: AUTRE_PAQUET },
+    };
+    const svg = svgOf(renderFloorPlan(autreSite, RDC, floorOpts));
+    expect(poses(svg, AUTRE_TRACE)).toBe(1);
+    expect(poses(svg, DESIGNE.svg_path)).toBe(0);
+  });
+
+  it('ne pose rien sur un site sans paquet : le registre de sécurité n’y a pas de source', () => {
+    const sansPaquet: SiteData = {
+      ...organisation, site: { ...organisation.site, rules_pack_id: null },
+    };
+    const out = renderFloorPlan(sansPaquet, RDC, floorOpts);
+    expect(codes(out)).toContain('PICTO.FUNCTION_NOT_DESIGNATED');
+    expect(svgOf(out)).not.toContain('<path d=');
+  });
+
+  it('garde le paquet du site de référence comme portée', () => {
+    expect(PAQUET).toBe(DESIGNE.rules_pack_id);
   });
 });
 

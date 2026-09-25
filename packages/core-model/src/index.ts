@@ -90,9 +90,10 @@ export type { ParkingSpaceView, PlanContext, AccessibleMark } from './parking-vi
 export {
   ACCESSIBLE_FUNCTION_KEY, DECLARED_PICTOGRAM_FUNCTIONS, isFunctionKeyShape,
   pictogramFunctionDeclaration, resolvePictogramFunction, pictogramFunctionFinding,
+  siteScope,
 } from './pictogram-functions.js';
 export type {
-  PictogramFunctionDeclaration, PictogramFunctionResolution,
+  PictogramFunctionDeclaration, PictogramFunctionResolution, PictogramScope,
 } from './pictogram-functions.js';
 export {
   FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText,

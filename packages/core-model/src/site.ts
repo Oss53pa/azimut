@@ -402,6 +402,15 @@ export type Pictogram = {
    * aucune fonction nommée, ce qui est le cas courant.
    */
   readonly function_key: string | null;
+  /**
+   * Le paquet de règles qui porte ce pictogramme — A5.4.
+   *
+   * Requis pour le registre de sécurité, d'où vient toute désignation de ce
+   * registre ; c'est aussi la portée de son unicité : une fonction y est
+   * désignée au plus une fois par paquet. `null` pour un pictogramme
+   * d'orientation, qui ne relève d'aucun paquet.
+   */
+  readonly rules_pack_id: string | null;
 };
 
 export type OccupancyStatus =

@@ -247,6 +247,7 @@ export const refMinimal: SiteData = {
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
       function_key: null,
+      rules_pack_id: null,
     },
     {
       id: 'picto-fire-exit-safety',
@@ -257,6 +258,7 @@ export const refMinimal: SiteData = {
       svg_path: 'M5 5l10 10M15 5L5 15',
       registry: 'safety',
       function_key: null,
+      rules_pack_id: null,
     },
   ],
   destinations: [

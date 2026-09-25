@@ -28,13 +28,25 @@ export const pictogram = azimut.table('pictogram', {
   svg_path: text('svg_path').notNull(),
   registry: text('registry').notNull(),
   function_key: text('function_key'),
+  // Référence à `rules_pack`, posée en base par la migration 0054. Déclarée
+  // sans `.references()`, comme `site.rules_pack_id`, pour ne pas faire
+  // dépendre ce fichier de celui des chartes.
+  rules_pack_id: uuid('rules_pack_id'),
 }, (t) => [
   index('idx_pictogram_org').on(t.org_id),
-  // A5.4 : « une fonction est désignée au plus une fois par registre et par
-  // site ». Partiel — une fonction non désignée ne se compare à rien.
-  uniqueIndex('uq_pictogram_function')
-    .on(t.org_id, t.registry, t.function_key)
-    .where(sql`function_key IS NOT NULL`),
+  // A5.4 : portée d'unicité d'une fonction, l'organisation pour le registre
+  // d'orientation, le paquet de règles pour celui de sécurité. Migration 0054,
+  // qui dit aussi pourquoi `org_id` reste dans la seconde clé et pourquoi les
+  // valeurs nulles y sont égales entre elles.
+  uniqueIndex('uq_pictogram_function_wayfinding')
+    .on(t.org_id, t.function_key)
+    .where(sql`registry = 'wayfinding' AND function_key IS NOT NULL`),
+  // La base pose en plus NULLS NOT DISTINCT, que le constructeur d'index de
+  // Drizzle n'exprime pas. La migration fait foi ; ce fichier ne sert qu'à
+  // composer des requêtes.
+  uniqueIndex('uq_pictogram_function_safety')
+    .on(t.org_id, t.rules_pack_id, t.function_key)
+    .where(sql`registry = 'safety' AND function_key IS NOT NULL`),
 ]);
 
 export const destination = azimut.table('destination', {

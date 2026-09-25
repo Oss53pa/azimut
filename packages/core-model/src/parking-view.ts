@@ -4,6 +4,7 @@ import type { SiteFact } from './site-facts.js';
 import { declaredInteger, PARKING_UNDIGITIZED_SPACES_KEY } from './fact-keys.js';
 import {
   ACCESSIBLE_FUNCTION_KEY, resolvePictogramFunction, pictogramFunctionFinding,
+  siteScope,
 } from './pictogram-functions.js';
 import type { Finding } from './outcome.js';
 
@@ -118,16 +119,21 @@ export type AccessibleMark = {
  * même fonction, fût-il bien dessiné, n'est pas celui que la règle demande, et
  * la résolution ne le voit même pas.
  *
+ * La portée est le paquet de règles du site, A5.4 : le pictogramme d'un autre
+ * paquet de la même organisation, désigné pour un autre site, n'est ni celui
+ * de ce site ni un concurrent qui le rendrait ambigu.
+ *
  * **À n'appeler que lorsqu'une marque est demandée.** Un niveau sans place
  * accessible ne demande rien, et ne doit donc rien signaler : la fonction n'y
  * manque pas, personne ne l'a réclamée.
  */
 export function accessibleSpaceMark(site: SiteData): AccessibleMark {
+  const scope = siteScope(site.site, 'safety');
   const resolution = resolvePictogramFunction(
-    site.pictograms, 'safety', ACCESSIBLE_FUNCTION_KEY,
+    site.pictograms, scope, ACCESSIBLE_FUNCTION_KEY,
   );
   const finding = pictogramFunctionFinding(
-    resolution, 'safety', ACCESSIBLE_FUNCTION_KEY, 'S-39',
+    resolution, scope, ACCESSIBLE_FUNCTION_KEY, 'S-39',
   );
   return {
     pictogram: resolution.kind === 'designated' ? resolution.pictogram : null,

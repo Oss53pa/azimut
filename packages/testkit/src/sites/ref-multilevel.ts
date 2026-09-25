@@ -13,7 +13,11 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
+    // A5.8 — rattaché au paquet d'essai du dépôt, `testkit/fixtures/rules-packs/
+    // test-fixture`. Sans paquet, le site n'aurait pas de registre de sécurité,
+    // et sa place accessible ne pourrait porter aucune marque : A5.4 fait du
+    // paquet la portée de toute désignation de ce registre.
+    rules_pack_id: 'rp-test-0001',
     // M01.S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
     // de l'image du premier fond.
@@ -234,6 +238,23 @@ export const refMultilevel: SiteData = {
       svg_path: 'M5 5l10 10M15 5L5 15',
       registry: 'safety',
       function_key: null,
+      // A5.4 : un pictogramme de sécurité vient du paquet de règles.
+      rules_pack_id: 'rp-test-0001',
+    },
+    {
+      // S-39 — la marque de la place accessible `fp-ml-a3`, désignée par la
+      // fonction d'accessibilité dans le paquet du site. Tracé de synthèse,
+      // dans le carré de trente unités des tracés du dépôt : il n'imite aucun
+      // pictogramme normalisé, et n'a pas à le faire pour éprouver la règle.
+      id: 'picto-ml-accessible-safety',
+      org_id: 'org-test-001',
+      category_id: 'cat-office',
+      source: 'rules_pack',
+      standard_ref: 'SF-002',
+      svg_path: 'M6 6h18v18H6z',
+      registry: 'safety',
+      function_key: 'access.accessible',
+      rules_pack_id: 'rp-test-0001',
     },
     {
       id: 'picto-office-wayfinding',
@@ -244,6 +265,7 @@ export const refMultilevel: SiteData = {
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
       function_key: null,
+      rules_pack_id: null,
     },
   ],
   destinations: [

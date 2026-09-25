@@ -22,6 +22,16 @@ const context: CompileContext = {
   creation_date: new Date('2024-06-15T12:00:00Z'),
 };
 
+/**
+ * Le site de référence, sans paquet rattaché.
+ *
+ * `refMultilevel` est rattaché au paquet d'essai depuis que sa place accessible
+ * porte une marque désignée dans ce paquet (A5.4, S-39). Un essai qui éprouve
+ * le cas du site sans paquet le dit donc ici, au lieu de le tenir d'un état du
+ * site de référence qui n'est plus le sien.
+ */
+const unboundSite = { ...refMultilevel, site: { ...refMultilevel.site, rules_pack_id: null } };
+
 function makeJob(payload: Record<string, unknown>): Job {
   return {
     id: 'job-compile-001',
@@ -332,7 +342,7 @@ describe('T-2.12 createArtworkHandler', () => {
     });
 
     it('runs no contrast check when no pack is bound', async () => {
-      const ctx: CompileContext = { ...context, theme: hexTheme(GREY_LOW) };
+      const ctx: CompileContext = { ...context, site: unboundSite, theme: hexTheme(GREY_LOW) };
       const result = await createArtworkHandler(ctx)(job);
       expect(result['contrast_finding_count']).toBe(0);
     });
@@ -383,7 +393,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     it('surfaces PACK_NOT_BOUND and skips the check for an unbound site', async () => {
       const ctx: CompileContext = {
-        ...context, theme: hexTheme(GREY_LOW), rules_pack_index: index,
+        ...context, site: unboundSite, theme: hexTheme(GREY_LOW), rules_pack_index: index,
       };
       const result = await createArtworkHandler(ctx)(job);
       expect(result['pack_bound']).toBe(false);
@@ -393,7 +403,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     it('still produces artwork despite an unresolved binding', async () => {
       const ctx: CompileContext = {
-        ...context, theme: hexTheme(GREY_LOW), rules_pack_index: index,
+        ...context, site: unboundSite, theme: hexTheme(GREY_LOW), rules_pack_index: index,
       };
       const result = await createArtworkHandler(ctx)(job);
       expect((result['svg_length'] as number)).toBeGreaterThan(0);

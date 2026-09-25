@@ -242,6 +242,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     svg_path: p.svg_path,
     registry: p.registry as PictogramRegistry,
     function_key: p.function_key,
+    rules_pack_id: p.rules_pack_id,
   }));
 
   const destinations: Destination[] = rows.destinations.map(d => ({

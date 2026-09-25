@@ -161,6 +161,7 @@ export type PictogramRow = {
   readonly svg_path: string;
   readonly registry: string;
   readonly function_key: string | null;
+  readonly rules_pack_id: string | null;
 };
 
 export type DestinationRow = {
