@@ -1,14 +1,23 @@
 /**
- * Stationnement au plan de niveau.
+ * Stationnement au plan de niveau — section S8.
  *
  * Fichier distinct du reste des essais de `renderFloorPlan` : les deux réunis
  * dépassaient les quatre cents lignes qu'un fichier du dépôt ne franchit pas
  * sans découpage (A2.4). La coupure suit la matière, elle ne coupe pas au
  * milieu d'un sujet.
+ *
+ * Ce qu'ils éprouvaient a changé d'objets, pas de sens. Le plan ne dessine plus
+ * l'emprise d'une table `parking` : il dessine les empreintes de place qu'une
+ * zone de nature `parking` déclare, et distingue celles qu'un fait marque non
+ * numérisées (S-37). Les deux cas que les anciens essais tenaient — l'ordre des
+ * couches et le cadrage de ce qui déborde du bâti — sont tenus ici sur les
+ * nouveaux objets.
  */
 import { describe, it, expect } from 'vitest';
 import { renderFloorPlan } from '../render-floor-plan.js';
 import type { FloorPlanOptions, FloorPlanTheme } from '../render-floor-plan.js';
+import type { Footprint, SiteZone, SiteFact, SiteData } from '@azimut/core-model';
+import { PARKING_UNDIGITIZED_SPACES_KEY } from '@azimut/core-model';
 import { refMultilevel } from '@azimut/testkit';
 
 const theme: FloorPlanTheme = {
@@ -38,26 +47,70 @@ const defaultOptions: FloorPlanOptions = {
   padding_px: 20,
 };
 
-describe('emprise de parking', () => {
-  const parking = (status: 'existant' | 'proposition') => ({
-    id: 'park-1',
-    org_id: 'org1',
-    level_id: 'lvl-ml-rdc',
+const RDC = 'lvl-ml-rdc';
+
+function place(id: string, x: number, y: number, side = 10): Footprint {
+  return {
+    id,
+    org_id: 'org-test-001',
+    level_id: RDC,
     geometry: {
       vertices: [
-        { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
-        { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
+        { x_m: x, y_m: y }, { x_m: x + side, y_m: y },
+        { x_m: x + side, y_m: y + side }, { x_m: x, y_m: y + side },
       ],
     },
-    name: 'Ouest',
-    free: true,
-    declared_capacity: 0,
-    provenance: { status, source: 'Plan' },
-  });
+    kind: 'parking_space',
+  };
+}
 
-  it('dessine l’emprise avant les empreintes : le parking est le sol', () => {
-    const site = { ...refMultilevel, parkings: [parking('existant')] };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+function parkingZone(footprintIds: readonly string[]): SiteZone {
+  return {
+    id: 'zone-park-1',
+    org_id: 'org-test-001',
+    level_id: RDC,
+    name: 'Ouest',
+    kind: 'parking',
+    footprint_ids: [...footprintIds],
+  };
+}
+
+function marque(footprintId: string): SiteFact {
+  return {
+    key: PARKING_UNDIGITIZED_SPACES_KEY,
+    value: 40,
+    status: 'existing',
+    source_ref: 'Plan coupé au bord de page',
+    declared_at: '2026-01-05',
+    target: { kind: 'footprint', id: footprintId },
+    forbidden: [],
+  };
+}
+
+/**
+ * `refMultilevel` porte déjà un parking conforme. Ces essais posent le leur, et
+ * repartent donc d'un site sans zone ni place, pour que chaque cas se lise
+ * seul.
+ */
+function site(extra: Partial<SiteData>): SiteData {
+  return {
+    ...refMultilevel,
+    zones: [],
+    footprints: refMultilevel.footprints.filter(f => f.kind !== 'parking_space'),
+    ...extra,
+  };
+}
+
+describe('les places d’un parking', () => {
+  const p1 = place('fp-p1', -20, -20);
+
+  it('les dessine avant les empreintes : le parking est le sol', () => {
+    const r = renderFloorPlan(
+      site({ zones: [parkingZone(['fp-p1'])], footprints: [
+        ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'), p1,
+      ] }),
+      RDC, defaultOptions,
+    );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const park = r.value.indexOf('tok-park-fill');
@@ -66,164 +119,123 @@ describe('emprise de parking', () => {
     expect(park).toBeLessThan(fp);
   });
 
-  it('cadre le plan sur l’emprise, qui déborde du bâti', () => {
-    // Sans le parking dans les bornes, il sortirait du cadre sans un mot.
-    const sans = renderFloorPlan({ ...refMultilevel, parkings: [] }, 'lvl-ml-rdc', defaultOptions);
-    const avec = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
+  it('cadre le plan sur elles, quand elles débordent du bâti', () => {
+    // Sans les places dans les bornes, elles sortiraient du cadre sans un mot.
+    const loin = place('fp-loin', -400, -400);
+    const sans = renderFloorPlan(site({}), RDC, defaultOptions);
+    const avec = renderFloorPlan(
+      site({ zones: [parkingZone(['fp-loin'])], footprints: [
+        ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'), loin,
+      ] }),
+      RDC, defaultOptions,
+    );
     expect(sans.ok && avec.ok).toBe(true);
     if (!sans.ok || !avec.ok) return;
     expect(avec.value).not.toBe(sans.value);
   });
 
-  it('trait plein pour un existant, pointillé pour une proposition', () => {
-    // Un trait plein affirme ; un pointillé montre sans affirmer, ce que la règle M01.S11
-    // demande d'une proposition.
-    const existant = renderFloorPlan({ ...refMultilevel, parkings: [parking('existant')] }, 'lvl-ml-rdc', defaultOptions);
-    const propose = renderFloorPlan({ ...refMultilevel, parkings: [parking('proposition')] }, 'lvl-ml-rdc', defaultOptions);
-    expect(existant.ok && propose.ok).toBe(true);
-    if (!existant.ok || !propose.ok) return;
-
-    const ligneExistant = /<polygon[^>]*tok-park-stroke[^>]*\/>/.exec(existant.value)?.[0] ?? '';
-    const lignePropose = /<polygon[^>]*tok-park-stroke[^>]*\/>/.exec(propose.value)?.[0] ?? '';
-    expect(ligneExistant).not.toContain('stroke-dasharray');
-    expect(lignePropose).toContain('stroke-dasharray');
+  it('dessine comme une empreinte ordinaire une place qu’aucune zone ne déclare', () => {
+    // Le plan ne devine pas un rattachement que la donnée ne porte pas : c'est
+    // `DATA.PARKING_SPACE_WITHOUT_ZONE` qui le dit, pas le dessin.
+    const r = renderFloorPlan(
+      site({ zones: [], footprints: [
+        ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'), p1,
+      ] }),
+      RDC, defaultOptions,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-park-fill');
+    expect(r.value).toContain('tok-fp-fill');
   });
 
-  it('écarte une emprise dégénérée plutôt que de dessiner un trait', () => {
-    const plat = { ...parking('existant'), geometry: { vertices: [{ x_m: 0, y_m: 0 }] } };
-    const r = renderFloorPlan({ ...refMultilevel, parkings: [plat] }, 'lvl-ml-rdc', defaultOptions);
+  it('ignore une zone de parking d’un autre niveau', () => {
+    const ailleurs: SiteZone = { ...parkingZone(['fp-p1']), level_id: 'lvl-ml-r1' };
+    const r = renderFloorPlan(
+      site({ zones: [ailleurs], footprints: [
+        ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'), p1,
+      ] }),
+      RDC, defaultOptions,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-park-fill');
+  });
+
+  it('écarte une place dégénérée plutôt que de dessiner un trait', () => {
+    const plat: Footprint = {
+      ...p1, geometry: { vertices: [{ x_m: 0, y_m: 0 }] },
+    };
+    const r = renderFloorPlan(
+      site({ zones: [parkingZone(['fp-p1'])], footprints: [
+        ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'), plat,
+      ] }),
+      RDC, defaultOptions,
+    );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value).not.toContain('tok-park-fill');
   });
 });
 
-describe('zone non couverte', () => {
-  const parkingExistant = {
-    id: 'park-1',
-    org_id: 'org-test-001',
-    level_id: 'lvl-ml-rdc',
-    geometry: {
-      vertices: [
-        { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
-        { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
-      ],
-    },
-    name: 'Ouest',
-    free: true,
-    declared_capacity: 0,
-    provenance: { status: 'existant' as const, source: 'Plan' },
-  };
+describe('la surface non numérisée (S-37)', () => {
+  const p1 = place('fp-p1', -20, -20);
+  const surface = place('fp-surface', 0, -20);
 
-  const zone = (withGeometry: boolean) => ({
-    id: 'unc-1',
-    org_id: 'org-test-001',
-    parking_id: 'park-1',
-    reason: 'Plan coupé au bord de page',
-    ...(withGeometry
-      ? {
-          geometry: {
-            vertices: [
-              { x_m: 0, y_m: -20 }, { x_m: 20, y_m: -20 },
-              { x_m: 20, y_m: -5 }, { x_m: 0, y_m: -5 },
-            ],
-          },
-        }
-      : {}),
+  const avecLesDeux = () => site({
+    zones: [parkingZone(['fp-p1', 'fp-surface'])],
+    footprints: [
+      ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'),
+      p1, surface,
+    ],
   });
 
-  it('dessine la zone tracée par-dessus l’emprise et sous le bâti', () => {
-    const site = {
-      ...refMultilevel,
-      parkings: [parkingExistant],
-      parking_uncovered: [zone(true)],
-    };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+  it('la dessine par-dessus les places et sous le bâti', () => {
+    const r = renderFloorPlan(
+      avecLesDeux(), RDC, defaultOptions, [marque('fp-surface')],
+    );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const park = r.value.indexOf('tok-park-fill');
     const unc = r.value.indexOf('tok-unc-fill');
     const fp = r.value.indexOf('tok-fp-fill');
+    expect(park).toBeGreaterThan(-1);
     expect(park).toBeLessThan(unc);
     expect(unc).toBeLessThan(fp);
   });
 
-  it('ne dessine rien pour une zone sans tracé, plutôt que d’inventer sa limite', () => {
-    // Le plan reste alors muet sur une incomplétude que le contrôle connaît.
-    // C'est une limite assumée : dessiner reviendrait à inventer la limite que
-    // le relevé n'a pas trouvée.
-    const site = {
-      ...refMultilevel,
-      parkings: [parkingExistant],
-      parking_uncovered: [zone(false)],
-    };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+  it('sans le fait qui la marque, elle est une place comme une autre', () => {
+    // C'est l'existence du fait qui fait la marque, et rien d'autre.
+    const r = renderFloorPlan(avecLesDeux(), RDC, defaultOptions, []);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value).not.toContain('tok-unc-fill');
+    expect(r.value).toContain('tok-park-fill');
+  });
+
+  it('ne lit pas la marque d’une autre empreinte', () => {
+    const r = renderFloorPlan(
+      avecLesDeux(), RDC, defaultOptions, [marque('fp-ailleurs')],
+    );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value).not.toContain('tok-unc-fill');
   });
 
-  it('ignore une zone rattachée à un parking d’un autre niveau', () => {
-    const site = {
-      ...refMultilevel,
-      parkings: [parkingExistant],
-      parking_uncovered: [{ ...zone(true), parking_id: 'park-ailleurs' }],
-    };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    expect(r.value).not.toContain('tok-unc-fill');
-  });
-});
-
-describe('revue : ce que le plan dessine, il le cadre', () => {
-  const emprise = {
-    id: 'park-1',
-    org_id: 'org-test-001',
-    level_id: 'lvl-ml-rdc',
-    geometry: {
-      vertices: [
-        { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
-        { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
-      ],
-    },
-    name: 'Ouest',
-    free: true,
-    declared_capacity: 0,
-    provenance: { status: 'existant' as const, source: 'Plan' },
-  };
-
-  /** Les points d'un `<polygon>` dont le remplissage porte ce jeton. */
-  function pointsDuPolygone(svg: string, jeton: string): { x: number; y: number }[] {
-    const balise = new RegExp(`<polygon[^>]*${jeton}[^>]*/>`).exec(svg)?.[0] ?? '';
-    const bruts = /points="([^"]*)"/.exec(balise)?.[1] ?? '';
-    if (bruts === '') return [];
-    return bruts.split(' ').map((paire) => {
-      const [x, y] = paire.split(',');
-      return { x: Number(x), y: Number(y) };
-    });
-  }
-
-  it('cadre le plan sur une zone non couverte qui déborde de l’emprise', () => {
-    // Le cadrage ne tenait compte ni du bâti seul ni des emprises seules : une
-    // zone tracée au-delà des deux se dessinait hors du viewBox, sans un mot.
-    const site = {
-      ...refMultilevel,
-      parkings: [emprise],
-      parking_uncovered: [{
-        id: 'unc-1',
-        org_id: 'org-test-001',
-        parking_id: 'park-1',
-        reason: 'Relevé interrompu au sud',
-        geometry: {
-          vertices: [
-            { x_m: -400, y_m: -400 }, { x_m: -300, y_m: -400 },
-            { x_m: -300, y_m: -300 }, { x_m: -400, y_m: -300 },
-          ],
-        },
-      }],
-    };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
+  it('cadre le plan sur une surface qui déborde des places', () => {
+    // Le cadrage ne tenait compte ni du bâti seul ni des places seules : une
+    // surface tracée au-delà des deux se dessinait hors du viewBox, sans un mot.
+    const loin = place('fp-surface', -400, -400, 100);
+    const r = renderFloorPlan(
+      site({
+        zones: [parkingZone(['fp-p1', 'fp-surface'])],
+        footprints: [
+          ...refMultilevel.footprints.filter(f => f.kind !== 'parking_space'),
+          p1, loin,
+        ],
+      }),
+      RDC, defaultOptions, [marque('fp-surface')],
+    );
     expect(r.ok).toBe(true);
     if (!r.ok) return;
 
@@ -236,60 +248,15 @@ describe('revue : ce que le plan dessine, il le cadre', () => {
       expect(p.y).toBeLessThanOrEqual(defaultOptions.height_px);
     }
   });
-
-  it('ne dessine pas un parking retiré, et ne le cadre pas non plus', () => {
-    // M01.S11 : le retiré reste en base pour l'historique et sort des livrables. Le
-    // montrer en pointillé le confondrait avec une proposition — l'inverse même
-    // d'un retrait, puisqu'une proposition n'existe pas encore.
-    const retire = {
-      ...emprise,
-      geometry: {
-        vertices: [
-          { x_m: -500, y_m: -500 }, { x_m: -400, y_m: -500 },
-          { x_m: -400, y_m: -400 }, { x_m: -500, y_m: -400 },
-        ],
-      },
-      provenance: { status: 'retire' as const, source: 'Plan 2019' },
-    };
-    const sans = renderFloorPlan({ ...refMultilevel, parkings: [] }, 'lvl-ml-rdc', defaultOptions);
-    const avec = renderFloorPlan({ ...refMultilevel, parkings: [retire] }, 'lvl-ml-rdc', defaultOptions);
-    expect(sans.ok && avec.ok).toBe(true);
-    if (!sans.ok || !avec.ok) return;
-
-    expect(avec.value).not.toContain('tok-park-fill');
-    // Même cadrage qu'en son absence : un objet qui ne se dessine pas ne doit
-    // pas davantage tirer le plan vers lui.
-    expect(avec.value).toBe(sans.value);
-  });
-
-  it('écarte la zone non couverte d’un parking retiré', () => {
-    const retire = { ...emprise, provenance: { status: 'retire' as const, source: 'Plan 2019' } };
-    const site = {
-      ...refMultilevel,
-      parkings: [retire],
-      parking_uncovered: [{
-        id: 'unc-1',
-        org_id: 'org-test-001',
-        parking_id: 'park-1',
-        reason: 'Relevé interrompu',
-        geometry: {
-          vertices: [
-            { x_m: 0, y_m: -20 }, { x_m: 20, y_m: -20 }, { x_m: 20, y_m: -5 },
-          ],
-        },
-      }],
-    };
-    const r = renderFloorPlan(site, 'lvl-ml-rdc', defaultOptions);
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    expect(r.value).not.toContain('tok-unc-fill');
-  });
-
-  it('dessine encore une proposition, que le retrait ne doit pas emporter', () => {
-    const propose = { ...emprise, provenance: { status: 'proposition' as const, source: 'Détection' } };
-    const r = renderFloorPlan({ ...refMultilevel, parkings: [propose] }, 'lvl-ml-rdc', defaultOptions);
-    expect(r.ok).toBe(true);
-    if (!r.ok) return;
-    expect(r.value).toContain('tok-park-fill');
-  });
 });
+
+/** Les points d'un `<polygon>` dont le remplissage porte ce jeton. */
+function pointsDuPolygone(svg: string, jeton: string): { x: number; y: number }[] {
+  const balise = new RegExp(`<polygon[^>]*${jeton}[^>]*/>`).exec(svg)?.[0] ?? '';
+  const bruts = /points="([^"]*)"/.exec(balise)?.[1] ?? '';
+  if (bruts === '') return [];
+  return bruts.split(' ').map((paire) => {
+    const [x, y] = paire.split(',');
+    return { x: Number(x), y: Number(y) };
+  });
+}

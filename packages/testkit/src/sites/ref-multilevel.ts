@@ -136,6 +136,65 @@ export const refMultilevel: SiteData = {
       kind: 'cell',
       unit_code: 'C-100',
     },
+    // S-35 — « Une place de stationnement est une empreinte de nature
+    // `parking_space`. » Quatre places au sud du bâti, hors de son emprise :
+    // elles se dessinent sur le même niveau et ne le recouvrent pas.
+    {
+      id: 'fp-ml-a1',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      geometry: {
+        vertices: [
+          { x_m: 0, y_m: -30 },
+          { x_m: 2, y_m: -30 },
+          { x_m: 2, y_m: -25 },
+          { x_m: 0, y_m: -25 },
+        ],
+      },
+      kind: 'parking_space',
+    },
+    {
+      id: 'fp-ml-a2',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      geometry: {
+        vertices: [
+          { x_m: 3, y_m: -30 },
+          { x_m: 5, y_m: -30 },
+          { x_m: 5, y_m: -25 },
+          { x_m: 3, y_m: -25 },
+        ],
+      },
+      kind: 'parking_space',
+    },
+    {
+      id: 'fp-ml-a3',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      geometry: {
+        vertices: [
+          { x_m: 6, y_m: -30 },
+          { x_m: 8, y_m: -30 },
+          { x_m: 8, y_m: -25 },
+          { x_m: 6, y_m: -25 },
+        ],
+      },
+      kind: 'parking_space',
+    },
+    {
+      id: 'fp-ml-b1',
+      org_id: 'org-test-001',
+      level_id: 'lvl-ml-rdc',
+      geometry: {
+        vertices: [
+          { x_m: 9, y_m: -30 },
+          { x_m: 11, y_m: -30 },
+          { x_m: 11, y_m: -25 },
+          { x_m: 9, y_m: -25 },
+        ],
+      },
+      kind: 'parking_space',
+    },
   ],
   volumes: [
     {
@@ -297,77 +356,42 @@ export const refMultilevel: SiteData = {
       ],
     },
   ],
-  // Stationnement. Le seul site de référence qui en
-  // porte, comme il est le seul à porter un vocabulaire : les autres montrent
-  // le cas d'un site qui n'en déclare pas.
+  // S8 — le stationnement, sur les objets du socle. Le seul site de référence
+  // qui en porte, comme il est le seul à porter un vocabulaire : les autres
+  // montrent le cas d'un site qui n'en déclare pas.
   //
-  // Quatre places annoncées, quatre numérisées : cas conforme. Les cas fautifs
-  // sont couverts en test unitaire, pas en donnée de référence, pour qu'un site
-  // de référence reste un site valide.
-  parkings: [
+  // Quatre places annoncées, quatre tracées : cas conforme. La capacité
+  // annoncée est un fait d'A5.11 ciblant la zone, et elle vit donc dans le
+  // vocabulaire du site, non ici. Les cas fautifs sont couverts en test
+  // unitaire, pas en donnée de référence, pour qu'un site de référence reste
+  // un site valide.
+  zones: [
     {
-      id: 'park-ml-ouest',
+      id: 'zone-ml-parking-ouest',
       org_id: 'org-test-001',
       level_id: 'lvl-ml-rdc',
-      geometry: {
-        vertices: [
-          { x_m: 0, y_m: -30 },
-          { x_m: 40, y_m: -30 },
-          { x_m: 40, y_m: -5 },
-          { x_m: 0, y_m: -5 },
-        ],
-      },
       name: 'Parking Ouest',
-      free: true,
-      declared_capacity: 4,
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+      kind: 'parking',
+      footprint_ids: ['fp-ml-a1', 'fp-ml-a2', 'fp-ml-a3', 'fp-ml-b1'],
     },
   ],
+  // A5.3 — l'extension d'une empreinte de place. Deux des quatre la portent :
+  // une empreinte sans extension reste une place standard sans repère de
+  // travée, comme une arête sans `vertical_link` reste une arête.
   parking_spaces: [
     {
-      id: 'space-ml-a1',
+      id: 'ps-ml-a3',
       org_id: 'org-test-001',
-      parking_id: 'park-ml-ouest',
-      kind: 'standard',
-      row: 'A',
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+      footprint_id: 'fp-ml-a3',
+      space_kind: 'accessible',
+      row_label: 'A',
     },
     {
-      id: 'space-ml-a2',
+      id: 'ps-ml-b1',
       org_id: 'org-test-001',
-      parking_id: 'park-ml-ouest',
-      kind: 'standard',
-      row: 'A',
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
-    },
-    {
-      id: 'space-ml-a3',
-      org_id: 'org-test-001',
-      parking_id: 'park-ml-ouest',
-      kind: 'pmr',
-      row: 'A',
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
-    },
-    {
-      id: 'space-ml-b1',
-      org_id: 'org-test-001',
-      parking_id: 'park-ml-ouest',
-      kind: 'livraison',
-      row: 'B',
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
-    },
-  ],
-  parking_uncovered: [],
-  vehicle_gates: [
-    {
-      id: 'gate-ml-v1',
-      org_id: 'org-test-001',
-      level_id: 'lvl-ml-rdc',
-      code: 'V1',
-      role: 'Entrée véhicules',
-      width_m: 6,
-      position: { x_m: 0, y_m: -18 },
-      provenance: { status: 'existant', source: 'Plan RDC indice 20' },
+      footprint_id: 'fp-ml-b1',
+      space_kind: 'delivery',
+      row_label: 'B',
     },
   ],
 };

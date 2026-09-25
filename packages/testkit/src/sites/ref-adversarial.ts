@@ -261,8 +261,5 @@ export const refAdversarial: SiteData = {
   content_blocks: [],
   support_versions: [],
   face_templates: [],
-  parkings: [],
   parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
 };

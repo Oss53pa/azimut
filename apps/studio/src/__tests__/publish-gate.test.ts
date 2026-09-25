@@ -3,24 +3,34 @@ import { refMultilevel } from '@azimut/testkit';
 import { runChecks } from '@azimut/engine-graph';
 import { evaluatePublishGate } from '../publish-gate.js';
 import { EMPTY_VOCABULARY_STATE, type VocabularyState } from '../context/site-vocabulary.js';
+import type { SiteFact } from '@azimut/core-model';
+import { PARKING_CAPACITY_KEY } from '@azimut/core-model';
 
-const parkingPropose = {
-  id: 'park-1',
-  org_id: 'org-test-001',
-  level_id: 'lvl-ml-rdc',
-  geometry: {
-    vertices: [
-      { x_m: -20, y_m: -20 }, { x_m: 20, y_m: -20 },
-      { x_m: 20, y_m: -5 }, { x_m: -20, y_m: -5 },
-    ],
-  },
-  name: 'Ouest',
-  free: true,
-  declared_capacity: 0,
-  provenance: { status: 'proposition' as const, source: 'Détection assistée' },
+/**
+ * A5.11 — le statut porte sur le fait, non sur l'objet.
+ *
+ * Ni `zone` ni `footprint` n'en déclarent : la section S8 a retiré les tables
+ * de stationnement qui en portaient un. Une capacité annoncée mais non arrêtée
+ * est une proposition, et c'est elle qu'un livrable ne peut pas montrer.
+ */
+const capaciteProposee: SiteFact = {
+  key: PARKING_CAPACITY_KEY,
+  value: 4,
+  status: 'proposal',
+  source_ref: 'Détection assistée',
+  declared_at: '2026-01-05',
+  target: { kind: 'zone', id: 'zone-ml-parking-ouest' },
+  forbidden: [],
 };
 
-const siteAvecProposition = { ...refMultilevel, parkings: [parkingPropose] };
+function avecFaits(facts: readonly SiteFact[]): VocabularyState {
+  return {
+    ...EMPTY_VOCABULARY_STATE,
+    vocabulary: { ...EMPTY_VOCABULARY_STATE.vocabulary, facts: [...facts] },
+  };
+}
+
+const ETAT_PROPOSITION = avecFaits([capaciteProposee]);
 
 function codes(findings: readonly { code: string }[]): readonly string[] {
   return findings.map(f => f.code);
@@ -32,23 +42,20 @@ describe('porte de publication', () => {
     // de travail légitime ; portée à un livrable elle s'afficherait comme un
     // fait, et la règle M01.S11 la refuse. Le bouton « Publier » doit lire la seconde
     // réponse, pas la première.
-    const atelier = runChecks(siteAvecProposition, EMPTY_VOCABULARY_STATE.vocabulary);
+    const atelier = runChecks(refMultilevel, ETAT_PROPOSITION.vocabulary);
     expect(atelier.ok).toBe(true);
     if (!atelier.ok) return;
     expect(codes(atelier.value.findings)).not.toContain('PARK.PROPOSAL_AS_EXISTING');
 
-    const gate = evaluatePublishGate(siteAvecProposition, EMPTY_VOCABULARY_STATE);
+    const gate = evaluatePublishGate(refMultilevel, ETAT_PROPOSITION);
     expect(codes(gate.findings)).toContain('PARK.PROPOSAL_AS_EXISTING');
     expect(codes(gate.blocking)).toContain('PARK.PROPOSAL_AS_EXISTING');
     expect(gate.publishable).toBe(false);
   });
 
-  it('laisse passer un site dont les objets existent', () => {
-    const existant = {
-      ...refMultilevel,
-      parkings: [{ ...parkingPropose, provenance: { status: 'existant' as const, source: 'Relevé 2026' } }],
-    };
-    const gate = evaluatePublishGate(existant, EMPTY_VOCABULARY_STATE);
+  it('laisse passer un site dont les faits sont arrêtés', () => {
+    const arrete = avecFaits([{ ...capaciteProposee, status: 'existing' }]);
+    const gate = evaluatePublishGate(refMultilevel, arrete);
     expect(codes(gate.blocking)).not.toContain('PARK.PROPOSAL_AS_EXISTING');
   });
 

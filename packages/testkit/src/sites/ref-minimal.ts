@@ -377,8 +377,5 @@ export const refMinimal: SiteData = {
       ],
     },
   ],
-  parkings: [],
   parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
 };

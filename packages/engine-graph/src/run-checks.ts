@@ -1,4 +1,5 @@
 import type { SiteData, Outcome, Finding, SiteVocabulary } from '@azimut/core-model';
+import { isParkingZone } from '@azimut/core-model';
 import { checkNamingCollisions } from './checks/naming.js';
 import {
   checkDuplicateDisplayName,
@@ -137,14 +138,16 @@ export function runChecks(
     run.push('site_facts');
   }
 
-  // Le stationnement est de la géométrie du site : il vient de `SiteData`, pas
-  // du vocabulaire, et un site sans parking n'a rien à contrôler — ce n'est pas
-  // un contrôle non exercé, c'est un site sans parking.
-  if (site.parkings.length > 0) {
+  // Le stationnement est de la géométrie du site : zones et empreintes viennent
+  // de `SiteData`, les capacités annoncées des faits d'A5.11. Un site sans zone
+  // de parking n'a rien à contrôler — ce n'est pas un contrôle non exercé,
+  // c'est un site sans parking.
+  const parkingZonesDeclared = (site.zones ?? []).filter(z => isParkingZone(z.kind));
+  if (parkingZonesDeclared.length > 0) {
     findings.push(...auditParking({
-      parkings: site.parkings,
-      spaces: site.parking_spaces,
-      uncovered: site.parking_uncovered,
+      zones: site.zones ?? [],
+      footprints: site.footprints,
+      facts,
     }, forDeliverable).findings);
     run.push('parking_coverage');
     // Le contrôle de publication ne tourne qu'en mode livrable, et il se

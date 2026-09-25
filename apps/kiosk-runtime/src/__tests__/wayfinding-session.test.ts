@@ -184,10 +184,7 @@ describe('computeWayfinding', () => {
       content_blocks: [],
       support_versions: [],
       face_templates: [],
-      parkings: [],
       parking_spaces: [],
-      parking_uncovered: [],
-      vehicle_gates: [],
     };
 
     const cP = corridorSite.travel_profiles[0] as TravelProfile;

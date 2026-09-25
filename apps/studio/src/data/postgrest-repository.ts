@@ -16,7 +16,7 @@ import type {
   PlanCalibrationRow, PlanSourceRow, SiteRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
-  ParkingRow, ParkingSpaceRow, ParkingUncoveredAreaRow, VehicleGateRow,
+  ZoneRow,
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
@@ -344,23 +344,14 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<SupportVersionRow>(config, 'support_version', 'support_id', supportIds),
         ]);
 
-      // Stationnement. Les portails et les parkings
-      // pendent aux niveaux, les places et les zones non couvertes aux
-      // parkings : deux vagues, comme pour les faces et leurs blocs.
-      const [contentBlocks, parkings, vehicleGates] = await Promise.all([
+      // A5.2 — les zones du socle, qui pendent au niveau comme les empreintes
+      // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et
+      // c'est par ici que les contrôles du domaine `PARK` le voient.
+      const [contentBlocks, zones] = await Promise.all([
         queryIn<SupportContentBlockRow>(
           config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
         ),
-        queryIn<ParkingRow>(config, 'parking', 'level_id', levelIds),
-        queryIn<VehicleGateRow>(config, 'vehicle_gate', 'level_id', levelIds),
-      ]);
-
-      const parkingIds = parkings.map(p => p.id);
-      const [parkingSpaces, parkingUncovered] = await Promise.all([
-        queryIn<ParkingSpaceRow>(config, 'parking_space', 'parking_id', parkingIds),
-        queryIn<ParkingUncoveredAreaRow>(
-          config, 'parking_uncovered_area', 'parking_id', parkingIds,
-        ),
+        queryIn<ZoneRow>(config, 'zone', 'level_id', levelIds),
       ]);
 
       return assembleSiteData({
@@ -386,10 +377,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         support_faces: supportFaces,
         content_blocks: contentBlocks,
         support_versions: supportVersions,
-        parkings,
-        parking_spaces: parkingSpaces,
-        parking_uncovered: parkingUncovered,
-        vehicle_gates: vehicleGates,
+        zones,
       });
     },
 

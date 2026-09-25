@@ -31,13 +31,17 @@ function distance(a: Point, b: Point): number {
 /**
  * Tout ce qui porte un polygone en coordonnées métier.
  *
- * Les quatre contrôles ci-dessous ne regardaient que les empreintes, parce que
- * c'était la seule entité polygonale du modèle. L'emprise d'un parking en est
- * une autre : la laisser hors contrôle acceptait un contour à zéro sommet ou
- * auto-sécant sans que rien ne le dise.
+ * Il y eut un temps où le modèle en comptait deux familles : les empreintes, et
+ * l'emprise d'un parking, que la table `parking` portait. La section S8 a retiré
+ * cette table — « un parking est une zone de nature `parking` », et une zone
+ * n'a pas de géométrie propre : elle déclare les empreintes qu'elle couvre
+ * (A5.2). Toute la géométrie polygonale du site est donc revenue aux
+ * empreintes, places de stationnement comprises, et ces contrôles les voient
+ * toutes sans rien perdre.
  *
- * `kind` accompagne l'objet pour que l'anomalie désigne ce qu'elle a vu, et non
- * « footprint » pour tout.
+ * `kind` accompagne l'objet pour que l'anomalie désigne ce qu'elle a vu. Une
+ * seule famille le renseigne aujourd'hui ; le champ reste, parce que c'est lui
+ * qui a permis d'en accueillir une seconde sans toucher aux quatre contrôles.
  */
 type PolygonalObject = {
   readonly id: string;
@@ -45,15 +49,11 @@ type PolygonalObject = {
   readonly geometry: { readonly vertices: readonly Point[] };
 };
 
-/** Les empreintes et les emprises de parking, dans un ordre stable. */
+/** Les empreintes, dans un ordre stable. */
 function polygonalObjects(
   footprints: readonly Footprint[],
-  parkings: readonly { readonly id: string; readonly geometry: { readonly vertices: readonly Point[] } }[],
 ): readonly PolygonalObject[] {
-  return [
-    ...footprints.map(f => ({ id: f.id, kind: 'footprint', geometry: f.geometry })),
-    ...parkings.map(p => ({ id: p.id, kind: 'parking', geometry: p.geometry })),
-  ];
+  return footprints.map(f => ({ id: f.id, kind: 'footprint', geometry: f.geometry }));
 }
 
 function tooFewVerticesFindings(objects: readonly PolygonalObject[]): Finding[] {
@@ -286,10 +286,7 @@ export function validateGeometry(
     a.id.localeCompare(b.id),
   );
 
-  const sortedParkings = [...site.parkings].sort((a, b) =>
-    a.id.localeCompare(b.id),
-  );
-  const polygons = polygonalObjects(sortedFootprints, sortedParkings);
+  const polygons = polygonalObjects(sortedFootprints);
 
   const allFindings: Finding[] = [
     ...tooFewVerticesFindings(polygons),
@@ -297,8 +294,6 @@ export function validateGeometry(
     ...polygonDegenerateFindings(polygons),
     ...selfIntersectingFindings(polygons),
     ...volumeNoHeightFindings(sortedVolumes),
-    // Le recouvrement reste propre aux empreintes : deux parkings mitoyens se
-    // touchent légitimement, et un parking recouvre souvent une empreinte.
     ...footprintsOverlapFindings(sortedFootprints),
   ];
 

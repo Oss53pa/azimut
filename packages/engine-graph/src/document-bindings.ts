@@ -1,5 +1,8 @@
 import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimut/core-model';
-import { PUBLISHABLE_STATUSES, factValueText } from '@azimut/core-model';
+import {
+  factValueText, isParkingZone, isParkingSpaceFootprint, declaredInteger,
+  PARKING_CAPACITY_KEY, PARKING_FREE_KEY, PARKING_UNDIGITIZED_SPACES_KEY,
+} from '@azimut/core-model';
 
 /**
  * Ce qu'un document de stratégie peut lier — A5.11, règle M01.S11.
@@ -50,26 +53,38 @@ export function buildDocumentBindings(
   // Un document qui parle de plusieurs parkings demandera une liaison indexée,
   // que ce module n'offre pas encore : mieux vaut ne rien rendre qu'un chiffre
   // pris au hasard dans la liste.
-  const parkings = [...site.parkings].sort((l, r) => l.id.localeCompare(r.id));
+  const parkings = (site.zones ?? [])
+    .filter(zone => isParkingZone(zone.kind))
+    .sort((l, r) => l.id.localeCompare(r.id));
   const first = parkings[0];
   if (first !== undefined) {
-    // Un document est un livrable : il ne compte que l'existant (A5.11, règle
-    // M01.S11). Une proposition non validée s'y afficherait comme un fait, et
-    // le nombre de places d'un parking est précisément le genre de fait qu'on
-    // cite ensuite sans le revérifier.
-    //
-    // Ce compte diffère donc de celui de `auditParking`, qui mesure la
-    // numérisation et retient aussi les propositions. Deux questions, deux
+    // Le compte des places est celui des empreintes tracées : une empreinte
+    // marquée non numérisée n'en est pas une, elle est la surface où le plan
+    // s'arrête. Ce compte diffère donc de celui d'`auditParking`, qui totalise
+    // aussi les places que ces marques déclarent. Deux questions, deux
     // comptes : « ce qui a été tracé » n'est pas « ce que le site a ».
-    const digitised = site.parking_spaces.filter(
-      s => s.parking_id === first.id
-        && PUBLISHABLE_STATUSES.includes(s.provenance.status),
-    ).length;
+    const spaces = new Set(site.footprints
+      .filter(footprint => isParkingSpaceFootprint(footprint.kind))
+      .map(footprint => footprint.id));
+    const digitised = first.footprint_ids.filter(id => spaces.has(id)
+      && declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY,
+        { kind: 'footprint', id }) === null).length;
+
+    const target = { kind: 'zone', id: first.id };
+    const capacity = declaredInteger(facts, PARKING_CAPACITY_KEY, target);
+    const free = facts.find(fact => fact.key === PARKING_FREE_KEY
+      && fact.target?.kind === target.kind && fact.target.id === target.id);
+
+    // Un champ que rien ne déclare reste vide, et non rempli d'un défaut. La
+    // règle M01.S11 — « un nombre affiché dans un livrable provient d'un fait
+    // ou d'un calcul » — refuse qu'un document annonce une capacité que
+    // personne n'a déclarée, et « payant » est une annonce tout autant que
+    // « gratuit ».
     values['parking'] = {
       name: first.name,
-      capacity: String(first.declared_capacity),
+      ...(capacity === null ? {} : { capacity: String(capacity) }),
       digitised_spaces: String(digitised),
-      access: first.free ? 'gratuit' : 'payant',
+      ...(free === undefined ? {} : { access: free.value === true ? 'gratuit' : 'payant' }),
     };
   }
 

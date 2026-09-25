@@ -3,25 +3,25 @@ import type {
   GraphNode,
   Edge,
   Footprint,
-  Parking,
-  UncoveredArea,
   Destination,
+  SiteFact,
   Point,
   Outcome,
   Finding,
 } from '@azimut/core-model';
 import {
-  roundSvg, countsAsDigitised, PUBLISHABLE_STATUSES,
+  roundSvg, isParkingZone, isParkingSpaceFootprint, declaredInteger,
+  PARKING_UNDIGITIZED_SPACES_KEY,
 } from '@azimut/core-model';
 
 export type FloorPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
-  /** Emprise de parking, distincte d'un bâtiment. */
+  /** Place de stationnement, distincte d'un bâtiment. */
   readonly parking_fill: string;
   readonly parking_stroke: string;
-  /** Zone que le plan source ne couvre pas : ni vide, ni relevée. */
+  /** Surface que le plan source ne couvre pas : ni vide, ni relevée (S-37). */
   readonly uncovered_fill: string;
   readonly uncovered_stroke: string;
   readonly edge_stroke: string;
@@ -44,9 +44,21 @@ export type FloorPlanOptions = {
 };
 
 export type FloorPlanData = {
+  /** Les empreintes du niveau qui ne sont pas des places de stationnement. */
   readonly footprints: readonly Footprint[];
-  readonly parkings: readonly Parking[];
-  readonly uncovered: readonly UncoveredArea[];
+  /**
+   * Les places d'un parking, au sens de S-35 : une empreinte de nature
+   * `parking_space` déclarée par une zone de nature `parking`. Séparées des
+   * autres empreintes parce qu'elles se dessinent avant elles, et autrement.
+   */
+  readonly parkings: readonly Footprint[];
+  /**
+   * Celles de ces places qu'un fait marque non numérisées — S-37. Ce ne sont
+   * pas des emplacements mais des surfaces, et le plan doit les montrer comme
+   * telles, faute de quoi un parking à demi relevé se lit comme un parking à
+   * demi vide.
+   */
+  readonly uncovered: readonly Footprint[];
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly destinations: readonly Destination[];
@@ -154,8 +166,9 @@ function nodeRadius(kind: string): number {
 function filterLevelData(
   site: SiteData,
   levelId: string,
+  facts: readonly SiteFact[],
 ): FloorPlanData {
-  const footprints = site.footprints.filter(
+  const levelFootprints = site.footprints.filter(
     (f) => f.level_id === levelId,
   );
   const nodes = site.graph.nodes.filter(
@@ -168,24 +181,44 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
-  // Un parking retiré sort du plan, parce qu'il sort des livrables (M01.S11) : le
-  // modèle le garde en base pour l'historique, pas pour l'imprimer. Le dessiner
-  // en pointillé le rendrait indiscernable d'une proposition, qui est l'inverse
-  // — quelque chose qui n'existe pas encore, et non qui n'existe plus.
-  const parkings = site.parkings.filter(
-    (p) => p.level_id === levelId && countsAsDigitised(p.provenance.status),
-  );
-  const parkingIds = new Set(parkings.map((p) => p.id));
-  const uncovered = site.parking_uncovered.filter(
-    (a) => parkingIds.has(a.parking_id),
-  );
-  return { footprints, parkings, uncovered, nodes, edges, destinations };
+  // Les places d'un parking sont des empreintes, et les zones de nature
+  // `parking` disent lesquelles. Une empreinte de place qu'aucune zone ne
+  // déclare se dessine donc comme une empreinte ordinaire : le plan ne devine
+  // pas un rattachement que la donnée ne porte pas, et le contrôle
+  // `DATA.PARKING_SPACE_WITHOUT_ZONE` est là pour le dire.
+  const declared = new Set((site.zones ?? [])
+    .filter((z) => isParkingZone(z.kind) && z.level_id === levelId)
+    .flatMap((z) => [...z.footprint_ids]));
+
+  const parkings: Footprint[] = [];
+  const uncovered: Footprint[] = [];
+  const plain: Footprint[] = [];
+  for (const footprint of levelFootprints) {
+    if (!isParkingSpaceFootprint(footprint.kind) || !declared.has(footprint.id)) {
+      plain.push(footprint);
+    } else if (declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY,
+      { kind: 'footprint', id: footprint.id }) === null) {
+      parkings.push(footprint);
+    } else {
+      uncovered.push(footprint);
+    }
+  }
+
+  return { footprints: plain, parkings, uncovered, nodes, edges, destinations };
 }
 
 export function renderFloorPlan(
   site: SiteData,
   levelId: string,
   options: FloorPlanOptions,
+  /**
+   * Les faits du site, section A5.11. Le plan n'en lit qu'un,
+   * `parking.undigitized_spaces`, qui distingue une place tracée d'une surface
+   * où le relevé s'arrête (S-37). Facultatif, et par défaut vide : un appelant
+   * qui ne les passe pas obtient un plan où toute place est une place, ce qui
+   * est le rendu d'un site sans marque.
+   */
+  facts: readonly SiteFact[] = [],
 ): Outcome<string> {
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
@@ -199,11 +232,11 @@ export function renderFloorPlan(
     return { ok: false, findings: [f] };
   }
 
-  const data = filterLevelData(site, levelId);
+  const data = filterLevelData(site, levelId, facts);
   const outlines: (readonly Point[])[] = [
     ...data.footprints.map((f) => f.geometry.vertices),
     ...data.parkings.map((p) => p.geometry.vertices),
-    ...data.uncovered.flatMap((a) => (a.geometry ? [a.geometry.vertices] : [])),
+    ...data.uncovered.map((a) => a.geometry.vertices),
   ];
   const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
@@ -252,8 +285,8 @@ export function renderFloorPlan(
     ` fill="${esc(options.theme.background)}" />`,
   );
 
-  // Les parkings d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
-  // après recouvrirait une empreinte par une emprise.
+  // Les places d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
+  // après recouvrirait une empreinte de bâti par une place.
   const sortedParkings = [...data.parkings].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
@@ -265,32 +298,27 @@ export function renderFloorPlan(
         return `${p.x},${p.y}`;
       })
       .join(' ');
-    // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
-    // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
-    // ce qui est exactement ce que la règle M01.S11 demande d'une proposition.
-    const dashed = !PUBLISHABLE_STATUSES.includes(park.provenance.status);
     parts.push(
       `<polygon points="${points}"` +
       ` fill="${esc(options.theme.parking_fill)}"` +
       ` stroke="${esc(options.theme.parking_stroke)}"` +
-      ` stroke-width="1"` +
-      (dashed ? ` stroke-dasharray="6 4"` : '') +
-      ` />`,
+      ` stroke-width="1" />`,
     );
   }
 
-  // Les zones non couvertes juste après les emprises, avant le bâti : elles
+  // Les surfaces non numérisées juste après les places, avant le bâti : elles
   // qualifient le sol qu'elles recouvrent.
   //
-  // Une zone sans tracé ne se dessine pas, et c'est une limite assumée : le
-  // plan reste alors muet sur une incomplétude que le contrôle, lui, connaît.
-  // Dessiner une zone dont on ignore l'étendue reviendrait à inventer la limite
-  // que le relevé n'a pas trouvée.
+  // Elles ont toujours un tracé, désormais : ce sont des empreintes, et A5.2
+  // exige d'une empreinte un polygone fermé d'au moins trois sommets. La limite
+  // de l'ancien modèle — une zone non couverte pouvait n'avoir aucune
+  // géométrie, et le plan restait muet là où le contrôle savait — tombe avec
+  // lui.
   const sortedUncovered = [...data.uncovered].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
   for (const area of sortedUncovered) {
-    const verts = area.geometry?.vertices ?? [];
+    const verts = area.geometry.vertices;
     if (verts.length < 3) continue;
     const points = verts
       .map((v) => {

@@ -4,6 +4,7 @@ import type { AuditSiteContext } from '../audit-site.js';
 import type { Job } from '../job.js';
 import { refMinimal, refBroken, refMultilevel } from '@azimut/testkit';
 import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
+import { EMPTY_VOCABULARY, PARKING_CAPACITY_KEY } from '@azimut/core-model';
 
 function makeJob(payload?: Record<string, unknown>): Job {
   return {
@@ -218,30 +219,38 @@ describe('createAuditSiteHandler', () => {
 });
 
 describe('mode d’audit — A5.11, règle M01.S11', () => {
-  const avecProposition = {
-    ...refMultilevel,
-    parking_spaces: refMultilevel.parking_spaces.map((s, i) =>
-      i === 0
-        ? { ...s, provenance: { status: 'proposition' as const, source: 'Détection' } }
-        : s,
-    ),
+  // A5.11 — le statut porte sur le fait, non sur l'objet : ni `zone` ni
+  // `footprint` n'en déclarent. Une capacité annoncée mais non arrêtée est une
+  // proposition, et c'est elle qu'un livrable ne peut pas montrer.
+  const avecProposition = refMultilevel;
+  const vocabulaireProposition: SiteVocabulary = {
+    ...EMPTY_VOCABULARY,
+    facts: [{
+      key: PARKING_CAPACITY_KEY,
+      value: 4,
+      status: 'proposal',
+      source_ref: 'Détection assistée',
+      declared_at: '2026-01-05',
+      target: { kind: 'zone', id: 'zone-ml-parking-ouest' },
+      forbidden: [],
+    }],
   };
 
   it('vaut atelier quand la charge de travail ne dit rien', async () => {
-    const handler = createAuditSiteHandler({ site: avecProposition });
+    const handler = createAuditSiteHandler({ site: avecProposition, vocabulary: vocabulaireProposition });
     const result = await handler(makeJob());
     expect(result['mode']).toBe('atelier');
   });
 
   it('ne refuse pas une proposition à l’atelier', async () => {
-    const handler = createAuditSiteHandler({ site: avecProposition });
+    const handler = createAuditSiteHandler({ site: avecProposition, vocabulary: vocabulaireProposition });
     const result = await handler(makeJob());
     const findings = result['findings'] as { code: string }[];
     expect(findings.some(f => f.code === 'PARK.PROPOSAL_AS_EXISTING')).toBe(false);
   });
 
   it('la refuse au livrable, et le rapport dit sous quel mode il a tourné', async () => {
-    const handler = createAuditSiteHandler({ site: avecProposition });
+    const handler = createAuditSiteHandler({ site: avecProposition, vocabulary: vocabulaireProposition });
     const result = await handler(makeJob({ mode: 'livrable' }));
     expect(result['mode']).toBe('livrable');
     const findings = result['findings'] as { code: string }[];
@@ -251,7 +260,7 @@ describe('mode d’audit — A5.11, règle M01.S11', () => {
   it('un mode inconnu retombe sur atelier, jamais sur livrable', async () => {
     // Retomber sur livrable durcirait un audit que personne n'a demandé de
     // durcir ; retomber sur atelier ne fait passer personne à l'impression.
-    const handler = createAuditSiteHandler({ site: avecProposition });
+    const handler = createAuditSiteHandler({ site: avecProposition, vocabulary: vocabulaireProposition });
     const result = await handler(makeJob({ mode: 'production' }));
     expect(result['mode']).toBe('atelier');
   });

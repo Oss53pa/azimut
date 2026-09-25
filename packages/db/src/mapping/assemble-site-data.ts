@@ -9,7 +9,7 @@
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
 import {
-  readActiveLangs, readOpeningHours, computeEdgeLengths,
+  readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
 } from '@azimut/core-model';
 import type {
   FootprintKind,
@@ -19,8 +19,7 @@ import type {
   Destination, DestinationName, TravelProfile,
   PlanSource, PlanCalibration,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
-  PictogramRegistry, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea, VehicleGate,
-  ObjectStatus, Point, Polygon,
+  PictogramRegistry, SiteZone, SiteZoneKind,
 } from '@azimut/core-model';
 import type {
   SiteRowSet, } from './row-types.js';
@@ -35,29 +34,16 @@ export {
 };
 
 /**
- * Un statut que le code ne reconnaît pas ne devient jamais `existant`.
+ * La nature d'une zone, ou la plus neutre des natures d'A5.2.
  *
- * `existant` est le seul statut qui autorise un objet à paraître dans un
- * livrable (A5.11, règle M01.S11). Une valeur mal orthographiée en base, ou
- * venue d'une version ultérieure du modèle, doit donc retomber sur un statut
- * qui retient l'objet, pas sur celui qui le publie. `a_verifier` dit exactement
- * cela : on ne sait pas, quelqu'un doit regarder.
+ * Une valeur que le modèle ne connaît pas ne doit pas se faire passer pour un
+ * parking : la nature commande les contrôles du domaine `PARK`, et retomber
+ * sur `parking` inventerait un parking là où la base dit autre chose.
+ * `technical` est le choix inverse — une zone que rien ne réclame.
  */
-function toObjectStatus(raw: string): ObjectStatus {
-  switch (raw) {
-    case 'existant':
-    case 'proposition':
-    case 'retire':
-      return raw;
-    default:
-      return 'a_verifier';
-  }
+function toZoneKind(raw: string): SiteZoneKind {
+  return isSiteZoneKind(raw) ? raw : 'technical';
 }
-
-function toSpaceKind(raw: string): ParkingSpaceKind {
-  return raw === 'pmr' || raw === 'livraison' ? raw : 'standard';
-}
-
 
 /**
  * Assemble le modèle du site depuis ses lignes.
@@ -277,51 +263,17 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     honor_hours: p.honor_hours,
   }));
 
-  // Stationnement.
-  const parkings: Parking[] = rows.parkings.map(p => ({
-    id: p.id,
-    org_id: p.org_id,
-    level_id: p.level_id,
-    geometry: p.geometry as Parking['geometry'],
-    name: p.name,
-    free: p.free,
-    declared_capacity: p.declared_capacity,
-    provenance: { status: toObjectStatus(p.status), source: p.source },
-  }));
-
-  const parkingSpaces: ParkingSpace[] = rows.parking_spaces.map(s => ({
-    id: s.id,
-    org_id: s.org_id,
-    parking_id: s.parking_id,
-    kind: toSpaceKind(s.kind),
-    row: s.row_label,
-    provenance: { status: toObjectStatus(s.status), source: s.source },
-    // Colonne facultative : absente du modèle plutôt que présente et vide,
-    // comme les autres champs optionnels de ce module.
-    ...(s.geometry === null || s.geometry === undefined
-      ? {}
-      : { geometry: s.geometry as Polygon }),
-  }));
-
-  const parkingUncovered: UncoveredArea[] = rows.parking_uncovered.map(a => ({
-    id: a.id,
-    org_id: a.org_id,
-    parking_id: a.parking_id,
-    reason: a.reason,
-    ...(a.geometry === null || a.geometry === undefined
-      ? {}
-      : { geometry: a.geometry as Polygon }),
-  }));
-
-  const vehicleGates: VehicleGate[] = rows.vehicle_gates.map(g => ({
-    id: g.id,
-    org_id: g.org_id,
-    level_id: g.level_id,
-    code: g.code,
-    role: g.role,
-    width_m: num(g.width_m),
-    position: g.position as Point,
-    provenance: { status: toObjectStatus(g.status), source: g.source },
+  // A5.2, version 18 — les zones du socle. Elles n'étaient pas assemblées : une
+  // zone ne portait qu'un nom et une nature, et aucun moteur ne les lisait.
+  // `footprint_ids` et la section S8 changent cela — un parking **est** une
+  // zone, et les contrôles du domaine `PARK` n'ont plus d'autre source.
+  const zones: SiteZone[] = rows.zones.map(z => ({
+    id: z.id,
+    org_id: z.org_id,
+    level_id: z.level_id,
+    name: z.name,
+    kind: toZoneKind(z.kind),
+    footprint_ids: asStringArray(z.footprint_ids) ?? [],
   }));
 
   return {
@@ -347,9 +299,10 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     content_blocks: rows.content_blocks.map(mapContentBlockRow),
     support_versions: rows.support_versions.map(mapSupportVersionRow),
     face_templates: [],
-    parkings,
-    parking_spaces: parkingSpaces,
-    parking_uncovered: parkingUncovered,
-    vehicle_gates: vehicleGates,
+    zones,
+    // A5.3 — l'extension des empreintes de place. Vide tant que la table n'a
+    // pas pris sa nouvelle forme : sa migration est séparée, et lire une
+    // colonne qui n'existe pas encore ferait échouer le chargement.
+    parking_spaces: [],
   };
 }

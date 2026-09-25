@@ -47,23 +47,45 @@ function zone(id: string, kind: SiteZone['kind'], footprintIds: readonly string[
   };
 }
 
+/**
+ * Le site de référence sans son stationnement.
+ *
+ * `refMultilevel` porte désormais un parking conforme — une zone et quatre
+ * places. Chaque cas ci-dessous pose le sien, et repart donc d'un site qui n'en
+ * porte aucun : sans cela, les places de référence s'ajouteraient à chaque
+ * compte et aucune attente ne se lirait plus.
+ */
+const SANS_STATIONNEMENT: SiteData = {
+  ...refMultilevel,
+  footprints: refMultilevel.footprints.filter(f => f.kind !== 'parking_space'),
+  zones: [],
+};
+
 function site(
   places: readonly Footprint[],
   zones: readonly SiteZone[] | undefined,
 ): SiteData {
   return {
-    ...refMultilevel,
-    footprints: [...refMultilevel.footprints, ...places],
+    ...SANS_STATIONNEMENT,
+    footprints: [...SANS_STATIONNEMENT.footprints, ...places],
     ...(zones === undefined ? {} : { zones }),
   };
 }
 
 describe('DATA.PARKING_SPACE_WITHOUT_ZONE — S8, règle S-35', () => {
-  it('ne signale rien sur les sites de référence, qui n’ont aucune place', () => {
+  it('ne signale rien sur un site sans aucune place', () => {
     // Le contrôle naît sans rien à dire ; sans cette vérification, une panne
     // aurait l'air d'une vertu.
-    const report = auditParkingZones(refMultilevel);
+    const report = auditParkingZones(SANS_STATIONNEMENT);
     expect(report.space_count).toBe(0);
+    expect(report.findings).toEqual([]);
+  });
+
+  it('ne signale rien non plus sur le site de référence, qui en porte', () => {
+    // `refMultilevel` déclare quatre places et la zone qui les revendique :
+    // un site de référence reste un site valide.
+    const report = auditParkingZones(refMultilevel);
+    expect(report.space_count).toBe(4);
     expect(report.findings).toEqual([]);
   });
 
@@ -154,9 +176,16 @@ describe('DATA.PARKING_SPACE_WITHOUT_ZONE — S8, règle S-35', () => {
   });
 
   it('ne se nomme pas exercé sur un site sans aucune place', () => {
-    const r = runChecks(refMultilevel, {});
+    const r = runChecks(SANS_STATIONNEMENT, {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.checks_run).not.toContain('parking_space_zone');
+  });
+
+  it('se nomme exercé dès qu’une place est tracée', () => {
+    const r = runChecks(refMultilevel, {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.checks_run).toContain('parking_space_zone');
   });
 });

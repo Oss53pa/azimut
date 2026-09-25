@@ -10,7 +10,26 @@
 import { describe, it, expect } from 'vitest';
 import { runChecks } from '../run-checks.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
-import type { CharterRule } from '@azimut/core-model';
+import type { CharterRule, SiteFact } from '@azimut/core-model';
+import { PARKING_CAPACITY_KEY } from '@azimut/core-model';
+
+/**
+ * La capacité annoncée du parking de `refMultilevel` — A5.11, S-36.
+ *
+ * Un fait du site, donc porté par le vocabulaire et non par `SiteData` : c'est
+ * l'appelant de `runChecks` qui le fournit. Quatre places, quatre annoncées.
+ */
+function capacite(value: number): SiteFact {
+  return {
+    key: PARKING_CAPACITY_KEY,
+    value,
+    status: 'existing',
+    source_ref: 'Plan RDC indice 20',
+    declared_at: '2026-01-05',
+    target: { kind: 'zone', id: 'zone-ml-parking-ouest' },
+    forbidden: [],
+  };
+}
 
 describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
   const terms = [{ lang: 'fr', term: 'client', severity: 'forbidden' as const }];
@@ -104,6 +123,17 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
   });
 
   it('exerce le contrôle sur le site qui en porte un', () => {
+    const r = runChecks(refMultilevel, { facts: [capacite(4)] });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.value.checks_run).toContain('parking_coverage');
+    expect(r.value.findings.filter(f => f.code.startsWith('PARK.'))).toEqual([]);
+  });
+
+  it('l’exerce même sans capacité annoncée, et ne trouve alors rien à dire', () => {
+    // Le contrôle porte sur les zones, pas sur les faits : il tourne dès qu'un
+    // parking est déclaré. Sans capacité annoncée, il n'a simplement rien à
+    // comparer — c'est un contrôle exercé et muet, pas un contrôle absent.
     const r = runChecks(refMultilevel);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -112,11 +142,7 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
   });
 
   it('remonte l’écart de capacité dans le rapport commun', () => {
-    const ampute = {
-      ...refMultilevel,
-      parking_spaces: refMultilevel.parking_spaces.slice(0, 2),
-    };
-    const r = runChecks(ampute);
+    const r = runChecks(refMultilevel, { facts: [capacite(6)] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     const park = r.value.findings.find(f => f.code === 'PARK.CAPACITY_UNEXPLAINED');
@@ -125,17 +151,14 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
 });
 
 describe('mode de contrôle : atelier ou livrable', () => {
-  const site = {
-    ...refMultilevel,
-    parking_spaces: refMultilevel.parking_spaces.map((s, i) =>
-      i === 0
-        ? { ...s, provenance: { status: 'proposition' as const, source: 'Détection' } }
-        : s,
-    ),
-  };
+  // A5.11 — le statut porte sur le fait, non sur l'objet : `zone` et
+  // `footprint` n'en déclarent aucun. Une capacité annoncée mais non arrêtée
+  // est une proposition, et c'est elle qu'un livrable ne peut pas montrer.
+  const site = refMultilevel;
+  const proposee: SiteFact = { ...capacite(4), status: 'proposal' };
 
   it('tolère une proposition à l’atelier', () => {
-    const r = runChecks(site);
+    const r = runChecks(site, { facts: [proposee] });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.findings.map(f => f.code)).not.toContain('PARK.PROPOSAL_AS_EXISTING');
@@ -144,7 +167,7 @@ describe('mode de contrôle : atelier ou livrable', () => {
   });
 
   it('refuse la même proposition au livrable (règle M01.S11)', () => {
-    const r = runChecks(site, {}, { mode: 'livrable' });
+    const r = runChecks(site, { facts: [proposee] }, { mode: 'livrable' });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.findings.map(f => f.code)).toContain('PARK.PROPOSAL_AS_EXISTING');

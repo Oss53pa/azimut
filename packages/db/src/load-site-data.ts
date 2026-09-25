@@ -5,7 +5,7 @@ import type { SiteData } from '@azimut/core-model';
 import { organization } from './schema/org.js';
 import {
   site, building, level, footprint, volume, planSource, planCalibration,
-  parking, parkingSpace, parkingUncoveredArea, vehicleGate,
+  zone,
 } from './schema/site.js';
 import { node, edge, verticalLink, buildingLink } from './schema/graph.js';
 import {
@@ -115,26 +115,12 @@ export async function loadSiteData(
     ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
     : [];
 
-  // Stationnement. Les places et les zones non
-  // couvertes pendent aux parkings : sans parking, aucune requête.
-  const [parkingRows, gateRows] = await Promise.all([
-    levelIds.length > 0
-      ? db.select().from(parking).where(inArray(parking.level_id, levelIds))
-      : Promise.resolve([]),
-    levelIds.length > 0
-      ? db.select().from(vehicleGate).where(inArray(vehicleGate.level_id, levelIds))
-      : Promise.resolve([]),
-  ]);
-  const parkingIds = parkingRows.map((p) => p.id);
-
-  const [parkingSpaceRows, uncoveredRows] = await Promise.all([
-    parkingIds.length > 0
-      ? db.select().from(parkingSpace).where(inArray(parkingSpace.parking_id, parkingIds))
-      : Promise.resolve([]),
-    parkingIds.length > 0
-      ? db.select().from(parkingUncoveredArea).where(inArray(parkingUncoveredArea.parking_id, parkingIds))
-      : Promise.resolve([]),
-  ]);
+  // A5.2 — les zones du socle. Elles pendent au niveau, comme les empreintes
+  // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et c'est
+  // par ici que les contrôles du domaine `PARK` le voient désormais.
+  const zoneRows = levelIds.length > 0
+    ? await db.select().from(zone).where(inArray(zone.level_id, levelIds))
+    : [];
 
   return assembleSiteData({
     organization: orgRow,
@@ -159,9 +145,6 @@ export async function loadSiteData(
     support_faces: faceRows,
     content_blocks: blockRows,
     support_versions: versionRows,
-    parkings: parkingRows,
-    parking_spaces: parkingSpaceRows,
-    parking_uncovered: uncoveredRows,
-    vehicle_gates: gateRows,
+    zones: zoneRows,
   });
 }

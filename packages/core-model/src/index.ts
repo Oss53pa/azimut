@@ -87,11 +87,8 @@ export {
 } from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
-export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
-export type {
-  ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
-} from './parking.js';
-export type { VehicleGate } from './site.js';
+export { PARKING_SPACE_KINDS, isParkingSpaceKind } from './parking.js';
+export type { ParkingSpace, ParkingSpaceKind } from './parking.js';
 export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
 export type {
   TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,

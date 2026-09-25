@@ -1,5 +1,5 @@
+import type { ParkingSpace } from './parking.js';
 import type { Polygon, Point } from './geometry.js';
-import type { Parking, ParkingSpace, UncoveredArea, Provenance } from './parking.js';
 import type { PlanSource, PlanCalibration } from './plan.js';
 import type { ActiveLang } from './lang.js';
 import type { OpeningHours } from './opening-hours.js';
@@ -451,19 +451,6 @@ export type SiteGraph = {
   readonly building_links: readonly BuildingLink[];
 };
 
-/** Un portail ou un accès véhicule. Objet hors d'A5 : voir l'en-tête de `parking.ts`. */
-export type VehicleGate = {
-  readonly id: string;
-  readonly org_id: string;
-  readonly level_id: string;
-  /** Code du plan source : V1 à V5 sur Cosmos Angré. */
-  readonly code: string;
-  readonly role: string;
-  readonly width_m: number;
-  readonly position: Point;
-  readonly provenance: Provenance;
-};
-
 export type SiteData = {
   readonly organization: Organization;
   readonly site: Site;
@@ -505,17 +492,13 @@ export type SiteData = {
   readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
   /**
-   * Le stationnement fait partie de la géométrie du site, au même titre que
-   * les empreintes : un parking se dessine sur un plan et se compte. Il entre
-   * donc ici, et non dans un registre à part comme le vocabulaire, qui lui
-   * n'est pas de la géométrie.
+   * A5.3 — ce que les empreintes de place portent en plus, quand elles le
+   * portent. Une ligne par empreinte, au plus ; une empreinte sans extension
+   * reste une place standard sans repère de travée.
    *
-   * A5.11 porte les **faits** du stationnement — « capacité annoncée d'un
-   * parking » y est l'exemple même d'un fait du site. Elle ne porte pas les
-   * objets, et c'est l'écart déclaré dans `parking.ts`.
+   * Le stationnement n'a plus d'autre entrée ici. Les parkings sont des zones,
+   * les places des empreintes, et les capacités annoncées des faits d'A5.11 —
+   * section S8, règles S-35 à S-37.
    */
-  readonly parkings: readonly Parking[];
   readonly parking_spaces: readonly ParkingSpace[];
-  readonly parking_uncovered: readonly UncoveredArea[];
-  readonly vehicle_gates: readonly VehicleGate[];
 };

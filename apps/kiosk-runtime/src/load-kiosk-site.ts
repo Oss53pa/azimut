@@ -173,9 +173,6 @@ export function loadKioskSite(
     // Le paquet de borne ne porte pas le stationnement : une borne montre un
     // itinéraire, elle ne compte pas les places. Le jour où un plan de borne en
     // aura besoin, c'est le paquet qu'il faudra étendre, pas ce défaut.
-    parkings: [],
     parking_spaces: [],
-    parking_uncovered: [],
-    vehicle_gates: [],
   };
 }
