@@ -49,7 +49,7 @@ export const PRODUCTION_FR = {
   'worksite.note': "Un support ne bascule en « posé » qu'une fois ses réserves levées — ce qui donne à la couche de divergence une origine connue.",
 
   'operations.eyebrow': 'Module 08 · H7',
-  'operations.title': 'Exploitation',
+  'operations.title': 'Maintenance',
   'operations.subtitle': 'Operations',
   'operations.metric.tracked': 'Supports suivis',
   'operations.metric.rounds': 'Tournées',
@@ -139,7 +139,7 @@ export const PRODUCTION_EN: Readonly<Record<keyof typeof PRODUCTION_FR, string>>
   'worksite.note': 'A support only flips to "installed" once its reserves are lifted — which gives the divergence layer a known origin.',
 
   'operations.eyebrow': 'Module 08 · H7',
-  'operations.title': 'Operations',
+  'operations.title': 'Maintenance',
   'operations.subtitle': 'Exploitation',
   'operations.metric.tracked': 'Supports tracked',
   'operations.metric.rounds': 'Rounds',

@@ -49,6 +49,9 @@ export type ViewId =
   | 'worksite-reserves'
   // 08 — Maintenance
   | 'operations'
+  | 'ops-rounds'
+  | 'ops-incidents'
+  | 'ops-divergences'
   // 09 — Budget
   | 'budget'
   // 10 — Portefeuille

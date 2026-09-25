@@ -198,7 +198,11 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
     nameKey: 'module.08.name',
     summaryKey: 'module.08.summary',
     entry: 'operations',
-    screens: [],
+    screens: [
+      { view: 'ops-rounds', labelKey: 'nav.item.opsrounds' },
+      { view: 'ops-incidents', labelKey: 'nav.item.opsincidents' },
+      { view: 'ops-divergences', labelKey: 'nav.item.opsdivergences' },
+    ],
     // Partiel, comme le tableau de la partie H le dit déjà. `reconcile` produit
     // trois des six types de divergence de A5.7 et un quatrième sous un autre
     // nom ; `outdated_content` et `damaged` manquent. Une ligne de

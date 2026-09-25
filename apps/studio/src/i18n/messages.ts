@@ -33,6 +33,7 @@ import { SIGNAGE_REGISTER_FR, SIGNAGE_REGISTER_EN } from './messages/signage-reg
 import { COMMERCE_REGISTER_FR, COMMERCE_REGISTER_EN } from './messages/commerce-register.js';
 import { TENANT_REGISTER_FR, TENANT_REGISTER_EN } from './messages/tenant-register.js';
 import { PRODUCTION_REGISTER_FR, PRODUCTION_REGISTER_EN } from './messages/production-register.js';
+import { OPERATIONS_REGISTER_FR, OPERATIONS_REGISTER_EN } from './messages/operations-register.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -57,6 +58,7 @@ export const MESSAGES_FR = {
   ...COMMERCE_REGISTER_FR,
   ...TENANT_REGISTER_FR,
   ...PRODUCTION_REGISTER_FR,
+  ...OPERATIONS_REGISTER_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -84,6 +86,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...COMMERCE_REGISTER_EN,
   ...TENANT_REGISTER_EN,
   ...PRODUCTION_REGISTER_EN,
+  ...OPERATIONS_REGISTER_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {
