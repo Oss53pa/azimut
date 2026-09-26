@@ -1257,3 +1257,120 @@ point, sur les flottants, s'en trouve détaché. Son contenu reste appliqué.
   commencée.
 - L'écran d'évacuation (P10).
 - `lineFingerprint`, hors des empreintes.
+
+## Portée du déterminisme, fond de plan jugé sur son contenu, configurations, ce que la version 28 ferme
+
+| Ce que la version 28 pose | Où | État |
+| --- | --- | --- |
+| A9 — portée : tout code qui produit une sortie ou une empreinte | Essai `a9-comparaison-localisee`, relevé étendu | Contrôle étendu ; tâche redéclarée ci-dessous |
+| M2 — le format se juge sur le contenu ; un contenu hors des formats acceptés est refusé | `acceptPlanFile`, `inspectPlanContent` (studio) | Fait |
+| M2 — le nombre de pages d'un PDF se lit, `IMPORT.PAGE_REQUIRED` se lève | `pdf-pages.ts` ; champ « Page » de l'écran M2 | Fait |
+| A5.2 — `plan_source.content_kind` | Migration `0059_a5_2_plan_source_content_kind` ; écriture à l'import | Fait |
+| Cinq fichiers de configuration sous contrôle de types | `tsconfig.config.json` (racine, studio, db) ; essai `typecheck-couverture` | Fait |
+| A9 — liste des sources d'indéterminisme rétablie | Document | Rien à faire dans le code |
+
+Les quatre premiers points ouverts après la version 27 sont fermés : le format
+jugé sur l'extension, le nombre de pages jamais lu, les fichiers de
+configuration hors contrôle, le défaut de mise en page d'A9.
+
+**Le fond de plan.** Le format se lit dans les premiers octets : PDF, PNG,
+JPEG, DXF texte ou binaire. Le nom et le type annoncé n'entrent plus nulle
+part, et le type de média enregistré est celui du format reconnu. Un contenu
+qui n'est aucun de ces formats est refusé par `IMPORT.FORMAT_UNSUPPORTED`,
+un DWG compris, quel que soit son nom. Un fichier qui ne se lit pas du tout
+n'est reconnu comme aucun format : il est refusé de même.
+
+Un format reconnu sans tracés reste accepté, avec
+`IMPORT.RASTER_PRECISION_LIMITED`. Le cas indéterminé aussi : un flux PDF
+que le produit ne sait pas décoder, ou un DXF binaire.
+
+**La nature du contenu.** `plan_source.content_kind` reçoit l'une de trois
+valeurs :
+
+| Ce que le contenu montre | `content_kind` |
+| --- | --- |
+| Au moins un tracé lu | `vector` |
+| Aucun tracé lu : image, PDF numérisé, DXF sans entité géométrique | `raster` |
+| Un flux qui ne se décode pas, sans tracé lu ailleurs | `undetermined` |
+
+La migration 0059 porte la colonne, obligatoire, avec sa contrainte et sans
+valeur par défaut. Une ligne antérieure reçoit `undetermined` ; la base de
+développement n'en comptait aucune. Une valeur inconnue relue est
+`undetermined`, jamais présumée vectorielle.
+
+**Le nombre de pages.** Il se lit dans l'arbre des pages : le catalogue que
+désigne le dernier `/Root`, son nœud `/Pages`, et le `/Count` de ce nœud.
+Les objets se lisent en clair ou dans les flux d'objets, la dernière
+révision l'emportant. À défaut d'arbre lisible, le compte retombe sur les
+objets `/Page`. Si rien ne se lit, le nombre de pages est inconnu : le
+document est traité comme d'une seule page. Un PDF de plusieurs pages lève
+`IMPORT.PAGE_REQUIRED` jusqu'au choix de sa page, dans le champ « Page » que
+l'écran affiche alors.
+
+**Les fichiers de configuration.** Trois projets de configuration, chacun
+ajouté au script `typecheck` de son paquet. Le contrôle a relevé tout de
+suite un défaut réel, corrigé dans un commit séparé : dans
+`playwright.config.ts`, la fenêtre de 1366 × 768 était écrasée par celle du
+poste type. Toute la suite de bout en bout tournait donc en 1280 × 720, sous
+la largeur minimale de F12. Elle passe à 1366 × 768 (133 essais).
+
+`packages/db` déclare `@types/node`, déjà déclaré par trois paquets dans la
+même version : aucun paquet nouveau n'entre au verrou.
+
+### Tâche déclarée : remplacement des comparaisons localisées, version 28
+
+Elle remplace la déclaration de la version 27.
+
+**Objet.** A9 : « Comparer deux chaînes [...] se fait par leurs points de
+code, jamais par une comparaison sensible à la langue », là où la section
+s'applique : « tout code qui produit une sortie ou une empreinte ».
+
+**Portée.** Les 155 occurrences relevées dans
+`tests/a9-releve-comparaisons-localisees.json`, dans 66 fichiers :
+
+| Où | Occurrences |
+| --- | --- |
+| `engine-graph` | 100 |
+| `engine-layout` | 16 |
+| `engine-package` | 5 |
+| `engine-iso` | 3 |
+| `core-model` | 21, dont une mention en commentaire |
+| Compilateur | 7, dont 2 dans ses essais |
+| Exécution de borne | 2 |
+| Studio, code qui alimente une empreinte | 1 (`schedule-model.ts`) |
+
+Chacune passe à `codePointCompare`. Le périmètre contrôlé couvre aussi les
+paquets qui n'en portent aucune (règles, trousse d'essai, base, jetons), pour
+qu'ils n'en gagnent pas. Dans le studio, un fichier alimente une empreinte
+s'il en importe un point d'entrée ; chacun de ces points ordonne lui-même ses
+ensembles par points de code.
+
+**Échéance.** Avant le premier livrable réel.
+
+**Vérification.** Le relevé tombe à zéro et disparaît. Chaîne A13.2
+complète : `test:visual` et `test:determinism` diront si l'ordre d'une sortie
+a changé.
+
+**État.** Non commencée. Le contrôle automatique empêche le relevé de
+croître.
+
+### Reste ouvert après la version 28
+
+**Tris d'affichage du studio sans langue déclarée.** Hors du code qui
+alimente une empreinte, le studio porte 58 appels à `localeCompare`. Aucun
+ne déclare la langue : tous la déduisent de la machine. A9 admet le tri par
+langue dans l'interface « à condition que la langue soit déclarée
+explicitement ». Ils sont hors du périmètre de la tâche ; relevé, non
+tranché.
+
+**Précision d'un PDF de plusieurs pages.** Elle se juge sur le fichier
+entier, et non sur la page retenue. Un PDF dont une page est vectorielle et
+une autre numérisée passe pour vectoriel, quelle que soit la page choisie.
+
+**Toujours au registre.**
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
+- `lineFingerprint`, hors des empreintes.
