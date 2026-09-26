@@ -15,7 +15,7 @@
  * restent donc ici, nommées, et non dans un paquet de règles (INV-5).
  */
 import type { Finding, Outcome, PlanContentKind } from '@azimut/core-model';
-import { contentKindOf, planPrecisionWarnings } from './plan-content.js';
+import { contentKindOf, planPrecisionWarnings, precisionOfPage } from './plan-content.js';
 import type { PlanInspection } from './plan-content.js';
 
 /** M2 (partie M) : « 60 Mo maximum ». */
@@ -63,7 +63,8 @@ export type AcceptedPlan = {
  * découvrir les défauts un par un ferait reprendre le dépôt autant de fois.
  *
  * Un fond accepté porte, en avertissement, `IMPORT.RASTER_PRECISION_LIMITED`
- * quand son contenu n'a pas de tracé lisible.
+ * quand son contenu n'a pas de tracé lisible. Version 29 : c'est la page
+ * retenue qui en décide, et non le fichier entier.
  */
 export function acceptPlanFile(file: PlanFile, inspection: PlanInspection): Outcome<AcceptedPlan> {
   const findings: Finding[] = [];
@@ -87,16 +88,18 @@ export function acceptPlanFile(file: PlanFile, inspection: PlanInspection): Outc
     return { ok: false, findings };
   }
 
+  const page = file.page ?? 1;
+  const precision = precisionOfPage(inspection, page);
   return {
     ok: true,
     value: {
       format: inspection.format,
       mediaType: mediaTypeOf(inspection.format),
       byteSize: file.byteSize,
-      page: file.page ?? 1,
-      contentKind: contentKindOf(inspection.precision),
+      page,
+      contentKind: contentKindOf(precision),
     },
-    warnings: [...planPrecisionWarnings(inspection.precision, file.name)],
+    warnings: [...planPrecisionWarnings(precision, file.name)],
   };
 }
 
@@ -122,7 +125,7 @@ function mediaTypeOf(format: PlanFormatKey): string {
  * contenu qui ne correspond à aucun format accepté est refusé.
  */
 export function unreadablePlanInspection(): PlanInspection {
-  return { format: null, precision: 'undetermined', pageCount: null };
+  return { format: null, pageCount: null, pages: [] };
 }
 
 function finding(code: string, params: Record<string, string | number>): Finding {

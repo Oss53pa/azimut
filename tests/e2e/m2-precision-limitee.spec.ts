@@ -12,6 +12,9 @@ import type { Page } from '@playwright/test';
  *
  * Version 28 : le format aussi se juge sur le contenu, et le nombre de pages
  * d'un PDF se lit : un PDF de plusieurs pages demande la sienne.
+ *
+ * Version 29 : la nature se juge sur la page retenue. Les PDF d'essai portent
+ * donc un arbre de pages, que le lecteur suit depuis le catalogue.
  */
 
 const PLAN = '/sites/site-essai/levels/niveau-essai/plan';
@@ -21,23 +24,34 @@ async function drop(page: Page, name: string, mimeType: string, buffer: Buffer):
   await page.getByLabel(/Fichier du fond de plan|Base plan file/).setInputFiles({ name, mimeType, buffer });
 }
 
-const PDF_WITH_PATH = Buffer.from(
-  '%PDF-1.4\n1 0 obj\n<< /Length 15 >>\nstream\n0 0 m 100 0 l S\nendstream\nendobj\n%%EOF\n',
-  'latin1',
+/** Un PDF dont les objets sont écrits dans l'ordre, numérotés à partir de 1. */
+function pdf(...objects: readonly string[]): Buffer {
+  const body = objects.map((object, i) => `${i + 1} 0 obj\n${object}\nendobj\n`).join('');
+  return Buffer.from(`%PDF-1.7\n${body}trailer\n<< /Root 1 0 R >>\n%%EOF\n`, 'latin1');
+}
+
+const CATALOG = '<< /Type /Catalog /Pages 2 0 R >>';
+const TRACE = '<< /Length 15 >>\nstream\n0 0 m 100 0 l S\nendstream';
+const PDF_WITH_PATH = pdf(CATALOG, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>', '<< /Type /Page /Parent 2 0 R /Contents 4 0 R >>', TRACE);
+const PDF_WITHOUT_PATH = pdf(CATALOG, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>', '<< /Type /Page /Parent 2 0 R >>');
+/** Deux pages : la première porte un tracé, la seconde n'en porte aucun. */
+const PDF_TRACE_ON_FIRST_PAGE = pdf(
+  CATALOG,
+  '<< /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >>',
+  '<< /Type /Page /Parent 2 0 R /Contents 5 0 R >>',
+  '<< /Type /Page /Parent 2 0 R >>',
+  TRACE,
 );
-const PDF_WITHOUT_PATH = Buffer.from('%PDF-1.4 fond de plan d’essai');
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13]);
 /** L'en-tête d'un DWG : aucun des formats que M2 (partie M) accepte. */
 const DWG = Buffer.from('AC1032\0\0\0\0\0', 'latin1');
-const PDF_THREE_PAGES = Buffer.from([
-  '%PDF-1.7',
-  '1 0 obj', '<< /Type /Catalog /Pages 2 0 R >>', 'endobj',
-  '2 0 obj', '<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 >>', 'endobj',
-  '3 0 obj', '<< /Type /Page /Parent 2 0 R >>', 'endobj',
-  '4 0 obj', '<< /Type /Page /Parent 2 0 R >>', 'endobj',
-  '5 0 obj', '<< /Type /Page /Parent 2 0 R >>', 'endobj',
-  'trailer', '<< /Root 1 0 R >>', '%%EOF', '',
-].join('\n'), 'latin1');
+const PDF_THREE_PAGES = pdf(
+  CATALOG,
+  '<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 >>',
+  '<< /Type /Page /Parent 2 0 R >>',
+  '<< /Type /Page /Parent 2 0 R >>',
+  '<< /Type /Page /Parent 2 0 R >>',
+);
 
 test.describe('M2 (partie M) — précision limitée, jugée sur le contenu', () => {
   test('un PDF sans tracé lève l’avertissement, sans bloquer le calage', async ({ page }) => {
@@ -86,5 +100,17 @@ test.describe('M2 (partie M) — précision limitée, jugée sur le contenu', ()
     await expect(page.getByRole('button', { name: /Valider le calage|Validate calibration/ })).toBeDisabled();
     await field.fill('2');
     await expect(page.getByRole('button', { name: /Valider le calage|Validate calibration/ })).toBeEnabled();
+  });
+
+  test('la nature se juge sur la page retenue, non sur le fichier entier', async ({ page }) => {
+    await page.goto(PLAN);
+    await drop(page, 'niveau-0.pdf', 'application/pdf', PDF_TRACE_ON_FIRST_PAGE);
+    const field = page.getByLabel(/Page du fond de plan|Base plan page/);
+    await field.fill('2');
+    await expect(page.getByText(WARNING)).toBeVisible();
+    await field.fill('1');
+    await expect(page.getByText(WARNING)).toHaveCount(0);
+    await field.fill('2');
+    await expect(page.getByText(WARNING)).toBeVisible();
   });
 });

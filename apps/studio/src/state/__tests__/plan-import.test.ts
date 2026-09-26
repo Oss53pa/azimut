@@ -5,13 +5,14 @@ import {
 import type { PlanFile } from '../plan-import.js';
 import { inspectPlanContent } from '../plan-content.js';
 import type { PlanInspection } from '../plan-content.js';
+import { latin1, onePagePdf, plain } from './pdf-fixtures.js';
 
 function file(over: Partial<PlanFile> = {}): PlanFile {
   return { name: 'niveau-0.pdf', byteSize: 1024, page: null, ...over };
 }
 
 function inspection(over: Partial<PlanInspection> = {}): PlanInspection {
-  return { format: 'pdf', precision: 'vector', pageCount: 1, ...over };
+  return { format: 'pdf', pageCount: 1, pages: ['vector'], ...over };
 }
 
 function codes(over: Partial<PlanFile> = {}, seen: Partial<PlanInspection> = {}): string[] {
@@ -19,14 +20,12 @@ function codes(over: Partial<PlanFile> = {}, seen: Partial<PlanInspection> = {})
   return r.ok ? [] : r.findings.map(f => f.code);
 }
 
-const latin1 = (text: string): Uint8Array => Uint8Array.from(text, ch => ch.charCodeAt(0));
-
 /** Juge un fichier sur ses octets, comme l'écran le fait. */
 async function judgeBytes(name: string, bytes: Uint8Array) {
   return acceptPlanFile(file({ name, byteSize: bytes.length }), await inspectPlanContent(bytes));
 }
 
-const VECTOR_PDF = latin1('%PDF-1.4\n1 0 obj\n<< /Length 15 >>\nstream\n0 0 m 100 0 l S\nendstream\nendobj\n%%EOF\n');
+const VECTOR_PDF = onePagePdf([plain('0 0 m 100 0 l S')]);
 const PNG = Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13]);
 const JPEG = Uint8Array.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]);
 const DXF = latin1(['0', 'SECTION', '2', 'ENTITIES', '0', 'LINE', '8', 'c', '0', 'ENDSEC', '0', 'EOF'].join('\n'));
@@ -83,14 +82,14 @@ describe('M2 (partie M) — import du fond de plan', () => {
 
   describe('nature du contenu (A5.2)', () => {
     it('un fond vectoriel est enregistré vectoriel, sans avertissement', () => {
-      const r = acceptPlanFile(file(), inspection({ precision: 'vector' }));
+      const r = acceptPlanFile(file(), inspection({ pages: ['vector'] }));
       expect(r.ok).toBe(true);
       if (r.ok) expect([r.value.contentKind, r.warnings]).toEqual(['vector', []]);
     });
 
     it('un fond sans tracé est accepté, enregistré sans contenu vectoriel, et averti', () => {
       for (const precision of ['raster', 'pdf_without_paths', 'dxf_without_geometry'] as const) {
-        const r = acceptPlanFile(file(), inspection({ precision }));
+        const r = acceptPlanFile(file(), inspection({ pages: [precision] }));
         expect(r.ok, precision).toBe(true);
         if (!r.ok) continue;
         expect(r.value.contentKind).toBe('raster');
@@ -99,11 +98,31 @@ describe('M2 (partie M) — import du fond de plan', () => {
     });
 
     it('le cas indéterminé est accepté, jamais présumé vectoriel', () => {
-      const r = acceptPlanFile(file(), inspection({ precision: 'undetermined' }));
+      const r = acceptPlanFile(file(), inspection({ pages: ['undetermined'] }));
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       expect(r.value.contentKind).toBe('undetermined');
       expect(r.warnings.map(w => w.params['content'])).toEqual(['undetermined']);
+    });
+
+    /**
+     * Version 29 — « la nature se juge sur la page retenue » : les tracés
+     * d'une autre page ne masquent pas leur absence sur celle-ci.
+     */
+    it('la nature est celle de la page retenue', () => {
+      const seen = inspection({ pageCount: 2, pages: ['vector', 'pdf_without_paths'] });
+      const second = acceptPlanFile(file({ page: 2 }), seen);
+      const first = acceptPlanFile(file({ page: 1 }), seen);
+      expect(second.ok && [second.value.contentKind, second.warnings.map(w => w.params['content'])])
+        .toEqual(['raster', ['pdf_without_paths']]);
+      expect(first.ok && [first.value.contentKind, first.warnings]).toEqual(['vector', []]);
+    });
+
+    it('une page que le suivi n’a pas atteinte est indéterminée, jamais vectorielle', () => {
+      const r = acceptPlanFile(file({ page: 3 }), inspection({ pageCount: 3, pages: ['vector', 'vector'] }));
+      expect(r.ok && r.value.contentKind).toBe('undetermined');
+      const unwalked = acceptPlanFile(file(), inspection({ pageCount: 1, pages: [] }));
+      expect(unwalked.ok && unwalked.value.contentKind).toBe('undetermined');
     });
   });
 

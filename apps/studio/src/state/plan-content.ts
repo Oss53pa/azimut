@@ -1,6 +1,6 @@
 import type { Finding, PlanContentKind } from '@azimut/core-model';
-import { countPdfPaintedPaths } from '../domain/pdf-painted-paths.js';
-import { countPdfPages } from '../domain/pdf-pages.js';
+import { readPdfPages } from '../domain/pdf-page-nature.js';
+import type { PdfPageNature } from '../domain/pdf-page-nature.js';
 import { countDxfGeometry, looksLikeTextDxf } from '../domain/dxf-geometry.js';
 import type { PlanFormatKey } from './plan-import.js';
 
@@ -19,6 +19,9 @@ import type { PlanFormatKey } from './plan-import.js';
  * reconnu dont un flux ne se décode pas n'est pas présumé vectoriel :
  * l'avertissement est levé et dit pourquoi. Un contenu qui n'est aucun des
  * formats acceptés est refusé par `acceptPlanFile` (version 28).
+ *
+ * Version 29 : un PDF se juge page par page, en suivant les objets de chacune
+ * (`pdf-page-nature.ts`), et l'import retient la nature de la page choisie.
  */
 
 export type PlanPrecision =
@@ -26,21 +29,33 @@ export type PlanPrecision =
   | 'vector'
   /** Image en mode point, PNG ou JPEG. */
   | 'raster'
-  /** PDF lu en entier, sans aucun tracé peint. */
+  /** Page de PDF suivie en entier, sans aucun tracé peint. */
   | 'pdf_without_paths'
   /** DXF lu en entier, sans aucune entité géométrique. */
   | 'dxf_without_geometry'
-  /** Format reconnu, mais flux que le produit ne sait pas décoder. */
+  /** Format reconnu, mais contenu que le suivi n'a pas pu lire jusqu'au bout. */
   | 'undetermined';
 
 /** Ce que le contenu d'un fichier dit de lui, lu dans ses octets. */
 export type PlanInspection = {
   /** Le format lu dans le contenu ; `null` s'il n'est aucun des formats acceptés. */
   readonly format: PlanFormatKey | null;
-  readonly precision: PlanPrecision;
   /** Le nombre de pages d'un PDF ; `null` pour un autre format, ou s'il ne se lit pas. */
   readonly pageCount: number | null;
+  /**
+   * La nature de chaque page, dans l'ordre du document : une seule pour une
+   * image ou un DXF. Vide quand l'arbre des pages d'un PDF ne se suit pas.
+   */
+  readonly pages: readonly PlanPrecision[];
 };
+
+/**
+ * La nature de la page retenue. Une page que le suivi n'a pas atteinte est
+ * indéterminée, jamais vectorielle (version 29).
+ */
+export function precisionOfPage(inspection: PlanInspection, page: number): PlanPrecision {
+  return inspection.pages[page - 1] ?? 'undetermined';
+}
 
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] as const;
 const JPEG_SIGNATURE = [0xff, 0xd8, 0xff] as const;
@@ -70,20 +85,24 @@ export async function inspectPlanContent(bytes: Uint8Array): Promise<PlanInspect
   switch (format) {
     case 'png':
     case 'jpg':
-      return { format, precision: 'raster', pageCount: null };
+      return { format, pageCount: null, pages: ['raster'] };
     case 'pdf': {
-      const paths = await countPdfPaintedPaths(bytes);
-      const precision = paths.painted > 0 ? 'vector' : paths.undecodable > 0 ? 'undetermined' : 'pdf_without_paths';
-      return { format, precision, pageCount: await countPdfPages(bytes) };
+      const reading = await readPdfPages(bytes);
+      return { format, pageCount: reading.pageCount, pages: (reading.pages ?? []).map(pdfPagePrecision) };
     }
     case 'dxf': {
       const geometry = countDxfGeometry(bytes);
       const precision = geometry.binary ? 'undetermined' : geometry.geometric > 0 ? 'vector' : 'dxf_without_geometry';
-      return { format, precision, pageCount: null };
+      return { format, pageCount: null, pages: [precision] };
     }
     case null:
-      return { format, precision: 'undetermined', pageCount: null };
+      return { format, pageCount: null, pages: [] };
   }
+}
+
+/** Un tracé lu conclut ; sans tracé, un objet non lu laisse la page indéterminée. */
+function pdfPagePrecision(page: PdfPageNature): PlanPrecision {
+  return page.painted > 0 ? 'vector' : page.unresolved > 0 ? 'undetermined' : 'pdf_without_paths';
 }
 
 /**

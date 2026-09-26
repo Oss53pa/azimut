@@ -1,72 +1,73 @@
-import { decodePdfStream, listPdfStreams, pdfText } from './pdf-streams.js';
-import type { PdfStream } from './pdf-streams.js';
+import { dictionaryOfObject, readPdfDocument, resolveDictionary } from './pdf-objects.js';
+import type { PdfDocument } from './pdf-objects.js';
+import { referenceOf, referencesOf } from './pdf-syntax.js';
 
 /**
  * M2 (partie M) — « Page | sélecteur | si PDF multipage, requis |
  * `IMPORT.PAGE_REQUIRED` ». Version 28 : le nombre de pages d'un PDF n'était
  * jamais lu, et le code de page requise ne se levait donc jamais.
  *
- * Le nombre de pages se lit dans l'arbre des pages : le catalogue que désigne
- * le dernier `/Root` du fichier, son nœud `/Pages`, et le `/Count` de ce nœud.
- * Les objets se lisent dans l'ordre du fichier, la dernière révision d'un
- * objet l'emportant, qu'elle soit écrite en clair ou rangée dans un flux
- * d'objets (`/Type /ObjStm`) : c'est ce qu'une mise à jour incrémentale
- * produit.
- *
- * Quand l'arbre ne se lit pas, le compte retombe sur les objets de type
- * `/Page` de la dernière révision. Quand rien ne se lit, il rend `null` : un
- * nombre de pages inconnu n'est pas un nombre de pages.
+ * Version 29 : la nature d'un document de plusieurs pages se juge sur la page
+ * retenue. Les pages se lisent donc une à une, dans l'ordre de l'arbre des
+ * pages : le catalogue, son nœud `/Pages`, et les `/Kids` de chaque nœud.
  */
-export async function countPdfPages(bytes: Uint8Array): Promise<number | null> {
-  const text = pdfText(bytes);
-  const objects = await readObjects(bytes, text);
-  const fromTree = pageTreeCount(text, objects);
-  if (fromTree !== null) return fromTree;
-  const pages = [...objects.values()].filter(body => /\/Type\s*\/Page(?![A-Za-z])/.test(body)).length;
+
+/**
+ * Les objets page du document, dans l'ordre de lecture. `null` quand l'arbre
+ * ne se suit pas jusqu'au bout : un nœud introuvable, d'un type inconnu, ou
+ * visité deux fois. Un arbre suivi à moitié ne dit pas quelle page est la
+ * deuxième.
+ */
+export function listPdfPages(doc: PdfDocument): number[] | null {
+  if (doc.root === null) return null;
+  const top = referenceOf(dictionaryOfObject(doc, doc.root)?.get('Pages'));
+  if (top === null) return null;
+  const pages: number[] = [];
+  const seen = new Set<number>();
+  const walk = (node: number): boolean => {
+    if (seen.has(node)) return false;
+    seen.add(node);
+    const dict = dictionaryOfObject(doc, node);
+    const type = dict?.get('Type')?.trim();
+    if (type === '/Page') { pages.push(node); return true; }
+    if (type !== '/Pages') return false;
+    const kids = kidsOf(doc, dict?.get('Kids'));
+    return kids !== null && kids.every(walk);
+  };
+  return walk(top) ? pages : null;
+}
+
+/** Les enfants d'un nœud : un tableau de références, en ligne ou par référence. */
+function kidsOf(doc: PdfDocument, value: string | undefined): number[] | null {
+  if (value === undefined) return null;
+  const ref = referenceOf(value);
+  if (ref === null) return referencesOf(value);
+  const body = doc.objects.get(ref)?.body;
+  return body === undefined ? null : referencesOf(body);
+}
+
+/**
+ * Le nombre de pages. L'arbre suivi jusqu'au bout fait foi ; à défaut, le
+ * `/Count` du nœud des pages ; à défaut, les objets de type `/Page` de la
+ * dernière révision. Quand rien ne se lit, il rend `null` : un nombre de
+ * pages inconnu n'est pas un nombre de pages.
+ */
+export function countPdfPagesOf(doc: PdfDocument): number | null {
+  const walked = listPdfPages(doc);
+  if (walked !== null && walked.length > 0) return walked.length;
+  const fromCount = declaredCount(doc);
+  if (fromCount !== null) return fromCount;
+  const pages = [...doc.objects.values()].filter(o => /\/Type\s*\/Page(?![A-Za-z])/.test(o.body)).length;
   return pages > 0 ? pages : null;
 }
 
-function pageTreeCount(text: string, objects: ReadonlyMap<number, string>): number | null {
-  const roots = [...text.matchAll(/\/Root\s+(\d+)\s+\d+\s+R/g)];
-  const root = roots[roots.length - 1]?.[1];
-  if (root === undefined) return null;
-  const pagesRef = /\/Pages\s+(\d+)\s+\d+\s+R/.exec(objects.get(Number(root)) ?? '')?.[1];
-  if (pagesRef === undefined) return null;
-  const count = /\/Count\s+(\d+)/.exec(objects.get(Number(pagesRef)) ?? '')?.[1];
+export async function countPdfPages(bytes: Uint8Array): Promise<number | null> {
+  return countPdfPagesOf(await readPdfDocument(bytes));
+}
+
+function declaredCount(doc: PdfDocument): number | null {
+  if (doc.root === null) return null;
+  const pages = dictionaryOfObject(doc, doc.root)?.get('Pages');
+  const count = /^\s*(\d+)\s*$/.exec((pages === undefined ? undefined : resolveDictionary(doc, pages))?.get('Count') ?? '')?.[1];
   return count === undefined || Number(count) === 0 ? null : Number(count);
-}
-
-/** Numéro d'objet → corps de sa dernière révision, flux d'objets compris. */
-async function readObjects(bytes: Uint8Array, text: string): Promise<Map<number, string>> {
-  const objects = new Map<number, string>();
-  const streams = listPdfStreams(bytes, text);
-  for (const header of text.matchAll(/(\d+)\s+\d+\s+obj\b/g)) {
-    const start = header.index + header[0].length;
-    const close = text.indexOf('endobj', start);
-    const end = close < 0 ? text.length : close;
-    const body = text.slice(start, end);
-    objects.set(Number(header[1]), body);
-    if (/\/Type\s*\/ObjStm\b/.test(body)) {
-      const stream = streams.find(s => s.at >= start && s.at < end);
-      if (stream !== undefined) await readObjectStream(stream, objects);
-    }
-  }
-  return objects;
-}
-
-/** Un flux d'objets : un en-tête de paires `numéro décalage`, puis les objets. */
-async function readObjectStream(stream: PdfStream, objects: Map<number, string>): Promise<void> {
-  const count = Number(/\/N\s+(\d+)/.exec(stream.dict)?.[1] ?? NaN);
-  const first = Number(/\/First\s+(\d+)/.exec(stream.dict)?.[1] ?? NaN);
-  if (!Number.isInteger(count) || !Number.isInteger(first)) return;
-  const decoded = await decodePdfStream(stream);
-  if (decoded === null) return;
-  const header = decoded.slice(0, first).trim().split(/\s+/).map(Number);
-  for (let i = 0; i < count; i += 1) {
-    const number = header[2 * i];
-    const offset = header[2 * i + 1];
-    if (number === undefined || offset === undefined) return;
-    const next = header[2 * i + 3];
-    objects.set(number, decoded.slice(first + offset, next === undefined ? decoded.length : first + next));
-  }
 }

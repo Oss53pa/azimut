@@ -9,46 +9,34 @@
  * `b`, `b*`). Un chemin fermé par `n` ne peint rien : c'est la découpe qui
  * entoure l'image d'un plan numérisé, et elle ne fait pas un tracé.
  *
- * Les flux se lisent par `pdf-streams.ts`. Un flux qui ne se décode pas est
- * compté comme tel, jamais supposé vide ni supposé vectoriel.
+ * Version 29 : le contenu lu est celui de la page retenue, suivi par
+ * `pdf-page-nature.ts`. Ce module dit, d'un flux de contenu décodé, combien de
+ * chemins il peint et quels objets externes il invoque par `Do`.
  */
-import { decodePdfStream, isPdfWhitespace, listPdfStreams } from './pdf-streams.js';
+import { isPdfWhitespace } from './pdf-streams.js';
+import { PDF_DELIMITERS, endOfLine, endOfLiteralString, endOfToken } from './pdf-syntax.js';
 
-export type PdfPaintedPaths = {
-  /** Chemins peints dans les flux de contenu lus. */
+export type ContentScan = {
+  /** Chemins peints. */
   readonly painted: number;
-  /** Flux de contenu qui n'ont pas pu être décodés. */
-  readonly undecodable: number;
+  /** Noms des objets externes invoqués par `Do`, dans l'ordre, sans doublon. */
+  readonly invoked: readonly string[];
 };
-
-/** Flux qui ne sont pas du contenu de page : images, polices, index, métadonnées. */
-const NOT_CONTENT = [
-  /\/Subtype\s*\/Image\b/,
-  /\/Type\s*\/(?:ObjStm|XRef|Metadata|EmbeddedFile)\b/,
-  /\/Length[123]\b/,
-  /\/Subtype\s*\/(?:Type1C|CIDFontType0C|OpenType|XML)\b/,
-] as const;
-
-export async function countPdfPaintedPaths(bytes: Uint8Array): Promise<PdfPaintedPaths> {
-  let painted = 0;
-  let undecodable = 0;
-  for (const stream of listPdfStreams(bytes)) {
-    if (NOT_CONTENT.some(pattern => pattern.test(stream.dict))) continue;
-    const content = await decodePdfStream(stream);
-    if (content === null) { undecodable += 1; continue; }
-    painted += countPaintedPaths(content);
-  }
-  return { painted, undecodable };
-}
 
 const PATH_CONSTRUCTION = new Set(['m', 'l', 'c', 'v', 'y', 're', 'h']);
 const PATH_PAINTING = new Set(['S', 's', 'f', 'F', 'f*', 'B', 'B*', 'b', 'b*']);
-const DELIMITERS = '()<>[]{}/%';
 
 /** Compte les chemins peints d'un flux de contenu décodé. */
 export function countPaintedPaths(content: string): number {
+  return scanContent(content).painted;
+}
+
+/** Lit un flux de contenu décodé : chemins peints et objets invoqués. */
+export function scanContent(content: string): ContentScan {
   let painted = 0;
   let pathOpen = false;
+  const invoked = new Set<string>();
+  let lastName: string | null = null;
   let i = 0;
   while (i < content.length) {
     const ch = content.charAt(i);
@@ -56,46 +44,24 @@ export function countPaintedPaths(content: string): number {
     if (ch === '%') { i = endOfLine(content, i); continue; }
     if (ch === '(') { i = endOfLiteralString(content, i); continue; }
     if (ch === '<') { i = content.charAt(i + 1) === '<' ? i + 2 : endOf(content, i, '>'); continue; }
-    if (ch === '/') { i = endOfToken(content, i + 1); continue; }
-    if (DELIMITERS.includes(ch)) { i += 1; continue; }
+    if (ch === '/') { const end = endOfToken(content, i + 1); lastName = content.slice(i + 1, end); i = end; continue; }
+    if (PDF_DELIMITERS.includes(ch)) { lastName = null; i += 1; continue; }
     const end = endOfToken(content, i);
     const token = content.slice(i, end);
     i = end;
+    if (token === 'Do' && lastName !== null) invoked.add(lastName);
+    lastName = null;
     if (token === 'BI') { i = endOfInlineImage(content, i); continue; }
     if (PATH_CONSTRUCTION.has(token)) pathOpen = true;
     else if (PATH_PAINTING.has(token)) { if (pathOpen) painted += 1; pathOpen = false; }
     else if (token === 'n') pathOpen = false;
   }
-  return painted;
-}
-
-function endOfToken(content: string, from: number): number {
-  let i = from;
-  while (i < content.length && !isPdfWhitespace(content.charAt(i)) && !DELIMITERS.includes(content.charAt(i))) i += 1;
-  return i;
-}
-
-function endOfLine(content: string, from: number): number {
-  let i = from;
-  while (i < content.length && content.charAt(i) !== '\n' && content.charAt(i) !== '\r') i += 1;
-  return i;
+  return { painted, invoked: [...invoked] };
 }
 
 function endOf(content: string, from: number, closing: string): number {
   const at = content.indexOf(closing, from + 1);
   return at < 0 ? content.length : at + 1;
-}
-
-/** Une chaîne littérale : parenthèses imbriquées, échappements par `\`. */
-function endOfLiteralString(content: string, from: number): number {
-  let depth = 0;
-  for (let i = from; i < content.length; i += 1) {
-    const ch = content.charAt(i);
-    if (ch === '\\') { i += 1; continue; }
-    if (ch === '(') depth += 1;
-    else if (ch === ')') { depth -= 1; if (depth === 0) return i + 1; }
-  }
-  return content.length;
 }
 
 /** Une image en ligne : `BI … ID <octets> EI`, dont les octets ne sont pas du contenu. */
