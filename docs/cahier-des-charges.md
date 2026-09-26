@@ -692,6 +692,8 @@ Sources d'indéterminisme interdites dans `engine-*` :
 - Tri non stable, ou tri dont la fonction de comparaison peut retourner 0 pour deux éléments distincts. Prévoir toujours un critère de départage final sur l'identifiant.
 - Génération d'identifiants dans un rendu.
 - Dépendance à la locale du système pour la comparaison de chaînes, le formatage des nombres ou des dates.
+
+**Comparer deux chaînes dans un moteur** se fait par leurs points de code, jamais par une comparaison sensible à la langue : un même jeu de données trié sur deux machines doit donner le même ordre. Dans l'interface, un tri selon la langue de l'utilisateur est légitime, à condition que la langue soit déclarée explicitement et non déduite de la machine. Un contrôle automatique refuse toute comparaison localisée introduite dans `engine-*`.
 - Flottants dont l'arrondi n'est pas explicité. Toute coordonnée écrite dans un SVG est arrondie à une précision fixée et documentée.
 
 Test obligatoire, exécuté sur chaque site de référence : compiler deux fois de suite, comparer les empreintes des sorties, exiger l'égalité stricte.
@@ -1597,6 +1599,7 @@ IMPORT
 | Code | Gravité | Sens |
 | --- | --- | --- |
 | `IMPORT.EMPTY_FILE` | bloquant | Fichier d'import sans aucune ligne |
+| `IMPORT.RASTER_PRECISION_LIMITED` | avertissement | Plan sans contenu vectoriel exploitable : image en mode point, ou PDF sans tracés. Le calage et la numérisation restent possibles, avec une précision moindre |
 
 LAYOUT
 
@@ -5311,9 +5314,11 @@ C'est l'écran d'entrée réel du produit, et le plus important de la tranche. T
 | Champ | Type | Contrainte | Erreur |
 | --- | --- | --- | --- |
 | Fichier | dépôt ou sélection | PDF vectoriel, DXF, PNG, JPG. 60 Mo maximum | `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` |
-
-**Le DWG n'est pas accepté.** Le lire exige une bibliothèque sous licence propriétaire, là où le DXF et le PDF vectoriel n'en demandent aucune, et un architecte fournit l'un ou l'autre sans difficulté. Une image en mode point reste acceptée en dernier recours, avec l'avertissement de précision limitée.
 | Page | sélecteur | si PDF multipage, requis | `IMPORT.PAGE_REQUIRED` |
+
+**Le DWG n'est pas accepté.** Le lire exige une bibliothèque sous licence propriétaire, là où le DXF et le PDF vectoriel n'en demandent aucune, et un architecte fournit l'un ou l'autre sans difficulté.
+
+**Précision limitée.** Un fichier sans contenu vectoriel exploitable est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED`. Cela vise l'image en mode point comme le PDF qui se présente comme vectoriel sans l'être : c'est le contenu qui est contrôlé, jamais l'extension.
 
 Pour un fichier de CAO, la qualification décrite en partie D s'exécute avant tout import et affiche son rapport : proportion de polylignes fermées, calques exploitables, cohérence des unités, références manquantes, doublons, nombre de niveaux. En dessous du seuil, l'écran recommande explicitement le calage manuel et propose les deux voies sans en imposer une.
 
@@ -8610,3 +8615,6 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 290. D7.2 : la forme canonique vaut pour toutes les empreintes
 291. M2 : DWG refusé, DXF accepté
 292. D2.2 : code de valeur non hachable
+293. M2 : tableau des champs rétabli, précision limitée écrite
+294. D2.2 : code de précision limitée
+295. A9 : comparaison de chaînes dans un moteur et dans l'interface
