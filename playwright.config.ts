@@ -46,9 +46,12 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     baseURL: 'http://127.0.0.1:4317',
-    // F12 fixe la largeur minimale de poste à 1366 pixels.
-    viewport: { width: 1366, height: 768 },
+    // F12 fixe la largeur minimale de poste à 1366 pixels. Le poste type vient
+    // d'abord, la fenêtre ensuite : placée avant, elle était écrasée par celle
+    // du poste type (1280 × 720), et la suite tournait sous la largeur minimale.
+    // Le contrôle de types l'a relevé dès que ce fichier y est entré.
     ...devices['Desktop Chrome'],
+    viewport: { width: 1366, height: 768 },
     launchOptions: chromiumLaunchOptions(),
   },
   webServer: {
