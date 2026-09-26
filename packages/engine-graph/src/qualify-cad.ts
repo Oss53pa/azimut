@@ -6,7 +6,7 @@ import { roundSvg } from '@azimut/core-model';
  * Before any import attempt, a CAD file is qualified and a report is produced.
  * This module works on a neutral, already-parsed entity set (the DXF →
  * CadEntitySet adapter is out of scope, like other external-format adapters;
- * M2 no longer accepts DWG, which would need a proprietary-licence reader):
+ * M2 (partie M) no longer accepts DWG, which would need a proprietary-licence reader):
  * it computes the D4.3 metrics, estimates an expected extraction rate, and —
  * below a configurable threshold — recommends manual tracing over import and
  * says why. A half-successful silent import costs more than a redraw and

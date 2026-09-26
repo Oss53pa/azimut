@@ -41,7 +41,7 @@ describe('M2 (partie M) — import du fond de plan', () => {
 
     /**
      * Beaucoup de navigateurs rendent une chaîne vide pour un DXF. Le refuser
-     * pour cette raison rejetterait le format de CAO que M2 retient.
+     * pour cette raison rejetterait le format de CAO que M2 (partie M) retient.
      */
     it('reconnaît un fichier dont le navigateur ne donne pas le type', () => {
       expect(acceptPlanFile(file({ name: 'plan.dxf', mediaType: '' })).ok).toBe(true);
@@ -59,7 +59,7 @@ describe('M2 (partie M) — import du fond de plan', () => {
         .toEqual(['IMPORT.FORMAT_UNSUPPORTED']);
     });
 
-    it('les formats acceptés sont exactement ceux que M2 nomme', () => {
+    it('les formats acceptés sont exactement ceux que M2 (partie M) nomme', () => {
       expect(ACCEPTED_PLAN_FORMATS.map(f => f.key)).toEqual(['pdf', 'png', 'jpg', 'dxf']);
     });
 
