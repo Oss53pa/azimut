@@ -1,8 +1,9 @@
-import { type JSX, useState } from 'react';
+import { type JSX, useRef, useState } from 'react';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { acceptPlanFile } from '../state/plan-import.js';
+import { planPrecisionWarnings, unreadablePlanWarnings } from '../state/plan-content.js';
 import { calibrationCommands } from '../state/plan-calibration-commands.js';
 import { computeCalibration } from '../domain/plan-calibration.js';
 import type { PlanPoint } from '../domain/plan-calibration.js';
@@ -36,6 +37,11 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   const [pointB, setPointB] = useState<PartialPoint>(NO_POINT);
   const [pending, setPending] = useState<ReplacementVerdict | null>(null);
   const [findings, setFindings] = useState<readonly Finding[]>([]);
+  // M2 (partie M), version 27 : l'avertissement de précision limitée porte
+  // sur le fond chargé. Le jeton écarte la lecture d'un fichier remplacé
+  // entre-temps, dont le résultat arriverait après celui du suivant.
+  const [warnings, setWarnings] = useState<readonly Finding[]>([]);
+  const contentReading = useRef(0);
   const [calibrated, setCalibrated] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -45,20 +51,28 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
       draft={draft}
       step={stepOf(draft)}
       findings={findings}
-      warnings={[]}
+      warnings={warnings}
       busy={busy}
       calibrated={calibrated}
-      onPickFile={plan => {
+      onPickFile={(plan, content) => {
+        const reading = ++contentReading.current;
+        setWarnings([]);
         const accepted = acceptPlanFile(plan);
         if (!accepted.ok) { setFindings(accepted.findings); return; }
         setFindings([]);
         setDraft(previous => ({ ...previous, plan: accepted.value }));
+        void content.arrayBuffer()
+          .then(buffer => planPrecisionWarnings(new Uint8Array(buffer), plan.name))
+          .catch(() => unreadablePlanWarnings(plan.name))
+          .then(found => { if (reading === contentReading.current) setWarnings(found); });
       }}
       onReplaceFile={() => {
         setPending(judgeReplacement({ widthPx: 0, heightPx: 0 }, { widthPx: 1, heightPx: 1 }));
       }}
       pendingReplacement={pending ?? undefined}
       onConfirmReplacement={() => {
+        contentReading.current += 1;
+        setWarnings([]);
         setPending(null);
         setDraft(EMPTY_DRAFT);
         setPointA(NO_POINT);

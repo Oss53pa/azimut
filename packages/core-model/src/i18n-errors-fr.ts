@@ -104,6 +104,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'IMPORT.UNIT_AMBIGUOUS': 'Unité du fichier source indéterminable',
   'IMPORT.ENCODING_UNSUPPORTED': 'Encodage non reconnu',
   'IMPORT.EMPTY_FILE': 'Fichier d\'import vide',
+  'IMPORT.RASTER_PRECISION_LIMITED': 'Plan sans contenu vectoriel exploitable : précision limitée',
   'IMPORT.VECTOR_AS_REFERENCE_ONLY': 'Fichier importé en référence de fond, sans exploitation',
   'PACKAGE.NETWORK_DEPENDENCY': 'Le paquet de borne émet une requête sortante',
   'PACKAGE.CHECKSUM_MISMATCH': 'Intégrité du paquet non vérifiée',

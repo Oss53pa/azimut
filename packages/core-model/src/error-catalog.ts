@@ -156,6 +156,7 @@ export const ERROR_CATALOG = {
   'IMPORT.PAGE_REQUIRED':                   { severity: 'blocking', description: 'Page à choisir dans un document multipage' },
   'IMPORT.ENCODING_UNSUPPORTED':            { severity: 'blocking', description: 'Encodage non reconnu' },
   'IMPORT.EMPTY_FILE':                      { severity: 'blocking', description: 'Fichier d’import sans aucune ligne' },
+  'IMPORT.RASTER_PRECISION_LIMITED':       { severity: 'warning',  description: 'Plan sans contenu vectoriel exploitable : image en mode point, ou PDF sans tracés. Le calage et la numérisation restent possibles, avec une précision moindre' },
   'IMPORT.VECTOR_AS_REFERENCE_ONLY':        { severity: 'info',     description: 'Fichier importé en référence de fond, sans exploitation' },
 
   // ── PACKAGE ───────────────────────────────────────────────

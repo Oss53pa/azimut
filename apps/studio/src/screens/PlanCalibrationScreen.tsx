@@ -39,7 +39,12 @@ export type PlanCalibrationScreenProps = {
   readonly warnings: readonly Finding[];
   readonly busy: boolean;
   readonly calibrated: boolean;
-  readonly onPickFile: (file: PlanFile) => void;
+  /**
+   * Le fichier déposé, décrit, et son contenu. M2 (partie M), version 27 :
+   * la précision du fond se juge sur le contenu, jamais sur l'extension ;
+   * l'écran le transmet sans le lire.
+   */
+  readonly onPickFile: (file: PlanFile, content: Blob) => void;
   /** M2 (partie M), action « Remplacer le fond ». */
   readonly onReplaceFile?: ((file: PlanFile) => void) | undefined;
   /**
@@ -141,7 +146,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
                   mediaType: file.type,
                   pageCount: null,
                   page: null,
-                });
+                }, file);
               }}
             />
             {draft.plan !== null && (

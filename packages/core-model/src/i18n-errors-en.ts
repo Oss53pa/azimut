@@ -104,6 +104,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'IMPORT.UNIT_AMBIGUOUS': 'Source file unit indeterminate',
   'IMPORT.ENCODING_UNSUPPORTED': 'Encoding not recognized',
   'IMPORT.EMPTY_FILE': 'Import file empty',
+  'IMPORT.RASTER_PRECISION_LIMITED': 'Plan without usable vector content: limited precision',
   'IMPORT.VECTOR_AS_REFERENCE_ONLY': 'File imported as a background reference, not exploited',
   'PACKAGE.NETWORK_DEPENDENCY': 'Kiosk package emits outbound request',
   'PACKAGE.CHECKSUM_MISMATCH': 'Package integrity not verified',
