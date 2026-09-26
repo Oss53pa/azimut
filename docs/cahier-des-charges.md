@@ -1529,6 +1529,7 @@ DATA
 | `DATA.DEST_CATEGORY_NOT_FOUND` | avertissement | Catégorie d'une destination inexistante |
 | `DATA.EMPTY_SVG_PATH` | bloquant | Pictogramme sans tracé |
 | `DATA.FACE_CONTENT_UNSERIALIZABLE` | bloquant | Contenu de face non sérialisable en forme canonique, section D7.2 |
+| `DATA.HASH_INPUT_INVALID` | bloquant | Valeur non hachable soumise à un calcul d'empreinte : nombre non fini, objet non simple. Le calcul refuse au lieu d'écrire une valeur nulle |
 | `DATA.FACE_DIMENSIONS_INVALID` | bloquant | Dimensions de face nulles ou négatives |
 | `DATA.KIOSK_CONFIG_INVALID` | bloquant | Configuration locale de borne invalide, section D10.3 |
 | `DATA.PICTOGRAM_CATEGORY_NOT_FOUND` | bloquant | Catégorie d'un pictogramme inexistante |
@@ -5309,7 +5310,9 @@ C'est l'écran d'entrée réel du produit, et le plus important de la tranche. T
 
 | Champ | Type | Contrainte | Erreur |
 | --- | --- | --- | --- |
-| Fichier | dépôt ou sélection | PDF, PNG, JPG, DWG. 60 Mo maximum | `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` |
+| Fichier | dépôt ou sélection | PDF vectoriel, DXF, PNG, JPG. 60 Mo maximum | `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` |
+
+**Le DWG n'est pas accepté.** Le lire exige une bibliothèque sous licence propriétaire, là où le DXF et le PDF vectoriel n'en demandent aucune, et un architecte fournit l'un ou l'autre sans difficulté. Une image en mode point reste acceptée en dernier recours, avec l'avertissement de précision limitée.
 | Page | sélecteur | si PDF multipage, requis | `IMPORT.PAGE_REQUIRED` |
 
 Pour un fichier de CAO, la qualification décrite en partie D s'exécute avant tout import et affiche son rapport : proportion de polylignes fermées, calques exploitables, cohérence des unités, références manquantes, doublons, nombre de niveaux. En dessous du seuil, l'écran recommande explicitement le calage manuel et propose les deux voies sans en imposer une.
@@ -8605,3 +8608,5 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 288. D7.2 : forme canonique de l'empreinte précisée
 289. D10.0 : le paquet agrège les anomalies et bloque sur une marque de sécurité omise
 290. D7.2 : la forme canonique vaut pour toutes les empreintes
+291. M2 : DWG refusé, DXF accepté
+292. D2.2 : code de valeur non hachable
