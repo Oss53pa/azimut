@@ -47,6 +47,10 @@ export const ERROR_CATALOG = {
   // Partie N, module 02 (N2.4) : audit de couverture.
   'GRAPH.DECISION_POINT_UNCOVERED':         { severity: 'blocking', description: 'Point de décision qu’aucun support ne couvre' },
   'GRAPH.SUPPORT_UNUSED':                   { severity: 'warning',  description: 'Support ne servant aucun parcours' },
+  // A5.3 : fermetures d'arêtes (edge.availability), proposition de schéma 4.1.
+  'GRAPH.EDGE_AVAILABILITY_UNREADABLE':     { severity: 'blocking', description: 'Disponibilité d’arête illisible' },
+  'GRAPH.EVACUATION_EDGE_CLOSURE':          { severity: 'warning',  description: 'Chemin d’évacuation touché par une fermeture déclarée' },
+  'GRAPH.ROUTE_INSTANT_INVALID':            { severity: 'blocking', description: 'Instant d’itinéraire hors du format local du site' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },

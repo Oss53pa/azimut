@@ -24,26 +24,30 @@ export type ProfileRoutes = {
   readonly meanDetour: number | null;
 };
 
-function lengths(site: SiteData, profile: TravelProfile): Map<string, number | null> {
+function lengths(site: SiteData, profile: TravelProfile, at: string | undefined): Map<string, number | null> {
   const out = new Map<string, number | null>();
   const origins = site.graph.nodes.filter(n => n.kind === 'entrance').sort((a, b) => a.id.localeCompare(b.id));
   const destinations = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
   for (const origin of origins) {
     for (const destination of destinations) {
       if (destination.node_id === origin.id) continue;
-      const route = computeRoute(site, profile, origin.id, destination.node_id);
+      const route = computeRoute(site, profile, origin.id, destination.node_id, at === undefined ? {} : { at });
       out.set(`${origin.id}→${destination.id}`, route.ok ? route.value.cost : null);
     }
   }
   return out;
 }
 
-export function profileRoutes(site: SiteData): readonly ProfileRoutes[] {
+/**
+ * `at` — instant simulé, heure locale du site : les arêtes fermées à cet
+ * instant ne se parcourent pas (A5.3). Absent, les fermetures ne comptent pas.
+ */
+export function profileRoutes(site: SiteData, at?: string): readonly ProfileRoutes[] {
   const reference = site.travel_profiles[0];
-  const referenceLengths = reference === undefined ? new Map<string, number | null>() : lengths(site, reference);
+  const referenceLengths = reference === undefined ? new Map<string, number | null>() : lengths(site, reference, at);
 
   return site.travel_profiles.map((profile): ProfileRoutes => {
-    const own = profile.id === reference?.id ? referenceLengths : lengths(site, profile);
+    const own = profile.id === reference?.id ? referenceLengths : lengths(site, profile, at);
     let solved = 0;
     let ratioSum = 0;
     let compared = 0;

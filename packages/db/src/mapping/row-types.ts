@@ -123,6 +123,8 @@ export type EdgeRow = {
   readonly direction: string;
   readonly evacuation_route: boolean;
   readonly length_m: string;
+  /** A5.3 — `jsonb`, forme libre du point de vue de la base ; lue par `readEdgeAvailability`. */
+  readonly availability: unknown;
 };
 
 export type VerticalLinkRow = {

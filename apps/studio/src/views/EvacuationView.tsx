@@ -1,5 +1,5 @@
 import { type JSX, useMemo, useState } from 'react';
-import { auditEvacuation } from '@azimut/engine-graph';
+import { auditEvacuation, checkEdgeAvailability } from '@azimut/engine-graph';
 import { renderEvacuationPlan, type EvacuationStats } from '@azimut/engine-layout';
 import type { Finding } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
@@ -46,6 +46,13 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
     const audit = auditEvacuation(site);
     return audit.ok ? audit.value.uncovered_nodes : [];
   }, [site]);
+
+  // A5.3 — le plan, imprimé et durable, ne voit pas les fermetures ; le
+  // contrôle les montre, pour qu'une décision humaine soit prise sur la période.
+  const closureFindings = useMemo(
+    () => checkEdgeAvailability(site).filter(f => f.code === 'GRAPH.EVACUATION_EDGE_CLOSURE'),
+    [site],
+  );
 
   // T-2.10 : un plan d'évacuation ne se produit que sous un paquet de règles
   // rattaché. Sans lui, aucun rendu n'est tenté, pas même un aperçu.
@@ -131,6 +138,17 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
   return (
     <div>
       {header}
+      {closureFindings.length > 0 && (
+        <div style={{ marginBottom: SPACE.lg }}>
+          <StateBanner
+            severity="warning"
+            code="GRAPH.EVACUATION_EDGE_CLOSURE"
+            message={t('evacuation.closures', { count: closureFindings.length })}
+          >
+            <FindingList findings={closureFindings} empty="" />
+          </StateBanner>
+        </div>
+      )}
       <MetricRow metrics={metrics} />
       <div style={{ marginTop: SPACE.lg }}>
         <Panel title={t('evacuation.panel.levels')} note={String(plans.length)} padded={false}>

@@ -1,4 +1,4 @@
-import type { Edge, TravelProfile } from '@azimut/core-model';
+import { isClosedAt, type Edge, type TravelProfile } from '@azimut/core-model';
 
 /**
  * Build a Set from a profile's excluded_edge_kinds once,
@@ -16,6 +16,11 @@ export function buildExcludedKindsSet(
  *
  * Pass a pre-built `excludedKinds` set (via `buildExcludedKindsSet`)
  * to avoid allocating a Set on every call in hot loops.
+ *
+ * A5.3 — `at`, an instant in the site's local time (`AAAA-MM-JJTHH:MM:SS`),
+ * makes declared closures count: an edge closed at that instant is not
+ * traversable. Without it, closures are ignored — the engine never reads the
+ * clock (INV-4), and durable renders do not see temporary closures.
  */
 export function isEdgeTraversableFrom(
   edge: Edge,
@@ -23,7 +28,9 @@ export function isEdgeTraversableFrom(
   profile: TravelProfile,
   nodeKindMap: Map<string, string>,
   excludedKinds?: ReadonlySet<string>,
+  at?: string,
 ): boolean {
+  if (at !== undefined && isClosedAt(edge.availability, at)) return false;
   if (profile.require_accessible && !edge.accessible) return false;
 
   if (edge.direction === 'forward' && nodeId !== edge.from_node_id) {

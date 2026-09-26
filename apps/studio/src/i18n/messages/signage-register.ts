@@ -11,7 +11,7 @@ export const SIGNAGE_REGISTER_FR = {
   'nav.item.evacuation': 'Évacuation',
 
   'wallplans.title': 'Plans muraux orientés',
-  'wallplans.summary': '{count} emplacement(s) · un par support implanté',
+  'wallplans.summary': '{count} emplacement(s) · un par support portant un bloc plan',
   'wallplans.col.rotation': 'Rotation du plan, °',
   'wallplans.state.oriented': 'Orienté',
   'wallplans.state.orphan': 'Nœud introuvable',
@@ -54,7 +54,7 @@ export const SIGNAGE_REGISTER_EN: Readonly<Record<keyof typeof SIGNAGE_REGISTER_
   'nav.item.evacuation': 'Evacuation',
 
   'wallplans.title': 'Oriented wall plans',
-  'wallplans.summary': '{count} location(s) · one per placed support',
+  'wallplans.summary': '{count} location(s) · one per support carrying a map block',
   'wallplans.col.rotation': 'Plan rotation, °',
   'wallplans.state.oriented': 'Oriented',
   'wallplans.state.orphan': 'Node not found',

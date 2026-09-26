@@ -146,12 +146,25 @@ Forme proposée, à valider avec O4 (fuseau du site) :
 Heures locales du site (O4). Aucune table. Travail : type, lecture, prise en
 compte par `isEdgeTraversableFrom`.
 
+**Décidé et appliqué le 26/09/2026.** Forme ci-dessus retenue, bornes incluses,
+sans décalage horaire. Une fermeture ne compte **qu'à un instant donné** : le
+calcul d'itinéraire reçoit un instant facultatif et écarte alors les arêtes
+fermées ; sans instant, rien ne change. Le tableau des messages, les panneaux et
+les plans d'évacuation, imprimés et durables, ignorent les fermetures
+temporaires. Le contrôle `edge_availability` bloque une disponibilité illisible
+(tenue pour fermée à tout instant) et avertit d'un chemin d'évacuation touché ;
+l'écran des créneaux de pose montre les fermetures du jour autour de leurs
+supports.
+
 ### 4.2 Emplacements de plans muraux
 
 T-2.9 : « un rendu par implantation ». A5.6 donne à `content_block.kind` la
 valeur `map`. Un emplacement de plan mural est donc un support dont une face
 porte un bloc `map` ; son orientation est son azimut. Aucune table : l'écran
 « Plans muraux » filtrera sur ce bloc au lieu de lister tous les supports.
+
+**Appliqué le 26/09/2026** : l'écran ne liste plus que ces supports, et dit
+comment en déclarer quand il n'y en a aucun.
 
 ## 5. Famille C — tables nouvelles, modules 05 à 09
 
@@ -287,7 +300,7 @@ Chaque migration ajoute son entrée à `migrations/ORDRE.md` et ses tables à
 2. ~~`divergence` : option 1, 2 ou 3 de 3.2 ?~~ Décidé : 1 et 3 (migration 0041).
 3. ~~`information_level` : colonnes de 3.3, sans valeur normative ?~~ Décidé : rien n'est ajouté.
 4. ~~`work_order` : conversion en unité mineure de 3.4 ?~~ Décidé : H8 fait foi (migration 0048).
-5. Fermetures : format de `edge.availability` de 4.1 ?
+5. ~~Fermetures : format de `edge.availability` de 4.1 ?~~ Décidé : forme de 4.1, à un instant donné seulement.
 6. ~~Famille C : lesquels des modules 05 à 09 passent aux données réelles, et
    dans quel ordre ?~~ Décidé : tous, dans l'ordre 07, 09, 08, 05, 06 (0042 à 0046).
 7. ~~Régie : interdire en base le chevauchement de réservations, ou le laisser au

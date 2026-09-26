@@ -4,9 +4,12 @@ import { useI18n } from '../i18n/useI18n.js';
 import { loadWorksite, useRegistry } from '../data/index.js';
 import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
-  type Column, type RegisterFilter,
+  type Column, type RegisterFilter, type InspectorRow,
 } from '../components/ui/index.js';
 import { RegistryStatus } from './register/RegistryStatus.js';
+import { useSiteData } from '../context/useSiteData.js';
+import { closuresOnDay } from './closures/closure-rows.js';
+import { siteLabels } from './register/labels.js';
 import { formatDay } from './register/format.js';
 
 const ALL = 'all';
@@ -27,6 +30,7 @@ type WorksiteSlotsViewProps = {
 };
 
 export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Element {
+  const site = useSiteData();
   const { t, lang } = useI18n();
   const state = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
   const [filter, setFilter] = useState(ALL);
@@ -66,6 +70,20 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
     { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.planned_on ?? undefined, lang) ?? '—' },
   ];
 
+  // A5.3 — les arêtes qui aboutissent aux supports du créneau, fermées le jour de pose.
+  const closureInfo = (slot: InstallSlot): readonly InspectorRow[] => {
+    if (slot.planned_on === null) return [{ id: 'undated', label: t('worksiteslots.closures.undated'), value: '' }];
+    const labels = siteLabels(site, lang);
+    const closures = closuresOnDay(site, slot.support_ids, slot.planned_on);
+    if (closures.length === 0) return [{ id: 'none', label: t('worksiteslots.closures.none'), value: '' }];
+    return closures.map((c, i) => ({
+      id: `${c.edge.id}-${String(i)}`,
+      label: `${labels.node(c.edge.from_node_id)} — ${labels.node(c.edge.to_node_id)}`,
+      value: c.closure === null ? t('closures.unreadable') : `${c.closure.from} → ${c.closure.to}`,
+      computed: true,
+    }));
+  };
+
   const inspector = selected === null
     ? <InspectorEmpty text={t('worksiteslots.inspector.empty')} />
     : (
@@ -88,6 +106,12 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
             rows: [
               { id: 'supports', label: t('worksite.col.supports'), value: String(selected.support_ids.length), computed: true },
             ],
+          },
+          {
+            id: 'closures',
+            title: t('worksiteslots.section.closures'),
+            // A5.3 — les arêtes qui aboutissent aux supports du créneau, fermées le jour de pose.
+            rows: closureInfo(selected),
           },
         ]}
       />

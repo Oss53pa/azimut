@@ -9,7 +9,7 @@
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
 import {
-  readActiveLangs, readOpeningHours, computeEdgeLengths,
+  readActiveLangs, readOpeningHours, readEdgeAvailability, computeEdgeLengths,
 } from '@azimut/core-model';
 import type {
   FootprintKind,
@@ -196,18 +196,24 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
    */
   const edgeLengths = computeEdgeLengths({ levels, nodes, edges: rows.edges });
 
-  const edges: Edge[] = rows.edges.map(e => ({
-    id: e.id,
-    org_id: e.org_id,
-    from_node_id: e.from_node_id,
-    to_node_id: e.to_node_id,
-    width_m: num(e.width_m),
-    slope_pct: num(e.slope_pct),
-    accessible: e.accessible,
-    direction: e.direction as EdgeDirection,
-    evacuation_route: e.evacuation_route,
-    length_m: edgeLengths.get(e.id) ?? num(e.length_m),
-  }));
+  const edges: Edge[] = rows.edges.map(e => {
+    // A5.3 — une disponibilité illisible est gardée comme telle : un contrôle
+    // la signale, et à un instant donné l'arête compte pour fermée.
+    const availability = readEdgeAvailability(e.availability);
+    return {
+      id: e.id,
+      org_id: e.org_id,
+      from_node_id: e.from_node_id,
+      to_node_id: e.to_node_id,
+      width_m: num(e.width_m),
+      slope_pct: num(e.slope_pct),
+      accessible: e.accessible,
+      direction: e.direction as EdgeDirection,
+      evacuation_route: e.evacuation_route,
+      length_m: edgeLengths.get(e.id) ?? num(e.length_m),
+      ...(availability !== undefined ? { availability } : {}),
+    };
+  });
 
   const verticalLinks: VerticalLink[] = rows.vertical_links.map(v => ({
     id: v.id,

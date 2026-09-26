@@ -11,6 +11,7 @@ import { FindingList } from './message-schedule/FindingList.js';
 import { siteLabels } from './register/labels.js';
 import { formatNumber } from './register/format.js';
 import { ORIENTED_PLAN_PREVIEW_THEME, PLAN_PREVIEW_FONT_FAMILY } from './plans/plan-preview.js';
+import { wallPlanSupportIds } from './plans/wall-plan-locations.js';
 
 const ALL = 'all';
 const PREVIEW_WIDTH = 288;
@@ -27,9 +28,10 @@ type WallPlanRow = {
  * Module 04 — les plans muraux orientés (D6), au gabarit « registre ».
  *
  * Un plan mural se tourne comme le regard du lecteur : ce qui est devant lui
- * est en haut. Chaque support implanté est un emplacement possible ; la
- * rotation vient de son azimut par `orientationDegForAzimuth`, et l'aperçu est
- * le rendu du moteur, jamais un dessin.
+ * est en haut. Un emplacement de plan mural est un support dont une face
+ * porte un bloc `map` (T-2.9, proposition de schéma 4.2) ; la rotation vient
+ * de son azimut par `orientationDegForAzimuth`, et l'aperçu est le rendu du
+ * moteur, jamais un dessin.
  */
 export function WallPlansView(): JSX.Element {
   const site = useSiteData();
@@ -38,13 +40,17 @@ export function WallPlansView(): JSX.Element {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
 
-  const rows = useMemo<readonly WallPlanRow[]>(() => [...site.supports]
-    .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id))
-    .map(support => ({
-      support,
-      levelId: labels.nodeLevel(support.node_id),
-      rotationDeg: orientationDegForAzimuth(support.azimuth_deg),
-    })), [site, labels]);
+  const rows = useMemo<readonly WallPlanRow[]>(() => {
+    const locations = wallPlanSupportIds(site);
+    return [...site.supports]
+      .filter(support => locations.has(support.id))
+      .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id))
+      .map(support => ({
+        support,
+        levelId: labels.nodeLevel(support.node_id),
+        rotationDeg: orientationDegForAzimuth(support.azimuth_deg),
+      }));
+  }, [site, labels]);
 
   const levels = site.levels.filter(l => rows.some(r => r.levelId === l.id));
   const visible = filter === ALL ? rows : rows.filter(r => r.levelId === filter);
@@ -140,7 +146,7 @@ export function WallPlansView(): JSX.Element {
         columns={columns}
         rows={visible}
         rowKey={r => r.support.id}
-        empty={t('placement.empty')}
+        empty={t('wallplans.empty')}
         onSelect={r => { setSelectedId(r.support.id); }}
         selectedKey={selected?.support.id}
       />

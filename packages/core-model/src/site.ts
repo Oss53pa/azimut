@@ -3,6 +3,7 @@ import type { Parking, ParkingSpace, UncoveredArea, Provenance } from './parking
 import type { PlanSource, PlanCalibration } from './plan.js';
 import type { ActiveLang } from './lang.js';
 import type { OpeningHours } from './opening-hours.js';
+import type { EdgeAvailability } from './edge-availability.js';
 
 import type {
   SupportType,
@@ -255,6 +256,11 @@ export type Edge = {
   readonly direction: EdgeDirection;
   readonly evacuation_route: boolean;
   readonly length_m: number;
+  /**
+   * A5.3 — fermetures déclarées (voir `edge-availability.ts`). Absente quand
+   * la colonne est vide ; illisible, elle est gardée comme telle.
+   */
+  readonly availability?: EdgeAvailability;
 };
 
 export type VerticalLinkKind =

@@ -1,12 +1,14 @@
 import { type JSX, useMemo, useState } from 'react';
-import type { NodeKind, TravelProfile } from '@azimut/core-model';
+import { isLocalInstant, type NodeKind, type TravelProfile } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, TextField, StateBanner, SPACE,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
+import { ClosuresPanel } from './closures/ClosuresPanel.js';
+import { edgesClosedAt } from './closures/closure-rows.js';
 import { profileRoutes, type ProfileRoutes } from '../domain/profile-routes.js';
 import { formatNumber } from './register/format.js';
 
@@ -33,11 +35,15 @@ export function ProfilesView(): JSX.Element {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // A5.3 — instant simulé, heure locale du site : lu ici, jamais dans le moteur.
+  const [instant, setInstant] = useState('');
+  const at = isLocalInstant(instant) ? instant : undefined;
 
   const rows = useMemo<readonly ProfileRow[]>(() => {
-    const routes = new Map(profileRoutes(site).map(r => [r.profileId, r]));
+    const routes = new Map(profileRoutes(site, at).map(r => [r.profileId, r]));
     return site.travel_profiles.map(profile => ({ profile, routes: routes.get(profile.id) }));
-  }, [site]);
+  }, [site, at]);
+  const closedNow = useMemo(() => (at === undefined ? [] : edgesClosedAt(site, at)), [site, at]);
 
   const visible = filter === ALL ? rows : rows.filter(r => r.profile.require_accessible);
   const selected = rows.find(r => r.profile.id === selectedId) ?? visible[0] ?? null;
@@ -120,25 +126,44 @@ export function ProfilesView(): JSX.Element {
     );
 
   return (
-    <RegisterLayout
-      title={t('profiles.title')}
-      summary={t('profiles.summary', { count: rows.length, site: site.site.name })}
-      filtersLabel={t('register.filters')}
-      filters={filters}
-      filter={filter}
-      onFilter={id => { setFilter(id); setSelectedId(null); }}
-      shown={t('profiles.shown', { count: visible.length })}
-      inspector={inspector}
-      note={t('profiles.note')}
-    >
-      <DataTable
-        columns={columns}
-        rows={visible}
-        rowKey={r => r.profile.id}
-        empty={t('profiles.empty')}
-        onSelect={r => { setSelectedId(r.profile.id); }}
-        selectedKey={selected?.profile.id}
-      />
-    </RegisterLayout>
+    <div>
+      <div style={{ maxWidth: 360, marginBottom: SPACE.lg }}>
+        <TextField
+          label={t('closures.at.label')}
+          value={instant}
+          onChange={setInstant}
+          hint={t('closures.at.hint')}
+          error={instant !== '' && at === undefined ? t('closures.at.invalid') : undefined}
+        />
+      </div>
+      {closedNow.length > 0 && (
+        <div style={{ marginBottom: SPACE.lg }}>
+          <StateBanner severity="warning" message={t('closures.active', { count: closedNow.length })} />
+        </div>
+      )}
+      <RegisterLayout
+        title={t('profiles.title')}
+        summary={t('profiles.summary', { count: rows.length, site: site.site.name })}
+        filtersLabel={t('register.filters')}
+        filters={filters}
+        filter={filter}
+        onFilter={id => { setFilter(id); setSelectedId(null); }}
+        shown={t('profiles.shown', { count: visible.length })}
+        inspector={inspector}
+        note={t('profiles.note')}
+      >
+        <DataTable
+          columns={columns}
+          rows={visible}
+          rowKey={r => r.profile.id}
+          empty={t('profiles.empty')}
+          onSelect={r => { setSelectedId(r.profile.id); }}
+          selectedKey={selected?.profile.id}
+        />
+      </RegisterLayout>
+      <div style={{ marginTop: SPACE.lg }}>
+        <ClosuresPanel />
+      </div>
+    </div>
   );
 }

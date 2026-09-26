@@ -49,8 +49,6 @@ const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
     'Résidu moyen du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
   'plan_calibration.max_residual_m':
     'Résidu maximal du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
-  'edge.availability':
-    'Colonne JSON de disponibilité d’une arête, sans lecteur à ce jour.',
   'travel_profile.weights':
     'Pondérations de profil en JSON, que le calcul d’itinéraire ne lit pas encore.',
   'support_content_block.config':
