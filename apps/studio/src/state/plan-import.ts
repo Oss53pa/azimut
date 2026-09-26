@@ -1,8 +1,10 @@
 /**
  * M2 (partie M), étape 1 — le fond de plan.
  *
- * « Fichier | dépôt ou sélection | PDF, PNG, JPG, DWG. 60 Mo maximum |
+ * « Fichier | dépôt ou sélection | PDF vectoriel, DXF, PNG, JPG. 60 Mo maximum |
  * `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` »
+ * « Le DWG n'est pas accepté. Le lire exige une bibliothèque sous licence
+ * propriétaire, là où le DXF et le PDF vectoriel n'en demandent aucune. »
  * « Page | sélecteur | si PDF multipage, requis | `IMPORT.PAGE_REQUIRED` »
  *
  * Les deux valeurs que M2 (partie M) donne — quatre formats, 60 Mo — sont des contraintes
@@ -16,15 +18,19 @@ import type { Finding, Outcome } from '@azimut/core-model';
 export const MAX_PLAN_BYTES = 60 * 1024 * 1024;
 
 /**
- * M2 (partie M) : « PDF, PNG, JPG, DWG ». Le type est jugé sur le type de média quand le
- * navigateur en donne un, sur l'extension sinon — un DWG n'a pas de type de
- * média enregistré, et beaucoup de navigateurs rendent une chaîne vide.
+ * M2 (partie M) : « PDF vectoriel, DXF, PNG, JPG ». Le type est jugé sur le type de
+ * média quand le navigateur en donne un, sur l'extension sinon — beaucoup de
+ * navigateurs rendent une chaîne vide pour un DXF.
+ *
+ * Le DWG n'y figure pas : un `.dwg` est refusé par `IMPORT.FORMAT_UNSUPPORTED`,
+ * comme tout format hors de la liste. Qu'un PDF soit vectoriel ne se juge pas
+ * sur son type ni sur son extension ; ce n'est pas vérifié ici.
  */
 export const ACCEPTED_PLAN_FORMATS = [
   { key: 'pdf', mediaTypes: ['application/pdf'], extensions: ['.pdf'] },
   { key: 'png', mediaTypes: ['image/png'], extensions: ['.png'] },
   { key: 'jpg', mediaTypes: ['image/jpeg'], extensions: ['.jpg', '.jpeg'] },
-  { key: 'dwg', mediaTypes: ['image/vnd.dwg', 'application/acad'], extensions: ['.dwg'] },
+  { key: 'dxf', mediaTypes: ['image/vnd.dxf', 'application/dxf'], extensions: ['.dxf'] },
 ] as const;
 
 export type PlanFormatKey = (typeof ACCEPTED_PLAN_FORMATS)[number]['key'];

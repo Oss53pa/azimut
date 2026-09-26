@@ -19,7 +19,8 @@ function codes(over: Partial<PlanFile> = {}): string[] {
 }
 
 /**
- * M2 (partie M), étape 1 — « Fichier : PDF, PNG, JPG, DWG. 60 Mo maximum ».
+ * M2 (partie M), étape 1 — « Fichier : PDF vectoriel, DXF, PNG, JPG. 60 Mo
+ * maximum ». « Le DWG n'est pas accepté. »
  */
 describe('M2 (partie M) — import du fond de plan', () => {
   describe('format', () => {
@@ -39,12 +40,27 @@ describe('M2 (partie M) — import du fond de plan', () => {
     });
 
     /**
-     * Un DWG n'a pas de type de média enregistré et beaucoup de navigateurs
-     * rendent une chaîne vide. Le refuser pour cette raison rejetterait le
-     * format que les bureaux d'études emploient le plus.
+     * Beaucoup de navigateurs rendent une chaîne vide pour un DXF. Le refuser
+     * pour cette raison rejetterait le format de CAO que M2 retient.
      */
     it('reconnaît un fichier dont le navigateur ne donne pas le type', () => {
-      expect(acceptPlanFile(file({ name: 'plan.dwg', mediaType: '' })).ok).toBe(true);
+      expect(acceptPlanFile(file({ name: 'plan.dxf', mediaType: '' })).ok).toBe(true);
+    });
+
+    /**
+     * Version 26 : « Le DWG n'est pas accepté. » Ni par son extension, ni par
+     * les types de média qu'on lui connaît.
+     */
+    it('refuse un DWG, par son extension comme par son type de média', () => {
+      expect(codes({ name: 'plan.dwg', mediaType: '' })).toEqual(['IMPORT.FORMAT_UNSUPPORTED']);
+      expect(codes({ name: 'plan.dwg', mediaType: 'image/vnd.dwg' }))
+        .toEqual(['IMPORT.FORMAT_UNSUPPORTED']);
+      expect(codes({ name: 'plan.dwg', mediaType: 'application/acad' }))
+        .toEqual(['IMPORT.FORMAT_UNSUPPORTED']);
+    });
+
+    it('les formats acceptés sont exactement ceux que M2 nomme', () => {
+      expect(ACCEPTED_PLAN_FORMATS.map(f => f.key)).toEqual(['pdf', 'png', 'jpg', 'dxf']);
     });
 
     it('reconnaît l’extension quelle que soit sa casse', () => {
