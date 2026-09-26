@@ -1374,3 +1374,123 @@ une autre numérisée passe pour vectoriel, quelle que soit la page choisie.
   commencée.
 - L'écran d'évacuation (P10).
 - `lineFingerprint`, hors des empreintes.
+
+## Nature jugée sur la page retenue, tris d'affichage du studio, fenêtre des relevés, ce que la version 29 ferme
+
+| Ce que la version 29 pose | Où | État |
+| --- | --- | --- |
+| M2 — la nature d'un document de plusieurs pages se juge sur la page retenue, indéterminée quand le suivi ne conclut pas | `pdf-page-nature.ts`, `pdf-objects.ts`, `pdf-syntax.ts` (studio) ; `precisionOfPage` | Fait |
+| A9 — les tris d'affichage du studio entrent dans la tâche, par la langue active déclarée | Tâche redéclarée ci-dessous | Déclarée |
+| D13 — taille de fenêtre déclarée avec tout relevé qui dépend d'un rendu | Essai `m8-tranche` ; `docs/releves-m8-anterieurs.json` ; essai `d13-releves-fenetre` | Fait |
+
+Les deux points ouverts après la version 28 sont fermés : la précision d'un
+PDF de plusieurs pages jugée sur le fichier entier, et les tris d'affichage
+du studio laissés hors de la tâche.
+
+**La page retenue.** Le lecteur suit l'arbre des pages depuis le catalogue
+que désigne le dernier `/Root` : le nœud `/Pages`, puis les `/Kids` de
+chaque nœud, dans leur ordre. Pour chaque page, il lit ses flux de contenu,
+puis chaque objet externe que ce contenu invoque par `Do`, résolu dans les
+ressources de la page ou dans celles qu'elle hérite de l'arbre. Un
+formulaire se lit comme du contenu, avec ses propres ressources ; une image
+ne porte aucun tracé.
+
+Deux choses ne sont pas suivies, et l'une comme l'autre ne peut que faire
+manquer un tracé, jamais en prêter un :
+- une ressource déclarée et jamais invoquée. Des ressources partagées au
+  niveau de l'arbre porteraient sinon les formulaires des autres pages ;
+- une annotation, qui se superpose à la page sans en être le contenu.
+
+| Ce que le suivi de la page montre | Nature | `content_kind` |
+| --- | --- | --- |
+| Au moins un tracé lu | `vector` | `vector` |
+| Tout lu, aucun tracé | `pdf_without_paths` | `raster` |
+| Aucun tracé lu, et un objet que le suivi n'a pas pu lire | `undetermined` | `undetermined` |
+| Arbre des pages illisible, bouclé, ou page qu'il n'atteint pas | `undetermined` | `undetermined` |
+
+Un objet que le suivi ne lit pas : un flux introuvable ou non décodable, un
+nom invoqué absent des ressources, un objet externe d'un type inconnu, un
+formulaire qui s'invoque lui-même. Un flux de tracés que nul arbre de pages
+ne désigne ne rend donc plus un fichier vectoriel : c'était le cas du fichier
+d'essai de bout en bout, reconstruit avec un arbre.
+
+Le nombre de pages suit la même lecture : l'arbre suivi jusqu'au bout fait
+foi, puis le `/Count` du nœud des pages, puis les objets `/Page`.
+
+L'inspection porte une nature par page, lue une fois au dépôt. Changer de
+page rejuge sans relire le fichier. Nouvel essai de bout en bout : un PDF de
+deux pages dont seule la première porte un tracé lève l'avertissement sur la
+seconde, pas sur la première.
+
+**La fenêtre des relevés.** L'essai du critère 4 de M8 relève la fenêtre sur
+la page mesurée, comme il relève la machine, et refuse d'écrire un relevé
+sans elle. Le relevé porte aussi avec quels autres relevés il se compare.
+
+Les relevés antérieurs n'existaient plus que dans l'historique git : chaque
+passage réécrivait le fichier. Les 43 sont rétablis tels qu'ils ont été
+écrits dans `docs/releves-m8-anterieurs.json`, chacun marqué non comparable.
+Aucun ne déclare sa fenêtre ; les 22 premiers sont en outre des exécutions
+uniques, antérieures au protocole D13. La fenêtre que la configuration
+imposait à chaque commit est jointe à titre d'indication, déduite de
+`playwright.config.ts` : 1280 × 720 pour 42 d'entre eux, 1366 × 768 pour le
+dernier (`ae18323`).
+
+### Tâche déclarée : remplacement des comparaisons localisées, version 29
+
+Elle remplace la déclaration de la version 28.
+
+**Objet.** A9 : « Comparer deux chaînes [...] se fait par leurs points de
+code, jamais par une comparaison sensible à la langue ». « Dans
+l'interface, un tri selon la langue de l'utilisateur est légitime, à
+condition que la langue soit déclarée explicitement et non déduite de la
+machine. » Version 29 : les tris d'affichage du studio « passent par la
+langue active, déclarée explicitement ».
+
+**Portée, première partie : ce qui produit.** Inchangée : les 155
+occurrences relevées dans `tests/a9-releve-comparaisons-localisees.json`,
+dans 66 fichiers. Chacune passe à `codePointCompare`.
+
+**Portée, seconde partie : le studio hors du code qui alimente une
+empreinte.** 64 occurrences dans 42 fichiers, relevées par la même
+expression que le contrôle, dont 6 dans 3 fichiers d'essai. Les 58 hors
+essais sont le décompte que donnait la version 28 ; elle les appelait toutes
+des tris d'affichage, ce qui était inexact. Lues une à une, elles se
+rangent en trois groupes :
+
+| Ce qu'elles comparent | Occurrences | Traitement |
+| --- | --- | --- |
+| Du texte affiché : noms de sites, libellés de légende | 4, dans `PortfolioView`, `SiteRecordAdapter`, `reference-repository`, `legend` | Langue active, déclarée explicitement. `legend` déclare déjà la sienne |
+| Des identifiants, des codes, des clés, des dates : départages de tri, ordre des options de filtre et des groupes, sélection (E6.1), magnétisme (E8.2), dernier passage de validation | 49, dans 33 fichiers | Points de code, `codePointCompare` |
+| Un pliage de casse avec une langue fixe déjà déclarée (`'fr'`) | 5 : unicité d'un nom de site, d'un nom de bâtiment ou de niveau, d'un code de cellule (4) ; recherche du tableau des messages (1) | Unicité : indépendante de la langue active. Recherche : langue active |
+
+Les 6 occurrences des essais comparent des identifiants : points de code.
+
+Ordonner un identifiant selon la langue de l'interface n'aurait pas de sens,
+et ferait changer un départage à chaque bascule de langue ; A9 donne pour
+règle les points de code, la langue n'étant qu'une exception admise pour
+l'affichage. De même, un nom ne doit pas être accepté ou refusé selon la
+langue de l'interface.
+
+**Échéance.** Avant le premier livrable réel.
+
+**Vérification.** Le relevé de la première partie tombe à zéro et
+disparaît. Dans le studio, plus aucun appel ne déduit la langue de la
+machine ; les 4 tris de texte reçoivent la langue active. Chaîne A13.2
+complète.
+
+**État.** Non commencée. Le contrôle automatique empêche le relevé de la
+première partie de croître ; rien n'empêche encore la seconde de croître.
+
+### Reste ouvert après la version 29
+
+**Le studio n'est pas gardé.** Le contrôle automatique d'A9 ne couvre que ce
+qui produit. Un tri du studio qui déduit la langue de la machine peut encore
+s'ajouter sans que rien ne le refuse, avant que la tâche ne s'exécute.
+
+**Toujours au registre.**
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
+- `lineFingerprint`, hors des empreintes.
