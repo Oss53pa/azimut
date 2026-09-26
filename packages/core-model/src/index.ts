@@ -122,8 +122,14 @@ export {
 export type {
   TenantRegistry, TenantSignRegulation, TenantSignDossier, TenantSignPart, TenantDossierState,
 } from './tenant-registry.js';
-export { readEdgeAvailability, isClosedAt, closuresOverlapping, isLocalInstant } from './edge-availability.js';
-export type { EdgeAvailability, EdgeClosure } from './edge-availability.js';
+export {
+  readEdgeAvailability, isClosedAt, closuresOverlapping, isLocalInstant, CLOSURE_REASONS, isClosureReason,
+} from './edge-availability.js';
+export type { EdgeAvailability, EdgeClosure, ClosureReason } from './edge-availability.js';
+export {
+  serializeEdgeAvailability, validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
+} from './edge-closure-commands.js';
+export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

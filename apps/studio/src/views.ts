@@ -14,6 +14,7 @@ export type ViewId =
   | 'plan-calibration'
   | 'footprints'
   | 'graph'
+  | 'closures'
   | 'destinations'
   | 'supports'
   | 'floor-plans'

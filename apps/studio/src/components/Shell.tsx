@@ -105,7 +105,12 @@ export function Shell(): JSX.Element {
   }
 
   return (
-    <SiteDataProvider site={site.state.value} vocabulary={vocabulary.state} wayfinding={wayfinding.state}>
+    <SiteDataProvider
+      site={site.state.value}
+      vocabulary={vocabulary.state}
+      wayfinding={wayfinding.state}
+      onReload={site.refresh}
+    >
       <I18nProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <HeaderBar

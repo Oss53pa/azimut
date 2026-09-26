@@ -2,7 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
-import { buildCommand } from '@azimut/core-model';
+import {
+  buildCommand, declareClosureCommand, withdrawClosureCommand, readEdgeAvailability, type Edge, type EntityCommand,
+} from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
 
@@ -184,5 +186,56 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await expect(callAs(ALICE, [
       { operation: 'create', table: 'pg_shadow', id: ALICE, after: { x: '1' } },
     ])).rejects.toThrow();
+  });
+
+  /**
+   * A5.3 — une fermeture se déclare par une commande `update` sur
+   * `edge.availability`, écrite en texte et reçue en jsonb, puis se retire.
+   */
+  it('déclare puis retire une fermeture d’arête, relue telle qu’écrite', async () => {
+    const { commands } = creation('00ee04', ORG);
+    const level = 'a7000000-0000-0000-0000-00000000ee04';
+    const n1 = 'a8000000-0000-0000-0000-00000000ee04';
+    const n2 = 'a8000000-0000-0000-0000-00000000ee05';
+    const edgeId = 'a9000000-0000-0000-0000-00000000ee04';
+    await callAs(ALICE, [
+      ...commands,
+      ...[n1, n2].map(id => ({ operation: 'create', table: 'node', id,
+        after: { id, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } })),
+      { operation: 'create', table: 'edge', id: edgeId,
+        after: { id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: '2', length_m: '5' } },
+    ]);
+    const edge: Edge = {
+      id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: 2, slope_pct: 0,
+      accessible: true, direction: 'both', evacuation_route: false, length_m: 5,
+    };
+    const payload = (c: EntityCommand) => ({ operation: c.operation, table: c.table, id: c.id, before: c.before, after: c.after });
+    const availability = async (): Promise<unknown> => db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      const rows = await tx.execute(sql`select availability from azimut.edge where id = ${edgeId}`);
+      return rows[0]?.['availability'];
+    });
+
+    const declared = declareClosureCommand(edge,
+      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works' },
+      { timestamp: '2026-09-26T00:00:00.000Z', declaredBy: null });
+    if (!declared.ok) throw new Error(JSON.stringify(declared.findings));
+    await callAs(ALICE, [payload(declared.value)]);
+    const read = readEdgeAvailability(await availability());
+    expect(read).toEqual({ readable: true, closures: [
+      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works', declared_by: null },
+    ] });
+
+    // Bob n'écrit pas sur l'arête d'une autre organisation : la ligne lui est invisible.
+    await callAs(BOB, [payload(declared.value)]);
+    expect(readEdgeAvailability(await availability())).toEqual(read);
+
+    const closure = read?.readable === true ? read.closures[0] : undefined;
+    if (closure === undefined || read === undefined) throw new Error('fermeture absente');
+    const withdrawn = withdrawClosureCommand({ ...edge, availability: read }, closure, '2026-09-26T00:00:01.000Z');
+    if (!withdrawn.ok) throw new Error(JSON.stringify(withdrawn.findings));
+    await callAs(ALICE, [payload(withdrawn.value)]);
+    expect(await availability()).toBeNull();
   });
 });

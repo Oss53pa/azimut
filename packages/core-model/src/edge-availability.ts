@@ -34,6 +34,18 @@ export type EdgeAvailability =
   | { readonly readable: true; readonly closures: readonly EdgeClosure[] }
   | { readonly readable: false };
 
+/**
+ * Les motifs d'une fermeture, en liste fermée (décision du 26/09/2026).
+ * Un motif hors liste lu en base n'est pas rejeté : l'interface l'affiche
+ * tel quel ; le formulaire, lui, n'en propose pas d'autre.
+ */
+export const CLOSURE_REASONS = ['works', 'event', 'security', 'maintenance', 'other'] as const;
+export type ClosureReason = (typeof CLOSURE_REASONS)[number];
+
+export function isClosureReason(value: string): value is ClosureReason {
+  return (CLOSURE_REASONS as readonly string[]).includes(value);
+}
+
 const LOCAL_INSTANT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/;
 
 /** Vrai d'un instant au format local du site, `AAAA-MM-JJTHH:MM:SS`. */

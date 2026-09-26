@@ -31,6 +31,7 @@ import { EditorView } from '../editor/EditorView.js';
 import { SiteSheetView } from '../views/SiteSheetView.js';
 import { StaggeringView } from '../views/StaggeringView.js';
 import { ProfilesView } from '../views/ProfilesView.js';
+import { ClosuresView } from '../views/ClosuresView.js';
 import { WallPlansView } from '../views/WallPlansView.js';
 import { AdInventoryView } from '../views/AdInventoryView.js';
 import { TenantRulesView } from '../views/TenantRulesView.js';
@@ -75,6 +76,7 @@ export function ViewRouter(
     case 'plan-calibration': return <PlanCalibrationView />;
     case 'footprints': return <FootprintsView onNavigate={onNavigate} />;
     case 'graph': return <GraphView onNavigate={onNavigate} />;
+    case 'closures': return <ClosuresView />;
     case 'destinations': return <DestinationsView onNavigate={onNavigate} />;
     case 'supports': return <SupportsView onNavigate={onNavigate} />;
     case 'floor-plans': return <FloorPlansView />;

@@ -67,6 +67,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'plan-calibration', labelKey: 'nav.item.calibration' },
       { view: 'footprints', labelKey: 'nav.item.footprints' },
       { view: 'graph', labelKey: 'nav.item.graph' },
+      { view: 'closures', labelKey: 'nav.item.closures' },
       { view: 'checks', labelKey: 'nav.item.checks' },
       { view: 'site-sheet', labelKey: 'nav.item.sitesheet' },
       { view: 'destinations', labelKey: 'nav.item.destinations' },

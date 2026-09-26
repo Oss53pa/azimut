@@ -51,6 +51,11 @@ export const ERROR_CATALOG = {
   'GRAPH.EDGE_AVAILABILITY_UNREADABLE':     { severity: 'blocking', description: 'Disponibilité d’arête illisible' },
   'GRAPH.EVACUATION_EDGE_CLOSURE':          { severity: 'warning',  description: 'Chemin d’évacuation touché par une fermeture déclarée' },
   'GRAPH.ROUTE_INSTANT_INVALID':            { severity: 'blocking', description: 'Instant d’itinéraire hors du format local du site' },
+  'GRAPH.CLOSURE_RANGE_INVALID':            { severity: 'blocking', description: 'Fermeture aux bornes illisibles ou inversées' },
+  'GRAPH.CLOSURE_REASON_UNKNOWN':           { severity: 'blocking', description: 'Motif de fermeture hors de la liste' },
+  'GRAPH.CLOSURE_DUPLICATE':                { severity: 'blocking', description: 'Fermeture déjà déclarée sur cette arête' },
+  'GRAPH.CLOSURE_NOT_FOUND':                { severity: 'blocking', description: 'Fermeture à retirer absente de l’arête' },
+  'GRAPH.CLOSURE_AVAILABILITY_UNREADABLE':  { severity: 'blocking', description: 'Disponibilité illisible : réécriture refusée depuis le poste' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },
