@@ -8,7 +8,7 @@ import { join, resolve } from 'node:path';
  * différentes ne se comparent pas, et un relevé sans cette mention ne vaut
  * pas comme base de révision. »
  *
- * Le relevé du critère 4 de M8 est écrit par `tests/e2e/m8-tranche.spec.ts`.
+ * Le relevé du critère 4 de M8 (partie M) est écrit par `tests/e2e/m8-tranche.spec.ts`.
  * Les relevés antérieurs, pris sans cette mention, sont conservés dans
  * `docs/releves-m8-anterieurs.json` et marqués non comparables plutôt
  * qu'effacés.
@@ -31,7 +31,7 @@ function isWindow(value: unknown): boolean {
 }
 
 describe('D13 — un relevé qui dépend d’un rendu déclare sa fenêtre', () => {
-  it('le relevé du critère 4 de M8 déclare la fenêtre où il a été pris', () => {
+  it('le relevé du critère 4 de M8 (partie M) déclare la fenêtre où il a été pris', () => {
     expect(isWindow(field(read('releve-m8-parcours.json'), 'fenetre'))).toBe(true);
   });
 
