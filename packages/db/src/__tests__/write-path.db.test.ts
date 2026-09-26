@@ -277,5 +277,15 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await callAs(ALICE, [{ operation: 'delete', table: 'support_content_block', id: block }]);
     expect(await count('support_content_block', block)).toBe(0);
     expect(await count('support_face', face)).toBe(1);
+
+    // A5.6 — la face se modifie : gabarit et langues, écrits en texte, relus en jsonb.
+    await callAs(ALICE, [{ operation: 'update', table: 'support_face', id: face,
+      before: { template_key: null, langs: null }, after: { template_key: 'tpl-essai', langs: '["fr","en"]' } }]);
+    const faceRow = await db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      return tx.execute(sql`select template_key, langs from azimut.support_face where id = ${face}`);
+    });
+    expect(faceRow[0]).toEqual({ template_key: 'tpl-essai', langs: ['fr', 'en'] });
   });
 });

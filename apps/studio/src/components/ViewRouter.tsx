@@ -32,6 +32,7 @@ import { SiteSheetView } from '../views/SiteSheetView.js';
 import { StaggeringView } from '../views/StaggeringView.js';
 import { ProfilesView } from '../views/ProfilesView.js';
 import { ClosuresView } from '../views/ClosuresView.js';
+import { SupportFacesView } from '../views/SupportFacesView.js';
 import { WallPlansView } from '../views/WallPlansView.js';
 import { AdInventoryView } from '../views/AdInventoryView.js';
 import { TenantRulesView } from '../views/TenantRulesView.js';
@@ -94,6 +95,7 @@ export function ViewRouter(
     case 'charter': return <CharterView siteKey={siteKey} />;
     case 'templates': return <TemplatesView onNavigate={onNavigate} />;
     case 'faces': return <FacesView />;
+    case 'support-faces': return <SupportFacesView />;
     case 'wall-plans': return <WallPlansView />;
     case 'evacuation': return <EvacuationView onNavigate={onNavigate} />;
     case 'proofs': return <ProofsView onNavigate={onNavigate} />;

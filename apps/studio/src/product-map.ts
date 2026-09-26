@@ -131,6 +131,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'charter', labelKey: 'nav.item.charter' },
       { view: 'templates', labelKey: 'nav.item.templates' },
       { view: 'faces', labelKey: 'nav.item.faces' },
+      { view: 'support-faces', labelKey: 'nav.item.supportfaces' },
       { view: 'wall-plans', labelKey: 'nav.item.wallplans' },
       { view: 'evacuation', labelKey: 'nav.item.evacuation' },
       { view: 'proofs', labelKey: 'nav.item.proofs' },

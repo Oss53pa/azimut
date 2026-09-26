@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { refMultilevel } from '@azimut/testkit/sites';
 import {
-  declareWallPlanCommands, withdrawWallPlanCommand, inverseCommand, wallPlanFaceCount,
+  declareWallPlanCommands, withdrawWallPlanCommand, inverseCommand, supportFaceCount,
   type SiteData, type Support,
 } from '@azimut/core-model';
 
@@ -53,7 +53,7 @@ describe('T-2.9 — saisie d’un plan mural', () => {
       return out.ok ? undefined : out.findings[0]?.code;
     };
     expect(code(withFace([{ kind: 'map', block_index: 0 }]), support.id, 0)).toBe('LAYOUT.WALL_PLAN_DUPLICATE');
-    expect(code(refMultilevel, support.id, wallPlanFaceCount(refMultilevel, support.id))).toBe('LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE');
+    expect(code(refMultilevel, support.id, supportFaceCount(refMultilevel, support.id))).toBe('LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE');
     expect(code(refMultilevel, support.id, -1)).toBe('LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE');
     expect(code(refMultilevel, 'absent', 0)).toBe('LAYOUT.WALL_PLAN_SUPPORT_UNKNOWN');
   });

@@ -13,7 +13,7 @@
  */
 import type { SiteData } from './site.js';
 import type { ContentBlockInstance } from './site-signage.js';
-import { supportTypologyOf } from './site-signage.js';
+import { supportFaceCount } from './support-face-commands.js';
 import { buildCommand, type EntityCommand, type RowValues } from './site-commands.js';
 import type { Finding, Outcome } from './outcome.js';
 
@@ -32,16 +32,6 @@ const MODULE = '04-signaletique';
 
 function refusal(code: string, id: string, params: Record<string, string | number> = {}): Finding {
   return { code, severity: 'blocking', entity: { kind: 'support', id }, params, ruleRef: RULE_REF };
-}
-
-/**
- * Le nombre de faces d'un support : celui de sa typologie. Sans typologie, le
- * support n'offre que sa face 0.
- */
-export function wallPlanFaceCount(site: SiteData, supportId: string): number {
-  const support = site.supports.find(s => s.id === supportId);
-  if (support === undefined) return 0;
-  return supportTypologyOf(site.support_types, support)?.face_count ?? 1;
 }
 
 /** Les blocs de plan mural du site, face par face. */
@@ -68,7 +58,7 @@ export function declareWallPlanCommands(
   if (support === undefined) {
     return { ok: false, findings: [refusal('LAYOUT.WALL_PLAN_SUPPORT_UNKNOWN', supportId)] };
   }
-  const faces = wallPlanFaceCount(site, supportId);
+  const faces = supportFaceCount(site, supportId);
   if (!Number.isInteger(faceIndex) || faceIndex < 0 || faceIndex >= faces) {
     return { ok: false, findings: [refusal('LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE', supportId, { face: faceIndex, faces })] };
   }

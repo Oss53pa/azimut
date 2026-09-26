@@ -131,9 +131,13 @@ export {
 } from './edge-closure-commands.js';
 export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
 export {
-  WALL_PLAN_BLOCK_KIND, wallPlanFaceCount, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
+  WALL_PLAN_BLOCK_KIND, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
 } from './wall-plan-commands.js';
 export type { WallPlanEnvironment } from './wall-plan-commands.js';
+export {
+  supportFaceCount, validateFaceDraft, declareFaceCommand, updateFaceCommand,
+} from './support-face-commands.js';
+export type { FaceDraft, FaceEnvironment } from './support-face-commands.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

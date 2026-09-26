@@ -60,6 +60,11 @@ export const ERROR_CATALOG = {
   'LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE':     { severity: 'blocking', description: 'Plan mural demandé sur une face que le support n’a pas' },
   'LAYOUT.WALL_PLAN_DUPLICATE':             { severity: 'blocking', description: 'Plan mural déjà déclaré sur cette face' },
   'LAYOUT.WALL_PLAN_NOT_A_PLAN':            { severity: 'blocking', description: 'Retrait demandé sur un bloc qui ne porte pas de plan mural' },
+  'LAYOUT.FACE_SUPPORT_UNKNOWN':            { severity: 'blocking', description: 'Face demandée sur un support absent du site' },
+  'LAYOUT.FACE_INDEX_OUT_OF_RANGE':         { severity: 'blocking', description: 'Face que la typologie du support ne prévoit pas' },
+  'LAYOUT.FACE_ALREADY_DECLARED':           { severity: 'blocking', description: 'Face déjà déclarée sur ce support' },
+  'LAYOUT.FACE_TEMPLATE_UNKNOWN':           { severity: 'blocking', description: 'Gabarit de face inconnu du site' },
+  'LAYOUT.FACE_LANG_INACTIVE':              { severity: 'blocking', description: 'Langue de face hors des langues actives du site' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },

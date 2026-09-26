@@ -1,5 +1,5 @@
 import { type JSX, useMemo, useState } from 'react';
-import { declareWallPlanCommands, wallPlanFaceCount } from '@azimut/core-model';
+import { declareWallPlanCommands, supportFaceCount } from '@azimut/core-model';
 import { useSiteData } from '../../context/useSiteData.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import { Panel, SelectField, Button, StateBanner, Note, SPACE, type Option } from '../../components/ui/index.js';
@@ -29,7 +29,7 @@ export function WallPlanEntry({ write }: WallPlanEntryProps): JSX.Element {
       .map(s => ({ value: s.id, label: `${s.code ?? s.id} · ${labels.node(s.node_id)}` })),
     [site, labels],
   );
-  const faces = supportId === '' ? 0 : wallPlanFaceCount(site, supportId);
+  const faces = supportId === '' ? 0 : supportFaceCount(site, supportId);
   const faceOptions: readonly Option[] = Array.from({ length: faces }, (_, i) => ({
     value: String(i), label: t('wallplans.entry.face.option', { index: i }),
   }));

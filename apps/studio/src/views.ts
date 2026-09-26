@@ -35,6 +35,7 @@ export type ViewId =
   | 'charter'
   | 'templates'
   | 'faces'
+  | 'support-faces'
   | 'wall-plans'
   | 'evacuation'
   | 'proofs'
