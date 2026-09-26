@@ -2121,6 +2121,7 @@ Les seuils du cahier des charges principal existent sans méthode de mesure, ce 
 - Chaque mesure porte sur un site de référence nommé, jamais sur un site improvisé.
 - 5 exécutions, mesure retenue = médiane. La première exécution est écartée.
 - Base amorcée, caches vidés entre chaque exécution, condition déclarée dans le résultat.
+- **Taille de fenêtre déclarée avec le relevé**, pour toute mesure qui dépend d'un rendu : c'est elle qui détermine la surface à dessiner. Deux relevés pris dans des fenêtres différentes ne se comparent pas, et un relevé sans cette mention ne vaut pas comme base de révision.
 - Un dépassement de seuil fait échouer la chaîne d'intégration, il ne produit pas un simple avertissement.
 - Les seuils actuels ne reposent sur aucune mesure. Ce sont des cibles, à réviser après le premier site réel modélisé, et la révision doit être tracée.
 
@@ -5329,6 +5330,8 @@ C'est l'écran d'entrée réel du produit, et le plus important de la tranche. T
 **Le format se juge sur le contenu, jamais sur l'extension ni sur le type annoncé.** Un fichier dont le contenu ne correspond à aucun des formats acceptés est refusé, `IMPORT.FORMAT_UNSUPPORTED`.
 
 **Précision limitée.** Un fichier d'un format reconnu mais sans contenu vectoriel exploitable est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED` : l'image en mode point, le PDF qui se présente comme vectoriel sans l'être, et le contenu illisible, qui n'est jamais présumé vectoriel.
+
+Pour un document de plusieurs pages, la nature se juge **sur la page retenue**, en suivant les objets qu'elle référence, et non sur le fichier entier : les tracés d'une autre page masqueraient l'absence de tracés sur celle qui est importée. Quand le suivi ne permet pas de conclure, la nature est indéterminée, jamais vectorielle.
 
 Pour un fichier de CAO, la qualification décrite en partie D s'exécute avant tout import et affiche son rapport : proportion de polylignes fermées, calques exploitables, cohérence des unités, références manquantes, doublons, nombre de niveaux. En dessous du seuil, l'écran recommande explicitement le calage manuel et propose les deux voies sans en imposer une.
 
@@ -8633,3 +8636,5 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 298. A9 : portée élargie à tout code qui produit une sortie ou une empreinte
 299. M2 : format jugé sur le contenu
 300. A5.2 : nature du contenu d'une source de plan
+301. M2 : nature jugée sur la page retenue
+302. D13 : taille de fenêtre déclarée avec le relevé
