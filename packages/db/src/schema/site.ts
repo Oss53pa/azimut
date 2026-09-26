@@ -124,6 +124,9 @@ export const planSource = azimut.table('plan_source', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   storage_path: text('storage_path').notNull(),
   media_type: text('media_type').notNull(),
+  // A5.2 — nature réelle du contenu, constatée à l'import (migration 0059,
+  // qui porte aussi la contrainte des trois valeurs).
+  content_kind: text('content_kind').notNull(),
   uploaded_at: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_plan_source_org').on(t.org_id),

@@ -19,6 +19,19 @@ import type { Outcome } from './outcome.js';
  * métrique ou sans dimension, et le pixel n'entre que par l'entrée.
  */
 
+/**
+ * A5.2, version 28 — la nature réelle du contenu d'un fond, constatée à
+ * l'import et non déduite de l'extension. `raster` : aucun contenu vectoriel
+ * exploitable ; `undetermined` : un contenu que le produit n'a pas su lire, et
+ * qui n'est jamais présumé vectoriel (M2, partie M).
+ */
+export const PLAN_CONTENT_KINDS = ['vector', 'raster', 'undetermined'] as const;
+export type PlanContentKind = (typeof PLAN_CONTENT_KINDS)[number];
+
+export function isPlanContentKind(value: string): value is PlanContentKind {
+  return (PLAN_CONTENT_KINDS as readonly string[]).includes(value);
+}
+
 /** Fond de plan importé pour un niveau. Un fichier, pas une géométrie. */
 export type PlanSource = {
   readonly id: string;
@@ -26,6 +39,12 @@ export type PlanSource = {
   readonly level_id: string;
   readonly storage_path: string;
   readonly media_type: string;
+  /**
+   * « Un plan sans contenu vectoriel reste imprécis toute sa vie : cette
+   * information survit à l'écran d'import et expliquera plus tard un résidu
+   * de calage médiocre. »
+   */
+  readonly content_kind: PlanContentKind;
   /** Horodatage ISO 8601 de l'import. */
   readonly uploaded_at: string;
 };

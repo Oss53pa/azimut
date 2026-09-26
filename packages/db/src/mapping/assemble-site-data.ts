@@ -10,7 +10,7 @@
  */
 import {
   readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
-  isParkingSpaceKind,
+  isParkingSpaceKind, isPlanContentKind,
 } from '@azimut/core-model';
 import type {
   FootprintKind,
@@ -18,7 +18,7 @@ import type {
   Organization, Site, Building, Level, Footprint, Volume,
   GraphNode, Edge, VerticalLink, BuildingLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
-  PlanSource, PlanCalibration,
+  PlanSource, PlanCalibration, PlanContentKind,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
   PictogramRegistry, SiteZone, SiteZoneKind, ParkingSpace, ParkingSpaceKind,
   SiteRulesBinding,
@@ -57,6 +57,15 @@ function toZoneKind(raw: string): SiteZoneKind {
  */
 function toSpaceKind(raw: string): ParkingSpaceKind {
   return isParkingSpaceKind(raw) ? raw : 'standard';
+}
+
+/**
+ * La nature du contenu d'un fond, ou `undetermined`. M2 (partie M) : un contenu
+ * qui n'a pas été lu n'est « jamais présumé vectoriel » ; une valeur inconnue
+ * n'a pas davantage été lue. La contrainte de la migration 0059 l'exclut déjà.
+ */
+function toPlanContentKind(raw: string): PlanContentKind {
+  return isPlanContentKind(raw) ? raw : 'undetermined';
 }
 
 /**
@@ -128,6 +137,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     level_id: p.level_id,
     storage_path: p.storage_path,
     media_type: p.media_type,
+    content_kind: toPlanContentKind(p.content_kind),
     uploaded_at: isoString(p.uploaded_at),
   }));
 

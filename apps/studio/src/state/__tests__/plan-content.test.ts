@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { deflateSync } from 'node:zlib';
-import {
-  judgePlanPrecision, planPrecisionWarnings, sniffPlanContent, unreadablePlanWarnings,
-} from '../plan-content.js';
+import { inspectPlanContent, planPrecisionWarnings, sniffPlanFormat } from '../plan-content.js';
+import type { PlanPrecision } from '../plan-content.js';
+import { countPdfPages } from '../../domain/pdf-pages.js';
 import { countPaintedPaths } from '../../domain/pdf-painted-paths.js';
 
 /**
@@ -55,14 +55,22 @@ function dxf(sections: readonly [string, readonly string[]][]): Uint8Array {
   return latin1(lines.join('\r\n'));
 }
 
+async function judgePlanPrecision(bytes: Uint8Array): Promise<PlanPrecision> {
+  return (await inspectPlanContent(bytes)).precision;
+}
+
+async function warningsOf(bytes: Uint8Array, name: string) {
+  return planPrecisionWarnings(await judgePlanPrecision(bytes), name);
+}
+
 describe('M2 — la nature du fichier se lit dans ses octets', () => {
   it('reconnaît PDF, PNG, JPEG et DXF, texte comme binaire', () => {
-    expect(sniffPlanContent(pdf(plain('')))).toBe('pdf');
-    expect(sniffPlanContent(PNG_HEAD)).toBe('png');
-    expect(sniffPlanContent(JPEG_HEAD)).toBe('jpeg');
-    expect(sniffPlanContent(dxf([['ENTITIES', ['LINE']]]))).toBe('dxf');
-    expect(sniffPlanContent(latin1('AutoCAD Binary DXF\r\n\x1a\0'))).toBe('dxf');
-    expect(sniffPlanContent(latin1('PK\x03\x04'))).toBe('unknown');
+    expect(sniffPlanFormat(pdf(plain('')))).toBe('pdf');
+    expect(sniffPlanFormat(PNG_HEAD)).toBe('png');
+    expect(sniffPlanFormat(JPEG_HEAD)).toBe('jpg');
+    expect(sniffPlanFormat(dxf([['ENTITIES', ['LINE']]]))).toBe('dxf');
+    expect(sniffPlanFormat(latin1('AutoCAD Binary DXF\r\n\x1a\0'))).toBe('dxf');
+    expect(sniffPlanFormat(latin1('PK\x03\x04'))).toBeNull();
   });
 });
 
@@ -144,7 +152,7 @@ describe('M2 — un DXF est vectoriel s’il porte une entité géométrique', (
 
 describe('M2 — IMPORT.RASTER_PRECISION_LIMITED, un avertissement jugé sur le contenu', () => {
   it('une image en mode point lève l’avertissement', async () => {
-    const warnings = await planPrecisionWarnings(PNG_HEAD, 'niveau-0.png');
+    const warnings = await warningsOf(PNG_HEAD, 'niveau-0.png');
     expect(warnings).toEqual([{
       code: 'IMPORT.RASTER_PRECISION_LIMITED',
       severity: 'warning',
@@ -155,24 +163,71 @@ describe('M2 — IMPORT.RASTER_PRECISION_LIMITED, un avertissement jugé sur le 
   });
 
   it('c’est le contenu qui compte : un JPEG nommé .pdf, un PDF nommé .png', async () => {
-    const jpegAsPdf = await planPrecisionWarnings(JPEG_HEAD, 'plan.pdf');
+    const jpegAsPdf = await warningsOf(JPEG_HEAD, 'plan.pdf');
     expect(jpegAsPdf.map(w => w.params['content'])).toEqual(['raster']);
-    expect(await planPrecisionWarnings(pdf(plain('0 0 m 1 0 l S')), 'plan.png')).toEqual([]);
+    expect(await warningsOf(pdf(plain('0 0 m 1 0 l S')), 'plan.png')).toEqual([]);
   });
 
   it('un PDF qui se présente comme vectoriel sans l’être lève l’avertissement', async () => {
     const scan = pdf(flate('q 595 0 0 842 0 0 cm /Im0 Do Q'), scannedImage);
-    const warnings = await planPrecisionWarnings(scan, 'plan-vectoriel.pdf');
+    const warnings = await warningsOf(scan, 'plan-vectoriel.pdf');
     expect(warnings.map(w => [w.code, w.severity, w.params['content']]))
       .toEqual([['IMPORT.RASTER_PRECISION_LIMITED', 'warning', 'pdf_without_paths']]);
   });
 
-  it('un fichier illisible lève l’avertissement, contenu indéterminé', () => {
-    expect(unreadablePlanWarnings('plan.pdf').map(w => [w.code, w.params['content']]))
-      .toEqual([['IMPORT.RASTER_PRECISION_LIMITED', 'undetermined']]);
+  it('un fond vectoriel ne lève rien', async () => {
+    expect(await warningsOf(dxf([['ENTITIES', ['LINE']]]), 'plan.dxf')).toEqual([]);
+  });
+});
+
+/** Un PDF fait d'objets écrits en clair, et d'une fin libre (bande-annonce). */
+function pdfObjects(objects: readonly string[], tail: string): Uint8Array {
+  const body = objects.map((o, i) => `${i + 1} 0 obj\n${o}\nendobj\n`).join('');
+  return latin1(`%PDF-1.7\n${body}${tail}%%EOF\n`);
+}
+
+const pageTree = (count: number): string[] => [
+  '<< /Type /Catalog /Pages 2 0 R >>',
+  `<< /Type /Pages /Kids [] /Count ${count} >>`,
+  ...Array.from({ length: count }, () => '<< /Type /Page /Parent 2 0 R >>'),
+];
+
+describe('M2 — le nombre de pages d’un PDF se lit dans son arbre des pages', () => {
+  it('lit le compte du nœud des pages que désigne le catalogue', async () => {
+    expect(await countPdfPages(pdfObjects(pageTree(3), 'trailer\n<< /Root 1 0 R >>\n'))).toBe(3);
+    expect(await countPdfPages(pdfObjects(pageTree(1), 'trailer\n<< /Root 1 0 R >>\n'))).toBe(1);
   });
 
-  it('un fond vectoriel ne lève rien', async () => {
-    expect(await planPrecisionWarnings(dxf([['ENTITIES', ['LINE']]]), 'plan.dxf')).toEqual([]);
+  it('une mise à jour incrémentale l’emporte sur la révision précédente', async () => {
+    const update = '2 0 obj\n<< /Type /Pages /Kids [] /Count 2 >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n';
+    expect(await countPdfPages(pdfObjects(pageTree(3), `trailer\n<< /Root 1 0 R >>\n${update}`))).toBe(2);
+  });
+
+  it('lit un catalogue rangé dans un flux d’objets compressé', async () => {
+    const catalog = '<< /Type /Catalog /Pages 2 0 R >>';
+    const pages = '<< /Type /Pages /Kids [] /Count 4 >>';
+    const header = `1 0 2 ${catalog.length + 1} `;
+    const packed = new Uint8Array(deflateSync(latin1(`${header}${catalog} ${pages}`)));
+    const objStm = latin1(`%PDF-1.7\n10 0 obj\n<< /Type /ObjStm /N 2 /First ${header.length} /Filter /FlateDecode /Length ${packed.length} >>\nstream\n`);
+    const tail = latin1('\nendstream\nendobj\n11 0 obj\n<< /Type /XRef /Root 1 0 R /Length 0 >>\nstream\n\nendstream\nendobj\n%%EOF\n');
+    const bytes = new Uint8Array(objStm.length + packed.length + tail.length);
+    bytes.set(objStm, 0);
+    bytes.set(packed, objStm.length);
+    bytes.set(tail, objStm.length + packed.length);
+    expect(await countPdfPages(bytes)).toBe(4);
+  });
+
+  it('sans arbre lisible, compte les objets de type page', async () => {
+    const pages = ['<< /Type /Page >>', '<< /Type /Page >>', '<< /Type /Pages /Count 0 >>'];
+    expect(await countPdfPages(pdfObjects(pages, ''))).toBe(2);
+  });
+
+  it('rien de lisible : le nombre de pages est inconnu, et non supposé', async () => {
+    expect(await countPdfPages(latin1('%PDF-1.4 fond de plan d’essai'))).toBeNull();
+  });
+
+  it('l’inspection porte le nombre de pages d’un PDF, et nul autre', async () => {
+    expect((await inspectPlanContent(pdfObjects(pageTree(5), 'trailer\n<< /Root 1 0 R >>\n'))).pageCount).toBe(5);
+    expect((await inspectPlanContent(PNG_HEAD)).pageCount).toBeNull();
   });
 });

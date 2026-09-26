@@ -76,6 +76,7 @@ export const refMultilevel: SiteData = {
       level_id: 'lvl-ml-rdc',
       storage_path: 'plans/site-multilevel-001/lvl-ml-rdc.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
     {
@@ -84,6 +85,7 @@ export const refMultilevel: SiteData = {
       level_id: 'lvl-ml-r1',
       storage_path: 'plans/site-multilevel-001/lvl-ml-r1.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:05:00.000Z',
     },
   ],

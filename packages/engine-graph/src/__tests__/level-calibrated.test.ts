@@ -22,6 +22,7 @@ function source(id: string, levelId: string): PlanSource {
     level_id: levelId,
     storage_path: `plans/${id}.png`,
     media_type: 'image/png',
+    content_kind: 'raster',
     uploaded_at: '2026-01-05T09:00:00.000Z',
   };
 }

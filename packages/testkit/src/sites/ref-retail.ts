@@ -243,6 +243,7 @@ function source(
     level_id: levelId,
     storage_path: `plans/site-retail-001/${levelId}.png`,
     media_type: 'image/png',
+    content_kind: 'raster',
     uploaded_at: `2026-02-10T${time}:00.000Z`,
   };
 }

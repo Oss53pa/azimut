@@ -84,6 +84,7 @@ export const refBroken: SiteData = {
       level_id: 'lvl-brk-rdc',
       storage_path: 'plans/site-broken-001/lvl-brk-rdc.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],

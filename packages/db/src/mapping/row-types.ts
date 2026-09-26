@@ -79,6 +79,7 @@ export type PlanSourceRow = {
   readonly level_id: string;
   readonly storage_path: string;
   readonly media_type: string;
+  readonly content_kind: string;
   readonly uploaded_at: TimestampValue;
 };
 

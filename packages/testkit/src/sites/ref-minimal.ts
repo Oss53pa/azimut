@@ -70,6 +70,7 @@ export const refMinimal: SiteData = {
       level_id: 'lvl-001',
       storage_path: 'plans/site-minimal-001/lvl-001.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],

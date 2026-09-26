@@ -63,6 +63,7 @@ export const refAdversarial: SiteData = {
       level_id: 'lvl-adv-001',
       storage_path: 'plans/site-adversarial-001/lvl-adv-001.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],

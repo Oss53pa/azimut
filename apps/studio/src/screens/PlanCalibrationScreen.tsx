@@ -1,7 +1,7 @@
 import { type JSX } from 'react';
 import {
   Panel, ScreenStates, NumericField, AngleField, Button, StatusBar,
-  StateBanner, Tag, SPACE, TEXT,
+  StateBanner, Tag, SPACE, TEXT, DIMENSIONLESS,
 } from '../components/ui/index.js';
 import type { ScreenState, StatusItem } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -45,6 +45,14 @@ export type PlanCalibrationScreenProps = {
    * l'écran le transmet sans le lire.
    */
   readonly onPickFile: (file: PlanFile, content: Blob) => void;
+  /**
+   * M2 (partie M) : « Page | sélecteur | si PDF multipage, requis ». Le nombre
+   * de pages lu dans le contenu du fond ; `null` pour un fond d'une seule page
+   * ou qui n'est pas un PDF. Le champ ne paraît que pour un PDF multipage.
+   */
+  readonly pageCount: number | null;
+  readonly page: number | null;
+  readonly onPage: (page: number | null) => void;
   /** M2 (partie M), action « Remplacer le fond ». */
   readonly onReplaceFile?: ((file: PlanFile) => void) | undefined;
   /**
@@ -140,13 +148,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
               onChange={event => {
                 const file = event.target.files?.[0];
                 if (file === undefined) return;
-                props.onPickFile({
-                  name: file.name,
-                  byteSize: file.size,
-                  mediaType: file.type,
-                  pageCount: null,
-                  page: null,
-                }, file);
+                props.onPickFile({ name: file.name, byteSize: file.size, page: null }, file);
               }}
             />
             {draft.plan !== null && (
@@ -166,20 +168,26 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
                   onChange={event => {
                     const file = event.target.files?.[0];
                     if (file === undefined) return;
-                    props.onReplaceFile?.({
-                      name: file.name,
-                      byteSize: file.size,
-                      mediaType: file.type,
-                      pageCount: null,
-                      page: null,
-                    });
+                    props.onReplaceFile?.({ name: file.name, byteSize: file.size, page: null });
                   }}
                 />
               </>
             )}
-            <Anomaly message={messageFor(
-              'IMPORT.FORMAT_UNSUPPORTED', 'IMPORT.FILE_TOO_LARGE', 'IMPORT.PAGE_REQUIRED',
-            )} />
+            {props.pageCount !== null && props.pageCount > 1 && (
+              <NumericField
+                label={t('calib.plan.page')}
+                unit={DIMENSIONLESS}
+                value={props.page}
+                onChange={props.onPage}
+                step={1}
+                min={1}
+                max={props.pageCount}
+                hint={t('calib.plan.pages', { pages: String(props.pageCount) })}
+                error={messageFor('IMPORT.PAGE_REQUIRED')}
+                disabled={busy}
+              />
+            )}
+            <Anomaly message={messageFor('IMPORT.FORMAT_UNSUPPORTED', 'IMPORT.FILE_TOO_LARGE')} />
           </div>
         </Panel>
 

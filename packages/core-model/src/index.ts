@@ -27,9 +27,9 @@ export { edgeLengthBetween, computeEdgeLengths } from './edge-length.js';
 export type { EdgeEnd, EdgeLengthInput } from './edge-length.js';
 export {
   isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
-  firstCalibration,
+  firstCalibration, PLAN_CONTENT_KINDS, isPlanContentKind,
 } from './plan.js';
-export type { PlanSource, PlanCalibration, SiteOriginBearer } from './plan.js';
+export type { PlanSource, PlanCalibration, PlanContentKind, SiteOriginBearer } from './plan.js';
 export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';
 export type { ActiveLang } from './lang.js';
 export {

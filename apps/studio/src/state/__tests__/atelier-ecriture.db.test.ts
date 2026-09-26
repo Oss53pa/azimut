@@ -145,7 +145,7 @@ afterAll(async () => {
 // ---------------------------------------------------------------------------
 
 const PLAN: AcceptedPlan = {
-  format: 'pdf', mediaType: 'application/pdf', byteSize: 2048, page: 1,
+  format: 'pdf', mediaType: 'application/pdf', byteSize: 2048, page: 1, contentKind: 'raster',
 };
 
 const CALIBRATION_WRITE: CalibrationWrite = {
@@ -176,10 +176,12 @@ describe('M2 (partie M) — le calage s’écrit', () => {
     await apply(calibrationCommands(PLAN, calibration(), ORIGIN, CALIBRATION_WRITE));
 
     const source = await alice`
-      select level_id, media_type, storage_path
+      select level_id, media_type, storage_path, content_kind
       from azimut.plan_source where id = ${PLAN_SOURCE}`;
     expect(source[0]?.['level_id']).toBe(LEVEL);
     expect(source[0]?.['media_type']).toBe('application/pdf');
+    // A5.2, version 28 : la nature du contenu survit à l'écran d'import.
+    expect(source[0]?.['content_kind']).toBe('raster');
 
     const points = await alice`
       select ordinal, image_x_px, image_y_px from azimut.plan_calibration_point

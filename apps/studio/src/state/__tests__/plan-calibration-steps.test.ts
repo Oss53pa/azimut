@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { stepOf, blockingReason, EMPTY_DRAFT, CALIBRATION_STEPS } from '../plan-calibration-steps.js';
 import type { CalibrationDraft } from '../plan-calibration-steps.js';
 
-const PLAN = { format: 'pdf', mediaType: 'application/pdf', byteSize: 1, page: 1 } as const;
+const PLAN = { format: 'pdf', mediaType: 'application/pdf', byteSize: 1, page: 1, contentKind: 'vector' } as const;
 
 function draft(over: Partial<CalibrationDraft> = {}): CalibrationDraft {
   return { ...EMPTY_DRAFT, ...over };
