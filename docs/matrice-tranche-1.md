@@ -1026,3 +1026,131 @@ locale. Relevé, non corrigé.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
 - L'écran d'évacuation (P10).
+
+## Journal d'audit, empreintes et fond de plan, ce que la version 26 ferme
+
+| Ce que la version 26 pose | Où | État |
+| --- | --- | --- |
+| A12.3 — le journal d'audit en insertion seule, en priorité | Migration `0058_a12_3_audit_log_insert_only` ; essai `a12-3-insertion-seule.db` | Fait |
+| D7.2 — toutes les empreintes suivent la forme canonique, en un seul lot | `empreinteOutcome` (core-model), appelée par chaque empreinte nommée ci-dessous | Fait |
+| A9 — plus de `localeCompare` dans un ensemble haché | `codePointCompare` (core-model) | Fait pour les empreintes |
+| Clé de liaison `parking.digitized_spaces` | `document-bindings.ts`, `audit-parking.ts` | Fait |
+| D2.2 — `DATA.HASH_INPUT_INVALID`, bloquant | Catalogue, libellés, `empreinteOutcome` | Fait |
+| M2 — le DWG refusé, le DXF accepté | `ACCEPTED_PLAN_FORMATS` (studio) | Fait |
+
+Le journal d'audit, les empreintes restantes, le tri par `localeCompare`
+dans les empreintes et la graphie en -is- sont fermés. Ce sont les quatre
+premiers constats de la section précédente.
+
+### Tâche déclarée : le journal d'audit en insertion seule
+
+**Objet.** A12.3 : `audit_log`, `approval`, `message_schedule_approval` et
+`graph_validation` sont en insertion seule, garanti en base. Le rôle
+`authenticated` détenait `UPDATE` et `DELETE` sur `audit_log`, sous une
+politique `FOR ALL`, sans déclencheur.
+
+**Portée.** Une migration, seule dans son commit (`ce5d937`). Elle pose trois
+barrières :
+- des politiques de lecture et d'insertion à la place de `FOR ALL` ;
+- le retrait de `UPDATE`, `DELETE` et `TRUNCATE` au rôle applicatif ;
+- trois déclencheurs de refus, qui tiennent aussi contre le propriétaire.
+
+Aucune ligne n'est touchée.
+
+**Essai.** `packages/db/src/__tests__/a12-3-insertion-seule.db.test.ts`
+(`9c1b8af`) lit la base réelle, comme les essais de cloisonnement. Il échoue
+si un rôle autre que le propriétaire regagne l'un des trois droits, si une
+politique autorise la modification ou la suppression, ou si un déclencheur
+disparaît. Il vérifie ces trois points sur les quatre tables. Il éprouve
+ensuite `audit_log` sous les deux rôles, dans une transaction annulée. Sans
+la migration, cinq de ses six essais échouent.
+
+`message_schedule_approval` n'existe pas encore, parce que la tranche 2 est
+suspendue. L'essai la tient en attente nommée, et échoue le jour où elle
+naît sans en sortir.
+
+**État.** Faite, avant le reste de la version.
+
+### Le lot des empreintes
+
+Toutes les empreintes passent par `empreinteOutcome` : NFC, champ absent
+omis, clés triées par point de code, préfixe `sha256:`. Une valeur non
+hachable (nombre non fini, objet non simple) est refusée par
+`DATA.HASH_INPUT_INVALID`, et le refus remonte à l'appelant au lieu d'une
+empreinte nulle.
+
+| Empreinte | Où | Ce qui change pour une valeur enregistrée |
+| --- | --- | --- |
+| Entrées d'un parcours, graphe validé | `computeInputsHash`, `computeGraphHash` ; le cache de parcours n'a plus de calcul propre | Forme déjà alignée en version 25 ; le tri passe au point de code, ce qui ne change l'empreinte que si deux identifiants s'ordonnent autrement |
+| Entrées d'un tableau des messages | `computeScheduleInputsHash` | Un tableau enregistré, approuvé compris, se lit périmé |
+| Manifeste d'un paquet de borne | `kioskManifestContentHash`, seule fonction : l'assemblage et le protocole de mise à jour l'appellent tous deux | Un paquet construit sous l'ancienne forme est refusé à la mise à jour |
+| Dossier de livraison | `build-delivery-archive.ts` | Le `checksum` enregistré ne se retrouve plus |
+| Paquet de règles | `pack-empreinte.ts`, seule fonction : fichiers lus comme JSON, avec leur nom, dans l'ordre du manifeste | Un manifeste qui porte l'ancien `checksum` est refusé (`RULES.PACK_CHECKSUM_MISMATCH`) ; celui de la fixture de test est réécrit |
+| Grille de famille, doublons de bibliothèque | `guard-family-consistency.ts`, `guard-library-import.ts` | Rien n'est enregistré |
+| Sommes du testkit | `stableChecksum`, `siteChecksum` | `siteChecksum` ne dépend plus de l'ordre des clés |
+
+`contentHash` est retiré de core-model : il n'avait plus d'appelant. L'essai
+`d7-2-empreinte-unique` vérifie quatre points :
+- aucune empreinte n'est définie hors d'`empreinte.ts` ;
+- `createHash` n'apparaît nulle part ;
+- aucun fichier ne combine `canonicalSerialize` et un condensé ;
+- `contentHash(` n'est plus appelé.
+
+Les condensés d'octets qui restent sont des sommes de fichiers, pas des
+empreintes de valeur :
+- entrées de fichier du paquet de borne ;
+- `checksum` du paquet persisté ;
+- artefacts assemblés.
+
+**Aucune valeur enregistrée n'est convertie.** Il n'y a ni migration ni
+réécriture. Ce que l'ancienne forme a produit se lit périmé, ou est refusé.
+
+**La clé renommée.** La version 25 relevait qu'un texte de livrable déjà
+saisi peut citer `parking.digitised_spaces`. Un tel texte n'est pas
+converti : l'ancienne clé ne se résout plus.
+
+### Le fond de plan
+
+Un `.dwg` est refusé par `IMPORT.FORMAT_UNSUPPORTED`, par son extension comme
+par ses types de média. Un `.dxf` est accepté, y compris quand le navigateur
+ne donne pas de type. L'écran d'étalonnage lit la liste depuis la même
+constante. C'est le septième conflit de la matrice de l'atelier, tranché dans
+le sens du complément.
+
+### Reste ouvert après la version 26
+
+**`localeCompare` hors des empreintes.** A9 interdit, dans un moteur, une
+comparaison de chaînes dépendante de la locale. Aucun appel ne passe de
+locale. On en compte, hors essais :
+- 147 dans `engine-*`, core-model, le compilateur, `engine-package` et
+  l'exécution de borne ;
+- 53 dans le studio.
+
+La plupart trient des identifiants pour fixer un ordre de rendu. Les
+remplacer peut changer l'ordre de sorties déjà produites pour un identifiant
+non ASCII. Relevé, non corrigé : le lot ne portait que les ensembles hachés.
+
+**`lineFingerprint`** (tableau des messages) sérialise par
+`canonicalSerialize` sans condensé. Il n'est ni haché ni enregistré. Il
+reste hors du lot.
+
+**M2 : l'avertissement de précision limitée** d'une image en mode point n'a
+pas de code au catalogue. Il n'est pas émis. Qu'un PDF soit vectoriel n'est
+pas vérifié à l'import.
+
+**Défaut du document, M2 étape 1.** Le paragraphe « Le DWG n'est pas
+accepté » est inséré dans le tableau. La ligne « Page » (`IMPORT.PAGE_REQUIRED`)
+se trouve ainsi détachée du tableau. Son contenu reste appliqué tel qu'il
+était.
+
+**Les essais du dossier `tests/` ne sont pas vérifiés par `pnpm typecheck`.**
+La commande ne parcourt que les paquets. Un essai de déterminisme comparait
+des `Outcome` par identité après le changement de signature, et seul
+`pnpm test` l'a vu.
+
+**Toujours au registre.**
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
