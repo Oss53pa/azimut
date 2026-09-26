@@ -7,7 +7,7 @@
   },
   "packageManager": "pnpm@9.15.9",
   "scripts": {
-    "typecheck": "pnpm -r --parallel run typecheck",
+    "typecheck": "pnpm -r --parallel run typecheck && tsc -p tsconfig.config.json",
     "lint": "eslint . && node scripts/check-deps.js",
     "test": "vitest run",
     "test:visual": "vitest run tests/visual.test.ts",
