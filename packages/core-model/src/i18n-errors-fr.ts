@@ -132,6 +132,7 @@ export const ERROR_MESSAGES_FR: ErrorMessages = {
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': 'Transition d\'état de version de support interdite',
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': 'Rejet de version de support sans motif',
   'DATA.FACE_CONTENT_UNSERIALIZABLE': 'Contenu de face non sérialisable pour l\'empreinte',
+  'DATA.HASH_INPUT_INVALID': 'Valeur non hachable soumise au calcul d\'une empreinte',
   'DATA.APPROVED_VERSION_NOT_IMMUTABLE': 'Version approuvée dont l’immuabilité n’est pas tenue',
   'DATA.UNIT_CODE_REQUIRED': 'Empreinte de nature cellule sans code d\u2019unité',
   'DATA.CODE_DUPLICATE': 'Deux cellules portent le même code sur un niveau',

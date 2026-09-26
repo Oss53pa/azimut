@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { canonicalContentJson, empreinte } from '../empreinte.js';
+import { canonicalContentJson, empreinte, empreinteOutcome } from '../empreinte.js';
 
 describe('canonicalContentJson (T-2.14a §4)', () => {
   it('sorts object keys by code point and emits no whitespace', () => {
@@ -67,5 +67,27 @@ describe('empreinte (T-2.14a §4.9)', () => {
 
   it('differs when content differs', () => {
     expect(empreinte({ a: 1 })).not.toBe(empreinte({ a: 2 }));
+  });
+});
+
+describe('D2.2 — empreinteOutcome refuse une valeur non hachable', () => {
+  it('rend l’empreinte d’une valeur ordinaire', () => {
+    const r = empreinteOutcome({ a: 1, b: 'é' });
+    expect(r.ok && r.value).toBe(empreinte({ a: 1, b: 'é' }));
+  });
+
+  it.each([
+    ['un nombre non fini', { x: Number.NaN }],
+    ['un infini', [Number.POSITIVE_INFINITY]],
+    ['un objet non simple', { at: new Date(0) }],
+    ['un nul dans un tableau', [1, null]],
+  ])('refuse %s par DATA.HASH_INPUT_INVALID, sans lever', (_label, value) => {
+    const r = empreinteOutcome(value, { kind: 'graph', id: 'g' });
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings).toHaveLength(1);
+    expect(r.findings[0]?.code).toBe('DATA.HASH_INPUT_INVALID');
+    expect(r.findings[0]?.severity).toBe('blocking');
+    expect(r.findings[0]?.entity).toEqual({ kind: 'graph', id: 'g' });
   });
 });

@@ -1,5 +1,6 @@
 import { roundSvg } from './round.js';
 import { sha256Hex } from './hash.js';
+import type { Finding, Outcome } from './outcome.js';
 
 /**
  * T-2.14a §4 — Canonical serialization for the content empreinte. Fully
@@ -52,8 +53,14 @@ function isPlainObject(value: object): boolean {
   return proto === Object.prototype || proto === null;
 }
 
-/** Compare two strings by Unicode code point (§4.2), not UTF-16 code unit. */
-function codePointCompare(a: string, b: string): number {
+/**
+ * Compare two strings by Unicode code point (§4.2), not UTF-16 code unit.
+ *
+ * A9 interdit la comparaison dépendante de la locale : c'est aussi ce
+ * comparateur qui ordonne les ensembles avant qu'ils entrent dans une
+ * empreinte (identifiants, codes), jamais `localeCompare`.
+ */
+export function codePointCompare(a: string, b: string): number {
   const ca = Array.from(a);
   const cb = Array.from(b);
   const n = Math.min(ca.length, cb.length);
@@ -117,4 +124,30 @@ export function canonicalContentJson(value: unknown): string {
  */
 export function empreinte(value: unknown): string {
   return `sha256:${sha256Hex(canonicalContentJson(value))}`;
+}
+
+/**
+ * D7.2 et D2.2 — l'empreinte, ou son refus. Toute empreinte du produit passe
+ * par cette fonction : une valeur non hachable (nombre non fini, objet non
+ * simple, nul dans un tableau) est refusée par `DATA.HASH_INPUT_INVALID`, au
+ * lieu d'être écrite nulle ou de lever une exception hors du moteur (A7).
+ */
+export function empreinteOutcome(
+  value: unknown,
+  entity: Finding['entity'] = null,
+): Outcome<string> {
+  try {
+    return { ok: true, value: empreinte(value), warnings: [] };
+  } catch (err) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'DATA.HASH_INPUT_INVALID',
+        severity: 'blocking',
+        entity,
+        params: { detail: err instanceof Error ? err.message : String(err) },
+        ruleRef: null,
+      }],
+    };
+  }
 }

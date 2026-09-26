@@ -191,6 +191,7 @@ export const ERROR_CATALOG = {
   // une nouvelle version.
   'DATA.APPROVED_VERSION_NOT_IMMUTABLE': { severity: 'blocking', description: 'Tentative de modification d’une version approuvée, règle M04.G7' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable en forme canonique, section D7.2' },
+  'DATA.HASH_INPUT_INVALID':               { severity: 'blocking', description: 'Valeur non hachable soumise à un calcul d’empreinte : nombre non fini, objet non simple. Le calcul refuse au lieu d’écrire une valeur nulle' },
 
   // Partie N, module 01 (N1.4) : code de cellule (règle M01.S3).
   'DATA.UNIT_CODE_REQUIRED':                { severity: 'blocking', description: 'Cellule sans code' },

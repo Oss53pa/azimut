@@ -132,6 +132,7 @@ export const ERROR_MESSAGES_EN: ErrorMessages = {
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': 'Forbidden support version state transition',
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': 'Support version rejection without a reason',
   'DATA.FACE_CONTENT_UNSERIALIZABLE': 'Face content not serializable for the empreinte',
+  'DATA.HASH_INPUT_INVALID': 'Value that cannot be hashed submitted to an empreinte',
   'DATA.APPROVED_VERSION_NOT_IMMUTABLE': 'Approved version whose immutability is not guaranteed',
   'DATA.UNIT_CODE_REQUIRED': 'Cell footprint with no unit code',
   'DATA.CODE_DUPLICATE': 'Two cells share the same code on one level',
