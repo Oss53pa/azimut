@@ -32,6 +32,11 @@ function canonicalObject(obj: Record<string, unknown>): string {
   return '{' + pairs.join(',') + '}';
 }
 
+/**
+ * Sérialisation déterministe des fichiers de données (paquet de borne, index
+ * de livraison). Ce n'est pas une forme d'empreinte : D7.2 n'en admet qu'une,
+ * `empreinte` de `./empreinte.ts`, et aucune empreinte ne passe par ici.
+ */
 export function canonicalSerialize(value: unknown): string {
   return canonicalValue(value);
 }
@@ -155,8 +160,4 @@ export function sha256Hex(data: string): string {
 
 export function sha256Binary(data: Uint8Array): string {
   return hexEncode(sha256Bytes(data));
-}
-
-export function contentHash(value: unknown): string {
-  return sha256Hex(canonicalSerialize(value));
 }

@@ -29,7 +29,7 @@ const SITE_FIELDS = ['name', 'country_code'] as const;
  * Champs d'un parking. Catalogués même quand le site n'a pas de parking : le
  * modèle les offre, et c'est ce que le catalogue décrit.
  */
-const PARKING_FIELDS = ['name', 'capacity', 'digitised_spaces', 'access'] as const;
+const PARKING_FIELDS = ['name', 'capacity', 'digitized_spaces', 'access'] as const;
 
 const LEVEL_FIELDS = ['count'] as const;
 
@@ -66,7 +66,7 @@ export function buildDocumentBindings(
     const spaces = new Set(site.footprints
       .filter(footprint => isParkingSpaceFootprint(footprint.kind))
       .map(footprint => footprint.id));
-    const digitised = first.footprint_ids.filter(id => spaces.has(id)
+    const digitized = first.footprint_ids.filter(id => spaces.has(id)
       && declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY,
         { kind: 'footprint', id }) === null).length;
 
@@ -83,7 +83,7 @@ export function buildDocumentBindings(
     values['parking'] = {
       name: first.name,
       ...(capacity === null ? {} : { capacity: String(capacity) }),
-      digitised_spaces: String(digitised),
+      digitized_spaces: String(digitized),
       ...(free === undefined ? {} : { access: free.value === true ? 'gratuit' : 'payant' }),
     };
   }

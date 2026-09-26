@@ -50,7 +50,7 @@ describe('buildDocumentBindings (M15)', () => {
     const { values } = buildDocumentBindings(refMultilevel, FAITS_PARKING);
     expect(values['parking']?.['name']).toBe('Parking Ouest');
     expect(values['parking']?.['capacity']).toBe('4');
-    expect(values['parking']?.['digitised_spaces']).toBe('4');
+    expect(values['parking']?.['digitized_spaces']).toBe('4');
     expect(values['parking']?.['access']).toBe('gratuit');
   });
 
@@ -129,7 +129,7 @@ describe('ce qu’un document compte comme place tracée', () => {
     // `auditParking` totalise les douze places que la marque déclare ; le
     // document ne cite que les trois emplacements qui restent dessinés.
     const { values } = buildDocumentBindings(refMultilevel, [...FAITS_PARKING, marque]);
-    expect(values['parking']?.['digitised_spaces']).toBe('3');
+    expect(values['parking']?.['digitized_spaces']).toBe('3');
   });
 
   it('ne compte pas une empreinte que la zone ne déclare pas', () => {
@@ -139,7 +139,7 @@ describe('ce qu’un document compte comme place tracée', () => {
         ...z, footprint_ids: z.footprint_ids.slice(0, 2),
       })),
     };
-    expect(buildDocumentBindings(site, FAITS_PARKING).values['parking']?.['digitised_spaces'])
+    expect(buildDocumentBindings(site, FAITS_PARKING).values['parking']?.['digitized_spaces'])
       .toBe('2');
   });
 });

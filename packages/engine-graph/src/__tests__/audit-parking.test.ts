@@ -76,7 +76,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
     });
     expect(report.findings).toEqual([]);
     expect(report.counted_spaces).toBe(40);
-    expect(report.digitised_count).toBe(40);
+    expect(report.digitized_count).toBe(40);
     expect(report.parking_count).toBe(1);
   });
 
@@ -97,7 +97,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
     expect(finding?.entity).toEqual({ kind: 'zone', id: 'souterrain' });
     expect(finding?.params['missing']).toBe(49);
     expect(finding?.params['counted']).toBe(40);
-    expect(finding?.params['digitised']).toBe(40);
+    expect(finding?.params['digitized']).toBe(40);
   });
 
   it('ne contrôle rien quand aucune capacité n’est annoncée', () => {
@@ -231,7 +231,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
     expect(report.findings[0]?.params['counted']).toBe(60);
     // Une seule surface dessinée, soixante places déclarées : les deux comptes
     // diffèrent, et l'anomalie les porte tous les deux.
-    expect(report.findings[0]?.params['digitised']).toBe(1);
+    expect(report.findings[0]?.params['digitized']).toBe(1);
   });
 
   it('une marque ne vaut pas une place en plus de ce qu’elle déclare', () => {
@@ -333,7 +333,7 @@ describe('S-38 — la règle de comptage, éprouvée pour elle-même', () => {
       footprints: fps,
       facts: [nonNumerisee(fps[0]?.id ?? '', 30)],
     });
-    expect(report.digitised_count).toBe(2);
+    expect(report.digitized_count).toBe(2);
     expect(report.counted_spaces).toBe(31);
   });
 });

@@ -3,10 +3,9 @@ import {
   canonicalSerialize,
   sha256Hex,
   sha256Binary,
-  contentHash,
 } from '../index.js';
 
-describe('D7.2 — canonical serialization', () => {
+describe('canonicalSerialize — sérialisation des fichiers de données, hors empreinte', () => {
   it('sorts object keys alphabetically', () => {
     const result = canonicalSerialize({ b: 1, a: 2 });
     expect(result).toBe('{"a":2,"b":1}');
@@ -98,14 +97,6 @@ describe('sha256Binary', () => {
   });
 });
 
-describe('contentHash convenience', () => {
-  it('serializes then hashes', () => {
-    const hash = contentHash({ a: 1 });
-    expect(hash).toMatch(/^[a-f0-9]{64}$/);
-    expect(hash).toBe(sha256Hex(canonicalSerialize({ a: 1 })));
-  });
-});
-
 describe('canonicalSerialize — additional edge cases', () => {
   it('serializes booleans correctly', () => {
     expect(canonicalSerialize({ f: false, t: true })).toBe('{"f":false,"t":true}');
@@ -189,17 +180,6 @@ describe('canonicalSerialize — top-level primitives', () => {
 
   it('serializes top-level boolean false', () => {
     expect(canonicalSerialize(false)).toBe('false');
-  });
-
-  it('contentHash of a bare string is deterministic', () => {
-    const h1 = contentHash('test');
-    const h2 = contentHash('test');
-    expect(h1).toBe(h2);
-    expect(h1).toMatch(/^[a-f0-9]{64}$/);
-  });
-
-  it('contentHash of a bare number differs from its string', () => {
-    expect(contentHash(42)).not.toBe(contentHash('42'));
   });
 });
 

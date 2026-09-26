@@ -1,4 +1,4 @@
-import { sha256Binary, contentHash } from '@azimut/core-model';
+import { codePointCompare, empreinteOutcome, sha256Binary } from '@azimut/core-model';
 import type { Outcome, Finding } from '@azimut/core-model';
 import { scanForNetworkDependency } from './scan-network.js';
 
@@ -132,28 +132,30 @@ export function assembleKioskPackage(
   if (blocking.length > 0) return { ok: false, findings: blocking };
 
   // 4. Hash every file, sorted by path for determinism.
-  const sortedPaths = [...input.files.keys()].sort();
+  const sortedPaths = [...input.files.keys()].sort(codePointCompare);
   const manifestFiles: KioskManifestFile[] = sortedPaths.map((path) => ({
     path,
     sha256: sha256Binary(input.files.get(path) as Uint8Array),
   }));
 
   // 5. contentHash over everything EXCEPT builtAt (D10.2).
-  const hash = contentHash({
+  const langs = [...input.langs].sort(codePointCompare);
+  const hash = kioskManifestContentHash({
     siteId: input.siteId,
     version: input.version,
-    langs: [...input.langs].sort(),
+    langs,
     minRuntime: input.minRuntime,
     files: manifestFiles,
   });
+  if (!hash.ok) return hash;
 
   const manifest: KioskManifest = {
     siteId: input.siteId,
     version: input.version,
     builtAt: input.builtAt,
-    contentHash: `sha256:${hash}`,
+    contentHash: hash.value,
     files: manifestFiles,
-    langs: [...input.langs].sort(),
+    langs,
     minRuntime: input.minRuntime,
   };
 
@@ -165,6 +167,31 @@ export function assembleKioskPackage(
     value: { manifest, files: tree },
     warnings: scan.ok ? scan.warnings : [],
   };
+}
+
+/**
+ * D10.2 et D7.2 — l'empreinte d'un manifeste, calculée en un seul endroit :
+ * l'assemblage l'écrit, le protocole de mise à jour la recalcule, et les deux
+ * passent par ici. Elle porte tout le manifeste sauf `builtAt`, dans la forme
+ * canonique commune ; une valeur non hachable est refusée par
+ * `DATA.HASH_INPUT_INVALID`.
+ *
+ * Un paquet construit sous l'ancienne forme ne se convertit pas : son
+ * empreinte ne se retrouve plus, et la mise à jour le refuse jusqu'à ce qu'il
+ * soit reconstruit (D7.2, « valeurs dérivées »).
+ */
+export function kioskManifestContentHash(
+  manifest: Pick<KioskManifest, 'siteId' | 'version' | 'langs' | 'minRuntime' | 'files'>,
+): Outcome<string> {
+  return empreinteOutcome({
+    siteId: manifest.siteId,
+    version: manifest.version,
+    langs: [...manifest.langs].sort(codePointCompare),
+    minRuntime: manifest.minRuntime,
+    files: [...manifest.files]
+      .sort((a, b) => codePointCompare(a.path, b.path))
+      .map(f => ({ path: f.path, sha256: f.sha256 })),
+  }, { kind: 'kiosk_package', id: manifest.siteId });
 }
 
 const encoder = new TextEncoder();

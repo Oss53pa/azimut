@@ -26,7 +26,7 @@ describe('reference sites', () => {
         const c1 = siteChecksum(site);
         const c2 = siteChecksum(site);
         expect(c1).toBe(c2);
-        expect(c1).toMatch(/^[a-f0-9]{64}$/);
+        expect(c1).toMatch(/^sha256:[a-f0-9]{64}$/);
       });
 
       it('has required top-level fields', () => {

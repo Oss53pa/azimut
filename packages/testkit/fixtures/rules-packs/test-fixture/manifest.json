@@ -10,7 +10,7 @@
     "mounting.json",
     "safety-registry.json"
   ],
-  "checksum": "sha256:3c6ddc356916055fb5cdbaa0b10cad2928b98a4a8d6dc70ced8e8f1d925d3e34",
+  "checksum": "sha256:92e4b62b70258ef0e01d0692b6a17cb7019dfa4f09083a2f63bd6f89c0a43b19",
   "testOnly": true,
   "warning": "Paquet de test. Valeurs fictives, sans portee normative. Le chargeur doit refuser ce paquet hors environnement de test."
 }

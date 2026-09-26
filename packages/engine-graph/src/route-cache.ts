@@ -1,5 +1,6 @@
 import type { SiteData, TravelProfile, Outcome } from '@azimut/core-model';
 import { computeRoute, type Route } from './compute-route.js';
+import { computeInputsHash } from './compute-hashes.js';
 
 type CacheKey = string;
 
@@ -7,23 +8,6 @@ type CacheEntry = {
   readonly route: Route;
   readonly inputs_hash: string;
 };
-
-function hashInputs(site: SiteData, profileId: string): string {
-  const edgeParts = [...site.graph.edges]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map(
-      (e) =>
-        `${e.id}:${e.from_node_id}:${e.to_node_id}:${e.length_m}:${e.accessible}:${e.direction}`,
-    );
-  const nodeParts = [...site.graph.nodes]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map((n) => `${n.id}:${n.level_id}`);
-  const vlParts = [...site.graph.vertical_links]
-    .sort((a, b) => a.id.localeCompare(b.id))
-    .map((vl) => `${vl.id}:${vl.edge_id}:${vl.accessible}`);
-
-  return [profileId, ...nodeParts, ...edgeParts, ...vlParts].join('|');
-}
 
 function makeCacheKey(
   profileId: string,
@@ -43,7 +27,11 @@ export class RouteCache {
     to: string,
   ): Outcome<Route> {
     const key = makeCacheKey(profile.id, from, to);
-    const currentHash = hashInputs(site, profile.id);
+    // D7.2 — une seule implantation : le cache s'invalide sur l'empreinte
+    // des entrées de D7.1, et non sur une chaîne composée à part.
+    const inputs = computeInputsHash(site, profile);
+    if (!inputs.ok) return inputs;
+    const currentHash = inputs.value;
 
     const cached = this.cache.get(key);
     if (cached && cached.inputs_hash === currentHash) {

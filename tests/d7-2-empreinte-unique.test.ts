@@ -4,24 +4,23 @@ import { resolve, relative, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * D7.2 — « Une seule implantation. L'empreinte est calculée par une seule
- * fonction, employée par tous les appelants. » Et depuis la version 25 : « Ces
- * règles valent pour toutes les empreintes du produit […]. Une seconde forme
- * canonique, même implicite, en serait une de trop. »
+ * D7.2 — « Ces règles valent pour toutes les empreintes du produit […]. Une
+ * seconde forme canonique, même implicite, en serait une de trop. » Et : « Une
+ * seule implantation. L'empreinte est calculée par une seule fonction,
+ * employée par tous les appelants. »
  *
- * La fonction est `empreinte`, dans core-model. L'essai garde deux choses : que
- * personne d'autre ne la réimplante, et que les empreintes déjà alignées ne
- * retombent pas sur l'ancienne sérialisation (`contentHash`, qui écrit `null`
- * pour un champ absent et ne normalise pas en NFC).
+ * La fonction est `empreinte`, dans core-model, et tous les appelants passent
+ * par `empreinteOutcome`, qui refuse une valeur non hachable (D2.2). L'essai
+ * lit les sources et refuse toute autre voie vers un condensé d'une valeur :
+ * `createHash`, `sha256Hex` hors de la forme canonique, ou un condensé posé sur
+ * une sérialisation qui n'est pas elle. Ce qui reste permis, c'est le condensé
+ * des octets d'un fichier (`sha256Binary`), qui est une somme d'intégrité et
+ * non l'empreinte d'une valeur.
  */
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-
-/** Les modules dont l'empreinte suit la forme canonique de D7.2. */
-const ALIGNED = [
-  'packages/core-model/src/face-content-hash.ts',
-  'packages/engine-graph/src/compute-hashes.ts',
-];
+const FORM = 'packages/core-model/src/empreinte.ts';
+const HASH = 'packages/core-model/src/hash.ts';
 
 function sources(dir: string): string[] {
   return readdirSync(dir).flatMap(name => {
@@ -32,28 +31,38 @@ function sources(dir: string): string[] {
   });
 }
 
-function allSources(): string[] {
-  return ['packages', 'apps']
-    .flatMap(top => readdirSync(join(ROOT, top)).map(name => join(ROOT, top, name, 'src')))
-    .filter(dir => { try { return statSync(dir).isDirectory(); } catch { return false; } })
-    .flatMap(sources);
-}
-
 const rel = (path: string): string => relative(ROOT, path).split('\\').join('/');
 
-describe('D7.2 — une seule implantation de l’empreinte', () => {
+const ALL: readonly { readonly path: string; readonly text: string }[] = ['packages', 'apps']
+  .flatMap(top => readdirSync(join(ROOT, top)).map(name => join(ROOT, top, name, 'src')))
+  .filter(dir => { try { return statSync(dir).isDirectory(); } catch { return false; } })
+  .flatMap(sources)
+  .map(path => ({ path: rel(path), text: readFileSync(path, 'utf8') }));
+
+const matching = (pattern: RegExp): string[] =>
+  ALL.filter(f => pattern.test(f.text)).map(f => f.path);
+
+describe('D7.2 — une seule forme canonique, une seule implantation', () => {
   it('la forme canonique n’est définie qu’une fois, dans core-model', () => {
-    const definers = allSources()
-      .filter(path => /\bfunction\s+(empreinte|canonicalContentJson)\b/.test(readFileSync(path, 'utf8')))
-      .map(rel);
-    expect(definers).toEqual(['packages/core-model/src/empreinte.ts']);
+    expect(matching(/\bfunction\s+(empreinte|empreinteOutcome|canonicalContentJson)\b/)).toEqual([FORM]);
   });
 
-  it('les empreintes alignées passent par `empreinte`, jamais par l’ancienne sérialisation', () => {
-    for (const path of ALIGNED) {
-      const text = readFileSync(join(ROOT, path), 'utf8');
-      expect(text, path).toMatch(/\bempreinte\(/);
-      expect(text, path).not.toMatch(/\b(contentHash|canonicalSerialize|sha256Hex|sha256Binary)\b/);
-    }
+  it('seul le module de la forme canonique condense une chaîne', () => {
+    expect(matching(/\bsha256Hex\(/).filter(p => p !== HASH)).toEqual([FORM]);
+  });
+
+  it('aucun source ne calcule un condensé par une autre bibliothèque', () => {
+    expect(matching(/\bcreateHash\b/)).toEqual([]);
+  });
+
+  it('aucun condensé ne se pose sur la sérialisation des fichiers de données', () => {
+    const offenders = ALL
+      .filter(f => f.path !== HASH && /\bcanonicalSerialize\(/.test(f.text) && /\bsha256(Hex|Binary)\(/.test(f.text))
+      .map(f => f.path);
+    expect(offenders).toEqual([]);
+  });
+
+  it('l’ancienne fonction d’empreinte n’existe plus', () => {
+    expect(matching(/\bcontentHash\(/)).toEqual([]);
   });
 });

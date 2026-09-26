@@ -48,3 +48,5 @@ export type {
   StrokeToHeightInput,
   MountingHeightInput,
 } from './rule-checks.js';
+export { computeRulesPackChecksum, rulesPackEmpreinte } from './pack-empreinte.js';
+export type { RulesPackDocument } from './pack-empreinte.js';

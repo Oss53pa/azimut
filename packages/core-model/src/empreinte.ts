@@ -3,13 +3,11 @@ import { sha256Hex } from './hash.js';
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * T-2.14a §4 — Canonical serialization for the content empreinte. Fully
- * specified, nothing to choose. This is a distinct serializer from
- * `canonicalSerialize` (which several engines already hash with and must not
- * change): it omits absent/null fields instead of emitting `null`, normalizes
- * strings to NFC, and formats numbers in fixed notation. Used by both the
- * content empreinte and, when they choose to, any other empreinte — the only
- * code the two are allowed to share (§3.3).
+ * T-2.14a §4 et D7.2 — la forme canonique, et la seule. Depuis la version 25,
+ * elle vaut pour toutes les empreintes du produit : contenu d'une face,
+ * entrées d'un tableau des messages, graphe d'une validation, entrées d'un
+ * parcours, paquet de règles, manifeste. Aucune ne passe ailleurs.
+ * `canonicalSerialize` (`./hash.ts`) n'écrit que des fichiers de données.
  *
  * §4 rules, in order:
  *  1. JSON, UTF-8, no whitespace, no newline.

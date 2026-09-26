@@ -68,7 +68,7 @@ export type ParkingReport = {
    * unique, et ce champ n'en est pas un — il dit combien de surfaces ont été
    * dessinées, non combien de places elles portent.
    */
-  readonly digitised_count: number;
+  readonly digitized_count: number;
   /** Le comptage des places, au sens de S-38. C'est lui qu'on compare au fait. */
   readonly counted_spaces: number;
   readonly findings: readonly Finding[];
@@ -86,7 +86,7 @@ export type ParkingInput = {
 /** Ce que les empreintes d'un parking donnent : des surfaces, et des places. */
 type Counted = {
   /** Le nombre d'empreintes retenues. */
-  readonly digitised: number;
+  readonly digitized: number;
   /** Le comptage des places, au sens de S-38. */
   readonly counted: number;
 };
@@ -114,17 +114,17 @@ function countSpaces(
   spaces: ReadonlyMap<string, Footprint>,
   facts: readonly SiteFact[],
 ): Counted {
-  let digitised = 0;
+  let digitized = 0;
   let counted = 0;
   for (const id of ids) {
     if (!spaces.has(id)) continue;
-    digitised += 1;
+    digitized += 1;
     const declared = declaredInteger(
       facts, PARKING_UNDIGITIZED_SPACES_KEY, { kind: 'footprint', id },
     );
     counted += declared === null ? 1 : Math.max(declared, 0);
   }
-  return { digitised, counted };
+  return { digitized, counted };
 }
 
 /**
@@ -148,12 +148,12 @@ export function auditParking(
     .filter(footprint => isParkingSpaceFootprint(footprint.kind))
     .map(footprint => [footprint.id, footprint]));
 
-  let digitisedCount = 0;
+  let digitizedCount = 0;
   let countedSpaces = 0;
 
   for (const parking of parkings) {
     const counted = countSpaces(parking.footprint_ids, spaces, input.facts);
-    digitisedCount += counted.digitised;
+    digitizedCount += counted.digitized;
     countedSpaces += counted.counted;
 
     const declared = declaredInteger(
@@ -165,7 +165,7 @@ export function auditParking(
     if (declared === null) continue;
 
     // Les deux comptes voyagent avec l'anomalie. `counted` est celui que S-38
-    // définit et que la comparaison emploie ; `digitised` dit combien de
+    // définit et que la comparaison emploie ; `digitized` dit combien de
     // surfaces ont été dessinées. Quand ils diffèrent, c'est qu'une marque de
     // S-37 explique l'écart, et le lecteur de l'anomalie doit le voir sans
     // avoir à rouvrir le plan.
@@ -174,7 +174,7 @@ export function auditParking(
         code: 'PARK.CAPACITY_EXCEEDED',
         severity: 'blocking',
         entity: { kind: 'zone', id: parking.id },
-        params: { counted: counted.counted, digitised: counted.digitised, declared },
+        params: { counted: counted.counted, digitized: counted.digitized, declared },
         ruleRef: 'S-36',
       });
     } else if (counted.counted < declared) {
@@ -184,7 +184,7 @@ export function auditParking(
         entity: { kind: 'zone', id: parking.id },
         params: {
           counted: counted.counted,
-          digitised: counted.digitised,
+          digitized: counted.digitized,
           declared,
           missing: declared - counted.counted,
         },
@@ -201,7 +201,7 @@ export function auditParking(
 
   return {
     parking_count: parkings.length,
-    digitised_count: digitisedCount,
+    digitized_count: digitizedCount,
     counted_spaces: countedSpaces,
     findings,
   };

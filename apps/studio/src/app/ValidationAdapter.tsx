@@ -63,6 +63,11 @@ export function ValidationScreenAdapter({ session, siteId }: {
         const outcome = validateGraph(scope);
         findings.push(...(outcome.ok ? outcome.warnings : outcome.findings));
 
+        // D2.2 — un graphe dont l'empreinte est refusée ne s'enregistre pas :
+        // un passage sans empreinte ne vaudrait pour aucun graphe (M02.W11).
+        const graphHash = computeGraphHash(scope.graph);
+        if (!graphHash.ok) findings.push(...graphHash.findings);
+
         const ranAt = session.now();
         setValidation({
           kind: 'ran',
@@ -71,12 +76,13 @@ export function ValidationScreenAdapter({ session, siteId }: {
           durationMs: Math.round(performance.now() - started),
         });
 
+        if (!graphHash.ok) return;
         const command = writeGraphValidation(findings, {
           orgId: ORG_OF_SESSION,
           siteId,
           id: session.newId(),
           timestamp: ranAt,
-          graphHash: computeGraphHash(scope.graph),
+          graphHash: graphHash.value,
         });
         // `record` et non `write` : un passage de validation ne s'annule pas.
         // La table est en insertion seule (A12.3) et l'inverse de son

@@ -1,5 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
-import { sha256Binary, canonicalSerialize } from '@azimut/core-model';
+import { codePointCompare, empreinteOutcome, sha256Binary } from '@azimut/core-model';
 import { computeQuantities } from '@azimut/engine-graph';
 import type {
   FaceTheme, PlacedSupport, LoadedRulesPack, RulesPackIndex, TextMeasure,
@@ -219,11 +219,18 @@ export function createBuildDeliveryArchiveHandler(
       await archiveSink.write(base.length === 0 ? name : `${base}/${name}`, bytes);
     }
 
-    // Archive integrity: hash of the per-file digests, order-independent.
-    const digest = [...files.keys()].sort().map(
-      (name) => [name, sha256Binary(files.get(name) as Uint8Array)],
+    // Archive integrity: the D7.2 empreinte of the per-file digests, in the
+    // one canonical form, files ordered by code point (A9). A digest that
+    // cannot be hashed is refused rather than recorded (D2.2).
+    const digest = [...files.keys()].sort(codePointCompare).map(
+      (name) => ({ name, sha256: sha256Binary(files.get(name) as Uint8Array) }),
     );
-    const checksum = `sha256:${sha256Binary(new TextEncoder().encode(canonicalSerialize(digest)))}`;
+    const archiveHash = empreinteOutcome({ files: digest }, { kind: 'delivery_package', id: archive_name });
+    if (!archiveHash.ok) {
+      const codes = archiveHash.findings.map((f) => f.code).join(', ');
+      throw new Error(`Delivery archive empreinte refused: ${codes}`);
+    }
+    const checksum = archiveHash.value;
 
     if (context.recordDelivery) {
       await context.recordDelivery(

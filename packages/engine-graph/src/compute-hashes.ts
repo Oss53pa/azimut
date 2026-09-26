@@ -1,8 +1,9 @@
 import type {
+  Outcome,
   SiteData,
   TravelProfile,
 } from '@azimut/core-model';
-import { empreinte } from '@azimut/core-model';
+import { codePointCompare, empreinteOutcome } from '@azimut/core-model';
 
 function pickNodeFields(
   node: SiteData['graph']['nodes'][number],
@@ -49,7 +50,7 @@ function pickProfileFields(
 ): Record<string, unknown> {
   return {
     key: profile.key,
-    excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(),
+    excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(codePointCompare),
     require_accessible: profile.require_accessible,
     honor_hours: profile.honor_hours,
   };
@@ -83,13 +84,13 @@ function graphParts(graph: SiteData['graph']): {
 } {
   return {
     nodes: [...graph.nodes]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickNodeFields),
     edges: [...graph.edges]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickEdgeFields),
     vertical_links: [...graph.vertical_links]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickVerticalLinkFields),
   };
 }
@@ -101,15 +102,18 @@ function graphParts(graph: SiteData['graph']): {
  *
  * Une empreinte enregistrée sous l'ancienne forme ne se convertit pas : elle
  * cesse de correspondre, et le parcours se recalcule (D7.2).
+ *
+ * Une valeur non hachable est refusée par `DATA.HASH_INPUT_INVALID` (D2.2).
+ * Les ensembles sont triés par point de code, jamais par la locale (A9).
  */
 export function computeInputsHash(
   site: SiteData,
   profile: TravelProfile,
-): string {
-  return empreinte({
+): Outcome<string> {
+  return empreinteOutcome({
     ...graphParts(site.graph),
     profile: pickProfileFields(profile),
-  });
+  }, { kind: 'site', id: site.site.id });
 }
 
 /**
@@ -132,6 +136,6 @@ export function computeInputsHash(
  * exiger un `SiteData` entier obligerait l'appelant à en fabriquer une coquille
  * là où il n'a qu'un graphe.
  */
-export function computeGraphHash(graph: SiteData['graph']): string {
-  return empreinte(graphParts(graph));
+export function computeGraphHash(graph: SiteData['graph']): Outcome<string> {
+  return empreinteOutcome(graphParts(graph));
 }

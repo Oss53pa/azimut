@@ -1,6 +1,7 @@
-import { sha256Binary, contentHash } from '@azimut/core-model';
+import { codePointCompare, sha256Binary } from '@azimut/core-model';
 import type { Outcome, Finding } from '@azimut/core-model';
 import type { KioskManifest, KioskManifestFile } from './assemble-kiosk-package.js';
+import { kioskManifestContentHash } from './assemble-kiosk-package.js';
 
 /**
  * D10.4 — Kiosk update protocol (pure decision logic).
@@ -34,17 +35,6 @@ export function shouldUpdate(
   return localVersion === null || localVersion !== remoteVersion;
 }
 
-function recomputeContentHash(manifest: KioskManifest): string {
-  const hash = contentHash({
-    siteId: manifest.siteId,
-    version: manifest.version,
-    langs: [...manifest.langs].sort(),
-    minRuntime: manifest.minRuntime,
-    files: manifest.files.map((f) => ({ path: f.path, sha256: f.sha256 })),
-  });
-  return `sha256:${hash}`;
-}
-
 /**
  * Step 4 of D10.4: verify every manifest file against a downloaded tree. A
  * single discrepancy cancels the update (PACKAGE.INTEGRITY_MISMATCH). The
@@ -57,7 +47,10 @@ export function verifyAgainstManifest(
 ): Outcome<true> {
   const findings: Finding[] = [];
 
-  if (recomputeContentHash(manifest) !== manifest.contentHash) {
+  const recomputed = kioskManifestContentHash(manifest);
+  if (!recomputed.ok) {
+    findings.push(...recomputed.findings);
+  } else if (recomputed.value !== manifest.contentHash) {
     findings.push({
       code: 'PACKAGE.CHECKSUM_MISMATCH',
       severity: 'blocking',
@@ -68,7 +61,7 @@ export function verifyAgainstManifest(
   }
 
   const sorted: readonly KioskManifestFile[] = [...manifest.files].sort(
-    (a, b) => a.path.localeCompare(b.path),
+    (a, b) => codePointCompare(a.path, b.path),
   );
   for (const entry of sorted) {
     const bytes = files.get(entry.path);

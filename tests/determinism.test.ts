@@ -261,10 +261,13 @@ describe('INV-4 — deterministic rendering', () => {
 
   it('computeInputsHash produces identical output across runs', () => {
     const profile = getProfile('standard');
-    const results = Array.from({ length: RUNS }, () =>
-      computeInputsHash(refMultilevel, profile),
-    );
+    const results = Array.from({ length: RUNS }, () => {
+      const hash = computeInputsHash(refMultilevel, profile);
+      if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+      return hash.value;
+    });
     const first = results[0];
+    expect(first).toMatch(/^sha256:[0-9a-f]{64}$/);
     for (let i = 1; i < RUNS; i++) {
       expect(results[i]).toBe(first);
     }

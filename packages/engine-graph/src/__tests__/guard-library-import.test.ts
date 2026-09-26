@@ -70,3 +70,16 @@ describe('J6.3 — guardLibraryImport', () => {
     expect(r.warnings).toEqual([]);
   });
 });
+
+describe('D2.2 — un symbole non hachable est refusé', () => {
+  it('refuse par DATA.HASH_INPUT_INVALID au lieu de laisser passer un doublon inconnu', () => {
+    const r = guardLibraryImport(
+      [{ id: 'in-1', content: { d: Number.POSITIVE_INFINITY } }],
+      [{ id: 'ex-1', content: { d: 'M0 0' } }],
+    );
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings.map(f => f.code)).toEqual(['DATA.HASH_INPUT_INVALID']);
+    expect(r.findings[0]?.entity).toEqual({ kind: 'library_symbol', id: 'in-1' });
+  });
+});

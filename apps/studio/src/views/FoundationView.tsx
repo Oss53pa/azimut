@@ -64,6 +64,9 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
     const access = profile === undefined ? null : auditAccessibility(site, profile);
     const evac = auditEvacuation(site);
     const quantities = computeQuantities(site, placedSupports(site, site.support_types[0]?.key ?? ''));
+    // D2.2 — une empreinte refusée est une anomalie comme une autre.
+    const inputs = profile === undefined ? null : computeInputsHash(site, profile);
+    if (inputs !== null && !inputs.ok) findings.push(...inputs.findings);
 
     return {
       findings,
@@ -71,7 +74,7 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
       access: access !== null && access.ok ? access.value : null,
       evacuation: evac.ok ? evac.value : null,
       quantities: quantities.ok ? quantities.value : null,
-      inputsHash: profile === undefined ? '' : computeInputsHash(site, profile),
+      inputsHash: inputs !== null && inputs.ok ? inputs.value : '',
     };
   }, [site, profile]);
 

@@ -1,10 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { refMinimal, refMultilevel, refRetail } from '@azimut/testkit';
 import type { BoundRulesPacks, SiteData, FaceTemplate } from '@azimut/core-model';
-import { computeInputsHash } from '../compute-hashes.js';
+import { computeInputsHash as computeInputsHashOutcome } from '../compute-hashes.js';
 import { resolvedFaceContentHash } from '../compute-staleness.js';
 import { resolveFaceContent } from '../resolve-face.js';
 import type { ResolvedFace } from '../resolve-face.js';
+
+/** computeInputsHash déballé : un refus fait échouer l'essai en nommant ses codes. */
+function computeInputsHash(...args: Parameters<typeof computeInputsHashOutcome>): string {
+  const hash = computeInputsHashOutcome(...args);
+  if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+  return hash.value;
+}
 
 /**
  * D7.2 — l'empreinte de contenu n'a qu'une implantation, dans core-model ;
