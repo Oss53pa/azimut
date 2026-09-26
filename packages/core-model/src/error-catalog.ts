@@ -65,6 +65,10 @@ export const ERROR_CATALOG = {
   'LAYOUT.FACE_ALREADY_DECLARED':           { severity: 'blocking', description: 'Face déjà déclarée sur ce support' },
   'LAYOUT.FACE_TEMPLATE_UNKNOWN':           { severity: 'blocking', description: 'Gabarit de face inconnu du site' },
   'LAYOUT.FACE_LANG_INACTIVE':              { severity: 'blocking', description: 'Langue de face hors des langues actives du site' },
+  'LAYOUT.BLOCK_KIND_NOT_ENTERABLE':        { severity: 'blocking', description: 'Type de bloc qui ne se saisit pas sur une face' },
+  'LAYOUT.FREE_TEXT_EMPTY':                 { severity: 'blocking', description: 'Bloc libre sans aucun texte' },
+  'LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE':     { severity: 'blocking', description: 'Texte libre dans une langue que la face ne porte pas' },
+  'LAYOUT.FREE_TEXT_LANG_MISSING':          { severity: 'warning',  description: 'Langue de la face sans texte dans un bloc libre' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },

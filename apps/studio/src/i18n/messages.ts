@@ -43,6 +43,7 @@ import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-da
 import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
 import { WALL_PLAN_ENTRY_FR, WALL_PLAN_ENTRY_EN } from './messages/wall-plan-entry.js';
 import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js';
+import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -77,6 +78,7 @@ export const MESSAGES_FR = {
   ...CLOSURES_FR,
   ...WALL_PLAN_ENTRY_FR,
   ...SUPPORT_FACES_FR,
+  ...FACE_BLOCKS_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -114,6 +116,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...CLOSURES_EN,
   ...WALL_PLAN_ENTRY_EN,
   ...SUPPORT_FACES_EN,
+  ...FACE_BLOCKS_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

@@ -138,6 +138,11 @@ export {
   supportFaceCount, validateFaceDraft, declareFaceCommand, updateFaceCommand,
 } from './support-face-commands.js';
 export type { FaceDraft, FaceEnvironment } from './support-face-commands.js';
+export {
+  ENTERABLE_BLOCK_KINDS, isEnterableBlockKind, faceLangs, readFreeTexts,
+  declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
+} from './content-block-commands.js';
+export type { EnterableBlockKind, FreeTexts, BlockEnvironment } from './content-block-commands.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

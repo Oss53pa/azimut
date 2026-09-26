@@ -2,13 +2,15 @@ import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE, TEXT,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
 import { useCommandWrite } from '../state/use-command-write.js';
 import { siteLabels } from './register/labels.js';
 import { faceSlots, slotKey, type FaceSlot } from './faces/face-slots.js';
 import { FaceForm } from './faces/FaceForm.js';
+import { FaceBlocks } from './faces/FaceBlocks.js';
+import { FindingList } from './message-schedule/FindingList.js';
 
 const ALL = 'all';
 const DECLARED = 'declared';
@@ -77,6 +79,9 @@ export function SupportFacesView(): JSX.Element {
         sections={[]}
       >
         <FaceForm key={`${slotKey(selected)}:${selected.face?.id ?? 'new'}`} slot={selected} write={write} />
+        {selected.face === undefined
+          ? <p style={{ margin: 0, padding: '0 16px 12px', fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('faceblocks.undeclared')}</p>
+          : <FaceBlocks key={selected.face.id} face={selected.face} write={write} />}
       </Inspector>
     );
 
@@ -90,6 +95,11 @@ export function SupportFacesView(): JSX.Element {
       {write.done !== null && (
         <div style={{ marginBottom: SPACE.lg }}>
           <StateBanner severity="valid" message={t(write.done)} />
+          {write.warnings.length > 0 && (
+            <div style={{ marginTop: SPACE.sm }}>
+              <FindingList findings={write.warnings} empty="" />
+            </div>
+          )}
         </div>
       )}
       <RegisterLayout

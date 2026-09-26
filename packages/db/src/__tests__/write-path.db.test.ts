@@ -287,5 +287,20 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
       return tx.execute(sql`select template_key, langs from azimut.support_face where id = ${face}`);
     });
     expect(faceRow[0]).toEqual({ template_key: 'tpl-essai', langs: ['fr', 'en'] });
+
+    // D8.3 — un bloc libre porte son texte par langue ; il se réécrit, puis se retire.
+    const free = 'ac000000-0000-0000-0000-00000000ee08';
+    await callAs(ALICE, [{ operation: 'create', table: 'support_content_block', id: free,
+      after: { id: free, org_id: ORG, face_id: face, block_index: '1', kind: 'free', free_text: '{"fr":"Sortie"}' } }]);
+    await callAs(ALICE, [{ operation: 'update', table: 'support_content_block', id: free,
+      before: { free_text: '{"fr":"Sortie"}' }, after: { free_text: '{"fr":"Sortie","en":"Exit"}' } }]);
+    const freeRow = await db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      return tx.execute(sql`select kind, free_text from azimut.support_content_block where id = ${free}`);
+    });
+    expect(freeRow[0]).toEqual({ kind: 'free', free_text: { fr: 'Sortie', en: 'Exit' } });
+    await callAs(ALICE, [{ operation: 'delete', table: 'support_content_block', id: free }]);
+    expect(await count('support_content_block', free)).toBe(0);
   });
 });
