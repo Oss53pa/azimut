@@ -1154,3 +1154,106 @@ des `Outcome` par identité après le changement de signature, et seul
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
 - L'écran d'évacuation (P10).
+
+## Précision du fond, comparaisons localisées et contrôle de types, ce que la version 27 ferme
+
+| Ce que la version 27 pose | Où | État |
+| --- | --- | --- |
+| D2.2 — `IMPORT.RASTER_PRECISION_LIMITED`, avertissement | Catalogue et libellés (core-model) | Fait |
+| M2 — la précision du fond se juge sur le contenu, jamais sur l'extension | `plan-content.ts`, `pdf-painted-paths.ts`, `dxf-geometry.ts` (studio) ; écran M2 | Fait |
+| M2 — tableau des champs rétabli | Document | Rien à faire dans le code |
+| A9 — contrôle automatique des comparaisons localisées dans `engine-*` | Essai `a9-comparaison-localisee`, relevé `a9-releve-comparaisons-localisees.json` | Fait |
+| A9 — remplacement des comparaisons localisées existantes | Déclaré ci-dessous | Déclarée |
+| Le dossier `tests/` vérifié par le contrôle de types | `tests/tsconfig.json` ; essai `typecheck-couverture` | Fait |
+
+**La précision du fond.** La nature du fichier se lit dans ses premiers
+octets : PDF, PNG, JPEG, DXF texte ou binaire. Le nom du fichier et le type
+annoncé par le navigateur n'y entrent pas.
+
+- Une image PNG ou JPEG lève l'avertissement.
+- Un PDF est vectoriel s'il porte au moins un chemin peint dans un flux de
+  contenu. Les flux d'image, de police, d'index et de métadonnées ne sont
+  pas lus. La découpe fermée par `n`, qui entoure l'image d'un plan
+  numérisé, ne compte pas.
+- Un DXF texte est vectoriel s'il porte une entité géométrique, ou insère un
+  bloc qui en porte.
+- Ce qui ne se lit pas lève l'avertissement avec le motif `undetermined` :
+  filtre de flux autre que `FlateDecode`, DXF binaire, fichier illisible,
+  nature inconnue. Rien n'est présumé vectoriel.
+
+L'avertissement paraît dans le bandeau de l'écran M2. Il n'empêche pas le
+calage. La lecture se fait sans bibliothèque : `DecompressionStream`, que le
+navigateur fournit.
+
+**Correction d'un constat de la version 26.** Le rapport de
+la version 26 disait que `pnpm typecheck` ne vérifiait pas le dossier
+`tests/`. C'était faux pour les essais `*.test.ts`, vérifiés depuis le
+début. L'essai de déterminisme qui avait échoué comparait des `Outcome` par
+identité, ce qui n'est pas une erreur de types. Le trou réel était ailleurs :
+les quinze essais de bout en bout de `tests/e2e/`, que le motif `*.test.ts`
+excluait. Ils sont inclus et passent sans erreur. L'essai
+`typecheck-couverture` compare la liste que `tsc` vérifie aux fichiers du
+dossier ; sans la correction, il relève les quinze.
+
+### Tâche déclarée : remplacement des comparaisons localisées
+
+**Objet.** A9 : « Comparer deux chaînes dans un moteur se fait par leurs
+points de code, jamais par une comparaison sensible à la langue. » Aucun
+appel relevé ne passe de langue : tous dépendent de la locale de la machine.
+
+**Portée.** Les 124 occurrences des moteurs, dans 49 fichiers, relevées dans
+`tests/a9-releve-comparaisons-localisees.json` (121 dans le code, 3 dans les
+essais). Chacune passe à `codePointCompare` (core-model).
+
+Hors des moteurs, on compte aussi, hors essais :
+- 20 appels dans core-model ;
+- 5 dans le compilateur ;
+- 2 dans l'exécution de borne ;
+- 59 dans le studio.
+
+A9 ne classe ni core-model, ni le compilateur, ni l'exécution de borne. Le
+studio relève de la règle de l'interface : un tri selon la langue y est
+légitime si la langue est déclarée explicitement. Aucun des 59 appels ne la
+déclare. La portée hors moteurs reste à arrêter avant de commencer.
+
+**Échéance.** Avant le premier livrable réel.
+
+**Vérification.** Le relevé des moteurs tombe à zéro et disparaît. Chaîne
+A13.2 complète : `test:visual` et `test:determinism` diront si l'ordre d'une
+sortie a changé, ce qui arrive pour des identifiants dont la casse ou les
+accents diffèrent.
+
+**État.** Non commencée. Le contrôle automatique empêche le relevé de
+croître entre-temps.
+
+### Reste ouvert après la version 27
+
+**Le format accepté se juge encore sur l'extension et le type annoncé.**
+`acceptPlanFile` accepte un fichier nommé `.pdf` qui contient une image, et
+refuse un plan valide mal nommé. La précision, elle, est jugée sur le
+contenu. Faut-il aussi juger le format sur le contenu ? Relevé, non
+tranché.
+
+**Le nombre de pages d'un PDF n'est pas lu.** L'écran transmet toujours
+`pageCount: null`, si bien qu'`IMPORT.PAGE_REQUIRED` n'est jamais levé.
+Relevé, non corrigé.
+
+**Fichiers de configuration hors du contrôle de types.** Cinq fichiers
+TypeScript ne relèvent d'aucun `tsconfig` :
+- `playwright.config.ts` ;
+- `vitest.config.ts` ;
+- `vitest.db.config.ts` ;
+- `apps/studio/vite.config.ts` ;
+- `packages/db/drizzle.config.ts`.
+
+**Défaut de mise en page du document, A9.** Le paragraphe « Comparer deux
+chaînes » s'insère dans la liste des sources d'indéterminisme : le dernier
+point, sur les flottants, s'en trouve détaché. Son contenu reste appliqué.
+
+**Toujours au registre.**
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
+- `lineFingerprint`, hors des empreintes.
