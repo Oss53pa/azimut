@@ -382,6 +382,19 @@ function machineOfRecord(): Record<string, string> {
   };
 }
 
+/**
+ * D13, version 29 : « Taille de fenêtre déclarée avec le relevé, pour toute
+ * mesure qui dépend d'un rendu. » Relevée sur la page mesurée, comme la
+ * machine : c'est la fenêtre où le parcours a tourné, et non celle que la
+ * configuration est censée imposer — la version 28 a montré que les deux
+ * pouvaient différer. Une page sans fenêtre fixe ne produit pas de relevé.
+ */
+function windowOfRecord(page: Page): { largeur_px: number; hauteur_px: number } {
+  const size = page.viewportSize();
+  if (size === null) throw new Error('D13 : fenêtre non déterminée, le relevé ne vaudrait pas comme base de révision.');
+  return { largeur_px: size.width, hauteur_px: size.height };
+}
+
 test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et consigné', () => {
   test('le parcours est chronométré selon le protocole D13', async ({ page }) => {
     const runs: Run[] = [];
@@ -441,6 +454,10 @@ test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et 
       protocole: 'D13',
       releve_le: new Date().toISOString(),
       machine: machineOfRecord(),
+      fenetre: windowOfRecord(page),
+      comparable_avec: 'Les seuls relevés pris dans la même fenêtre (D13). Les relevés '
+        + 'antérieurs, sans fenêtre déclarée, sont conservés et marqués non comparables '
+        + 'dans releves-m8-anterieurs.json.',
       condition: 'Base amorcée. Entre deux exécutions : stockages local et de '
         + 'session vidés, cache du navigateur vidé, contexte conservé. La '
         + 'première exécution est écartée.',
