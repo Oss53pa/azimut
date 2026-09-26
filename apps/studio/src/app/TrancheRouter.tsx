@@ -8,10 +8,10 @@ import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
-import {
-  PlanScreenAdapter, FootprintsScreenAdapter,
-  GraphScreenAdapter, ValidationScreenAdapter,
-} from './workshop-adapters.js';
+import { PlanScreenAdapter } from './PlanScreenAdapter.js';
+import { FootprintsScreenAdapter } from './FootprintsScreenAdapter.js';
+import { GraphScreenAdapter } from './GraphScreenAdapter.js';
+import { ValidationScreenAdapter } from './ValidationScreenAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 
 /**
