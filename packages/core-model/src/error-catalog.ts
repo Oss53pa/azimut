@@ -56,6 +56,10 @@ export const ERROR_CATALOG = {
   'GRAPH.CLOSURE_DUPLICATE':                { severity: 'blocking', description: 'Fermeture déjà déclarée sur cette arête' },
   'GRAPH.CLOSURE_NOT_FOUND':                { severity: 'blocking', description: 'Fermeture à retirer absente de l’arête' },
   'GRAPH.CLOSURE_AVAILABILITY_UNREADABLE':  { severity: 'blocking', description: 'Disponibilité illisible : réécriture refusée depuis le poste' },
+  'LAYOUT.WALL_PLAN_SUPPORT_UNKNOWN':       { severity: 'blocking', description: 'Plan mural demandé sur un support absent du site' },
+  'LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE':     { severity: 'blocking', description: 'Plan mural demandé sur une face que le support n’a pas' },
+  'LAYOUT.WALL_PLAN_DUPLICATE':             { severity: 'blocking', description: 'Plan mural déjà déclaré sur cette face' },
+  'LAYOUT.WALL_PLAN_NOT_A_PLAN':            { severity: 'blocking', description: 'Retrait demandé sur un bloc qui ne porte pas de plan mural' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },

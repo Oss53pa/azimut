@@ -228,7 +228,7 @@ export type SupportContentBlockRow = {
   readonly org_id: string;
   readonly face_id: string;
   readonly block_index: number | null;
-  readonly ordinal: number;
+  readonly ordinal: number | null;
   readonly kind: string;
   readonly binding: unknown;
   readonly free_text: unknown;

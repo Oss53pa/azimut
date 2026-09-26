@@ -47,15 +47,24 @@ export function mapSupportFaceRow(row: SupportFaceRow): SupportFace {
   };
 }
 
-/** A5.6 — `block_index` retombe sur l'`ordinal` antérieur. */
+/**
+ * A5.6 — `block_index` retombe sur l'`ordinal` antérieur. La contrainte
+ * `support_content_block_position_present` (0049) garantit l'un des deux ; une
+ * ligne qui n'en porte aucun ne peut venir que d'un schéma qui a dérivé, et la
+ * lecture échoue plutôt que de placer le bloc au hasard.
+ */
 export function mapContentBlockRow(row: SupportContentBlockRow): ContentBlockInstance {
+  const blockIndex = row.block_index ?? row.ordinal;
+  if (blockIndex === null) {
+    throw new Error(`support_content_block ${row.id}: neither block_index nor ordinal`);
+  }
   const binding = asRecord(row.binding);
   const freeText = asRecord(row.free_text);
   return {
     id: row.id,
     org_id: row.org_id,
     face_id: row.face_id,
-    block_index: row.block_index ?? row.ordinal,
+    block_index: blockIndex,
     kind: row.kind,
     ...(binding !== undefined ? { binding } : {}),
     ...(freeText !== undefined ? { free_text: freeText } : {}),

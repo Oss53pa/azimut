@@ -238,4 +238,44 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await callAs(ALICE, [payload(withdrawn.value)]);
     expect(await availability()).toBeNull();
   });
+
+  /**
+   * T-2.9 et 0049 — un plan mural s'écrit selon A5.6 : une face sans `side`,
+   * un bloc `map` sans `ordinal`. Un bloc sans aucune position est refusé, et
+   * le bloc se retire en laissant sa face.
+   */
+  it('écrit une face et un bloc de plan mural sans les colonnes héritées, puis retire le bloc', async () => {
+    const { site, commands } = creation('00ee06', ORG);
+    const level = 'a7000000-0000-0000-0000-00000000ee06';
+    const node = 'a8000000-0000-0000-0000-00000000ee06';
+    const support = 'aa000000-0000-0000-0000-00000000ee06';
+    const face = 'ab000000-0000-0000-0000-00000000ee06';
+    const block = 'ac000000-0000-0000-0000-00000000ee06';
+    await callAs(ALICE, [
+      ...commands,
+      { operation: 'create', table: 'node', id: node,
+        after: { id: node, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } },
+      { operation: 'create', table: 'support', id: support,
+        after: { id: support, org_id: ORG, site_id: site, node_id: node, kind: 'directional' } },
+      { operation: 'create', table: 'support_face', id: face,
+        after: { id: face, org_id: ORG, support_id: support, face_index: '0' } },
+      { operation: 'create', table: 'support_content_block', id: block,
+        after: { id: block, org_id: ORG, face_id: face, block_index: '0', kind: 'map' } },
+    ]);
+    const count = async (table: string, id: string): Promise<number> => db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      const rows = await tx.execute(sql`select id from ${sql.identifier('azimut')}.${sql.identifier(table)} where id = ${id}`);
+      return rows.length;
+    });
+    expect(await count('support_content_block', block)).toBe(1);
+
+    const orphan = 'ac000000-0000-0000-0000-00000000ee07';
+    await expect(callAs(ALICE, [{ operation: 'create', table: 'support_content_block', id: orphan,
+      after: { id: orphan, org_id: ORG, face_id: face, kind: 'map' } }])).rejects.toThrow();
+
+    await callAs(ALICE, [{ operation: 'delete', table: 'support_content_block', id: block }]);
+    expect(await count('support_content_block', block)).toBe(0);
+    expect(await count('support_face', face)).toBe(1);
+  });
 });

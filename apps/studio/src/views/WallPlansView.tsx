@@ -1,12 +1,14 @@
 import { type JSX, useMemo, useState } from 'react';
-import type { Support } from '@azimut/core-model';
+import { wallPlanBlocks, withdrawWallPlanCommand, type Support } from '@azimut/core-model';
 import { renderOrientedPlan, orientationDegForAzimuth } from '@azimut/engine-layout';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, SPACE, TEXT,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, Button, SPACE, TEXT, LABEL_STYLE,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
+import { useCommandWrite, single } from '../state/use-command-write.js';
+import { WallPlanEntry } from './plans/WallPlanEntry.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { siteLabels } from './register/labels.js';
 import { formatNumber } from './register/format.js';
@@ -39,6 +41,7 @@ export function WallPlansView(): JSX.Element {
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
+  const write = useCommandWrite();
 
   const rows = useMemo<readonly WallPlanRow[]>(() => {
     const locations = wallPlanSupportIds(site);
@@ -72,6 +75,16 @@ export function WallPlansView(): JSX.Element {
       viewer_position: node.position,
       show_north_arrow: true,
     });
+  }, [site, selected]);
+
+  // Les blocs de plan du support choisi, face par face, pour le retrait.
+  const selectedBlocks = useMemo(() => {
+    if (selected === null) return [];
+    const faces = new Map(site.support_faces.filter(f => f.support_id === selected.support.id).map(f => [f.id, f.face_index]));
+    return wallPlanBlocks(site)
+      .filter(b => faces.has(b.face_id))
+      .map(block => ({ block, face: faces.get(block.face_id) ?? 0 }))
+      .sort((a, b) => a.face - b.face || a.block.block_index - b.block.block_index);
   }, [site, selected]);
 
   const filters: readonly RegisterFilter[] = [
@@ -127,29 +140,47 @@ export function WallPlansView(): JSX.Element {
             {t('wallplans.preview.note')}
           </p>
         </section>
+        <section style={{ padding: '12px 16px', display: 'grid', gap: SPACE.sm }} aria-label={t('wallplans.section.blocks')}>
+          <h3 style={{ ...LABEL_STYLE, margin: 0 }}>{t('wallplans.section.blocks')}</h3>
+          {selectedBlocks.map(({ block, face }) => (
+            <div key={block.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACE.sm }}>
+              <span style={{ fontSize: TEXT.small }}>{t('wallplans.block.label', { face, block: block.block_index })}</span>
+              <Button
+                rank="quiet"
+                disabled={write.readonly || write.busy}
+                onClick={() => { void write.send(single(withdrawWallPlanCommand(block, new Date().toISOString())), 'wallplans.entry.withdrawn'); }}
+              >
+                {t('wallplans.withdraw')}
+              </Button>
+            </div>
+          ))}
+        </section>
       </Inspector>
     );
 
   return (
-    <RegisterLayout
-      title={t('wallplans.title')}
-      summary={t('wallplans.summary', { count: rows.length })}
-      filtersLabel={t('register.filters')}
-      filters={filters}
-      filter={filter}
-      onFilter={id => { setFilter(id); setSelectedId(null); }}
-      shown={t('placement.shown', { count: visible.length })}
-      inspector={inspector}
-      note={t('wallplans.note')}
-    >
-      <DataTable
-        columns={columns}
-        rows={visible}
-        rowKey={r => r.support.id}
-        empty={t('wallplans.empty')}
-        onSelect={r => { setSelectedId(r.support.id); }}
-        selectedKey={selected?.support.id}
-      />
-    </RegisterLayout>
+    <div>
+      <WallPlanEntry write={write} />
+      <RegisterLayout
+        title={t('wallplans.title')}
+        summary={t('wallplans.summary', { count: rows.length })}
+        filtersLabel={t('register.filters')}
+        filters={filters}
+        filter={filter}
+        onFilter={id => { setFilter(id); setSelectedId(null); }}
+        shown={t('placement.shown', { count: visible.length })}
+        inspector={inspector}
+        note={t('wallplans.note')}
+      >
+        <DataTable
+          columns={columns}
+          rows={visible}
+          rowKey={r => r.support.id}
+          empty={t('wallplans.empty')}
+          onSelect={r => { setSelectedId(r.support.id); }}
+          selectedKey={selected?.support.id}
+        />
+      </RegisterLayout>
+    </div>
   );
 }

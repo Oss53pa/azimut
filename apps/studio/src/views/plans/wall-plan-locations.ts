@@ -4,14 +4,12 @@
  * table : il se lit sur les faces et leurs blocs. Son orientation est
  * l'azimut du support.
  */
-import type { SiteData } from '@azimut/core-model';
-
-export const MAP_BLOCK_KIND = 'map';
+import { wallPlanBlocks, type SiteData } from '@azimut/core-model';
 
 /** Les supports qui portent un plan mural, par identifiant. */
 export function wallPlanSupportIds(site: SiteData): ReadonlySet<string> {
   const facesWithMap = new Set(
-    site.content_blocks.filter(b => b.kind === MAP_BLOCK_KIND).map(b => b.face_id),
+    wallPlanBlocks(site).map(b => b.face_id),
   );
   return new Set(
     site.support_faces.filter(f => facesWithMap.has(f.id)).map(f => f.support_id),

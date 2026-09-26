@@ -1,17 +1,12 @@
 import { type JSX, useMemo, useState } from 'react';
-import {
-  CLOSURE_REASONS, declareClosureCommand, withdrawClosureCommand,
-  type EntityCommand, type Finding, type Outcome,
-} from '@azimut/core-model';
+import { CLOSURE_REASONS, declareClosureCommand, withdrawClosureCommand } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
-import { useSiteReload } from '../context/useSiteReload.js';
 import { useI18n } from '../i18n/useI18n.js';
-import type { UiMessageKey } from '../i18n/messages.js';
 import {
   ScreenHeader, Panel, PanelGrid, TextField, SelectField, Button, StateBanner, SPACE,
   type Option,
 } from '../components/ui/index.js';
-import { appSink } from '../state/app-sink.js';
+import { useCommandWrite, single } from '../state/use-command-write.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { ClosuresPanel } from './closures/ClosuresPanel.js';
 import { closureRows, type ClosureRow } from './closures/closure-rows.js';
@@ -30,9 +25,9 @@ const FIRST_REASON = CLOSURE_REASONS[0];
  */
 export function ClosuresView(): JSX.Element {
   const site = useSiteData();
-  const reload = useSiteReload();
   const { t, lang } = useI18n();
-  const sink = useMemo(() => appSink(), []);
+  const write = useCommandWrite();
+  const { readonly, busy, findings, done } = write;
   const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
   const rows = useMemo(() => closureRows(site), [site]);
 
@@ -40,11 +35,6 @@ export function ClosuresView(): JSX.Element {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [reason, setReason] = useState<string>(FIRST_REASON);
-  const [findings, setFindings] = useState<readonly Finding[]>([]);
-  const [done, setDone] = useState<UiMessageKey | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  const readonly = sink === null;
   const edgeOptions: readonly Option[] = useMemo(
     () => site.graph.edges
       .map(e => ({ value: e.id, label: `${labels.node(e.from_node_id)} — ${labels.node(e.to_node_id)}` }))
@@ -55,35 +45,21 @@ export function ClosuresView(): JSX.Element {
   const edge = site.graph.edges.find(e => e.id === edgeId);
   const unreadable = edge?.availability?.readable === false;
 
-  async function send(outcome: Outcome<EntityCommand>, doneKey: UiMessageKey): Promise<boolean> {
-    setDone(null);
-    if (!outcome.ok) { setFindings(outcome.findings); return false; }
-    if (sink === null) return false;
-    setBusy(true);
-    const result = await sink([outcome.value]);
-    setBusy(false);
-    if (!result.ok) { setFindings(result.findings); return false; }
-    setFindings([]);
-    setDone(doneKey);
-    reload();
-    return true;
-  }
-
   function declare(): void {
-    if (edge === undefined) { setDone(null); setFindings([]); return; }
+    if (edge === undefined) { write.clear(); return; }
     const outcome = declareClosureCommand(
       edge,
       { from, to, reason_key: reason },
       { timestamp: new Date().toISOString(), declaredBy: null },
     );
-    void send(outcome, 'closures.form.done').then(ok => {
+    void write.send(single(outcome), 'closures.form.done').then(ok => {
       if (ok) { setFrom(''); setTo(''); }
     });
   }
 
   function withdraw(row: ClosureRow): void {
     if (row.closure === null) return;
-    void send(withdrawClosureCommand(row.edge, row.closure, new Date().toISOString()), 'closures.form.withdrawn');
+    void write.send(single(withdrawClosureCommand(row.edge, row.closure, new Date().toISOString())), 'closures.form.withdrawn');
   }
 
   const inactive = readonly || busy;

@@ -55,7 +55,8 @@ export const supportFace = azimut.table('support_face', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
-  side: text('side').notNull(),
+  // Héritée, facultative depuis 0049 : A5.6 identifie la face par `face_index`.
+  side: text('side'),
   width_mm: numeric('width_mm'),
   height_mm: numeric('height_mm'),
   // A5.6 : identité de face par index, gabarit et langues. Additifs — cf.
@@ -74,7 +75,8 @@ export const supportContentBlock = azimut.table('support_content_block', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   face_id: uuid('face_id').notNull().references(() => supportFace.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
-  ordinal: integer('ordinal').notNull(),
+  // Hérité, facultatif depuis 0049 : A5.6 place le bloc par `block_index`.
+  ordinal: integer('ordinal'),
   config: jsonb('config').notNull().default({}),
   // A5.6 : index de bloc, liaison (contenu résolu) et texte libre. Additifs —
   // cf. migration 0016. `ordinal`/`config` préexistants sont laissés en place.

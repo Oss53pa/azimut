@@ -166,6 +166,13 @@ porte un bloc `map` ; son orientation est son azimut. Aucune table : l'écran
 **Appliqué le 26/09/2026** : l'écran ne liste plus que ces supports, et dit
 comment en déclarer quand il n'y en a aucun.
 
+**Saisie, 26/09/2026** : l'écran déclare un plan mural (support, face) et le
+retire. La face s'écrit si elle manque, selon A5.6 ; le nombre de faces vient
+de la typologie, face 0 seule sans typologie. Migration 0049 : les colonnes
+héritées `support_face.side` et `support_content_block.ordinal`, absentes de
+A5.6, deviennent facultatives (décision du même jour), un bloc devant garder
+`block_index` ou `ordinal`.
+
 ## 5. Famille C — tables nouvelles, modules 05 à 09
 
 Ni A5 ni la partie B ne définissent ces entités. Le studio les simule avec

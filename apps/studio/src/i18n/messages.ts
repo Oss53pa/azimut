@@ -41,6 +41,7 @@ import { SIGNAGE_CHARTER_FR, SIGNAGE_CHARTER_EN } from './messages/signage-chart
 import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages/operations-maintenance.js';
 import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-data.js';
 import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
+import { WALL_PLAN_ENTRY_FR, WALL_PLAN_ENTRY_EN } from './messages/wall-plan-entry.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -73,6 +74,7 @@ export const MESSAGES_FR = {
   ...OPERATIONS_MAINTENANCE_FR,
   ...PRODUCTION_DATA_FR,
   ...CLOSURES_FR,
+  ...WALL_PLAN_ENTRY_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -108,6 +110,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...OPERATIONS_MAINTENANCE_EN,
   ...PRODUCTION_DATA_EN,
   ...CLOSURES_EN,
+  ...WALL_PLAN_ENTRY_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

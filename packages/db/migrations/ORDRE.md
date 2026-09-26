@@ -92,6 +92,7 @@ non plus — elle n'en retire que les clés étrangères.
 0046_h5_tenant_sign_tables
 0047_a5_7_installed_support_columns
 0048_h8_work_order_cost_minor
+0049_a5_6_face_block_legacy_optional
 ```
 
 ## Règle pour la suite
