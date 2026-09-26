@@ -291,7 +291,13 @@ zone                (id, org_id, level_id, name, kind, footprint_ids jsonb)
 -- calculée, comme pour la zone d'orientation de la partie H.
                     kind in ('commercial','food','service','technical','parking','outdoor')
 
-plan_source         (id, org_id, level_id, storage_path, media_type, uploaded_at)
+plan_source         (id, org_id, level_id, storage_path, media_type, content_kind,
+                     uploaded_at)
+                    content_kind in ('vector','raster','undetermined')
+-- content_kind : nature réelle du contenu, constatée à l'import et non déduite de
+-- l'extension. Un plan sans contenu vectoriel reste imprécis toute sa vie : cette
+-- information survit à l'écran d'import et expliquera plus tard un résidu de calage
+-- médiocre.
 plan_calibration    (id, org_id, plan_source_id, scale_m_per_px numeric,
                      origin_x_px numeric, origin_y_px numeric, rotation_deg numeric,
                      reference_distance_m numeric)
@@ -684,7 +690,9 @@ Règle : `auditCoverage` refuse de produire un taux si `validateGraph` n'est pas
 
 Application de INV-4. Un moteur ne peut pas produire deux sorties différentes pour la même entrée.
 
-Sources d'indéterminisme interdites dans `engine-*` :
+**Portée.** Cette section s'applique à tout code qui produit une sortie ou une empreinte : les moteurs, le noyau, le compilateur et l'exécution de borne. Ce n'est pas le nom du dossier qui décide, c'est le fait de produire. L'interface du studio, qui affiche sans produire de livrable, en est exclue, sauf pour ce qui alimente une empreinte.
+
+Sources d'indéterminisme interdites :
 
 - `Math.random`, tout générateur pseudo-aléatoire.
 - `Date.now`, `new Date()`, toute lecture d'horloge. Une date nécessaire est passée en paramètre.
@@ -692,9 +700,9 @@ Sources d'indéterminisme interdites dans `engine-*` :
 - Tri non stable, ou tri dont la fonction de comparaison peut retourner 0 pour deux éléments distincts. Prévoir toujours un critère de départage final sur l'identifiant.
 - Génération d'identifiants dans un rendu.
 - Dépendance à la locale du système pour la comparaison de chaînes, le formatage des nombres ou des dates.
-
-**Comparer deux chaînes dans un moteur** se fait par leurs points de code, jamais par une comparaison sensible à la langue : un même jeu de données trié sur deux machines doit donner le même ordre. Dans l'interface, un tri selon la langue de l'utilisateur est légitime, à condition que la langue soit déclarée explicitement et non déduite de la machine. Un contrôle automatique refuse toute comparaison localisée introduite dans `engine-*`.
 - Flottants dont l'arrondi n'est pas explicité. Toute coordonnée écrite dans un SVG est arrondie à une précision fixée et documentée.
+
+**Comparer deux chaînes** se fait par leurs points de code, jamais par une comparaison sensible à la langue : un même jeu de données trié sur deux machines doit donner le même ordre. Dans l'interface, un tri selon la langue de l'utilisateur est légitime, à condition que la langue soit déclarée explicitement et non déduite de la machine. Un contrôle automatique refuse toute comparaison localisée introduite là où cette section s'applique.
 
 Test obligatoire, exécuté sur chaque site de référence : compiler deux fois de suite, comparer les empreintes des sorties, exiger l'égalité stricte.
 
@@ -5318,7 +5326,9 @@ C'est l'écran d'entrée réel du produit, et le plus important de la tranche. T
 
 **Le DWG n'est pas accepté.** Le lire exige une bibliothèque sous licence propriétaire, là où le DXF et le PDF vectoriel n'en demandent aucune, et un architecte fournit l'un ou l'autre sans difficulté.
 
-**Précision limitée.** Un fichier sans contenu vectoriel exploitable est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED`. Cela vise l'image en mode point comme le PDF qui se présente comme vectoriel sans l'être : c'est le contenu qui est contrôlé, jamais l'extension.
+**Le format se juge sur le contenu, jamais sur l'extension ni sur le type annoncé.** Un fichier dont le contenu ne correspond à aucun des formats acceptés est refusé, `IMPORT.FORMAT_UNSUPPORTED`.
+
+**Précision limitée.** Un fichier d'un format reconnu mais sans contenu vectoriel exploitable est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED` : l'image en mode point, le PDF qui se présente comme vectoriel sans l'être, et le contenu illisible, qui n'est jamais présumé vectoriel.
 
 Pour un fichier de CAO, la qualification décrite en partie D s'exécute avant tout import et affiche son rapport : proportion de polylignes fermées, calques exploitables, cohérence des unités, références manquantes, doublons, nombre de niveaux. En dessous du seuil, l'écran recommande explicitement le calage manuel et propose les deux voies sans en imposer une.
 
@@ -8618,3 +8628,8 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 293. M2 : tableau des champs rétabli, précision limitée écrite
 294. D2.2 : code de précision limitée
 295. A9 : comparaison de chaînes dans un moteur et dans l'interface
+296. A9 : liste des sources d'indéterminisme rétablie
+297. A9 : comparaison de chaînes placée après la liste
+298. A9 : portée élargie à tout code qui produit une sortie ou une empreinte
+299. M2 : format jugé sur le contenu
+300. A5.2 : nature du contenu d'une source de plan
