@@ -23,12 +23,14 @@ describe('D8.3 — blocs saisis sur une face', () => {
       id: 'blk-new', org_id: first.org_id, face_id: 'face-1', block_index: 1, kind: 'free',
       free_text: JSON.stringify({ fr: 'Sortie', en: 'Exit' }),
     });
-    expect(out.ok && out.warnings).toEqual([]);
+    // Sans typologie, le gabarit n'est pas connu : l'emplacement n'est pas vérifié, et c'est dit.
+    expect(out.ok && out.warnings.map(w => w.code)).toEqual(['LAYOUT.FACE_TEMPLATE_NOT_AT_HAND']);
   });
 
   it('avertit d’une langue de la face restée sans texte, sans bloquer', () => {
     const out = declareBlockCommand(SITE, FACE, 'free', { fr: 'Sortie' }, ENV);
-    expect(out.ok && out.warnings.map(w => [w.code, w.params['lang']])).toEqual([['LAYOUT.FREE_TEXT_LANG_MISSING', 'en']]);
+    expect(out.ok && out.warnings.map(w => w.code)).toEqual(['LAYOUT.FREE_TEXT_LANG_MISSING', 'LAYOUT.FACE_TEMPLATE_NOT_AT_HAND']);
+    expect(out.ok && out.warnings[0]?.params['lang']).toBe('en');
   });
 
   it('ajoute une légende sans texte', () => {

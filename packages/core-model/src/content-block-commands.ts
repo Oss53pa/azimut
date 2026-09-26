@@ -16,6 +16,7 @@
 import type { SiteData } from './site.js';
 import type { ContentBlockInstance, SupportFace } from './site-signage.js';
 import { buildCommand, type EntityCommand, type RowValues } from './site-commands.js';
+import { chooseSlot, freeTextsOf } from './face-template-slots.js';
 import type { Finding, Outcome } from './outcome.js';
 
 export const ENTERABLE_BLOCK_KINDS = ['free', 'legend'] as const;
@@ -48,11 +49,7 @@ export function faceLangs(site: SiteData, face: SupportFace): readonly string[] 
 
 /** Le texte d'un bloc libre tel que la base le porte, ses entrées non textuelles écartées. */
 export function readFreeTexts(block: ContentBlockInstance): FreeTexts {
-  const out: Record<string, string> = {};
-  for (const [lang, value] of Object.entries(block.free_text ?? {})) {
-    if (typeof value === 'string') out[lang] = value;
-  }
-  return out;
+  return freeTextsOf(block);
 }
 
 /** Le texte tel qu'il s'écrit : langues de la face, dans leur ordre, textes non vides. */
@@ -87,6 +84,8 @@ export function declareBlockCommand(
   kind: string,
   texts: FreeTexts,
   env: BlockEnvironment,
+  /** L'emplacement du gabarit visé ; absent, le premier libre de cette nature. */
+  slot?: number,
 ): Outcome<EntityCommand> {
   if (!isEnterableBlockKind(kind)) {
     return { ok: false, findings: [finding('LAYOUT.BLOCK_KIND_NOT_ENTERABLE', 'blocking', face.id, { kind })] };
@@ -99,9 +98,14 @@ export function declareBlockCommand(
     warnings = checked.warnings;
     freeText = freeTextValue(faceLangs(site, face), texts);
   }
-  const blockIndex = site.content_blocks
-    .filter(b => b.face_id === face.id)
-    .reduce((max, b) => Math.max(max, b.block_index + 1), 0);
+  const support = site.supports.find(s => s.id === face.support_id);
+  if (support === undefined) {
+    return { ok: false, findings: [finding('LAYOUT.FACE_SUPPORT_UNKNOWN', 'blocking', face.id, { support_id: face.support_id })] };
+  }
+  const chosen = chooseSlot(site, support, face.face_index, kind, site.content_blocks.filter(b => b.face_id === face.id), slot);
+  if (!chosen.ok) return chosen;
+  warnings = [...warnings, ...chosen.value.warnings];
+  const blockIndex = chosen.value.index;
   const id = env.newId();
   const after: RowValues = {
     id, org_id: face.org_id, face_id: face.id, block_index: blockIndex, kind,

@@ -7,7 +7,8 @@
  */
 import { composeFace, renderFace } from '@azimut/engine-graph';
 import type { FaceTheme, ResolvedFace } from '@azimut/engine-graph';
-import type { FaceTemplate, SiteData, TravelProfile, GraphNode } from '@azimut/core-model';
+import { faceTemplate } from '@azimut/core-model';
+import type { FaceTemplate, SiteData, Support, TravelProfile, GraphNode } from '@azimut/core-model';
 
 /**
  * Support et horodatage de l'aperçu : deux valeurs fixes, pour que deux
@@ -89,4 +90,34 @@ export function renderPreview(
     width_mm: dimensions.width_mm,
     height_mm: dimensions.height_mm,
   };
+}
+
+/**
+ * A5.6 — l'aperçu d'une face réelle : le gabarit de sa typologie, composé sur
+ * le support et son nœud, avec les blocs saisis sur la face (D8.3). `null`
+ * quand le gabarit n'est pas connu au poste ou que la face ne se compose pas.
+ */
+export function renderSupportFace(
+  site: SiteData,
+  support: Support,
+  faceIndex: number,
+  profile: TravelProfile,
+  lang: string,
+): { readonly svg: string; readonly width_mm: number; readonly height_mm: number } | null {
+  const template = faceTemplate(site, support, faceIndex);
+  if (template === null) return null;
+  const dimensions = faceDimensions(site, template);
+  if (dimensions === null) return null;
+  const resolved = composeFace({
+    site, template, profile, supportId: support.id, nodeId: support.node_id, generated_at: PREVIEW_GENERATED_AT,
+  });
+  if (!resolved.ok) return null;
+  const svg = renderFace(resolved.value, {
+    width_mm: dimensions.width_mm,
+    height_mm: dimensions.height_mm,
+    theme: FACE_THEME,
+    font_family: PREVIEW_FONT_FAMILY,
+    lang,
+  });
+  return { svg, ...dimensions };
 }

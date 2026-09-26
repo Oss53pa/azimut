@@ -253,5 +253,27 @@ export function computeScheduleInputsHash(inputs: ScheduleInputs): string {
       .sort((a, b) => a.support_type_key.localeCompare(b.support_type_key))
       .map(l => ({ key: l.support_type_key, levels: [...l.levels].sort((a, b) => a - b) })),
     rules,
+    // A5.6 — les blocs saisis sur les faces des supports du tableau. Absents,
+    // la clé l'est aussi : un site sans bloc d'instance garde son empreinte.
+    ...instanceBlocksHashPart(site, supports),
   });
+}
+
+function instanceBlocksHashPart(
+  site: SiteData,
+  supports: readonly PlacedSupport[],
+): { readonly instance_blocks?: readonly unknown[] } {
+  const ids = new Set(supports.map(s => s.id));
+  const faces = new Map(site.support_faces.filter(f => ids.has(f.support_id)).map(f => [f.id, f]));
+  const blocks = site.content_blocks
+    .flatMap(b => {
+      const face = faces.get(b.face_id);
+      return face === undefined ? [] : [{
+        support_id: face.support_id, face_index: face.face_index, block_index: b.block_index,
+        kind: b.kind, free_text: b.free_text ?? null,
+      }];
+    })
+    .sort((a, b) => a.support_id.localeCompare(b.support_id)
+      || a.face_index - b.face_index || a.block_index - b.block_index || a.kind.localeCompare(b.kind));
+  return blocks.length === 0 ? {} : { instance_blocks: blocks };
 }

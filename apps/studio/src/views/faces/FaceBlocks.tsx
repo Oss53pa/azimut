@@ -1,7 +1,7 @@
 import { type JSX, useState } from 'react';
 import {
   ENTERABLE_BLOCK_KINDS, declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
-  faceLangs, readFreeTexts, isEnterableBlockKind,
+  faceLangs, readFreeTexts, isEnterableBlockKind, faceTemplate, templateSlots, fitsSlot,
   type ContentBlockInstance, type FreeTexts, type SupportFace,
 } from '@azimut/core-model';
 import { useSiteData } from '../../context/useSiteData.js';
@@ -50,6 +50,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   const { t } = useI18n();
   const langs = faceLangs(site, face);
   const [kind, setKind] = useState<string>(ENTERABLE_BLOCK_KINDS[0]);
+  const [slot, setSlot] = useState('');
   const [texts, setTexts] = useState<FreeTexts>({});
   const [editing, setEditing] = useState<{ readonly id: string; readonly texts: FreeTexts } | null>(null);
   const inactive = write.readonly || write.busy;
@@ -61,11 +62,23 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   const kindOptions: readonly Option[] = ENTERABLE_BLOCK_KINDS.map(k => ({ value: k, label: kindLabel(k) }));
   const now = (): string => new Date().toISOString();
 
+  // D8.3 — les emplacements du gabarit que ce type de bloc peut remplir, libres.
+  const support = site.supports.find(s => s.id === face.support_id);
+  const template = support === undefined ? null : faceTemplate(site, support, face.face_index);
+  const taken = new Set(blocks.map(b => b.block_index));
+  const slotOptions: readonly Option[] = template === null ? [] : [
+    { value: '', label: t('faceblocks.slot.first') },
+    ...templateSlots(template)
+      .map((_, index) => index)
+      .filter(index => fitsSlot(template, { kind, block_index: index }) && !taken.has(index))
+      .map(index => ({ value: String(index), label: t('faceblocks.slot.option', { index }) })),
+  ];
+
   function add(): void {
     const outcome = declareBlockCommand(site, face, kind, kind === 'free' ? texts : {}, {
       newId: () => crypto.randomUUID(), timestamp: now(),
-    });
-    void write.send(single(outcome), 'faceblocks.added').then(ok => { if (ok) setTexts({}); });
+    }, slot === '' ? undefined : Number(slot));
+    void write.send(single(outcome), 'faceblocks.added').then(ok => { if (ok) { setTexts({}); setSlot(''); } });
   }
 
   function save(block: ContentBlockInstance, next: FreeTexts): void {
@@ -118,7 +131,10 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
         </div>
       ))}
       <h3 style={{ ...LABEL_STYLE, margin: `${String(SPACE.sm)}px 0 0` }}>{t('faceblocks.add.title')}</h3>
-      <SelectField label={t('faceblocks.add.kind')} value={kind} options={kindOptions} onChange={setKind} disabled={inactive} />
+      <SelectField label={t('faceblocks.add.kind')} value={kind} options={kindOptions} onChange={k => { setKind(k); setSlot(''); }} disabled={inactive} />
+      {template !== null && (
+        <SelectField label={t('faceblocks.slot')} value={slot} options={slotOptions} onChange={setSlot} disabled={inactive} />
+      )}
       {kind === 'free' && <TextFields langs={langs} texts={texts} onChange={setTexts} disabled={inactive} />}
       <div>
         <Button rank="secondary" onClick={add} disabled={inactive}>{t('faceblocks.add.submit')}</Button>

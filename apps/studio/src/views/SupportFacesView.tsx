@@ -10,6 +10,7 @@ import { siteLabels } from './register/labels.js';
 import { faceSlots, slotKey, type FaceSlot } from './faces/face-slots.js';
 import { FaceForm } from './faces/FaceForm.js';
 import { FaceBlocks } from './faces/FaceBlocks.js';
+import { FacePreview } from './faces/FacePreview.js';
 import { FindingList } from './message-schedule/FindingList.js';
 
 const ALL = 'all';
@@ -78,6 +79,7 @@ export function SupportFacesView(): JSX.Element {
         subtitle={t('supportfaces.inspector.subtitle', { face: selected.faceIndex, node: labels.node(selected.support.node_id) })}
         sections={[]}
       >
+        <FacePreview support={selected.support} faceIndex={selected.faceIndex} />
         <FaceForm key={`${slotKey(selected)}:${selected.face?.id ?? 'new'}`} slot={selected} write={write} />
         {selected.face === undefined
           ? <p style={{ margin: 0, padding: '0 16px 12px', fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('faceblocks.undeclared')}</p>

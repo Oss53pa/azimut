@@ -232,13 +232,19 @@ function renderFreeText(
   h: number,
   theme: FaceTheme,
   fontFamily: string,
+  lang: string | undefined,
 ): string {
   const fontSize = Math.min(h * 0.4, 8);
   const ty = y + h / 2 + fontSize * 0.35;
+  // D8.3 — un texte saisi sur la face se lit dans la langue active, comme un
+  // nom de destination ; à défaut, le texte du gabarit.
+  const text = content.texts !== undefined && Object.keys(content.texts).length > 0
+    ? pickName(content.texts, lang)
+    : content.text;
   return (
     `<text x="${x + 2}" y="${ty}"` +
     ` font-family="${esc(fontFamily)}" font-size="${fontSize}"` +
-    ` fill="${esc(theme.text_primary)}">${esc(content.text)}</text>`
+    ` fill="${esc(theme.text_primary)}">${esc(text)}</text>`
   );
 }
 
@@ -378,7 +384,7 @@ function renderBlock(
     case 'arrow':
       return renderArrow(content, x, y, w, h, theme);
     case 'free_text':
-      return renderFreeText(content, x, y, w, h, theme, fontFamily);
+      return renderFreeText(content, x, y, w, h, theme, fontFamily, lang);
     case 'map':
       return renderMap(content, x, y, w, h, theme, fontFamily);
     case 'legend':

@@ -14,6 +14,7 @@
 import type { SiteData } from './site.js';
 import type { ContentBlockInstance } from './site-signage.js';
 import { supportFaceCount } from './support-face-commands.js';
+import { chooseSlot } from './face-template-slots.js';
 import { buildCommand, type EntityCommand, type RowValues } from './site-commands.js';
 import type { Finding, Outcome } from './outcome.js';
 
@@ -69,6 +70,9 @@ export function declareWallPlanCommands(
     return { ok: false, findings: [refusal('LAYOUT.WALL_PLAN_DUPLICATE', supportId, { face: faceIndex })] };
   }
 
+  const chosen = chooseSlot(site, support, faceIndex, WALL_PLAN_BLOCK_KIND, blocks, undefined);
+  if (!chosen.ok) return chosen;
+
   const commands: EntityCommand[] = [];
   let faceId = face?.id;
   if (faceId === undefined) {
@@ -80,13 +84,13 @@ export function declareWallPlanCommands(
     }));
   }
   const blockId = env.newId();
-  const blockIndex = blocks.reduce((max, b) => Math.max(max, b.block_index + 1), 0);
+  const blockIndex = chosen.value.index;
   commands.push(command({
     operation: 'create', module: MODULE, table: 'support_content_block', id: blockId, org_id: support.org_id,
     after: { id: blockId, org_id: support.org_id, face_id: faceId, block_index: blockIndex, kind: WALL_PLAN_BLOCK_KIND },
     timestamp: env.timestamp, groupKey: `wall-plan:${supportId}:${String(faceIndex)}`,
   }));
-  return { ok: true, value: commands, warnings: [] };
+  return { ok: true, value: commands, warnings: [...chosen.value.warnings] };
 }
 
 /** Retire un bloc de plan mural. La face reste : d'autres blocs peuvent s'y ajouter. */

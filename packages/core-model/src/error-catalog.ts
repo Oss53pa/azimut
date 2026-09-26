@@ -69,6 +69,9 @@ export const ERROR_CATALOG = {
   'LAYOUT.FREE_TEXT_EMPTY':                 { severity: 'blocking', description: 'Bloc libre sans aucun texte' },
   'LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE':     { severity: 'blocking', description: 'Texte libre dans une langue que la face ne porte pas' },
   'LAYOUT.FREE_TEXT_LANG_MISSING':          { severity: 'warning',  description: 'Langue de la face sans texte dans un bloc libre' },
+  'LAYOUT.INSTANCE_BLOCK_NO_SLOT':          { severity: 'blocking', description: 'Bloc saisi sur une face sans emplacement de même nature dans son gabarit' },
+  'LAYOUT.BLOCK_SLOT_TAKEN':                { severity: 'blocking', description: 'Emplacement du gabarit déjà rempli sur cette face' },
+  'LAYOUT.FACE_TEMPLATE_NOT_AT_HAND':       { severity: 'warning',  description: 'Gabarit de la face inconnu au poste : emplacement non vérifié' },
 
   // ── GEOM ──────────────────────────────────────────────────
   'GEOM.POLYGON_SELF_INTERSECTING':         { severity: 'blocking', description: 'Polygone auto-intersectant' },

@@ -9,6 +9,7 @@ import { checkUnitCodeRequired, checkUnitCodeDuplicate } from './checks/unit-cod
 import { checkLevelCalibrated, checkSiteOriginCoherent } from './checks/site-frame.js';
 import { checkApprovedVersionImmutable } from './checks/support-version.js';
 import { checkEdgeAvailability } from './checks/edge-availability.js';
+import { checkInstanceBlocks } from './checks/instance-blocks.js';
 import { auditLexicon } from './audit-lexicon.js';
 import { auditTypography } from './audit-typography.js';
 import { auditSentenceLength } from './audit-sentence-length.js';
@@ -63,6 +64,7 @@ const BASE_CHECKS: readonly string[] = [
   'approved_version_immutable',
   'duplicate_display_name',
   'edge_availability',
+  'instance_blocks',
   'forbidden_characters',
   'sentence_length',
   'incomplete_lang_coverage',
@@ -96,6 +98,7 @@ export function runChecks(
   findings.push(...checkSiteOriginCoherent(site));
   findings.push(...checkApprovedVersionImmutable(site));
   findings.push(...checkEdgeAvailability(site));
+  findings.push(...checkInstanceBlocks(site));
 
   // QC-06 (complément atelier) n'attend aucune déclaration : un caractère
   // interdit l'est sans qu'une charte ait à le dire, et dans toutes les langues.

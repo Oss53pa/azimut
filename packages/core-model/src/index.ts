@@ -143,6 +143,11 @@ export {
   declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
 } from './content-block-commands.js';
 export type { EnterableBlockKind, FreeTexts, BlockEnvironment } from './content-block-commands.js';
+export {
+  INSTANCE_SLOT_KIND, templateForSide, sortedSides, templateSlots, faceTemplate, fitsSlot,
+  instanceBlocksOf, freeTextsOf, chooseSlot,
+} from './face-template-slots.js';
+export type { SlotChoice } from './face-template-slots.js';
 export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
 export type {
   ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,

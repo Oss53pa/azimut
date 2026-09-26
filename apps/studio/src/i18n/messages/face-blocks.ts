@@ -29,6 +29,12 @@ export const FACE_BLOCKS_FR = {
   'faceblocks.added': 'Bloc ajouté.',
   'faceblocks.saved': 'Texte enregistré.',
   'faceblocks.withdrawn': 'Bloc retiré.',
+  'faceblocks.preview.title': 'Rendu de la face',
+  'faceblocks.preview.none': 'Pas de rendu : le gabarit de la face n’est pas connu au poste (typologie absente, ou gabarits non chargés).',
+  'faceblocks.preview.aria': 'Rendu de la face {face} du support {support}',
+  'faceblocks.slot': 'Emplacement',
+  'faceblocks.slot.option': 'Emplacement {index}',
+  'faceblocks.slot.first': 'Premier emplacement libre',
 } as const;
 
 export const FACE_BLOCKS_EN: Readonly<Record<keyof typeof FACE_BLOCKS_FR, string>> = {
@@ -54,4 +60,10 @@ export const FACE_BLOCKS_EN: Readonly<Record<keyof typeof FACE_BLOCKS_FR, string
   'faceblocks.added': 'Block added.',
   'faceblocks.saved': 'Text saved.',
   'faceblocks.withdrawn': 'Block withdrawn.',
+  'faceblocks.preview.title': 'Face render',
+  'faceblocks.preview.none': 'No render: the face’s template is not known here (no typology, or templates not loaded).',
+  'faceblocks.preview.aria': 'Render of face {face} of support {support}',
+  'faceblocks.slot': 'Slot',
+  'faceblocks.slot.option': 'Slot {index}',
+  'faceblocks.slot.first': 'First free slot',
 };
