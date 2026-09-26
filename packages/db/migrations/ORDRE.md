@@ -101,6 +101,7 @@ non plus — elle n'en retire que les clés étrangères.
 0055_a5_4_safety_pictogram_requires_pack
 0056_a5_8_rules_binding_role
 0057_a5_2_drop_site_rules_pack_id
+0058_a12_3_audit_log_insert_only
 ```
 
 ## Règle pour la suite
