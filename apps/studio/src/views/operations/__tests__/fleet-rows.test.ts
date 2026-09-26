@@ -8,9 +8,9 @@ if (first === undefined) throw new Error('fixture without supports');
 
 const registry: MaintenanceRegistry = {
   installed: [
-    { id: 'i2', support_id: first.id, installed_at: '2026-05-01T00:00:00Z', photo_path: null, installer_notes: null },
-    { id: 'i1', support_id: first.id, installed_at: '2026-02-01T00:00:00Z', photo_path: null, installer_notes: null },
-    { id: 'ix', support_id: 'absent', installed_at: '2026-02-01T00:00:00Z', photo_path: null, installer_notes: null },
+    { id: 'i2', support_id: first.id, installed_at: '2026-05-01T00:00:00Z', photo_path: null, installer_notes: null, installed_version: null, condition: null, surveyed_by: null, surveyed_at: null },
+    { id: 'i1', support_id: first.id, installed_at: '2026-02-01T00:00:00Z', photo_path: null, installer_notes: null, installed_version: null, condition: null, surveyed_by: null, surveyed_at: null },
+    { id: 'ix', support_id: 'absent', installed_at: '2026-02-01T00:00:00Z', photo_path: null, installer_notes: null, installed_version: null, condition: null, surveyed_by: null, surveyed_at: null },
   ],
   divergences: [
     { id: 'd1', support_id: first.id, node_id: null, installed_support_id: 'i1', kind: 'damaged', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: { notes: 'Rayure' } },

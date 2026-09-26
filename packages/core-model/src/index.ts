@@ -86,10 +86,12 @@ export type {
   CharterLexiconEntry, LexiconLang,
 } from './charter-registry.js';
 export {
-  EMPTY_MAINTENANCE_REGISTRY, DIVERGENCE_KINDS, WORK_ORDER_STATES, isDivergenceKind, isWorkOrderState,
+  EMPTY_MAINTENANCE_REGISTRY, DIVERGENCE_KINDS, WORK_ORDER_STATES, INSTALLED_CONDITIONS,
+  isDivergenceKind, isWorkOrderState, isInstalledCondition,
 } from './maintenance-registry.js';
 export type {
   MaintenanceRegistry, InstalledSupport, RecordedDivergence, DivergenceKind, WorkOrder, WorkOrderState,
+  InstalledCondition,
 } from './maintenance-registry.js';
 export {
   EMPTY_WORKSITE_REGISTRY, FABRICATION_LOT_STATES, isFabricationLotState,

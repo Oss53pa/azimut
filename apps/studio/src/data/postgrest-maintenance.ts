@@ -3,14 +3,14 @@
  * enregistrées, ordres de travaux (migrations 0006 et 0041).
  *
  * Une divergence désigne un support du site, ou le nœud d'un point non
- * couvert : elle se lit par l'un et par l'autre. Le coût estimé est lu tel que
- * la base le porte, sans conversion. Une valeur hors liste ne peut
+ * couvert : elle se lit par l'un et par l'autre. Le coût estimé se lit en
+ * entier d'unité mineure avec sa devise (0048, H8). Une valeur hors liste ne peut
  * venir que d'un schéma qui a dérivé ; la lecture échoue alors, plutôt que
  * d'écarter la ligne en silence.
  */
 import {
-  isDivergenceKind, isWorkOrderState,
-  type MaintenanceRegistry, type InstalledSupport, type RecordedDivergence, type WorkOrder,
+  isDivergenceKind, isWorkOrderState, isInstalledCondition,
+  type MaintenanceRegistry, type Money, type InstalledSupport, type RecordedDivergence, type WorkOrder,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
@@ -21,6 +21,10 @@ type InstalledRow = {
   readonly installed_at: string;
   readonly photo_path: string | null;
   readonly installer_notes: string | null;
+  readonly installed_version: number | null;
+  readonly condition: string | null;
+  readonly surveyed_by: string | null;
+  readonly surveyed_at: string | null;
 };
 type DivergenceRow = {
   readonly id: string;
@@ -35,7 +39,7 @@ type DivergenceRow = {
 type WorkOrderRow = {
   readonly id: string;
   readonly scope: unknown;
-  readonly estimated_cost: number | string | null;
+  readonly estimated_cost_minor: number | string | null;
   readonly currency: string;
   readonly state: string;
   readonly created_at: string;
@@ -46,22 +50,25 @@ function drift(table: string, detail: string): RepositoryError {
   return new RepositoryError('request_failed', `${table}: ${detail}`);
 }
 
-/**
- * Le coût tel que la base le rend, en texte décimal. PostgREST rend un
- * `numeric` en nombre JSON : sa forme décimale est gardée telle quelle, sans
- * arrondi ni conversion d'unité.
- */
+function conditionOf(value: string | null): InstalledSupport['condition'] {
+  if (value === null) return null;
+  if (!isInstalledCondition(value)) throw drift('installed_support', `condition « ${value} »`);
+  return value;
+}
+
 function detailOf(value: unknown): Readonly<Record<string, unknown>> | null {
   if (value === null) return null;
   if (typeof value !== 'object' || Array.isArray(value)) throw drift('divergence', 'detail n’est pas un objet JSON');
   return value as Readonly<Record<string, unknown>>;
 }
 
-function decimalText(value: number | string | null): string | null {
-  if (value === null) return null;
-  const text = String(value);
-  if (!/^-?\d+(\.\d+)?$/.test(text)) throw drift('work_order', `estimated_cost « ${text} »`);
-  return text;
+/** Le coût en unité mineure avec sa devise ; un entier non exact fait échouer la lecture. */
+function money(minor: number | string | null, currency: string): Money | null {
+  if (minor === null) return null;
+  const value = Number(minor);
+  if (!Number.isSafeInteger(value)) throw drift('work_order', `estimated_cost_minor « ${String(minor)} »`);
+  if (!/^[A-Z]{3}$/.test(currency)) throw drift('work_order', `devise « ${currency} »`);
+  return { minor: value, currency };
 }
 
 export async function loadMaintenanceRegistry(
@@ -77,7 +84,7 @@ export async function loadMaintenanceRegistry(
     query<{ readonly id: string }>(config, 'support', `select=id&site_id=eq.${siteId}`),
     query<WorkOrderRow>(
       config, 'work_order',
-      `select=id,scope,estimated_cost,currency,state,created_at,closed_at&site_id=eq.${siteId}`,
+      `select=id,scope,estimated_cost_minor,currency,state,created_at,closed_at&site_id=eq.${siteId}`,
     ),
   ]);
   const buildings = await query<{ readonly id: string }>(config, 'building', `select=id&site_id=eq.${siteId}`);
@@ -101,6 +108,10 @@ export async function loadMaintenanceRegistry(
       installed_at: r.installed_at,
       photo_path: r.photo_path,
       installer_notes: r.installer_notes,
+      installed_version: r.installed_version,
+      condition: conditionOf(r.condition),
+      surveyed_by: r.surveyed_by,
+      surveyed_at: r.surveyed_at,
     }))
     .sort((a, b) => a.support_id.localeCompare(b.support_id) || a.installed_at.localeCompare(b.installed_at) || a.id.localeCompare(b.id));
 
@@ -126,8 +137,7 @@ export async function loadMaintenanceRegistry(
       return {
         id: r.id,
         scope: r.scope,
-        estimated_cost: decimalText(r.estimated_cost),
-        currency: r.currency,
+        estimated_cost: money(r.estimated_cost_minor, r.currency),
         state: r.state,
         created_at: r.created_at,
         closed_at: r.closed_at,

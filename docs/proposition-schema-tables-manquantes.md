@@ -59,6 +59,9 @@ mise en service de tables déjà décidées.
 Proposé : ajout des quatre colonnes, `condition` sous `CHECK`. Additif, sans
 transformation. `installer_notes` est conservé.
 
+**Appliqué le 26/09/2026** par la migration `0047_a5_7_installed_support_columns` :
+les quatre colonnes sont nullables, une pose antérieure n'ayant pas été relevée.
+
 ### 3.2 `divergence`
 
 A5.7 rattache la divergence à `support_id` et lui donne `detail jsonb`. La base
@@ -102,12 +105,24 @@ chaque niveau citant la règle dont il tire ses seuils par `rules_pack_rule.code
 Additif. Le nombre maximal de messages par face est déjà une règle
 (`max_destinations_per_face`), et le reste.
 
+**Décidé le 26/09/2026 : ne rien ajouter.** Les colonnes proposées auraient
+recopié le nom d'un niveau sur chaque ligne typologie × niveau (INV-1). Les
+niveaux restent 1 à 4 (H2.3), nommés par l'interface ; à rouvrir si le cahier
+fixe une hiérarchie nommée.
+
 ### 3.4 `work_order.estimated_cost`
 
 La colonne est un `numeric` d'unité majeure. H8 impose l'unité mineure entière
 avec sa devise. Proposé : `estimated_cost_minor bigint` à côté, recopie des
 valeurs existantes multipliées par cent, puis retrait de l'ancienne colonne. Les
 valeurs sont transformées : cas 7, décision requise.
+
+A5.7 déclare lui-même `estimated_cost numeric` : A5.7 et H8 se contredisent.
+**Décidé le 26/09/2026 : H8 fait foi**, appliqué par la migration
+`0048_h8_work_order_cost_minor`. La recopie multiplie par 10 puissance
+l'exposant ISO 4217 de la devise, et non par cent partout (le franc CFA n'a pas
+de sous-unité) ; elle refuse une devise hors de sa liste close et un montant
+qui tomberait entre deux unités mineures. La descente restitue exactement.
 
 ## 4. Fermetures et plans muraux : pas de table
 
@@ -270,13 +285,13 @@ Chaque migration ajoute son entrée à `migrations/ORDRE.md` et ses tables à
 1. Famille A : engager la mise en service, module par module ? (aucun risque de
    données)
 2. ~~`divergence` : option 1, 2 ou 3 de 3.2 ?~~ Décidé : 1 et 3 (migration 0041).
-3. `information_level` : colonnes de 3.3, sans valeur normative ?
-4. `work_order` : conversion en unité mineure de 3.4 ?
+3. ~~`information_level` : colonnes de 3.3, sans valeur normative ?~~ Décidé : rien n'est ajouté.
+4. ~~`work_order` : conversion en unité mineure de 3.4 ?~~ Décidé : H8 fait foi (migration 0048).
 5. Fermetures : format de `edge.availability` de 4.1 ?
-6. Famille C : lesquels des modules 05 à 09 passent aux données réelles, et
-   dans quel ordre ?
-7. Régie : interdire en base le chevauchement de réservations, ou le laisser au
-   garde ?
+6. ~~Famille C : lesquels des modules 05 à 09 passent aux données réelles, et
+   dans quel ordre ?~~ Décidé : tous, dans l'ordre 07, 09, 08, 05, 06 (0042 à 0046).
+7. ~~Régie : interdire en base le chevauchement de réservations, ou le laisser au
+   garde ?~~ Décidé : laissé au garde.
 
 ## 8. Défaut relevé pendant cet inventaire
 

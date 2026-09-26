@@ -90,6 +90,8 @@ non plus — elle n'en retire que les clés étrangères.
 0044_i5_inspection_tables
 0045_h4_advertising_tables
 0046_h5_tenant_sign_tables
+0047_a5_7_installed_support_columns
+0048_h8_work_order_cost_minor
 ```
 
 ## Règle pour la suite

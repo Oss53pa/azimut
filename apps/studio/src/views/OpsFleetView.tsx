@@ -1,10 +1,11 @@
 import { type JSX, useMemo, useState } from 'react';
+import type { InstalledSupport } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { appRepository, useMaintenanceRegistryLoad } from '../data/index.js';
 import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE,
-  type Column, type RegisterFilter,
+  type Column, type RegisterFilter, type InspectorRow,
 } from '../components/ui/index.js';
 import { fleetRows, isOpen, lastPose, type FleetRow } from './operations/fleet-rows.js';
 import { MaintenanceBanner } from './operations/MaintenanceBanner.js';
@@ -85,6 +86,15 @@ export function OpsFleetView({ siteKey }: OpsFleetViewProps): JSX.Element {
     { id: 'state', header: t('fleet.col.state'), cell: stateTag },
   ];
 
+  const surveyRows = (pose: InstalledSupport | null): readonly InspectorRow[] => {
+    const none = t('fleet.survey.none');
+    return [
+      { id: 'version', label: t('fleet.field.version'), value: pose?.installed_version == null ? none : String(pose.installed_version) },
+      { id: 'condition', label: t('fleet.field.condition'), value: pose?.condition == null ? none : t(`fleet.condition.${pose.condition}`) },
+      { id: 'surveyed', label: t('fleet.field.surveyed'), value: pose?.surveyed_at == null ? none : day(pose.surveyed_at) },
+    ];
+  };
+
   const inspector = selected === null
     ? <InspectorEmpty text={t('fleet.inspector.empty')} />
     : (
@@ -103,6 +113,11 @@ export function OpsFleetView({ siteKey }: OpsFleetViewProps): JSX.Element {
                 value: [p.photo_path === null ? t('fleet.pose.nophoto') : t('fleet.pose.photo'), p.installer_notes ?? '']
                   .filter(v => v !== '').join(' · '),
               })),
+          },
+          {
+            id: 'survey',
+            title: t('fleet.section.survey'),
+            rows: surveyRows(lastPose(selected)),
           },
           {
             id: 'divergences',

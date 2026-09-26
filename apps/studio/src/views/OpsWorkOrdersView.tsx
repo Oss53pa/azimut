@@ -8,7 +8,8 @@ import {
 } from '../components/ui/index.js';
 import { jsonText } from './operations/fleet-rows.js';
 import { MaintenanceBanner } from './operations/MaintenanceBanner.js';
-import { formatDay, formatNumber } from './register/format.js';
+import { formatDay } from './register/format.js';
+import { formatMoney } from './budget/money.js';
 
 const ALL = 'all';
 const EMPTY = '—';
@@ -31,7 +32,7 @@ type OpsWorkOrdersViewProps = {
 /**
  * Module 08 — les ordres de travaux (A5.7), au gabarit « registre », lus en
  * base. Un ordre naît d'une décision humaine (E3) : l'écran n'en crée ni n'en
- * fait avancer aucun. Le coût est lu en unité majeure, comme la base le porte.
+ * fait avancer aucun. Le coût est en unité mineure avec sa devise (H8).
  */
 export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Element {
   const { t, lang } = useI18n();
@@ -47,9 +48,7 @@ export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Elem
   if (state.status !== 'ready') return <div>{banner}</div>;
 
   const day = (iso: string | null): string => (iso === null ? EMPTY : formatDay(iso.slice(0, 10), lang) ?? iso);
-  const cost = (o: WorkOrder): string => (o.estimated_cost === null
-    ? t('workorders.cost.none')
-    : `${formatNumber(Number(o.estimated_cost), lang, 2)} ${o.currency}`);
+  const cost = (o: WorkOrder): string => formatMoney(o.estimated_cost, lang, t('workorders.cost.none'));
   const stateLabel = (s: WorkOrderState): string => t(`workorders.state.${s}`);
   const ref = (o: WorkOrder): string => o.id.slice(0, REF_LENGTH);
 
@@ -94,7 +93,7 @@ export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Elem
             note: t('workorders.section.cost.note'),
             rows: [
               { id: 'cost', label: t('workorders.col.cost'), value: cost(selected) },
-              { id: 'currency', label: t('workorders.field.currency'), value: selected.currency },
+              { id: 'currency', label: t('workorders.field.currency'), value: selected.estimated_cost?.currency ?? '—' },
             ],
           },
         ]}

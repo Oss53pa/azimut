@@ -4,19 +4,24 @@
  *
  * La divergence désigne un support, ou le nœud d'un point de décision non
  * couvert (0041, décision sur la proposition de schéma 3.2, options 1 et 3) ;
- * la pose n'y est plus qu'un rattachement facultatif. Le coût estimé d'un
- * ordre de travaux reste un décimal d'unité majeure : cet écart à H8 attend
- * sa décision (3.4), et le lire tel quel ne transforme rien.
+ * la pose n'y est plus qu'un rattachement facultatif. La pose porte sa
+ * version, son état et son relevé (0047). Le coût estimé d'un ordre de travaux
+ * est un entier d'unité mineure avec sa devise (0048, H8).
  *
  * Comme le vocabulaire, ce registre ne rejoint pas `SiteData` : il se lit à
  * part, par les écrans du module 08. Les énumérés recopient les CHECK de 0006 ;
  * un test structurel vérifie que les listes coïncident.
  */
 
+import type { Money } from './budget-registry.js';
+
 export const DIVERGENCE_KINDS = [
   'outdated_content', 'wrong_orientation', 'undersized', 'missing', 'superfluous', 'damaged',
 ] as const;
 export type DivergenceKind = (typeof DIVERGENCE_KINDS)[number];
+
+export const INSTALLED_CONDITIONS = ['good', 'worn', 'damaged', 'missing'] as const;
+export type InstalledCondition = (typeof INSTALLED_CONDITIONS)[number];
 
 export const WORK_ORDER_STATES = ['draft', 'issued', 'in_progress', 'done', 'cancelled'] as const;
 export type WorkOrderState = (typeof WORK_ORDER_STATES)[number];
@@ -28,6 +33,12 @@ export type InstalledSupport = {
   readonly installed_at: string;
   readonly photo_path: string | null;
   readonly installer_notes: string | null;
+  /** Version du support posée, ou `null` si elle n'a pas été relevée (0047). */
+  readonly installed_version: number | null;
+  /** État constaté au dernier relevé, ou `null` s'il n'y en a pas eu. */
+  readonly condition: InstalledCondition | null;
+  readonly surveyed_by: string | null;
+  readonly surveyed_at: string | null;
 };
 
 export type RecordedDivergence = {
@@ -53,13 +64,8 @@ export type WorkOrder = {
   readonly id: string;
   /** JSON libre, cité tel quel : aucun moteur ne l'interprète encore. */
   readonly scope: unknown;
-  /**
-   * Coût estimé, texte décimal exact tel que la base le rend, en unité
-   * majeure. H8 veut l'unité mineure entière ; la conversion est une décision
-   * en attente (3.4), pas une lecture.
-   */
-  readonly estimated_cost: string | null;
-  readonly currency: string;
+  /** Coût estimé en unité mineure avec sa devise (H8), ou `null` s'il n'est pas chiffré. */
+  readonly estimated_cost: Money | null;
   readonly state: WorkOrderState;
   readonly created_at: string;
   readonly closed_at: string | null;
@@ -79,6 +85,10 @@ export const EMPTY_MAINTENANCE_REGISTRY: MaintenanceRegistry = {
 
 export function isDivergenceKind(value: string): value is DivergenceKind {
   return (DIVERGENCE_KINDS as readonly string[]).includes(value);
+}
+
+export function isInstalledCondition(value: string): value is InstalledCondition {
+  return (INSTALLED_CONDITIONS as readonly string[]).includes(value);
 }
 
 export function isWorkOrderState(value: string): value is WorkOrderState {

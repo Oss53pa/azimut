@@ -1,4 +1,4 @@
-import { uuid, text, timestamp, integer, numeric, jsonb, index } from 'drizzle-orm/pg-core';
+import { uuid, text, timestamp, integer, numeric, bigint, jsonb, index } from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 import { site } from './site.js';
@@ -136,6 +136,11 @@ export const installedSupport = azimut.table('installed_support', {
   installed_at: timestamp('installed_at', { withTimezone: true }).notNull().defaultNow(),
   photo_path: text('photo_path'),
   installer_notes: text('installer_notes'),
+  // 0047 : colonnes de A5.7, nullables — une pose antérieure n'a pas été relevée.
+  installed_version: integer('installed_version'),
+  condition: text('condition'),
+  surveyed_by: uuid('surveyed_by'),
+  surveyed_at: timestamp('surveyed_at', { withTimezone: true }),
 }, (t) => [
   index('idx_installed_support_org').on(t.org_id),
 ]);
@@ -163,7 +168,8 @@ export const workOrder = azimut.table('work_order', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   scope: jsonb('scope'),
-  estimated_cost: numeric('estimated_cost'),
+  // 0048 : unité mineure entière avec sa devise (H8).
+  estimated_cost_minor: bigint('estimated_cost_minor', { mode: 'number' }),
   currency: text('currency').notNull().default('EUR'),
   state: text('state').notNull().default('draft'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
