@@ -1494,3 +1494,91 @@ s'ajouter sans que rien ne le refuse, avant que la tâche ne s'exécute.
   commencée.
 - L'écran d'évacuation (P10).
 - `lineFingerprint`, hors des empreintes.
+
+## Contrôle de l'interface, pliage de casse sans langue, ce que la version 30 ferme
+
+| Ce que la version 30 pose | Où | État |
+| --- | --- | --- |
+| A9 — dans l'interface, un contrôle automatique refuse tout appel qui ne déclare aucune langue | Essai `a9-studio-langue-declaree`, relevé `a9-releve-studio-langue-non-declaree.json` | Fait |
+| A9 — le pliage de casse d'un contrôle d'unicité est indépendant de toute langue | Tâche redéclarée ci-dessous | Déclarée |
+| Échéance de la tâche : avant le premier livrable réel | Tâche | Confirmée |
+
+Le point ouvert après la version 29 est fermé : le studio est gardé.
+
+**Le contrôle de l'interface.** Il porte sur les sources du studio qui
+n'alimentent aucune empreinte, essais compris ; celles qui en alimentent une
+restent sous la règle du code qui produit. Une occurrence déclare sa langue
+si elle est appelée et que l'argument de langue est écrit et n'est pas
+`undefined` : le second de `localeCompare`, le premier de
+`toLocaleLowerCase`, de `toLocaleUpperCase` et d'`Intl.Collator`. Toute autre
+mention, commentaire compris, compte comme un appel sans langue.
+
+Le relevé fige 58 appels dans 38 fichiers, tous des `localeCompare` sans
+langue : 52 hors essais, 6 dans 3 fichiers d'essai. Aucun pliage de casse
+n'y figure, les 5 déclarant `'fr'`. Le compte se vérifie : 64 occurrences
+dans l'interface, moins `legend.ts` qui déclare sa langue, moins les 5
+pliages. Un appel sans langue ajouté fait échouer
+l'essai, vérifié en en ajoutant un à `GraphView.tsx`.
+
+Le motif, la liste des points d'entrée d'empreinte et la frontière entre
+code qui produit et interface sont passés dans `tests/a9-perimetre.ts`,
+commun aux deux contrôles. Le contrôle du code qui produit est inchangé :
+155 occurrences dans 66 fichiers.
+
+### Tâche déclarée : remplacement des comparaisons localisées, version 30
+
+Elle remplace la déclaration de la version 29, qu'elle reprend avec une
+seule différence : le traitement des quatre contrôles d'unicité.
+
+**Portée, première partie : ce qui produit.** Les 155 occurrences de
+`tests/a9-releve-comparaisons-localisees.json`, dans 66 fichiers. Chacune
+passe à `codePointCompare`.
+
+**Portée, seconde partie : l'interface.** 64 occurrences dans 42 fichiers,
+dont 58 relevées dans `tests/a9-releve-studio-langue-non-declaree.json`.
+
+| Ce qu'elles comparent | Occurrences | Traitement |
+| --- | --- | --- |
+| Du texte affiché : noms de sites, libellés de légende | 4, dans `PortfolioView`, `SiteRecordAdapter`, `reference-repository`, `legend` | Langue active, déclarée explicitement. `legend` déclare déjà la sienne |
+| Des identifiants, des codes, des clés, des dates | 49 hors essais, dans 33 fichiers, et 6 dans 3 fichiers d'essai | Points de code, `codePointCompare` |
+| Le pliage de casse de quatre contrôles d'unicité : nom de site, nom de bâtiment ou de niveau, code de cellule (deux) | 4, dans `site-creation`, `site-structure`, `footprint-input` | Indépendant de toute langue : pliage Unicode par défaut, sans langue déclarée |
+| Le pliage de casse de la recherche du tableau des messages | 1, dans `message-schedule-rows` | Langue active |
+
+Version 30, A9 : « Une langue déclarée reste un choix de langue : en turc, le
+pliage du i ne donne pas ce que le français produit, et deux noms jugés
+identiques ici seraient jugés distincts ailleurs. » Les quatre contrôles
+d'unicité déclarent aujourd'hui `'fr'` : ils passent le contrôle de
+l'interface, qui ne peut pas savoir qu'ils décident d'une unicité, et c'est
+la tâche qui les corrige.
+
+**Échéance.** Avant le premier livrable réel, confirmée à la version 30.
+
+**Vérification.** Les deux relevés tombent à zéro et disparaissent. Les
+quatre contrôles d'unicité ne portent plus de langue. Chaîne A13.2 complète.
+
+**État.** Non commencée. Les deux contrôles empêchent chacun leur relevé de
+croître.
+
+### Reste ouvert après la version 30
+
+**Un pliage de casse d'unicité nouveau n'est pas refusé.** Le contrôle de
+l'interface admet un pliage qui déclare sa langue, légitime pour la
+recherche, fautif pour une unicité. Rien ne distingue les deux dans le
+texte : un cinquième contrôle d'unicité en `'fr'` passerait.
+
+**Le formatage des nombres et des dates.** A9 range la dépendance à la
+locale « pour le formatage des nombres ou des dates » parmi les sources
+d'indéterminisme. Aucun des deux contrôles ne cherche `toLocaleString`,
+`toLocaleDateString`, `Intl.NumberFormat` ni `Intl.DateTimeFormat` ; le
+contrôle demandé porte sur les comparaisons. Le dépôt en porte une seule
+occurrence, hors du code qui produit : `BudgetView.tsx` formate un montant
+avec `toLocaleString('fr-FR')`, langue déclarée mais fixe, et non la langue
+active. Relevé, non traité.
+
+**Toujours au registre.**
+- L'index `NULLS NOT DISTINCT` de `0054`.
+- Le poids du paquet du studio.
+- La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
+  commencée.
+- L'écran d'évacuation (P10).
+- `lineFingerprint`, hors des empreintes.
