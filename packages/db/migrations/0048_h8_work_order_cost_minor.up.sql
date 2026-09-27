@@ -19,20 +19,25 @@
 --
 -- Cloisonnement : `work_order` est en FORCE ROW LEVEL SECURITY (0025) ;
 -- exécutée par son propriétaire sans identité, la recopie ne verrait aucune
--- ligne. FORCE est levé le temps de la recopie et rétabli avant la fin, dans
--- la transaction du lanceur.
-
-CREATE TEMPORARY TABLE currency_exponent (code char(3) PRIMARY KEY, exponent integer NOT NULL) ON COMMIT DROP;
-INSERT INTO currency_exponent (code, exponent) VALUES
-  ('EUR', 2), ('USD', 2), ('GBP', 2), ('CHF', 2), ('CAD', 2),
-  ('XOF', 0), ('XAF', 0), ('JPY', 0);
-
-ALTER TABLE azimut.work_order NO FORCE ROW LEVEL SECURITY;
+-- ligne. FORCE est levé le temps de la recopie et rétabli avant la fin.
+--
+-- Atomicité : toute la migration tient dans un seul bloc DO, donc une seule
+-- transaction, que le lanceur en ouvre une ou non — la CI applique chaque
+-- fichier par `psql -f`, sans transaction englobante. Un échec ne laisse ni
+-- colonne à moitié remplie ni FORCE levé, et la table des exposants, créée
+-- ON COMMIT DROP, vit jusqu'à la fin du bloc.
 
 DO $$
 DECLARE
   unknown text;
 BEGIN
+  CREATE TEMPORARY TABLE currency_exponent (code char(3) PRIMARY KEY, exponent integer NOT NULL) ON COMMIT DROP;
+  INSERT INTO currency_exponent (code, exponent) VALUES
+    ('EUR', 2), ('USD', 2), ('GBP', 2), ('CHF', 2), ('CAD', 2),
+    ('XOF', 0), ('XAF', 0), ('JPY', 0);
+
+  ALTER TABLE azimut.work_order NO FORCE ROW LEVEL SECURITY;
+
   SELECT string_agg(DISTINCT w.currency, ', ') INTO unknown
   FROM azimut.work_order w
   LEFT JOIN currency_exponent e ON e.code = w.currency
@@ -48,23 +53,20 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'work_order: an estimated_cost falls between two minor units; conversion refused';
   END IF;
-END $$;
 
-ALTER TABLE azimut.work_order
-  ADD COLUMN estimated_cost_minor bigint CHECK (estimated_cost_minor >= 0);
+  ALTER TABLE azimut.work_order
+    ADD COLUMN estimated_cost_minor bigint CHECK (estimated_cost_minor >= 0);
 
-UPDATE azimut.work_order w
-  SET estimated_cost_minor = (w.estimated_cost * 10::numeric ^ e.exponent)::bigint
-  FROM currency_exponent e
-  WHERE e.code = w.currency AND w.estimated_cost IS NOT NULL;
+  UPDATE azimut.work_order w
+    SET estimated_cost_minor = (w.estimated_cost * 10::numeric ^ e.exponent)::bigint
+    FROM currency_exponent e
+    WHERE e.code = w.currency AND w.estimated_cost IS NOT NULL;
 
-DO $$
-BEGIN
   IF EXISTS (SELECT 1 FROM azimut.work_order WHERE estimated_cost IS NOT NULL AND estimated_cost_minor IS NULL) THEN
     RAISE EXCEPTION 'work_order: conversion incomplete';
   END IF;
+
+  ALTER TABLE azimut.work_order FORCE ROW LEVEL SECURITY;
+
+  ALTER TABLE azimut.work_order DROP COLUMN estimated_cost;
 END $$;
-
-ALTER TABLE azimut.work_order FORCE ROW LEVEL SECURITY;
-
-ALTER TABLE azimut.work_order DROP COLUMN estimated_cost;
