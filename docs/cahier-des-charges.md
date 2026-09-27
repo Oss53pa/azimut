@@ -702,7 +702,9 @@ Sources d'indéterminisme interdites :
 - Dépendance à la locale du système pour la comparaison de chaînes, le formatage des nombres ou des dates.
 - Flottants dont l'arrondi n'est pas explicité. Toute coordonnée écrite dans un SVG est arrondie à une précision fixée et documentée.
 
-**Comparer deux chaînes** se fait par leurs points de code, jamais par une comparaison sensible à la langue : un même jeu de données trié sur deux machines doit donner le même ordre. Dans l'interface, un tri selon la langue de l'utilisateur est légitime, à condition que la langue soit déclarée explicitement et non déduite de la machine. Un contrôle automatique refuse toute comparaison localisée introduite là où cette section s'applique.
+**Comparer deux chaînes** se fait par leurs points de code, jamais par une comparaison sensible à la langue : un même jeu de données trié sur deux machines doit donner le même ordre. Dans l'interface, un tri selon la langue de l'utilisateur est légitime, à condition que la langue soit déclarée explicitement et non déduite de la machine. Un contrôle automatique refuse toute comparaison localisée introduite là où cette section s'applique, et, dans l'interface, tout appel qui ne déclare aucune langue.
+
+**Le pliage de casse d'un contrôle d'unicité est indépendant de toute langue**, et pas seulement fixé à l'une d'elles. Une langue déclarée reste un choix de langue : en turc, le pliage du i ne donne pas ce que le français produit, et deux noms jugés identiques ici seraient jugés distincts ailleurs. Un nom ne peut pas être accepté ou refusé selon la langue de celui qui le saisit.
 
 Test obligatoire, exécuté sur chaque site de référence : compiler deux fois de suite, comparer les empreintes des sorties, exiger l'égalité stricte.
 
@@ -8638,3 +8640,4 @@ Chaque libellé emploie les identifiants en vigueur au moment de l'opération. L
 300. A5.2 : nature du contenu d'une source de plan
 301. M2 : nature jugée sur la page retenue
 302. D13 : taille de fenêtre déclarée avec le relevé
+303. A9 : pliage de casse indépendant de la langue pour un contrôle d'unicité
