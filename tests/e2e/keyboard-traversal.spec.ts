@@ -34,6 +34,21 @@ async function focused(page: Page): Promise<{ tag: string; name: string }> {
   });
 }
 
+/**
+ * Attend que l'écran porte au moins une cible au clavier.
+ *
+ * `goto` rend la main au chargement du document, pas au montage de React :
+ * sur un exécuteur chargé, la première tabulation partait avant le rendu et
+ * le focus restait sur `<body>`, qui n'a pas de contour. L'essai jugeait
+ * alors l'instant du rendu, pas l'écran.
+ */
+async function openScreen(page: Page, path: string): Promise<void> {
+  await page.goto(path);
+  await page.waitForFunction(() => document.querySelector(
+    'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+  ) !== null);
+}
+
 /** Tabule jusqu'à revenir au corps du document, et rend ce qui a été atteint. */
 async function tabThrough(page: Page, limit = 60): Promise<readonly { tag: string; name: string }[]> {
   const reached: { tag: string; name: string }[] = [];
@@ -49,7 +64,7 @@ async function tabThrough(page: Page, limit = 60): Promise<readonly { tag: strin
 for (const screen of SCREENS) {
   test.describe(screen.name, () => {
     test('se parcourt entièrement au clavier', async ({ page }) => {
-      await page.goto(screen.path);
+      await openScreen(page, screen.path);
       const reached = await tabThrough(page);
 
       // Un écran sans aucune cible au clavier est inutilisable au clavier seul.
@@ -66,7 +81,7 @@ for (const screen of SCREENS) {
      * sélection. » Sans contour visible, la tabulation est aveugle.
      */
     test('montre où est le focus', async ({ page }) => {
-      await page.goto(screen.path);
+      await openScreen(page, screen.path);
       await page.keyboard.press('Tab');
       const outline = await page.evaluate(() => {
         const el = document.activeElement;
