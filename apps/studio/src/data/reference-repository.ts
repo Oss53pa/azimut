@@ -152,6 +152,7 @@ export function createReferenceRepository(): SiteRepository {
         name_fr: country.name_fr,
         name_en: country.name_en,
         timezones: country.timezones,
+        default_currency_code: country.default_currency_code,
       })));
     },
 

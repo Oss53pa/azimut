@@ -130,6 +130,8 @@ export {
   serializeEdgeAvailability, validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
 } from './edge-closure-commands.js';
 export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
+export { validateLegalEntityDraft, declareLegalEntityCommand } from './legal-entity-commands.js';
+export type { LegalEntityDraft, LegalEntityEnvironment } from './legal-entity-commands.js';
 export {
   WALL_PLAN_BLOCK_KIND, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
 } from './wall-plan-commands.js';
