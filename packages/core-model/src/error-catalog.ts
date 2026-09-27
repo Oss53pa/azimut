@@ -198,6 +198,10 @@ export const ERROR_CATALOG = {
   'DATA.NAME_REQUIRED':                     { severity: 'blocking', description: 'Nom requis' },
   'DATA.NAME_DUPLICATE':                    { severity: 'blocking', description: 'Nom déjà porté par un autre site de l’organisation' },
   'DATA.COUNTRY_REQUIRED':                  { severity: 'blocking', description: 'Pays requis' },
+  // Q5 — saisie d'une entité juridique (écran des clients, module 00).
+  'DATA.LEGAL_NAME_REQUIRED':               { severity: 'blocking', description: 'Raison sociale requise' },
+  'DATA.LEGAL_NAME_DUPLICATE':              { severity: 'warning',  description: 'Raison sociale déjà portée par une autre entité de l’organisation' },
+  'DATA.CURRENCY_INVALID':                  { severity: 'blocking', description: 'Devise absente ou hors du format à trois lettres' },
   'DATA.LANG_REQUIRED':                     { severity: 'blocking', description: 'Au moins une langue active requise' },
   'DATA.CODE_DUPLICATE':                    { severity: 'blocking', description: 'Deux cellules portent le même code sur un niveau' },
 

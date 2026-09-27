@@ -65,21 +65,26 @@ export function useCountries(repository: SiteRepository): AsyncState<readonly Co
   return useLoaded(repository, useCallback(() => repository.listCountries(), [repository]));
 }
 
-/** Q5 — les entités juridiques de l'organisation, chargées une fois. */
+/** Q5 — les entités juridiques de l'organisation, relues à chaque changement de `reloadKey`. */
 export function useLegalEntities(
   repository: SiteRepository,
+  /** Change pour relire la liste : après la création d'un client (Q5). */
+  reloadKey = 0,
 ): AsyncState<readonly LegalEntitySummary[]> {
-  return useLoaded(repository, useCallback(() => repository.listLegalEntities(), [repository]));
+  const load = useCallback(() => repository.listLegalEntities(), [repository]);
+  return useLoaded(repository, load, reloadKey);
 }
 
 /**
- * Charge une liste une fois, sans rechargement.
+ * Charge une liste, et la relit seulement quand `reloadKey` change.
  *
  * Les deux listes ci-dessus suivent le même chemin ; l'écrire deux fois aurait
  * dupliqué la gestion de l'annulation, qui est la partie qu'on se trompe.
  */
 function useLoaded<T>(
   repository: SiteRepository, load: () => Promise<T>,
+  /** Relit quand il change ; zéro pour une lecture unique. */
+  reloadKey = 0,
 ): AsyncState<T> {
   const [state, setState] = useState<AsyncState<T>>({ status: 'idle' });
   useEffect(() => {
@@ -90,7 +95,7 @@ function useLoaded<T>(
       cause => { if (!cancelled) setState({ status: 'failed', error: toRepositoryError(cause) }); },
     );
     return () => { cancelled = true; };
-  }, [repository, load]);
+  }, [repository, load, reloadKey]);
   return state;
 }
 

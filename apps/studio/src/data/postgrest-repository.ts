@@ -56,6 +56,7 @@ type CountryRow = {
   readonly name_fr: string;
   readonly name_en: string;
   readonly timezones: readonly string[];
+  readonly default_currency_code: string | null;
 };
 
 type LegalEntityRow = { readonly id: string; readonly legal_name: string };
@@ -360,13 +361,14 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
      */
     async listCountries(): Promise<readonly CountrySummary[]> {
       const rows = await query<CountryRow>(
-        config, 'country', 'select=code,name_fr,name_en,timezones&order=code.asc',
+        config, 'country', 'select=code,name_fr,name_en,timezones,default_currency_code&order=code.asc',
       );
       return rows.map((row): CountrySummary => ({
         code: row.code,
         name_fr: row.name_fr,
         name_en: row.name_en,
         timezones: row.timezones,
+        default_currency_code: row.default_currency_code,
       }));
     },
 

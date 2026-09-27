@@ -13,6 +13,7 @@ import { useSiteCreation } from '../state/use-site-creation.js';
 import { appSink } from '../state/app-sink.js';
 import type { CommandSink } from '../state/command-store.js';
 import { ORG_OF_SESSION } from './session-identity.js';
+import { ClientsSection } from './ClientsSection.js';
 
 /**
  * M1 (partie M) — la liste des sites, et le formulaire de création monté
@@ -29,7 +30,8 @@ export function SitesAdapter(): JSX.Element {
   const repository = useMemo(() => appRepository(), []);
   const { state: list, reload } = useSiteList(repository);
   const countryState = useCountries(repository);
-  const entityState = useLegalEntities(repository);
+  const [clientsVersion, setClientsVersion] = useState(0);
+  const entityState = useLegalEntities(repository, clientsVersion);
 
   /**
    * L'émetteur de la création.
@@ -123,6 +125,14 @@ export function SitesAdapter(): JSX.Element {
           onClose={creation.close}
         />
       )}
+
+      <ClientsSection
+        orgId={ORG_OF_SESSION}
+        entities={entityState}
+        countries={countries}
+        sink={sink}
+        onCreated={() => { setClientsVersion(version => version + 1); }}
+      />
     </div>
   );
 }

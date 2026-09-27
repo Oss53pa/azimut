@@ -182,6 +182,23 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     expect((await readAs(ALICE, site)).length).toBe(0);
   });
 
+  /** Q5 — un client (entité juridique) s'écrit dans son organisation, et pas ailleurs. */
+  it('écrit une entité juridique dans son organisation et la refuse ailleurs', async () => {
+    const id = 'aa000000-0000-0000-0000-00000000ee01';
+    const entity = (org: string, key: string) => ({
+      operation: 'create', table: 'legal_entity', id: key,
+      after: { id: key, org_id: org, legal_name: 'Société d’essai', country_code: 'FR', currency_code: 'EUR' },
+    });
+    await callAs(ALICE, [entity(ORG, id)]);
+    const rows = await db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      return tx.execute(sql`select legal_name, currency_code from azimut.legal_entity where id = ${id}`);
+    });
+    expect([...rows]).toEqual([{ legal_name: 'Société d’essai', currency_code: 'EUR' }]);
+    await expect(callAs(ALICE, [entity(ORG_B, 'aa000000-0000-0000-0000-00000000ee02')])).rejects.toThrow();
+  });
+
   it('refuse une table qui n’est pas au schéma', async () => {
     await expect(callAs(ALICE, [
       { operation: 'create', table: 'pg_shadow', id: ALICE, after: { x: '1' } },

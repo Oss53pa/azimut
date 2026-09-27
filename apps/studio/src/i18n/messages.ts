@@ -42,6 +42,7 @@ import { SIGNAGE_CHARTER_FR, SIGNAGE_CHARTER_EN } from './messages/signage-chart
 import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages/operations-maintenance.js';
 import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-data.js';
 import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
+import { CLIENTS_FR, CLIENTS_EN } from './messages/clients.js';
 import { WALL_PLAN_ENTRY_FR, WALL_PLAN_ENTRY_EN } from './messages/wall-plan-entry.js';
 import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js';
 import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
@@ -78,6 +79,7 @@ export const MESSAGES_FR = {
   ...OPERATIONS_MAINTENANCE_FR,
   ...PRODUCTION_DATA_FR,
   ...CLOSURES_FR,
+  ...CLIENTS_FR,
   ...WALL_PLAN_ENTRY_FR,
   ...SUPPORT_FACES_FR,
   ...FACE_BLOCKS_FR,
@@ -117,6 +119,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...OPERATIONS_MAINTENANCE_EN,
   ...PRODUCTION_DATA_EN,
   ...CLOSURES_EN,
+  ...CLIENTS_EN,
   ...WALL_PLAN_ENTRY_EN,
   ...SUPPORT_FACES_EN,
   ...FACE_BLOCKS_EN,

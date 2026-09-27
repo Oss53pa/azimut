@@ -34,6 +34,8 @@ export type CountrySummary = {
   readonly name_en: string;
   /** Les fuseaux du pays. M1 (partie M) pré-remplit quand il n'y en a qu'un. */
   readonly timezones: readonly string[];
+  /** Q4 — devise proposée par défaut à une entité juridique du pays, ou nulle. */
+  readonly default_currency_code: string | null;
 };
 
 /**
