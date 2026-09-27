@@ -53,5 +53,18 @@
     // est retenu quand même, pour qu'un lien profond ouvre l'application au
     // lieu de rendre une erreur.
     "not_found_handling": "single-page-application"
-  }
+  },
+
+  // Tenus ici plutôt que laissés au défaut de wrangler, qui peut changer
+  // d'une version à l'autre sans que le dépôt le dise (la version de wrangler
+  // n'est pas figée, voir le job de déploiement).
+  //
+  // `workers_dev` : l'adresse `azimut.<compte>.workers.dev` est aujourd'hui la
+  // seule qui serve le studio ; la couper le rendrait injoignable.
+  "workers_dev": true,
+
+  // `preview_urls` : une adresse par version téléversée. Le déploiement n'en
+  // téléverse pas à part (`wrangler deploy`, pas `versions upload`) ; la
+  // valeur retenue est celle que Cloudflare appliquait déjà.
+  "preview_urls": true
 }
