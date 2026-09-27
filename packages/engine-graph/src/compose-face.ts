@@ -34,6 +34,7 @@ import type {
 } from '@azimut/core-model';
 import type { ResolvedBlock, ResolvedContent, ResolvedDestinationEntry, ResolvedFace } from './resolve-face.js';
 import {
+  freeTextContent,
   resolveMapContent,
   resolveLegendContent,
   resolveLogoContent,
@@ -46,6 +47,7 @@ import type {
   WayfindingRules,
 } from './message-schedule.js';
 import { NO_WAYFINDING_RULES } from './message-schedule.js';
+import { instanceBlocksOf } from '@azimut/core-model';
 import { generateMessageSchedule } from './message-schedule-generate.js';
 
 // ---------------------------------------------------------------------------
@@ -133,7 +135,7 @@ function contentOfLine(
     case 'arrow':
       return { type: 'arrow', direction: line.direction ?? 'forward' };
     case 'free_text':
-      return { type: 'free_text', text: firstText(line) };
+      return freeTextContent(line.entries[0]?.text ?? {}, firstText(line));
     case 'map':
       return resolveMapContent(blockDef.config);
     case 'legend':
@@ -328,6 +330,12 @@ export function composeFace(options: ComposeFaceOptions): Outcome<ResolvedFace> 
     rules: options.rules ?? NO_WAYFINDING_RULES,
     version: options.version ?? 1,
     generated_at,
+    // A5.6 — la typologie synthétique n'a qu'une face ; les blocs saisis sont
+    // ceux de la face réelle portant ce côté sur la typologie déclarée.
+    instanceBlocks: id => {
+      const real = declaredType === undefined ? null : faceIndexForSide(declaredType, template.side);
+      return real === null ? [] : instanceBlocksOf(site, id, real);
+    },
   });
   if (!generated.ok) return { ok: false, findings: generated.findings };
 

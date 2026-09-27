@@ -14,6 +14,7 @@ import {
   SPACE, TEXT, type Metric, type Column, type ScreenAction,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
+import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 
 type FoundationViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -132,6 +133,7 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
         actions={actions}
       />
 
+      <UntypedSupportsBanner assumedTypeKey={site.support_types[0]?.key ?? ''} />
       <MetricRow metrics={metrics} />
 
       <div style={{ marginTop: SPACE.lg }}>

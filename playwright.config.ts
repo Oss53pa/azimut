@@ -60,9 +60,12 @@ export default defineConfig({
      * potentiellement contre du code qui n'est plus celui du dépôt, en
      * annonçant vert. Une vérification qui peut porter sur autre chose que ce
      * qu'on vérifie ne vérifie rien (A2.3).
+     *
+     * L'hôte est fixé : sur une machine à IPv6, `localhost` se résout en
+     * `::1`, et `url` ci-dessous, en `127.0.0.1`, n'était jamais joint.
      */
     command: 'pnpm --filter @azimut/studio build'
-      + ' && pnpm --filter @azimut/studio preview --port 4317 --strictPort',
+      + ' && pnpm --filter @azimut/studio preview --host 127.0.0.1 --port 4317 --strictPort',
     url: 'http://127.0.0.1:4317/sites',
     reuseExistingServer: false,
     timeout: 120_000,

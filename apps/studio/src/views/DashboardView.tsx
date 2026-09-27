@@ -6,19 +6,21 @@ import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
-import { auditInstallReserves } from '../domain/install-reserves.js';
-import { auditSurveySync } from '../domain/survey-sync.js';
-import { DEMO_BOOKINGS, DEMO_OPTIONS } from '../domain/demo/commerce.js';
-import { DEMO_RESERVES, DEMO_ROUNDS } from '../domain/demo/production.js';
+import { EMPTY_INSPECTION_REGISTRY, EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
+import { EMPTY_ADVERTISING_DATA, loadAdvertising, loadInspection, loadWorksite, useRegistry } from '../data/index.js';
+import { syncFindings } from './operations/rounds.js';
+import { openReserveFindings } from './worksite/rows.js';
 import { PRODUCT_MODULES } from '../product-map.js';
 import {
-  ScreenHeader, MetricRow, Panel, PanelGrid, Note, Tag,
+  Button, MetricRow, Panel, PanelGrid, Note, Tag,
   SPACE, TEXT, severityColor, type Metric,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 
 type DashboardViewProps = {
   readonly onNavigate: (view: ViewId) => void;
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
 };
 
 function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
@@ -40,11 +42,24 @@ type QueueEntry = {
  * socle, pas ici : ce qui figure sur cet écran est ce qu'un utilisateur doit
  * traiter, chaque ligne menant à l'écran qui permet de le faire.
  */
-export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
+export function DashboardView({ onNavigate, siteKey }: DashboardViewProps): JSX.Element {
   const site = useSiteData();
   const vocabulary = useSiteVocabulary();
-  const { t } = useI18n();
-  const today = new Date().toISOString().slice(0, 10);
+  const { t, lang } = useI18n();
+  const now = new Date();
+  const today = now.toISOString().slice(0, 10);
+  const longDate = now.toLocaleDateString(lang === 'en' ? 'en-GB' : 'fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  });
+
+  // Une file vide tant que la lecture n'a pas abouti : le tableau de bord ne
+  // montre que ce qui attend une action, et une lecture en cours n'en est pas.
+  const worksite = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
+  const worksiteReserves = worksite.registry.reserves;
+  const inspection = useRegistry(loadInspection, EMPTY_INSPECTION_REGISTRY, siteKey);
+  const rounds = inspection.registry.rounds;
+  const advertising = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
+  const { bookings: adBookings, options: adOptions } = advertising.registry.registry;
 
   const gate = useMemo(
     () => evaluatePublishGate(site, vocabulary),
@@ -53,10 +68,8 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
   const siteFindings = gate.findings;
 
   const queues = useMemo<readonly QueueEntry[]>(() => {
-    const bookings = guardPlacementBookings(DEMO_BOOKINGS);
-    const options = auditOptionExpiry(DEMO_OPTIONS, today);
-    const reserves = auditInstallReserves(DEMO_RESERVES.map(r => r.reserve));
-    const surveys = auditSurveySync(DEMO_ROUNDS.map(r => r.survey));
+    const bookings = guardPlacementBookings(adBookings);
+    const options = auditOptionExpiry(adOptions, today);
 
     return [
       { id: 'foundation', findings: siteFindings, labelKey: 'dashboard.queue.foundation', view: 'foundation' },
@@ -66,10 +79,10 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
         labelKey: 'dashboard.queue.ads',
         view: 'advertising',
       },
-      { id: 'worksite', findings: findingsOf(reserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
-      { id: 'operations', findings: findingsOf(surveys), labelKey: 'dashboard.queue.operations', view: 'operations' },
+      { id: 'worksite', findings: openReserveFindings(worksiteReserves), labelKey: 'dashboard.queue.worksite', view: 'worksite' },
+      { id: 'operations', findings: syncFindings(rounds), labelKey: 'dashboard.queue.operations', view: 'operations' },
     ];
-  }, [siteFindings, today]);
+  }, [siteFindings, today, worksiteReserves, rounds, adBookings, adOptions]);
 
   const all = queues.flatMap(q => q.findings);
   const blocking = all.filter(f => f.severity === 'blocking');
@@ -118,15 +131,32 @@ export function DashboardView({ onNavigate }: DashboardViewProps): JSX.Element {
 
   return (
     <div>
-      <ScreenHeader
-        eyebrow={t('dashboard.eyebrow')}
-        title={t('dashboard.title')}
-        subtitle={t('dashboard.subtitle')}
-      >
-        <span style={{ fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
-          {`${site.site.name} — ${site.organization.name}`}
-        </span>
-      </ScreenHeader>
+      <div style={{
+        display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: SPACE.lg, marginBottom: SPACE.xl,
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontSize: TEXT.small, color: 'var(--text-muted)' }}>
+            {t('home.greeting', { date: longDate })}
+          </div>
+          <h1 style={{ margin: `${String(SPACE.xs)}px 0`, fontSize: TEXT.title, fontWeight: 500 }}>
+            {site.site.name}
+          </h1>
+          <div style={{ fontSize: TEXT.body, color: 'var(--text-secondary)' }}>
+            {t('home.subtitle', {
+              building: site.buildings[0]?.name ?? t('header.building.fallback'),
+              organization: site.organization.name,
+            })}
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm }}>
+          <Button onClick={() => { onNavigate('editor'); }}>{t('home.action.plan')}</Button>
+          <Button onClick={() => { onNavigate('faces'); }}>{t('home.action.signage')}</Button>
+          <Button rank="primary" onClick={() => { onNavigate('deliverables'); }}>
+            {t('home.action.deliverables')}
+          </Button>
+        </div>
+      </div>
 
       <MetricRow metrics={metrics} />
 

@@ -1,8 +1,9 @@
-import type {
-  SiteData,
-  Edge,
-  TravelProfile,
-  Outcome,
+import {
+  isLocalInstant,
+  type SiteData,
+  type Edge,
+  type TravelProfile,
+  type Outcome,
 } from '@azimut/core-model';
 import { isEdgeTraversableFrom, buildExcludedKindsSet } from './edge-traversal.js';
 
@@ -27,6 +28,7 @@ function edgeCost(edge: Edge): number {
 function buildWeightedAdj(
   site: SiteData,
   profile: TravelProfile,
+  at: string | undefined,
 ): Map<string, AdjEntry[]> {
   const adj = new Map<string, AdjEntry[]>();
   const nodeKindMap = new Map<string, string>();
@@ -42,7 +44,7 @@ function buildWeightedAdj(
 
     const cost = edgeCost(edge);
 
-    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds)) {
+    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds, at)) {
       const list = adj.get(edge.from_node_id);
       if (list) {
         list.push({
@@ -53,7 +55,7 @@ function buildWeightedAdj(
       }
     }
 
-    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds)) {
+    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds, at)) {
       const list = adj.get(edge.to_node_id);
       if (list) {
         list.push({
@@ -140,12 +142,36 @@ function dijkstra(
   };
 }
 
+export type RouteOptions = {
+  /**
+   * A5.3 — instant, heure locale du site (`AAAA-MM-JJTHH:MM:SS`), auquel les
+   * fermetures déclarées comptent. Absent, elles ne comptent pas : c'est le
+   * cas de tout rendu durable. L'appelant lit l'horloge, jamais le moteur.
+   */
+  readonly at?: string;
+};
+
 export function computeRoute(
   site: SiteData,
   profile: TravelProfile,
   from: string,
   to: string,
+  options: RouteOptions = {},
 ): Outcome<Route> {
+  const { at } = options;
+  if (at !== undefined && !isLocalInstant(at)) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'GRAPH.ROUTE_INSTANT_INVALID',
+        severity: 'blocking',
+        entity: null,
+        params: { at },
+        ruleRef: 'A5.3',
+      }],
+    };
+  }
+
   if (from === to) {
     return {
       ok: true,
@@ -190,7 +216,7 @@ export function computeRoute(
     };
   }
 
-  const adj = buildWeightedAdj(site, profile);
+  const adj = buildWeightedAdj(site, profile, at);
   const route = dijkstra(adj, from, to);
 
   if (route === null) {

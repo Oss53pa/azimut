@@ -2,7 +2,9 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
-import { buildCommand } from '@azimut/core-model';
+import {
+  buildCommand, declareClosureCommand, withdrawClosureCommand, readEdgeAvailability, type Edge, type EntityCommand,
+} from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
 
@@ -184,5 +186,121 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await expect(callAs(ALICE, [
       { operation: 'create', table: 'pg_shadow', id: ALICE, after: { x: '1' } },
     ])).rejects.toThrow();
+  });
+
+  /**
+   * A5.3 — une fermeture se déclare par une commande `update` sur
+   * `edge.availability`, écrite en texte et reçue en jsonb, puis se retire.
+   */
+  it('déclare puis retire une fermeture d’arête, relue telle qu’écrite', async () => {
+    const { commands } = creation('00ee04', ORG);
+    const level = 'a7000000-0000-0000-0000-00000000ee04';
+    const n1 = 'a8000000-0000-0000-0000-00000000ee04';
+    const n2 = 'a8000000-0000-0000-0000-00000000ee05';
+    const edgeId = 'a9000000-0000-0000-0000-00000000ee04';
+    await callAs(ALICE, [
+      ...commands,
+      ...[n1, n2].map(id => ({ operation: 'create', table: 'node', id,
+        after: { id, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } })),
+      { operation: 'create', table: 'edge', id: edgeId,
+        after: { id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: '2', length_m: '5' } },
+    ]);
+    const edge: Edge = {
+      id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: 2, slope_pct: 0,
+      accessible: true, direction: 'both', evacuation_route: false, length_m: 5,
+    };
+    const payload = (c: EntityCommand) => ({ operation: c.operation, table: c.table, id: c.id, before: c.before, after: c.after });
+    const availability = async (): Promise<unknown> => db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      const rows = await tx.execute(sql`select availability from azimut.edge where id = ${edgeId}`);
+      return rows[0]?.['availability'];
+    });
+
+    const declared = declareClosureCommand(edge,
+      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works' },
+      { timestamp: '2026-09-26T00:00:00.000Z', declaredBy: null });
+    if (!declared.ok) throw new Error(JSON.stringify(declared.findings));
+    await callAs(ALICE, [payload(declared.value)]);
+    const read = readEdgeAvailability(await availability());
+    expect(read).toEqual({ readable: true, closures: [
+      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works', declared_by: null },
+    ] });
+
+    // Bob n'écrit pas sur l'arête d'une autre organisation : la ligne lui est invisible.
+    await callAs(BOB, [payload(declared.value)]);
+    expect(readEdgeAvailability(await availability())).toEqual(read);
+
+    const closure = read?.readable === true ? read.closures[0] : undefined;
+    if (closure === undefined || read === undefined) throw new Error('fermeture absente');
+    const withdrawn = withdrawClosureCommand({ ...edge, availability: read }, closure, '2026-09-26T00:00:01.000Z');
+    if (!withdrawn.ok) throw new Error(JSON.stringify(withdrawn.findings));
+    await callAs(ALICE, [payload(withdrawn.value)]);
+    expect(await availability()).toBeNull();
+  });
+
+  /**
+   * T-2.9 et 0049 — un plan mural s'écrit selon A5.6 : une face sans `side`,
+   * un bloc `map` sans `ordinal`. Un bloc sans aucune position est refusé, et
+   * le bloc se retire en laissant sa face.
+   */
+  it('écrit une face et un bloc de plan mural sans les colonnes héritées, puis retire le bloc', async () => {
+    const { site, commands } = creation('00ee06', ORG);
+    const level = 'a7000000-0000-0000-0000-00000000ee06';
+    const node = 'a8000000-0000-0000-0000-00000000ee06';
+    const support = 'aa000000-0000-0000-0000-00000000ee06';
+    const face = 'ab000000-0000-0000-0000-00000000ee06';
+    const block = 'ac000000-0000-0000-0000-00000000ee06';
+    await callAs(ALICE, [
+      ...commands,
+      { operation: 'create', table: 'node', id: node,
+        after: { id: node, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } },
+      { operation: 'create', table: 'support', id: support,
+        after: { id: support, org_id: ORG, site_id: site, node_id: node, kind: 'directional' } },
+      { operation: 'create', table: 'support_face', id: face,
+        after: { id: face, org_id: ORG, support_id: support, face_index: '0' } },
+      { operation: 'create', table: 'support_content_block', id: block,
+        after: { id: block, org_id: ORG, face_id: face, block_index: '0', kind: 'map' } },
+    ]);
+    const count = async (table: string, id: string): Promise<number> => db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      const rows = await tx.execute(sql`select id from ${sql.identifier('azimut')}.${sql.identifier(table)} where id = ${id}`);
+      return rows.length;
+    });
+    expect(await count('support_content_block', block)).toBe(1);
+
+    const orphan = 'ac000000-0000-0000-0000-00000000ee07';
+    await expect(callAs(ALICE, [{ operation: 'create', table: 'support_content_block', id: orphan,
+      after: { id: orphan, org_id: ORG, face_id: face, kind: 'map' } }])).rejects.toThrow();
+
+    await callAs(ALICE, [{ operation: 'delete', table: 'support_content_block', id: block }]);
+    expect(await count('support_content_block', block)).toBe(0);
+    expect(await count('support_face', face)).toBe(1);
+
+    // A5.6 — la face se modifie : gabarit et langues, écrits en texte, relus en jsonb.
+    await callAs(ALICE, [{ operation: 'update', table: 'support_face', id: face,
+      before: { template_key: null, langs: null }, after: { template_key: 'tpl-essai', langs: '["fr","en"]' } }]);
+    const faceRow = await db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      return tx.execute(sql`select template_key, langs from azimut.support_face where id = ${face}`);
+    });
+    expect(faceRow[0]).toEqual({ template_key: 'tpl-essai', langs: ['fr', 'en'] });
+
+    // D8.3 — un bloc libre porte son texte par langue ; il se réécrit, puis se retire.
+    const free = 'ac000000-0000-0000-0000-00000000ee08';
+    await callAs(ALICE, [{ operation: 'create', table: 'support_content_block', id: free,
+      after: { id: free, org_id: ORG, face_id: face, block_index: '1', kind: 'free', free_text: '{"fr":"Sortie"}' } }]);
+    await callAs(ALICE, [{ operation: 'update', table: 'support_content_block', id: free,
+      before: { free_text: '{"fr":"Sortie"}' }, after: { free_text: '{"fr":"Sortie","en":"Exit"}' } }]);
+    const freeRow = await db.transaction(async (tx) => {
+      await tx.execute(sql`set local role authenticated`);
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
+      return tx.execute(sql`select kind, free_text from azimut.support_content_block where id = ${free}`);
+    });
+    expect(freeRow[0]).toEqual({ kind: 'free', free_text: { fr: 'Sortie', en: 'Exit' } });
+    await callAs(ALICE, [{ operation: 'delete', table: 'support_content_block', id: free }]);
+    expect(await count('support_content_block', free)).toBe(0);
   });
 });

@@ -5,7 +5,7 @@
  * lui fournir ses entrées et rassembler ses sorties. Aucun texte de face n'est
  * reconstruit ici (invariant 2).
  */
-import type { SiteData, TravelProfile, Finding } from '@azimut/core-model';
+import type { SiteData, TravelProfile, Finding, InformationLevelBinding } from '@azimut/core-model';
 import {
   generateMessageSchedule,
   checkMessageSchedule,
@@ -115,17 +115,25 @@ export function buildScheduleModel(
   };
 }
 
-/** Niveaux d'information déclarés pour chaque typologie du site (H2.3). */
+/**
+ * Niveaux d'information déclarés pour chaque typologie du site (H2.3), lus
+ * dans le registre du wayfinding (`information_level`, migration 0027).
+ *
+ * Une typologie sans déclaration n'a pas de niveau : elle n'en reçoit pas un
+ * par défaut.
+ */
 export function declaredInformationLevels(
   site: SiteData,
+  bindings: readonly InformationLevelBinding[] = [],
 ): readonly TypologyInformationLevels[] {
   return [...site.support_types]
     .sort((a, b) => a.key.localeCompare(b.key))
     .map((type): TypologyInformationLevels => ({
       support_type_key: type.key,
-      // Aucun rattachement n'est porté par le modèle : une typologie sans
-      // déclaration n'a pas de niveau, elle n'en reçoit pas un par défaut.
-      levels: [],
+      levels: bindings
+        .filter(b => b.typology_key === type.key)
+        .map(b => b.level)
+        .sort((a, b) => a - b),
     }));
 }
 

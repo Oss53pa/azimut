@@ -9,11 +9,12 @@
  */
 
 import type {
-  FaceTemplate,
+  ContentBlockInstance,
   Finding,
   Outcome,
   SupportType,
 } from '@azimut/core-model';
+import { instanceBlocksOf, templateForSide } from '@azimut/core-model';
 import { deriveDecisionPoints } from './decision-points.js';
 import { resolveFaceContent } from './resolve-face.js';
 import type { ResolvedBlock } from './resolve-face.js';
@@ -38,6 +39,12 @@ export type GenerateScheduleOptions = ScheduleInputs & {
   readonly version: number;
   /** ISO-8601 fourni par l'appelant (E5.1, jamais lu dans un moteur). */
   readonly generated_at: string;
+  /**
+   * A5.6 — les blocs saisis sur la face d'un support. Par défaut, ceux du site
+   * à cet indice de face ; `composeFace` le fournit quand il génère sur une
+   * typologie synthétique dont les indices ne sont pas ceux de la face réelle.
+   */
+  readonly instanceBlocks?: ((supportId: string, faceIndex: number) => readonly ContentBlockInstance[]) | undefined;
 };
 
 // ---------------------------------------------------------------------------
@@ -72,7 +79,8 @@ function entriesOfBlock(block: ResolvedBlock): readonly MessageEntry[] {
     case 'free_text':
       return [{
         destination_id: null,
-        text: { fr: content.text, en: content.text },
+        // D8.3 — les variantes saisies sur la face, sinon le texte du gabarit.
+        text: content.texts ?? { fr: content.text, en: content.text },
         direction: null,
         distance_m: null,
       }];
@@ -100,17 +108,6 @@ function directionOfBlock(block: ResolvedBlock): string | null {
 // Génération
 // ---------------------------------------------------------------------------
 
-function templateFor(
-  templates: readonly FaceTemplate[],
-  supportTypeKey: string,
-  side: string,
-): FaceTemplate | null {
-  const matches = templates
-    .filter(t => t.support_type_key === supportTypeKey && t.side === side)
-    .sort((a, b) => a.id.localeCompare(b.id));
-  return matches[0] ?? null;
-}
-
 /**
  * Génère le tableau des messages.
  *
@@ -124,6 +121,7 @@ export function generateMessageSchedule(
   const { site, supports, profile, informationLevels, rules, version, generated_at } = options;
 
   const warnings: Finding[] = [];
+  const blocksFor = options.instanceBlocks ?? ((supportId: string, faceIndex: number) => instanceBlocksOf(site, supportId, faceIndex));
 
   const typeByKey = new Map<string, SupportType>(
     site.support_types.map(t => [t.key, t]),
@@ -189,7 +187,7 @@ export function generateMessageSchedule(
     const faces = [...supportType.faces].sort((a, b) => a.side.localeCompare(b.side));
 
     faces.forEach((face, faceIndex) => {
-      const template = templateFor(site.face_templates, supportType.key, face.side);
+      const template = templateForSide(site.face_templates, supportType.key, face.side);
       if (template === null) {
         warnings.push({
           code: 'WAYFIND.FACE_TEMPLATE_MISSING',
@@ -201,7 +199,7 @@ export function generateMessageSchedule(
         return;
       }
 
-      const resolved = resolveFaceContent(site, template, support.node_id, profile);
+      const resolved = resolveFaceContent(site, template, support.node_id, profile, blocksFor(support.id, faceIndex));
       if (!resolved.ok) {
         warnings.push(...resolved.findings);
         return;
