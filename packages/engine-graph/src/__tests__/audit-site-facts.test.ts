@@ -123,7 +123,7 @@ describe('auditSiteFacts — A5.11, un texte contre les faits du site', () => {
  * Les deux codes viennent du catalogue et changent de porteur : D2.2 les
  * définit au niveau du fait, `PARK.SOURCE_MISSING` en toutes lettres, et ils se
  * levaient sur les objets de stationnement faute d'une colonne pour porter le
- * statut d'un fait. La migration 0044 l'a ajoutée.
+ * statut d'un fait. La migration 0053 l'a ajoutée.
  */
 describe('A5.11 — le statut et la source d’un fait', () => {
   const sansSource: SiteFact = {

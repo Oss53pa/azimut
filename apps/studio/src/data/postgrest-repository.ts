@@ -72,7 +72,7 @@ type LexiconTermRow = {
 type SiteFactRow = {
   readonly id: string;
   readonly key: string;
-  /** Colonne `jsonb` depuis la migration 0044 : ce qui arrive est du JSON, pas du texte. */
+  /** Colonne `jsonb` depuis la migration 0053 : ce qui arrive est du JSON, pas du texte. */
   readonly value: unknown;
   readonly status: string;
   readonly source_ref: string;
@@ -82,7 +82,7 @@ type SiteFactRow = {
    * A5.11, version 17 — la cible du fait. Les deux colonnes sont nulles
    * ensemble ou renseignées ensemble, `site_fact_target_complete` le garantit
    * en base. Le mappage ne s'y fie pas pour autant : une base antérieure à la
-   * migration 0047 rendrait `undefined`, et une moitié de cible se lit comme
+   * migration 0056 rendrait `undefined`, et une moitié de cible se lit comme
    * un fait de site plutôt que comme une cible incomplète.
    */
   readonly target_kind: string | null;
@@ -134,7 +134,7 @@ function toSeverity(raw: string): LexiconSeverity {
  *
  * Deux choses sont tout de même vérifiées, parce qu'elles ne relèvent pas des
  * paramètres : la nature doit être l'une des sept d'A5.8, ce que la contrainte
- * de la base garantit depuis la migration 0045 ; et `params` doit être un
+ * de la base garantit depuis la migration 0054 ; et `params` doit être un
  * objet, la colonne pouvant porter n'importe quel `jsonb`. Un `params` qui n'en
  * est pas un devient l'objet vide, que le résolveur signalera comme illisible
  * plutôt que de le taire.

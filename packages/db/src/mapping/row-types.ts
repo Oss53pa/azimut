@@ -48,7 +48,7 @@ export type SiteRulesBindingRow = {
   readonly org_id: string;
   readonly site_id: string;
   readonly rules_pack_id: string;
-  /** `base` ou `overlay`, contrainte en base (migration 0056). */
+  /** `base` ou `overlay`, contrainte en base (migration 0065). */
   readonly role: string;
   readonly bound_at: TimestampValue;
 };

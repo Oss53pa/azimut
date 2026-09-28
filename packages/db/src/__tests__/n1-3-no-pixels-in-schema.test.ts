@@ -25,7 +25,7 @@ const COORDINATE_IN_PIXELS = /(^|_)[xy]_px$/;
  * Infractions constatées et déclarées : aucune.
  *
  * `control_point` était la dernière. Elle portait des pixels hors des deux
- * tables que M01.S2 autorise, et la migration 0043 l'a supprimée : une seule
+ * tables que M01.S2 autorise, et la migration 0052 l'a supprimée : une seule
  * table de points de calage subsiste, `plan_calibration_point`, celle de
  * A5.2.
  *
@@ -137,7 +137,7 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
 
   it('le schéma ne porte plus qu’une table de points de calage', () => {
     const tables = migratedColumns();
-    expect(tables.has('control_point'), 'supprimée par la migration 0043').toBe(false);
+    expect(tables.has('control_point'), 'supprimée par la migration 0052').toBe(false);
     expect([...tables.get('plan_calibration_point') ?? []])
       .toEqual(expect.arrayContaining(['ordinal', 'image_x_px', 'image_y_px']));
   });

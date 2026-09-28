@@ -74,7 +74,7 @@ const BY_KEY = new Map(DECLARED_PICTOGRAM_FUNCTIONS.map(d => [d.key, d]));
  *
  * Même convention que les clés de fait d'A5.11, et pour le même motif : ni
  * l'un ni l'autre ne contient de point, sans quoi la coupure serait ambiguë,
- * et aucun n'est vide. La base tient la même règle, migration 0053.
+ * et aucun n'est vide. La base tient la même règle, migration 0062.
  */
 export function isFunctionKeyShape(key: string): boolean {
   const parts = key.split('.');

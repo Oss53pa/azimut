@@ -5,7 +5,7 @@ import type { SiteRulesBindingRow } from './row-types.js';
  * A5.8 — les lignes de rattachement d'un site, passées au modèle.
  *
  * Un rôle hors des deux valeurs n'entre pas au modèle : le CHECK de la
- * migration 0056 l'exclut en base, et le lire comme un socle déciderait d'une
+ * migration 0065 l'exclut en base, et le lire comme un socle déciderait d'une
  * précédence que personne n'a déclarée.
  *
  * Partagé par l'assemblage d'un site et par la liste des sites du studio, pour

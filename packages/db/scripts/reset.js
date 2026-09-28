@@ -72,7 +72,7 @@ try {
   // des migrations, qui part avec lui.
   await sql.unsafe('DROP SCHEMA IF EXISTS azimut CASCADE');
   // Les deux objets que les migrations 0001 et 0002 posaient hors du schéma,
-  // jusqu'à la migration 0042. Le nettoyage reste ici pour les bases montées
+  // jusqu'à la migration 0051. Le nettoyage reste ici pour les bases montées
   // avant elle ; sur une base neuve, il ne trouve rien.
   await sql.unsafe('DROP TABLE IF EXISTS public._migrations');
   await sql.unsafe('DROP FUNCTION IF EXISTS public.set_updated_at() CASCADE');

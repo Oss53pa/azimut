@@ -13,7 +13,7 @@ import { isParkingSpaceFootprint, isParkingZone } from '@azimut/core-model';
  * avertissement. Il n'était pas calculable avant la version 17 : A5.2 ne
  * donnait à `zone` ni géométrie ni liste d'empreintes, et rien ne permettait de
  * dire qu'une empreinte appartenait à une zone. La colonne `footprint_ids`,
- * posée par la migration 0048, le permet.
+ * posée par la migration 0057, le permet.
  *
  * **Pourquoi un avertissement et non un refus.** Une place orpheline n'est pas
  * une faute de géométrie : elle est tracée, elle existe, et elle compte au

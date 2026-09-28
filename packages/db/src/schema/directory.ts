@@ -28,14 +28,14 @@ export const pictogram = azimut.table('pictogram', {
   svg_path: text('svg_path').notNull(),
   registry: text('registry').notNull(),
   function_key: text('function_key'),
-  // Référence à `rules_pack`, posée en base par la migration 0054. Déclarée
+  // Référence à `rules_pack`, posée en base par la migration 0063. Déclarée
   // sans `.references()`, pour ne pas faire dépendre ce fichier de celui des
   // chartes.
   rules_pack_id: uuid('rules_pack_id'),
 }, (t) => [
   index('idx_pictogram_org').on(t.org_id),
   // A5.4 : portée d'unicité d'une fonction, l'organisation pour le registre
-  // d'orientation, le paquet de règles pour celui de sécurité. Migration 0054,
+  // d'orientation, le paquet de règles pour celui de sécurité. Migration 0063,
   // qui dit aussi pourquoi `org_id` reste dans la seconde clé et pourquoi les
   // valeurs nulles y sont égales entre elles.
   uniqueIndex('uq_pictogram_function_wayfinding')

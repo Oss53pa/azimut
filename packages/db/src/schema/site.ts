@@ -18,7 +18,7 @@ export const site = azimut.table('site', {
   // l'émission de la première facture : elle ne sert qu'à facturer.
   legal_entity_id: uuid('legal_entity_id'),
   // A5.8 — le paquet d'un site n'est plus une colonne : `site_rules_binding`
-  // fait foi, et la migration 0057 a retiré `rules_pack_id`.
+  // fait foi, et la migration 0066 a retiré `rules_pack_id`.
   // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
   // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
@@ -109,7 +109,7 @@ export const zone = azimut.table('zone', {
   kind: text('kind').notNull(),
   // A5.2, version 17 — « empreintes couvertes par la zone, appartenance
   // déclarée et non calculée, comme pour la zone d'orientation de la partie H ».
-  // Migration 0048. La base garantit le type du contenant ; la forme des
+  // Migration 0057. La base garantit le type du contenant ; la forme des
   // éléments se valide à la frontière, comme pour `footprint.geometry`.
   footprint_ids: jsonb('footprint_ids').notNull().default([]),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -124,7 +124,7 @@ export const planSource = azimut.table('plan_source', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   storage_path: text('storage_path').notNull(),
   media_type: text('media_type').notNull(),
-  // A5.2 — nature réelle du contenu, constatée à l'import (migration 0059,
+  // A5.2 — nature réelle du contenu, constatée à l'import (migration 0068,
   // qui porte aussi la contrainte des trois valeurs).
   content_kind: text('content_kind').notNull(),
   uploaded_at: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
@@ -187,7 +187,7 @@ export const opening = azimut.table('opening', {
  *
  * « site_fact (id, org_id, site_id, key, value jsonb, status, source_ref,
  * declared_by, declared_at) », `status in ('existing','proposal','to_verify')`.
- * La migration 0044 a aligné la table sur cette déclaration.
+ * La migration 0053 a aligné la table sur cette déclaration.
  *
  * `source_ref` et `declared_at` sont obligatoires : une affirmation sans
  * provenance ne se conteste pas. `status` l'est aussi, et sans valeur par
@@ -213,7 +213,7 @@ export const siteFact = azimut.table('site_fact', {
   declared_by: uuid('declared_by'),
   // A5.11 — l'objet sur lequel le fait porte, facultatif. Renseigné, le fait
   // porte sur cet objet ; vide, sur le site entier. Les deux colonnes sont
-  // entières ou absentes ensemble : `site_fact_target_complete`, migration 0047.
+  // entières ou absentes ensemble : `site_fact_target_complete`, migration 0056.
   //
   // `target_kind` n'est pas un énuméré fermé, comme `audit_log.entity` et
   // `attachment.entity_kind`. Aucune clé étrangère sur `target_id` : une
@@ -283,7 +283,7 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
 // A5.3, section S8 — extension d'une empreinte de nature `parking_space`, une
 // ligne par empreinte, sur le modèle de `vertical_link` qui étend une arête.
 // Ne porte que ce que l'empreinte générique n'a pas à porter : le type de place
-// et son repère de travée. Migration 0049.
+// et son repère de travée. Migration 0058.
 export const parkingSpace = azimut.table('parking_space', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),

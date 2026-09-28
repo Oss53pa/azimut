@@ -18,7 +18,7 @@ après la remise de la version en cours du cahier des charges consolidé.
 | --- | --- | --- |
 | **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
 | **M01.S10** Toute arête entre deux bâtiments porte sa ligne `building_link` | **tenu** | `engine-graph/__tests__/checks-structure.test.ts` — `GRAPH.BUILDING_LINK_MISSING`, son contre-exemple, et la remontée jusqu'à `validateGraph` ; `state/__tests__/graph-vertical-link.test.ts` — l'outil de liaison écrit l'arête et sa ligne en un geste. Le cas et son contre-exemple sont désormais portés par des sites de référence : `ref-broken` porte l'arête entre bâtiments sans sa ligne, `ref-retail` les deux passages avec la leur, une couverte et une non couverte (C1). La table existait en base depuis la migration 0004 sans que rien ne la lise. Limite déclarée par la règle : aucun calcul ne lit encore l'attribut de passage couvert |
-| **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0043 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
+| **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0052 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
 | **M01.S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
 | **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
 | **M01.S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
@@ -186,7 +186,7 @@ signature de `resolveFaceContent`, colonnes absentes de `pictogram` et de
 **Clos par la version 14.** Les deux divergences ouvertes par la version 13 sont
 traitées :
 
-- `site_fact` est alignée sur A5.11 par la migration 0044 — `status` avec ses
+- `site_fact` est alignée sur A5.11 par la migration 0053 — `status` avec ses
   trois valeurs, `value` en `jsonb`, `source` renommée `source_ref` et
   `recorded_on` renommée `declared_at`, `declared_by` ajoutée. Deux écarts
   restent, déclarés : `declared_by` est un ajout et non un renommage, la table
@@ -215,7 +215,7 @@ tranchés par l'éditeur :
   pas et n'a pas à donner.
 
 Défaut trouvé en appliquant le premier point, et corrigé par la migration
-0045 : la contrainte de `charter_rule.kind` n'admettait que cinq des sept
+0054 : la contrainte de `charter_rule.kind` n'admettait que cinq des sept
 natures d'A5.8, celles de la migration 0006. Les deux natures que les contrôles
 de rédaction lisent — `forbidden_character` et `max_sentence_words` — n'étaient
 pas stockables. Le chemin existait sans que rien puisse l'emprunter.
@@ -228,12 +228,12 @@ cinq en attente. L'éditeur l'a confirmé en version 16.
 **Clos par la version 16.** L'objet `parking` cesse d'être hors du cahier des
 charges, et la façon dont il y entre défait ce que le dépôt en avait fait :
 
-- la migration 0045 est ratifiée. Elle était nécessaire à la version 15, mais
+- la migration 0054 est ratifiée. Elle était nécessaire à la version 15, mais
   elle n'avait pas été demandée : l'éditeur la retient comme une extension de
   périmètre, à soumettre avant et non après ;
 - la section S8 tranche le modèle du stationnement, sans table nouvelle. Une
   place est une empreinte de nature `parking_space`, ajoutée à l'énumération
-  d'A5.2 et à la contrainte de base par la migration 0046 ; un parking est une
+  d'A5.2 et à la contrainte de base par la migration 0055 ; un parking est une
   zone de nature `parking`, que la migration 0029 admettait déjà sans que rien
   s'en serve ; la capacité annoncée reste un fait du site ;
 - l'exclusion définitive de l'édition simultanée, en G4.1, est levée par S6.
@@ -295,11 +295,11 @@ tranchées, et chacune l'est en corrigeant le modèle plutôt qu'en contournant 
 1. **Un fait désigne son objet.** `site_fact` gagne `target_kind` et
    `target_id`, facultatifs, et l'unicité passe du couple site et clé au
    triplet site, clé et cible. Un site à deux parkings déclare donc deux
-   capacités. Migration 0047, éprouvée aux deux sens.
+   capacités. Migration 0056, éprouvée aux deux sens.
 2. **Une zone porte ses empreintes.** `zone.footprint_ids`, appartenance
    déclarée et non calculée, comme la zone d'orientation d'H11.
    `DATA.PARKING_SPACE_WITHOUT_ZONE` devient calculable, il est levé, et il
-   sort des non construits. Migration 0048.
+   sort des non construits. Migration 0057.
 3. **La surface non numérisée est conservée**, et spécifiée en règle S-37.
    C'est elle qui explique un écart de capacité, et l'écart est admis à
    concurrence des places déclarées.
@@ -668,7 +668,7 @@ pictogramme y répond.
 
 | Ce qu'A5.4 pose | Où | État |
 | --- | --- | --- |
-| `pictogram.function_key`, facultative | Migration `0053`, `Pictogram`, schéma Drizzle, type de ligne | Fait |
+| `pictogram.function_key`, facultative | Migration `0062`, `Pictogram`, schéma Drizzle, type de ligne | Fait |
 | Forme espace de noms + point + nom | Contrainte de base et `isFunctionKeyShape` | Fait |
 | Une fonction au plus une fois par registre et par site | Index unique partiel, et `PICTO.FUNCTION_AMBIGUOUS` au rendu | Fait |
 | Vocabulaire enrichi au commit de son premier usage | `core-model/pictogram-functions.ts`, une seule fonction déclarée | Fait |
@@ -729,7 +729,7 @@ légitimement deux pictogrammes d'accessibilité, un par paquet.
 
 | Ce qu'A5.4 pose | Où | État |
 | --- | --- | --- |
-| `pictogram.rules_pack_id` | Migration `0054`, `Pictogram`, schéma Drizzle, type de ligne | Fait, nullable |
+| `pictogram.rules_pack_id` | Migration `0063`, `Pictogram`, schéma Drizzle, type de ligne | Fait, nullable |
 | Orientation : une fonction par organisation | Index `uq_pictogram_function_wayfinding`, portée `wayfinding` | Fait |
 | Sécurité : une fonction par paquet | Index `uq_pictogram_function_safety`, portée du paquet du site | Fait |
 | Le cas des deux paquets, non ambigu | `tests/s39-rendu-d-une-place.test.ts`, essais du vocabulaire | Fait |
@@ -779,17 +779,17 @@ anomalie.
 
 | Ce que la version 22 pose | Où | État |
 | --- | --- | --- |
-| A5.4 — paquet requis pour un pictogramme de sécurité, vide pour l'orientation | Migration `0055`, contrainte `pictogram_pack_by_registry` | Fait |
+| A5.4 — paquet requis pour un pictogramme de sécurité, vide pour l'orientation | Migration `0064`, contrainte `pictogram_pack_by_registry` | Fait |
 | Pictogrammes de sécurité des sites de référence rattachés | `ref-minimal`, `ref-retail` : `rp-test-0001` | Fait |
-| A5.8 — `site_rules_binding.role`, socle ou surcouche, au plus un de chaque | Migration `0056`, index `uq_site_rules_binding_role`, schéma Drizzle | Fait |
+| A5.8 — `site_rules_binding.role`, socle ou surcouche, au plus un de chaque | Migration `0065`, index `uq_site_rules_binding_role`, schéma Drizzle | Fait |
 | La table de rattachement fait foi : lectures migrées | `SiteData.rules_bindings`, chargeur, API REST, studio, compilateur | Fait |
 | Précédence : la surcouche l'emporte, l'ambiguïté se juge dans un paquet | `packsByPrecedence`, `resolvePictogramFunction`, `resolveSiteRulesPack` | Fait |
-| La colonne de paquet disparaît de la table des sites | Migration `0057`, gardée ; Drizzle et liste de dérive dans le même commit | Fait |
+| La colonne de paquet disparaît de la table des sites | Migration `0066`, gardée ; Drizzle et liste de dérive dans le même commit | Fait |
 | `PARK.UNDIGITIZED_REASON_MISSING`, avertissement | `auditParking`, catalogue, libellés fr et en | Fait |
 
 **Le chemin de la migration.** Elle s'est faite en quatre temps, un commit
-chacun : le rôle et le report de la colonne dans la table (`0056`), puis les
-lectures, puis le retrait de la colonne (`0057`). `0057` s'arrête si une
+chacun : le rôle et le report de la colonne dans la table (`0065`), puis les
+lectures, puis le retrait de la colonne (`0066`). `0066` s'arrête si une
 valeur de la colonne n'est pas reprise en socle. Sur la base de
 développement, la colonne était vide.
 
@@ -820,8 +820,8 @@ accessible.
 et la version du socle, et l'empreinte de contenu ne dit donc pas qu'une
 surcouche est intervenue.
 
-**`NULLS NOT DISTINCT` dans l'index de sécurité de `0054`.** Il devient
-superflu maintenant que `0055` interdit un paquet nul dans ce registre. Il
+**`NULLS NOT DISTINCT` dans l'index de sécurité de `0063`.** Il devient
+superflu maintenant que `0064` interdit un paquet nul dans ce registre. Il
 ne coûte rien, et le retirer serait une migration.
 
 **Le motif n'est toujours lu par aucun livrable.** Son absence est
@@ -877,7 +877,7 @@ numérisée. Deux commentaires parlent encore de « zone non couverte »
 dont le paquet n'est pas transporté. L'essai d'exécution empêche d'en tirer
 une résolution ; le modèle, lui, ne le dit pas.
 
-**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
+**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0063` et le poids
 du paquet du studio, sans correction au passage.
 
 ## Anomalies du paquet, empreinte unique et borne, ce que la version 24 ferme
@@ -967,7 +967,7 @@ question est posée.
 ne dessine aucun pictogramme de sécurité. La marque figée à la construction
 ne vaut donc, aujourd'hui, que pour les plans de niveau.
 
-**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0054` et le poids
+**Toujours au registre.** L'index `NULLS NOT DISTINCT` de `0063` et le poids
 du paquet du studio, sans correction au passage.
 
 ## Forme canonique pour toutes les empreintes, ce que la version 25 ferme
@@ -1021,7 +1021,7 @@ locale. Relevé, non corrigé.
 
 **Toujours au registre.**
 - Les empreintes non alignées, ci-dessus.
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
@@ -1031,7 +1031,7 @@ locale. Relevé, non corrigé.
 
 | Ce que la version 26 pose | Où | État |
 | --- | --- | --- |
-| A12.3 — le journal d'audit en insertion seule, en priorité | Migration `0058_a12_3_audit_log_insert_only` ; essai `a12-3-insertion-seule.db` | Fait |
+| A12.3 — le journal d'audit en insertion seule, en priorité | Migration `0067_a12_3_audit_log_insert_only` ; essai `a12-3-insertion-seule.db` | Fait |
 | D7.2 — toutes les empreintes suivent la forme canonique, en un seul lot | `empreinteOutcome` (core-model), appelée par chaque empreinte nommée ci-dessous | Fait |
 | A9 — plus de `localeCompare` dans un ensemble haché | `codePointCompare` (core-model) | Fait pour les empreintes |
 | Clé de liaison `parking.digitized_spaces` | `document-bindings.ts`, `audit-parking.ts` | Fait |
@@ -1149,7 +1149,7 @@ des `Outcome` par identité après le changement de signature, et seul
 `pnpm test` l'a vu.
 
 **Toujours au registre.**
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
@@ -1251,7 +1251,7 @@ chaînes » s'insère dans la liste des sources d'indéterminisme : le dernier
 point, sur les flottants, s'en trouve détaché. Son contenu reste appliqué.
 
 **Toujours au registre.**
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
@@ -1265,7 +1265,7 @@ point, sur les flottants, s'en trouve détaché. Son contenu reste appliqué.
 | A9 — portée : tout code qui produit une sortie ou une empreinte | Essai `a9-comparaison-localisee`, relevé étendu | Contrôle étendu ; tâche redéclarée ci-dessous |
 | M2 — le format se juge sur le contenu ; un contenu hors des formats acceptés est refusé | `acceptPlanFile`, `inspectPlanContent` (studio) | Fait |
 | M2 — le nombre de pages d'un PDF se lit, `IMPORT.PAGE_REQUIRED` se lève | `pdf-pages.ts` ; champ « Page » de l'écran M2 | Fait |
-| A5.2 — `plan_source.content_kind` | Migration `0059_a5_2_plan_source_content_kind` ; écriture à l'import | Fait |
+| A5.2 — `plan_source.content_kind` | Migration `0068_a5_2_plan_source_content_kind` ; écriture à l'import | Fait |
 | Cinq fichiers de configuration sous contrôle de types | `tsconfig.config.json` (racine, studio, db) ; essai `typecheck-couverture` | Fait |
 | A9 — liste des sources d'indéterminisme rétablie | Document | Rien à faire dans le code |
 
@@ -1293,7 +1293,7 @@ valeurs :
 | Aucun tracé lu : image, PDF numérisé, DXF sans entité géométrique | `raster` |
 | Un flux qui ne se décode pas, sans tracé lu ailleurs | `undetermined` |
 
-La migration 0059 porte la colonne, obligatoire, avec sa contrainte et sans
+La migration 0068 porte la colonne, obligatoire, avec sa contrainte et sans
 valeur par défaut. Une ligne antérieure reçoit `undetermined` ; la base de
 développement n'en comptait aucune. Une valeur inconnue relue est
 `undetermined`, jamais présumée vectorielle.
@@ -1368,7 +1368,7 @@ entier, et non sur la page retenue. Un PDF dont une page est vectorielle et
 une autre numérisée passe pour vectoriel, quelle que soit la page choisie.
 
 **Toujours au registre.**
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
@@ -1488,7 +1488,7 @@ qui produit. Un tri du studio qui déduit la langue de la machine peut encore
 s'ajouter sans que rien ne le refuse, avant que la tâche ne s'exécute.
 
 **Toujours au registre.**
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.
@@ -1576,7 +1576,7 @@ avec `toLocaleString('fr-FR')`, langue déclarée mais fixe, et non la langue
 active. Relevé, non traité.
 
 **Toujours au registre.**
-- L'index `NULLS NOT DISTINCT` de `0054`.
+- L'index `NULLS NOT DISTINCT` de `0063`.
 - Le poids du paquet du studio.
 - La tâche de découpage du dépôt PostgREST, déclarée à la version 24 et non
   commencée.

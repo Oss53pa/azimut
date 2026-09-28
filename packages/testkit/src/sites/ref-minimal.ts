@@ -266,7 +266,7 @@ export const refMinimal: SiteData = {
       registry: 'safety',
       function_key: null,
       // A5.4 : un pictogramme de sécurité vient d'un paquet de règles, contrainte
-      // en base (migration 0055). Rattaché au paquet d'essai du dépôt.
+      // en base (migration 0064). Rattaché au paquet d'essai du dépôt.
       rules_pack_id: 'rp-test-0001',
     },
   ],

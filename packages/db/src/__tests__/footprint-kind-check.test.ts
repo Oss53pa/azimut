@@ -18,7 +18,7 @@ const MIGRATIONS_DIR = resolve(HERE, '..', '..', 'migrations');
  * **Il lit la dernière migration qui pose la contrainte, non une migration
  * nommée.** Il visait `0019` en dur, et la version 16 du consolidé, qui ajoute
  * `parking_space`, l'a fait échouer alors que la base était juste : la
- * migration `0046` avait élargi la contrainte, et le test regardait ailleurs.
+ * migration `0055` avait élargi la contrainte, et le test regardait ailleurs.
  * Un test qui désigne une migration par son nom vieillit à la première
  * suivante ; celui-ci relit l'état effectif du schéma.
  */

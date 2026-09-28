@@ -113,7 +113,7 @@ export type Level = {
  * A5.2 — natures d'empreinte, énuméré fermé.
  *
  * La liste fait foi : une nature hors liste n'est pas représentable. La base
- * porte la même contrainte par un CHECK (migrations 0019 puis 0046), comme
+ * porte la même contrainte par un CHECK (migrations 0019 puis 0055), comme
  * pour toute autre énumération du schéma — `node.kind`, `vertical_link.kind`,
  * `destination.occupancy_status`. Un test structurel vérifie que les deux
  * listes coïncident.

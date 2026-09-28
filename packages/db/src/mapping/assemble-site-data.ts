@@ -62,7 +62,7 @@ function toSpaceKind(raw: string): ParkingSpaceKind {
 /**
  * La nature du contenu d'un fond, ou `undetermined`. M2 (partie M) : un contenu
  * qui n'a pas été lu n'est « jamais présumé vectoriel » ; une valeur inconnue
- * n'a pas davantage été lue. La contrainte de la migration 0059 l'exclut déjà.
+ * n'a pas davantage été lue. La contrainte de la migration 0068 l'exclut déjà.
  */
 function toPlanContentKind(raw: string): PlanContentKind {
   return isPlanContentKind(raw) ? raw : 'undetermined';

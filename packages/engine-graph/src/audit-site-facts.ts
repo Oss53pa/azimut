@@ -19,7 +19,7 @@ import { checkableTexts } from './site-texts.js';
  * proposition affiché comme un existant. Les deux se levaient jusqu'ici sur les
  * objets de stationnement, faute de colonne pour porter le statut d'un fait :
  * le statut vivait sur les objets, et un fait déclaré n'en avait aucun, donc
- * tout fait s'affichait comme un existant. La migration 0044 a aligné la table
+ * tout fait s'affichait comme un existant. La migration 0053 a aligné la table
  * sur A5.11, et les deux contrôles se rattachent au fait, là où le catalogue
  * les met.
  */
