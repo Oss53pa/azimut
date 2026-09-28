@@ -21,6 +21,7 @@ const INSERT_ONLY = ['audit_log', 'approval', 'graph_validation', 'message_sched
 const NOT_YET_CREATED = new Set<string>(['message_schedule_approval']);
 
 const ORG = 'a1230000-0000-0000-0000-0000000000a1';
+const USER = 'a1230000-0000-0000-0000-0000000000b1';
 
 let sql: postgres.Sql;
 let existing: readonly string[] = [];
@@ -92,12 +93,21 @@ describe('A12.3 — les tables en insertion seule, en base', () => {
  * supprime ni ne se vide, ni sous le rôle applicatif ni sous le rôle
  * propriétaire. Tout se passe dans une transaction annulée : la ligne d'essai
  * ne survit pas, puisqu'aucune suppression ne pourrait l'effacer ensuite.
+ *
+ * La ligne entre par le chemin de l'application, jamais en levant le
+ * cloisonnement (A2.4) : l'identité est posée, l'organisation créée, son
+ * membre inscrit, et la politique d'insertion d'`audit_log` l'admet. Le
+ * propriétaire de l'installation autonome est membre du rôle applicatif ;
+ * sous un super-utilisateur, les politiques ne jouent pas et le chemin passe
+ * de même.
  */
 describe('A12.3 — audit_log refuse la modification, la suppression et le vidage', () => {
   async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void>): Promise<void> {
     const done = new Error('annulation voulue');
     await sql.begin(async tx => {
+      await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
       await tx`insert into azimut.organization(id,name,slug) values (${ORG},'Audit','audit-a123')`;
+      await tx`insert into azimut.membership(org_id,user_id,role) values (${ORG},${USER},'admin')`;
       await tx`insert into azimut.audit_log(org_id, action, entity, occurred_at)
                values (${ORG}, 'essai', 'organization', now())`;
       await check(tx);
@@ -114,14 +124,40 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
     return 'accepté';
   }
 
-  it('sous le rôle propriétaire, les déclencheurs refusent les trois voies', async () => {
+  /** Le refus levé, ou le nombre de lignes que la tentative a atteintes. */
+  async function reached(
+    tx: postgres.TransactionSql, run: () => Promise<{ readonly count: number }>,
+  ): Promise<string> {
+    try {
+      let count = 0;
+      await tx.savepoint(async () => { count = (await run()).count; });
+      return `${String(count)} ligne(s) atteinte(s)`;
+    } catch (e: unknown) {
+      return e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  /**
+   * Deux barrages, selon ce que le rôle voit. Sous le propriétaire soumis aux
+   * politiques (FORCE, migration 0025), aucune ne lui ouvre la modification
+   * ni la suppression : la tentative n'atteint aucune ligne. Sous un rôle qui
+   * passe outre les politiques, la ligne est visible et les déclencheurs la
+   * refusent. Dans les deux cas la ligne reste intacte, et c'est ce qui est
+   * vérifié en dernier. Le vidage n'est pas soumis aux politiques : il se
+   * heurte toujours au déclencheur.
+   */
+  it('sous le rôle propriétaire, rien ne se modifie, ne se supprime ni ne se vide', async () => {
     await inRolledBack(async tx => {
-      expect(await refused(tx, () => tx`update azimut.audit_log set action = 'x' where org_id = ${ORG}`))
-        .toMatch(/insert-only/);
-      expect(await refused(tx, () => tx`delete from azimut.audit_log where org_id = ${ORG}`))
-        .toMatch(/insert-only/);
+      const untouched = /insert-only|^0 ligne\(s\) atteinte\(s\)$/;
+      expect(await reached(tx, () => tx`update azimut.audit_log set action = 'x' where org_id = ${ORG}`))
+        .toMatch(untouched);
+      expect(await reached(tx, () => tx`delete from azimut.audit_log where org_id = ${ORG}`))
+        .toMatch(untouched);
       expect(await refused(tx, () => tx`truncate azimut.audit_log`))
         .toMatch(/insert-only/);
+      const rows = await tx<{ action: string }[]>`
+        select action from azimut.audit_log where org_id = ${ORG}`;
+      expect(rows.map(r => r.action)).toEqual(['essai']);
     });
   });
 
