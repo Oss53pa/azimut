@@ -1595,7 +1595,7 @@ tranché, ce qu'elle a adapté et ce qu'elle laisse ouvert.
 | Montage des migrations sur une base vide, dans l'ordre | Base locale remise à zéro, 72 migrations appliquées, `0066` après `0041`–`0049` | Vérifié |
 | Code de `master` lu sur le rattachement des paquets (A5.8) | `EvacuationView`, `SiteSheetView` : `isBound`, `rulesPackLabel` au lieu de `site.rules_pack_id` | Fait |
 | Comparaisons localisées introduites par `master` (A9) | 12 dans le code qui produit, 76 appels sans langue dans l'interface | Remplacées |
-| Contrôle D2.2 du catalogue | `tests/catalogue-consolide.test.ts` | Rouge, arbitrage de l'éditeur attendu |
+| Contrôle D2.2 du catalogue | `tests/catalogue-consolide.test.ts` | Rouge à la fusion, vert après la PR #12 |
 
 **Résolution des conflits.** Là où `master` avait découpé un fichier que la
 branche avait modifié, le découpage de `master` est gardé et les ajouts de la
@@ -1630,33 +1630,33 @@ de `OperationsView`, de `message-schedule-generate` et de `resolve-face`.
 **Chaîne A13.2 sur le résultat.** `install`, `typecheck`, `lint`,
 `test:visual` (14), `test:rls` (67), `test:determinism` (11), `test:e2e`
 (138) et `build` sortent à 0. `test` sort à 1 : 4 513 essais passent, un
-échoue, le contrôle D2.2 ci-dessous. La CI de la PR échoue au même essai ;
-empreinte, installation, contrôle de types et lint y passent sous Node 24.
+échoue, le contrôle D2.2. La CI de la PR échoue au même essai ; empreinte,
+installation, contrôle de types et lint y passent sous Node 24.
+
+**La PR #12, fusionnée dans la branche.** Elle ferme D2.2 sans ajouter de
+code au catalogue : les codes des clients deviennent `DATA.NAME_REQUIRED`,
+`DATA.NAME_DUPLICATE` et `DATA.COUNTRY_REQUIRED`, les refus de formulaire
+sans code passent par `FormNotice`, la saisie des blocs se limite au bloc
+libre (`EDIT.CONTEXT_VIOLATION` sinon), la déclaration des plans muraux est
+retirée (D6), et les fermetures passent à `temporary_closure` (O11,
+migration `0069`). Chaîne A13.2 sur la branche qui la porte : les neuf étapes
+à 0, `test` à 4 499 essais, 73 migrations montées.
+
+**A12.3 sous un propriétaire non super-utilisateur.** La CI, qui atteint
+enfin `test:rls`, y échoue sur deux essais d'`audit_log` : l'essai insérait
+sous le rôle propriétaire sans identité posée, ce que `FORCE` (`0025`) et la
+politique d'insertion refusent. La chaîne locale se connecte en
+super-utilisateur et ne pouvait pas le voir. Reproduit sur une base montée
+comme en CI, corrigé par le chemin de l'application, sans lever le
+cloisonnement : 67 essais sur 67 sur les deux montages. La chaîne locale
+reste en super-utilisateur ; l'écart avec la CI est consigné ci-dessous.
 
 ### Reste ouvert après la fusion
 
-**D2.2 : 27 codes hors du catalogue du consolidé.** Levés par le code venu de
-`master`, ils ne figurent dans aucune table de la version 30. Un code
-s'inscrit au catalogue dans le même commit que sa première utilisation ; à
-défaut, c'est un arbitrage de l'éditeur. La poussée en l'état a été
-autorisée ; l'essai n'est pas affaibli.
-
-- Fermetures d'arêtes : `GRAPH.EDGE_AVAILABILITY_UNREADABLE`,
-  `GRAPH.EVACUATION_EDGE_CLOSURE`, `GRAPH.ROUTE_INSTANT_INVALID`,
-  `GRAPH.CLOSURE_RANGE_INVALID`, `GRAPH.CLOSURE_REASON_UNKNOWN`,
-  `GRAPH.CLOSURE_DUPLICATE`, `GRAPH.CLOSURE_NOT_FOUND`,
-  `GRAPH.CLOSURE_AVAILABILITY_UNREADABLE`.
-- Plans muraux, faces et blocs : `LAYOUT.WALL_PLAN_SUPPORT_UNKNOWN`,
-  `LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE`, `LAYOUT.WALL_PLAN_DUPLICATE`,
-  `LAYOUT.WALL_PLAN_NOT_A_PLAN`, `LAYOUT.FACE_SUPPORT_UNKNOWN`,
-  `LAYOUT.FACE_INDEX_OUT_OF_RANGE`, `LAYOUT.FACE_ALREADY_DECLARED`,
-  `LAYOUT.FACE_TEMPLATE_UNKNOWN`, `LAYOUT.FACE_LANG_INACTIVE`,
-  `LAYOUT.BLOCK_KIND_NOT_ENTERABLE`, `LAYOUT.FREE_TEXT_EMPTY`,
-  `LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE`, `LAYOUT.FREE_TEXT_LANG_MISSING`,
-  `LAYOUT.INSTANCE_BLOCK_NO_SLOT`, `LAYOUT.BLOCK_SLOT_TAKEN`,
-  `LAYOUT.FACE_TEMPLATE_NOT_AT_HAND`.
-- Entités juridiques : `DATA.LEGAL_NAME_REQUIRED`,
-  `DATA.LEGAL_NAME_DUPLICATE`, `DATA.CURRENCY_INVALID`.
+**La chaîne locale ne se connecte pas comme la CI.** Elle emploie le
+super-utilisateur, qui passe outre les politiques ; la CI emploie le
+propriétaire `azimut`, membre d'`authenticated`. Un essai de base peut donc
+passer en local et échouer en CI, comme A12.3 l'a montré. À aligner.
 
 **Noms de tables de `master` hors H11.** H11 nomme `ad_placement_state`,
 `ad_contract`, `ad_rate_card`, `ad_invoice`, `tenant_signage_rule`,
