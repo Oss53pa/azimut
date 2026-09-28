@@ -1,110 +1,64 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { reconcile, deriveDecisionPoints } from '@azimut/engine-graph';
-import type { SurveyedSupport, ExpectedSupport } from '@azimut/engine-graph';
-import { auditSurveySync } from '../domain/survey-sync.js';
-import {
-  DEMO_ROUNDS, DEMO_OBSERVATIONS,
-  type InspectionRound, type FieldObservation,
-} from '../domain/demo/production.js';
+import { EMPTY_INSPECTION_REGISTRY, type InspectionFinding, type InspectionRound } from '@azimut/core-model';
+import { loadInspection, useRegistry } from '../data/index.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { findingCounts, syncFindings } from './operations/rounds.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner,
   SPACE, TEXT, type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
-
-/**
- * Tolérance d'orientation du rapprochement, en degrés. Garde-fou de relevé,
- * pas un seuil normatif : une plage déclarée par site le remplacera.
- */
-const ORIENTATION_TOLERANCE_DEG = 5;
-
-const NATURE_KEYS = {
-  'operations.nature.lamp_out': 'operations.nature.lamp_out',
-  'operations.nature.soiled': 'operations.nature.soiled',
-  'operations.nature.fixing': 'operations.nature.fixing',
-  'operations.nature.content_diverges': 'operations.nature.content_diverges',
-} as const;
-
-type NatureKey = keyof typeof NATURE_KEYS;
-
-function natureKey(key: string): NatureKey {
-  return key in NATURE_KEYS ? (key as NatureKey) : 'operations.nature.fixing';
-}
+import { divergenceReport } from './operations/divergence.js';
+import { natureKey } from './operations/labels.js';
 
 /**
  * Module 08 — l'exploitation. La couche de divergence naît du rapprochement
  * entre ce que le carnet prévoit et ce qu'une tournée relève. Une tournée non
  * synchronisée est visible mais pas intégrée : elle ne disparaît pas en
- * silence.
+ * silence. Les tournées se lisent en base (0044), ou dans le jeu de
+ * démonstration du dépôt de référence.
  */
-export function OperationsView(): JSX.Element {
+type OperationsViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
+
+export function OperationsView({ siteKey }: OperationsViewProps): JSX.Element {
   const site = useSiteData();
   const { t } = useI18n();
   const profile = site.travel_profiles[0];
+  const state = useRegistry(loadInspection, EMPTY_INSPECTION_REGISTRY, siteKey);
+  const { rounds, findings: observations } = state.registry;
 
-  const syncFindings = useMemo(() => {
-    const result = auditSurveySync(DEMO_ROUNDS.map(r => r.survey));
-    return result.ok ? result.warnings : result.findings;
-  }, []);
+  const pendingFindings = useMemo(() => syncFindings(rounds), [rounds]);
+  const counts = useMemo(() => findingCounts(observations), [observations]);
 
-  /**
-   * Rapprochement réel. Le relevé, ce sont les supports du site avec leur
-   * azimut et leurs dimensions ; l'attendu, un support par point de décision.
-   *
-   * Aucune plage d'orientation ni dimension minimale n'est déclarée par le
-   * modèle : les bornes sont donc ouvertes, et le rapprochement ne rend que
-   * ce qu'il peut établir — le superflu et le non couvert. Rien n'est inventé
-   * pour remplir les colonnes d'orientation et de taille.
-   */
-  const divergence = useMemo(() => {
-    if (profile === undefined) return null;
+  const divergence = useMemo(
+    () => (profile === undefined ? null : divergenceReport(site, profile)),
+    [site, profile],
+  );
 
-    const typeByKey = new Map(site.support_types.map(type => [type.key, type]));
-    const firstType = site.support_types[0];
+  const header = (
+    <ScreenHeader eyebrow={t('operations.eyebrow')} title={t('operations.title')} subtitle={t('operations.subtitle')} />
+  );
+  if (state.status !== 'ready') return <div>{header}<RegistryStatus state={state} /></div>;
 
-    const surveyed: readonly SurveyedSupport[] = [...site.supports]
-      .sort((a, b) => a.id.localeCompare(b.id))
-      .map((support): SurveyedSupport => {
-        const type = firstType === undefined ? undefined : typeByKey.get(firstType.key);
-        const face = type?.faces[0];
-        return {
-          id: support.id,
-          node_id: support.node_id,
-          azimuth_deg: support.azimuth_deg,
-          width_m: (support.width_mm ?? face?.default_width_mm ?? 0) / 1000,
-          height_m: (support.height_mm ?? face?.default_height_mm ?? 0) / 1000,
-        };
-      });
-
-    const points = deriveDecisionPoints(site, profile, site.destinations);
-    const expected: readonly ExpectedSupport[] = (points.ok ? points.value : [])
-      .map((point): ExpectedSupport => ({
-        node_id: point.node_id,
-        min_azimuth_deg: 0,
-        max_azimuth_deg: 360,
-        min_width_m: 0,
-        min_height_m: 0,
-      }));
-
-    const result = reconcile(site, profile, surveyed, expected, ORIENTATION_TOLERANCE_DEG);
-    return result.ok ? result.value : null;
-  }, [site, profile]);
-
-  const pendingRounds = DEMO_ROUNDS.filter(r => r.survey.sync_state === 'pending');
-  const blockingObservations = DEMO_OBSERVATIONS.filter(o => o.severity === 'blocking');
+  const nature = (k: string): string => { const key = natureKey(k); return key === null ? k : t(key); };
+  const pendingRounds = rounds.filter(r => r.sync_state === 'pending');
+  const blockingObservations = observations.filter(o => o.severity === 'blocking');
 
   const metrics: readonly Metric[] = [
     { id: 'tracked', label: t('operations.metric.tracked'), value: String(site.supports.length) },
-    { id: 'rounds', label: t('operations.metric.rounds'), value: String(DEMO_ROUNDS.length) },
+    { id: 'rounds', label: t('operations.metric.rounds'), value: String(rounds.length) },
     {
       id: 'pending',
       label: t('operations.metric.pending'),
       value: String(pendingRounds.length),
       severity: pendingRounds.length > 0 ? 'warning' : 'valid',
     },
-    { id: 'observations', label: t('operations.metric.observations'), value: String(DEMO_OBSERVATIONS.length) },
+    { id: 'observations', label: t('operations.metric.observations'), value: String(observations.length) },
     {
       id: 'blocking',
       label: t('operations.metric.blocking'),
@@ -114,27 +68,27 @@ export function OperationsView(): JSX.Element {
   ];
 
   const roundColumns: readonly Column<InspectionRound>[] = [
-    { id: 'id', header: t('operations.col.round'), cell: r => r.survey.id },
-    { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone },
+    { id: 'id', header: t('operations.col.round'), cell: r => r.id },
+    { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone_label },
     { id: 'date', header: t('operations.col.surveyed'), cell: r => r.surveyed_on ?? t('operations.round.planned') },
-    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor ?? '—' },
-    { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(r.observation_count) },
+    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '—' },
+    { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(counts.get(r.id) ?? 0) },
     {
       id: 'sync',
       header: t('operations.col.sync'),
       cell: r => (
         <Tag
-          label={r.survey.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending')}
-          severity={r.survey.sync_state === 'synced' ? 'valid' : 'warning'}
+          label={r.sync_state === 'synced' ? t('operations.sync.synced') : t('operations.sync.pending')}
+          severity={r.sync_state === 'synced' ? 'valid' : 'warning'}
         />
       ),
     },
   ];
 
-  const observationColumns: readonly Column<FieldObservation>[] = [
+  const observationColumns: readonly Column<InspectionFinding>[] = [
     { id: 'id', header: t('operations.col.observation'), cell: o => o.id },
     { id: 'support', header: t('operations.col.support'), cell: o => o.support_id },
-    { id: 'nature', header: t('operations.col.nature'), cell: o => t(natureKey(o.nature_key)) },
+    { id: 'nature', header: t('operations.col.nature'), cell: o => nature(o.nature_key) },
     { id: 'round', header: t('operations.col.round'), cell: o => o.round_id },
     {
       id: 'severity',
@@ -150,14 +104,9 @@ export function OperationsView(): JSX.Element {
 
   return (
     <div>
-      <ScreenHeader
-        eyebrow={t('operations.eyebrow')}
-        title={t('operations.title')}
-        subtitle={t('operations.subtitle')}
-      />
-
+      {header}
+      <RegistryStatus state={state} />
       <div style={{ display: 'grid', gap: SPACE.sm, marginBottom: SPACE.md }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
         {pendingRounds.length > 0 && (
           <StateBanner
             severity="warning"
@@ -171,7 +120,7 @@ export function OperationsView(): JSX.Element {
 
       <div style={{ marginTop: SPACE.lg }}>
         <Panel title={t('operations.panel.rounds')} padded={false}>
-          <DataTable columns={roundColumns} rows={DEMO_ROUNDS} rowKey={r => r.survey.id} empty={t('operations.rounds.empty')} />
+          <DataTable columns={roundColumns} rows={rounds} rowKey={r => r.id} empty={t('operations.rounds.empty')} />
         </Panel>
       </div>
 
@@ -179,7 +128,7 @@ export function OperationsView(): JSX.Element {
         <Panel title={t('operations.panel.observations')} padded={false}>
           <DataTable
             columns={observationColumns}
-            rows={DEMO_OBSERVATIONS}
+            rows={observations}
             rowKey={o => o.id}
             empty={t('operations.observations.empty')}
           />
@@ -205,7 +154,7 @@ export function OperationsView(): JSX.Element {
           </Panel>
 
           <Panel title={t('operations.panel.sync')}>
-            <FindingList findings={syncFindings} empty={t('operations.sync.empty')} />
+            <FindingList findings={pendingFindings} empty={t('operations.sync.empty')} />
           </Panel>
         </PanelGrid>
       </div>

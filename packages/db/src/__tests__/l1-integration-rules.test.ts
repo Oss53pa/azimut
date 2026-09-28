@@ -178,7 +178,7 @@ describe('L1 — règles d’intégration', () => {
    * spécifié, jamais improvisé, et jamais silencieux. »
    */
   describe('INT-4 — dégradation déclarée', () => {
-    it('les douze modules déclarent leur dégradation', () => {
+    it('la plateforme et les douze modules déclarent leur dégradation', () => {
       const muets = MODULE_KEYS.filter(m => (DEGRADATION_WHEN_ABSENT[m] ?? '').trim() === '');
       expect(muets).toEqual([]);
     });

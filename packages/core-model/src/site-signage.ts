@@ -77,7 +77,26 @@ export type Support = {
   readonly width_mm?: number;
   readonly height_mm?: number;
   readonly dimensions_source?: DimensionsSource;
+  /**
+   * A5.6 — la typologie du support (`support.typology_id`). Facultative : la
+   * colonne est nullable en base et une typologie supprimée la remet à nul
+   * (0015). Un support sans typologie ne s'invente pas la première venue ;
+   * c'est l'appelant qui dit ce qu'il suppose, et le montre.
+   */
+  readonly typology_id?: string;
 };
+
+/**
+ * A5.6 — la typologie d'un support, ou `null` quand le support n'en porte
+ * pas, ou en porte une que le site ne connaît pas.
+ */
+export function supportTypologyOf(
+  types: readonly SupportType[],
+  support: Pick<Support, 'typology_id'>,
+): SupportType | null {
+  if (support.typology_id === undefined) return null;
+  return types.find(t => t.id === support.typology_id) ?? null;
+}
 
 /**
  * A5.6 `support_face` — one face of a support instance. Binds to a face

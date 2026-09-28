@@ -84,6 +84,15 @@ non plus — elle n'en retire que les clés étrangères.
 0038_a5_11_audit_log_no_cascade
 0039_a5_11_no_cascade_to_org_or_site
 0040_q9_country
+0041_a5_7_divergence_support_node
+0042_h6_worksite_tables
+0043_h8_budget_tables
+0044_i5_inspection_tables
+0045_h4_advertising_tables
+0046_h5_tenant_sign_tables
+0047_a5_7_installed_support_columns
+0048_h8_work_order_cost_minor
+0049_a5_6_face_block_legacy_optional
 0050_m01_s2_control_point_image_px
 0051_a4_migrations_registry_in_schema
 0052_m01_s2_drop_control_point

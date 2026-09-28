@@ -1,59 +1,47 @@
 import { type JSX, useMemo } from 'react';
+import {
+  EMPTY_WORKSITE_REGISTRY, type FabricationLot, type InstallSlot, type RecordedReserve,
+} from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
-import { auditInstallReserves } from '../domain/install-reserves.js';
+import { loadWorksite, useRegistry } from '../data/index.js';
 import {
-  DEMO_LOTS, DEMO_RESERVES, DEMO_INSTALL_SLOTS,
-  type ProductionLot, type ReserveRecord, type InstallSlot,
-} from '../domain/demo/production.js';
-import {
-  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note, StateBanner,
+  ScreenHeader, MetricRow, Panel, PanelGrid, DataTable, Tag, Note,
   SPACE, type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
+import { RegistryStatus } from './register/RegistryStatus.js';
+import { openReserveFindings } from './worksite/rows.js';
+import { LOT_STATE_KEYS, observationKey } from './worksite/labels.js';
 
-const LOT_STATE_KEYS = {
-  ordered: 'worksite.lot.ordered',
-  in_production: 'worksite.lot.inproduction',
-  delivered: 'worksite.lot.delivered',
-  installed: 'worksite.lot.installed',
-} as const;
-
-const OBSERVATION_KEYS = {
-  'worksite.observation.fixing': 'worksite.observation.fixing',
-  'worksite.observation.scratch': 'worksite.observation.scratch',
-  'worksite.observation.plumb': 'worksite.observation.plumb',
-  'worksite.observation.lamp': 'worksite.observation.lamp',
-} as const;
-
-type ObservationKey = keyof typeof OBSERVATION_KEYS;
-
-function observationKey(key: string): ObservationKey {
-  return key in OBSERVATION_KEYS ? (key as ObservationKey) : 'worksite.observation.fixing';
-}
+type WorksiteViewProps = {
+  /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
+  readonly siteKey: string;
+};
 
 /**
  * Module 07 — chantier et pose. Un support ne bascule en « posé » qu'une fois
  * ses réserves levées : c'est ce qui donne à la couche de divergence du module
- * 08 une origine connue.
+ * 08 une origine connue. Lu en base (0042), ou dans le jeu de démonstration du
+ * dépôt de référence.
  */
-export function WorksiteView(): JSX.Element {
+export function WorksiteView({ siteKey }: WorksiteViewProps): JSX.Element {
   const { t } = useI18n();
+  const state = useRegistry(loadWorksite, EMPTY_WORKSITE_REGISTRY, siteKey);
+  const { lots, slots, reserves } = state.registry;
+  const openReserves = useMemo(() => openReserveFindings(reserves), [reserves]);
+  const lotCodes = useMemo(() => new Map(lots.map(l => [l.id, l.code])), [lots]);
 
-  const openReserves = useMemo(() => {
-    const result = auditInstallReserves(DEMO_RESERVES.map(r => r.reserve));
-    return result.ok ? result.warnings : result.findings;
-  }, []);
+  const header = (
+    <ScreenHeader eyebrow={t('worksite.eyebrow')} title={t('worksite.title')} subtitle={t('worksite.subtitle')} />
+  );
+  if (state.status !== 'ready') return <div>{header}<RegistryStatus state={state} /></div>;
 
-  const totalSupports = DEMO_LOTS.reduce((n, lot) => n + lot.support_count, 0);
-  const delivered = DEMO_LOTS
-    .filter(lot => lot.state === 'delivered' || lot.state === 'installed')
-    .reduce((n, lot) => n + lot.support_count, 0);
-  const planned = DEMO_INSTALL_SLOTS
-    .filter(slot => slot.date !== null)
-    .reduce((n, slot) => n + slot.support_count, 0);
-  const unplanned = DEMO_INSTALL_SLOTS
-    .filter(slot => slot.date === null)
-    .reduce((n, slot) => n + slot.support_count, 0);
+  const count = (list: readonly { readonly support_ids: readonly string[] }[]): number =>
+    list.reduce((n, item) => n + item.support_ids.length, 0);
+  const totalSupports = count(lots);
+  const delivered = count(lots.filter(lot => lot.state === 'delivered' || lot.state === 'installed'));
+  const planned = count(slots.filter(slot => slot.planned_on !== null));
+  const unplanned = count(slots.filter(slot => slot.planned_on === null));
 
   const metrics: readonly Metric[] = [
     { id: 'ordered', label: t('worksite.metric.ordered'), value: String(totalSupports) },
@@ -73,10 +61,10 @@ export function WorksiteView(): JSX.Element {
     },
   ];
 
-  const lotColumns: readonly Column<ProductionLot>[] = [
-    { id: 'id', header: t('worksite.col.lot'), cell: l => l.id },
-    { id: 'manufacturer', header: t('worksite.col.manufacturer'), cell: l => l.manufacturer },
-    { id: 'count', header: t('worksite.col.supports'), numeric: true, cell: l => String(l.support_count) },
+  const lotColumns: readonly Column<FabricationLot>[] = [
+    { id: 'id', header: t('worksite.col.lot'), cell: l => l.code },
+    { id: 'manufacturer', header: t('worksite.col.manufacturer'), cell: l => l.manufacturer_name },
+    { id: 'count', header: t('worksite.col.supports'), numeric: true, cell: l => String(l.support_ids.length) },
     {
       id: 'state',
       header: t('worksite.col.state'),
@@ -90,28 +78,32 @@ export function WorksiteView(): JSX.Element {
     },
   ];
 
-  const reserveColumns: readonly Column<ReserveRecord>[] = [
-    { id: 'id', header: t('worksite.col.reserve'), cell: r => r.reserve.id },
-    { id: 'support', header: t('worksite.col.support'), cell: r => r.reserve.support_id },
-    { id: 'lot', header: t('worksite.col.lot'), cell: r => r.lot_id },
-    { id: 'observation', header: t('worksite.col.observation'), cell: r => t(observationKey(r.observation_key)) },
+  const reserveColumns: readonly Column<RecordedReserve>[] = [
+    { id: 'id', header: t('worksite.col.reserve'), cell: r => r.id },
+    { id: 'support', header: t('worksite.col.support'), cell: r => r.support_id },
+    { id: 'lot', header: t('worksite.col.lot'), cell: r => lotCodes.get(r.lot_id) ?? r.lot_id },
+    {
+      id: 'observation',
+      header: t('worksite.col.observation'),
+      cell: r => { const key = observationKey(r.observation_key); return key === null ? r.observation_key : t(key); },
+    },
     { id: 'by', header: t('worksite.col.observedby'), cell: r => r.observed_by },
     {
       id: 'lifted',
       header: t('worksite.col.lifted'),
       cell: r => (
         <Tag
-          label={r.reserve.lifted ? (r.lifted_on ?? t('worksite.reserve.lifted')) : t('worksite.reserve.open')}
-          severity={r.reserve.lifted ? 'valid' : 'warning'}
+          label={r.lifted_at !== null ? r.lifted_at.slice(0, 10) : t('worksite.reserve.open')}
+          severity={r.lifted_at !== null ? 'valid' : 'warning'}
         />
       ),
     },
   ];
 
   const slotColumns: readonly Column<InstallSlot>[] = [
-    { id: 'date', header: t('worksite.col.date'), cell: s => s.date ?? t('worksite.slot.unplanned') },
-    { id: 'zone', header: t('worksite.col.zone'), cell: s => s.zone },
-    { id: 'count', header: t('worksite.col.supports'), numeric: true, cell: s => String(s.support_count) },
+    { id: 'date', header: t('worksite.col.date'), cell: s => s.planned_on ?? t('worksite.slot.unplanned') },
+    { id: 'zone', header: t('worksite.col.zone'), cell: s => s.zone_label },
+    { id: 'count', header: t('worksite.col.supports'), numeric: true, cell: s => String(s.support_ids.length) },
     {
       id: 'shift',
       header: t('worksite.col.shift'),
@@ -126,25 +118,18 @@ export function WorksiteView(): JSX.Element {
 
   return (
     <div>
-      <ScreenHeader
-        eyebrow={t('worksite.eyebrow')}
-        title={t('worksite.title')}
-        subtitle={t('worksite.subtitle')}
-      />
-
-      <div style={{ marginBottom: SPACE.md }}>
-        <StateBanner severity="info" message={t('demo.dataset.message')} hint={t('demo.dataset.hint')} />
-      </div>
+      {header}
+      <RegistryStatus state={state} />
 
       <MetricRow metrics={metrics} />
 
       <div style={{ marginTop: SPACE.lg }}>
         <PanelGrid min={320}>
           <Panel title={t('worksite.panel.lots')} padded={false}>
-            <DataTable columns={lotColumns} rows={DEMO_LOTS} rowKey={l => l.id} empty={t('worksite.lots.empty')} />
+            <DataTable columns={lotColumns} rows={lots} rowKey={l => l.id} empty={t('worksite.lots.empty')} />
           </Panel>
           <Panel title={t('worksite.panel.slots')} note={t('worksite.panel.slots.note')} padded={false}>
-            <DataTable columns={slotColumns} rows={DEMO_INSTALL_SLOTS} rowKey={s => s.id} empty={t('worksite.slots.empty')} />
+            <DataTable columns={slotColumns} rows={slots} rowKey={s => s.id} empty={t('worksite.slots.empty')} />
           </Panel>
         </PanelGrid>
       </div>
@@ -153,8 +138,8 @@ export function WorksiteView(): JSX.Element {
         <Panel title={t('worksite.panel.reserves')} note={t('worksite.panel.reserves.note')} padded={false}>
           <DataTable
             columns={reserveColumns}
-            rows={DEMO_RESERVES}
-            rowKey={r => r.reserve.id}
+            rows={reserves}
+            rowKey={r => r.id}
             empty={t('worksite.reserves.empty')}
           />
         </Panel>

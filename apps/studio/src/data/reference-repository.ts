@@ -7,8 +7,17 @@
  */
 import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
-import type { SiteData, SiteVocabulary } from '@azimut/core-model';
+import {
+  EMPTY_CHARTER_REGISTRY, EMPTY_MAINTENANCE_REGISTRY, EMPTY_WAYFINDING_REGISTRY,
+  type BudgetRegistry, type CharterRegistry, type InspectionRegistry, type TenantRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry,
+} from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
+import { REFERENCE_WORKSITE } from './reference-worksite.js';
+import { REFERENCE_BUDGET } from './reference-budget.js';
+import { REFERENCE_INSPECTION } from './reference-inspection.js';
+import { REFERENCE_ADVERTISING } from './reference-advertising.js';
+import type { AdvertisingData } from './advertising-data.js';
+import { referenceTenant } from './reference-tenant.js';
 import {
   RepositoryError,
   type SiteRepository,
@@ -57,6 +66,82 @@ export function createReferenceRepository(): SiteRepository {
     },
 
     /**
+     * Aucun site de référence ne déclare de zone, de règle de nommage ni de
+     * niveau d'information : le registre est vide, et les écrans le disent.
+     * En inventer ici ferait passer pour déclaré ce qui ne l'est pas.
+     */
+    loadWayfindingRegistry(siteId: string): Promise<WayfindingRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(EMPTY_WAYFINDING_REGISTRY);
+    },
+
+    /**
+     * Aucun site de référence ne porte de charte : une charte est une donnée
+     * client, et le dépôt n'en contient aucune. Le registre est vide.
+     */
+    loadCharterRegistry(siteId: string): Promise<CharterRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(EMPTY_CHARTER_REGISTRY);
+    },
+
+    /**
+     * Aucun site de référence n'a de parc posé : ni pose, ni divergence
+     * enregistrée, ni ordre de travaux. En inventer ferait passer une
+     * exploitation pour réelle.
+     */
+    loadMaintenanceRegistry(siteId: string): Promise<MaintenanceRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(EMPTY_MAINTENANCE_REGISTRY);
+    },
+
+    /** Le jeu de démonstration du module 07 ; les écrans le signalent. */
+    loadWorksiteRegistry(siteId: string): Promise<WorksiteRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_WORKSITE);
+    },
+
+    /** Le jeu de démonstration du module 09 ; les écrans le signalent. */
+    loadBudgetRegistry(siteId: string): Promise<BudgetRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_BUDGET);
+    },
+
+    /** Le jeu de démonstration des tournées du module 08 ; les écrans le signalent. */
+    loadInspectionRegistry(siteId: string): Promise<InspectionRegistry> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_INSPECTION);
+    },
+
+    /** Le jeu de démonstration du module 05 ; les écrans le signalent. */
+    loadAdvertisingData(siteId: string): Promise<AdvertisingData> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(REFERENCE_ADVERTISING);
+    },
+
+    /** Le jeu de démonstration du module 06, rattaché aux destinations du site. */
+    loadTenantRegistry(siteId: string): Promise<TenantRegistry> {
+      const site = allReferenceSites.get(siteId);
+      if (site === undefined) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(referenceTenant(site));
+    },
+
+    /**
      * Q9 — le même fichier que celui versé dans `azimut.country` par
      * `pnpm seed:reference`. Sur un poste sans base, l'écran de création doit
      * rester praticable, et une seconde liste divergerait de la table (INV-1).
@@ -67,6 +152,7 @@ export function createReferenceRepository(): SiteRepository {
         name_fr: country.name_fr,
         name_en: country.name_en,
         timezones: country.timezones,
+        default_currency_code: country.default_currency_code,
       })));
     },
 

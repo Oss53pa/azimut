@@ -8,7 +8,11 @@
  * Toute défaillance remonte en `RepositoryError`, avec un code du catalogue
  * D2 : l'interface ne montre jamais un message de plateforme brut.
  */
-import type { SiteData, SiteRulesBinding, SiteVocabulary } from '@azimut/core-model';
+import type { AdvertisingData } from './advertising-data.js';
+import type {
+  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, TenantRegistry, SiteData,
+  SiteRulesBinding, SiteVocabulary, WayfindingRegistry, WorksiteRegistry,
+} from '@azimut/core-model';
 
 export type SiteSummary = {
   readonly id: string;
@@ -31,6 +35,8 @@ export type CountrySummary = {
   readonly name_en: string;
   /** Les fuseaux du pays. M1 (partie M) pré-remplit quand il n'y en a qu'un. */
   readonly timezones: readonly string[];
+  /** Q4 — devise proposée par défaut à une entité juridique du pays, ou nulle. */
+  readonly default_currency_code: string | null;
 };
 
 /**
@@ -64,6 +70,51 @@ export type SiteRepository = {
    * rangent alors parmi les non exercés — jamais parmi les réussis.
    */
   loadVocabulary(siteId: string): Promise<SiteVocabulary>;
+  /**
+   * N2.2 — le registre du wayfinding : zones d'orientation, règles de
+   * nommage, niveaux d'information par typologie. Lu à part comme le
+   * vocabulaire : un site se dessine sans lui, et un dépôt qui n'en porte pas
+   * rend un registre vide.
+   */
+  loadWayfindingRegistry(siteId: string): Promise<WayfindingRegistry>;
+  /**
+   * A5.8 — les chartes du site, avec leurs couleurs, caractères, règles et
+   * lexique. Lues à part, par l'écran qui les montre ; un dépôt qui n'en
+   * porte pas rend un registre vide.
+   */
+  loadCharterRegistry(siteId: string): Promise<CharterRegistry>;
+  /**
+   * A5.7 — le parc posé : supports posés, divergences enregistrées, ordres de
+   * travaux, lus tels que la base les porte. À part, pour les écrans du
+   * module 08 ; un dépôt qui n'en porte pas rend un registre vide.
+   */
+  loadMaintenanceRegistry(siteId: string): Promise<MaintenanceRegistry>;
+  /**
+   * H6 — le chantier : lots, créneaux et réserves de pose (0042). Le dépôt de
+   * référence sert un jeu de démonstration, que les écrans signalent.
+   */
+  loadWorksiteRegistry(siteId: string): Promise<WorksiteRegistry>;
+  /**
+   * H8 — le budget : coûts de référence de l'organisation, lignes du site
+   * (0043). Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadBudgetRegistry(siteId: string): Promise<BudgetRegistry>;
+  /**
+   * I5.6 — les tournées d'inspection et leurs constats (0044). Le dépôt de
+   * référence sert un jeu de démonstration.
+   */
+  loadInspectionRegistry(siteId: string): Promise<InspectionRegistry>;
+  /**
+   * H4 — la régie : emplacements, réservations, options et visuels (0045),
+   * avec la file de réception et la fiche technique, que la base ne porte
+   * pas encore. Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadAdvertisingData(siteId: string): Promise<AdvertisingData>;
+  /**
+   * H5 — les enseignes locataires : versions du règlement, dossiers et
+   * pièces (0046). Le dépôt de référence sert un jeu de démonstration.
+   */
+  loadTenantRegistry(siteId: string): Promise<TenantRegistry>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

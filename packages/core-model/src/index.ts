@@ -109,6 +109,87 @@ export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
 export { PARKING_SPACE_KINDS, isParkingSpaceKind } from './parking.js';
 export type { ParkingSpace, ParkingSpaceKind } from './parking.js';
+export {
+  EMPTY_WAYFINDING_REGISTRY, ORIENTATION_ZONE_KINDS, NAMING_TARGETS, NAMING_SCOPES, INFORMATION_LEVELS,
+  isOrientationZoneKind, isNamingTarget, isNamingScope, isInformationLevelRank,
+} from './wayfinding-registry.js';
+export type {
+  WayfindingRegistry, OrientationZone, OrientationZoneKind, NamingRule, NamingTarget, NamingScope,
+  InformationLevelBinding, InformationLevelRank,
+} from './wayfinding-registry.js';
+export {
+  EMPTY_CHARTER_REGISTRY, LEXICON_LANGS, LEXICON_SEVERITIES,
+  isCharterRuleKind, isLexiconLang, isLexiconSeverity,
+} from './charter-registry.js';
+export type {
+  CharterRegistry, SiteCharter, CharterColorEntry, CharterTypeface,
+  CharterLexiconEntry, LexiconLang,
+} from './charter-registry.js';
+export {
+  EMPTY_MAINTENANCE_REGISTRY, DIVERGENCE_KINDS, WORK_ORDER_STATES, INSTALLED_CONDITIONS,
+  isDivergenceKind, isWorkOrderState, isInstalledCondition,
+} from './maintenance-registry.js';
+export type {
+  MaintenanceRegistry, InstalledSupport, RecordedDivergence, DivergenceKind, WorkOrder, WorkOrderState,
+  InstalledCondition,
+} from './maintenance-registry.js';
+export {
+  EMPTY_WORKSITE_REGISTRY, FABRICATION_LOT_STATES, isFabricationLotState,
+} from './worksite-registry.js';
+export type {
+  WorksiteRegistry, FabricationLot, FabricationLotState, InstallSlot, RecordedReserve,
+} from './worksite-registry.js';
+export { EMPTY_BUDGET_REGISTRY } from './budget-registry.js';
+export type { BudgetRegistry, CostReference, BudgetLine, Money } from './budget-registry.js';
+export {
+  EMPTY_INSPECTION_REGISTRY, INSPECTION_SYNC_STATES, INSPECTION_SEVERITIES,
+  isInspectionSyncState, isInspectionSeverity,
+} from './inspection-registry.js';
+export type {
+  InspectionRegistry, InspectionRound, InspectionFinding, InspectionSyncState, InspectionSeverity,
+} from './inspection-registry.js';
+export {
+  EMPTY_AD_REGISTRY, AD_BOOKING_STATES, AD_SANITATION_STATES, AD_CREATIVE_VERDICTS,
+  isAdBookingState, isAdSanitationState, isAdCreativeVerdict,
+} from './ad-registry.js';
+export type {
+  AdRegistry, AdPlacement, AdBooking, AdBookingState, AdOption, AdCreative,
+  AdSanitationState, AdCreativeVerdict,
+} from './ad-registry.js';
+export {
+  EMPTY_TENANT_REGISTRY, TENANT_DOSSIER_STATES, isTenantDossierState, regulationInForce,
+} from './tenant-registry.js';
+export type {
+  TenantRegistry, TenantSignRegulation, TenantSignDossier, TenantSignPart, TenantDossierState,
+} from './tenant-registry.js';
+export {
+  readEdgeAvailability, isClosedAt, closuresOverlapping, isLocalInstant, CLOSURE_REASONS, isClosureReason,
+} from './edge-availability.js';
+export type { EdgeAvailability, EdgeClosure, ClosureReason } from './edge-availability.js';
+export {
+  serializeEdgeAvailability, validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
+} from './edge-closure-commands.js';
+export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
+export { validateLegalEntityDraft, declareLegalEntityCommand } from './legal-entity-commands.js';
+export type { LegalEntityDraft, LegalEntityEnvironment } from './legal-entity-commands.js';
+export {
+  WALL_PLAN_BLOCK_KIND, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
+} from './wall-plan-commands.js';
+export type { WallPlanEnvironment } from './wall-plan-commands.js';
+export {
+  supportFaceCount, validateFaceDraft, declareFaceCommand, updateFaceCommand,
+} from './support-face-commands.js';
+export type { FaceDraft, FaceEnvironment } from './support-face-commands.js';
+export {
+  ENTERABLE_BLOCK_KINDS, isEnterableBlockKind, faceLangs, readFreeTexts,
+  declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
+} from './content-block-commands.js';
+export type { EnterableBlockKind, FreeTexts, BlockEnvironment } from './content-block-commands.js';
+export {
+  INSTANCE_SLOT_KIND, templateForSide, sortedSides, templateSlots, faceTemplate, fitsSlot,
+  instanceBlocksOf, freeTextsOf, chooseSlot,
+} from './face-template-slots.js';
+export type { SlotChoice } from './face-template-slots.js';
 export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
 export type {
   TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,
@@ -155,7 +236,7 @@ export { transitionSupportVersion, admittedEvents } from './support-version-stat
 export type {
   SupportVersionEvent, SupportVersionEffect, SupportVersionTransition,
 } from './support-version-state.js';
-export { SUPPORT_VERSION_STATES } from './site.js';
+export { SUPPORT_VERSION_STATES, supportTypologyOf } from './site.js';
 export {
   assertProofTransition,
   assertJobTransition,

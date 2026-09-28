@@ -10,6 +10,7 @@ import {
   SPACE, TEXT, type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
+import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 
 type SupportsViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -127,6 +128,7 @@ export function SupportsView({ onNavigate }: SupportsViewProps): JSX.Element {
         ]}
       />
 
+      <UntypedSupportsBanner assumedTypeKey={site.support_types[0]?.key ?? ''} />
       <MetricRow metrics={metrics} />
 
       <div style={{ marginTop: SPACE.lg }}>

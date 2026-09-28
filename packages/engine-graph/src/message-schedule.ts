@@ -259,5 +259,27 @@ export function computeScheduleInputsHash(inputs: ScheduleInputs): Outcome<strin
       .sort((a, b) => codePointCompare(a.support_type_key, b.support_type_key))
       .map(l => ({ key: l.support_type_key, levels: [...l.levels].sort((a, b) => a - b) })),
     rules,
+    // A5.6 — les blocs saisis sur les faces des supports du tableau. Absents,
+    // la clé l'est aussi : un site sans bloc d'instance garde son empreinte.
+    ...instanceBlocksHashPart(site, supports),
   }, { kind: 'site', id: site.site.id });
+}
+
+function instanceBlocksHashPart(
+  site: SiteData,
+  supports: readonly PlacedSupport[],
+): { readonly instance_blocks?: readonly unknown[] } {
+  const ids = new Set(supports.map(s => s.id));
+  const faces = new Map(site.support_faces.filter(f => ids.has(f.support_id)).map(f => [f.id, f]));
+  const blocks = site.content_blocks
+    .flatMap(b => {
+      const face = faces.get(b.face_id);
+      return face === undefined ? [] : [{
+        support_id: face.support_id, face_index: face.face_index, block_index: b.block_index,
+        kind: b.kind, free_text: b.free_text ?? null,
+      }];
+    })
+    .sort((a, b) => codePointCompare(a.support_id, b.support_id)
+      || a.face_index - b.face_index || a.block_index - b.block_index || codePointCompare(a.kind, b.kind));
+  return blocks.length === 0 ? {} : { instance_blocks: blocks };
 }

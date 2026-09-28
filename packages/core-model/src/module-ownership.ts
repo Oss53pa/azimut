@@ -11,10 +11,14 @@
  */
 
 // ---------------------------------------------------------------------------
-// Les douze modules et leurs couches (L2)
+// La plateforme, les douze modules et leurs couches (L2)
 // ---------------------------------------------------------------------------
 
 export const MODULE_KEYS = [
+  // Q2 range à la plateforme, numérotée 00, ce qui n'appartient à aucun des
+  // douze modules métier. Clé ouverte le 27/09/2026 pour donner un
+  // propriétaire à `legal_entity` (INT-1), décision de l'utilisateur.
+  '00-plateforme',
   '01-socle', '02-wayfinding', '03-parcours', '04-signaletique',
   '05-regie', '06-enseignes', '07-chantier', '08-exploitation',
   '09-budget', '10-portefeuille', '11-transverse', '12-atelier',
@@ -29,6 +33,9 @@ export type ModuleKey = (typeof MODULE_KEYS)[number];
  * celui de la couche la plus haute qu'il sert, et il ne lit rien au-dessus.
  */
 export const MODULE_LAYER: Readonly<Record<ModuleKey, number>> = {
+  // La plateforme porte ce que le socle référence (`site.legal_entity_id`) :
+  // elle ne peut pas être au-dessus de lui, et L2 n'a pas de couche plus basse.
+  '00-plateforme': 0,
   '01-socle': 0,
   '02-wayfinding': 1,
   '03-parcours': 1,
@@ -51,7 +58,7 @@ export const MODULE_LAYER: Readonly<Record<ModuleKey, number>> = {
  * comme le socle ». L'atelier : « Sans objet. L'atelier n'est pas optionnel. »
  */
 export const NON_OPTIONAL_MODULES: readonly ModuleKey[] = [
-  '01-socle', '02-wayfinding', '11-transverse', '12-atelier',
+  '00-plateforme', '01-socle', '02-wayfinding', '11-transverse', '12-atelier',
 ];
 
 // ---------------------------------------------------------------------------
@@ -67,6 +74,11 @@ export const NON_OPTIONAL_MODULES: readonly ModuleKey[] = [
  * avec la tranche qui les construit.
  */
 export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
+  // Q2 et Q5 : l'entité juridique émettrice, rangée à la plateforme. Les
+  // autres tables que Q2 lui donne — `country`, `organization`, `membership` —
+  // restent dans TABLES_WITHOUT_DECLARED_OWNER tant qu'aucune saisie ne les
+  // écrit.
+  '00-plateforme': ['legal_entity'],
   '01-socle': [
     'site', 'building', 'level', 'zone', 'plan_source', 'plan_calibration',
     // Q2 range les points de calage au module 01 : ils décrivent la source de
@@ -104,11 +116,13 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     'support_typology', 'support_face', 'support_content_block',
     'support_version', 'proof', 'approval', 'pictogram',
   ],
-  '05-regie': [],
-  '06-enseignes': [],
-  '07-chantier': [],
-  '08-exploitation': ['installed_support', 'divergence', 'work_order'],
-  '09-budget': [],
+  '05-regie': ['ad_placement', 'ad_booking', 'ad_option', 'ad_creative'],
+  '06-enseignes': ['tenant_sign_regulation', 'tenant_sign_dossier', 'tenant_sign_part'],
+  '07-chantier': ['fabrication_lot', 'lot_support', 'install_slot', 'slot_support', 'install_reserve'],
+  '08-exploitation': [
+    'installed_support', 'divergence', 'work_order', 'inspection_round', 'inspection_finding',
+  ],
+  '09-budget': ['cost_reference', 'budget_line'],
   '10-portefeuille': [],
   '11-transverse': [],
   '12-atelier': [],
@@ -229,7 +243,9 @@ export function ownsSupportColumn(module: ModuleKey, column: string): boolean {
  * cycle est une erreur de conception, jamais un cas à gérer. »
  */
 export const MODULE_READS: Readonly<Record<ModuleKey, readonly ModuleKey[]>> = {
-  '01-socle': [],
+  '00-plateforme': [],
+  // Q5 et M1 (partie M) : la création d'un site propose les entités juridiques.
+  '01-socle': ['00-plateforme'],
   '02-wayfinding': ['01-socle', '03-parcours'],
   '03-parcours': ['01-socle', '09-budget'],
   '04-signaletique': ['01-socle', '02-wayfinding'],
@@ -278,6 +294,7 @@ export const DECLARED_UPWARD_READS: readonly {
  * jamais silencieux. » Rubrique « Si absent » de L3, en substance.
  */
 export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
+  '00-plateforme': 'Impossible. La plateforme porte le cadre commun des modules ; elle n’entre pas dans le modèle de droits.',
   '01-socle': 'Impossible. Aucun module ne fonctionne sans lui ; il n’entre pas dans le modèle de droits.',
   '02-wayfinding': 'La signalétique ne peut pas composer : le tableau des messages est le seul producteur de contenu de face.',
   '03-parcours': 'Le wayfinding calcule ses points de décision avec un profil par défaut unique, non paramétrable, et le signale. La régie perd la tarification indexée sur l’exposition et retombe sur une grille saisie à la main.',
@@ -306,8 +323,7 @@ export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
  * ici, sans quoi le contrôle de INT-1 échoue.
  */
 export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
-  legal_entity: 'Q2 l’attribue à la plateforme, numérotée 00. Ce registre ne connaît que les douze modules métier : la plateforme n’y a pas de clé, et lui en donner une touche les couches de L2, les lectures de L3 et leurs contrôles. Inscrite ici en attendant, plutôt qu’attribuée d’office à un module qui ne la possède pas.',
-  country: 'Q9 et Q2 : référentiel global des pays, sans org_id, rangé à la plateforme numérotée 00. Même motif que `legal_entity` — ce registre ne connaît que les douze modules métier.',
+  country: 'Q9 et Q2 : référentiel global des pays, sans org_id, rangé à la plateforme numérotée 00. Aucune saisie ne l’écrit : il reste sans propriétaire déclaré tant qu’il n’est chargé que par migration.',
   organization: 'A5.1, accès et cloisonnement. N’appartient à aucun module : c’est la frontière dans laquelle les modules vivent.',
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',

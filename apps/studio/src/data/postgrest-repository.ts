@@ -25,21 +25,23 @@ import type {
 } from '@azimut/core-model';
 import { canonicalSerialize, CHARTER_RULE_KINDS } from '@azimut/core-model';
 import {
-  RepositoryError, failureForStatus,
+  RepositoryError,
   type SiteRepository, type SiteSummary,
   type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
+import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { loadWayfindingRegistry } from './postgrest-wayfinding.js';
+import { loadCharterRegistry } from './postgrest-charter.js';
+import { loadMaintenanceRegistry } from './postgrest-maintenance.js';
+import { loadWorksiteRegistry } from './postgrest-worksite.js';
+import { loadBudgetRegistry } from './postgrest-budget.js';
+import { loadInspectionRegistry } from './postgrest-inspection.js';
+import { loadAdvertisingData } from './postgrest-advertising.js';
+import { loadTenantRegistry } from './postgrest-tenant.js';
 
 type SiteListRow = Pick<SiteRow, 'id' | 'org_id' | 'name' | 'country_code'>;
 
-export type PostgrestConfig = {
-  /** Racine de l'API REST, sans barre oblique finale. */
-  readonly url: string;
-  /** Clé publiable. Elle n'ouvre rien par elle-même : le cloisonnement est en base. */
-  readonly apiKey: string;
-  /** Schéma interrogé. */
-  readonly schema: string;
-};
+export type { PostgrestConfig } from './postgrest-http.js';
 
 /**
  * Lignes des registres de vocabulaire. Elles ne passent pas par `@azimut/db` :
@@ -53,6 +55,7 @@ type CountryRow = {
   readonly name_fr: string;
   readonly name_en: string;
   readonly timezones: readonly string[];
+  readonly default_currency_code: string | null;
 };
 
 type LegalEntityRow = { readonly id: string; readonly legal_name: string };
@@ -197,61 +200,6 @@ function toFactTarget(
   const id = row.target_id ?? '';
   if (kind.trim() === '' || id.trim() === '') return {};
   return { target: { kind, id } };
-}
-
-/** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
-function transportError(detail: string): RepositoryError {
-  const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
-  return new RepositoryError(offline ? 'offline' : 'request_failed', detail);
-}
-
-async function query<Row>(
-  config: PostgrestConfig,
-  table: string,
-  search: string,
-): Promise<readonly Row[]> {
-  const url = `${config.url}/${table}?${search}`;
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      headers: {
-        apikey: config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
-        'Accept-Profile': config.schema,
-        Accept: 'application/json',
-      },
-    });
-  } catch (cause) {
-    throw transportError(`${table}: ${String(cause)}`);
-  }
-
-  if (!response.ok) {
-    throw new RepositoryError(
-      failureForStatus(response.status),
-      `${table}: ${String(response.status)} ${response.statusText}`,
-    );
-  }
-
-  try {
-    return await response.json() as readonly Row[];
-  } catch (cause) {
-    throw new RepositoryError('request_failed', `${table}: ${String(cause)}`);
-  }
-}
-
-/** Filtre `in.(a,b,c)` de PostgREST. Une liste vide ne déclenche aucune requête. */
-function inList(column: string, ids: readonly string[]): string {
-  return `${column}=in.(${ids.join(',')})`;
-}
-
-async function queryIn<Row>(
-  config: PostgrestConfig,
-  table: string,
-  column: string,
-  ids: readonly string[],
-): Promise<readonly Row[]> {
-  if (ids.length === 0) return [];
-  return query<Row>(config, table, inList(column, ids));
 }
 
 function firstOrThrow<Row>(rows: readonly Row[], table: string, id: string): Row {
@@ -482,6 +430,38 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       return { charter_rules, lexicon, facts, claims, decisions };
     },
 
+    loadWayfindingRegistry(siteId: string) {
+      return loadWayfindingRegistry(config, siteId);
+    },
+
+    loadCharterRegistry(siteId: string) {
+      return loadCharterRegistry(config, siteId);
+    },
+
+    loadMaintenanceRegistry(siteId: string) {
+      return loadMaintenanceRegistry(config, siteId);
+    },
+
+    loadWorksiteRegistry(siteId: string) {
+      return loadWorksiteRegistry(config, siteId);
+    },
+
+    loadBudgetRegistry(siteId: string) {
+      return loadBudgetRegistry(config, siteId);
+    },
+
+    loadInspectionRegistry(siteId: string) {
+      return loadInspectionRegistry(config, siteId);
+    },
+
+    loadAdvertisingData(siteId: string) {
+      return loadAdvertisingData(config, siteId);
+    },
+
+    loadTenantRegistry(siteId: string) {
+      return loadTenantRegistry(config, siteId);
+    },
+
     /**
      * Q9 — lecture du référentiel global. Il n'est pas cloisonné : la table
      * n'a pas d'`org_id` et sa politique la rend lisible par tout compte
@@ -489,13 +469,14 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
      */
     async listCountries(): Promise<readonly CountrySummary[]> {
       const rows = await query<CountryRow>(
-        config, 'country', 'select=code,name_fr,name_en,timezones&order=code.asc',
+        config, 'country', 'select=code,name_fr,name_en,timezones,default_currency_code&order=code.asc',
       );
       return rows.map((row): CountrySummary => ({
         code: row.code,
         name_fr: row.name_fr,
         name_en: row.name_en,
         timezones: row.timezones,
+        default_currency_code: row.default_currency_code,
       }));
     },
 

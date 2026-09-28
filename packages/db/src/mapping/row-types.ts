@@ -137,6 +137,8 @@ export type EdgeRow = {
   readonly direction: string;
   readonly evacuation_route: boolean;
   readonly length_m: string;
+  /** A5.3 — `jsonb`, forme libre du point de vue de la base ; lue par `readEdgeAvailability`. */
+  readonly availability: unknown;
 };
 
 export type VerticalLinkRow = {
@@ -225,6 +227,8 @@ export type SupportRow = {
   readonly width_mm: number | null;
   readonly height_mm: number | null;
   readonly dimensions_source: string | null;
+  /** A5.6 — typologie du support (0015). Nullable : ON DELETE SET NULL. */
+  readonly typology_id: string | null;
 };
 
 export type SupportTypologyRow = {
@@ -250,7 +254,7 @@ export type SupportContentBlockRow = {
   readonly org_id: string;
   readonly face_id: string;
   readonly block_index: number | null;
-  readonly ordinal: number;
+  readonly ordinal: number | null;
   readonly kind: string;
   readonly binding: unknown;
   readonly free_text: unknown;

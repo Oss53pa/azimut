@@ -1,4 +1,4 @@
-import { uuid, text, timestamp, integer, numeric, jsonb, index } from 'drizzle-orm/pg-core';
+import { uuid, text, timestamp, integer, numeric, bigint, jsonb, index } from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 import { site } from './site.js';
@@ -55,7 +55,8 @@ export const supportFace = azimut.table('support_face', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   support_id: uuid('support_id').notNull().references(() => support.id, { onDelete: 'cascade' }),
-  side: text('side').notNull(),
+  // Héritée, facultative depuis 0049 : A5.6 identifie la face par `face_index`.
+  side: text('side'),
   width_mm: numeric('width_mm'),
   height_mm: numeric('height_mm'),
   // A5.6 : identité de face par index, gabarit et langues. Additifs — cf.
@@ -74,7 +75,8 @@ export const supportContentBlock = azimut.table('support_content_block', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   face_id: uuid('face_id').notNull().references(() => supportFace.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
-  ordinal: integer('ordinal').notNull(),
+  // Hérité, facultatif depuis 0049 : A5.6 place le bloc par `block_index`.
+  ordinal: integer('ordinal'),
   config: jsonb('config').notNull().default({}),
   // A5.6 : index de bloc, liaison (contenu résolu) et texte libre. Additifs —
   // cf. migration 0016. `ordinal`/`config` préexistants sont laissés en place.
@@ -136,6 +138,11 @@ export const installedSupport = azimut.table('installed_support', {
   installed_at: timestamp('installed_at', { withTimezone: true }).notNull().defaultNow(),
   photo_path: text('photo_path'),
   installer_notes: text('installer_notes'),
+  // 0047 : colonnes de A5.7, nullables — une pose antérieure n'a pas été relevée.
+  installed_version: integer('installed_version'),
+  condition: text('condition'),
+  surveyed_by: uuid('surveyed_by'),
+  surveyed_at: timestamp('surveyed_at', { withTimezone: true }),
 }, (t) => [
   index('idx_installed_support_org').on(t.org_id),
 ]);
@@ -143,13 +150,19 @@ export const installedSupport = azimut.table('installed_support', {
 export const divergence = azimut.table('divergence', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  installed_support_id: uuid('installed_support_id').notNull().references(() => installedSupport.id, { onDelete: 'cascade' }),
+  // 0041 : rattachée au support ou au nœud d'un point non couvert ; la pose
+  // devient facultative, et `detail` remplace `notes`.
+  installed_support_id: uuid('installed_support_id').references(() => installedSupport.id, { onDelete: 'cascade' }),
+  support_id: uuid('support_id').references(() => support.id, { onDelete: 'cascade' }),
+  node_id: uuid('node_id').references(() => node.id, { onDelete: 'cascade' }),
   kind: text('kind').notNull(),
   detected_at: timestamp('detected_at', { withTimezone: true }).notNull().defaultNow(),
   resolved_at: timestamp('resolved_at', { withTimezone: true }),
-  notes: text('notes'),
+  detail: jsonb('detail'),
 }, (t) => [
   index('idx_divergence_org').on(t.org_id),
+  index('idx_divergence_support').on(t.support_id),
+  index('idx_divergence_node').on(t.node_id),
 ]);
 
 export const workOrder = azimut.table('work_order', {
@@ -157,7 +170,8 @@ export const workOrder = azimut.table('work_order', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   scope: jsonb('scope'),
-  estimated_cost: numeric('estimated_cost'),
+  // 0048 : unité mineure entière avec sa devise (H8).
+  estimated_cost_minor: bigint('estimated_cost_minor', { mode: 'number' }),
   currency: text('currency').notNull().default('EUR'),
   state: text('state').notNull().default('draft'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

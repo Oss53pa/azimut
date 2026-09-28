@@ -8,10 +8,13 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import type { SiteData } from '@azimut/core-model';
-import { EMPTY_VOCABULARY } from '@azimut/core-model';
+import { EMPTY_VOCABULARY, EMPTY_WAYFINDING_REGISTRY } from '@azimut/core-model';
 import {
   EMPTY_VOCABULARY_STATE, type VocabularyState,
 } from '../context/site-vocabulary.js';
+import {
+  EMPTY_WAYFINDING_STATE, type WayfindingRegistryState,
+} from '../context/site-wayfinding.js';
 import {
   isRepositoryError, RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -62,21 +65,26 @@ export function useCountries(repository: SiteRepository): AsyncState<readonly Co
   return useLoaded(repository, useCallback(() => repository.listCountries(), [repository]));
 }
 
-/** Q5 — les entités juridiques de l'organisation, chargées une fois. */
+/** Q5 — les entités juridiques de l'organisation, relues à chaque changement de `reloadKey`. */
 export function useLegalEntities(
   repository: SiteRepository,
+  /** Change pour relire la liste : après la création d'un client (Q5). */
+  reloadKey = 0,
 ): AsyncState<readonly LegalEntitySummary[]> {
-  return useLoaded(repository, useCallback(() => repository.listLegalEntities(), [repository]));
+  const load = useCallback(() => repository.listLegalEntities(), [repository]);
+  return useLoaded(repository, load, reloadKey);
 }
 
 /**
- * Charge une liste une fois, sans rechargement.
+ * Charge une liste, et la relit seulement quand `reloadKey` change.
  *
  * Les deux listes ci-dessus suivent le même chemin ; l'écrire deux fois aurait
  * dupliqué la gestion de l'annulation, qui est la partie qu'on se trompe.
  */
 function useLoaded<T>(
   repository: SiteRepository, load: () => Promise<T>,
+  /** Relit quand il change ; zéro pour une lecture unique. */
+  reloadKey = 0,
 ): AsyncState<T> {
   const [state, setState] = useState<AsyncState<T>>({ status: 'idle' });
   useEffect(() => {
@@ -87,7 +95,7 @@ function useLoaded<T>(
       cause => { if (!cancelled) setState({ status: 'failed', error: toRepositoryError(cause) }); },
     );
     return () => { cancelled = true; };
-  }, [repository, load]);
+  }, [repository, load, reloadKey]);
   return state;
 }
 
@@ -95,9 +103,15 @@ function useLoaded<T>(
 export function useSite(repository: SiteRepository, siteId: string): {
   readonly state: AsyncState<SiteData>;
   readonly reload: () => void;
+  /**
+   * Relit le site sans repasser par « chargement » : l'écran reste monté,
+   * avec le site d'avant, jusqu'à ce que la nouvelle lecture arrive. C'est la
+   * relecture qui suit une écriture acceptée.
+   */
+  readonly refresh: () => void;
 } {
   const [state, setState] = useState<AsyncState<SiteData>>({ status: 'idle' });
-  const [attempt, setAttempt] = useState(0);
+  const [attempt, setAttempt] = useState({ count: 0, quiet: false });
 
   useEffect(() => {
     if (siteId === '') {
@@ -105,7 +119,7 @@ export function useSite(repository: SiteRepository, siteId: string): {
       return;
     }
     let cancelled = false;
-    setState({ status: 'loading' });
+    if (!attempt.quiet) setState({ status: 'loading' });
     repository.loadSite(siteId).then(
       value => { if (!cancelled) setState({ status: 'ready', value }); },
       cause => { if (!cancelled) setState({ status: 'failed', error: toRepositoryError(cause) }); },
@@ -113,8 +127,9 @@ export function useSite(repository: SiteRepository, siteId: string): {
     return () => { cancelled = true; };
   }, [repository, siteId, attempt]);
 
-  const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
-  return { state, reload };
+  const reload = useCallback(() => { setAttempt(a => ({ count: a.count + 1, quiet: false })); }, []);
+  const refresh = useCallback(() => { setAttempt(a => ({ count: a.count + 1, quiet: true })); }, []);
+  return { state, reload, refresh };
 }
 
 /**
@@ -211,4 +226,32 @@ export function useSiteVocabularyLoad(
   // dirait « non exercé » jusqu'au rechargement de la page.
   const reload = useCallback(() => { setAttempt(n => n + 1); }, []);
   return { state, reload };
+}
+
+/**
+ * N2.2 — charge le registre du wayfinding d'un site, à part du site. Un échec
+ * se déclare `failed` et rend un registre vide que l'écran ne prend pas pour
+ * un fait.
+ */
+export function useWayfindingRegistryLoad(
+  repository: SiteRepository,
+  siteId: string,
+): { readonly state: WayfindingRegistryState } {
+  const [state, setState] = useState<WayfindingRegistryState>(EMPTY_WAYFINDING_STATE);
+
+  useEffect(() => {
+    if (siteId === '') {
+      setState(EMPTY_WAYFINDING_STATE);
+      return;
+    }
+    let cancelled = false;
+    setState({ registry: EMPTY_WAYFINDING_REGISTRY, status: 'loading' });
+    repository.loadWayfindingRegistry(siteId).then(
+      registry => { if (!cancelled) setState({ registry, status: 'ready' }); },
+      () => { if (!cancelled) setState({ registry: EMPTY_WAYFINDING_REGISTRY, status: 'failed' }); },
+    );
+    return () => { cancelled = true; };
+  }, [repository, siteId]);
+
+  return { state };
 }

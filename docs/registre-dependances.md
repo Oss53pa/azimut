@@ -46,3 +46,20 @@ ne s'automatise pas, et l'attestation relève de l'audit externe du lot 4.7.
 par fichier. Elle s'exercerait sur des fichiers modifiés et redistribués ;
 axe-core n'est ni modifié ni redistribué, et n'entre dans aucun livrable. Le
 contrôle de non-livraison est donc aussi ce qui maintient cette situation.
+
+### Polices de l'interface : Dosis et Grand Hotel
+
+| | |
+| --- | --- |
+| **Version** | Fichiers WOFF2 figés dans le dépôt, sous-ensembles latin et latin étendu, `packages/design-tokens/src/fonts/` |
+| **Portée** | Interface du studio seulement, déclarées dans `studio-theme.css` |
+| **Licence** | SIL Open Font License 1.1, texte joint à côté de chaque fichier (`OFL-dosis.txt`, `OFL-grand-hotel.txt`) |
+| **Distribuée** | Oui, avec l'interface. L'OFL l'autorise tant que la licence et la mention de droits accompagnent les fichiers |
+| **Autorisée le** | 25 septembre 2026, par le porteur du projet, avec l'adoption de la maquette « Azimut, logiciel autonome v2 » |
+| **Emploi** | Dosis pour tout le texte de l'interface (`--font-sans`), Grand Hotel pour le logotype seul (`--font-brand`) |
+
+**Ce qui n'est pas une dépendance.** Aucun paquet n'est ajouté et aucune
+requête ne part vers un service de polices : les fichiers sont servis par
+l'application elle-même, ce qui tient A3.4 en installation autonome. Ces
+polices ne concernent pas le rendu des panneaux, dont les polices relèvent des
+paquets de règles et de la charte.

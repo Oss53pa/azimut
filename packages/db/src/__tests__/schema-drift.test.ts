@@ -49,16 +49,12 @@ const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
     'Résidu moyen du calage à n points (section M2, partie M) : lu par le studio, non par `loadSiteData`.',
   'plan_calibration.max_residual_m':
     'Résidu maximal du calage à n points (section M2, partie M) : lu par le studio, non par `loadSiteData`.',
-  'edge.availability':
-    'Colonne JSON de disponibilité d’une arête, sans lecteur à ce jour.',
   'travel_profile.weights':
     'Pondérations de profil en JSON, que le calcul d’itinéraire ne lit pas encore.',
   'support_content_block.config':
     'Configuration de bloc en JSON ; A5.6 lui a substitué `binding` et `free_text`, que le type porte.',
   'support.kind':
     'Colonne d’avant la refonte A5.6, remplacée par `registry` et `context`. Le commentaire de `schema/signage.ts` la signale.',
-  'support.typology_id':
-    'Additif A5.6 (migration 0015) que le chargeur ne joint pas encore à la typologie.',
   'support.width_m':
     'Dimension d’avant A5.6, en mètres ; `width_mm` la remplace et le type la porte.',
   'support.height_m':

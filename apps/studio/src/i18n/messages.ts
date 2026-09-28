@@ -23,8 +23,30 @@ import { DIRECTION_FR, DIRECTION_EN } from './messages/direction.js';
 import { SIGNAGE_FR, SIGNAGE_EN } from './messages/signage.js';
 import { CATALOGUE_FR, CATALOGUE_EN } from './messages/catalogue.js';
 import { DATA_SOURCE_FR, DATA_SOURCE_EN } from './messages/data-source.js';
+import { WORKSHOP_SCREENS_FR, WORKSHOP_SCREENS_EN } from './messages/workshop-screens.js';
+import { WORKSHOP_STRUCTURE_FR, WORKSHOP_STRUCTURE_EN } from './messages/workshop-structure.js';
 import { SESSION_FR, SESSION_EN } from './messages/session.js';
 import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
+import { SHELL_FR, SHELL_EN } from './messages/shell.js';
+import { REGISTER_FR, REGISTER_EN } from './messages/register.js';
+import { WAYFINDING_REGISTER_FR, WAYFINDING_REGISTER_EN } from './messages/wayfinding-register.js';
+import { FLOWS_REGISTER_FR, FLOWS_REGISTER_EN } from './messages/flows-register.js';
+import { SIGNAGE_REGISTER_FR, SIGNAGE_REGISTER_EN } from './messages/signage-register.js';
+import { COMMERCE_REGISTER_FR, COMMERCE_REGISTER_EN } from './messages/commerce-register.js';
+import { TENANT_REGISTER_FR, TENANT_REGISTER_EN } from './messages/tenant-register.js';
+import { PRODUCTION_REGISTER_FR, PRODUCTION_REGISTER_EN } from './messages/production-register.js';
+import { OPERATIONS_REGISTER_FR, OPERATIONS_REGISTER_EN } from './messages/operations-register.js';
+import { BUDGET_REGISTER_FR, BUDGET_REGISTER_EN } from './messages/budget-register.js';
+import { WAYFINDING_REGISTRY_FR, WAYFINDING_REGISTRY_EN } from './messages/wayfinding-registry.js';
+import { SUPPORT_TYPOLOGY_FR, SUPPORT_TYPOLOGY_EN } from './messages/support-typology.js';
+import { SIGNAGE_CHARTER_FR, SIGNAGE_CHARTER_EN } from './messages/signage-charter.js';
+import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages/operations-maintenance.js';
+import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-data.js';
+import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
+import { CLIENTS_FR, CLIENTS_EN } from './messages/clients.js';
+import { WALL_PLAN_ENTRY_FR, WALL_PLAN_ENTRY_EN } from './messages/wall-plan-entry.js';
+import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js';
+import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -39,8 +61,30 @@ export const MESSAGES_FR = {
   ...SIGNAGE_FR,
   ...CATALOGUE_FR,
   ...DATA_SOURCE_FR,
+  ...WORKSHOP_SCREENS_FR,
+  ...WORKSHOP_STRUCTURE_FR,
   ...SESSION_FR,
   ...MESSAGE_TABLE_FR,
+  ...SHELL_FR,
+  ...REGISTER_FR,
+  ...WAYFINDING_REGISTER_FR,
+  ...FLOWS_REGISTER_FR,
+  ...SIGNAGE_REGISTER_FR,
+  ...COMMERCE_REGISTER_FR,
+  ...TENANT_REGISTER_FR,
+  ...PRODUCTION_REGISTER_FR,
+  ...OPERATIONS_REGISTER_FR,
+  ...BUDGET_REGISTER_FR,
+  ...WAYFINDING_REGISTRY_FR,
+  ...SUPPORT_TYPOLOGY_FR,
+  ...SIGNAGE_CHARTER_FR,
+  ...OPERATIONS_MAINTENANCE_FR,
+  ...PRODUCTION_DATA_FR,
+  ...CLOSURES_FR,
+  ...CLIENTS_FR,
+  ...WALL_PLAN_ENTRY_FR,
+  ...SUPPORT_FACES_FR,
+  ...FACE_BLOCKS_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -58,8 +102,30 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...SIGNAGE_EN,
   ...CATALOGUE_EN,
   ...DATA_SOURCE_EN,
+  ...WORKSHOP_SCREENS_EN,
+  ...WORKSHOP_STRUCTURE_EN,
   ...SESSION_EN,
   ...MESSAGE_TABLE_EN,
+  ...SHELL_EN,
+  ...REGISTER_EN,
+  ...WAYFINDING_REGISTER_EN,
+  ...FLOWS_REGISTER_EN,
+  ...SIGNAGE_REGISTER_EN,
+  ...COMMERCE_REGISTER_EN,
+  ...TENANT_REGISTER_EN,
+  ...PRODUCTION_REGISTER_EN,
+  ...OPERATIONS_REGISTER_EN,
+  ...BUDGET_REGISTER_EN,
+  ...WAYFINDING_REGISTRY_EN,
+  ...SUPPORT_TYPOLOGY_EN,
+  ...SIGNAGE_CHARTER_EN,
+  ...OPERATIONS_MAINTENANCE_EN,
+  ...PRODUCTION_DATA_EN,
+  ...CLOSURES_EN,
+  ...CLIENTS_EN,
+  ...WALL_PLAN_ENTRY_EN,
+  ...SUPPORT_FACES_EN,
+  ...FACE_BLOCKS_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

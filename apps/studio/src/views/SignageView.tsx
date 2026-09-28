@@ -3,7 +3,7 @@ import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { guardCharterOnSafety, checkFaceContentFit } from '@azimut/engine-graph';
 import type { CharterApplication, TextMeasure } from '@azimut/engine-graph';
-import type { Finding } from '@azimut/core-model';
+import { supportTypologyOf, type Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, Note, Tag,
@@ -11,6 +11,7 @@ import {
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { renderPreview, FACE_THEME, PREVIEW_FONT_FAMILY } from './signage/face-preview.js';
+import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 
 type SignageViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -82,11 +83,13 @@ export function SignageView({ onNavigate }: SignageViewProps): JSX.Element {
 
   /** Faces à compiler : une par face déclarée de chaque typologie implantée. */
   const facesToCompile = useMemo(() => {
+    // Chaque support compte les faces de sa typologie (A5.6). Un support qui
+    // n'en porte pas prend la première du site ; la note de l'écran le dit.
     const firstType = site.support_types[0];
-    if (firstType === undefined) return 0;
-    // Le lien support → typologie n'est pas porté par le modèle A5 : le
-    // décompte suppose la première typologie pour tous, et le dit.
-    return site.supports.length * firstType.face_count;
+    return site.supports.reduce(
+      (n, support) => n + ((supportTypologyOf(site.support_types, support) ?? firstType)?.face_count ?? 0),
+      0,
+    );
   }, [site]);
 
   const metrics: readonly Metric[] = [
@@ -117,6 +120,7 @@ export function SignageView({ onNavigate }: SignageViewProps): JSX.Element {
         actions={actions}
       />
 
+      <UntypedSupportsBanner assumedTypeKey={site.support_types[0]?.key ?? ''} />
       <MetricRow metrics={metrics} />
 
       <div style={{
