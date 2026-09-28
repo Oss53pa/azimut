@@ -23,7 +23,7 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM azimut.control_point) THEN
     RAISE EXCEPTION
-      'azimut.control_point porte des lignes : la migration 0043 refuse de les détruire (A2.2, point 7). Les traiter, puis réappliquer.';
+      'azimut.control_point porte des lignes : la migration 0052 refuse de les détruire (A2.2, point 7). Les traiter, puis réappliquer.';
   END IF;
 END;
 $$;

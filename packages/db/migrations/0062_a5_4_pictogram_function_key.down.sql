@@ -1,4 +1,4 @@
--- Retour à l'état antérieur à 0053 : la colonne, sa contrainte de forme et son
+-- Retour à l'état antérieur à 0062 : la colonne, sa contrainte de forme et son
 -- index d'unicité disparaissent ensemble. La contrainte et l'index tombent avec
 -- la colonne, mais les nommer dit ce que cette migration a posé.
 

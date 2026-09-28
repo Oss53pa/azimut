@@ -5,8 +5,8 @@
 -- ciblent une empreinte, quand la table pendait à un parking qui n'existe
 -- peut-être plus.
 --
--- Elle dépend de `azimut.parking`, que la migration 0051 retire. Ce sens-ci ne
--- se joue donc qu'avec le retour de 0051, et dans cet ordre.
+-- Elle dépend de `azimut.parking`, que la migration 0060 retire. Ce sens-ci ne
+-- se joue donc qu'avec le retour de 0060, et dans cet ordre.
 
 CREATE TABLE azimut.parking_uncovered_area (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

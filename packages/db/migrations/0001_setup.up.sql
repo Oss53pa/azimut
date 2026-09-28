@@ -4,7 +4,7 @@
 -- Le registre des migrations n'est pas créé ici. C'est le script de migration
 -- qui le tient, avant d'appliquer quoi que ce soit, et il le crée qualifié :
 -- `azimut._migrations`. Le créer aussi ici, sans qualifier son schéma, en
--- produisait un second à chaque base neuve — voir la migration 0042.
+-- produisait un second à chaque base neuve — voir la migration 0051.
 
 -- La fonction d'horodatage n'est pas créée ici non plus. Elle l'était sans
 -- qualifier son schéma, donc hors du schéma de l'application, et la migration

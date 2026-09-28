@@ -2,11 +2,11 @@
 --
 -- « La colonne de paquet disparaît de la table des sites. » Le rattachement
 -- d'un site à ses paquets est porté par `site_rules_binding`, qui fait foi
--- depuis 0056, et plus aucune lecture ne passe par la colonne.
+-- depuis 0065, et plus aucune lecture ne passe par la colonne.
 --
 -- **Migration destructrice.** Elle ne s'applique que si la colonne ne porte
 -- plus rien que la table ne porte déjà : chaque valeur non nulle doit s'y
--- retrouver en socle, pour le même site et le même paquet. 0056 les y a
+-- retrouver en socle, pour le même site et le même paquet. 0065 les y a
 -- reportées ; une valeur écrite depuis, ou qui contredit la table, serait
 -- perdue au retrait. La migration s'arrête alors avant toute modification et
 -- donne le compte (A2.2, point 7).

@@ -1,4 +1,4 @@
--- Retour de 0058 : le journal redevient modifiable, comme avant. Aucune ligne
+-- Retour de 0067 : le journal redevient modifiable, comme avant. Aucune ligne
 -- n'est touchée dans un sens ni dans l'autre.
 DROP TRIGGER IF EXISTS guard_audit_log_truncate ON azimut.audit_log;
 DROP TRIGGER IF EXISTS guard_audit_log_delete ON azimut.audit_log;

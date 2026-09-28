@@ -5,7 +5,7 @@
 -- un polygone d'emprise, et rien ne dit lequel des deux faits porte le statut
 -- du parking.
 --
--- Doit être jouée avant le retour de 0050, qui recrée une table pendant à
+-- Doit être jouée avant le retour de 0059, qui recrée une table pendant à
 -- celle-ci.
 
 CREATE TABLE azimut.parking (

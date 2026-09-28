@@ -12,7 +12,7 @@ BEGIN
     WHERE kind IN ('forbidden_character', 'max_sentence_words')
   ) THEN
     RAISE EXCEPTION
-      'azimut.charter_rule porte des règles de rédaction : le retour de la migration 0045 les rendrait invalides. Les traiter, puis réappliquer.';
+      'azimut.charter_rule porte des règles de rédaction : le retour de la migration 0054 les rendrait invalides. Les traiter, puis réappliquer.';
   END IF;
 END;
 $$;

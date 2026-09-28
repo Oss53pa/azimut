@@ -1,9 +1,9 @@
--- Retour à l'état de 0053 : un seul index, par organisation et registre, et
+-- Retour à l'état de 0062 : un seul index, par organisation et registre, et
 -- plus de colonne `rules_pack_id`.
 --
 -- **Le retour peut être refusé, et c'est voulu.** Deux pictogrammes de sécurité
 -- de même fonction portés par deux paquets d'une même organisation sont
--- légitimes après 0054 et interdits avant : l'index de 0053 échouera à se
+-- légitimes après 0063 et interdits avant : l'index de 0062 échouera à se
 -- reposer sur une base qui en contient. Et une colonne `rules_pack_id`
 -- renseignée porterait une donnée que le retour détruirait : A2.2, point 7,
 -- l'arrêt se produit avant toute modification.
@@ -15,7 +15,7 @@ BEGIN
   SELECT count(*) INTO lignes FROM azimut.pictogram WHERE rules_pack_id IS NOT NULL;
   IF lignes > 0 THEN
     RAISE EXCEPTION
-      'azimut.pictogram porte % ligne(s) rattachée(s) à un paquet de règles : le retour avant 0054 les perdrait (A2.2, point 7).',
+      'azimut.pictogram porte % ligne(s) rattachée(s) à un paquet de règles : le retour avant 0063 les perdrait (A2.2, point 7).',
       lignes;
   END IF;
 END;

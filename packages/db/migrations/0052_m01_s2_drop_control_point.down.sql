@@ -1,6 +1,6 @@
--- Rétablit `azimut.control_point` dans l'état exact où la migration 0043 l'a
+-- Rétablit `azimut.control_point` dans l'état exact où la migration 0052 l'a
 -- trouvée : la table de 0018, sa clé étrangère d'organisation resserrée en
--- RESTRICT par 0039, ses colonnes de pixels renommées par 0041, et le
+-- RESTRICT par 0039, ses colonnes de pixels renommées par 0050, et le
 -- forçage de sécurité par ligne posé par 0025.
 --
 -- Rien n'est restauré du contenu : la migration montante ne s'exécute que sur

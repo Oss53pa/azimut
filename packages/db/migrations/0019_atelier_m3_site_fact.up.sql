@@ -1,7 +1,7 @@
 -- Faits du site et mots qu'ils interdisent — A5.11, règle M01.S11.
 --
 -- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
--- foi ; les faits du site sont depuis inscrits en A5.11, et la migration 0044
+-- foi ; les faits du site sont depuis inscrits en A5.11, et la migration 0053
 -- aligne cette table sur ce que la section déclare. Le nom du fichier garde sa
 -- forme d'origine, pour la raison exposée dans ORDRE.md.
 --

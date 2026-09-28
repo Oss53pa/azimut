@@ -62,7 +62,7 @@ ALTER TABLE azimut.site_rules_binding
   ADD CONSTRAINT site_rules_binding_role_check CHECK (role IN ('base', 'overlay'));
 
 -- « Au plus un socle et au plus une surcouche. » `org_id` en tête de clé, pour
--- la raison déjà donnée en 0054 : un index qui franchirait la frontière
+-- la raison déjà donnée en 0063 : un index qui franchirait la frontière
 -- d'organisation révélerait par son message de conflit une ligne voisine.
 CREATE UNIQUE INDEX uq_site_rules_binding_role
   ON azimut.site_rules_binding(org_id, site_id, role);

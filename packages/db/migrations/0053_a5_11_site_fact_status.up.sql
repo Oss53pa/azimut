@@ -34,7 +34,7 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM azimut.site_fact) THEN
     RAISE EXCEPTION
-      'azimut.site_fact porte des lignes : la migration 0044 refuse de transformer `value` en jsonb (A2.2, point 7). Les convertir, puis réappliquer.';
+      'azimut.site_fact porte des lignes : la migration 0053 refuse de transformer `value` en jsonb (A2.2, point 7). Les convertir, puis réappliquer.';
   END IF;
 END;
 $$;

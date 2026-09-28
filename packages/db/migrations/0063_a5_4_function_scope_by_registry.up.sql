@@ -6,7 +6,7 @@
 -- légitimement deux pictogrammes de même fonction, un par paquet : l'unicité
 -- par organisation les déclarerait ambigus à tort. »
 --
--- L'index de 0053 tenait une seule portée, l'organisation, pour les deux
+-- L'index de 0062 tenait une seule portée, l'organisation, pour les deux
 -- registres. Il refusait donc le cas que la règle nomme comme légitime. Il est
 -- remplacé par deux index, un par registre.
 --
