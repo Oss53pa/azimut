@@ -1582,3 +1582,103 @@ active. Relevé, non traité.
   commencée.
 - L'écran d'évacuation (P10).
 - `lineFingerprint`, hors des empreintes.
+
+## Fusion de `master` dans la branche de la PR #11
+
+Ce n'est pas une version du consolidé : la fusion (`760ed5f`) porte les
+PR #5 à #10 de `master` sous la version 30, et cette section dit ce qu'elle a
+tranché, ce qu'elle a adapté et ce qu'elle laisse ouvert.
+
+| Ce que la fusion pose | Où | État |
+| --- | --- | --- |
+| Numéros de migration de `master` conservés, ceux de la branche renumérotés | `0041`–`0049` de `master`, `0050`–`0068` de la branche (`21376c0`, renvois `9a4fe41`) | Fait |
+| Montage des migrations sur une base vide, dans l'ordre | Base locale remise à zéro, 72 migrations appliquées, `0066` après `0041`–`0049` | Vérifié |
+| Code de `master` lu sur le rattachement des paquets (A5.8) | `EvacuationView`, `SiteSheetView` : `isBound`, `rulesPackLabel` au lieu de `site.rules_pack_id` | Fait |
+| Comparaisons localisées introduites par `master` (A9) | 12 dans le code qui produit, 76 appels sans langue dans l'interface | Remplacées |
+| Contrôle D2.2 du catalogue | `tests/catalogue-consolide.test.ts` | Rouge, arbitrage de l'éditeur attendu |
+
+**Résolution des conflits.** Là où `master` avait découpé un fichier que la
+branche avait modifié, le découpage de `master` est gardé et les ajouts de la
+branche y sont reportés : `postgrest-http.ts` porte les requêtes, les clés de
+libellés propres à la branche passent dans `messages/workshop-structure.ts`,
+les essais de `compile-artwork` et de `checks-structure` suivent le découpage
+de `master`. Le bloc M01.S10 de `checks-structure`, perdu au découpage, est
+rétabli dans `checks-structure-cross-building.test.ts`. Aucun nom d'essai de
+l'un ou l'autre côté ne manque au résultat, vérifié dans les deux sens.
+
+Deux doublons sont retirés. Les adaptateurs d'atelier `*ScreenAdapter.tsx` de
+`master` étaient un déplacement pur du code de base (`ecde44e`) : ceux de la
+branche, plus complets, sont gardés. La garde de rendu `openScreen` de
+`keyboard-traversal` corrigeait la même course que `waitForInteractive` : la
+seconde, bornée et qui nomme son échec, est gardée.
+
+**Adaptations au schéma et aux règles v30.** Libellés des natures de règle
+`forbidden_character` et `max_sentence_words`, et note de charte corrigée,
+l'audit jugeant ces deux règles. Thème d'aperçu complété de `parking_fill` et
+`parking_stroke`. `a5-8-charter-enums-check` lit la dernière redéfinition de
+la contrainte (`0054`, sept natures) et non plus `0006` seule.
+
+**A9.** Identifiants, codes et dates passent à `codePointCompare`. Les noms de
+bâtiment (`levelRows`) et les initiales de site se comparent ou se capitalisent
+dans la langue active, déclarée par l'appelant. Le pliage du nom légal est un
+contrôle d'unicité : il passe à `toLowerCase()`, sans langue, comme les quatre
+autres selon la version 30. Les deux relevés ne font que baisser : 155 à 153
+occurrences dans 66 fichiers pour le code qui produit, 58 à 57 appels dans
+37 fichiers pour l'interface. `master` avait lui-même retiré les occurrences
+de `OperationsView`, de `message-schedule-generate` et de `resolve-face`.
+
+**Chaîne A13.2 sur le résultat.** `install`, `typecheck`, `lint`,
+`test:visual` (14), `test:rls` (67), `test:determinism` (11), `test:e2e`
+(138) et `build` sortent à 0. `test` sort à 1 : 4 513 essais passent, un
+échoue, le contrôle D2.2 ci-dessous. La CI de la PR échoue au même essai ;
+empreinte, installation, contrôle de types et lint y passent sous Node 24.
+
+### Reste ouvert après la fusion
+
+**D2.2 : 27 codes hors du catalogue du consolidé.** Levés par le code venu de
+`master`, ils ne figurent dans aucune table de la version 30. Un code
+s'inscrit au catalogue dans le même commit que sa première utilisation ; à
+défaut, c'est un arbitrage de l'éditeur. La poussée en l'état a été
+autorisée ; l'essai n'est pas affaibli.
+
+- Fermetures d'arêtes : `GRAPH.EDGE_AVAILABILITY_UNREADABLE`,
+  `GRAPH.EVACUATION_EDGE_CLOSURE`, `GRAPH.ROUTE_INSTANT_INVALID`,
+  `GRAPH.CLOSURE_RANGE_INVALID`, `GRAPH.CLOSURE_REASON_UNKNOWN`,
+  `GRAPH.CLOSURE_DUPLICATE`, `GRAPH.CLOSURE_NOT_FOUND`,
+  `GRAPH.CLOSURE_AVAILABILITY_UNREADABLE`.
+- Plans muraux, faces et blocs : `LAYOUT.WALL_PLAN_SUPPORT_UNKNOWN`,
+  `LAYOUT.WALL_PLAN_FACE_OUT_OF_RANGE`, `LAYOUT.WALL_PLAN_DUPLICATE`,
+  `LAYOUT.WALL_PLAN_NOT_A_PLAN`, `LAYOUT.FACE_SUPPORT_UNKNOWN`,
+  `LAYOUT.FACE_INDEX_OUT_OF_RANGE`, `LAYOUT.FACE_ALREADY_DECLARED`,
+  `LAYOUT.FACE_TEMPLATE_UNKNOWN`, `LAYOUT.FACE_LANG_INACTIVE`,
+  `LAYOUT.BLOCK_KIND_NOT_ENTERABLE`, `LAYOUT.FREE_TEXT_EMPTY`,
+  `LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE`, `LAYOUT.FREE_TEXT_LANG_MISSING`,
+  `LAYOUT.INSTANCE_BLOCK_NO_SLOT`, `LAYOUT.BLOCK_SLOT_TAKEN`,
+  `LAYOUT.FACE_TEMPLATE_NOT_AT_HAND`.
+- Entités juridiques : `DATA.LEGAL_NAME_REQUIRED`,
+  `DATA.LEGAL_NAME_DUPLICATE`, `DATA.CURRENCY_INVALID`.
+
+**Noms de tables de `master` hors H11.** H11 nomme `ad_placement_state`,
+`ad_contract`, `ad_rate_card`, `ad_invoice`, `tenant_signage_rule`,
+`tenant_signage_case`, `tenant_signage_doc`, `fabrication_order` et
+`installation_record`. Les migrations `0042` à `0046` de `master` créent
+`ad_booking`, `ad_option`,
+`tenant_sign_regulation`, `tenant_sign_dossier`, `tenant_sign_part`,
+`lot_support`, `install_slot`, `slot_support` et `install_reserve`. Conservées
+telles quelles ; les aligner est une migration qui renomme des tables, donc un
+cas d'arrêt d'A2.2.
+
+**Migration `0048` de `master`, destructrice.** Elle convertit
+`work_order.estimated_cost` en unité mineure, puis supprime la colonne. C'est
+une migration qui transforme et détruit des données existantes (A2.2,
+point 7), et la conversion et la suppression y sont réunies. Conservée telle
+quelle ; aucune base portant des données réelles n'a été vérifiée ici.
+
+**`postgrest-repository.ts` au-delà de 400 lignes.** 496 lignes après la
+fusion ; la branche en portait déjà 515. Rejoint la tâche de découpage du
+dépôt PostgREST, déclarée à la version 24.
+
+**« Workers Builds: azimut ».** Le check de l'intégration Git du tableau de
+bord Cloudflare échoue sur la PR comme sur les PR #5 et #10. Il ne vient pas
+de la CI du dépôt ; le déploiement du dépôt est le job « Déploiement
+Cloudflare », qui ne tourne que sur `master`.
