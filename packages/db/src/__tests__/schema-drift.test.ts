@@ -51,6 +51,8 @@ const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
     'Résidu maximal du calage à n points (section M2, partie M) : lu par le studio, non par `loadSiteData`.',
   'travel_profile.weights':
     'Pondérations de profil en JSON, que le calcul d’itinéraire ne lit pas encore.',
+  'edge.availability':
+    'Horaires de disponibilité hebdomadaires en JSON (fiche d’arête, O11) : aucun moteur ne les lit encore. Les fermetures temporaires vivent dans `temporary_closure` (0069).',
   'support_content_block.config':
     'Configuration de bloc en JSON ; A5.6 lui a substitué `binding` et `free_text`, que le type porte.',
   'support.kind':

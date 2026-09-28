@@ -1,15 +1,17 @@
 /**
  * A5.6 / D8.3 — saisir les blocs de contenu d'une face de support.
  *
- * Seuls se saisissent sur une face les blocs que le gabarit ne porte pas
- * (décision du 26/09/2026) : le bloc `free`, dont le texte est une donnée
- * d'instance, et le bloc `legend`, sans contenu. Les blocs `resolved` et
- * `pictogram` restent définis par le gabarit et résolus par le tableau des
- * messages (INV-1, INV-2) ; le bloc `map` se déclare par les plans muraux.
+ * « Un bloc `free` est le seul dont le texte est saisi » (D8.3), et E1.4 ne
+ * laisse, en contexte 3, que « Saisir du texte libre : blocs `free`
+ * seulement ». Les autres blocs viennent du gabarit et sont résolus par le
+ * tableau des messages (INV-1, INV-2). Toute autre nature se refuse par
+ * `EDIT.CONTEXT_VIOLATION`.
  *
- * Le texte d'un bloc libre a une entrée par langue — `{"fr": "…", "en": "…"}` —
- * parmi les langues de la face, à défaut celles du site. Une langue de la face
- * restée sans texte est signalée, sans bloquer.
+ * Le texte d'un bloc libre a une entrée par langue — `{"fr": "…", "en": "…"}`
+ * (A5.6) — parmi les langues de la face, à défaut celles du site. Une langue
+ * de la face restée sans texte est signalée, sans bloquer. Ces contrôles de
+ * saisie n'ont pas de code au catalogue : ce sont des refus de formulaire
+ * (D2.2, décision du 28/09/2026).
  *
  * Commandes du module 04 (L3). Le fichier est pur.
  */
@@ -17,9 +19,11 @@ import type { SiteData } from './site.js';
 import type { ContentBlockInstance, SupportFace } from './site-signage.js';
 import { buildCommand, type EntityCommand, type RowValues } from './site-commands.js';
 import { chooseSlot, freeTextsOf } from './face-template-slots.js';
-import type { Finding, Outcome } from './outcome.js';
+import type { Finding } from './outcome.js';
+import { asFormOutcome, notice, refusedBy, type FormNotice, type FormOutcome } from './form-notice.js';
 
-export const ENTERABLE_BLOCK_KINDS = ['free', 'legend'] as const;
+/** E1.4, contexte 3 : le bloc `free`, et lui seul. */
+export const ENTERABLE_BLOCK_KINDS = ['free'] as const;
 export type EnterableBlockKind = (typeof ENTERABLE_BLOCK_KINDS)[number];
 
 export function isEnterableBlockKind(value: string): value is EnterableBlockKind {
@@ -35,11 +39,15 @@ export type BlockEnvironment = {
   readonly timestamp: string;
 };
 
-const RULE_REF = 'D8.3';
 const MODULE = '04-signaletique';
 
-function finding(code: string, severity: Finding['severity'], id: string, params: Record<string, string | number> = {}): Finding {
-  return { code, severity, entity: { kind: 'face', id }, params, ruleRef: RULE_REF };
+/** E1.4 — une nature de bloc que le contexte 3 ne laisse pas saisir. */
+function contextViolation(faceId: string, kind: string): FormOutcome<never> {
+  const finding: Finding = {
+    code: 'EDIT.CONTEXT_VIOLATION', severity: 'blocking', entity: { kind: 'face', id: faceId },
+    params: { kind }, ruleRef: 'E1.4',
+  };
+  return { ok: false, findings: [finding], notices: [] };
 }
 
 /** Les langues d'une face : les siennes, à défaut celles du site. */
@@ -60,24 +68,24 @@ function freeTextValue(langs: readonly string[], texts: FreeTexts): string | nul
   return entries.length === 0 ? null : JSON.stringify(Object.fromEntries(entries));
 }
 
-/** Refus et avertissements d'un texte libre sur la face. */
-function checkTexts(site: SiteData, face: SupportFace, texts: FreeTexts): { blocking: Finding[]; warnings: Finding[] } {
+/** Refus et avis d'un texte libre sur la face. */
+function checkTexts(site: SiteData, face: SupportFace, texts: FreeTexts): { blocking: FormNotice[]; warnings: FormNotice[] } {
   const langs = faceLangs(site, face);
-  const blocking: Finding[] = [];
+  const blocking: FormNotice[] = [];
   for (const [lang, text] of Object.entries(texts)) {
     if (text.trim() !== '' && !langs.includes(lang)) {
-      blocking.push(finding('LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE', 'blocking', face.id, { lang }));
+      blocking.push(notice('form.free_text.lang.outside_face', 'blocking', { lang }));
     }
   }
   const filled = langs.filter(l => (texts[l] ?? '').trim() !== '');
-  if (filled.length === 0) blocking.push(finding('LAYOUT.FREE_TEXT_EMPTY', 'blocking', face.id));
+  if (filled.length === 0) blocking.push(notice('form.free_text.empty'));
   const warnings = filled.length === 0
     ? []
-    : langs.filter(l => !filled.includes(l)).map(lang => finding('LAYOUT.FREE_TEXT_LANG_MISSING', 'warning', face.id, { lang }));
+    : langs.filter(l => !filled.includes(l)).map(lang => notice('form.free_text.lang.missing', 'warning', { lang }));
   return { blocking, warnings };
 }
 
-/** Ajoute un bloc libre ou une légende après les blocs de la face. */
+/** Ajoute un bloc libre sur la face, à l'emplacement du gabarit qui l'attend. */
 export function declareBlockCommand(
   site: SiteData,
   face: SupportFace,
@@ -86,36 +94,24 @@ export function declareBlockCommand(
   env: BlockEnvironment,
   /** L'emplacement du gabarit visé ; absent, le premier libre de cette nature. */
   slot?: number,
-): Outcome<EntityCommand> {
-  if (!isEnterableBlockKind(kind)) {
-    return { ok: false, findings: [finding('LAYOUT.BLOCK_KIND_NOT_ENTERABLE', 'blocking', face.id, { kind })] };
-  }
-  let warnings: Finding[] = [];
-  let freeText: string | null = null;
-  if (kind === 'free') {
-    const checked = checkTexts(site, face, texts);
-    if (checked.blocking.length > 0) return { ok: false, findings: checked.blocking };
-    warnings = checked.warnings;
-    freeText = freeTextValue(faceLangs(site, face), texts);
-  }
+): FormOutcome<EntityCommand> {
+  if (!isEnterableBlockKind(kind)) return contextViolation(face.id, kind);
+  const checked = checkTexts(site, face, texts);
+  if (checked.blocking.length > 0) return refusedBy(checked.blocking);
+  const freeText = freeTextValue(faceLangs(site, face), texts);
   const support = site.supports.find(s => s.id === face.support_id);
-  if (support === undefined) {
-    return { ok: false, findings: [finding('LAYOUT.FACE_SUPPORT_UNKNOWN', 'blocking', face.id, { support_id: face.support_id })] };
-  }
+  if (support === undefined) return refusedBy([notice('form.face.support.unknown')]);
   const chosen = chooseSlot(site, support, face.face_index, kind, site.content_blocks.filter(b => b.face_id === face.id), slot);
   if (!chosen.ok) return chosen;
-  warnings = [...warnings, ...chosen.value.warnings];
-  const blockIndex = chosen.value.index;
   const id = env.newId();
   const after: RowValues = {
-    id, org_id: face.org_id, face_id: face.id, block_index: blockIndex, kind,
+    id, org_id: face.org_id, face_id: face.id, block_index: chosen.value.index, kind,
     ...(freeText !== null ? { free_text: freeText } : {}),
   };
-  const out = buildCommand({
+  return asFormOutcome(buildCommand({
     operation: 'create', module: MODULE, table: 'support_content_block', id, org_id: face.org_id,
     after, timestamp: env.timestamp, groupKey: null,
-  });
-  return out.ok ? { ...out, warnings } : out;
+  }), [...checked.warnings, ...chosen.value.notices]);
 }
 
 /** Réécrit le texte d'un bloc libre de la face. */
@@ -125,33 +121,28 @@ export function updateFreeTextCommand(
   block: ContentBlockInstance,
   texts: FreeTexts,
   timestamp: string,
-): Outcome<EntityCommand> {
-  if (block.kind !== 'free' || block.face_id !== face.id) {
-    return { ok: false, findings: [finding('LAYOUT.BLOCK_KIND_NOT_ENTERABLE', 'blocking', face.id, { kind: block.kind })] };
-  }
+): FormOutcome<EntityCommand> {
+  if (block.kind !== 'free' || block.face_id !== face.id) return contextViolation(face.id, block.kind);
   const checked = checkTexts(site, face, texts);
-  if (checked.blocking.length > 0) return { ok: false, findings: checked.blocking };
-  const out = buildCommand({
+  if (checked.blocking.length > 0) return refusedBy(checked.blocking);
+  return asFormOutcome(buildCommand({
     operation: 'update', module: MODULE, table: 'support_content_block', id: block.id, org_id: block.org_id,
     before: { free_text: block.free_text === undefined ? null : JSON.stringify(block.free_text) },
     after: { free_text: freeTextValue(faceLangs(site, face), texts) },
     timestamp, groupKey: null,
-  });
-  return out.ok ? { ...out, warnings: checked.warnings } : out;
+  }), checked.warnings);
 }
 
-/** Retire un bloc libre ou une légende ; l'inverse le recrée à l'identique. */
-export function withdrawBlockCommand(block: ContentBlockInstance, timestamp: string): Outcome<EntityCommand> {
-  if (!isEnterableBlockKind(block.kind)) {
-    return { ok: false, findings: [finding('LAYOUT.BLOCK_KIND_NOT_ENTERABLE', 'blocking', block.face_id, { kind: block.kind })] };
-  }
+/** Retire un bloc libre ; l'inverse le recrée à l'identique. */
+export function withdrawBlockCommand(block: ContentBlockInstance, timestamp: string): FormOutcome<EntityCommand> {
+  if (!isEnterableBlockKind(block.kind)) return contextViolation(block.face_id, block.kind);
   const before: RowValues = {
     id: block.id, org_id: block.org_id, face_id: block.face_id, block_index: block.block_index, kind: block.kind,
     ...(block.binding !== undefined ? { binding: JSON.stringify(block.binding) } : {}),
     ...(block.free_text !== undefined ? { free_text: JSON.stringify(block.free_text) } : {}),
   };
-  return buildCommand({
+  return asFormOutcome(buildCommand({
     operation: 'delete', module: MODULE, table: 'support_content_block', id: block.id, org_id: block.org_id,
     before, timestamp, groupKey: null,
-  });
+  }));
 }

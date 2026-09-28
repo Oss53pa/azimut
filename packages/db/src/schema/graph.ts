@@ -1,7 +1,7 @@
 import { uuid, text, timestamp, integer, numeric, boolean, jsonb, index } from 'drizzle-orm/pg-core';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
-import { level, building } from './site.js';
+import { site, level, building } from './site.js';
 
 export const node = azimut.table('node', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -57,4 +57,24 @@ export const buildingLink = azimut.table('building_link', {
   sheltered: boolean('sheltered').notNull().default(false),
 }, (t) => [
   index('idx_building_link_org').on(t.org_id),
+]);
+
+/**
+ * O11 — fermeture temporaire d'une ou plusieurs arêtes (migration 0069).
+ * Bornes en heure locale du site (O4), sans fuseau ; fin incluse.
+ */
+export const temporaryClosure = azimut.table('temporary_closure', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
+  edge_ids: jsonb('edge_ids').notNull(),
+  // Chaîne, pas `Date` : un instant local n'a pas de fuseau à convertir.
+  from_at: timestamp('from_at', { withTimezone: false, mode: 'string' }).notNull(),
+  to_at: timestamp('to_at', { withTimezone: false, mode: 'string' }).notNull(),
+  reason: text('reason').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_temporary_closure_org').on(t.org_id),
+  index('idx_temporary_closure_site').on(t.site_id),
 ]);

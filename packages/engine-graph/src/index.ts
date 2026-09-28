@@ -4,8 +4,6 @@ export type { GraphScope } from './graph-scope.js';
 export { buildAdjacency, buildDirectedAdjacency, bfs } from './graph-traversal.js';
 export { computeRoute } from './compute-route.js';
 export type { RouteOptions } from './compute-route.js';
-export { checkEdgeAvailability } from './checks/edge-availability.js';
-export { checkInstanceBlocks } from './checks/instance-blocks.js';
 export type { Route, RouteSite } from './compute-route.js';
 export { RouteCache } from './route-cache.js';
 export { deriveDecisionPoints } from './decision-points.js';

@@ -24,7 +24,7 @@ export function freeTextContent(texts: Readonly<Record<string, string>>, fallbac
 /**
  * D8.3 — le texte qu'un bloc libre de la face apporte à l'emplacement libre du
  * gabarit de même indice. Un bloc sans emplacement de même nature n'apporte
- * rien : le contrôle `instance_blocks` le signale.
+ * rien, et le bloc reste hors du rendu.
  */
 export function withInstanceText(
   template: FaceTemplate,

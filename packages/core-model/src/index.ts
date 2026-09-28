@@ -163,19 +163,19 @@ export type {
   TenantRegistry, TenantSignRegulation, TenantSignDossier, TenantSignPart, TenantDossierState,
 } from './tenant-registry.js';
 export {
-  readEdgeAvailability, isClosedAt, closuresOverlapping, isLocalInstant, CLOSURE_REASONS, isClosureReason,
-} from './edge-availability.js';
-export type { EdgeAvailability, EdgeClosure, ClosureReason } from './edge-availability.js';
+  isLocalInstant, localInstantOf, sortClosures, isActiveAt, closedEdgesAt, closuresOverlapping,
+} from './temporary-closure.js';
+export type { TemporaryClosure } from './temporary-closure.js';
 export {
-  serializeEdgeAvailability, validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
-} from './edge-closure-commands.js';
-export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
+  validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
+} from './temporary-closure-commands.js';
+export type { ClosureDraft, ClosureEnvironment } from './temporary-closure-commands.js';
+export {
+  FORM_NOTICE_KEYS, notice, refusedBy, asFormOutcome, asList,
+} from './form-notice.js';
+export type { FormNotice, FormNoticeKey, FormOutcome } from './form-notice.js';
 export { validateLegalEntityDraft, declareLegalEntityCommand } from './legal-entity-commands.js';
 export type { LegalEntityDraft, LegalEntityEnvironment } from './legal-entity-commands.js';
-export {
-  WALL_PLAN_BLOCK_KIND, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
-} from './wall-plan-commands.js';
-export type { WallPlanEnvironment } from './wall-plan-commands.js';
 export {
   supportFaceCount, validateFaceDraft, declareFaceCommand, updateFaceCommand,
 } from './support-face-commands.js';
