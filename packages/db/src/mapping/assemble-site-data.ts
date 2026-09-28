@@ -9,7 +9,7 @@
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
 import {
-  readActiveLangs, readOpeningHours, readEdgeAvailability, computeEdgeLengths, isSiteZoneKind,
+  readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
   isParkingSpaceKind, isPlanContentKind,
 } from '@azimut/core-model';
 import type {
@@ -27,6 +27,7 @@ import type {
   SiteRowSet, } from './row-types.js';
 import { num, isoString, asStringArray } from './row-scalars.js';
 import { mapRulesBindingRows } from './map-rules-bindings.js';
+import { mapClosureRows } from './map-closure-rows.js';
 import {
   mapSupportTypologyRow, mapSupportFaceRow, mapContentBlockRow,
   mapSupportVersionRow, mapSupportRow,
@@ -205,24 +206,18 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
    */
   const edgeLengths = computeEdgeLengths({ levels, nodes, edges: rows.edges });
 
-  const edges: Edge[] = rows.edges.map(e => {
-    // A5.3 — une disponibilité illisible est gardée comme telle : un contrôle
-    // la signale, et à un instant donné l'arête compte pour fermée.
-    const availability = readEdgeAvailability(e.availability);
-    return {
-      id: e.id,
-      org_id: e.org_id,
-      from_node_id: e.from_node_id,
-      to_node_id: e.to_node_id,
-      width_m: num(e.width_m),
-      slope_pct: num(e.slope_pct),
-      accessible: e.accessible,
-      direction: e.direction as EdgeDirection,
-      evacuation_route: e.evacuation_route,
-      length_m: edgeLengths.get(e.id) ?? num(e.length_m),
-      ...(availability !== undefined ? { availability } : {}),
-    };
-  });
+  const edges: Edge[] = rows.edges.map(e => ({
+    id: e.id,
+    org_id: e.org_id,
+    from_node_id: e.from_node_id,
+    to_node_id: e.to_node_id,
+    width_m: num(e.width_m),
+    slope_pct: num(e.slope_pct),
+    accessible: e.accessible,
+    direction: e.direction as EdgeDirection,
+    evacuation_route: e.evacuation_route,
+    length_m: edgeLengths.get(e.id) ?? num(e.length_m),
+  }));
 
   const verticalLinks: VerticalLink[] = rows.vertical_links.map(v => ({
     id: v.id,
@@ -347,5 +342,6 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     face_templates: [],
     zones,
     parking_spaces: parkingSpaces,
+    temporary_closures: mapClosureRows(rows.temporary_closures ?? []),
   };
 }

@@ -12,8 +12,9 @@ const ENV = { newId: () => 'blk-new', timestamp: '2026-09-26T00:00:00.000Z' };
 const MAP: ContentBlockInstance = { id: 'blk-0', org_id: first.org_id, face_id: 'face-1', block_index: 0, kind: 'map' };
 const SITE: SiteData = { ...refMultilevel, support_faces: [FACE], content_blocks: [MAP] };
 
-function codes(out: { ok: boolean; findings?: readonly { code: string }[] }): readonly string[] {
-  return out.findings?.map(f => f.code) ?? [];
+/** Les codes du catalogue et les clés des refus de saisie, dans cet ordre. */
+function codes(out: { ok: boolean; findings?: readonly { code: string }[]; notices: readonly { key: string }[] }): readonly string[] {
+  return [...(out.findings?.map(f => f.code) ?? []), ...out.notices.map(n => n.key)];
 }
 
 describe('D8.3 — blocs saisis sur une face', () => {
@@ -24,26 +25,28 @@ describe('D8.3 — blocs saisis sur une face', () => {
       free_text: JSON.stringify({ fr: 'Sortie', en: 'Exit' }),
     });
     // Sans typologie, le gabarit n'est pas connu : l'emplacement n'est pas vérifié, et c'est dit.
-    expect(out.ok && out.warnings.map(w => w.code)).toEqual(['LAYOUT.FACE_TEMPLATE_NOT_AT_HAND']);
+    expect(out.ok && out.notices.map(n => n.key)).toEqual(['form.block.template.not_at_hand']);
+    expect(out.ok && out.warnings).toEqual([]);
   });
 
   it('avertit d’une langue de la face restée sans texte, sans bloquer', () => {
     const out = declareBlockCommand(SITE, FACE, 'free', { fr: 'Sortie' }, ENV);
-    expect(out.ok && out.warnings.map(w => w.code)).toEqual(['LAYOUT.FREE_TEXT_LANG_MISSING', 'LAYOUT.FACE_TEMPLATE_NOT_AT_HAND']);
-    expect(out.ok && out.warnings[0]?.params['lang']).toBe('en');
+    expect(out.ok && out.notices.map(n => [n.key, n.severity])).toEqual([
+      ['form.free_text.lang.missing', 'warning'], ['form.block.template.not_at_hand', 'warning'],
+    ]);
+    expect(out.ok && out.notices[0]?.params['lang']).toBe('en');
   });
 
-  it('ajoute une légende sans texte', () => {
-    const out = declareBlockCommand(SITE, FACE, 'legend', {}, ENV);
-    expect(out.ok && out.value.after).toEqual({ id: 'blk-new', org_id: first.org_id, face_id: 'face-1', block_index: 1, kind: 'legend' });
+  it('E1.4 — refuse une légende ou un type résolu par EDIT.CONTEXT_VIOLATION', () => {
+    expect(codes(declareBlockCommand(SITE, FACE, 'legend', {}, ENV))).toEqual(['EDIT.CONTEXT_VIOLATION']);
+    expect(codes(declareBlockCommand(SITE, FACE, 'resolved', {}, ENV))).toEqual(['EDIT.CONTEXT_VIOLATION']);
   });
 
-  it('refuse un type résolu, un texte vide, une langue que la face ne porte pas', () => {
-    expect(codes(declareBlockCommand(SITE, FACE, 'resolved', {}, ENV))).toEqual(['LAYOUT.BLOCK_KIND_NOT_ENTERABLE']);
-    expect(codes(declareBlockCommand(SITE, FACE, 'free', { fr: '  ' }, ENV))).toEqual(['LAYOUT.FREE_TEXT_EMPTY']);
+  it('refuse un texte vide, une langue que la face ne porte pas, sans code au catalogue', () => {
+    expect(codes(declareBlockCommand(SITE, FACE, 'free', { fr: '  ' }, ENV))).toEqual(['form.free_text.empty']);
     const frOnly = { ...FACE, langs: ['fr'] };
     expect(codes(declareBlockCommand(SITE, frOnly, 'free', { fr: 'Sortie', en: 'Exit' }, ENV)))
-      .toEqual(['LAYOUT.FREE_TEXT_LANG_OUTSIDE_FACE']);
+      .toEqual(['form.free_text.lang.outside_face']);
   });
 
   it('réécrit un texte libre, et l’inverse le rétablit', () => {
@@ -54,9 +57,11 @@ describe('D8.3 — blocs saisis sur une face', () => {
     expect(out.ok && inverseCommand(out.value, ENV.timestamp).after).toEqual({ free_text: '{"fr":"Accueil"}' });
   });
 
-  it('retire un bloc libre ou une légende, mais pas un bloc de plan mural', () => {
-    const legend: ContentBlockInstance = { ...MAP, id: 'blk-2', kind: 'legend' };
-    expect(withdrawBlockCommand(legend, ENV.timestamp).ok).toBe(true);
-    expect(codes(withdrawBlockCommand(MAP, ENV.timestamp))).toEqual(['LAYOUT.BLOCK_KIND_NOT_ENTERABLE']);
+  it('retire un bloc libre, mais pas un bloc venu du gabarit', () => {
+    const free: ContentBlockInstance = { ...MAP, id: 'blk-2', kind: 'free', free_text: { fr: 'Accueil' } };
+    expect(withdrawBlockCommand(free, ENV.timestamp).ok).toBe(true);
+    const legend: ContentBlockInstance = { ...MAP, id: 'blk-3', kind: 'legend' };
+    expect(codes(withdrawBlockCommand(legend, ENV.timestamp))).toEqual(['EDIT.CONTEXT_VIOLATION']);
+    expect(codes(withdrawBlockCommand(MAP, ENV.timestamp))).toEqual(['EDIT.CONTEXT_VIOLATION']);
   });
 });

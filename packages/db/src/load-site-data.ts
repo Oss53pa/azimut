@@ -8,7 +8,7 @@ import {
   zone, parkingSpace,
 } from './schema/site.js';
 import { siteRulesBinding } from './schema/charters.js';
-import { node, edge, verticalLink, buildingLink } from './schema/graph.js';
+import { node, edge, verticalLink, buildingLink, temporaryClosure } from './schema/graph.js';
 import {
   category, pictogram, destination, destinationName,
   travelProfile,
@@ -125,7 +125,7 @@ export async function loadSiteData(
   // A5.2 — les zones du socle. Elles pendent au niveau, comme les empreintes
   // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et c'est
   // par ici que les contrôles du domaine `PARK` le voient désormais.
-  const [zoneRows, parkingSpaceRows] = await Promise.all([
+  const [zoneRows, parkingSpaceRows, closureRows] = await Promise.all([
     levelIds.length > 0
       ? db.select().from(zone).where(inArray(zone.level_id, levelIds))
       : Promise.resolve([]),
@@ -134,6 +134,8 @@ export async function loadSiteData(
       ? db.select().from(parkingSpace)
         .where(inArray(parkingSpace.footprint_id, footprintIds))
       : Promise.resolve([]),
+    // O11 — les fermetures temporaires du site.
+    db.select().from(temporaryClosure).where(eq(temporaryClosure.site_id, siteId)),
   ]);
 
   return assembleSiteData({
@@ -162,5 +164,6 @@ export async function loadSiteData(
     support_versions: versionRows,
     zones: zoneRows,
     parking_spaces: parkingSpaceRows,
+    temporary_closures: closureRows,
   });
 }

@@ -21,7 +21,7 @@ test.describe('Q5 — création d’un client', () => {
     await page.getByLabel(/Numéro fiscal/).fill('NCC-1');
     await page.getByRole('button', { name: /^Créer le client$/ }).click();
 
-    await expect(page.getByText('Raison sociale requise')).toBeVisible();
+    await expect(page.getByText('Nom requis')).toBeVisible();
     await expect(page.getByText('Pays requis')).toBeVisible();
     await expect(page.getByText(/Devise requise/)).toBeVisible();
     await expect(page.getByLabel(/Numéro fiscal/)).toHaveValue('NCC-1');

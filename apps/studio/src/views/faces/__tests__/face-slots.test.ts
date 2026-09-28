@@ -44,12 +44,12 @@ describe('A5.6 — saisie d’une face', () => {
   it('refuse une face déjà déclarée, hors typologie, un gabarit inconnu, une langue inactive', () => {
     const codes = (site: SiteData, face: number, template: string | null, langs: readonly string[]): readonly string[] => {
       const out = declareFaceCommand(site, support.id, face, { template_key: template, langs }, ENV);
-      return out.ok ? [] : out.findings.map(f => f.code);
+      return out.ok ? [] : out.notices.map(n => n.key);
     };
-    expect(codes(withFaces([FACE]), 0, null, [])).toEqual(['LAYOUT.FACE_ALREADY_DECLARED']);
-    expect(codes(refMultilevel, supportFaceCount(refMultilevel, support.id), null, [])).toEqual(['LAYOUT.FACE_INDEX_OUT_OF_RANGE']);
-    expect(codes(refMultilevel, 0, 'gabarit-absent', [])).toEqual(['LAYOUT.FACE_TEMPLATE_UNKNOWN']);
-    expect(codes(refMultilevel, 0, null, ['xx'])).toEqual(['LAYOUT.FACE_LANG_INACTIVE']);
+    expect(codes(withFaces([FACE]), 0, null, [])).toEqual(['form.face.already_declared']);
+    expect(codes(refMultilevel, supportFaceCount(refMultilevel, support.id), null, [])).toEqual(['form.face.index.out_of_range']);
+    expect(codes(refMultilevel, 0, 'gabarit-absent', [])).toEqual(['form.face.template.unknown']);
+    expect(codes(refMultilevel, 0, null, ['xx'])).toEqual(['form.face.lang.inactive']);
   });
 
   it('modifie une face ; l’inverse rétablit ses valeurs, et une clé déjà portée reste permise', () => {

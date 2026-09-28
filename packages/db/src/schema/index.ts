@@ -8,7 +8,7 @@ export {
   sourceClaim, discrepancyDecision,
   parkingSpace,
 } from './site.js';
-export { node, edge, verticalLink, buildingLink } from './graph.js';
+export { node, edge, verticalLink, buildingLink, temporaryClosure } from './graph.js';
 export {
   category, pictogram, destination, destinationName,
   travelProfile, routeCache, decisionPoint,

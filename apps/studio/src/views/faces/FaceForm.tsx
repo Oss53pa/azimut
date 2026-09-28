@@ -1,11 +1,11 @@
 import { type JSX, useState } from 'react';
-import { declareFaceCommand, updateFaceCommand, supportTypologyOf } from '@azimut/core-model';
+import { asList, declareFaceCommand, updateFaceCommand, supportTypologyOf } from '@azimut/core-model';
 import { useSiteData } from '../../context/useSiteData.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import { SelectField, MultiChoice, Button, SPACE, type Option } from '../../components/ui/index.js';
 import type { CommandWrite } from '../../state/use-command-write.js';
-import { single } from '../../state/use-command-write.js';
 import { FindingList } from '../message-schedule/FindingList.js';
+import { NoticeList } from '../message-schedule/NoticeList.js';
 import type { FaceSlot } from './face-slots.js';
 
 /** La valeur du sélecteur qui laisse la face suivre le gabarit de la typologie. */
@@ -46,9 +46,9 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
       const outcome = declareFaceCommand(site, slot.support.id, slot.faceIndex, draft, {
         newId: () => crypto.randomUUID(), timestamp,
       });
-      void write.send(single(outcome), 'supportfaces.form.declared');
+      void write.send(asList(outcome), 'supportfaces.form.declared');
     } else {
-      void write.send(single(updateFaceCommand(site, slot.face, draft, timestamp)), 'supportfaces.form.saved');
+      void write.send(asList(updateFaceCommand(site, slot.face, draft, timestamp)), 'supportfaces.form.saved');
     }
   }
 
@@ -71,6 +71,7 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
         disabled={inactive}
       />
       <FindingList findings={write.findings} empty="" />
+      <NoticeList notices={write.notices} />
       <div>
         <Button rank="primary" onClick={submit} disabled={inactive}>
           {slot.face === undefined ? t('supportfaces.form.declare') : t('supportfaces.form.save')}

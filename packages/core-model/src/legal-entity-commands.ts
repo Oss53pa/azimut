@@ -12,7 +12,8 @@
  * Le fichier est pur : l'identifiant et l'horodatage viennent de l'appelant.
  */
 import { buildCommand, type EntityCommand, type RowValues } from './site-commands.js';
-import type { Finding, Outcome } from './outcome.js';
+import type { Finding } from './outcome.js';
+import { asFormOutcome, notice, type FormNotice, type FormOutcome } from './form-notice.js';
 
 export type LegalEntityDraft = {
   readonly legalName: string;
@@ -46,50 +47,57 @@ const MODULE = '00-plateforme';
  */
 const CURRENCY_FORMAT = /^[A-Z]{3}$/;
 
-function finding(
-  code: string, severity: Finding['severity'], params: Record<string, string | number> = {},
-): Finding {
-  return { code, severity, entity: null, params, ruleRef: RULE_REF };
+function finding(code: string, params: Record<string, string | number> = {}): Finding {
+  return { code, severity: 'blocking', entity: null, params, ruleRef: RULE_REF };
 }
 
 function normalise(value: string): string {
   return value.trim().toLowerCase().normalize('NFC');
 }
 
-/** Les refus et avertissements du formulaire, tous ensemble (M7.5, partie M). */
+/**
+ * Les refus du formulaire, tous ensemble (M7.5, partie M).
+ *
+ * La raison sociale et son unicité suivent les codes du catalogue que le
+ * formulaire de site emploie déjà (`DATA.NAME_REQUIRED`,
+ * `DATA.NAME_DUPLICATE`, bloquants tous deux). Le pays suit
+ * `DATA.COUNTRY_REQUIRED`. La devise n'a pas de code au catalogue pour une
+ * entité : c'est un refus de saisie (`form.currency.invalid`).
+ */
 export function validateLegalEntityDraft(
   draft: LegalEntityDraft,
   env: Pick<LegalEntityEnvironment, 'countryCodes' | 'existingNames'>,
-): { readonly blocking: readonly Finding[]; readonly warnings: readonly Finding[] } {
-  const blocking: Finding[] = [];
-  const warnings: Finding[] = [];
+): { readonly findings: readonly Finding[]; readonly notices: readonly FormNotice[] } {
+  const findings: Finding[] = [];
+  const notices: FormNotice[] = [];
   const name = draft.legalName.trim();
-  if (name === '') blocking.push(finding('DATA.LEGAL_NAME_REQUIRED', 'blocking'));
+  if (name === '') {
+    findings.push(finding('DATA.NAME_REQUIRED', { length: 0 }));
+  } else if (env.existingNames.some(other => normalise(other) === normalise(name))) {
+    findings.push(finding('DATA.NAME_DUPLICATE', { name }));
+  }
   if (!env.countryCodes.includes(draft.countryCode)) {
-    blocking.push(finding('DATA.COUNTRY_REQUIRED', 'blocking', {
+    findings.push(finding('DATA.COUNTRY_REQUIRED', {
       given: draft.countryCode === '' ? 'none' : draft.countryCode,
     }));
   }
   if (!CURRENCY_FORMAT.test(draft.currencyCode.trim())) {
-    blocking.push(finding('DATA.CURRENCY_INVALID', 'blocking', {
+    notices.push(notice('form.currency.invalid', 'blocking', {
       given: draft.currencyCode.trim() === '' ? 'none' : draft.currencyCode.trim(),
     }));
   }
-  // Deux sociétés distinctes peuvent porter la même raison sociale dans deux
-  // pays : le doublon avertit, il ne bloque pas.
-  if (name !== '' && env.existingNames.some(other => normalise(other) === normalise(name))) {
-    warnings.push(finding('DATA.LEGAL_NAME_DUPLICATE', 'warning', { name }));
-  }
-  return { blocking, warnings };
+  return { findings, notices };
 }
 
 /** Déclare une entité juridique : une commande, ou les refus. */
 export function declareLegalEntityCommand(
   draft: LegalEntityDraft,
   env: LegalEntityEnvironment,
-): Outcome<EntityCommand> {
+): FormOutcome<EntityCommand> {
   const checked = validateLegalEntityDraft(draft, env);
-  if (checked.blocking.length > 0) return { ok: false, findings: [...checked.blocking] };
+  if (checked.findings.length > 0 || checked.notices.length > 0) {
+    return { ok: false, findings: checked.findings, notices: checked.notices };
+  }
 
   const id = env.newId();
   const registration = draft.registrationRef.trim();
@@ -103,9 +111,8 @@ export function declareLegalEntityCommand(
     ...(registration !== '' ? { registration_ref: registration } : {}),
     ...(tax !== '' ? { tax_ref: tax } : {}),
   };
-  const out = buildCommand({
+  return asFormOutcome(buildCommand({
     operation: 'create', module: MODULE, table: 'legal_entity', id, org_id: env.orgId,
     after, timestamp: env.timestamp, groupKey: null,
-  });
-  return out.ok ? { ...out, warnings: [...checked.warnings] } : out;
+  }));
 }

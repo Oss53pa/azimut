@@ -13,7 +13,7 @@
 import type { SiteData } from './site.js';
 import type { ContentBlockDef, ContentBlockInstance, FaceTemplate, Support, SupportType } from './site-signage.js';
 import { supportTypologyOf } from './site-signage.js';
-import type { Finding, Outcome } from './outcome.js';
+import { notice, refusedBy, type FormNotice, type FormOutcome } from './form-notice.js';
 import { codePointCompare } from './empreinte.js';
 
 /** La nature d'emplacement qu'un bloc d'instance remplit. */
@@ -79,11 +79,7 @@ export function freeTextsOf(block: Pick<ContentBlockInstance, 'free_text'>): Rea
 }
 
 /** L'emplacement retenu pour un bloc d'instance, et ce qu'il faut en dire. */
-export type SlotChoice = { readonly index: number; readonly warnings: readonly Finding[] };
-
-function slotFinding(code: string, severity: Finding['severity'], supportId: string, params: Record<string, string | number>): Finding {
-  return { code, severity, entity: { kind: 'support', id: supportId }, params, ruleRef: 'D8.3' };
-}
+export type SlotChoice = { readonly index: number; readonly notices: readonly FormNotice[] };
 
 /**
  * Choisit l'emplacement d'un nouveau bloc d'instance sur la face `faceIndex`.
@@ -91,8 +87,9 @@ function slotFinding(code: string, severity: Finding['severity'], supportId: str
  * Gabarit connu : l'emplacement demandé doit être de même nature, sinon le
  * premier libre de cette nature ; aucun, refus. Gabarit inconnu au poste
  * (ils ne sont pas stockés en base) : l'emplacement demandé, sinon le suivant
- * des blocs existants, avec un avertissement — le contrôle `instance_blocks`
- * le jugera là où le gabarit est connu. Un emplacement déjà rempli est refusé.
+ * des blocs existants, et l'écran dit qu'il n'a pas pu le vérifier. Un
+ * emplacement déjà rempli est refusé. Refus de saisie sans code au catalogue
+ * (D2.2, décision du 28/09/2026).
  */
 export function chooseSlot(
   site: SiteData,
@@ -101,26 +98,27 @@ export function chooseSlot(
   kind: string,
   existing: readonly Pick<ContentBlockInstance, 'block_index'>[],
   requested: number | undefined,
-): Outcome<SlotChoice> {
+): FormOutcome<SlotChoice> {
   const taken = new Set(existing.map(b => b.block_index));
   const params = { face_index: faceIndex, kind };
   const template = faceTemplate(site, support, faceIndex);
   if (template === null) {
     const index = requested ?? existing.reduce((max, b) => Math.max(max, b.block_index + 1), 0);
-    if (taken.has(index)) {
-      return { ok: false, findings: [slotFinding('LAYOUT.BLOCK_SLOT_TAKEN', 'blocking', support.id, { ...params, block_index: index })] };
-    }
-    return { ok: true, value: { index, warnings: [slotFinding('LAYOUT.FACE_TEMPLATE_NOT_AT_HAND', 'warning', support.id, { ...params, block_index: index })] }, warnings: [] };
+    if (taken.has(index)) return refusedBy([notice('form.block.slot.taken', 'blocking', { ...params, block_index: index })]);
+    return {
+      ok: true,
+      value: { index, notices: [notice('form.block.template.not_at_hand', 'warning', { ...params, block_index: index })] },
+      warnings: [],
+      notices: [],
+    };
   }
   const fitting = templateSlots(template)
     .map((_, index) => index)
     .filter(index => fitsSlot(template, { kind, block_index: index }));
   const index = requested ?? fitting.find(i => !taken.has(i));
   if (index === undefined || !fitting.includes(index)) {
-    return { ok: false, findings: [slotFinding('LAYOUT.INSTANCE_BLOCK_NO_SLOT', 'blocking', support.id, { ...params, block_index: index ?? -1, template_id: template.id })] };
+    return refusedBy([notice('form.block.slot.none', 'blocking', { ...params, block_index: index ?? -1 })]);
   }
-  if (taken.has(index)) {
-    return { ok: false, findings: [slotFinding('LAYOUT.BLOCK_SLOT_TAKEN', 'blocking', support.id, { ...params, block_index: index })] };
-  }
-  return { ok: true, value: { index, warnings: [] }, warnings: [] };
+  if (taken.has(index)) return refusedBy([notice('form.block.slot.taken', 'blocking', { ...params, block_index: index })]);
+  return { ok: true, value: { index, notices: [] }, warnings: [], notices: [] };
 }

@@ -1,19 +1,16 @@
 import { type JSX, useMemo, useState } from 'react';
-import { wallPlanBlocks, withdrawWallPlanCommand, type Support, codePointCompare } from '@azimut/core-model';
+import { type Support, codePointCompare } from '@azimut/core-model';
 import { renderOrientedPlan, orientationDegForAzimuth } from '@azimut/engine-layout';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, Button, SPACE, TEXT, LABEL_STYLE,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, SPACE, TEXT,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
-import { useCommandWrite, single } from '../state/use-command-write.js';
-import { WallPlanEntry } from './plans/WallPlanEntry.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { siteLabels } from './register/labels.js';
 import { formatNumber } from './register/format.js';
 import { ORIENTED_PLAN_PREVIEW_THEME, PLAN_PREVIEW_FONT_FAMILY } from './plans/plan-preview.js';
-import { wallPlanSupportIds } from './plans/wall-plan-locations.js';
 
 const ALL = 'all';
 const PREVIEW_WIDTH = 288;
@@ -30,8 +27,8 @@ type WallPlanRow = {
  * Module 04 — les plans muraux orientés (D6), au gabarit « registre ».
  *
  * Un plan mural se tourne comme le regard du lecteur : ce qui est devant lui
- * est en haut. Un emplacement de plan mural est un support dont une face
- * porte un bloc `map` (T-2.9, proposition de schéma 4.2) ; la rotation vient
+ * est en haut. D6 et T-2.9 : « un rendu par implantation » — chaque support
+ * implanté est une implantation, sans déclaration à part ; la rotation vient
  * de son azimut par `orientationDegForAzimuth`, et l'aperçu est le rendu du
  * moteur, jamais un dessin.
  */
@@ -41,19 +38,14 @@ export function WallPlansView(): JSX.Element {
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const labels = useMemo(() => siteLabels(site, lang), [site, lang]);
-  const write = useCommandWrite();
 
-  const rows = useMemo<readonly WallPlanRow[]>(() => {
-    const locations = wallPlanSupportIds(site);
-    return [...site.supports]
-      .filter(support => locations.has(support.id))
-      .sort((a, b) => codePointCompare(a.code ?? a.id, b.code ?? b.id))
-      .map(support => ({
-        support,
-        levelId: labels.nodeLevel(support.node_id),
-        rotationDeg: orientationDegForAzimuth(support.azimuth_deg),
-      }));
-  }, [site, labels]);
+  const rows = useMemo<readonly WallPlanRow[]>(() => [...site.supports]
+    .sort((a, b) => codePointCompare(a.code ?? a.id, b.code ?? b.id))
+    .map(support => ({
+      support,
+      levelId: labels.nodeLevel(support.node_id),
+      rotationDeg: orientationDegForAzimuth(support.azimuth_deg),
+    })), [site, labels]);
 
   const levels = site.levels.filter(l => rows.some(r => r.levelId === l.id));
   const visible = filter === ALL ? rows : rows.filter(r => r.levelId === filter);
@@ -75,16 +67,6 @@ export function WallPlansView(): JSX.Element {
       viewer_position: node.position,
       show_north_arrow: true,
     });
-  }, [site, selected]);
-
-  // Les blocs de plan du support choisi, face par face, pour le retrait.
-  const selectedBlocks = useMemo(() => {
-    if (selected === null) return [];
-    const faces = new Map(site.support_faces.filter(f => f.support_id === selected.support.id).map(f => [f.id, f.face_index]));
-    return wallPlanBlocks(site)
-      .filter(b => faces.has(b.face_id))
-      .map(block => ({ block, face: faces.get(block.face_id) ?? 0 }))
-      .sort((a, b) => a.face - b.face || a.block.block_index - b.block.block_index);
   }, [site, selected]);
 
   const filters: readonly RegisterFilter[] = [
@@ -140,27 +122,11 @@ export function WallPlansView(): JSX.Element {
             {t('wallplans.preview.note')}
           </p>
         </section>
-        <section style={{ padding: '12px 16px', display: 'grid', gap: SPACE.sm }} aria-label={t('wallplans.section.blocks')}>
-          <h3 style={{ ...LABEL_STYLE, margin: 0 }}>{t('wallplans.section.blocks')}</h3>
-          {selectedBlocks.map(({ block, face }) => (
-            <div key={block.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACE.sm }}>
-              <span style={{ fontSize: TEXT.small }}>{t('wallplans.block.label', { face, block: block.block_index })}</span>
-              <Button
-                rank="quiet"
-                disabled={write.readonly || write.busy}
-                onClick={() => { void write.send(single(withdrawWallPlanCommand(block, new Date().toISOString())), 'wallplans.entry.withdrawn'); }}
-              >
-                {t('wallplans.withdraw')}
-              </Button>
-            </div>
-          ))}
-        </section>
       </Inspector>
     );
 
   return (
     <div>
-      <WallPlanEntry write={write} />
       <RegisterLayout
         title={t('wallplans.title')}
         summary={t('wallplans.summary', { count: rows.length })}
