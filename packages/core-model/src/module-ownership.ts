@@ -33,9 +33,10 @@ export type ModuleKey = (typeof MODULE_KEYS)[number];
  * celui de la couche la plus haute qu'il sert, et il ne lit rien au-dessus.
  */
 export const MODULE_LAYER: Readonly<Record<ModuleKey, number>> = {
-  // La plateforme porte ce que le socle référence (`site.legal_entity_id`) :
-  // elle ne peut pas être au-dessus de lui, et L2 n'a pas de couche plus basse.
-  '00-plateforme': 0,
+  // L2 et Q1.2 placent la plateforme sous le socle, hors des couches
+  // numérotées : elle ne lit rien, et le socle lit ce qu'elle porte
+  // (`site.legal_entity_id`).
+  '00-plateforme': -1,
   '01-socle': 0,
   '02-wayfinding': 1,
   '03-parcours': 1,
@@ -89,6 +90,9 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // A5.3 et Q2 : la trace des passages de la validation de complétude
     // appartient au module qui possède le graphe.
     'graph_validation',
+    // O11 et Q2 : la fermeture temporaire « appartient au socle, parce
+    // qu'elle modifie la disponibilité des arêtes » (migration 0069).
+    'temporary_closure',
     // Q2 : « site_fact | 01 Socle | Faits déclarés du site, avec source et
     // statut, section A5.11 ». La table était rangée parmi celles sans
     // propriétaire, faute d'y avoir été inscrite ; elle l'est.

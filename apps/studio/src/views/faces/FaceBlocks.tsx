@@ -1,6 +1,6 @@
 import { type JSX, useState } from 'react';
 import {
-  ENTERABLE_BLOCK_KINDS, declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
+  asList, declareBlockCommand, updateFreeTextCommand, withdrawBlockCommand,
   faceLangs, readFreeTexts, isEnterableBlockKind, faceTemplate, templateSlots, fitsSlot,
   type ContentBlockInstance, type FreeTexts, type SupportFace,
 } from '@azimut/core-model';
@@ -9,10 +9,12 @@ import { useI18n } from '../../i18n/useI18n.js';
 import type { UiMessageKey } from '../../i18n/messages.js';
 import { SelectField, TextField, Button, Note, SPACE, TEXT, LABEL_STYLE, type Option } from '../../components/ui/index.js';
 import type { CommandWrite } from '../../state/use-command-write.js';
-import { single } from '../../state/use-command-write.js';
 import { codePointCompare } from '@azimut/core-model';
 
 const KNOWN_KINDS: ReadonlySet<string> = new Set(['free', 'legend', 'map', 'resolved', 'pictogram']);
+
+/** E1.4, contexte 3 : seul le bloc `free` se saisit sur une face. */
+const KIND = 'free';
 
 type FaceBlocksProps = {
   readonly face: SupportFace;
@@ -42,15 +44,14 @@ function TextFields({ langs, texts, onChange, disabled }: {
 }
 
 /**
- * D8.3 — les blocs d'une face déclarée : ajouter un bloc libre ou une
- * légende, réécrire un texte libre, retirer. Les blocs venus du gabarit ou
+ * D8.3 et E1.4 — les blocs d'une face déclarée : ajouter un bloc libre,
+ * réécrire son texte, le retirer. Les blocs venus du gabarit ou
  * des plans muraux se lisent ici sans se saisir.
  */
 export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   const site = useSiteData();
   const { t } = useI18n();
   const langs = faceLangs(site, face);
-  const [kind, setKind] = useState<string>(ENTERABLE_BLOCK_KINDS[0]);
   const [slot, setSlot] = useState('');
   const [texts, setTexts] = useState<FreeTexts>({});
   const [editing, setEditing] = useState<{ readonly id: string; readonly texts: FreeTexts } | null>(null);
@@ -60,7 +61,6 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
     .filter(b => b.face_id === face.id)
     .sort((a, b) => a.block_index - b.block_index || codePointCompare(a.id, b.id));
   const kindLabel = (k: string): string => (KNOWN_KINDS.has(k) ? t(`faceblocks.kind.${k}` as UiMessageKey) : k);
-  const kindOptions: readonly Option[] = ENTERABLE_BLOCK_KINDS.map(k => ({ value: k, label: kindLabel(k) }));
   const now = (): string => new Date().toISOString();
 
   // D8.3 — les emplacements du gabarit que ce type de bloc peut remplir, libres.
@@ -71,24 +71,24 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
     { value: '', label: t('faceblocks.slot.first') },
     ...templateSlots(template)
       .map((_, index) => index)
-      .filter(index => fitsSlot(template, { kind, block_index: index }) && !taken.has(index))
+      .filter(index => fitsSlot(template, { kind: KIND, block_index: index }) && !taken.has(index))
       .map(index => ({ value: String(index), label: t('faceblocks.slot.option', { index }) })),
   ];
 
   function add(): void {
-    const outcome = declareBlockCommand(site, face, kind, kind === 'free' ? texts : {}, {
+    const outcome = declareBlockCommand(site, face, KIND, texts, {
       newId: () => crypto.randomUUID(), timestamp: now(),
     }, slot === '' ? undefined : Number(slot));
-    void write.send(single(outcome), 'faceblocks.added').then(ok => { if (ok) { setTexts({}); setSlot(''); } });
+    void write.send(asList(outcome), 'faceblocks.added').then(ok => { if (ok) { setTexts({}); setSlot(''); } });
   }
 
   function save(block: ContentBlockInstance, next: FreeTexts): void {
-    void write.send(single(updateFreeTextCommand(site, face, block, next, now())), 'faceblocks.saved')
+    void write.send(asList(updateFreeTextCommand(site, face, block, next, now())), 'faceblocks.saved')
       .then(ok => { if (ok) setEditing(null); });
   }
 
   const summary = (b: ContentBlockInstance): string => {
-    if (b.kind !== 'free') return isEnterableBlockKind(b.kind) ? '' : t('faceblocks.fixed');
+    if (!isEnterableBlockKind(b.kind)) return t('faceblocks.fixed');
     const read = readFreeTexts(b);
     return langs.map(l => read[l]).filter((v): v is string => v !== undefined).join(' · ');
   };
@@ -103,7 +103,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
             <span style={{ fontSize: TEXT.small }}>{t('faceblocks.item', { index: b.block_index, kind: kindLabel(b.kind) })}</span>
             {isEnterableBlockKind(b.kind) && (
               <span style={{ display: 'flex', gap: SPACE.xs }}>
-                {b.kind === 'free' && editing?.id !== b.id && (
+                {editing?.id !== b.id && (
                   <Button rank="quiet" disabled={inactive} onClick={() => { setEditing({ id: b.id, texts: readFreeTexts(b) }); }}>
                     {t('faceblocks.edit')}
                   </Button>
@@ -111,7 +111,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
                 <Button
                   rank="quiet"
                   disabled={inactive}
-                  onClick={() => { void write.send(single(withdrawBlockCommand(b, now())), 'faceblocks.withdrawn'); }}
+                  onClick={() => { void write.send(asList(withdrawBlockCommand(b, now())), 'faceblocks.withdrawn'); }}
                 >
                   {t('faceblocks.withdraw')}
                 </Button>
@@ -132,11 +132,10 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
         </div>
       ))}
       <h3 style={{ ...LABEL_STYLE, margin: `${String(SPACE.sm)}px 0 0` }}>{t('faceblocks.add.title')}</h3>
-      <SelectField label={t('faceblocks.add.kind')} value={kind} options={kindOptions} onChange={k => { setKind(k); setSlot(''); }} disabled={inactive} />
       {template !== null && (
         <SelectField label={t('faceblocks.slot')} value={slot} options={slotOptions} onChange={setSlot} disabled={inactive} />
       )}
-      {kind === 'free' && <TextFields langs={langs} texts={texts} onChange={setTexts} disabled={inactive} />}
+      <TextFields langs={langs} texts={texts} onChange={setTexts} disabled={inactive} />
       <div>
         <Button rank="secondary" onClick={add} disabled={inactive}>{t('faceblocks.add.submit')}</Button>
       </div>

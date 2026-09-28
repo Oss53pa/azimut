@@ -3,7 +3,7 @@ import type { Polygon, Point } from './geometry.js';
 import type { PlanSource, PlanCalibration } from './plan.js';
 import type { ActiveLang } from './lang.js';
 import type { OpeningHours } from './opening-hours.js';
-import type { EdgeAvailability } from './edge-availability.js';
+import type { TemporaryClosure } from './temporary-closure.js';
 import type { FootprintKind, SiteZone } from './site-kinds.js';
 
 export {
@@ -186,11 +186,6 @@ export type Edge = {
   readonly direction: EdgeDirection;
   readonly evacuation_route: boolean;
   readonly length_m: number;
-  /**
-   * A5.3 — fermetures déclarées (voir `edge-availability.ts`). Absente quand
-   * la colonne est vide ; illisible, elle est gardée comme telle.
-   */
-  readonly availability?: EdgeAvailability;
 };
 
 export type VerticalLinkKind =
@@ -397,4 +392,9 @@ export type SiteData = {
    * section S8, règles S-35 à S-37.
    */
   readonly parking_spaces: readonly ParkingSpace[];
+  /**
+   * O11 — les fermetures temporaires du site. Facultatif au type pour les
+   * jeux d'essai qui n'en portent pas : absent vaut aucune fermeture.
+   */
+  readonly temporary_closures?: readonly TemporaryClosure[];
 };

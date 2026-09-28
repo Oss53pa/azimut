@@ -137,8 +137,18 @@ export type EdgeRow = {
   readonly direction: string;
   readonly evacuation_route: boolean;
   readonly length_m: string;
-  /** A5.3 — `jsonb`, forme libre du point de vue de la base ; lue par `readEdgeAvailability`. */
-  readonly availability: unknown;
+};
+
+/** O11 — `temporary_closure` (migration 0069). Bornes `timestamp` sans fuseau. */
+export type TemporaryClosureRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly site_id: string;
+  /** `jsonb`, tableau d'identifiants d'arêtes. */
+  readonly edge_ids: unknown;
+  readonly from_at: string;
+  readonly to_at: string;
+  readonly reason: string;
 };
 
 export type VerticalLinkRow = {
@@ -320,4 +330,6 @@ export type SiteRowSet = {
   readonly support_versions: readonly SupportVersionRow[];
   readonly zones: readonly ZoneRow[];
   readonly parking_spaces: readonly ParkingSpaceRow[];
+  /** O11 — facultatif : un chargeur qui ne lit pas la table n'en rend aucune. */
+  readonly temporary_closures?: readonly TemporaryClosureRow[];
 };

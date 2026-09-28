@@ -112,6 +112,7 @@ non plus — elle n'en retire que les clés étrangères.
 0066_a5_2_drop_site_rules_pack_id
 0067_a12_3_audit_log_insert_only
 0068_a5_2_plan_source_content_kind
+0069_o11_temporary_closure
 ```
 
 ## Règle pour la suite

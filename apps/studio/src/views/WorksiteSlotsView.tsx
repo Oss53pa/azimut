@@ -9,7 +9,6 @@ import {
 import { RegistryStatus } from './register/RegistryStatus.js';
 import { useSiteData } from '../context/useSiteData.js';
 import { closuresOnDay } from './closures/closure-rows.js';
-import { siteLabels } from './register/labels.js';
 import { formatDay } from './register/format.js';
 
 const ALL = 'all';
@@ -70,16 +69,15 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
     { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.planned_on ?? undefined, lang) ?? '—' },
   ];
 
-  // A5.3 — les arêtes qui aboutissent aux supports du créneau, fermées le jour de pose.
+  // O11 — les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
   const closureInfo = (slot: InstallSlot): readonly InspectorRow[] => {
     if (slot.planned_on === null) return [{ id: 'undated', label: t('worksiteslots.closures.undated'), value: '' }];
-    const labels = siteLabels(site, lang);
     const closures = closuresOnDay(site, slot.support_ids, slot.planned_on);
     if (closures.length === 0) return [{ id: 'none', label: t('worksiteslots.closures.none'), value: '' }];
-    return closures.map((c, i) => ({
-      id: `${c.edge.id}-${String(i)}`,
-      label: `${labels.node(c.edge.from_node_id)} — ${labels.node(c.edge.to_node_id)}`,
-      value: c.closure === null ? t('closures.unreadable') : `${c.closure.from} → ${c.closure.to}`,
+    return closures.map(c => ({
+      id: c.id,
+      label: c.reason,
+      value: `${c.from_at} → ${c.to_at}`,
       computed: true,
     }));
   };
@@ -110,7 +108,7 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
           {
             id: 'closures',
             title: t('worksiteslots.section.closures'),
-            // A5.3 — les arêtes qui aboutissent aux supports du créneau, fermées le jour de pose.
+            // O11 — les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
             rows: closureInfo(selected),
           },
         ]}
