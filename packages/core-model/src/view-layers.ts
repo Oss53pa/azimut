@@ -1,4 +1,5 @@
 import type { Finding } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * Calques thématiques et coloration de travail — sections S2.3 et S3.
@@ -89,7 +90,7 @@ export function stackedLayers(layers: readonly ViewLayer[]): readonly ViewLayer[
   return [...layers].sort((l, r) => {
     const byOrder = l.z_order - r.z_order;
     if (byOrder !== 0) return byOrder;
-    return l.key.localeCompare(r.key);
+    return codePointCompare(l.key, r.key);
   });
 }
 
@@ -222,12 +223,12 @@ export function workColoursOf(
 ): ReadonlyMap<string, string> {
   const mine = colours
     .filter(c => c.user_id === userId)
-    .sort((l, r) => l.id.localeCompare(r.id));
+    .sort((l, r) => codePointCompare(l.id, r.id));
   const resolved = new Map<string, string>();
   for (const colour of mine) {
     resolved.set(`${colour.target_kind}:${colour.target_id}`, colour.hex);
   }
-  return new Map([...resolved.entries()].sort(([l], [r]) => l.localeCompare(r)));
+  return new Map([...resolved.entries()].sort(([l], [r]) => codePointCompare(l, r)));
 }
 
 /**

@@ -8,6 +8,7 @@ import {
   SPACE, TEXT, type Metric, type Column,
 } from '../components/ui/index.js';
 import { TemplateRegions } from './templates/TemplateRegions.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type TemplatesViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -47,7 +48,7 @@ export function TemplatesView({ onNavigate }: TemplatesViewProps): JSX.Element {
     const typeByKey = new Map(site.support_types.map(type => [type.key, type]));
 
     return [...site.face_templates]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map((template): TemplateRow => {
         const type = typeByKey.get(template.support_type_key);
         let overlapCount = 0;

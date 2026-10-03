@@ -9,6 +9,7 @@
  */
 import type { SiteData } from '@azimut/core-model';
 import type { MessageSchedule, JalonnementSequence, JalonnementStep, NamedEntity } from '@azimut/engine-graph';
+import { codePointCompare } from '@azimut/core-model';
 
 /** Bâtiment porteur d'un nœud, via son niveau. */
 function buildingOfNode(site: SiteData, nodeId: string): string {
@@ -53,11 +54,11 @@ export function jalonnementFromSchedule(
   }
 
   const steps: JalonnementStep[] = [...announced.keys()]
-    .sort((a, b) => a.localeCompare(b))
+    .sort((a, b) => codePointCompare(a, b))
     .map((point): JalonnementStep => ({
       point_id: point,
-      announced: [...(announced.get(point) ?? new Set<string>())].sort((a, b) => a.localeCompare(b)),
-      reached: [...(reachedAt.get(point) ?? [])].sort((a, b) => a.localeCompare(b)),
+      announced: [...(announced.get(point) ?? new Set<string>())].sort((a, b) => codePointCompare(a, b)),
+      reached: [...(reachedAt.get(point) ?? [])].sort((a, b) => codePointCompare(a, b)),
     }));
 
   return [{ id: `${schedule.site_id}#v${String(schedule.version)}`, steps }];
@@ -70,7 +71,7 @@ export function jalonnementFromSchedule(
  */
 export function orientationNames(site: SiteData, lang: string): readonly NamedEntity[] {
   return [...site.destinations]
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.id, b.id))
     .map((destination): NamedEntity => {
       const named = site.destination_names.find(
         n => n.destination_id === destination.id && n.lang === lang,

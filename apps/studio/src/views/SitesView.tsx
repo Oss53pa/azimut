@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
+import { sitesByName } from '../state/site-order.js';
 import { isBound } from '@azimut/core-model';
 import { rulesPackLabel } from '../state/rules-pack-label.js';
 import { appRepository, useSiteList, type SiteSummary } from '../data/index.js';
@@ -29,12 +30,12 @@ type SitesViewProps = {
  * regarde des cas d'essai ou des sites réels.
  */
 export function SitesView({ currentKey, onOpenSite, onCreate }: SitesViewProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const repository = useMemo(() => appRepository(), []);
   const { state, reload } = useSiteList(repository);
   const [query, setQuery] = useState('');
 
-  const sites = state.status === 'ready' ? state.value : [];
+  const sites = state.status === 'ready' ? sitesByName(state.value, lang) : [];
   const filtered = sites.filter(site =>
     query.length === 0 || site.name.toLowerCase().includes(query.toLowerCase()),
   );

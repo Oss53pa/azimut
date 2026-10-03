@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H5.2 / H5.3 — A tenant sign is instructed and followed against the site's
@@ -72,7 +73,7 @@ export function guardSignProject(
     violate('lighting', project.lighting);
   }
   const forbidden = new Set(regulation.forbidden_features);
-  for (const feature of [...project.features].sort((a, b) => a.localeCompare(b))) {
+  for (const feature of [...project.features].sort((a, b) => codePointCompare(a, b))) {
     if (forbidden.has(feature)) {
       violate('forbidden_feature', feature);
     }

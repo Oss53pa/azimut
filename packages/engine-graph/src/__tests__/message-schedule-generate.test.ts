@@ -7,6 +7,7 @@ import {
   NO_WAYFINDING_RULES, messageLineId, reduceInformationLevel,
 } from '../message-schedule.js';
 import type { TypologyInformationLevels } from '../message-schedule.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * N2.7, critère 1 : « Sur un site de référence, le tableau des messages généré
@@ -69,7 +70,7 @@ function nameOf(destinationId: string, lang: 'fr' | 'en'): string {
 function blockCount(): number {
   const type = SITE.support_types.find(t => t.key === TYPOLOGY);
   if (type === undefined) throw new Error('typologie absente du site de référence');
-  const side = [...type.faces].sort((a, b) => a.side.localeCompare(b.side))[0]?.side;
+  const side = [...type.faces].sort((a, b) => codePointCompare(a.side, b.side))[0]?.side;
   const template = SITE.face_templates.find(
     t => t.support_type_key === TYPOLOGY && t.side === side,
   );

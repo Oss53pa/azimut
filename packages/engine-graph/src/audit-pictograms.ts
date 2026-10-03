@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * J5.3 — Each orientation-registry pictogram carries a comprehension-test
@@ -27,7 +28,7 @@ export function auditPictogramComprehension(
   pictograms: readonly PictogramComprehension[],
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...pictograms].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...pictograms].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const picto of sorted) {
     if (picto.registry === 'wayfinding' && picto.comprehension_state === 'untested') {

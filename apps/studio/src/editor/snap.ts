@@ -11,6 +11,7 @@
  */
 
 import type { Point } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -101,7 +102,7 @@ export function findSnapTarget(
       if (dist < bestDist) {
         best = t;
         bestDist = dist;
-      } else if (dist === bestDist && t.sourceId.localeCompare(best.sourceId) < 0) {
+      } else if (dist === bestDist && codePointCompare(t.sourceId, best.sourceId) < 0) {
         best = t;
         bestDist = dist;
       }

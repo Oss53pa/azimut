@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
-import { LOCALIZED, ROOT, readBaseline, studioFiles } from './a9-perimetre.js';
+import { relative } from 'node:path';
+import { LOCALIZED, ROOT, studioFiles } from './a9-perimetre.js';
 
 /**
  * A9, version 30 — « Dans l'interface, un tri selon la langue de l'utilisateur
@@ -21,14 +21,11 @@ import { LOCALIZED, ROOT, readBaseline, studioFiles } from './a9-perimetre.js';
  * autre mention, un commentaire compris, compte comme un appel sans langue :
  * le décompte reste textuel, pour ne rien laisser passer.
  *
- * Les occurrences existantes sont relevées dans
- * `a9-releve-studio-langue-non-declaree.json`, et leur remplacement appartient
- * à la tâche A9 déclarée à la matrice. Le contrôle fige le relevé : aucun
- * fichier ne peut en compter une de plus, et un fichier qui en compte une de
- * moins oblige à resserrer le relevé dans le même commit.
+ * Le relevé des appels antérieurs au contrôle est tombé à zéro et a disparu :
+ * la tâche déclarée à la version 30 les a remplacés, par `codePointCompare`
+ * pour les identifiants, les codes et les dates, par la langue active pour le
+ * texte affiché. Le contrôle exige désormais zéro appel sans langue.
  */
-
-const BASELINE_PATH = join(import.meta.dirname, 'a9-releve-studio-langue-non-declaree.json');
 
 /** Rang de l'argument qui porte la langue, par forme d'appel. */
 function languageArgument(name: string): number {
@@ -115,20 +112,9 @@ describe('A9 — ce qui déclare une langue dans l’interface', () => {
   });
 });
 
-describe('A9 — aucun appel sans langue nouveau dans l’interface', () => {
-  it('aucun fichier de l’interface n’en compte plus que le relevé', () => {
-    const baseline = readBaseline(BASELINE_PATH);
-    const introduced = [...currentCounts()]
-      .filter(([file, count]) => count > (baseline.get(file) ?? 0))
-      .map(([file, count]) => `${file} : ${count} (relevé ${baseline.get(file) ?? 0})`);
-    expect(introduced, 'Déclarer la langue active, ou comparer par points de code (codePointCompare)').toEqual([]);
-  });
-
-  it('le relevé est exact : une occurrence retirée s’y retire aussi', () => {
-    const current = currentCounts();
-    const stale = [...readBaseline(BASELINE_PATH)]
-      .filter(([file, count]) => (current.get(file) ?? 0) < count)
-      .map(([file, count]) => `${file} : relevé ${count}, compté ${current.get(file) ?? 0}`);
-    expect(stale, 'Resserrer tests/a9-releve-studio-langue-non-declaree.json').toEqual([]);
+describe('A9 — aucun appel sans langue dans l’interface', () => {
+  it('aucun fichier de l’interface n’en compte un seul', () => {
+    const found = [...currentCounts()].map(([file, count]) => `${file} : ${count}`);
+    expect(found, 'Déclarer la langue active, ou comparer par points de code (codePointCompare)').toEqual([]);
   });
 });

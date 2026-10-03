@@ -5,7 +5,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg, parkingSpacesOfLevel, accessibleSpaceMark } from '@azimut/core-model';
+import { roundSvg, parkingSpacesOfLevel, accessibleSpaceMark, codePointCompare } from '@azimut/core-model';
 import { accessibleMarkSvg } from './parking-mark.js';
 
 /** L'épaisseur de trait d'une place — S-39, « contour léger ». */
@@ -259,7 +259,7 @@ export function renderOrientedPlan(
   );
 
   const sortedFp = [...rotatedFootprints].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const fp of sortedFp) {
     const points = fp.vertices
@@ -304,7 +304,7 @@ export function renderOrientedPlan(
       rotatedNodes.map((n) => [n.id, n]),
     );
     const sortedEdges = [...edges].sort(
-      (a, b) => a.id.localeCompare(b.id),
+      (a, b) => codePointCompare(a.id, b.id),
     );
     for (const e of sortedEdges) {
       const from = rnMap.get(e.from_node_id);
@@ -324,7 +324,7 @@ export function renderOrientedPlan(
   }
 
   const sortedNodes = [...rotatedNodes].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const n of sortedNodes) {
     const p = tx(n.position, t);
@@ -344,7 +344,7 @@ export function renderOrientedPlan(
     const sortedDests = [...destinations].sort(
       (a, b) =>
         a.display_priority - b.display_priority
-        || a.id.localeCompare(b.id),
+        || codePointCompare(a.id, b.id),
     );
     for (const d of sortedDests) {
       const rn = rotatedNodes.find((n) => n.id === d.node_id);

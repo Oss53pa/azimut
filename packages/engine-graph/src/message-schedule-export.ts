@@ -11,6 +11,7 @@
  */
 
 import type { MessageLine, MessageSchedule } from './message-schedule.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type ScheduleLang = 'fr' | 'en';
 
@@ -145,7 +146,7 @@ export function messageScheduleToCsv(
   ].map(escapeCsvField).join(';'));
 
   const ordered = [...schedule.lines].sort((a, b) =>
-    a.support_id.localeCompare(b.support_id) ||
+    codePointCompare(a.support_id, b.support_id) ||
     a.face_index - b.face_index ||
     a.block_index - b.block_index,
   );
@@ -191,7 +192,7 @@ export function messageScheduleToMarkdown(
   out.push(`| ${header.map(() => '---').join(' | ')} |`);
 
   const ordered = [...schedule.lines].sort((a, b) =>
-    a.support_id.localeCompare(b.support_id) ||
+    codePointCompare(a.support_id, b.support_id) ||
     a.face_index - b.face_index ||
     a.block_index - b.block_index,
   );

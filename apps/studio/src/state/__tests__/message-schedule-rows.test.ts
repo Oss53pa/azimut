@@ -163,7 +163,7 @@ describe('R6 (partie R) — filtres et recherche', () => {
   });
 
   it('les lignes écartées sont masquées par défaut', () => {
-    const out = applyFilters(rows, NO_FILTERS);
+    const out = applyFilters(rows, NO_FILTERS, 'fr');
     expect(out.rows).toHaveLength(2);
   });
 
@@ -174,49 +174,49 @@ describe('R6 (partie R) — filtres et recherche', () => {
    * et l'écran cesserait de dire ce qui n'a pas trouvé de place.
    */
   it('le compte des écartées ne dépend pas du filtre qui les masque', () => {
-    expect(applyFilters(rows, NO_FILTERS).excluded).toBe(1);
-    expect(applyFilters(rows, { ...NO_FILTERS, showExcluded: true }).excluded).toBe(1);
+    expect(applyFilters(rows, NO_FILTERS, 'fr').excluded).toBe(1);
+    expect(applyFilters(rows, { ...NO_FILTERS, showExcluded: true }, 'fr').excluded).toBe(1);
   });
 
   it('le filtre « Écartées » les fait revenir, et elles sont comptées', () => {
-    const out = applyFilters(rows, { ...NO_FILTERS, showExcluded: true });
+    const out = applyFilters(rows, { ...NO_FILTERS, showExcluded: true }, 'fr');
     expect(out.rows).toHaveLength(3);
   });
 
   /** Critère 4 de R18 : « Un filtre actif affiche le nombre de lignes qu'il masque. » */
   it('un filtre actif donne le nombre exact de lignes masquées', () => {
-    const out = applyFilters(rows, { ...NO_FILTERS, staleOnly: true });
+    const out = applyFilters(rows, { ...NO_FILTERS, staleOnly: true }, 'fr');
     expect(out.rows).toHaveLength(1);
     expect(out.hidden).toBe(2);
   });
 
   it('le filtre de direction retient les seules lignes qui la portent', () => {
-    const out = applyFilters(rows, { ...NO_FILTERS, directions: ['right'] });
+    const out = applyFilters(rows, { ...NO_FILTERS, directions: ['right'] }, 'fr');
     expect(out.rows.map(r => r.line.id)).toEqual(['sup-1#0#1']);
   });
 
   it('le filtre de point de décision retient les seules lignes qui le citent', () => {
     const out = applyFilters(rows, {
       ...NO_FILTERS, decisionPointIds: ['n-parvis'], showExcluded: true,
-    });
+    }, 'fr');
     expect(out.rows.map(r => r.line.id)).toEqual(['sup-2#0#0']);
   });
 
   it('la recherche ignore les accents et la casse', () => {
-    expect(foldForSearch('Café Étoilé')).toBe('cafe etoile');
+    expect(foldForSearch('Café Étoilé', 'fr')).toBe('cafe etoile');
     const out = applyFilters(rows, {
       ...NO_FILTERS, search: 'ETOILE', showExcluded: true,
-    });
+    }, 'fr');
     expect(out.rows.map(r => r.line.id)).toEqual(['sup-2#0#0']);
   });
 
   it('la recherche porte aussi sur les codes et les points de décision', () => {
-    const out = applyFilters(rows, { ...NO_FILTERS, search: 'd-042' });
+    const out = applyFilters(rows, { ...NO_FILTERS, search: 'd-042' }, 'fr');
     expect(out.rows).toHaveLength(2);
   });
 
   it('aucun filtre ne masque rien', () => {
-    expect(applyFilters(rows, { ...NO_FILTERS, showExcluded: true }).hidden).toBe(0);
+    expect(applyFilters(rows, { ...NO_FILTERS, showExcluded: true }, 'fr').hidden).toBe(0);
   });
 });
 

@@ -47,7 +47,7 @@ import type {
   WayfindingRules,
 } from './message-schedule.js';
 import { NO_WAYFINDING_RULES } from './message-schedule.js';
-import { instanceBlocksOf } from '@azimut/core-model';
+import { instanceBlocksOf, codePointCompare } from '@azimut/core-model';
 import { generateMessageSchedule } from './message-schedule-generate.js';
 
 // ---------------------------------------------------------------------------
@@ -63,14 +63,14 @@ export function faceIndexForSide(
   supportType: SupportType,
   side: string,
 ): number | null {
-  const sorted = [...supportType.faces].sort((a, b) => a.side.localeCompare(b.side));
+  const sorted = [...supportType.faces].sort((a, b) => codePointCompare(a.side, b.side));
   const index = sorted.findIndex(f => f.side === side);
   return index === -1 ? null : index;
 }
 
 function sortedBlocks(template: FaceTemplate): readonly ContentBlockDef[] {
   return [...template.blocks].sort(
-    (a, b) => a.ordinal - b.ordinal || a.kind.localeCompare(b.kind),
+    (a, b) => a.ordinal - b.ordinal || codePointCompare(a.kind, b.kind),
   );
 }
 

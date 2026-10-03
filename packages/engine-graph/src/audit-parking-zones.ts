@@ -1,5 +1,5 @@
 import type { Finding, SiteData, SiteZone } from '@azimut/core-model';
-import { isParkingSpaceFootprint, isParkingZone } from '@azimut/core-model';
+import { isParkingSpaceFootprint, isParkingZone, codePointCompare } from '@azimut/core-model';
 
 /**
  * Places de stationnement et zones qui les portent — section S8.
@@ -38,7 +38,7 @@ export type ParkingZoneReport = {
 function parkingZones(zones: readonly SiteZone[]): readonly SiteZone[] {
   return [...zones]
     .filter(zone => isParkingZone(zone.kind))
-    .sort((l, r) => l.id.localeCompare(r.id));
+    .sort((l, r) => codePointCompare(l.id, r.id));
 }
 
 /**
@@ -60,7 +60,7 @@ export function auditParkingZones(site: SiteData): ParkingZoneReport {
 
   const spaces = site.footprints
     .filter(footprint => isParkingSpaceFootprint(footprint.kind))
-    .sort((l, r) => l.id.localeCompare(r.id));
+    .sort((l, r) => codePointCompare(l.id, r.id));
 
   const findings: Finding[] = [];
   for (const space of spaces) {

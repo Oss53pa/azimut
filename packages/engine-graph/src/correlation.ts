@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * N3.2 / N3.3 — M03.P5 : un montant n'est calculé que si la corrélation entre
@@ -147,7 +148,7 @@ function pairSample(
     });
   }
 
-  pairs.sort((a, b) => a.destination_id.localeCompare(b.destination_id));
+  pairs.sort((a, b) => codePointCompare(a.destination_id, b.destination_id));
   return { pairs, dropped };
 }
 
@@ -159,7 +160,7 @@ function pairSample(
  */
 function ranks(values: readonly { readonly key: string; readonly value: number }[]): Map<string, number> {
   const sorted = [...values].sort((a, b) =>
-    a.value === b.value ? a.key.localeCompare(b.key) : a.value - b.value,
+    a.value === b.value ? codePointCompare(a.key, b.key) : a.value - b.value,
   );
 
   const result = new Map<string, number>();

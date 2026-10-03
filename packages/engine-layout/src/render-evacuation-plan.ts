@@ -5,7 +5,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg, parkingSpacesOfLevel, pointInPolygon } from '@azimut/core-model';
+import { roundSvg, parkingSpacesOfLevel, pointInPolygon, codePointCompare } from '@azimut/core-model';
 
 export type EvacuationTheme = {
   readonly background: string;
@@ -245,7 +245,7 @@ export function renderEvacuationPlan(
   );
 
   const sortedFp = [...footprints].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const fp of sortedFp) {
     const points = fp.geometry.vertices
@@ -265,7 +265,7 @@ export function renderEvacuationPlan(
   if (options.show_non_evacuation) {
     const nodeMap = new Map(nodes.map((n) => [n.id, n]));
     const sortedNonEvac = [...nonEvacRoutes].sort(
-      (a, b) => a.id.localeCompare(b.id),
+      (a, b) => codePointCompare(a.id, b.id),
     );
     for (const e of sortedNonEvac) {
       const from = nodeMap.get(e.from_node_id);
@@ -283,7 +283,7 @@ export function renderEvacuationPlan(
 
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const sortedEvac = [...evacRoutes].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const e of sortedEvac) {
     const from = nodeMap.get(e.from_node_id);
@@ -319,7 +319,7 @@ export function renderEvacuationPlan(
   }
 
   const sortedExits = [...exits].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const ex of sortedExits) {
     const p = tx(ex.position, t);
@@ -340,7 +340,7 @@ export function renderEvacuationPlan(
 
   const nonExitNodes = nodes.filter((n) => !EXIT_KINDS.has(n.kind));
   const sortedNonExit = [...nonExitNodes].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const n of sortedNonExit) {
     const p = tx(n.position, t);

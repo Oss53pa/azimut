@@ -1,5 +1,5 @@
 import type { SiteData, Finding, SiteVocabulary } from '@azimut/core-model';
-import { EMPTY_VOCABULARY } from '@azimut/core-model';
+import { EMPTY_VOCABULARY, codePointCompare } from '@azimut/core-model';
 import {
   validateGraph,
   validateDirectory,
@@ -112,11 +112,11 @@ export function createAuditSiteHandler(
 
     // Sort findings deterministically by code then entity id (INV-4)
     allFindings.sort((a, b) => {
-      const codeCmp = a.code.localeCompare(b.code);
+      const codeCmp = codePointCompare(a.code, b.code);
       if (codeCmp !== 0) return codeCmp;
       const aId = a.entity?.id ?? '';
       const bId = b.entity?.id ?? '';
-      return aId.localeCompare(bId);
+      return codePointCompare(aId, bId);
     });
 
     let blockingCount = 0;

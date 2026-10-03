@@ -1,5 +1,5 @@
 import type { Finding, Outcome, SiteData } from '@azimut/core-model';
-import { canonicalSerialize } from '@azimut/core-model';
+import { canonicalSerialize, codePointCompare } from '@azimut/core-model';
 import { renderFloorPlan } from '@azimut/engine-layout';
 import type { FloorPlanOptions, FloorPlanTheme } from '@azimut/engine-layout';
 import { themePapier, stateColorsPapier } from '@azimut/design-tokens';
@@ -129,7 +129,7 @@ export function buildKioskMapFiles(site: SiteData): Outcome<Map<string, Uint8Arr
   const findings: Finding[] = [];
   let refused = false;
   const levels = [...site.levels]
-    .sort((a, b) => a.ordinal - b.ordinal || a.id.localeCompare(b.id));
+    .sort((a, b) => a.ordinal - b.ordinal || codePointCompare(a.id, b.id));
   for (const level of levels) {
     const rendered = renderFloorPlan(site, level.id, {
       ...FLOOR_OPTS,

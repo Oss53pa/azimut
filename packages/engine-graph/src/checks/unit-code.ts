@@ -1,5 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
-import { isCellFootprint } from '@azimut/core-model';
+import { isCellFootprint, codePointCompare } from '@azimut/core-model';
 
 /**
  * N1.4 — règle M01.S3. Une empreinte de nature cellule porte obligatoirement un
@@ -10,7 +10,7 @@ import { isCellFootprint } from '@azimut/core-model';
  */
 export function checkUnitCodeRequired(site: SiteData): Finding[] {
   const findings: Finding[] = [];
-  const sorted = [...site.footprints].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...site.footprints].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const footprint of sorted) {
     if (!isCellFootprint(footprint.kind)) continue;
@@ -50,13 +50,13 @@ export function checkUnitCodeDuplicate(site: SiteData): Finding[] {
   }
 
   const findings: Finding[] = [];
-  const levelIds = [...byLevel.keys()].sort((a, b) => a.localeCompare(b));
+  const levelIds = [...byLevel.keys()].sort((a, b) => codePointCompare(a, b));
   for (const levelId of levelIds) {
     const byCode = byLevel.get(levelId);
     if (byCode === undefined) continue;
-    const codes = [...byCode.keys()].sort((a, b) => a.localeCompare(b));
+    const codes = [...byCode.keys()].sort((a, b) => codePointCompare(a, b));
     for (const code of codes) {
-      const ids = [...(byCode.get(code) ?? [])].sort((a, b) => a.localeCompare(b));
+      const ids = [...(byCode.get(code) ?? [])].sort((a, b) => codePointCompare(a, b));
       if (ids.length < 2) continue;
       for (const id of ids) {
         findings.push({

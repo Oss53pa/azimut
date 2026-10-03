@@ -5,6 +5,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * INV-3 — les trois gardes du registre de sécurité vivaient ici et n'étaient
@@ -34,7 +35,7 @@ function categoryParentNotFoundFindings(
   const ids = new Set(categories.map((c) => c.id));
   const findings: Finding[] = [];
   const sorted = [...categories].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const cat of sorted) {
     if (cat.parent_id !== null && !ids.has(cat.parent_id)) {
@@ -61,7 +62,7 @@ function categoryCycleFindings(
   const findings: Finding[] = [];
   const visited = new Set<string>();
   const sorted = [...categories].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const cat of sorted) {
@@ -95,7 +96,7 @@ function pictogramCategoryNotFoundFindings(
   const catIds = new Set(site.categories.map((c) => c.id));
   const findings: Finding[] = [];
   const sorted = [...site.pictograms].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const p of sorted) {
     if (!catIds.has(p.category_id)) {
@@ -117,7 +118,7 @@ function destCategoryNotFoundFindings(
   const catIds = new Set(site.categories.map((c) => c.id));
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     if (!catIds.has(dest.category_id)) {
@@ -138,7 +139,7 @@ function emptySvgPathFindings(
 ): Finding[] {
   const findings: Finding[] = [];
   const sorted = [...pictograms].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const p of sorted) {
     if (p.svg_path.trim() === '') {

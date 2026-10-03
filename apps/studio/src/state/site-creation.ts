@@ -262,7 +262,8 @@ function checkLangs(langs: readonly string[]): readonly Finding[] {
 }
 
 function normalise(value: string): string {
-  return value.trim().toLocaleLowerCase('fr').normalize('NFC');
+  // A9 : un pliage d'unicité ne dépend d'aucune langue.
+  return value.trim().toLowerCase().normalize('NFC');
 }
 
 function finding(code: string, params: Record<string, string | number>): Finding {

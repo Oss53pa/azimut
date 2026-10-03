@@ -16,6 +16,7 @@ import type { SelectableItem } from './selection.js';
 import type { SceneObject } from './snap-integration.js';
 import type { DecorationLayer, DecorationShape } from './scene-objects.js';
 import { geometryVertices } from './shape-geometry.js';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Document
@@ -183,7 +184,7 @@ export function applyPatch(
 
   const remaining = [...byId.values()]
     .filter(s => !placed.has(s.id))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   return {
     siteId: doc.siteId,

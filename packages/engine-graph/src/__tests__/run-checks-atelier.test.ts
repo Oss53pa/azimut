@@ -11,7 +11,7 @@ import { describe, it, expect } from 'vitest';
 import { runChecks } from '../run-checks.js';
 import { refMinimal, refMultilevel } from '@azimut/testkit';
 import type { CharterRule, SiteFact } from '@azimut/core-model';
-import { PARKING_CAPACITY_KEY } from '@azimut/core-model';
+import { PARKING_CAPACITY_KEY, codePointCompare } from '@azimut/core-model';
 
 /**
  * La capacité annoncée du parking de `refMultilevel` — A5.11, S-36.
@@ -106,7 +106,7 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
     const r = runChecks(refMinimal, { lexicon: terms });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect([...r.value.checks_run]).toEqual([...r.value.checks_run].sort((a, b) => a.localeCompare(b)));
+    expect([...r.value.checks_run]).toEqual([...r.value.checks_run].sort((a, b) => codePointCompare(a, b)));
   });
 });
 

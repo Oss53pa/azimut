@@ -1,5 +1,6 @@
 import type { Point } from './geometry.js';
 import type { Outcome } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * A5.2 — fond de plan et calage.
@@ -135,7 +136,7 @@ export function firstCalibration(
 
   dated.sort((a, b) => (
     a.at === b.at
-      ? a.calibration.id.localeCompare(b.calibration.id)
+      ? codePointCompare(a.calibration.id, b.calibration.id)
       : a.at - b.at
   ));
   return dated[0]?.calibration ?? null;

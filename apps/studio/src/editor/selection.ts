@@ -9,6 +9,7 @@
  */
 
 import type { Point } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -67,7 +68,7 @@ function sortIds(
       const orderCmp = ia.drawOrder - ib.drawOrder;
       if (orderCmp !== 0) return orderCmp;
     }
-    return a.localeCompare(b);
+    return codePointCompare(a, b);
   });
 }
 

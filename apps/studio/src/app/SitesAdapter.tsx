@@ -5,6 +5,7 @@ import type { CountryOption } from '../screens/NewSiteDialog.js';
 import { StateBanner } from '../components/ui/index.js';
 import type { Option } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { sitesByName } from '../state/site-order.js';
 import {
   appRepository, useCountries, useLegalEntities, useSiteList,
 } from '../data/index.js';
@@ -55,8 +56,8 @@ export function SitesAdapter(): JSX.Element {
   // Mémorisée : sans cela le tableau vide de l'état non chargé serait neuf à
   // chaque rendu, et les listes qui en dérivent se recalculeraient sans fin.
   const sites = useMemo(
-    () => (list.status === 'ready' ? list.value : []),
-    [list],
+    () => (list.status === 'ready' ? sitesByName(list.value, lang) : []),
+    [list, lang],
   );
 
   const countries: readonly CountrySummary[] = useMemo(

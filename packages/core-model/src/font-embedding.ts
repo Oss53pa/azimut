@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * G5.2 — Font registry and embedding rules.
@@ -55,7 +56,7 @@ export function guardFontEmbedding(
   }
 
   const findings: Finding[] = [];
-  const sorted = [...fonts].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...fonts].sort((a, b) => codePointCompare(a.id, b.id));
   for (const font of sorted) {
     const reason = reasonFor(font, target);
     if (reason !== null) {

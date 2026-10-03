@@ -6,6 +6,7 @@ import {
   renderHeader, renderDestinationList, renderPictogram, renderArrow, renderFreeText,
 } from './render-face-text-blocks.js';
 import { renderLogo, renderMap, renderLegend, renderEmergency } from './render-face-embedded-blocks.js';
+import { codePointCompare } from '@azimut/core-model';
 
 // Réexportés : l'API du rendu reste celle de ce fichier.
 export type { FaceTheme } from './face-svg.js';
@@ -91,7 +92,7 @@ function renderFaceParts(
   );
 
   const sorted = [...face.blocks].sort(
-    (a, b) => a.ordinal - b.ordinal || a.kind.localeCompare(b.kind),
+    (a, b) => a.ordinal - b.ordinal || codePointCompare(a.kind, b.kind),
   );
 
   let minTextFontSizeMm: number | null = null;

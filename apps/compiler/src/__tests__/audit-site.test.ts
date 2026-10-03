@@ -4,7 +4,7 @@ import type { AuditSiteContext } from '../audit-site.js';
 import type { Job } from '../job.js';
 import { refMinimal, refBroken, refMultilevel } from '@azimut/testkit';
 import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
-import { EMPTY_VOCABULARY, PARKING_CAPACITY_KEY } from '@azimut/core-model';
+import { EMPTY_VOCABULARY, PARKING_CAPACITY_KEY, codePointCompare } from '@azimut/core-model';
 
 function makeJob(payload?: Record<string, unknown>): Job {
   return {
@@ -90,14 +90,14 @@ describe('createAuditSiteHandler', () => {
       const prev = findings[i - 1];
       const curr = findings[i];
       if (!prev || !curr) continue;
-      const codeCmp = prev.code.localeCompare(curr.code);
+      const codeCmp = codePointCompare(prev.code, curr.code);
       if (codeCmp > 0) {
         expect.fail(`findings not sorted by code: ${prev.code} > ${curr.code}`);
       }
       if (codeCmp === 0) {
         const prevId = prev.entity?.id ?? '';
         const currId = curr.entity?.id ?? '';
-        expect(prevId.localeCompare(currId)).toBeLessThanOrEqual(0);
+        expect(codePointCompare(prevId, currId)).toBeLessThanOrEqual(0);
       }
     }
   });

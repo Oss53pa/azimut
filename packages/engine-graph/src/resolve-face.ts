@@ -7,7 +7,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
-import { normalizeAzimuth, templateSlots } from '@azimut/core-model';
+import { normalizeAzimuth, templateSlots, codePointCompare } from '@azimut/core-model';
 import type { ContentBlockInstance } from '@azimut/core-model';
 import { computeRoute } from './compute-route.js';
 import {
@@ -129,7 +129,7 @@ function resolveDestinationList(
   const warnings: Finding[] = [];
   const sortedDests = [...site.destinations].sort((a, b) =>
     a.display_priority - b.display_priority ||
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const dest of sortedDests) {

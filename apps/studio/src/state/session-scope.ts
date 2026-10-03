@@ -19,6 +19,7 @@ import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
 import { readSessionGraph } from './session-graph.js';
 import { text, numeric, boolean, structured, point } from './row-values.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type SessionScope = {
   readonly scope: GraphScope;
@@ -72,9 +73,9 @@ export function levelsOfSession(session: SessionState): {
   const unreadable: string[] = [];
   const levels = collect(session, 'level', readLevel, unreadable);
   levels.sort((a, b) =>
-    a.building_id.localeCompare(b.building_id)
+    codePointCompare(a.building_id, b.building_id)
     || a.ordinal - b.ordinal
-    || a.id.localeCompare(b.id));
+    || codePointCompare(a.id, b.id));
   return { levels, unreadable };
 }
 

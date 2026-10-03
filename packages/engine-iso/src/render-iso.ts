@@ -8,7 +8,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { parkingSpacesOfLevel } from '@azimut/core-model';
+import { parkingSpacesOfLevel, codePointCompare } from '@azimut/core-model';
 import {
   type IsoTransform,
   type LevelGeom,
@@ -176,7 +176,7 @@ function renderLevelContent(
     }
   }
 
-  const sortedBare = [...bareFps].sort((a, b) => a.id.localeCompare(b.id));
+  const sortedBare = [...bareFps].sort((a, b) => codePointCompare(a.id, b.id));
   for (const fp of sortedBare) {
     const z = ld.level.elevation_m + zOffset;
     const verts = fp.geometry.vertices.map((v) => isoTx(v.x_m, v.y_m, z, t));
@@ -210,7 +210,7 @@ function renderLevelContent(
 
   if (showNodes) {
     const sortedNodes = [...ld.nodes].sort(
-      (a, b) => a.id.localeCompare(b.id),
+      (a, b) => codePointCompare(a.id, b.id),
     );
     const nodeZ = ld.volumes.length > 0
       ? Math.max(
@@ -260,7 +260,7 @@ export function renderIsoView(
 
   levelDataList.sort(
     (a, b) => a.level.ordinal - b.level.ordinal
-      || a.level.id.localeCompare(b.level.id),
+      || codePointCompare(a.level.id, b.level.id),
   );
 
   for (const ld of levelDataList) {

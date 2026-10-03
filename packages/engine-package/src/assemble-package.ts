@@ -1,5 +1,5 @@
 import {
-  sha256Binary,
+  sha256Binary, codePointCompare,
 } from '@azimut/core-model';
 import type {
   SiteData,
@@ -72,7 +72,7 @@ export function assemblePackage(
   const warnings: Finding[] = [];
 
   const sortedInputs = [...inputs].sort(
-    (a, b) => a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.kind, b.kind) || codePointCompare(a.id, b.id),
   );
 
   const seenIds = new Set<string>();

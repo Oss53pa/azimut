@@ -1,5 +1,5 @@
 import type { CharterRule, Finding, ForbiddenCharacterRange, SiteData } from '@azimut/core-model';
-import { resolveForbiddenCharacters } from '@azimut/core-model';
+import { resolveForbiddenCharacters, codePointCompare } from '@azimut/core-model';
 import { checkableTexts } from './site-texts.js';
 
 /**
@@ -83,7 +83,7 @@ function forbiddenAt(
  */
 export function templateFreeTexts(site: SiteData): readonly { id: string; value: string }[] {
   const out: { id: string; value: string }[] = [];
-  const templates = [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id));
+  const templates = [...site.face_templates].sort((a, b) => codePointCompare(a.id, b.id));
   for (const template of templates) {
     // Par rang, comme l'annonce l'ordre déterministe : rien ne garantit que le
     // tableau des blocs arrive trié de la base.

@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import {
   EMPREINTE_ENTRY_POINTS, PRODUCING_APPS, ROOT, countLocalized, feedsEmpreinte,
-  readBaseline as readBaselineFile, sources, studioFiles,
+  sources, studioFiles,
 } from './a9-perimetre.js';
 
 /**
@@ -24,12 +24,9 @@ import {
  *   ensembles par points de code (D7.2) : l'ordre produit en amont n'entre pas
  *   dans l'empreinte, ce qui y entre passe par ces fichiers.
  *
- * Les occurrences existantes sont relevées dans
- * `a9-releve-comparaisons-localisees.json`. Leur remplacement est une tâche
- * déclarée à la matrice, à exécuter avant le premier livrable réel. Jusque-là,
- * ce contrôle fige le relevé : aucun fichier ne peut en compter une de plus,
- * et un fichier qui en compte une de moins oblige à resserrer le relevé dans
- * le même commit.
+ * Le relevé des occurrences antérieures au contrôle est tombé à zéro et a
+ * disparu : la tâche déclarée à la version 30 les a toutes remplacées par
+ * `codePointCompare`. Le contrôle exige désormais zéro, sans exception.
  *
  * Est comptée comme comparaison localisée toute mention de `localeCompare`,
  * d'`Intl.Collator`, de `toLocaleLowerCase` ou de `toLocaleUpperCase`, code,
@@ -37,8 +34,6 @@ import {
  * laisse rien passer. Le motif et la frontière avec l'interface sont
  * communs aux deux contrôles d'A9 (`a9-perimetre.ts`).
  */
-
-const BASELINE_PATH = join(import.meta.dirname, 'a9-releve-comparaisons-localisees.json');
 
 /** Les fichiers où A9 s'applique. */
 function scopedFiles(): string[] {
@@ -55,10 +50,6 @@ function currentCounts(): Map<string, number> {
     if (count > 0) counts.set(relative(ROOT, file), count);
   }
   return counts;
-}
-
-function readBaseline(): Map<string, number> {
-  return readBaselineFile(BASELINE_PATH);
 }
 
 describe('A9 — le périmètre contrôlé', () => {
@@ -97,20 +88,9 @@ describe('A9 — le périmètre contrôlé', () => {
   });
 });
 
-describe('A9 — aucune comparaison localisée nouvelle là où la section s’applique', () => {
-  it('aucun fichier du périmètre n’en compte plus que le relevé', () => {
-    const baseline = readBaseline();
-    const introduced = [...currentCounts()]
-      .filter(([file, count]) => count > (baseline.get(file) ?? 0))
-      .map(([file, count]) => `${file} : ${count} (relevé ${baseline.get(file) ?? 0})`);
-    expect(introduced, 'Comparer par points de code (codePointCompare), jamais selon une langue').toEqual([]);
-  });
-
-  it('le relevé est exact : une occurrence retirée s’y retire aussi', () => {
-    const current = currentCounts();
-    const stale = [...readBaseline()]
-      .filter(([file, count]) => (current.get(file) ?? 0) < count)
-      .map(([file, count]) => `${file} : relevé ${count}, compté ${current.get(file) ?? 0}`);
-    expect(stale, 'Resserrer tests/a9-releve-comparaisons-localisees.json').toEqual([]);
+describe('A9 — aucune comparaison localisée là où la section s’applique', () => {
+  it('aucun fichier du périmètre n’en compte une seule', () => {
+    const found = [...currentCounts()].map(([file, count]) => `${file} : ${count}`);
+    expect(found, 'Comparer par points de code (codePointCompare), jamais selon une langue').toEqual([]);
   });
 });

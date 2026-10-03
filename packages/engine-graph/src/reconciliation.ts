@@ -3,7 +3,7 @@ import type {
   TravelProfile,
   Outcome,
 } from '@azimut/core-model';
-import { normalizeAzimuth } from '@azimut/core-model';
+import { normalizeAzimuth, codePointCompare } from '@azimut/core-model';
 import { deriveDecisionPoints } from './decision-points.js';
 
 export type SurveyedSupport = {
@@ -75,7 +75,7 @@ export function reconcile(
   const lines: ReconciliationLine[] = [];
 
   const sortedSurveyed = [...surveyed].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const s of sortedSurveyed) {
     if (!dpNodeIds.has(s.node_id)) {

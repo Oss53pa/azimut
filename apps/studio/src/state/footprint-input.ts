@@ -115,9 +115,9 @@ function checkUnitCode(code: string, existing: readonly string[]): readonly Find
     })];
   }
   // L'unicité se juge sans la casse : « B12 » et « b12 » sont le même local
-  // pour quiconque lit un plan.
-  const key = trimmed.toLocaleUpperCase('fr');
-  if (existing.some(other => other.trim().toLocaleUpperCase('fr') === key)) {
+  // pour quiconque lit un plan. Le pliage ne dépend d'aucune langue (A9).
+  const key = trimmed.toUpperCase();
+  if (existing.some(other => other.trim().toUpperCase() === key)) {
     return [finding('DATA.CODE_DUPLICATE', { code: trimmed })];
   }
   return [];

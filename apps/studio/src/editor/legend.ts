@@ -9,6 +9,7 @@
  * Same rule for the compass rose: oriented from data, not drawn.
  */
 
+import { codePointCompare } from '@azimut/core-model';
 // ---------------------------------------------------------------------------
 // Legend entry
 // ---------------------------------------------------------------------------
@@ -62,7 +63,7 @@ export function generateLegend(
       const labelB = b.label[lang] ?? '';
       const cmp = labelA.localeCompare(labelB, lang);
       if (cmp !== 0) return cmp;
-      return a.categoryId.localeCompare(b.categoryId);
+      return codePointCompare(a.categoryId, b.categoryId);
     });
 }
 

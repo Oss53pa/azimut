@@ -1,5 +1,6 @@
 import type { PictogramRegistry } from './site.js';
 import type { Finding, Outcome } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * INV-3 — le registre de sécurité est cloisonné.
@@ -75,7 +76,7 @@ export function guardSafetyRegistry(
   const findings: Finding[] = [];
 
   for (const mutation of [...mutations].sort(
-    (l, r) => l.pictogram_id.localeCompare(r.pictogram_id),
+    (l, r) => codePointCompare(l.pictogram_id, r.pictogram_id),
   )) {
     if (known.get(mutation.pictogram_id)?.registry !== 'safety') continue;
     findings.push(denial(mutation.pictogram_id, {
@@ -98,7 +99,7 @@ export function guardSafetyCreation(
   creations: readonly PictogramCreation[],
 ): Outcome<null> {
   const findings = [...creations]
-    .sort((l, r) => l.id.localeCompare(r.id))
+    .sort((l, r) => codePointCompare(l.id, r.id))
     .filter(creation => creation.registry === 'safety')
     .map(creation => denial(creation.id, { operation: 'create' }));
 

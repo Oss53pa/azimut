@@ -3,6 +3,7 @@ import { refBroken, refMinimal, refMultilevel } from '@azimut/testkit';
 import { sessionFromSite, sessionRowsFromSite } from '../session-from-site.js';
 import { readSessionGraph } from '../session-graph.js';
 import { rowsOf } from '../session-store.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * E5.4 et N1.7 critère 1 — un site enregistré se rouvre tel qu'il est.
@@ -56,12 +57,12 @@ describe('E5.4 — l’atelier repart de l’état du dépôt', () => {
 
   it('rend le graphe à l’identique, attribut par attribut', () => {
     const graph = readSessionGraph(sessionFromSite(refMinimal));
-    const expected = [...refMinimal.graph.nodes].sort((a, b) => a.id.localeCompare(b.id));
-    const read = [...graph.nodes].sort((a, b) => a.id.localeCompare(b.id));
+    const expected = [...refMinimal.graph.nodes].sort((a, b) => codePointCompare(a.id, b.id));
+    const read = [...graph.nodes].sort((a, b) => codePointCompare(a.id, b.id));
     expect(read).toEqual(expected);
 
-    const expectedEdges = [...refMinimal.graph.edges].sort((a, b) => a.id.localeCompare(b.id));
-    const readEdges = [...graph.edges].sort((a, b) => a.id.localeCompare(b.id));
+    const expectedEdges = [...refMinimal.graph.edges].sort((a, b) => codePointCompare(a.id, b.id));
+    const readEdges = [...graph.edges].sort((a, b) => codePointCompare(a.id, b.id));
     expect(readEdges).toEqual(expectedEdges);
   });
 

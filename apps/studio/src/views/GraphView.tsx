@@ -9,6 +9,7 @@ import {
   SPACE, TEXT, type Metric, type Column,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type GraphViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -66,7 +67,7 @@ export function GraphView({ onNavigate }: GraphViewProps): JSX.Element {
       if (levelId !== '' && node.level_id !== levelId) continue;
       counts.set(node.kind, (counts.get(node.kind) ?? 0) + 1);
     }
-    return [...counts.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return [...counts.entries()].sort(([a], [b]) => codePointCompare(a, b));
   }, [site, levelId]);
 
   const edgeRows = useMemo<readonly EdgeRow[]>(() =>
@@ -74,7 +75,7 @@ export function GraphView({ onNavigate }: GraphViewProps): JSX.Element {
       .filter(edge => levelId === ''
         || nodeLevel.get(edge.from_node_id) === levelId
         || nodeLevel.get(edge.to_node_id) === levelId)
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map((edge): EdgeRow => ({
         edge,
         from: nodeLabel.get(edge.from_node_id) ?? edge.from_node_id,

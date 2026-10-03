@@ -14,6 +14,7 @@ import {
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { formatDay } from './register/format.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type DestinationsViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -85,7 +86,7 @@ export function DestinationsView({ onNavigate }: DestinationsViewProps): JSX.Ele
     const categories = new Map(site.categories.map(c => [c.id, c.code]));
 
     return [...site.destinations]
-      .sort((a, b) => a.display_priority - b.display_priority || a.id.localeCompare(b.id))
+      .sort((a, b) => a.display_priority - b.display_priority || codePointCompare(a.id, b.id))
       .map((destination): DirectoryRow => {
         const levelId = nodeLevels.get(destination.node_id) ?? null;
         return {

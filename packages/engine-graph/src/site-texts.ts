@@ -1,4 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * Les textes du site qu'un contrôle de vocabulaire peut juger.
@@ -27,7 +28,7 @@ export type CheckableText = {
 /** Parcours déterministe : par nature, puis par identifiant. */
 export function checkableTexts(site: SiteData): readonly CheckableText[] {
   return [...site.destination_names]
-    .sort((left, right) => left.id.localeCompare(right.id))
+    .sort((left, right) => codePointCompare(left.id, right.id))
     .map((name) => ({
       id: name.id,
       kind: 'destination_name',

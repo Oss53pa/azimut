@@ -3,6 +3,7 @@ import {
   createRepository, createReferenceRepository, createPostgrestRepository,
   failureForStatus, isRepositoryError, DEFAULT_SCHEMA,
 } from '../index.js';
+import { codePointCompare } from '@azimut/core-model';
 
 afterEach(() => { vi.unstubAllGlobals(); });
 
@@ -38,7 +39,7 @@ describe('Dépôt des sites de référence', () => {
     const sites = await repo.listSites();
     expect(sites.length).toBeGreaterThan(0);
     const names = sites.map(s => s.name);
-    expect([...names].sort((a, b) => a.localeCompare(b))).toEqual(names);
+    expect([...names].sort((a, b) => codePointCompare(a, b))).toEqual(names);
   });
 
   it('charge un site par sa clé', async () => {

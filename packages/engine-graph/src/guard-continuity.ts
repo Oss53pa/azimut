@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H2.4 — The staggering plan (plan de jalonnement) produces, per route and
@@ -60,7 +61,7 @@ export function guardWayfindingContinuity(
   sequences: readonly JalonnementSequence[],
 ): Outcome<null> {
   const findings: Finding[] = [];
-  const sortedSequences = [...sequences].sort((a, b) => a.id.localeCompare(b.id));
+  const sortedSequences = [...sequences].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const sequence of sortedSequences) {
     const { steps } = sequence;
@@ -72,7 +73,7 @@ export function guardWayfindingContinuity(
       for (const d of step.reached) destinations.add(d);
     }
 
-    for (const destination of [...destinations].sort((a, b) => a.localeCompare(b))) {
+    for (const destination of [...destinations].sort((a, b) => codePointCompare(a, b))) {
       const present = steps.map(
         (s) => s.announced.includes(destination) || s.reached.includes(destination),
       );
@@ -95,11 +96,9 @@ export function guardWayfindingContinuity(
   }
 
   findings.sort((a, b) => {
-    const byDest = (a.entity?.id ?? '').localeCompare(b.entity?.id ?? '');
+    const byDest = codePointCompare(a.entity?.id ?? '', b.entity?.id ?? '');
     if (byDest !== 0) return byDest;
-    return String(a.params['sequence_id']).localeCompare(
-      String(b.params['sequence_id']),
-    );
+    return codePointCompare(String(a.params['sequence_id']), String(b.params['sequence_id']));
   });
 
   if (findings.length > 0) {

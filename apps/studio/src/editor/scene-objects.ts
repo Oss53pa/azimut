@@ -10,6 +10,7 @@
  */
 
 import type { Point } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Decoration shapes (E9.3 decoration_shape)
@@ -140,7 +141,7 @@ export function sortLayers(
   return [...layers].sort((a, b) => {
     const zCmp = a.zOrder - b.zOrder;
     if (zCmp !== 0) return zCmp;
-    return a.id.localeCompare(b.id);
+    return codePointCompare(a.id, b.id);
   });
 }
 

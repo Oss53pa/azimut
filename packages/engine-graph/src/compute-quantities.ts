@@ -1,4 +1,5 @@
 import type { SiteData, Outcome, Finding } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 export type PlacedSupport = {
   readonly id: string;
@@ -78,7 +79,7 @@ export function computeQuantities(
   let orphanCount = 0;
 
   const sorted = [...supports].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const sup of sorted) {
@@ -112,7 +113,7 @@ export function computeQuantities(
   }
 
   const byType: TypeQuantity[] = [...byTypeCount.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => codePointCompare(a, b))
     .map(([key, count]) => {
       const info = typeMap.get(key);
       return {
@@ -124,7 +125,7 @@ export function computeQuantities(
     });
 
   const byBuilding: BuildingQuantity[] = [...byBuildingCount.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => codePointCompare(a, b))
     .map(([id, count]) => ({
       building_id: id,
       building_name: buildingNames.get(id) ?? id,
@@ -132,7 +133,7 @@ export function computeQuantities(
     }));
 
   const byLevel: LevelQuantity[] = [...byLevelCount.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => codePointCompare(a, b))
     .map(([id, count]) => ({
       level_id: id,
       level_name: levelNames.get(id) ?? id,
@@ -246,7 +247,7 @@ export function quantityReportToCsv(
     [l.type, l.typeName, l.count, l.faces].map(escapeCsvField).join(';'),
   );
   const sortedTypes = [...report.by_type].sort((a, b) =>
-    a.support_type_key.localeCompare(b.support_type_key),
+    codePointCompare(a.support_type_key, b.support_type_key),
   );
   for (const t of sortedTypes) {
     lines.push(
@@ -266,7 +267,7 @@ export function quantityReportToCsv(
     [l.building, l.count].map(escapeCsvField).join(';'),
   );
   const sortedBuildings = [...report.by_building].sort((a, b) =>
-    a.building_id.localeCompare(b.building_id),
+    codePointCompare(a.building_id, b.building_id),
   );
   for (const b of sortedBuildings) {
     lines.push(
@@ -281,7 +282,7 @@ export function quantityReportToCsv(
     [l.level, l.count].map(escapeCsvField).join(';'),
   );
   const sortedLevels = [...report.by_level].sort((a, b) =>
-    a.level_id.localeCompare(b.level_id),
+    codePointCompare(a.level_id, b.level_id),
   );
   for (const lvl of sortedLevels) {
     lines.push(

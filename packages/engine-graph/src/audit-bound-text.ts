@@ -1,7 +1,7 @@
 import type {
   BindingCatalogue, BindingValues, BoundParagraph, Finding,
 } from '@azimut/core-model';
-import { literalNumbers, resolveBoundParagraph } from '@azimut/core-model';
+import { literalNumbers, resolveBoundParagraph, codePointCompare } from '@azimut/core-model';
 
 /**
  * Contrôle du texte lié d'un document — A5.11, règle M01.S11.
@@ -34,7 +34,7 @@ export function auditBoundText(
   values: BindingValues,
   catalogue?: BindingCatalogue,
 ): DocumentTextReport {
-  const ordered = [...paragraphs].sort((l, r) => l.id.localeCompare(r.id));
+  const ordered = [...paragraphs].sort((l, r) => codePointCompare(l.id, r.id));
   const findings: Finding[] = [];
   const rendered: { id: string; text: string }[] = [];
 

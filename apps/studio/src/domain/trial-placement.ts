@@ -13,7 +13,7 @@
  * Déterminisme : l'identifiant d'un support d'essai vient du nœud, jamais d'un
  * compteur, d'une horloge ou d'un tirage.
  */
-import { supportTypologyOf, type SiteData, type TravelProfile } from '@azimut/core-model';
+import { supportTypologyOf, type SiteData, type TravelProfile, codePointCompare } from '@azimut/core-model';
 import { deriveDecisionPoints, type PlacedSupport } from '@azimut/engine-graph';
 
 export type TrialPlacement = {
@@ -44,7 +44,7 @@ export function trialPlacement(
   }
 
   const supports = [...points.value]
-    .sort((a, b) => a.node_id.localeCompare(b.node_id))
+    .sort((a, b) => codePointCompare(a.node_id, b.node_id))
     .map((point): PlacedSupport => ({
       id: trialSupportId(point.node_id),
       node_id: point.node_id,
@@ -70,7 +70,7 @@ export function placedSupports(
   fallbackTypeKey: string,
 ): readonly PlacedSupport[] {
   return [...site.supports]
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.id, b.id))
     .map((s): PlacedSupport => ({
       id: s.id,
       node_id: s.node_id,

@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H6.2 — Between an approved proof and an installed support lies the worksite
@@ -23,7 +24,7 @@ export function auditInstallReserves(
   reserves: readonly InstallReserve[],
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...reserves].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...reserves].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const reserve of sorted) {
     if (!reserve.lifted) {

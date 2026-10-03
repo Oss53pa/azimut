@@ -1,5 +1,5 @@
 import type { Finding, LexiconTerm, SiteData, SiteFact } from '@azimut/core-model';
-import { findLexiconMatches, factValueText, PUBLISHABLE_FACT_STATUSES } from '@azimut/core-model';
+import { findLexiconMatches, factValueText, PUBLISHABLE_FACT_STATUSES, codePointCompare } from '@azimut/core-model';
 import { checkableTexts } from './site-texts.js';
 
 /**
@@ -43,7 +43,7 @@ export function auditSiteFacts(
   forDeliverable = false,
 ): SiteFactReport {
   const texts = checkableTexts(site);
-  const ordered = [...facts].sort((left, right) => left.key.localeCompare(right.key));
+  const ordered = [...facts].sort((left, right) => codePointCompare(left.key, right.key));
   const findings: Finding[] = [];
 
   for (const fact of ordered) {

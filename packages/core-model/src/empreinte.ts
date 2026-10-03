@@ -56,7 +56,7 @@ function isPlainObject(value: object): boolean {
  *
  * A9 interdit la comparaison dépendante de la locale : c'est aussi ce
  * comparateur qui ordonne les ensembles avant qu'ils entrent dans une
- * empreinte (identifiants, codes), jamais `localeCompare`.
+ * empreinte (identifiants, codes), jamais une comparaison selon une langue.
  */
 export function codePointCompare(a: string, b: string): number {
   const ca = Array.from(a);

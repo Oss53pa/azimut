@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * I3 — Five assistances, each proposes and the user decides; nothing is applied
@@ -24,7 +25,7 @@ export function filterAssistProposals(
   proposals: readonly AssistProposal[],
   rejectedSignatures: ReadonlySet<string>,
 ): Outcome<readonly AssistProposal[]> {
-  const sorted = [...proposals].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...proposals].sort((a, b) => codePointCompare(a.id, b.id));
   const kept: AssistProposal[] = [];
   const warnings: Finding[] = [];
 
@@ -61,7 +62,7 @@ export function auditExtractionRate(
   runs: readonly ExtractionRun[],
   threshold: number,
 ): Outcome<null> {
-  const sorted = [...runs].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...runs].sort((a, b) => codePointCompare(a.id, b.id));
   const warnings: Finding[] = [];
 
   for (const run of sorted) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { refMultilevel, refMinimal } from '@azimut/testkit/sites';
 import { trialPlacement, trialSupportId, placedSupports, untypedSupportCount } from '../trial-placement.js';
+import { codePointCompare } from '@azimut/core-model';
 
 const profile = refMultilevel.travel_profiles[0];
 if (profile === undefined) throw new Error('fixture without a travel profile');
@@ -12,7 +13,7 @@ describe('H2.5 — implantation d’essai', () => {
     expect(result.supports.length).toBe(result.decision_point_count);
 
     const ids = result.supports.map(s => s.node_id);
-    expect([...ids].sort((a, b) => a.localeCompare(b))).toEqual(ids);
+    expect([...ids].sort((a, b) => codePointCompare(a, b))).toEqual(ids);
   });
 
   it('dérive l’identifiant du nœud, sans compteur ni horloge', () => {

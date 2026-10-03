@@ -12,9 +12,7 @@
  * l'angle de bâtiment, l'entrée, l'ascenseur et le portail.
  */
 import {
-  fitMeasuredCalibration,
-  auditCalibrationResiduals,
-  MIN_CALIBRATION_POINTS,
+  fitMeasuredCalibration, auditCalibrationResiduals, MIN_CALIBRATION_POINTS, codePointCompare,
 } from '@azimut/core-model';
 import type {
   CalibrationPointPair,
@@ -70,7 +68,7 @@ export function landmarkNodes(site: SiteData, levelId: string): readonly GraphNo
   return site.graph.nodes
     .filter((node) => node.level_id === levelId && LANDMARK_NODE_KINDS.includes(node.kind))
     .slice()
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .sort((left, right) => codePointCompare(left.id, right.id));
 }
 
 /**

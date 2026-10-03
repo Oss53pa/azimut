@@ -8,8 +8,7 @@
 import { allReferenceSites } from '@azimut/testkit/sites';
 import { COUNTRIES } from '@azimut/db/reference';
 import {
-  EMPTY_CHARTER_REGISTRY, EMPTY_MAINTENANCE_REGISTRY, EMPTY_WAYFINDING_REGISTRY,
-  type BudgetRegistry, type CharterRegistry, type InspectionRegistry, type TenantRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry,
+  EMPTY_CHARTER_REGISTRY, EMPTY_MAINTENANCE_REGISTRY, EMPTY_WAYFINDING_REGISTRY, type BudgetRegistry, type CharterRegistry, type InspectionRegistry, type TenantRegistry, type MaintenanceRegistry, type SiteData, type WorksiteRegistry, type SiteVocabulary, type WayfindingRegistry, codePointCompare,
 } from '@azimut/core-model';
 import { referenceVocabulary } from './reference-vocabulary.js';
 import { REFERENCE_WORKSITE } from './reference-worksite.js';
@@ -46,7 +45,9 @@ export function createReferenceRepository(): SiteRepository {
           rules_bindings: site.rules_bindings,
         });
       }
-      summaries.sort((a, b) => a.name.localeCompare(b.name));
+      // Ordre de donnée, par points de code (A9). L'écran ordonne pour
+      // l'affichage dans la langue active : voir `sitesByName`.
+      summaries.sort((a, b) => codePointCompare(a.name, b.name) || codePointCompare(a.id, b.id));
       return Promise.resolve(summaries);
     },
 

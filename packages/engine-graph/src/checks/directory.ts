@@ -1,4 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * Contrôles de l'annuaire : dénominations, couverture linguistique, vacance.
@@ -6,7 +7,7 @@ import type { SiteData, Finding } from '@azimut/core-model';
 export function checkDuplicateDisplayName(site: SiteData): Finding[] {
   const nameMap = new Map<string, string[]>();
   const sorted = [...site.destination_names].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const dn of sorted) {
@@ -60,7 +61,7 @@ export function checkIncompleteLangCoverage(site: SiteData): Finding[] {
   const findings: Finding[] = [];
   const sortedLangs = [...allLangs].sort();
   const sortedDests = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const dest of sortedDests) {
@@ -86,7 +87,7 @@ export function checkIncompleteLangCoverage(site: SiteData): Finding[] {
 export function checkAllVacantCategory(site: SiteData): Finding[] {
   const catDestMap = new Map<string, { total: number; vacant: number }>();
   const sortedDests = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const dest of sortedDests) {

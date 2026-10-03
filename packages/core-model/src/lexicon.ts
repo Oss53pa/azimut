@@ -12,6 +12,7 @@
  * fait du site.
  */
 import { transliterate } from './file-naming.js';
+import { codePointCompare } from './empreinte.js';
 
 export type LexiconSeverity = 'forbidden' | 'discouraged';
 
@@ -123,6 +124,6 @@ export function findLexiconMatches(
   }
 
   return matches.sort((left, right) =>
-    left.start - right.start || left.term.localeCompare(right.term),
+    left.start - right.start || codePointCompare(left.term, right.term),
   );
 }

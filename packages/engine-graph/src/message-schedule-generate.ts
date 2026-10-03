@@ -14,7 +14,7 @@ import type {
   Outcome,
   SupportType,
 } from '@azimut/core-model';
-import { instanceBlocksOf, templateForSide } from '@azimut/core-model';
+import { instanceBlocksOf, templateForSide, codePointCompare } from '@azimut/core-model';
 import { deriveDecisionPoints } from './decision-points.js';
 import { resolveFaceContent } from './resolve-face.js';
 import type { ResolvedBlock } from './resolve-face.js';
@@ -142,7 +142,7 @@ export function generateMessageSchedule(
   }
 
   const lines: MessageLine[] = [];
-  const ordered = [...supports].sort((a, b) => a.id.localeCompare(b.id));
+  const ordered = [...supports].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const support of ordered) {
     const supportType = typeByKey.get(support.support_type_key);
@@ -184,7 +184,7 @@ export function generateMessageSchedule(
     }
     const decisionPointId = support.node_id;
 
-    const faces = [...supportType.faces].sort((a, b) => a.side.localeCompare(b.side));
+    const faces = [...supportType.faces].sort((a, b) => codePointCompare(a.side, b.side));
 
     faces.forEach((face, faceIndex) => {
       const template = templateForSide(site.face_templates, supportType.key, face.side);

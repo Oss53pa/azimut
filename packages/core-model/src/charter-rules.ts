@@ -1,4 +1,5 @@
 import type { Finding } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * Règles de charte — A5.8, table `charter_rule`.
@@ -154,7 +155,7 @@ export function resolveForbiddenCharacters(
 ): CharterRuleResolution<readonly ForbiddenCharacterRange[]> {
   const declared = rules
     .filter((rule) => rule.kind === 'forbidden_character')
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .sort((left, right) => codePointCompare(left.id, right.id));
   if (declared.length === 0) return { declared: false, value: null, findings: [] };
 
   const ranges: ForbiddenCharacterRange[] = [];
@@ -184,7 +185,7 @@ export function resolveForbiddenCharacters(
 
   ranges.sort((left, right) => left.from - right.from
     || left.to - right.to
-    || left.name.localeCompare(right.name));
+    || codePointCompare(left.name, right.name));
 
   return { declared: true, value: readable === 0 ? null : ranges, findings };
 }
@@ -205,7 +206,7 @@ export function resolveMaxSentenceWords(
 ): CharterRuleResolution<number> {
   const declared = rules
     .filter((rule) => rule.kind === 'max_sentence_words')
-    .sort((left, right) => left.id.localeCompare(right.id));
+    .sort((left, right) => codePointCompare(left.id, right.id));
   if (declared.length === 0) return { declared: false, value: null, findings: [] };
 
   const findings: Finding[] = [];

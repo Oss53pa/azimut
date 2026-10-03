@@ -7,6 +7,7 @@ import type {
 import { validateGraph } from './validate-graph.js';
 import { deriveDecisionPoints } from './decision-points.js';
 import { bfs } from './graph-traversal.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type Support = {
   readonly id: string;
@@ -101,7 +102,7 @@ export function auditCoverage(
   const dpNodes = new Set(decisionPointNodeIds);
   const unused: string[] = [];
   const sortedSupports = [...supports].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const s of sortedSupports) {
     if (!dpNodes.has(s.node_id)) {
@@ -187,7 +188,7 @@ export function auditAccessibility(
 
   const unreachable: { dest_id: string; node_id: string }[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     if (!reachable.has(dest.node_id)) {
@@ -219,7 +220,7 @@ export function auditEvacuation(
 
   const uncovered: string[] = [];
   const sorted = [...site.graph.nodes].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const n of sorted) {
     if (!nodesOnEvacRoute.has(n.id)) {
