@@ -1682,3 +1682,45 @@ dépôt PostgREST, déclarée à la version 24.
 bord Cloudflare échoue sur la PR comme sur les PR #5 et #10. Il ne vient pas
 de la CI du dépôt ; le déploiement du dépôt est le job « Déploiement
 Cloudflare », qui ne tourne que sur `master`.
+
+## Fusion de la PR #11 dans `master`
+
+La branche des versions 20 à 30 entre dans `master` par le commit de fusion
+`8fe3ecc`, le 3 octobre. Elle portait déjà `master` (`760ed5f`) et la PR #12 :
+la fusion se fait sans conflit.
+
+| Ce que la fusion pose | Où | État |
+| --- | --- | --- |
+| Branche fusionnée par commit de fusion, et non écrasée en un seul commit | `8fe3ecc` | Fait |
+| Migrations et code applicatif dans des commits distincts (A2.5) | Historique de `0050` à `0069` conservé tel quel | Conservé |
+| CI de `master` sur le commit de fusion | Job `ci` : empreinte, typecheck, lint, test, visuel, RLS, déterminisme, bout en bout, build | Vert |
+| Mise en production | Job « Déploiement Cloudflare », après `ci` | Vert |
+| Intégration Git du tableau de bord Cloudflare | Worker `azimut`, Settings > Builds | Déconnectée |
+
+**Pourquoi un commit de fusion.** Un écrasement en un seul commit aurait réuni
+les migrations et le code applicatif, ce qu'A2.5 interdit. La fusion garde
+chaque migration dans son propre commit.
+
+**Avant de fusionner.** CI verte sur la tête `00b3cd6`, `master` déjà contenu
+dans la branche, aucune revue ouverte. Le seul check rouge était
+« Workers Builds: azimut ».
+
+**Le check Cloudflare, élucidé.** Son journal, transmis après la fusion, en
+donne la cause : l'intégration lançait `npx wrangler deploy` à la racine de
+l'espace de travail, sans construction préalable, et wrangler refusait d'y
+choisir un projet. Elle publiait par ailleurs le même Worker que la CI, sans
+passer par les contrôles d'A2.3. Elle est déconnectée : la mise en production
+passe désormais par le seul job « Déploiement Cloudflare », qui ne part que de
+`master` et seulement après `ci`. Le check reste affiché en échec sur
+`8fe3ecc`, où il a tourné avant la déconnexion.
+
+### Reste ouvert après la fusion dans `master`
+
+**Les migrations `0050` à `0069` sur une base existante.** Une base montée sous
+l'ancien `master` les recevra. Plusieurs retirent des tables ou des colonnes
+(`0052`, `0059`, `0060`, `0061`, `0066`). Avant de les appliquer à une base qui
+porte des données réelles, la vérifier (A2.2, point 7).
+
+**Toujours ouverts**, reportés de la section précédente : noms de tables hors
+H11, migration `0048` destructrice, `postgrest-repository.ts` au-delà de 400
+lignes, chaîne locale connectée en super-utilisateur.
