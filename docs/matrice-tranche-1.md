@@ -1724,3 +1724,73 @@ porte des données réelles, la vérifier (A2.2, point 7).
 **Toujours ouverts**, reportés de la section précédente : noms de tables hors
 H11, migration `0048` destructrice, `postgrest-repository.ts` au-delà de 400
 lignes, chaîne locale connectée en super-utilisateur.
+
+## Tâche A9 exécutée : comparaisons localisées remplacées
+
+La tâche déclarée à la version 30, et confirmée « avant le premier livrable
+réel », est faite. Les deux relevés sont tombés à zéro et ont disparu ; les deux
+contrôles exigent désormais zéro.
+
+| Ce que la tâche exigeait | Où | État |
+| --- | --- | --- |
+| Code qui produit : chaque occurrence passe à `codePointCompare` | 153 occurrences dans 66 fichiers | Fait |
+| Interface, identifiants, codes et dates : points de code | 55 des 57 appels relevés, essais compris | Fait |
+| Interface, texte affiché : langue active, déclarée | Les 2 autres (noms de bâtiments, portefeuille), et le nouveau tri des sites `sitesByName` | Fait |
+| Pliages des contrôles d'unicité : indépendants de toute langue | Nom de site, nom de bâtiment ou de niveau, code de cellule (deux), nom légal | Fait |
+| Pliage de la recherche du tableau des messages : langue active | `foldForSearch`, `applyFilters` | Fait |
+| Les deux relevés tombent à zéro et disparaissent | `a9-releve-*.json` supprimés | Fait |
+
+**Code qui produit.** Les 153 occurrences, commentaire compris, passent à
+`codePointCompare`. Aucun essai ne change de résultat : les sites de référence
+ne portent pas d'identifiant ni de code dont l'ordre diffère entre les deux
+comparaisons. Le rendu visuel et le déterminisme sont inchangés.
+
+**Interface.** Les 57 appels sans langue sont remplacés. Le classement de la
+version 30 est suivi :
+
+- Les identifiants, les codes, les clés et les dates passent par points de
+  code.
+- Le texte affiché prend la langue active, déclarée par l'appelant.
+- Les pliages d'unicité passent à `toLowerCase` et `toUpperCase`, sans langue.
+  Le nom légal (Q5) en fait partie : il avait été traité à la fusion de
+  `master`.
+- La recherche reçoit la langue active jusqu'à `foldForSearch`.
+
+**Le tri des sites pour l'affichage.** Le dépôt de référence ne connaît pas la
+langue de l'écran. Il rend désormais ses sites dans un ordre de donnée, par
+points de code. Ce sont les écrans qui les affichent qui ordonnent par nom dans
+la langue active, au moyen de `sitesByName` :
+
+- l'écran d'ouverture ;
+- le sélecteur de site ;
+- la liste des sites ;
+- l'atelier.
+
+La couche de données n'apprend rien de l'i18n. La coquille porte son propre
+fournisseur de langue : seul l'écran qui affiche sait dans quelle langue il le
+fait.
+
+**Les contrôles.** Les essais d'exactitude des relevés sont retirés avec les
+relevés. Chaque contrôle tient en un essai : aucun fichier de son périmètre ne
+compte une occurrence. Vérifié en en introduisant une dans `engine-graph` et
+une dans l'interface : les deux contrôles échouent et nomment le fichier.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 : `test` à 4 500 essais,
+`test:visual` à 14, `test:rls` à 67, `test:determinism` à 11, `test:e2e` à
+138, `build` sans erreur.
+
+### Reste ouvert après la tâche A9
+
+**Un pliage d'unicité nouveau qui déclare une langue n'est toujours pas
+refusé.** Le contrôle de l'interface admet un appel qui déclare sa langue : la
+recherche en a besoin, une unicité non. Rien ne distingue les deux dans le
+texte. Reporté de la version 30.
+
+**L'ordre que rend le dépôt PostgREST.** `listSites` demande `order=name.asc`.
+L'ordre suit alors la collation de la base, que le dépôt ne fixe pas. Les
+écrans réordonnent dans la langue active, et l'affichage ne dépend donc pas de
+la collation. L'ordre de donnée du dépôt PostgREST, en revanche, peut différer
+de celui du dépôt de référence. Relevé, non traité.
+
+**Le formatage des nombres et des dates.** Reporté de la version 30 : aucun
+contrôle ne cherche `toLocaleString` ni `Intl.NumberFormat`.
