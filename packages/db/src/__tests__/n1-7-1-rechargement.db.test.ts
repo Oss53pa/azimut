@@ -57,8 +57,9 @@ let db: ReturnType<typeof drizzle>;
  *
  * `loadSiteData` ne pose ni rôle ni identité : sous `FORCE ROW LEVEL
  * SECURITY`, appelé tel quel, il ne voit rien et lève « organization not
- * found ». C'est l'appelant qui doit ouvrir la transaction identifiée — et
- * c'est un manque du côté production, relevé en « constaté, non traité ».
+ * found ». C'est l'appelant qui ouvre la transaction identifiée ; côté
+ * production, le service de compilation passe par `loadSiteDataAs`, sous
+ * l'identité du demandeur du travail (A6.1, migration 0070).
  */
 async function loadAs<T>(userId: string, read: (tx: never) => Promise<T>): Promise<T> {
   return db.transaction(async (tx) => {

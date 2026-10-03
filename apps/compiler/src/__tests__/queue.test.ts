@@ -16,6 +16,7 @@ function makeJob(overrides?: Partial<Job>): Job {
     started_at: null,
     finished_at: null,
     error: null,
+    requested_by: 'user-essai',
     ...overrides,
   };
 }

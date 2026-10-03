@@ -10,7 +10,7 @@ function makeQueuedJob(itemId: string, overrides?: Partial<Job>): Job {
     id: `compile_artworks-${itemId}`, org_id: 'org-001', kind: 'compile_artworks',
     state: 'queued', payload: { item_id: itemId }, result: null, attempts: 0,
     max_attempts: 3, created_at: new Date('2024-01-01T00:00:00Z'),
-    started_at: null, finished_at: null, error: null, ...overrides,
+    started_at: null, finished_at: null, error: null, requested_by: 'user-essai', ...overrides,
   };
 }
 
@@ -37,6 +37,7 @@ function makeOptions(
 ): BatchOptions {
   return {
     org_id: 'org-001',
+    requested_by: 'user-essai',
     kind: 'compile_artworks',
     queue,
     handler,
@@ -86,6 +87,7 @@ describe('T-2.16 runBatch', () => {
       started_at: new Date('2024-01-01T00:00:01Z'),
       finished_at: new Date('2024-01-01T00:00:02Z'),
       error: null,
+      requested_by: 'user-essai',
     };
     await queue.enqueue(preExisting);
 
@@ -124,6 +126,7 @@ describe('T-2.16 runBatch', () => {
       started_at: null,
       finished_at: null,
       error: 'previous failure',
+      requested_by: 'user-essai',
     };
     await queue.enqueue(failedJob);
 
@@ -247,6 +250,7 @@ describe('T-2.16 runBatch', () => {
       started_at: new Date('2024-01-01T00:00:01Z'),
       finished_at: null,
       error: null,
+      requested_by: 'user-essai',
     };
     await queue.enqueue(runningJob);
 
@@ -333,6 +337,14 @@ describe('T-2.16 runBatch', () => {
     await runBatch(items, makeOptions(queue, handler));
     const job = await queue.getJob('compile_artworks-org-test');
     expect(job?.org_id).toBe('org-001');
+  });
+
+  it('A6.1 — chaque travail créé porte le demandeur du lot', async () => {
+    const queue = new MemoryQueue();
+    const handler: JobHandler = async () => ({ ok: true });
+    await runBatch([{ item_id: 'demandeur', payload: {} }], makeOptions(queue, handler));
+    const job = await queue.getJob('compile_artworks-demandeur');
+    expect(job?.requested_by).toBe('user-essai');
   });
 
   it('duplicate item_ids: second is silently absorbed', async () => {

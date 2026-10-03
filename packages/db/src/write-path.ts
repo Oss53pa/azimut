@@ -88,7 +88,7 @@ export async function applyCommands(
  * d'une transaction à la suivante sur une connexion mutualisée, ce qui serait
  * le moyen le plus discret de franchir la frontière d'organisation.
  */
-async function setSessionIdentity(
+export async function setSessionIdentity(
   tx: Executor,
   session: WriteSession,
 ): Promise<void> {

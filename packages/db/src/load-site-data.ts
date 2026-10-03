@@ -17,9 +17,20 @@ import {
   support, supportTypology, supportFace, supportContentBlock, supportVersion,
 } from './schema/signage.js';
 import { assembleSiteData } from './mapping/index.js';
+import { setSessionIdentity } from './write-path.js';
 
-export async function loadSiteData(
-  db: PostgresJsDatabase,
+/** Ce que la lecture d'un site demande d'une base : sélectionner. */
+type SiteReader<TSchema extends Record<string, unknown>> = Pick<PostgresJsDatabase<TSchema>, 'select'>;
+
+/**
+ * Lit un site sous l'identité déjà posée par l'appelant.
+ *
+ * Sous `FORCE ROW LEVEL SECURITY`, une lecture sans identité ne voit rien :
+ * appelée hors d'une transaction identifiée, la fonction lève « organization
+ * not found ». Le service de compilation passe par {@link loadSiteDataAs}.
+ */
+export async function loadSiteData<TSchema extends Record<string, unknown> = Record<string, never>>(
+  db: SiteReader<TSchema>,
   orgId: string,
   siteId: string,
 ): Promise<SiteData> {
@@ -34,6 +45,12 @@ export async function loadSiteData(
     .from(site)
     .where(eq(site.id, siteId));
   if (!siteRow) throw new Error(`site ${siteId} not found`);
+  // A6.1 — le site doit appartenir à l'organisation demandée. Sans cette
+  // vérification, un utilisateur membre de deux organisations ferait lire le
+  // site de l'une sous le nom de l'autre.
+  if (siteRow.org_id !== orgId) {
+    throw new Error(`site ${siteId} not in organization ${orgId}`);
+  }
 
   const buildingRows = await db
     .select()
@@ -165,5 +182,25 @@ export async function loadSiteData(
     zones: zoneRows,
     parking_spaces: parkingSpaceRows,
     temporary_closures: closureRows,
+  });
+}
+
+/**
+ * A6.1 — lit un site sous l'identité d'un utilisateur, dans une transaction
+ * qui la pose et la retire.
+ *
+ * C'est la lecture du service de compilation : un travail porte son demandeur
+ * (migration 0070), et le service voit exactement ce que ce demandeur voit,
+ * ni plus, ni moins. Le cloisonnement reste celui de la base.
+ */
+export async function loadSiteDataAs<TSchema extends Record<string, unknown> = Record<string, never>>(
+  db: PostgresJsDatabase<TSchema>,
+  userId: string,
+  orgId: string,
+  siteId: string,
+): Promise<SiteData> {
+  return db.transaction(async (tx) => {
+    await setSessionIdentity(tx, { userId });
+    return loadSiteData(tx, orgId, siteId);
   });
 }

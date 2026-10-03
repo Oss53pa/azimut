@@ -29,6 +29,12 @@ export type Job = {
   finished_at: Date | null;
   error: string | null;
   /**
+   * A6.1 — l'utilisateur qui a demandé le travail, posé par la base
+   * (migration 0070). Le service lit sous son identité ; un travail sans
+   * demandeur, antérieur à la migration, est refusé.
+   */
+  requested_by: string | null;
+  /**
    * D9.2 — earliest time a re-queued job may be dequeued again (exponential
    * backoff). Null/absent means immediately eligible.
    */
