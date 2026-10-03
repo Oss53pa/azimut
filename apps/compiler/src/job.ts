@@ -1,12 +1,19 @@
-export type JobKind =
-  | 'import_plan'
-  | 'import_roster'
-  | 'compile_artworks'
-  | 'build_delivery_archive'
-  | 'build_wall_plans'
-  | 'build_kiosk_package'
-  | 'export_quantities'
-  | 'audit_site';
+export const JOB_KINDS = [
+  'import_plan',
+  'import_roster',
+  'compile_artworks',
+  'build_delivery_archive',
+  'build_wall_plans',
+  'build_kiosk_package',
+  'export_quantities',
+  'audit_site',
+] as const;
+
+export type JobKind = (typeof JOB_KINDS)[number];
+
+export function isJobKind(value: unknown): value is JobKind {
+  return (JOB_KINDS as readonly unknown[]).includes(value);
+}
 
 export type JobState =
   | 'queued'

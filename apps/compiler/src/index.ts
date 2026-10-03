@@ -88,3 +88,12 @@ export {
   dbLoadSite,
 } from './kiosk-package-job.js';
 export type { KioskPackageJobDeps } from './kiosk-package-job.js';
+export type { WorkerQueue } from './queue.js';
+export { JOB_KINDS, isJobKind } from './job.js';
+export {
+  DbWorkerQueue,
+  NO_REQUESTER,
+  REQUESTER_CANNOT_READ,
+  REQUESTER_CANNOT_WRITE,
+} from './db-queue.js';
+export type { DbWorkerQueueOptions } from './db-queue.js';
