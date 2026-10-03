@@ -113,6 +113,7 @@ non plus — elle n'en retire que les clés étrangères.
 0067_a12_3_audit_log_insert_only
 0068_a5_2_plan_source_content_kind
 0069_o11_temporary_closure
+0070_a6_1_job_requested_by
 ```
 
 ## Règle pour la suite
