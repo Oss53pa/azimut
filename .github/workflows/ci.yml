@@ -99,6 +99,12 @@ jobs:
           CREATE ROLE azimut LOGIN;
           CREATE ROLE authenticated NOLOGIN;
           GRANT authenticated TO azimut;
+          -- Les deux rôles de la file des travaux (migration 0071). Le
+          -- propriétaire n'a pas le droit de créer un rôle ; il doit être
+          -- membre du rôle de prise pour lui confier ses fonctions.
+          CREATE ROLE azimut_compiler NOLOGIN;
+          CREATE ROLE azimut_job_dispatch NOLOGIN;
+          GRANT azimut_compiler, azimut_job_dispatch TO azimut;
           -- Les deux rôles de PostgREST. `authenticator` n'a aucun droit
           -- propre : il se connecte, puis bascule vers `anon` ou
           -- `authenticated` selon le jeton. `NOINHERIT` est ce qui l'empêche
