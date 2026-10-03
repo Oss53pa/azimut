@@ -1859,3 +1859,80 @@ la file en base se construit.
 **Les autres lectures du service.** Seul le paquet de borne lit la base
 aujourd'hui. Tout autre gestionnaire qui la lira devra passer par la même
 lecture identifiée.
+
+## File des travaux en base (T-0.11)
+
+Voie retenue par l'utilisatrice, entre trois proposées : des fonctions de
+prise, et rien d'autre. Les deux voies écartées étaient un rôle qui lève le
+cloisonnement sur `job`, et un service par organisation.
+
+**Migration 0071** (commit seul, A2.5). Trois fonctions SECURITY DEFINER :
+
+- `job_claim` prend le plus ancien travail en file dont la temporisation est
+  écoulée. Elle utilise `SKIP LOCKED` et un ordre total.
+- `job_stalled` désigne les travaux en cours depuis plus que le délai de D9.2.
+- `job_abandon` clôt en échec un travail en cours que nul ne peut plus porter.
+
+Elles n'apprennent d'un travail que son identifiant, son organisation, son
+type, son demandeur et sa tentative. Elles appartiennent à
+`azimut_job_dispatch`, rôle sans connexion. Les deux politiques de prise ne
+s'adressent qu'à lui, et il n'a sur `job` que la lecture et la modification.
+Seul `azimut_compiler`, rôle du service sans aucun droit sur les tables, les
+exécute. `authenticated` n'en exécute aucune.
+
+Un second rôle est nécessaire parce que FORCE soumet aussi le propriétaire des
+tables aux politiques. Possédées par lui, les fonctions ne verraient rien, et
+ouvrir une politique au propriétaire l'ouvrirait à toute connexion sous son
+nom.
+
+La temporisation n'ajoute pas de colonne. Un travail remis en file garde
+l'heure de fin de son essai échoué, et le service passe la temporisation en
+paramètre, depuis sa seule définition. Aucune ligne n'est touchée. La CI et
+ORDRE.md posent les deux rôles avant les migrations, comme `authenticated`.
+
+**Le service** (`DbWorkerQueue`, requêtes dans `@azimut/db`) prend sous
+`azimut_compiler`, puis lit le contenu et clôt sous l'identité du demandeur.
+Une clôture réussie termine le travail. Un échec le remet en file avec la
+temporisation tant que des tentatives restent, et le clôt en échec ensuite.
+Un travail sans demandeur, ou dont le demandeur a quitté l'organisation, est
+abandonné, avec sa raison écrite dans la ligne. Une clôture tardive, après
+qu'un travail stagnant a été relevé et repris ailleurs, ne touche pas l'essai
+suivant.
+
+**Essais sur base réelle** (`db-queue.db.test.ts`, 7 cas) :
+
+- prise des travaux de deux organisations, chacun lu et clos sous son
+  demandeur ;
+- rejeu d'un travail factice après échec, refusé à 4 s et pris à 5 s, sans
+  doublon, c'est l'acceptation de T-0.11 ;
+- tentatives épuisées ;
+- stagnation relevée à 30 minutes et pas à 29, clôture tardive sans effet ;
+- demandeur parti de l'organisation, travail abandonné avec la raison ;
+- `authenticated` n'exécute aucune des trois fonctions ;
+- `azimut_compiler` ne lit ni n'écrit la table.
+
+Sur la base configurée comme en CI (propriétaire non superutilisateur),
+`test:rls` passe : 81 essais sur 81.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 : `test` à 4 502 essais,
+`test:visual` à 14, `test:rls` à 81 (74 avant, plus les 7 de la file),
+`test:determinism` à 11, `test:e2e` à 138, `build` sans erreur. Les 75
+migrations se montent sur une base vide.
+
+### Reste ouvert après la file en base
+
+**Le point d'entrée du service.** Aucun exécutable ne lance encore
+`runWorkerLoop` sur `DbWorkerQueue` avec une connexion réelle. Sa connexion,
+en production, devra être membre de `azimut_compiler` et de `authenticated`,
+et de rien d'autre (ORDRE.md).
+
+**L'historique par tentative.** La trace de A12.2 est la ligne du travail :
+état, début et fin, tentatives, dernière erreur, résultat. Les erreurs des
+tentatives antérieures ne sont pas conservées en base. La file en mémoire les
+garde, la file en base non.
+
+**Deux types de travaux sans place en base.** Le service connaît
+`build_delivery_archive` et `build_wall_plans`. Ni A5.10 ni la contrainte de
+`job.kind` ne les listent, donc un tel travail ne peut pas être inséré.
+L'écart est entre le code et le cahier des charges, et il revient à l'éditeur
+du cahier de le trancher.
