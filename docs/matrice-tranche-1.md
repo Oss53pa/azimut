@@ -1794,3 +1794,68 @@ de celui du dépôt de référence. Relevé, non traité.
 
 **Le formatage des nombres et des dates.** Reporté de la version 30 : aucun
 contrôle ne cherche `toLocaleString` ni `Intl.NumberFormat`.
+
+## Identité du service de compilation : le travail porte son demandeur
+
+Le blocage relevé à la section 5 (« `loadSiteData` sans identité ») est levé.
+Le cahier des charges ne disait pas comment un service sans utilisateur lit
+sous cloisonnement ; l'utilisatrice a retenu, parmi les options présentées,
+celle où **le travail porte l'identité de son demandeur**.
+
+| Ce qui est posé | Où | État |
+| --- | --- | --- |
+| Le travail porte son demandeur | `job.requested_by`, migration `0070` | Fait |
+| Le demandeur est posé par la base et ne s'usurpe pas | Défaut `azimut.current_user_id()`, politique restrictive `job_requested_by_self` | Fait |
+| Le demandeur ne change plus après l'insertion | Déclencheur `guard_job_requested_by` | Fait |
+| Le service lit sous l'identité du demandeur | `loadSiteDataAs`, `dbLoadSite` | Fait |
+| Le site lu appartient à l'organisation du travail | `loadSiteData` | Fait |
+| Un travail sans demandeur est refusé, jamais deviné | `createKioskPackageJobHandler` | Fait |
+| Un lot porte son demandeur sur chaque travail | `runBatch`, option `requested_by` | Fait |
+
+**Aucune politique n'élargit ce qu'un rôle voit.** Le service ouvre une
+transaction par lecture, sous le rôle `authenticated` et l'identité du
+demandeur, par le même mécanisme que le chemin d'écriture. Il voit exactement
+ce que le demandeur voit, et le cloisonnement reste en base (A6.1).
+
+**Trois gardes**, sans lesquelles l'option ouvrirait une brèche entre
+organisations :
+
+1. Un membre de A ne peut pas créer un travail au nom d'un utilisateur de B :
+   le service lirait B pour le compte de A.
+2. Le demandeur ne change pas après l'insertion.
+3. Un membre de deux organisations ne fait pas lire le site de l'une sous le
+   nom de l'autre.
+
+**Migration additive.** La colonne est facultative et aucune ligne existante
+n'est transformée (A2.2, point 7). Un travail antérieur, sans demandeur, est
+refusé par le service.
+
+**Preuve.** `a6-1-travail-demandeur.db.test.ts`, 7 essais, passe sur la base
+de développement et sur une base montée comme en CI (propriétaire non
+super-utilisateur). Il vérifie :
+
+- le demandeur lit son site ;
+- un utilisateur de A ne lit rien de B ;
+- un membre des deux organisations est refusé ;
+- sans identité, la lecture ne voit rien ;
+- le demandeur est posé par défaut ;
+- l'usurpation est refusée par la politique ;
+- la modification est refusée par le déclencheur.
+
+Le décor s'installe par le chemin identifié, sans lever le cloisonnement.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 : `test` à 4 502 essais,
+`test:visual` à 14, `test:rls` à 74, `test:determinism` à 11, `test:e2e` à
+138, `build` sans erreur. Les 74 migrations se montent sur une base vide.
+
+### Reste ouvert après l'identité du service
+
+**La file elle-même.** Le service n'a encore ni file en base, ni point
+d'entrée `worker` : la file n'existe qu'en mémoire. Une file en base devra
+lire les travaux en attente de toutes les organisations, ce que l'identité
+d'un demandeur ne permet pas. Il faudra une voie dédiée, à décider le jour où
+la file en base se construit.
+
+**Les autres lectures du service.** Seul le paquet de borne lit la base
+aujourd'hui. Tout autre gestionnaire qui la lira devra passer par la même
+lecture identifiée.
