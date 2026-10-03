@@ -1,12 +1,12 @@
 import type { Job } from './job.js';
-import { STALL_TIMEOUT_MS, type JobQueue } from './queue.js';
+import { STALL_TIMEOUT_MS, type WorkerQueue } from './queue.js';
 
 export type JobHandler = (
   job: Job,
 ) => Promise<Record<string, unknown>>;
 
 export type WorkerOptions = {
-  queue: JobQueue;
+  queue: WorkerQueue;
   handlers: ReadonlyMap<string, JobHandler>;
   now: () => Date;
 };

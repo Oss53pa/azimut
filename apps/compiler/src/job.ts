@@ -1,12 +1,19 @@
-export type JobKind =
-  | 'import_plan'
-  | 'import_roster'
-  | 'compile_artworks'
-  | 'build_delivery_archive'
-  | 'build_wall_plans'
-  | 'build_kiosk_package'
-  | 'export_quantities'
-  | 'audit_site';
+export const JOB_KINDS = [
+  'import_plan',
+  'import_roster',
+  'compile_artworks',
+  'build_delivery_archive',
+  'build_wall_plans',
+  'build_kiosk_package',
+  'export_quantities',
+  'audit_site',
+] as const;
+
+export type JobKind = (typeof JOB_KINDS)[number];
+
+export function isJobKind(value: unknown): value is JobKind {
+  return (JOB_KINDS as readonly unknown[]).includes(value);
+}
 
 export type JobState =
   | 'queued'
@@ -28,6 +35,12 @@ export type Job = {
   started_at: Date | null;
   finished_at: Date | null;
   error: string | null;
+  /**
+   * A6.1 — l'utilisateur qui a demandé le travail, posé par la base
+   * (migration 0070). Le service lit sous son identité ; un travail sans
+   * demandeur, antérieur à la migration, est refusé.
+   */
+  requested_by: string | null;
   /**
    * D9.2 — earliest time a re-queued job may be dequeued again (exponential
    * backoff). Null/absent means immediately eligible.

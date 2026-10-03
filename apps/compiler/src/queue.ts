@@ -32,6 +32,16 @@ export type JobQueue = {
   getTraces(jobId: string): Promise<readonly JobTrace[]>;
 };
 
+/**
+ * Ce dont la boucle du service a besoin : prendre, clore, relever ce qui
+ * stagne. La création et la lecture d'un travail appartiennent au demandeur,
+ * pas au service (A6.1, migration 0071).
+ */
+export type WorkerQueue = Pick<
+  JobQueue,
+  'dequeue' | 'markRunning' | 'markSucceeded' | 'markFailed' | 'reapStalled'
+>;
+
 export class MemoryQueue implements JobQueue {
   private readonly jobs = new Map<string, Job>();
   private readonly traces = new Map<string, JobTrace[]>();

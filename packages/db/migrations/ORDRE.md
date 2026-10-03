@@ -113,6 +113,8 @@ non plus — elle n'en retire que les clés étrangères.
 0067_a12_3_audit_log_insert_only
 0068_a5_2_plan_source_content_kind
 0069_o11_temporary_closure
+0070_a6_1_job_requested_by
+0071_t0_11_job_dispatch
 ```
 
 ## Règle pour la suite
@@ -143,6 +145,17 @@ premier montage du banc d'essai du préalable K4 nº 7.
 sont toutes adressées ; un rôle qui n'en est pas membre n'a aucune politique et
 ne voit rien.
 
+**Les deux rôles de la file des travaux (0071).** `azimut_compiler` est le
+rôle du service de compilation : il n'a aucun droit sur les tables et
+n'exécute que les trois fonctions de prise. `azimut_job_dispatch` possède ces
+fonctions et ne sert à aucune connexion. La migration les crée s'ils manquent ;
+un propriétaire qui n'a pas le droit de créer un rôle les reçoit d'un compte
+d'administration, avant les migrations, et doit être membre de
+`azimut_job_dispatch` pour lui confier les fonctions. La connexion du service,
+en production, est membre de `azimut_compiler` et de `authenticated`, et de
+rien d'autre : elle prend un travail sous le premier, puis le traite sous
+l'identité de son demandeur.
+
 ```sh
 initdb -D "$PGDATA" -U postgres --auth=trust
 pg_ctl -D "$PGDATA" -o '-p 54332' -l "$PGDATA/server.log" start -w
@@ -151,6 +164,9 @@ psql -p 54332 -U postgres -d postgres <<'SQL'
 CREATE ROLE azimut LOGIN;
 CREATE ROLE authenticated NOLOGIN;
 GRANT authenticated TO azimut;
+CREATE ROLE azimut_compiler NOLOGIN;
+CREATE ROLE azimut_job_dispatch NOLOGIN;
+GRANT azimut_compiler, azimut_job_dispatch TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 

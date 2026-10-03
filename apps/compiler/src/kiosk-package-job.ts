@@ -1,5 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
-import { loadSiteData } from '@azimut/db';
+import { loadSiteDataAs } from '@azimut/db';
 import type { PostgresJsDatabase } from '@azimut/db';
 import { createBuildKioskPackageHandler } from './build-kiosk-package.js';
 import type { BuildKioskPackageContext } from './build-kiosk-package.js';
@@ -20,8 +20,11 @@ import type { Job } from './job.js';
  * The job payload carries `site_id` and `version`; the org comes from the job.
  */
 export type KioskPackageJobDeps = {
-  /** Load the site model for a job. Defaults to {@link dbLoadSite} in prod. */
-  readonly loadSite: (orgId: string, siteId: string) => Promise<SiteData>;
+  /**
+   * Load the site model for a job, as its requester (A6.1). Defaults to
+   * {@link dbLoadSite} in prod.
+   */
+  readonly loadSite: (orgId: string, siteId: string, requestedBy: string) => Promise<SiteData>;
   /** Storage the runtime app bundle is read from. */
   readonly bundleStore: AssetStore;
   /** Storage the assembled package is written to. */
@@ -44,11 +47,16 @@ export function siteActiveLangs(site: SiteData): readonly string[] {
   return sorted.length > 0 ? sorted : ['fr'];
 }
 
-/** Adapt a live database into a per-job site loader. */
+/**
+ * Adapt a live database into a per-job site loader.
+ *
+ * A6.1 — the site is read under the requester's identity, in a transaction
+ * that sets it and drops it: the service sees exactly what the requester sees.
+ */
 export function dbLoadSite(
   db: PostgresJsDatabase,
-): (orgId: string, siteId: string) => Promise<SiteData> {
-  return (orgId, siteId) => loadSiteData(db, orgId, siteId);
+): (orgId: string, siteId: string, requestedBy: string) => Promise<SiteData> {
+  return (orgId, siteId, requestedBy) => loadSiteDataAs(db, requestedBy, orgId, siteId);
 }
 
 function requireString(payload: Record<string, unknown>, key: string): string {
@@ -75,7 +83,11 @@ export function createKioskPackageJobHandler(
   return async (job: Job): Promise<Record<string, unknown>> => {
     const siteId = requireString(job.payload, 'site_id');
     const version = requireVersion(job.payload);
-    const site = await deps.loadSite(job.org_id, siteId);
+    // A6.1 — no requester, no identity to read under: refused, never guessed.
+    if (job.requested_by === null || job.requested_by === '') {
+      throw new Error('build_kiosk_package job has no requester (requested_by)');
+    }
+    const site = await deps.loadSite(job.org_id, siteId, job.requested_by);
 
     const context: BuildKioskPackageContext = {
       site,

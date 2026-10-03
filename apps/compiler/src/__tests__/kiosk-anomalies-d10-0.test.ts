@@ -36,6 +36,7 @@ function job(): Job {
     payload: { built_at: '2026-09-01T00:00:00Z' }, result: null, attempts: 1, max_attempts: 3,
     created_at: new Date('2026-09-01T00:00:00Z'), started_at: new Date('2026-09-01T00:00:01Z'),
     finished_at: null, error: null,
+    requested_by: 'user-essai',
   };
 }
 

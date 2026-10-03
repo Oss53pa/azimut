@@ -27,6 +27,8 @@ export type BatchReport = {
 
 export type BatchOptions = {
   readonly org_id: string;
+  /** A6.1 — l'utilisateur qui lance le lot ; chaque travail le porte. */
+  readonly requested_by: string;
   readonly kind: JobKind;
   readonly queue: JobQueue;
   readonly handler: JobHandler;
@@ -42,7 +44,7 @@ export async function runBatch(
   items: readonly BatchItem[],
   options: BatchOptions,
 ): Promise<BatchReport> {
-  const { org_id, kind, queue, handler, now, max_attempts } = options;
+  const { org_id, requested_by, kind, queue, handler, now, max_attempts } = options;
   const results: BatchResult[] = [];
   const sortedItems = [...items].sort((a, b) =>
     codePointCompare(a.item_id, b.item_id),
@@ -82,6 +84,7 @@ export async function runBatch(
       started_at: null,
       finished_at: null,
       error: null,
+      requested_by,
     };
     await queue.enqueue(job);
     created++;

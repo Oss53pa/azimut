@@ -21,7 +21,7 @@ function bundleStore() {
   );
 }
 
-function makeJob(payload: Record<string, unknown>): Job {
+function makeJob(payload: Record<string, unknown>, requestedBy: string | null = 'user-essai'): Job {
   return {
     id: 'job-1',
     org_id: 'org-42',
@@ -35,6 +35,7 @@ function makeJob(payload: Record<string, unknown>): Job {
     started_at: new Date('2026-09-01T12:00:01Z'),
     finished_at: null,
     error: null,
+    requested_by: requestedBy,
   };
 }
 
@@ -51,13 +52,13 @@ describe('siteActiveLangs', () => {
 
 describe('createKioskPackageJobHandler (D10 — job-driven)', () => {
   it('loads the site, assembles, persists and records in one flow', async () => {
-    const loaded: Array<{ orgId: string; siteId: string }> = [];
+    const loaded: Array<{ orgId: string; siteId: string; requestedBy: string }> = [];
     const records: Array<{ record: KioskPackageRecord; orgId: string }> = [];
     const sink = memoryAssetStore();
 
     const handler = createKioskPackageJobHandler({
-      loadSite: async (orgId, siteId) => {
-        loaded.push({ orgId, siteId });
+      loadSite: async (orgId, siteId, requestedBy) => {
+        loaded.push({ orgId, siteId, requestedBy });
         return refMultilevel;
       },
       bundleStore: bundleStore(),
@@ -71,8 +72,8 @@ describe('createKioskPackageJobHandler (D10 — job-driven)', () => {
       makeJob({ site_id: refMultilevel.site.id, version: 6, built_at: '2026-09-01T00:00:00Z' }),
     );
 
-    // Site was loaded with the job org and payload site.
-    expect(loaded).toEqual([{ orgId: 'org-42', siteId: refMultilevel.site.id }]);
+    // Site was loaded with the job org, payload site, and as the requester (A6.1).
+    expect(loaded).toEqual([{ orgId: 'org-42', siteId: refMultilevel.site.id, requestedBy: 'user-essai' }]);
 
     // Package summary.
     expect(result['site_id']).toBe(refMultilevel.site.id);
@@ -103,6 +104,19 @@ describe('createKioskPackageJobHandler (D10 — job-driven)', () => {
     await handler(makeJob({ site_id: 's', version: 1 }));
     const manifest = JSON.parse(new TextDecoder().decode(await sink.read('p/manifest.json')));
     expect(manifest.langs).toEqual(['en', 'fr']);
+  });
+
+  it('A6.1 — refuse un travail sans demandeur, sans lire le site', async () => {
+    let reads = 0;
+    const handler = createKioskPackageJobHandler({
+      loadSite: async () => { reads++; return refMultilevel; },
+      bundleStore: bundleStore(),
+      packageSink: memoryAssetStore(),
+      storagePathFor: () => 'p',
+      minRuntime: '1.0.0',
+    });
+    await expect(handler(makeJob({ site_id: 's', version: 1 }, null))).rejects.toThrow(/requester/);
+    expect(reads).toBe(0);
   });
 
   it('rejects a payload without site_id', async () => {

@@ -39,6 +39,7 @@ function makeJob(payload?: Record<string, unknown>): Job {
     started_at: new Date('2024-06-15T12:00:01Z'),
     finished_at: null,
     error: null,
+    requested_by: 'user-essai',
   };
 }
 
