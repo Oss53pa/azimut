@@ -66,6 +66,12 @@ export type TrancheSession = {
    * tranché. `null` le reste du temps (E5.4).
    */
   readonly pendingResume: SessionState | null;
+  /**
+   * Le dépôt n'a pas pu être lu, et l'atelier ne montre donc pas ce qu'il
+   * porte. Un site vide et un site illisible ne se ressemblent pas : F7
+   * (partie F) veut que le second le dise.
+   */
+  readonly loadFailed: boolean;
   /** Reprendre le travail local. */
   readonly acceptResume: () => void;
   /** Repartir sans lui. L'état local est effacé, jamais fusionné. */
@@ -87,9 +93,24 @@ const LOCAL_ONLY = async (): Promise<Outcome<unknown>> => ({
   ok: true, value: null, warnings: [],
 });
 
+/**
+ * Ce que le dépôt porte pour ce site, ou `null` s'il n'en porte rien.
+ *
+ * E5.4 : « Reprise proposée à la réouverture après incident, avec choix
+ * explicite de l'utilisateur entre l'état local et l'état serveur. » Sans ce
+ * chargement, le second terme du choix n'existait pas, et un site modélisé la
+ * veille s'ouvrait comme un site neuf.
+ *
+ * Un site que le dépôt ne connaît pas rend `null` : c'est le cas d'un site créé
+ * hors ligne, et ce n'est pas une défaillance. Toute autre défaillance est
+ * levée, et la session la signale au lieu de la faire passer pour un site vide.
+ */
+export type SessionLoader = () => Promise<SessionState | null>;
+
 export function useTrancheSession(
   context: SessionContext,
   send: (commands: readonly EntityCommand[]) => Promise<Outcome<unknown>> = LOCAL_ONLY,
+  load?: SessionLoader,
 ): TrancheSession {
   const [state, setState] = useState<SessionState>(EMPTY_SESSION);
   // L'état courant, lisible sans attendre un rendu : une écriture doit partir
@@ -105,6 +126,9 @@ export function useTrancheSession(
     [],
   );
   const [pendingResume, setPendingResume] = useState<SessionState | null>(null);
+  /** L'état du dépôt, tenu à part : c'est le second terme du choix d'E5.4. */
+  const stored = useRef<SessionState>(EMPTY_SESSION);
+  const [loadFailed, setLoadFailed] = useState(false);
   // E5.2 — la pile d'annulation du site en cours. Le `ref` porte l'état
   // courant, pour qu'un second geste parte du premier et non du dernier rendu.
   const [storeState, setStore] = useState<StoreState>(EMPTY_STORE);
@@ -123,21 +147,34 @@ export function useTrancheSession(
 
   // E5.4 — à l'ouverture d'un écran, l'état local est relu. Ce qu'on en fait
   // dépend de qui l'a laissé là : cet onglet, ou une session interrompue.
+  //
+  // Le dépôt est lu en parallèle. Il ne remplace jamais un travail local : il
+  // est ce vers quoi « repartir » ramène, et ce qui s'ouvre quand rien n'a été
+  // laissé sur le poste.
   useEffect(() => {
+    let cancelled = false;
     const decision = resumeDecision(
       readSession(context.siteId, storage),
       isOpenInTab(context.siteId, tabStorage),
     );
-    if (decision.kind === 'poursuivre') {
-      adopt(decision.state);
-      return;
-    }
-    if (decision.kind === 'proposer') {
-      setPendingResume(decision.state);
-      return;
-    }
-    markOpenInTab(context.siteId, tabStorage);
-  }, [adopt, context.siteId, storage, tabStorage]);
+    if (decision.kind === 'poursuivre') adopt(decision.state);
+    if (decision.kind === 'proposer') setPendingResume(decision.state);
+    if (decision.kind === 'rien') markOpenInTab(context.siteId, tabStorage);
+
+    if (load === undefined) return;
+    void load().then(
+      (fromRepository) => {
+        if (cancelled) return;
+        stored.current = fromRepository ?? EMPTY_SESSION;
+        // Rien n'a été laissé sur le poste : l'atelier s'ouvre sur le site tel
+        // que le dépôt le porte. C'est le cas courant, et le seul où le
+        // chargement s'adopte sans que personne ait à choisir.
+        if (decision.kind === 'rien' && fromRepository !== null) adopt(fromRepository);
+      },
+      () => { if (!cancelled) setLoadFailed(true); },
+    );
+    return () => { cancelled = true; };
+  }, [adopt, context.siteId, load, storage, tabStorage]);
 
   const acceptResume = useCallback((): void => {
     if (pendingResume !== null) adopt(pendingResume);
@@ -146,10 +183,10 @@ export function useTrancheSession(
   }, [adopt, context.siteId, pendingResume, tabStorage]);
 
   const discardResume = useCallback((): void => {
-    // Aucune fusion : ce qui est écarté est effacé, et le parcours repart de
-    // l'état vide. Le dépôt, lui, n'a rien perdu — la file n'était pas partie.
+    // Aucune fusion (E5.4) : ce qui est écarté est effacé, et le parcours
+    // repart de l'état du dépôt — vide tant que le dépôt ne porte rien.
     clearSession(context.siteId, storage);
-    adopt(EMPTY_SESSION);
+    adopt(stored.current);
     setPendingResume(null);
     markOpenInTab(context.siteId, tabStorage);
   }, [adopt, context.siteId, storage, tabStorage]);
@@ -221,14 +258,20 @@ export function useTrancheSession(
     const result = await undoLast(store.current, sink, new Date().toISOString());
     store.current = result.state;
     setStore(result.state);
-    return result.outcome.ok;
+    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
+    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
+    // si quelque chose a bougé.
+    return result.applied && result.outcome.ok;
   }, [sink]);
 
   const redo = useCallback(async (): Promise<boolean> => {
     const result = await redoLast(store.current, sink, new Date().toISOString());
     store.current = result.state;
     setStore(result.state);
-    return result.outcome.ok;
+    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
+    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
+    // si quelque chose a bougé.
+    return result.applied && result.outcome.ok;
   }, [sink]);
 
   const newId = useCallback((): string => {
@@ -250,6 +293,7 @@ export function useTrancheSession(
     undo,
     redo,
     pendingResume,
+    loadFailed,
     acceptResume,
     discardResume,
     count: useCallback((table: string) => countOf(state, table), [state]),

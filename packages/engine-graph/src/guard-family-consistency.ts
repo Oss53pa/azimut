@@ -1,4 +1,4 @@
-import { contentHash, type Finding, type Outcome } from '@azimut/core-model';
+import { codePointCompare, empreinteOutcome, type Finding, type Outcome } from '@azimut/core-model';
 
 /**
  * J5.2 / J5.4 — Pictograms of one family must be optically coherent: a single
@@ -27,16 +27,31 @@ export type FamilyMember = {
   readonly grid: unknown;
 };
 
+/**
+ * L'axe divergent, ou le refus d'empreinte de l'une des deux grilles. La
+ * grille se compare par l'empreinte de D7.2, la forme canonique commune : un
+ * même dessin encodé autrement n'est pas une divergence.
+ */
 function divergentAxis(
   member: FamilyMember,
   family: PictogramFamily,
-): string | null {
-  if (member.style !== family.style) return 'style';
+): Outcome<string | null> {
+  if (member.style !== family.style) return { ok: true, value: 'style', warnings: [] };
   if (family.style === 'stroke' && member.stroke_width !== family.stroke_width) {
-    return 'stroke_width';
+    return { ok: true, value: 'stroke_width', warnings: [] };
   }
-  if (contentHash(member.grid) !== contentHash(family.grid)) return 'grid';
-  return null;
+  const memberGrid = empreinteOutcome(member.grid, { kind: 'pictogram', id: member.id });
+  const familyGrid = empreinteOutcome(family.grid, { kind: 'pictogram_family', id: family.id });
+  if (!memberGrid.ok || !familyGrid.ok) {
+    return {
+      ok: false,
+      findings: [
+        ...(memberGrid.ok ? [] : memberGrid.findings),
+        ...(familyGrid.ok ? [] : familyGrid.findings),
+      ],
+    };
+  }
+  return { ok: true, value: memberGrid.value === familyGrid.value ? null : 'grid', warnings: [] };
 }
 
 /**
@@ -53,12 +68,18 @@ export function guardFamilyConsistency(
   for (const family of families) byId.set(family.id, family);
 
   const warnings: Finding[] = [];
-  const sorted = [...members].sort((a, b) => a.id.localeCompare(b.id));
+  const refusals: Finding[] = [];
+  const sorted = [...members].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const member of sorted) {
     const family = byId.get(member.family_id);
     if (family === undefined) continue;
-    const axis = divergentAxis(member, family);
+    const divergence = divergentAxis(member, family);
+    if (!divergence.ok) {
+      refusals.push(...divergence.findings);
+      continue;
+    }
+    const axis = divergence.value;
     if (axis !== null) {
       warnings.push({
         code: 'PICTO.FAMILY_INCONSISTENT',
@@ -70,5 +91,6 @@ export function guardFamilyConsistency(
     }
   }
 
+  if (refusals.length > 0) return { ok: false, findings: refusals };
   return { ok: true, value: null, warnings };
 }

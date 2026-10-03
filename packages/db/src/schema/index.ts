@@ -2,13 +2,13 @@ export { azimut } from './azimut.js';
 export { organization, membership, country } from './org.js';
 export {
   site, building, level, footprint, volume, zone,
-  planSource, planCalibration, planCalibrationPoint, controlPoint, opening, legalEntity,
+  planSource, planCalibration, planCalibrationPoint, opening, legalEntity,
   graphValidation,
   siteFact, siteFactForbiddenWord,
   sourceClaim, discrepancyDecision,
-  parking, parkingSpace, parkingUncoveredArea, vehicleGate,
+  parkingSpace,
 } from './site.js';
-export { node, edge, verticalLink, buildingLink } from './graph.js';
+export { node, edge, verticalLink, buildingLink, temporaryClosure } from './graph.js';
 export {
   category, pictogram, destination, destinationName,
   travelProfile, routeCache, decisionPoint,

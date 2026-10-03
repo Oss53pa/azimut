@@ -1,20 +1,31 @@
-import type { Finding, SiteData } from '@azimut/core-model';
+import type { CharterRule, Finding, ForbiddenCharacterRange, SiteData } from '@azimut/core-model';
+import { resolveForbiddenCharacters } from '@azimut/core-model';
 import { checkableTexts } from './site-texts.js';
 
 /**
- * QC-06 — caractères interdits dans un livrable (complément atelier).
+ * Caractères interdits dans un texte de livrable — A5.8.
  *
- * Le principe P7 (complément atelier) dit « Rédaction propre. Aucun tiret
- * cadratin ou demi-cadratin, point médian, flèche, signe de multiplication,
- * points de suspension dans un livrable », et QC-06 en fait un contrôle
- * bloquant. Rien ne l'exerçait.
+ * `charter_rule` porte la nature `forbidden_character`, et D2.2 nomme
+ * l'anomalie « Caractère interdit **par la charte** dans un texte de
+ * livrable ». La règle appartient donc à la charte d'un client, et non au
+ * produit : c'est l'arbitrage de l'éditeur, et il renverse celui que ce module
+ * portait — il tenait la liste pour une règle de rédaction valant pour tout
+ * livrable Azimut.
+ *
+ * **La liste vient désormais de la charte du site**, qui entre dans la
+ * signature de ce contrôle. Aucun caractère n'est écrit ici.
+ *
+ * Trois issues, et le rapport les distingue. La charte ne porte pas la règle :
+ * le contrôle ne s'exécute pas, `declared` est faux, l'appelant le range parmi
+ * les non exercés, et aucune valeur par défaut n'est appliquée — « une règle
+ * absente n'est pas une règle permissive ». La charte la porte et elle se lit :
+ * le contrôle juge. La charte la porte et elle ne se lit pas : le contrôle
+ * lève `CHARTER.RULE_MALFORMED`, bloquant, et **n'est pas rangé parmi les non
+ * exercés** : il a lu la charte et l'a refusée.
  *
  * **Ce n'est pas une valeur d'origine normative.** Aucune norme ne décide
- * qu'un tiret cadratin est interdit : c'est une règle de rédaction du produit,
- * énoncée par le document lui-même, au même titre que la mention d'auteur ou
- * le présent de l'indicatif. Elle ne relève donc pas d'un paquet de règles
- * (INV-5), et elle ne relève pas non plus du lexique de charte (A5.8), qui est
- * propre à un client quand celle-ci vaut pour tout livrable Azimut.
+ * qu'un tiret cadratin est interdit. INV-5 ne la vise pas, et aucun paquet de
+ * règles n'a à la porter.
  *
  * **Le contrôle porte sur la source, pas sur le rendu**, pour la raison que le
  * contrôle du lexique donne déjà : un caractère fautif dans une dénomination
@@ -22,41 +33,6 @@ import { checkableTexts } from './site-texts.js';
  * sur la dénomination dit quoi corriger ; le signaler sur douze panneaux dit
  * seulement où le mal s'est répandu.
  */
-
-export type ForbiddenCharacterRange = {
-  /** Premier point de code visé, inclus. */
-  readonly from: number;
-  /** Dernier point de code visé, inclus. Égal à `from` pour un caractère seul. */
-  readonly to: number;
-  /** Le nom que le document emploie, rapporté tel quel dans l'anomalie. */
-  readonly name: string;
-};
-
-/**
- * La liste de QC-06, traduite en points de code.
- *
- * Le document nomme les caractères en termes typographiques français ; les
- * ramener à des points de code est une traduction, et elle est écrite ici pour
- * qu'un lecteur puisse la vérifier plutôt que de la croire.
- *
- * Deux limites assumées, faute de quoi le contrôle inventerait la règle qu'il
- * applique :
- *
- * - « points de suspension » vise le caractère U+2026, non trois points ASCII
- *   à la suite. Les deux se lisent pareil et ne sont pas la même chaîne ;
- *   étendre à « ... » ajouterait à la règle au lieu de l'appliquer ;
- * - « flèche » vise le bloc Unicode des flèches, U+2190 à U+21FF. Les blocs
- *   supplémentaires (U+27F0, U+2B00) n'y sont pas : aucun texte du dépôt n'en
- *   produit, et les ajouter le jour où l'un apparaît coûtera une ligne.
- */
-export const FORBIDDEN_CHARACTERS: readonly ForbiddenCharacterRange[] = [
-  { from: 0x00b7, to: 0x00b7, name: 'point médian' },
-  { from: 0x00d7, to: 0x00d7, name: 'signe de multiplication' },
-  { from: 0x2013, to: 0x2013, name: 'tiret demi-cadratin' },
-  { from: 0x2014, to: 0x2014, name: 'tiret cadratin' },
-  { from: 0x2026, to: 0x2026, name: 'points de suspension' },
-  { from: 0x2190, to: 0x21ff, name: 'flèche' },
-];
 
 export type TypographyReport = {
   /**
@@ -66,11 +42,30 @@ export type TypographyReport = {
    * anomalie ne se distingue pas d'un rapport qui n'avait rien à lire.
    */
   readonly checked_texts: number;
+  /**
+   * Vrai dès que la charte porte une règle de cette nature, lisible ou non.
+   *
+   * C'est lui qui décide du rangement chez l'appelant. Une règle cassée est
+   * déclarée : la ranger parmi les non exercés cacherait qu'un site a une
+   * charte et qu'elle ne produit rien.
+   */
+  readonly declared: boolean;
+  /**
+   * Vrai quand le contrôle a réellement jugé les textes.
+   *
+   * Un rapport non appliqué n'est pas un rapport vert. C'est la distinction
+   * qu'A5.8 exige et que `checked_texts` seul ne rend pas : un site sans
+   * charte lit bien ses textes, il n'a rien à leur opposer.
+   */
+  readonly applied: boolean;
   readonly findings: readonly Finding[];
 };
 
-function forbiddenAt(codePoint: number): ForbiddenCharacterRange | null {
-  for (const range of FORBIDDEN_CHARACTERS) {
+function forbiddenAt(
+  ranges: readonly ForbiddenCharacterRange[],
+  codePoint: number,
+): ForbiddenCharacterRange | null {
+  for (const range of ranges) {
     if (codePoint >= range.from && codePoint <= range.to) return range;
   }
   return null;
@@ -114,7 +109,10 @@ export function templateFreeTexts(site: SiteData): readonly { id: string; value:
  * libres de gabarit par identifiant de gabarit et rang de bloc, et dans chaque
  * texte par position croissante.
  */
-export function auditTypography(site: SiteData): TypographyReport {
+export function auditTypography(
+  site: SiteData,
+  charterRules: readonly CharterRule[],
+): TypographyReport {
   const named = checkableTexts(site).map((t) => ({
     id: t.id, kind: t.kind, value: t.value,
   }));
@@ -123,12 +121,23 @@ export function auditTypography(site: SiteData): TypographyReport {
   }));
   const texts = [...named, ...free];
 
-  const findings: Finding[] = [];
+  const resolved = resolveForbiddenCharacters(charterRules);
+  const findings: Finding[] = [...resolved.findings];
+  const ranges = resolved.value;
+  if (ranges === null) {
+    return {
+      checked_texts: texts.length,
+      declared: resolved.declared,
+      applied: false,
+      findings,
+    };
+  }
+
   for (const text of texts) {
     let position = 0;
     for (const char of text.value) {
       const code = char.codePointAt(0) ?? 0;
-      const range = forbiddenAt(code);
+      const range = forbiddenAt(ranges, code);
       if (range !== null) {
         findings.push({
           code: 'LAYOUT.FORBIDDEN_CHARACTER',
@@ -140,12 +149,12 @@ export function auditTypography(site: SiteData): TypographyReport {
             name: range.name,
             position,
           },
-          ruleRef: 'atelier-QC-06',
+          ruleRef: 'A5.8',
         });
       }
       position += char.length;
     }
   }
 
-  return { checked_texts: texts.length, findings };
+  return { checked_texts: texts.length, declared: true, applied: true, findings };
 }

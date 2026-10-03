@@ -1,16 +1,17 @@
+import type { ParkingSpace } from './parking.js';
 import type { Polygon, Point } from './geometry.js';
-import type { Parking, ParkingSpace, UncoveredArea, Provenance } from './parking.js';
 import type { PlanSource, PlanCalibration } from './plan.js';
 import type { ActiveLang } from './lang.js';
 import type { OpeningHours } from './opening-hours.js';
-import type { EdgeAvailability } from './edge-availability.js';
-import type { FootprintKind } from './site-kinds.js';
+import type { TemporaryClosure } from './temporary-closure.js';
+import type { FootprintKind, SiteZone } from './site-kinds.js';
 
 export {
   FOOTPRINT_KINDS, isFootprintKind, ZONE_KINDS, isSiteZoneKind, OPENING_KINDS, isOpeningKind,
   CELL_FOOTPRINT_KIND, isCellFootprint,
+  PARKING_SPACE_FOOTPRINT_KIND, isParkingSpaceFootprint, PARKING_ZONE_KIND, isParkingZone,
 } from './site-kinds.js';
-export type { FootprintKind, SiteZoneKind, OpeningKind } from './site-kinds.js';
+export type { FootprintKind, SiteZoneKind, OpeningKind, SiteZone } from './site-kinds.js';
 
 import type {
   SupportType,
@@ -67,7 +68,6 @@ export type Site = {
    * avant l'émission de la première facture. Elle ne sert qu'à facturer.
    */
   readonly legal_entity_id?: string;
-  readonly rules_pack_id: string | null;
   /**
    * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que
    * rien n'est déclaré, et non que le français s'applique. Voir `lang.ts`.
@@ -186,11 +186,6 @@ export type Edge = {
   readonly direction: EdgeDirection;
   readonly evacuation_route: boolean;
   readonly length_m: number;
-  /**
-   * A5.3 — fermetures déclarées (voir `edge-availability.ts`). Absente quand
-   * la colonne est vide ; illisible, elle est gardée comme telle.
-   */
-  readonly availability?: EdgeAvailability;
 };
 
 export type VerticalLinkKind =
@@ -206,6 +201,28 @@ export type VerticalLink = {
   readonly kind: VerticalLinkKind;
   readonly capacity: number;
   readonly accessible: boolean;
+};
+
+/**
+ * A5.3 et M01.S10 — le passage entre deux bâtiments.
+ *
+ * « Toute arête dont les deux extrémités appartiennent à des bâtiments
+ * différents porte une ligne `building_link`, qui déclare si le passage est
+ * couvert. » Règle symétrique de celle des liaisons verticales : la
+ * connectivité est portée par l'arête, l'attribut de passage par la liaison.
+ *
+ * **Limite déclarée**, celle que la règle nomme elle-même : aucun calcul ne
+ * lit `sheltered` aujourd'hui. L'attribut est conservé parce qu'un cheminement
+ * extérieur non couvert change le parcours réel d'un visiteur, et qu'aucune
+ * autre donnée ne le porte.
+ */
+export type BuildingLink = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly edge_id: string;
+  readonly from_building_id: string;
+  readonly to_building_id: string;
+  readonly sheltered: boolean;
 };
 
 export type Category = {
@@ -226,6 +243,24 @@ export type Pictogram = {
   readonly standard_ref: string;
   readonly svg_path: string;
   readonly registry: PictogramRegistry;
+  /**
+   * À quoi sert ce pictogramme, et non d'où il vient — A5.4.
+   *
+   * C'est par elle qu'un moteur demande « le pictogramme d'accessibilité »
+   * sans connaître son code. Voir `pictogram-functions.ts`, qui porte le
+   * vocabulaire et la résolution. `null` pour un pictogramme qui ne sert
+   * aucune fonction nommée, ce qui est le cas courant.
+   */
+  readonly function_key: string | null;
+  /**
+   * Le paquet de règles qui porte ce pictogramme — A5.4.
+   *
+   * Requis pour le registre de sécurité, d'où vient toute désignation de ce
+   * registre ; c'est aussi la portée de son unicité : une fonction y est
+   * désignée au plus une fois par paquet. `null` pour un pictogramme
+   * d'orientation, qui ne relève d'aucun paquet.
+   */
+  readonly rules_pack_id: string | null;
 };
 
 export type OccupancyStatus =
@@ -280,24 +315,36 @@ export type SiteGraph = {
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly vertical_links: readonly VerticalLink[];
+  /** M01.S10. La table existait en base sans que rien ne la lise. */
+  readonly building_links: readonly BuildingLink[];
 };
 
-/** Complément atelier M2 — un portail ou un accès véhicule. */
-export type VehicleGate = {
+/** A5.8 — le rôle d'un paquet rattaché à un site. */
+export type RulesPackRole = 'base' | 'overlay';
+
+/**
+ * A5.8 — le rattachement d'un site à un paquet de règles.
+ *
+ * « Cette table fait foi pour le rattachement d'un site à ses paquets. Un site
+ * porte au plus un socle et au plus une surcouche pays. » Le site ne porte plus
+ * de colonne de paquet : A5.2 la retire, « une colonne unique ici serait une
+ * seconde source pour la même chose ». Voir `rules-bindings.ts`.
+ */
+export type SiteRulesBinding = {
   readonly id: string;
-  readonly org_id: string;
-  readonly level_id: string;
-  /** Code du plan source : V1 à V5 sur Cosmos Angré. */
-  readonly code: string;
-  readonly role: string;
-  readonly width_m: number;
-  readonly position: Point;
-  readonly provenance: Provenance;
+  readonly rules_pack_id: string;
+  readonly role: RulesPackRole;
 };
 
 export type SiteData = {
   readonly organization: Organization;
   readonly site: Site;
+  /**
+   * A5.8 — les paquets rattachés au site, zéro, un ou deux. Requis au type :
+   * un site sans rattachement le dit par une liste vide, et un jeu d'essai
+   * qui l'oublierait ne compilerait pas au lieu de passer pour non rattaché.
+   */
+  readonly rules_bindings: readonly SiteRulesBinding[];
   readonly buildings: readonly Building[];
   readonly levels: readonly Level[];
   /**
@@ -307,6 +354,20 @@ export type SiteData = {
    */
   readonly plan_sources: readonly PlanSource[];
   readonly plan_calibrations: readonly PlanCalibration[];
+  /**
+   * A5.2 — zones du socle, avec les empreintes qu'elles couvrent.
+   *
+   * Absentes de l'entrée des moteurs jusqu'à la version 17 : une zone ne
+   * portait alors qu'un nom et une nature, et aucun contrôle n'avait de raison
+   * de la lire. `footprint_ids` change cela, et `DATA.PARKING_SPACE_WITHOUT_ZONE`
+   * est le premier contrôle qui s'en sert.
+   *
+   * Facultatif au type, parce que tous les jeux d'essai antérieurs à la
+   * version 17 n'en portent pas, et qu'exiger le champ transformerait une
+   * absence de zone en erreur de compilation là où le modèle admet un site
+   * sans zone déclarée.
+   */
+  readonly zones?: readonly SiteZone[];
   readonly footprints: readonly Footprint[];
   readonly volumes: readonly Volume[];
   readonly graph: SiteGraph;
@@ -322,13 +383,18 @@ export type SiteData = {
   readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
   /**
-   * Complément atelier M2 — le stationnement fait partie de la géométrie du
-   * site, au même titre que les empreintes : un parking se dessine sur un plan
-   * et se compte. Il entre donc ici, et non dans un registre à part comme le
-   * vocabulaire, qui lui n'est pas de la géométrie.
+   * A5.3 — ce que les empreintes de place portent en plus, quand elles le
+   * portent. Une ligne par empreinte, au plus ; une empreinte sans extension
+   * reste une place standard sans repère de travée.
+   *
+   * Le stationnement n'a plus d'autre entrée ici. Les parkings sont des zones,
+   * les places des empreintes, et les capacités annoncées des faits d'A5.11 —
+   * section S8, règles S-35 à S-37.
    */
-  readonly parkings: readonly Parking[];
   readonly parking_spaces: readonly ParkingSpace[];
-  readonly parking_uncovered: readonly UncoveredArea[];
-  readonly vehicle_gates: readonly VehicleGate[];
+  /**
+   * O11 — les fermetures temporaires du site. Facultatif au type pour les
+   * jeux d'essai qui n'en portent pas : absent vaut aucune fermeture.
+   */
+  readonly temporary_closures?: readonly TemporaryClosure[];
 };

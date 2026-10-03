@@ -10,7 +10,7 @@
  * et confie les commandes à un émetteur qu'on lui donne — ce qui le rend
  * vérifiable sans base, et empêche l'interface de court-circuiter le chemin.
  */
-import type { EntityCommand, Outcome, Finding } from '@azimut/core-model';
+import type { EntityCommand, Outcome } from '@azimut/core-model';
 import { inverseCommand } from '@azimut/core-model';
 
 /** E5.2 — profondeur de la pile d'annulation, constante nommée. */
@@ -97,6 +97,21 @@ function capped(entries: readonly UndoEntry[]): readonly UndoEntry[] {
 // ---------------------------------------------------------------------------
 
 /**
+ * Ce qu'une annulation rend : l'état, et si elle a eu lieu.
+ *
+ * `applied` vaut faux quand la pile était vide. Ce n'est pas un refus : une
+ * pile vide est un état d'écran (F7), et l'écran le sait déjà — les boutons
+ * sont désactivés par `canUndo` et `canRedo`. Le code d'anomalie qui portait
+ * ce cas a été retiré du catalogue par l'éditeur, D2.2 le réservant aux
+ * anomalies produites par un moteur.
+ */
+export type UndoOutcome = {
+  readonly state: StoreState;
+  readonly applied: boolean;
+  readonly outcome: Outcome<unknown>;
+};
+
+/**
  * Annule le dernier geste, en écrivant son inverse.
  *
  * L'annulation n'est pas un retrait : c'est une écriture, qui passe par le
@@ -111,10 +126,10 @@ export async function undo(
   state: StoreState,
   sink: CommandSink,
   timestamp: string,
-): Promise<{ state: StoreState; outcome: Outcome<unknown> }> {
+): Promise<UndoOutcome> {
   const entry = state.undoStack[state.undoStack.length - 1];
   if (entry === undefined) {
-    return { state, outcome: { ok: false, findings: [nothingToUndo()] } };
+    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] } };
   }
 
   const inverses = [...entry.commands]
@@ -122,7 +137,7 @@ export async function undo(
     .map(c => inverseCommand(c, timestamp));
 
   const outcome = await sink(inverses);
-  if (!outcome.ok) return { state, outcome };
+  if (!outcome.ok) return { state, applied: false, outcome };
 
   return {
     state: {
@@ -130,6 +145,7 @@ export async function undo(
       redoStack: [...state.redoStack, entry],
       pending: [...state.pending, ...inverses],
     },
+    applied: true,
     outcome,
   };
 }
@@ -139,15 +155,15 @@ export async function redo(
   state: StoreState,
   sink: CommandSink,
   timestamp: string,
-): Promise<{ state: StoreState; outcome: Outcome<unknown> }> {
+): Promise<UndoOutcome> {
   const entry = state.redoStack[state.redoStack.length - 1];
   if (entry === undefined) {
-    return { state, outcome: { ok: false, findings: [nothingToRedo()] } };
+    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] } };
   }
 
   const replayed = entry.commands.map(c => ({ ...c, timestamp }));
   const outcome = await sink(replayed);
-  if (!outcome.ok) return { state, outcome };
+  if (!outcome.ok) return { state, applied: false, outcome };
 
   return {
     state: {
@@ -155,6 +171,7 @@ export async function redo(
       redoStack: state.redoStack.slice(0, -1),
       pending: [...state.pending, ...replayed],
     },
+    applied: true,
     outcome,
   };
 }
@@ -186,22 +203,3 @@ export function afterSync(state: StoreState): StoreState {
   return EMPTY_STORE;
 }
 
-function nothingToUndo(): Finding {
-  return {
-    code: 'EDIT.NOTHING_TO_UNDO',
-    severity: 'info',
-    entity: null,
-    params: {},
-    ruleRef: 'E5.2',
-  };
-}
-
-function nothingToRedo(): Finding {
-  return {
-    code: 'EDIT.NOTHING_TO_REDO',
-    severity: 'info',
-    entity: null,
-    params: {},
-    ruleRef: 'E5.2',
-  };
-}

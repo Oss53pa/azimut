@@ -63,6 +63,46 @@ test.describe('M7.1 (partie M) — les six états sont traités', () => {
     await expect(page.getByRole('toolbar')).toBeVisible();
     await expect(page.getByRole('button', { pressed: true })).toHaveCount(1);
   });
+
+  /**
+   * M2 (partie M), état « Partiel » : « Fond chargé, calage incomplet : le
+   * tracé reste inaccessible et l'écran dit pourquoi. »
+   *
+   * Les trois libellés existaient, traduits dans les deux langues, et
+   * n'étaient affichés nulle part : l'écran ne se débloquait pas et
+   * l'opérateur ne savait pas ce qui lui manquait.
+   */
+  test('l’état partiel nomme ce qui manque, et suit la saisie', async ({ page }) => {
+    await page.goto(PLAN);
+    // Aucun fond : rien n'est partiel, il n'y a rien à compléter.
+    await expect(page.getByText(/Le tracé attend/)).toHaveCount(0);
+
+    await loadPlan(page);
+    await expect(page.getByText(
+      /Le tracé attend deux points de calage|awaits two calibration points/,
+    )).toBeVisible();
+
+    // La distance seule ne suffit pas : les deux points manquent toujours, et
+    // le motif suit l'état réel de la saisie, non le dernier champ touché.
+    await page.getByLabel(/Distance réelle|Real distance/).fill('20');
+    await expect(page.getByText(
+      /Le tracé attend deux points de calage|awaits two calibration points/,
+    )).toBeVisible();
+
+    for (const [label, value] of [
+      [/Point A · X/, '0'], [/Point A · Y/, '0'],
+      [/Point B · X/, '200'], [/Point B · Y/, '0'],
+    ] as const) {
+      await page.getByLabel(label).fill(value);
+    }
+    await expect(page.getByText(
+      /Le tracé attend l’azimut du nord|awaits the north azimuth/,
+    )).toBeVisible();
+
+    await page.getByLabel(/Azimut du nord|North azimuth/).fill('0');
+    // Le nord franc est une orientation, pas une absence d'orientation.
+    await expect(page.getByText(/Le tracé attend/)).toHaveCount(0);
+  });
 });
 
 test.describe('M7.2 (partie M) — tout se saisit au clavier, en numérique, dans le panneau', () => {

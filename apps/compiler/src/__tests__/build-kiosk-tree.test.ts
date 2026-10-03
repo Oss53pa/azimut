@@ -7,6 +7,13 @@ import {
   buildKioskMapFiles,
 } from '../build-kiosk-tree.js';
 import type { KioskAppAssets } from '../build-kiosk-tree.js';
+import type { Outcome } from '@azimut/core-model';
+
+/** La valeur d'un succès ; un refus fait échouer l'essai en nommant ses codes. */
+function valueOf<T>(outcome: Outcome<T>): T {
+  if (!outcome.ok) throw new Error(outcome.findings.map(f => f.code).join(', '));
+  return outcome.value;
+}
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -43,7 +50,7 @@ describe('D10.1 — buildKioskDataFiles', () => {
 
 describe('D10.1 — buildKioskMapFiles', () => {
   it('renders one map per level, named by ordinal', () => {
-    const maps = buildKioskMapFiles(refMultilevel);
+    const maps = valueOf(buildKioskMapFiles(refMultilevel));
     expect([...maps.keys()].sort()).toEqual([
       'maps/level-0.svg',
       'maps/level-1.svg',
@@ -54,14 +61,14 @@ describe('D10.1 — buildKioskMapFiles', () => {
   });
 
   it('map colours come from design tokens (no CSS var references)', () => {
-    const svg = dec.decode(buildKioskMapFiles(refMultilevel).get('maps/level-0.svg'));
+    const svg = dec.decode(valueOf(buildKioskMapFiles(refMultilevel)).get('maps/level-0.svg'));
     expect(svg).not.toContain('var(--');
   });
 });
 
 describe('D10.1 — buildKioskTree feeds assembleKioskPackage', () => {
   it('produces a complete, assemblable, autonomous tree', () => {
-    const tree = buildKioskTree(refMultilevel, appAssets);
+    const tree = valueOf(buildKioskTree(refMultilevel, appAssets));
 
     // All D10.1 required files are present.
     for (const required of [
@@ -86,8 +93,8 @@ describe('D10.1 — buildKioskTree feeds assembleKioskPackage', () => {
   });
 
   it('the whole tree is deterministic', () => {
-    const a = buildKioskTree(refMultilevel, appAssets);
-    const b = buildKioskTree(refMultilevel, appAssets);
+    const a = valueOf(buildKioskTree(refMultilevel, appAssets));
+    const b = valueOf(buildKioskTree(refMultilevel, appAssets));
     expect([...a.keys()].sort()).toEqual([...b.keys()].sort());
     for (const key of a.keys()) {
       expect(dec.decode(b.get(key))).toBe(dec.decode(a.get(key)));
@@ -95,10 +102,10 @@ describe('D10.1 — buildKioskTree feeds assembleKioskPackage', () => {
   });
 
   it('includes extra assets (e.g. fonts) under the tree', () => {
-    const tree = buildKioskTree(refMultilevel, {
+    const tree = valueOf(buildKioskTree(refMultilevel, {
       ...appAssets,
       extra: new Map([['assets/fonts/inter.woff2', enc.encode('FONT')]]),
-    });
+    }));
     expect(tree.has('assets/fonts/inter.woff2')).toBe(true);
   });
 });

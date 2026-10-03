@@ -15,7 +15,6 @@ export const refAdversarial: SiteData = {
     name: 'Site adversarial',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
     // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
@@ -26,6 +25,8 @@ export const refAdversarial: SiteData = {
     // D1.1 — altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
+  // A5.8 — aucun paquet rattaché.
+  rules_bindings: [],
   buildings: [
     {
       id: 'bldg-adv-001',
@@ -62,6 +63,7 @@ export const refAdversarial: SiteData = {
       level_id: 'lvl-adv-001',
       storage_path: 'plans/site-adversarial-001/lvl-adv-001.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],
@@ -193,6 +195,7 @@ export const refAdversarial: SiteData = {
       },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {
@@ -212,6 +215,8 @@ export const refAdversarial: SiteData = {
       standard_ref: 'WF-002',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
+      rules_pack_id: null,
     },
   ],
   destinations: [
@@ -260,8 +265,5 @@ export const refAdversarial: SiteData = {
   content_blocks: [],
   support_versions: [],
   face_templates: [],
-  parkings: [],
   parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
 };

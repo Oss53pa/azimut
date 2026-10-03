@@ -1,8 +1,11 @@
 import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimut/core-model';
-import { PUBLISHABLE_STATUSES } from '@azimut/core-model';
+import {
+  factValueText, isParkingZone, isParkingSpaceFootprint, declaredInteger,
+  PARKING_CAPACITY_KEY, PARKING_FREE_KEY, PARKING_UNDIGITIZED_SPACES_KEY,
+} from '@azimut/core-model';
 
 /**
- * Ce qu'un document de stratégie peut lier — complément atelier, M15.
+ * Ce qu'un document de stratégie peut lier — A5.11, règle M01.S11.
  *
  * Le catalogue et les valeurs se construisent ensemble et volontairement : le
  * catalogue dit ce que le modèle sait offrir, les valeurs disent ce que ce
@@ -26,7 +29,7 @@ const SITE_FIELDS = ['name', 'country_code'] as const;
  * Champs d'un parking. Catalogués même quand le site n'a pas de parking : le
  * modèle les offre, et c'est ce que le catalogue décrit.
  */
-const PARKING_FIELDS = ['name', 'capacity', 'digitised_spaces', 'access'] as const;
+const PARKING_FIELDS = ['name', 'capacity', 'digitized_spaces', 'access'] as const;
 
 const LEVEL_FIELDS = ['count'] as const;
 
@@ -50,34 +53,52 @@ export function buildDocumentBindings(
   // Un document qui parle de plusieurs parkings demandera une liaison indexée,
   // que ce module n'offre pas encore : mieux vaut ne rien rendre qu'un chiffre
   // pris au hasard dans la liste.
-  const parkings = [...site.parkings].sort((l, r) => l.id.localeCompare(r.id));
+  const parkings = (site.zones ?? [])
+    .filter(zone => isParkingZone(zone.kind))
+    .sort((l, r) => l.id.localeCompare(r.id));
   const first = parkings[0];
   if (first !== undefined) {
-    // Un document est un livrable : il ne compte que l'existant (P1, complément atelier). Une
-    // proposition non validée s'y afficherait comme un fait, et le nombre de
-    // places d'un parking est précisément le genre de fait qu'on cite ensuite
-    // sans le revérifier.
-    //
-    // Ce compte diffère donc de celui de `auditParking`, qui mesure la
-    // numérisation et retient aussi les propositions. Deux questions, deux
+    // Le compte des places est celui des empreintes tracées : une empreinte
+    // marquée non numérisée n'en est pas une, elle est la surface où le plan
+    // s'arrête. Ce compte diffère donc de celui d'`auditParking`, qui totalise
+    // aussi les places que ces marques déclarent. Deux questions, deux
     // comptes : « ce qui a été tracé » n'est pas « ce que le site a ».
-    const digitised = site.parking_spaces.filter(
-      s => s.parking_id === first.id
-        && PUBLISHABLE_STATUSES.includes(s.provenance.status),
-    ).length;
+    const spaces = new Set(site.footprints
+      .filter(footprint => isParkingSpaceFootprint(footprint.kind))
+      .map(footprint => footprint.id));
+    const digitized = first.footprint_ids.filter(id => spaces.has(id)
+      && declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY,
+        { kind: 'footprint', id }) === null).length;
+
+    const target = { kind: 'zone', id: first.id };
+    const capacity = declaredInteger(facts, PARKING_CAPACITY_KEY, target);
+    const free = facts.find(fact => fact.key === PARKING_FREE_KEY
+      && fact.target?.kind === target.kind && fact.target.id === target.id);
+
+    // Un champ que rien ne déclare reste vide, et non rempli d'un défaut. La
+    // règle M01.S11 — « un nombre affiché dans un livrable provient d'un fait
+    // ou d'un calcul » — refuse qu'un document annonce une capacité que
+    // personne n'a déclarée, et « payant » est une annonce tout autant que
+    // « gratuit ».
     values['parking'] = {
       name: first.name,
-      capacity: String(first.declared_capacity),
-      digitised_spaces: String(digitised),
-      access: first.free ? 'gratuit' : 'payant',
+      ...(capacity === null ? {} : { capacity: String(capacity) }),
+      digitized_spaces: String(digitized),
+      ...(free === undefined ? {} : { access: free.value === true ? 'gratuit' : 'payant' }),
     };
   }
 
+  // Le statut d'un fait n'est pas jugé ici, et c'est délibéré : ce module rend
+  // des valeurs, il ne décide pas ce qui a le droit de paraître. La règle
+  // M01.S11 — « un fait de statut `proposal` ne s'affiche jamais comme un
+  // existant » — est opposée par `auditSiteFacts` en mode livrable, qui lève
+  // `PARK.PROPOSAL_AS_EXISTING`. Deux gardes pour une règle finiraient par se
+  // contredire, et c'est l'anomalie qui nomme le fait à réviser.
   const factFields: string[] = [];
   const factValues: Record<string, string> = {};
   for (const fact of [...facts].sort((l, r) => l.key.localeCompare(r.key))) {
     factFields.push(fact.key);
-    factValues[fact.key] = fact.value;
+    factValues[fact.key] = factValueText(fact.value);
   }
   values['site_fact'] = factValues;
 

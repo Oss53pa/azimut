@@ -4,7 +4,7 @@ import {
 } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { getErrorMessage } from '@azimut/core-model';
-import type { ErrorCode, Finding, LegalEntityDraft } from '@azimut/core-model';
+import type { ErrorCode, Finding, FormNotice, FormNoticeKey, LegalEntityDraft } from '@azimut/core-model';
 
 /** Un pays du référentiel, avec la devise qu'il propose par défaut (Q4). */
 export type ClientCountryOption = {
@@ -16,6 +16,7 @@ export type ClientCountryOption = {
 type NewClientDialogProps = {
   readonly countries: readonly ClientCountryOption[];
   readonly findings: readonly Finding[];
+  readonly notices: readonly FormNotice[];
   readonly busy: boolean;
   readonly onSubmit: (draft: LegalEntityDraft) => void;
   readonly onClose: () => void;
@@ -27,7 +28,7 @@ type NewClientDialogProps = {
  * l'adresse, dont la forme n'est pas définie.
  */
 export function NewClientDialog({
-  countries, findings, busy, onSubmit, onClose,
+  countries, findings, notices, busy, onSubmit, onClose,
 }: NewClientDialogProps): JSX.Element {
   const { t, lang } = useI18n();
   const [legalName, setLegalName] = useState('');
@@ -44,6 +45,10 @@ export function NewClientDialog({
     setCountry(code);
     const proposed = countries.find(option => option.value === code)?.defaultCurrency ?? null;
     if (proposed !== null && currency.trim() === '') setCurrency(proposed);
+  }
+
+  function noticeFor(key: FormNoticeKey): string | undefined {
+    return notices.some(n => n.key === key) ? t(key) : undefined;
   }
 
   function messageFor(code: string): string | undefined {
@@ -78,7 +83,7 @@ export function NewClientDialog({
           onChange={setLegalName}
           autoFocus
           disabled={busy}
-          error={messageFor('DATA.LEGAL_NAME_REQUIRED')}
+          error={messageFor('DATA.NAME_REQUIRED') ?? messageFor('DATA.NAME_DUPLICATE')}
         />
         <SelectField
           label={t('clients.create.country')}
@@ -96,7 +101,7 @@ export function NewClientDialog({
           maxLength={3}
           disabled={busy}
           hint={t('clients.create.currency.hint')}
-          error={messageFor('DATA.CURRENCY_INVALID')}
+          error={noticeFor('form.currency.invalid')}
         />
         <TextField
           label={t('clients.create.registration')}

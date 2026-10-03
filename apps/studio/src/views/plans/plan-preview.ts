@@ -16,6 +16,8 @@ export const ORIENTED_PLAN_PREVIEW_THEME: OrientedPlanTheme = {
   background: 'var(--surface-panel)',
   footprint_fill: 'var(--surface-sunken)',
   footprint_stroke: 'var(--border-strong)',
+  parking_fill: 'var(--surface-sunken)',
+  parking_stroke: 'var(--border-strong)',
   edge_stroke: 'var(--border-interactive)',
   edge_evacuation_stroke: 'var(--text-secondary)',
   node_fill: 'var(--surface-panel)',

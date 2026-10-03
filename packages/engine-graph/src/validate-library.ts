@@ -2,9 +2,22 @@ import type {
   SiteData,
   Category,
   Pictogram,
-  PictogramRegistry,
   Finding,
   Outcome,
+} from '@azimut/core-model';
+
+/**
+ * INV-3 — les trois gardes du registre de sécurité vivaient ici et n'étaient
+ * appelés par rien. Ils sont descendus dans `core-model`, où `buildCommand`
+ * peut les appeler : c'est le passage obligé de toute écriture, et A4.1
+ * interdit à `core-model` de lire un moteur. Réexportés pour que les appelants
+ * de ce module ne changent pas.
+ */
+export {
+  guardSafetyRegistry, guardSafetyCreation, guardSafetyDeletion,
+} from '@azimut/core-model';
+export type {
+  PictogramMutation, PictogramCreation, PictogramRegistryEntry,
 } from '@azimut/core-model';
 
 export type LibraryValidationResult = {
@@ -13,13 +26,6 @@ export type LibraryValidationResult = {
   readonly safety_pictograms: number;
   readonly wayfinding_pictograms: number;
   readonly sectors: readonly string[];
-};
-
-export type PictogramMutation = {
-  readonly pictogram_id: string;
-  readonly field: string;
-  readonly old_value: string;
-  readonly new_value: string;
 };
 
 function categoryParentNotFoundFindings(
@@ -186,101 +192,4 @@ export function validateLibrary(
     },
     warnings,
   };
-}
-
-export function guardSafetyRegistry(
-  site: SiteData,
-  mutations: readonly PictogramMutation[],
-): Outcome<null> {
-  const pictoMap = new Map(site.pictograms.map((p) => [p.id, p]));
-  const findings: Finding[] = [];
-  const sorted = [...mutations].sort((a, b) =>
-    a.pictogram_id.localeCompare(b.pictogram_id),
-  );
-
-  for (const mut of sorted) {
-    const picto = pictoMap.get(mut.pictogram_id);
-    if (!picto) continue;
-    if (picto.registry === 'safety') {
-      findings.push({
-        code: 'SECURITY.REGISTRY_WRITE_DENIED',
-        severity: 'blocking',
-        entity: { kind: 'pictogram', id: mut.pictogram_id },
-        params: {
-          field: mut.field,
-          attempted_value: mut.new_value,
-        },
-        ruleRef: 'INV-3',
-      });
-    }
-  }
-
-  if (findings.length > 0) {
-    return { ok: false, findings };
-  }
-  return { ok: true, value: null, warnings: [] };
-}
-
-/** A pictogram proposed for creation (J5.1 — the id need not exist yet). */
-export type PictogramCreation = {
-  readonly id: string;
-  readonly registry: PictogramRegistry;
-};
-
-/**
- * J5.1 / INV-3 — the safety registry is read-only: its pictograms come only
- * from the rules pack. Creating a new pictogram INTO the safety registry is
- * refused (mutation and deletion are guarded elsewhere; creation was the one
- * operation that slipped through, since a new id matches no existing picto).
- */
-export function guardSafetyCreation(
-  creations: readonly PictogramCreation[],
-): Outcome<null> {
-  const findings: Finding[] = [];
-  const sorted = [...creations].sort((a, b) => a.id.localeCompare(b.id));
-
-  for (const c of sorted) {
-    if (c.registry === 'safety') {
-      findings.push({
-        code: 'SECURITY.REGISTRY_WRITE_DENIED',
-        severity: 'blocking',
-        entity: { kind: 'pictogram', id: c.id },
-        params: { operation: 'create' },
-        ruleRef: 'INV-3',
-      });
-    }
-  }
-
-  if (findings.length > 0) {
-    return { ok: false, findings };
-  }
-  return { ok: true, value: null, warnings: [] };
-}
-
-export function guardSafetyDeletion(
-  site: SiteData,
-  pictogramIds: readonly string[],
-): Outcome<null> {
-  const pictoMap = new Map(site.pictograms.map((p) => [p.id, p]));
-  const findings: Finding[] = [];
-  const sorted = [...pictogramIds].sort();
-
-  for (const id of sorted) {
-    const picto = pictoMap.get(id);
-    if (!picto) continue;
-    if (picto.registry === 'safety') {
-      findings.push({
-        code: 'SECURITY.REGISTRY_WRITE_DENIED',
-        severity: 'blocking',
-        entity: { kind: 'pictogram', id },
-        params: { operation: 'delete' },
-        ruleRef: 'INV-3',
-      });
-    }
-  }
-
-  if (findings.length > 0) {
-    return { ok: false, findings };
-  }
-  return { ok: true, value: null, warnings: [] };
 }

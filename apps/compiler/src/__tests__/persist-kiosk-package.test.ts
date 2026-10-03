@@ -16,6 +16,12 @@ const appAssets: KioskAppAssets = {
   appCss: enc.encode('body{margin:0}'),
 };
 
+function tree(): ReadonlyMap<string, Uint8Array> {
+  const built = buildKioskTree(refMultilevel, appAssets);
+  if (!built.ok) throw new Error(built.findings.map(f => f.code).join(', '));
+  return built.value;
+}
+
 function assemble(builtAt: string): KioskPackage {
   const result = assembleKioskPackage({
     siteId: refMultilevel.site.id,
@@ -23,7 +29,7 @@ function assemble(builtAt: string): KioskPackage {
     builtAt,
     langs: ['fr', 'en'],
     minRuntime: '1.0.0',
-    files: buildKioskTree(refMultilevel, appAssets),
+    files: tree(),
   });
   if (!result.ok) throw new Error('assembly failed');
   return result.value;

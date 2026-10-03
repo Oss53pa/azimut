@@ -1,10 +1,24 @@
 import { describe, it, expect } from 'vitest';
 import { refMinimal } from '@azimut/testkit';
 import type { SiteData, FaceTemplate, TravelProfile } from '@azimut/core-model';
-import { computeStaleFaces } from '../compute-staleness.js';
-import type { FaceHashDescriptor } from '../compute-staleness.js';
+import { computeStaleFaces, resolvedFaceContentHash } from '../compute-staleness.js';
+import type { FaceHashContext, FaceHashDescriptor, StalenessReport } from '../compute-staleness.js';
 import { resolveFaceContent } from '../resolve-face.js';
-import { computeContentHash } from '../compute-hashes.js';
+
+/** Ce qui, hors contenu résolu, entre dans l'empreinte des faces essayées. */
+const CONTEXT: FaceHashContext = {
+  template_version: '1',
+  rules_packs: { base: { key: 'intl', version: '2026.1' } },
+  active_langs: ['fr', 'en'],
+  dimensions: { width_mm: 600, height_mm: 400 },
+  pictogram_ids: [],
+};
+
+function reportOf(site: SiteData, faces: readonly FaceHashDescriptor[]): StalenessReport {
+  const report = computeStaleFaces(site, faces);
+  if (!report.ok) throw new Error(report.findings.map(f => f.code).join(', '));
+  return report.value;
+}
 
 function first<T>(arr: readonly T[], label: string): T {
   const v = arr[0];
@@ -36,28 +50,15 @@ function descriptor(
 ): FaceHashDescriptor {
   const resolved = resolveFaceContent(site, template, nodeId, profile);
   if (!resolved.ok) throw new Error('resolve failed');
-  const previous = computeContentHash({
-    resolved: resolved.value,
-    template,
-    charter_id: null,
-    charter_version: null,
-    rules_pack_id: null,
-    rules_pack_version: null,
-    active_langs: ['fr', 'en'],
-    dimensions: { width_mm: 600, height_mm: 400 },
-  });
+  const previous = resolvedFaceContentHash(resolved.value, template, CONTEXT);
+  if (!previous.ok) throw new Error('hash failed');
   return {
+    ...CONTEXT,
     id,
     node_id: nodeId,
     template,
     profile,
-    charter_id: null,
-    charter_version: null,
-    rules_pack_id: null,
-    rules_pack_version: null,
-    active_langs: ['fr', 'en'],
-    dimensions: { width_mm: 600, height_mm: 400 },
-    previous_content_hash: previous,
+    previous_content_hash: previous.value,
   };
 }
 
@@ -76,7 +77,7 @@ describe('D7.3 — computeStaleFaces', () => {
       descriptor('dir@junction', dirTemplate, 'n-junction'),
       descriptor('hdr@junction', headerOnlyTemplate, 'n-junction'),
     ];
-    const report = computeStaleFaces(refMinimal, faces);
+    const report = reportOf(refMinimal, faces);
     expect(report.stale_count).toBe(0);
     expect(report.stale_ids).toEqual([]);
   });
@@ -88,7 +89,7 @@ describe('D7.3 — computeStaleFaces', () => {
     ];
     const modified = renameDestination('dest-b', 'en', 'Office B renamed');
 
-    const report = computeStaleFaces(modified, faces);
+    const report = reportOf(modified, faces);
     // Exactly one face is stale: the directional face with a destination list.
     expect(report.stale_count).toBe(1);
     expect(report.stale_ids).toEqual(['dir@junction']);
@@ -104,7 +105,7 @@ describe('D7.3 — computeStaleFaces', () => {
     const face = descriptor('dir@junction', dirTemplate, 'n-junction');
     // Point the recorded face at a node that does not exist in the site.
     const brokenFace = { ...face, node_id: 'n-does-not-exist' };
-    const report = computeStaleFaces(refMinimal, [brokenFace]);
+    const report = reportOf(refMinimal, [brokenFace]);
     expect(report.stale_count).toBe(1);
     expect(report.faces[0]?.current_content_hash).toBeNull();
   });
@@ -112,6 +113,19 @@ describe('D7.3 — computeStaleFaces', () => {
   it('is deterministic', () => {
     const faces = [descriptor('dir@junction', dirTemplate, 'n-junction')];
     const modified = renameDestination('dest-a', 'fr', 'Bureau A modifié');
-    expect(computeStaleFaces(modified, faces)).toEqual(computeStaleFaces(modified, faces));
+    expect(reportOf(modified, faces)).toEqual(reportOf(modified, faces));
+  });
+});
+
+describe('D7.2 — une face sans paquet n’a pas d’empreinte', () => {
+  it('refuse le rapport et nomme la face, au lieu de la dire périmée ou non', () => {
+    const face = { ...descriptor('dir@junction', dirTemplate, 'n-junction'), rules_packs: {} };
+    const report = computeStaleFaces(refMinimal, [face]);
+    expect(report.ok).toBe(false);
+    if (!report.ok) {
+      expect(report.findings.map(f => [f.code, f.entity])).toEqual([
+        ['RULES.PACK_NOT_BOUND', { kind: 'support_face', id: 'dir@junction' }],
+      ]);
+    }
   });
 });

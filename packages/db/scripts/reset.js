@@ -68,11 +68,12 @@ if (!LOOPBACK.has(host)) {
 const sql = postgres(url);
 
 try {
-  // Le schéma de l'application, et lui seul.
+  // Le schéma de l'application, et lui seul : il porte désormais le registre
+  // des migrations, qui part avec lui.
   await sql.unsafe('DROP SCHEMA IF EXISTS azimut CASCADE');
-  // Les deux objets que la migration 0001 pose hors du schéma : le journal
-  // des migrations et la fonction d'horodatage. Rien d'autre du schéma
-  // `public` n'est touché, parce que rien d'autre n'y appartient au produit.
+  // Les deux objets que les migrations 0001 et 0002 posaient hors du schéma,
+  // jusqu'à la migration 0051. Le nettoyage reste ici pour les bases montées
+  // avant elle ; sur une base neuve, il ne trouve rien.
   await sql.unsafe('DROP TABLE IF EXISTS public._migrations');
   await sql.unsafe('DROP FUNCTION IF EXISTS public.set_updated_at() CASCADE');
   console.log('Schéma azimut supprimé, journal des migrations vidé.');

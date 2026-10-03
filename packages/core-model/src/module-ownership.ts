@@ -33,9 +33,10 @@ export type ModuleKey = (typeof MODULE_KEYS)[number];
  * celui de la couche la plus haute qu'il sert, et il ne lit rien au-dessus.
  */
 export const MODULE_LAYER: Readonly<Record<ModuleKey, number>> = {
-  // La plateforme porte ce que le socle référence (`site.legal_entity_id`) :
-  // elle ne peut pas être au-dessus de lui, et L2 n'a pas de couche plus basse.
-  '00-plateforme': 0,
+  // L2 et Q1.2 placent la plateforme sous le socle, hors des couches
+  // numérotées : elle ne lit rien, et le socle lit ce qu'elle porte
+  // (`site.legal_entity_id`).
+  '00-plateforme': -1,
   '01-socle': 0,
   '02-wayfinding': 1,
   '03-parcours': 1,
@@ -89,6 +90,23 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // A5.3 et Q2 : la trace des passages de la validation de complétude
     // appartient au module qui possède le graphe.
     'graph_validation',
+    // O11 et Q2 : la fermeture temporaire « appartient au socle, parce
+    // qu'elle modifie la disponibilité des arêtes » (migration 0069).
+    'temporary_closure',
+    // Q2 : « site_fact | 01 Socle | Faits déclarés du site, avec source et
+    // statut, section A5.11 ». La table était rangée parmi celles sans
+    // propriétaire, faute d'y avoir été inscrite ; elle l'est.
+    'site_fact',
+    // Q2, version 18 : « parking_space | 01 Socle | Extension d'une empreinte
+    // de place, section A5.3 ». La table était rangée parmi celles sans
+    // propriétaire, quand elle portait une place autonome hors du cahier des
+    // charges ; redéfinie en extension d'empreinte, elle suit l'empreinte.
+    'parking_space',
+    // Q2 : « site_rules_binding | 01 Socle | Rattachement d'un site à un
+    // paquet ». La table était rangée parmi celles sans propriétaire, faute
+    // d'y avoir été inscrite. Depuis la version 22 elle fait foi pour le
+    // rattachement, A5.8, et la création d'un site l'écrit : elle suit le site.
+    'site_rules_binding',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
   // d'implantation de `support` — dont `code` — par la scission L0, déclarée
@@ -314,7 +332,6 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',
   rules_pack_rule: 'A5.9 et D3, même motif que `rules_pack`.',
-  site_rules_binding: 'Rattachement d’un site à un paquet de règles. Aucune fiche de L3 ne le range.',
   charter: 'A5.7, charte de site. L3 ne donne les chartes qu’au module 10, et seulement « de groupe ».',
   charter_color: 'A5.7, même motif que `charter`.',
   charter_typeface: 'A5.7, même motif que `charter`.',
@@ -327,13 +344,7 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   job: 'A5.10, file de travaux. Infrastructure, non métier.',
   audit_log: 'A5.10 et A12.3, journal d’audit en insertion seule. X4 le distingue du journal d’activité du module 11, sans l’y ranger.',
   support: 'Scindée entre les modules 02 et 04, colonne par colonne (L0). Voir `SUPPORT_COLUMN_OWNER` : elle a deux propriétaires, pas aucun.',
-  control_point: 'Complément « atelier », hors des quatorze documents. Son vocabulaire n’est pas celui de L.',
-  site_fact: 'Complément « atelier », même motif.',
-  site_fact_forbidden_word: 'Complément « atelier », même motif.',
-  source_claim: 'Complément « atelier », même motif.',
-  discrepancy_decision: 'Complément « atelier », même motif.',
-  parking: 'Complément « atelier », même motif.',
-  parking_space: 'Complément « atelier », même motif.',
-  parking_uncovered_area: 'Complément « atelier », même motif.',
-  vehicle_gate: 'Complément « atelier », même motif.',
+  site_fact_forbidden_word: 'Les mots qu’un fait interdit. A5.11 porte `site_fact`, que Q2 range au module 01 ; elle ne décrit pas cette table fille, et aucune fiche de L3 ne la range.',
+  source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
+  discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
 };

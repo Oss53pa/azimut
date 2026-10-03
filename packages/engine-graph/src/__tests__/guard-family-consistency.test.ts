@@ -111,3 +111,21 @@ describe('J5.2 — guardFamilyConsistency', () => {
     expect(r.warnings.map((w) => w.entity?.id)).toEqual(['p-b', 'p-c']);
   });
 });
+
+describe('D7.2 — la grille se compare par l’empreinte canonique', () => {
+  it('une grille encodée dans un autre ordre de clés n’est pas une divergence', () => {
+    const r = guardFamilyConsistency(
+      [member({ grid: { rows: 3, cols: 4 } })],
+      [{ ...FAM, grid: { cols: 4, rows: 3 } }],
+    );
+    expect(r.ok && r.warnings).toEqual([]);
+  });
+
+  it('une grille non hachable est refusée par DATA.HASH_INPUT_INVALID, jamais comparée', () => {
+    const r = guardFamilyConsistency([member({ grid: { rows: Number.NaN } })], [FAM]);
+    expect(r.ok).toBe(false);
+    if (r.ok) return;
+    expect(r.findings.map(f => f.code)).toEqual(['DATA.HASH_INPUT_INVALID']);
+    expect(r.findings[0]?.entity?.kind).toBe('pictogram');
+  });
+});

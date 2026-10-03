@@ -1,4 +1,5 @@
 import type { SiteData, Outcome, Finding, SiteVocabulary } from '@azimut/core-model';
+import { isParkingZone } from '@azimut/core-model';
 import { checkNamingCollisions } from './checks/naming.js';
 import {
   checkDuplicateDisplayName,
@@ -8,14 +9,13 @@ import {
 import { checkUnitCodeRequired, checkUnitCodeDuplicate } from './checks/unit-code.js';
 import { checkLevelCalibrated, checkSiteOriginCoherent } from './checks/site-frame.js';
 import { checkApprovedVersionImmutable } from './checks/support-version.js';
-import { checkEdgeAvailability } from './checks/edge-availability.js';
-import { checkInstanceBlocks } from './checks/instance-blocks.js';
 import { auditLexicon } from './audit-lexicon.js';
 import { auditTypography } from './audit-typography.js';
 import { auditSentenceLength } from './audit-sentence-length.js';
 import { auditSiteFacts } from './audit-site-facts.js';
 import { auditSourceClaims } from './audit-source-claims.js';
 import { auditParking } from './audit-parking.js';
+import { auditParkingZones } from './audit-parking-zones.js';
 
 /**
  * Réexport : le vocabulaire est un registre du modèle, pas une notion de
@@ -43,14 +43,13 @@ export type CheckReport = {
  * Ce pour quoi les contrôles tournent.
  *
  * `atelier` est le travail en cours : une proposition y est un état légitime.
- * `livrable` est ce qui part à l'impression ou à la publication, et P1 du
- * complément atelier y devient opposable — une proposition affichée s'y lirait
- * comme un fait.
+ * `livrable` est ce qui part à l'impression ou à la publication, et la règle
+ * M01.S11 y devient opposable — « un fait de statut `proposal` ne s'affiche
+ * jamais comme un existant », et une proposition affichée s'y lirait comme un
+ * fait.
  *
- * La notion n'est pas inventée : QC-21 du complément décrit exactement une
- * anomalie « signalante, bloquante à l'impression ». Un contrôle dont la
- * sévérité dépend de la destination du rendu a besoin de connaître cette
- * destination.
+ * Un contrôle dont la portée dépend de la destination du rendu a besoin de
+ * connaître cette destination : c'est tout ce que ce type porte.
  */
 export type CheckMode = 'atelier' | 'livrable';
 
@@ -58,15 +57,17 @@ export type CheckOptions = {
   readonly mode?: CheckMode;
 };
 
-/** Contrôles du socle, toujours exercés, quel que soit ce que le site déclare. */
+/**
+ * Contrôles du socle, toujours exercés, quel que soit ce que le site déclare.
+ *
+ * Les deux contrôles de rédaction en sont sortis : A5.8 range leurs limites
+ * parmi les règles de charte, et un site sans charte n'a rien à leur opposer.
+ * Ils rejoignent donc les contrôles qui dépendent d'une déclaration.
+ */
 const BASE_CHECKS: readonly string[] = [
   'all_vacant_category',
   'approved_version_immutable',
   'duplicate_display_name',
-  'edge_availability',
-  'instance_blocks',
-  'forbidden_characters',
-  'sentence_length',
   'incomplete_lang_coverage',
   'level_calibrated',
   'naming_collision',
@@ -97,21 +98,29 @@ export function runChecks(
   findings.push(...checkLevelCalibrated(site));
   findings.push(...checkSiteOriginCoherent(site));
   findings.push(...checkApprovedVersionImmutable(site));
-  findings.push(...checkEdgeAvailability(site));
-  findings.push(...checkInstanceBlocks(site));
-
-  // QC-06 (complément atelier) n'attend aucune déclaration : un caractère
-  // interdit l'est sans qu'une charte ait à le dire, et dans toutes les langues.
-  // Il tourne donc toujours, aux deux modes, puisque le contrôle est bloquant
-  // sans condition de destination — contrairement à QC-21.
-  findings.push(...auditTypography(site).findings);
-
-  // QC-20 (complément atelier), voisin du précédent et signalant : il n'attend
-  // aucune déclaration non plus, et ne juge que le texte libre d'un gabarit.
-  findings.push(...auditSentenceLength(site).findings);
 
   const run: string[] = [...BASE_CHECKS];
   const undeclared: string[] = [];
+
+  // A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
+  // ne s'exécute pas et le signale, comme pour un paquet de règles absent. »
+  // Les deux contrôles de rédaction lisent la charte du site, et aucune limite
+  // n'est appliquée par défaut.
+  //
+  // Le rangement suit `declared`, et non `applied` : une règle déclarée dont
+  // les paramètres ne se lisent pas lève `CHARTER.RULE_MALFORMED` en bloquant
+  // et reste parmi les contrôles exercés. Le contrôle a bien tourné — il a lu
+  // la charte et l'a refusée. Le ranger parmi les non exercés cacherait qu'un
+  // site a une charte et qu'elle ne produit rien.
+  const charterRules = vocabulary.charter_rules ?? [];
+
+  const typography = auditTypography(site, charterRules);
+  findings.push(...typography.findings);
+  (typography.declared ? run : undeclared).push('forbidden_characters');
+
+  const sentences = auditSentenceLength(site, charterRules);
+  findings.push(...sentences.findings);
+  (sentences.declared ? run : undeclared).push('sentence_length');
 
   const lexicon = vocabulary.lexicon ?? [];
   if (lexicon.length === 0) {
@@ -125,24 +134,42 @@ export function runChecks(
   if (facts.length === 0) {
     undeclared.push('site_facts');
   } else {
-    findings.push(...auditSiteFacts(site, facts).findings);
+    findings.push(...auditSiteFacts(site, facts, forDeliverable).findings);
     run.push('site_facts');
   }
 
-  // Le stationnement est de la géométrie du site : il vient de `SiteData`, pas
-  // du vocabulaire, et un site sans parking n'a rien à contrôler — ce n'est pas
-  // un contrôle non exercé, c'est un site sans parking.
-  if (site.parkings.length > 0) {
+  // Le stationnement est de la géométrie du site : zones et empreintes viennent
+  // de `SiteData`, les capacités annoncées des faits d'A5.11. Un site sans zone
+  // de parking n'a rien à contrôler — ce n'est pas un contrôle non exercé,
+  // c'est un site sans parking.
+  const parkingZonesDeclared = (site.zones ?? []).filter(z => isParkingZone(z.kind));
+  if (parkingZonesDeclared.length > 0) {
     findings.push(...auditParking({
-      parkings: site.parkings,
-      spaces: site.parking_spaces,
-      uncovered: site.parking_uncovered,
+      zones: site.zones ?? [],
+      footprints: site.footprints,
+      facts,
     }, forDeliverable).findings);
     run.push('parking_coverage');
-    // Le contrôle de P1 (complément atelier) ne tourne qu'en mode livrable, et
-    // il se nomme, pour qu'un rapport d'atelier ne laisse pas croire qu'il a
-    // été exercé.
+    // Le contrôle de publication ne tourne qu'en mode livrable, et il se
+    // nomme, pour qu'un rapport d'atelier ne laisse pas croire qu'il a été
+    // exercé.
     if (forDeliverable) run.push('parking_publication');
+  }
+
+  // S8 — le rattachement d'une place à un parking, sur les objets du socle.
+  // Distinct du contrôle ci-dessus, qui juge les objets d'un module que la
+  // section S8 rend redondant : celui-ci lit les empreintes de nature
+  // `parking_space` et les zones de nature `parking`, c'est-à-dire ce
+  // qu'A5.2 déclare.
+  //
+  // Exercé dès qu'une place est tracée, et non dès qu'une zone est déclarée :
+  // un site à places sans aucune zone de parking est exactement le cas que
+  // `DATA.PARKING_SPACE_WITHOUT_ZONE` doit signaler, et le taire faute de zone
+  // reviendrait à ne rien dire précisément quand tout manque.
+  const parkingZones = auditParkingZones(site);
+  if (parkingZones.space_count > 0) {
+    findings.push(...parkingZones.findings);
+    run.push('parking_space_zone');
   }
 
   const claims = vocabulary.claims ?? [];
@@ -162,7 +189,9 @@ export function runChecks(
         'contraste',
         'lisibilite',
       ],
-      checks_undeclared: undeclared,
+      // Trié, comme les exercés : l'ordre d'un rapport ne dit rien de l'ordre
+      // dans lequel le code a posé ses questions (A9).
+      checks_undeclared: undeclared.sort((a, b) => a.localeCompare(b)),
       findings,
     },
     warnings: [],

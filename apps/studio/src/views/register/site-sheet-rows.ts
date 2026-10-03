@@ -3,7 +3,7 @@
  * le site en sait. Tout est dérivé des données du site (INV-1) ; rien ne
  * s'enregistre ici.
  */
-import { calibratedLevelIds, isUsableScale, polygonArea, type SiteData } from '@azimut/core-model';
+import { calibratedLevelIds, codePointCompare, isUsableScale, polygonArea, type SiteData } from '@azimut/core-model';
 
 export type PlanState = 'calibrated' | 'uncalibrated' | 'absent';
 
@@ -42,7 +42,14 @@ function countBy<T>(items: readonly T[], key: (item: T) => string | undefined): 
   return out;
 }
 
-export function levelRows(site: SiteData): readonly LevelRow[] {
+/**
+ * Les lignes du tableau des niveaux, par bâtiment puis par rang.
+ *
+ * Le nom du bâtiment est du texte affiché : il se trie dans la langue active,
+ * que l'appelant déclare (A9, version 30). Les dates et les identifiants se
+ * comparent par points de code.
+ */
+export function levelRows(site: SiteData, lang: string): readonly LevelRow[] {
   const buildings = new Map(site.buildings.map(b => [b.id, b.name]));
   const calibrated = calibratedLevelIds(site.plan_sources, site.plan_calibrations);
   const nodeLevel = new Map(site.graph.nodes.map(n => [n.id, n.level_id]));
@@ -69,7 +76,7 @@ export function levelRows(site: SiteData): readonly LevelRow[] {
       // Le dernier fond importé fait foi ; à date égale, l'identifiant tranche (INV-4).
       const sources = site.plan_sources
         .filter(s => s.level_id === level.id)
-        .sort((a, b) => b.uploaded_at.localeCompare(a.uploaded_at) || a.id.localeCompare(b.id));
+        .sort((a, b) => codePointCompare(b.uploaded_at, a.uploaded_at) || codePointCompare(a.id, b.id));
       const source = sources[0];
       let updatedAt: string | undefined;
       for (const s of sources) updatedAt = latest(updatedAt, latest(s.uploaded_at, calibrationOf.get(s.id)));
@@ -90,6 +97,6 @@ export function levelRows(site: SiteData): readonly LevelRow[] {
         updatedAt,
       };
     })
-    .sort((a, b) => a.buildingName.localeCompare(b.buildingName)
-      || a.ordinal - b.ordinal || a.id.localeCompare(b.id));
+    .sort((a, b) => a.buildingName.localeCompare(b.buildingName, lang)
+      || a.ordinal - b.ordinal || codePointCompare(a.id, b.id));
 }

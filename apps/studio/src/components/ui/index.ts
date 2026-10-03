@@ -23,7 +23,7 @@ export { Button } from './Button.js';
 export type { ButtonRank } from './Button.js';
 export { Dialog } from './Dialog.js';
 export { controlStyle } from './tokens.js';
-export { NumericField, AngleField } from './NumericField.js';
+export { NumericField, AngleField, DIMENSIONLESS } from './NumericField.js';
 export { Toggle } from './Toggle.js';
 export { Toolbar, StatusBar } from './Toolbar.js';
 export type { ToolbarItem, StatusItem } from './Toolbar.js';

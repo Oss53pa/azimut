@@ -1,24 +1,156 @@
 {
-  "mesure": "M8 (partie M) critère 1 — parcours complet de la tranche",
-  "releve_le": "2026-09-23T09:34:48.798Z",
-  "etapes": [
+  "mesure": "M8 (partie M) critère 4 — temps du parcours complet de la tranche",
+  "protocole": "D13",
+  "releve_le": "2026-09-28T19:28:08.037Z",
+  "machine": {
+    "plateforme": "linux 6.18.44-fc-v37",
+    "processeur": "Intel(R) Xeon(R) Processor @ 2.10GHz",
+    "coeurs": "4",
+    "memoire_gio": "15.7",
+    "node": "v22.22.2"
+  },
+  "fenetre": {
+    "largeur_px": 1366,
+    "hauteur_px": 768
+  },
+  "comparable_avec": "Les seuls relevés pris dans la même fenêtre (D13). Les relevés antérieurs, sans fenêtre déclarée, sont conservés et marqués non comparables dans releves-m8-anterieurs.json.",
+  "condition": "Base amorcée. Entre deux exécutions : stockages local et de session vidés, cache du navigateur vidé, contexte conservé. La première exécution est écartée.",
+  "site": "site-m8, site vide. M8 critère 1 part d’un site vide : aucun site de référence de C1 ne convient, ils portent tous une modélisation.",
+  "executions": [
+    {
+      "rang": 1,
+      "ecartee": true,
+      "total_ms": 2131,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 440
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 597
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 632
+        },
+        {
+          "step": "validation",
+          "ms": 462
+        }
+      ]
+    },
+    {
+      "rang": 2,
+      "ecartee": false,
+      "total_ms": 1585,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 504
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 397
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 432
+        },
+        {
+          "step": "validation",
+          "ms": 252
+        }
+      ]
+    },
+    {
+      "rang": 3,
+      "ecartee": false,
+      "total_ms": 2182,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 566
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 514
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 663
+        },
+        {
+          "step": "validation",
+          "ms": 439
+        }
+      ]
+    },
+    {
+      "rang": 4,
+      "ecartee": false,
+      "total_ms": 1810,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 344
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 419
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 593
+        },
+        {
+          "step": "validation",
+          "ms": 454
+        }
+      ]
+    },
+    {
+      "rang": 5,
+      "ecartee": false,
+      "total_ms": 1875,
+      "etapes": [
+        {
+          "step": "import et calage",
+          "ms": 449
+        },
+        {
+          "step": "tracé de trois cellules",
+          "ms": 392
+        },
+        {
+          "step": "saisie du graphe",
+          "ms": 601
+        },
+        {
+          "step": "validation",
+          "ms": 433
+        }
+      ]
+    }
+  ],
+  "mediane_ms": 1843,
+  "mediane_par_etape_ms": [
     {
       "step": "import et calage",
-      "ms": 304
+      "ms": 477
     },
     {
       "step": "tracé de trois cellules",
-      "ms": 691
+      "ms": 408
     },
     {
       "step": "saisie du graphe",
-      "ms": 601
+      "ms": 597
     },
     {
       "step": "validation",
-      "ms": 408
+      "ms": 436
     }
   ],
-  "total_ms": 2004,
-  "note": "Parcours automatisé, non chronométré sur un opérateur réel. K3.4 place cette seconde mesure dans les sessions d’essai sur usagers."
+  "note": "Parcours automatisé, non chronométré sur un opérateur réel. K3.4 place cette seconde mesure dans les sessions d’essai sur usagers. Aucun seuil n’est révisé sur ce relevé : D13 réserve la révision au premier site réel modélisé, et la trace."
 }

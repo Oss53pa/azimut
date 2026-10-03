@@ -3,16 +3,16 @@ import {
   fitMeasuredCalibration,
   auditCalibrationResiduals,
   applyAffine,
-  MIN_CONTROL_POINTS,
-  MEASURING_CONTROL_POINTS,
+  MIN_CALIBRATION_POINTS,
+  MEASURING_CALIBRATION_POINTS,
 } from '../affine-calibration.js';
-import type { ControlPointPair, AffineTransform } from '../affine-calibration.js';
+import type { CalibrationPointPair, AffineTransform } from '../affine-calibration.js';
 
 /** Construit des paires en appliquant une transformation connue, sans bruit. */
 function pairsFrom(
   transform: AffineTransform,
   sources: readonly (readonly [number, number])[],
-): ControlPointPair[] {
+): CalibrationPointPair[] {
   return sources.map(([x_px, y_px], i) => ({
     id: `p${i}`,
     source: { x_px, y_px },
@@ -55,7 +55,7 @@ describe('fitMeasuredCalibration', () => {
     if (!result.ok) return;
     expect(result.value.mean_residual_m).toBeLessThan(1e-9);
     expect(result.value.max_residual_m).toBeLessThan(1e-9);
-    expect(result.value.control_point_count).toBe(SOURCES.length);
+    expect(result.value.calibration_point_count).toBe(SOURCES.length);
   });
 
   it('absorbe un cisaillement que quatre paramètres ne rendraient pas', () => {
@@ -134,7 +134,7 @@ describe('fitMeasuredCalibration', () => {
 
     expect(result.value.max_residual_m).toBeLessThan(1e-9);
     expect(result.warnings.map((w) => w.code)).toContain('CALIB.RESIDUAL_NOT_MEASURED');
-    expect(result.warnings[0]?.params['measuring_minimum']).toBe(MEASURING_CONTROL_POINTS);
+    expect(result.warnings[0]?.params['measuring_minimum']).toBe(MEASURING_CALIBRATION_POINTS);
   });
 
   it('à quatre paires, le résidu redevient une mesure', () => {
@@ -149,7 +149,7 @@ describe('fitMeasuredCalibration', () => {
     expect(result.ok).toBe(false);
     if (result.ok) return;
     expect(result.findings[0]?.code).toBe('CALIB.CONTROL_POINTS_INSUFFICIENT');
-    expect(result.findings[0]?.params['minimum']).toBe(MIN_CONTROL_POINTS);
+    expect(result.findings[0]?.params['minimum']).toBe(MIN_CALIBRATION_POINTS);
   });
 
   it('refuse des points alignés', () => {
@@ -203,7 +203,7 @@ describe('fitMeasuredCalibration', () => {
 describe('auditCalibrationResiduals', () => {
   const tolerance = { mean_m: 0.1, point_m: 0.2 };
 
-  function fitOf(pairs: readonly ControlPointPair[]) {
+  function fitOf(pairs: readonly CalibrationPointPair[]) {
     const result = fitMeasuredCalibration(pairs);
     if (!result.ok) throw new Error('ajustement refusé');
     return result.value;
@@ -226,7 +226,7 @@ describe('auditCalibrationResiduals', () => {
     const perPoint = findings.filter((f) => f.code === 'CALIB.RESIDUAL_POINT_EXCEEDED');
     expect(perPoint.length).toBeGreaterThan(0);
     expect(perPoint.some((f) => f.entity?.id === 'p1')).toBe(true);
-    expect(perPoint[0]?.entity?.kind).toBe('control_point');
+    expect(perPoint[0]?.entity?.kind).toBe('calibration_pair');
   });
 
   it('rapporte les résidus en millimètres entiers', () => {

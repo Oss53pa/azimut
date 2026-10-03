@@ -3,7 +3,7 @@
  * et ce que ses empreintes portent. La zone n'a pas de géométrie propre ;
  * sa surface est celle de ses empreintes (INV-1).
  */
-import { polygonArea, type OrientationZone, type SiteData } from '@azimut/core-model';
+import { polygonArea, type OrientationZone, type SiteData, codePointCompare } from '@azimut/core-model';
 
 export type ZoneRow = {
   readonly zone: OrientationZone;
@@ -21,7 +21,7 @@ export function zoneRows(site: SiteData, zones: readonly OrientationZone[]): rea
   for (const z of zones) for (const id of new Set(z.footprint_ids)) owners.set(id, (owners.get(id) ?? 0) + 1);
 
   return [...zones]
-    .sort((a, b) => a.code.localeCompare(b.code))
+    .sort((a, b) => codePointCompare(a.code, b.code))
     .map((zone): ZoneRow => {
       const ids = [...new Set(zone.footprint_ids)];
       const present = ids.filter(id => footprints.has(id));

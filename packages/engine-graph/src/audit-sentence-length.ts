@@ -1,31 +1,33 @@
-import type { Finding, SiteData } from '@azimut/core-model';
+import type { CharterRule, Finding, SiteData } from '@azimut/core-model';
+import { resolveMaxSentenceWords } from '@azimut/core-model';
 import { templateFreeTexts } from './audit-typography.js';
 
 /**
- * QC-20 — « Rédaction trop longue : phrase de plus de 25 mots dans un cartouche
- * ou une note », signalant (complément atelier).
+ * Phrase plus longue que la limite portée par la charte — A5.8.
  *
- * Voisin de QC-06 et de la même moitié de P7 (complément atelier), la rédaction
- * propre. Il s'en distingue sur deux points, et les deux sont délibérés.
+ * `charter_rule` porte la nature `max_sentence_words`, et D2.2 nomme
+ * l'anomalie « Phrase plus longue que la limite portée par la charte ». La
+ * limite appartient donc à la charte d'un client.
  *
- * **Le corpus est plus étroit.** QC-06 juge toutes les dénominations du site ;
- * celui-ci ne juge que le texte libre d'un gabarit de face. Le modèle ne porte
+ * **La limite vient désormais de la charte**, qui entre dans la signature de
+ * ce contrôle. Aucun nombre n'est écrit ici. Quand la charte ne porte pas la
+ * règle, le contrôle ne s'exécute pas et le dit, et il n'applique aucune
+ * valeur par défaut : « une règle absente n'est pas une règle permissive ».
+ * Une limite par défaut serait la pire des issues possibles — elle
+ * signalerait au nom d'une charte qui n'a rien demandé.
+ *
+ * Une limite déclarée mais illisible, elle, lève `CHARTER.RULE_MALFORMED` en
+ * bloquant, et ne range pas le contrôle parmi les non exercés : voir
+ * `audit-typography.ts`, qui porte le même partage en trois.
+ *
+ * **Le corpus est plus étroit** que celui du contrôle des caractères
+ * interdits, qui juge toutes les dénominations du site : celui-ci ne juge que
+ * le texte libre d'un gabarit de face. Le modèle ne porte
  * ni cartouche ni note, et le texte libre est ce qui s'en approche le plus :
  * c'est le seul endroit où l'on écrit des phrases. Une dénomination de
  * destination n'est pas une phrase, et lui opposer une règle de phrase
  * signalerait une longueur là où il n'y a pas de rédaction.
- *
- * **Le seuil est un nombre, et il est écrit ici.** Ce n'est pas une valeur
- * d'origine normative : aucune norme ne décide qu'une phrase s'arrête à
- * vingt-cinq mots, c'est une règle de rédaction du produit, énoncée par le
- * document. Elle ne relève donc pas d'un paquet de règles (INV-5). Si la
- * maîtrise d'ouvrage la range un jour parmi les seuils à déclarer — le point
- * ouvert n° 2 du registre pose la question pour quatre autres —, cette
- * constante est le seul endroit à déplacer.
  */
-
-/** QC-20 (complément atelier) — au-delà, la phrase est signalée. */
-export const MAX_WORDS_PER_SENTENCE = 25;
 
 /**
  * Découpe un texte en phrases.
@@ -57,6 +59,10 @@ export function countWords(sentence: string): number {
 export type SentenceLengthReport = {
   /** Nombre de textes parcourus, pour qu'un rapport vide se distingue d'un rapport sans matière. */
   readonly checked_texts: number;
+  /** Vrai dès que la charte porte une limite, lisible ou non. Même motif qu'en typographie. */
+  readonly declared: boolean;
+  /** Vrai quand le contrôle a réellement jugé les textes. */
+  readonly applied: boolean;
   readonly findings: readonly Finding[];
 };
 
@@ -68,15 +74,28 @@ export type SentenceLengthReport = {
  * L'ordre suit celui de `templateFreeTexts` — par gabarit puis par rang de
  * bloc — puis le rang de la phrase dans le texte.
  */
-export function auditSentenceLength(site: SiteData): SentenceLengthReport {
+export function auditSentenceLength(
+  site: SiteData,
+  charterRules: readonly CharterRule[],
+): SentenceLengthReport {
   const texts = templateFreeTexts(site);
-  const findings: Finding[] = [];
+  const resolved = resolveMaxSentenceWords(charterRules);
+  const findings: Finding[] = [...resolved.findings];
+  const maximum = resolved.value;
+  if (maximum === null) {
+    return {
+      checked_texts: texts.length,
+      declared: resolved.declared,
+      applied: false,
+      findings,
+    };
+  }
 
   for (const text of texts) {
     const sentences = splitSentences(text.value);
     sentences.forEach((sentence, index) => {
       const words = countWords(sentence);
-      if (words <= MAX_WORDS_PER_SENTENCE) return;
+      if (words <= maximum) return;
       findings.push({
         code: 'LAYOUT.SENTENCE_TOO_LONG',
         severity: 'warning',
@@ -84,12 +103,12 @@ export function auditSentenceLength(site: SiteData): SentenceLengthReport {
         params: {
           sentence_index: index,
           words,
-          maximum: MAX_WORDS_PER_SENTENCE,
+          maximum,
         },
-        ruleRef: 'atelier-QC-20',
+        ruleRef: 'A5.8',
       });
     });
   }
 
-  return { checked_texts: texts.length, findings };
+  return { checked_texts: texts.length, declared: true, applied: true, findings };
 }

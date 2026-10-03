@@ -8,6 +8,7 @@ import {
 } from '../components/ui/index.js';
 import { levelRows, type LevelRow, type PlanState } from './register/site-sheet-rows.js';
 import { formatDay, formatNumber } from './register/format.js';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 
 const ALL = 'all';
 const EMPTY = '—';
@@ -26,7 +27,7 @@ const PLAN_STATE: Readonly<Record<PlanState, { readonly key: UiMessageKey; reado
 export function SiteSheetView(): JSX.Element {
   const site = useSiteData();
   const { t, lang } = useI18n();
-  const rows = useMemo(() => levelRows(site), [site]);
+  const rows = useMemo(() => levelRows(site, lang), [site, lang]);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -78,7 +79,7 @@ export function SiteSheetView(): JSX.Element {
               {
                 id: 'rules',
                 label: t('sitesheet.field.rules'),
-                value: site.site.rules_pack_id ?? t('sitesheet.field.rules.none'),
+                value: rulesPackLabel(site.rules_bindings) ?? t('sitesheet.field.rules.none'),
               },
             ],
           },

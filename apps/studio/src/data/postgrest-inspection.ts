@@ -11,6 +11,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type RoundRow = {
   readonly id: string;
@@ -48,7 +49,7 @@ export async function loadInspectionRegistry(config: PostgrestConfig, siteId: st
       if (!isInspectionSyncState(r.sync_state)) throw drift('inspection_round', `sync_state « ${r.sync_state} »`);
       return { id: r.id, zone_label: r.zone_label, surveyor_id: r.surveyor_id, surveyed_on: r.surveyed_on, sync_state: r.sync_state };
     })
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const findings = findingRows
     .map((r): InspectionFinding => {
@@ -58,7 +59,7 @@ export async function loadInspectionRegistry(config: PostgrestConfig, siteId: st
         severity: r.severity, photo_path: r.photo_path,
       };
     })
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   return { rounds, findings };
 }

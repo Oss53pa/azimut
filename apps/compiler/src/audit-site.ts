@@ -1,4 +1,5 @@
-import type { SiteData, Finding } from '@azimut/core-model';
+import type { SiteData, Finding, SiteVocabulary } from '@azimut/core-model';
+import { EMPTY_VOCABULARY } from '@azimut/core-model';
 import {
   validateGraph,
   validateDirectory,
@@ -21,12 +22,24 @@ function parseMode(raw: unknown): CheckMode {
 
 export type AuditSiteContext = {
   readonly site: SiteData;
+  /**
+   * Ce que le site oppose à ses propres textes — A5.8 et A5.11.
+   *
+   * Facultatif, et l'absence n'est pas neutre : les contrôles qui dépendent
+   * d'une déclaration ne s'exécutent alors pas, et le résultat les nomme dans
+   * `checks_undeclared`. C'est ce qu'exige A5.8 — « le contrôle ne s'exécute
+   * pas et le signale » — et c'est ce qui distingue un site sans charte d'un
+   * site dont la charte n'interdit rien.
+   */
+  readonly vocabulary?: SiteVocabulary;
 };
 
 export type AuditSiteResult = {
   readonly mode: CheckMode;
   readonly checks_run: readonly string[];
   readonly checks_skipped: readonly string[];
+  /** Contrôles qu'aucune déclaration du site ne permet d'exercer. */
+  readonly checks_undeclared: readonly string[];
   readonly total_findings: number;
   readonly blocking_count: number;
   readonly warning_count: number;
@@ -43,7 +56,8 @@ export type AuditSiteResult = {
  *   4. Semantic checks (duplicates, language coverage, vacancies)
  *
  * Result:
- *   - checks_run, checks_skipped: which checks executed
+ *   - checks_run, checks_skipped, checks_undeclared: which checks executed,
+ *     which lacked a rules pack, and which the site declares nothing to oppose
  *   - total_findings, blocking_count, warning_count, info_count
  *   - findings: the full findings array
  */
@@ -51,11 +65,13 @@ export function createAuditSiteHandler(
   context: AuditSiteContext,
 ): (job: Job) => Promise<Record<string, unknown>> {
   const { site } = context;
+  const vocabulary = context.vocabulary ?? EMPTY_VOCABULARY;
 
   return async (job: Job): Promise<Record<string, unknown>> => {
     const mode = parseMode(job.payload['mode']);
     const checksRun: string[] = [];
     const checksSkipped: string[] = [];
+    const checksUndeclared: string[] = [];
     const allFindings: Finding[] = [];
 
     // 1. Graph validation
@@ -86,10 +102,11 @@ export function createAuditSiteHandler(
     }
 
     // 4. Semantic checks (runChecks)
-    const checkResult = runChecks(site, {}, { mode });
+    const checkResult = runChecks(site, vocabulary, { mode });
     if (checkResult.ok) {
       checksRun.push(...checkResult.value.checks_run);
       checksSkipped.push(...checkResult.value.checks_skipped);
+      checksUndeclared.push(...checkResult.value.checks_undeclared);
       allFindings.push(...checkResult.value.findings);
     }
 
@@ -117,6 +134,7 @@ export function createAuditSiteHandler(
       mode,
       checks_run: checksRun.sort(),
       checks_skipped: checksSkipped.sort(),
+      checks_undeclared: checksUndeclared.sort(),
       total_findings: allFindings.length,
       blocking_count: blockingCount,
       warning_count: warningCount,

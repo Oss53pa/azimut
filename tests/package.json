@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@azimut/core-model": "workspace:*",
+    "@azimut/design-tokens": "workspace:*",
     "@azimut/engine-graph": "workspace:*",
     "@azimut/engine-iso": "workspace:*",
     "@azimut/engine-layout": "workspace:*",

@@ -16,8 +16,19 @@ import {
   POLYGON_MIN_AREA_M2, isSelfIntersecting, quantizePoint, signedArea,
 } from '@azimut/core-model';
 
-/** M3 (partie M) : « cellule, circulation, technique, noyau vertical ». */
-export const FOOTPRINT_KINDS = ['cell', 'circulation', 'technical', 'vertical_core'] as const;
+/**
+ * M3 (partie M) : « cellule, circulation, technique, noyau vertical, place de
+ * stationnement ».
+ *
+ * Cinq natures depuis la version 17 du consolidé, qui ajoute la place de
+ * stationnement à l'écran. Le modèle en compte six : `outdoor` n'est toujours
+ * pas offerte à la saisie du tracé, et c'est l'écran qui le décide, non le
+ * modèle. Les deux listes n'ont pas à coïncider, et ce fichier suit celle de
+ * l'écran.
+ */
+export const FOOTPRINT_KINDS = [
+  'cell', 'circulation', 'technical', 'vertical_core', 'parking_space',
+] as const;
 export type FootprintKind = (typeof FOOTPRINT_KINDS)[number];
 
 /** M3 (partie M) : « Code de cellule | requis, unique par niveau, 1 à 20 caractères ». */

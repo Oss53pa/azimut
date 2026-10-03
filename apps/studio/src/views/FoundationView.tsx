@@ -1,6 +1,8 @@
 import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { isBound } from '@azimut/core-model';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import {
   auditCoverage, auditAccessibility, auditEvacuation,
   computeQuantities, computeInputsHash,
@@ -63,6 +65,9 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
     const access = profile === undefined ? null : auditAccessibility(site, profile);
     const evac = auditEvacuation(site);
     const quantities = computeQuantities(site, placedSupports(site, site.support_types[0]?.key ?? ''));
+    // D2.2 — une empreinte refusée est une anomalie comme une autre.
+    const inputs = profile === undefined ? null : computeInputsHash(site, profile);
+    if (inputs !== null && !inputs.ok) findings.push(...inputs.findings);
 
     return {
       findings,
@@ -70,7 +75,7 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
       access: access !== null && access.ok ? access.value : null,
       evacuation: evac.ok ? evac.value : null,
       quantities: quantities.ok ? quantities.value : null,
-      inputsHash: profile === undefined ? '' : computeInputsHash(site, profile),
+      inputsHash: inputs !== null && inputs.ok ? inputs.value : '',
     };
   }, [site, profile]);
 
@@ -240,13 +245,13 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
               <CompletenessRow label={t('foundation.trace.country')} value={site.site.country_code} />
               <CompletenessRow
                 label={t('foundation.trace.rulespack')}
-                value={site.site.rules_pack_id ?? t('foundation.trace.nopack')}
+                value={rulesPackLabel(site.rules_bindings) ?? t('foundation.trace.nopack')}
               />
             </dl>
             <div style={{ marginTop: SPACE.sm }}>
               <Tag
-                label={site.site.rules_pack_id === null ? t('foundation.trace.unbound') : t('foundation.trace.bound')}
-                severity={site.site.rules_pack_id === null ? 'warning' : 'valid'}
+                label={isBound(site.rules_bindings) ? t('foundation.trace.bound') : t('foundation.trace.unbound')}
+                severity={isBound(site.rules_bindings) ? 'valid' : 'warning'}
               />
             </div>
           </Panel>

@@ -20,6 +20,71 @@ const SCREENS = [
   { name: 'M5 validation', path: `/sites/${SITE}/validation` },
 ] as const;
 
+/**
+ * Sélecteur de ce qui reçoit le focus par tabulation.
+ *
+ * Le même qui sert à attendre le rendu et à décrire ce que l'essai parcourt :
+ * deux listes différentes feraient attendre autre chose que ce qui est ensuite
+ * tabulé.
+ */
+const FOCUSABLE = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Délai au-delà duquel un rendu manquant est un défaut, et non une lenteur.
+ *
+ * Volontairement court, et non le délai par défaut de Playwright. L'écran est
+ * servi par `preview` depuis un paquet déjà construit, en local : s'il n'a
+ * rien rendu au bout de cinq secondes, attendre trente n'y changera rien, et
+ * l'essai doit dire ce qu'il constate plutôt que patienter.
+ */
+const RENDER_TIMEOUT_MS = 5_000;
+
+/**
+ * Attend que l'application ait rendu quelque chose d'atteignable au clavier,
+ * et échoue en le disant si elle n'a rien rendu.
+ *
+ * **Ce que cette attente corrige, et ce qui reste supposé.** L'essai échouait
+ * une fois sur une dizaine d'exécutions complètes de la suite, jamais
+ * isolément : vingt-quatre sondes dédiées et six exécutions complètes après
+ * l'ajout de cette attente sont toutes passées, et je n'ai jamais reproduit
+ * l'échec. La course décrite ci-dessous est donc une **cause probable, non une
+ * cause prouvée** : je ne l'ai pas observée, je l'ai déduite de la forme de
+ * l'échec — le focus restant sur `body`, c'est-à-dire un document sans aucune
+ * cible. Écrire ici que le défaut est corrigé serait affirmer plus que ce que
+ * j'ai constaté. Si l'intermittence revient, la cause est à chercher
+ * ailleurs.
+ *
+ * La course supposée : `page.goto` rend la main à l'événement `load`,
+ * c'est-à-dire quand le script est exécuté. React 18 ne rend pas pour autant
+ * — `render` planifie le travail au lieu de l'accomplir. Tabuler aussitôt
+ * visait alors un document encore vide, où le focus reste sur `body`, qui ne
+ * porte aucun contour et qu'aucune tabulation ne quitte.
+ *
+ * **La garde.** L'attente est bornée et son échec est nommé. Sans elle, un
+ * rendu qui cesserait d'arriver se présenterait comme « aucun élément atteint
+ * au clavier » — le symptôme d'un défaut d'ordre de tabulation, alors que
+ * rien n'a été rendu. Un défaut de rendu doit se présenter comme un défaut de
+ * rendu, immédiatement, et le corps du document est rapporté avec lui : c'est
+ * ce qui manquait pour trancher la première fois.
+ */
+async function waitForInteractive(page: Page): Promise<void> {
+  try {
+    await page.locator(FOCUSABLE).first()
+      .waitFor({ state: 'attached', timeout: RENDER_TIMEOUT_MS });
+  } catch {
+    const body = (await page.locator('body').innerHTML()).trim();
+    throw new Error(
+      `L'application n'a rendu aucun élément atteignable au clavier en `
+      + `${RENDER_TIMEOUT_MS} ms sur ${page.url()}.\n\n`
+      + `Ce n'est pas une intermittence de tabulation : l'essai s'arrête avant `
+      + `de tabuler, pour qu'un rendu absent ne se présente pas comme un défaut `
+      + `d'ordre de tabulation.\n\n`
+      + `Corps du document au moment de l'échec :\n`
+      + (body === '' ? '(vide)' : body.slice(0, 800)),
+    );
+  }
+}
+
 /** Ce que le focus désigne, tel qu'un lecteur d'écran l'annoncerait. */
 async function focused(page: Page): Promise<{ tag: string; name: string }> {
   return page.evaluate(() => {
@@ -32,21 +97,6 @@ async function focused(page: Page): Promise<{ tag: string; name: string }> {
       ?? '';
     return { tag: el.tagName.toLowerCase(), name: label.trim() };
   });
-}
-
-/**
- * Attend que l'écran porte au moins une cible au clavier.
- *
- * `goto` rend la main au chargement du document, pas au montage de React :
- * sur un exécuteur chargé, la première tabulation partait avant le rendu et
- * le focus restait sur `<body>`, qui n'a pas de contour. L'essai jugeait
- * alors l'instant du rendu, pas l'écran.
- */
-async function openScreen(page: Page, path: string): Promise<void> {
-  await page.goto(path);
-  await page.waitForFunction(() => document.querySelector(
-    'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
-  ) !== null);
 }
 
 /** Tabule jusqu'à revenir au corps du document, et rend ce qui a été atteint. */
@@ -64,7 +114,8 @@ async function tabThrough(page: Page, limit = 60): Promise<readonly { tag: strin
 for (const screen of SCREENS) {
   test.describe(screen.name, () => {
     test('se parcourt entièrement au clavier', async ({ page }) => {
-      await openScreen(page, screen.path);
+      await page.goto(screen.path);
+      await waitForInteractive(page);
       const reached = await tabThrough(page);
 
       // Un écran sans aucune cible au clavier est inutilisable au clavier seul.
@@ -81,7 +132,8 @@ for (const screen of SCREENS) {
      * sélection. » Sans contour visible, la tabulation est aveugle.
      */
     test('montre où est le focus', async ({ page }) => {
-      await openScreen(page, screen.path);
+      await page.goto(screen.path);
+      await waitForInteractive(page);
       await page.keyboard.press('Tab');
       const outline = await page.evaluate(() => {
         const el = document.activeElement;

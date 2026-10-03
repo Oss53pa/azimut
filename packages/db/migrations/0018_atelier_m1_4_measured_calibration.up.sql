@@ -1,4 +1,10 @@
--- Complément atelier, M1.4 : calage mesuré sur points homologues.
+-- Calage à n points, ajusté et mesuré — section M2 de la partie M.
+--
+-- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
+-- foi ; la méthode est depuis spécifiée au cahier des charges. Le nom du
+-- fichier garde sa forme d'origine : le registre d'application est tenu par
+-- nom, et renommer une migration appliquée la ferait réapparaître comme non
+-- appliquée. Voir ORDRE.md.
 --
 -- Le calage existant (scale_m_per_px, origin, rotation) pose une similitude et
 -- ne dit rien de l'erreur commise. Le calage mesuré ajoute la transformation

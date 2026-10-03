@@ -78,7 +78,10 @@ export function buildScheduleModel(
     informationLevels: choice.informationLevels,
     rules: choice.rules,
   };
-  const inputsHash = computeScheduleInputsHash(inputs);
+  // Un refus de l'empreinte revient aussi par la génération, qui le porte
+  // dans ses anomalies : ici, il ne reste qu'une empreinte à ne pas afficher.
+  const inputsHashOutcome = computeScheduleInputsHash(inputs);
+  const inputsHash = inputsHashOutcome.ok ? inputsHashOutcome.value : '';
 
   const generated = generateMessageSchedule({
     ...inputs,

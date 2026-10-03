@@ -128,7 +128,7 @@ describe('loadRulesPack', () => {
     expect(result.value.key).toBe('erp-france');
     expect(result.value.version).toBe('2024.1');
     expect(result.value.jurisdiction).toBe('FR');
-    expect(result.value.checksum).toMatch(/^[a-f0-9]{64}$/);
+    expect(result.value.checksum).toMatch(/^sha256:[a-f0-9]{64}$/);
     expect(result.value.rules.size).toBe(2);
     expect(result.warnings).toHaveLength(0);
   });

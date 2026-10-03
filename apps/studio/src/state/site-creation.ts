@@ -1,10 +1,12 @@
 /**
  * M1 (partie M) — création d'un site.
  *
- * Le formulaire de M1 (partie M) porte quatre champs et quatre contrôles. Cette fonction
- * les tient, et rend les commandes à écrire — elle n'écrit pas elle-même :
+ * Le formulaire de M1 (partie M) porte six champs. Cette fonction tient les
+ * quatre contrôles bloquants — nom, pays, fuseau, langues — et rend les
+ * commandes à écrire — elle n'écrit pas elle-même :
  * M12.A2 veut que l'interface passe par les commandes du module
- * propriétaire, et le module 01 possède `site`, `building` et `level` (L3).
+ * propriétaire, et le module 01 possède `site`, `building` et `level` (L3),
+ * ainsi que `site_rules_binding` (Q2).
  *
  * « Créer un site crée aussi un premier bâtiment et un premier niveau, nommés
  * par défaut et renommables. Un site sans niveau est un état inutile que
@@ -12,7 +14,7 @@
  * ensemble, sous un même groupe : un seul geste, une seule annulation.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand } from '@azimut/core-model';
+import { buildCommand, listValue } from '@azimut/core-model';
 
 /** M1 (partie M) : « requis, 2 à 120 caractères ». */
 export const SITE_NAME_MIN = 2;
@@ -64,6 +66,11 @@ export type CreationContext = {
   readonly siteId: string;
   readonly buildingId: string;
   readonly levelId: string;
+  /**
+   * A5.8 — l'identifiant du rattachement au paquet choisi, tiré comme les
+   * autres. Il ne sert que si un paquet est choisi.
+   */
+  readonly bindingId: string;
   /** Les noms des sites de l'organisation, pour l'unicité de M1 (partie M). */
   readonly existingNames: readonly string[];
   /**
@@ -139,9 +146,11 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         name: draft.name.trim(),
         country_code: draft.countryCode,
         timezone: draft.timezone,
-        rules_pack_id: draft.rulesPackId,
         legal_entity_id: draft.legalEntityId,
-        active_langs: JSON.stringify([...draft.activeLangs].sort()),
+        // `active_langs` est une colonne de tableau, pas une colonne `jsonb` :
+        // elle veut un littéral de tableau. Le JSON qui figurait ici faisait
+        // refuser chaque création par la base.
+        active_langs: listValue([...draft.activeLangs].sort()),
       },
     },
     {
@@ -171,6 +180,22 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         elevation_m: 0,
       },
     },
+    // A5.8, version 22 — le paquet choisi n'est plus une colonne du site : il
+    // est porté par `site_rules_binding`, qui fait foi. Un seul paquet se
+    // choisit à la création ; c'est le socle, D3.6 nommant surcouche le
+    // paquet pays qui en durcit un autre. Rien ne s'écrit sans choix.
+    ...(draft.rulesPackId === null ? [] : [{
+      ...common,
+      table: 'site_rules_binding',
+      id: context.bindingId,
+      after: {
+        id: context.bindingId,
+        org_id: context.orgId,
+        site_id: context.siteId,
+        rules_pack_id: draft.rulesPackId,
+        role: 'base',
+      },
+    }]),
   ];
 }
 

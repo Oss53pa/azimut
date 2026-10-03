@@ -12,7 +12,6 @@ export const refMinimal: SiteData = {
     name: 'Site minimal',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
     // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
@@ -23,6 +22,13 @@ export const refMinimal: SiteData = {
     // D1.1 — altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
+  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // rules-packs/test-fixture`. Le pictogramme de sécurité du site vient de ce
+  // paquet (A5.4) : sans rattachement, aucun site ne le verrait, et le site de
+  // référence ne porterait pas le cas qu'il éprouve.
+  rules_bindings: [
+    { id: 'rb-min-base', rules_pack_id: 'rp-test-0001', role: 'base' },
+  ],
   buildings: [
     {
       id: 'bldg-001',
@@ -64,6 +70,7 @@ export const refMinimal: SiteData = {
       level_id: 'lvl-001',
       storage_path: 'plans/site-minimal-001/lvl-001.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],
@@ -219,6 +226,7 @@ export const refMinimal: SiteData = {
       },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {
@@ -245,6 +253,8 @@ export const refMinimal: SiteData = {
       standard_ref: 'WF-001',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
+      rules_pack_id: null,
     },
     {
       id: 'picto-fire-exit-safety',
@@ -254,6 +264,10 @@ export const refMinimal: SiteData = {
       standard_ref: 'SF-001',
       svg_path: 'M5 5l10 10M15 5L5 15',
       registry: 'safety',
+      function_key: null,
+      // A5.4 : un pictogramme de sécurité vient d'un paquet de règles, contrainte
+      // en base (migration 0064). Rattaché au paquet d'essai du dépôt.
+      rules_pack_id: 'rp-test-0001',
     },
   ],
   destinations: [
@@ -376,8 +390,5 @@ export const refMinimal: SiteData = {
       ],
     },
   ],
-  parkings: [],
   parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
 };

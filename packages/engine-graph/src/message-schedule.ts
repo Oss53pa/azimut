@@ -18,10 +18,11 @@
 
 import type {
   ContentBlockKind,
+  Outcome,
   SiteData,
   TravelProfile,
 } from '@azimut/core-model';
-import { canonicalSerialize, contentHash } from '@azimut/core-model';
+import { canonicalSerialize, codePointCompare, empreinteOutcome } from '@azimut/core-model';
 import type { PlacedSupport } from './compute-quantities.js';
 
 // ---------------------------------------------------------------------------
@@ -194,17 +195,22 @@ export type ScheduleInputs = {
  * Empreinte de tout ce dont le tableau dépend. Un changement du graphe,
  * de l'annuaire, des supports, des gabarits ou des principes la change,
  * ce qui rend la péremption détectable (H2.5).
+ *
+ * D7.2 — la forme canonique commune, ensembles triés par point de code (A9).
+ * Une valeur non hachable est refusée par `DATA.HASH_INPUT_INVALID`. Un
+ * tableau enregistré sous l'ancienne forme ne se convertit pas : son
+ * empreinte ne correspond plus, et il se lit périmé jusqu'à sa régénération.
  */
-export function computeScheduleInputsHash(inputs: ScheduleInputs): string {
+export function computeScheduleInputsHash(inputs: ScheduleInputs): Outcome<string> {
   const { site, supports, profile, informationLevels, rules } = inputs;
 
-  return contentHash({
+  return empreinteOutcome({
     site_id: site.site.id,
     nodes: [...site.graph.nodes]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(n => ({ id: n.id, kind: n.kind, level_id: n.level_id, position: n.position })),
     edges: [...site.graph.edges]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(e => ({
         id: e.id,
         from: e.from_node_id,
@@ -214,7 +220,7 @@ export function computeScheduleInputsHash(inputs: ScheduleInputs): string {
         length_m: e.length_m,
       })),
     destinations: [...site.destinations]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(d => ({
         id: d.id,
         node_id: d.node_id,
@@ -223,40 +229,40 @@ export function computeScheduleInputsHash(inputs: ScheduleInputs): string {
         display_priority: d.display_priority,
       })),
     destination_names: [...site.destination_names]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(n => ({ destination_id: n.destination_id, lang: n.lang, value: n.value })),
     pictograms: [...site.pictograms]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(p => ({ id: p.id, category_id: p.category_id, registry: p.registry })),
     support_types: [...site.support_types]
-      .sort((a, b) => a.key.localeCompare(b.key))
+      .sort((a, b) => codePointCompare(a.key, b.key))
       .map(t => ({ key: t.key, faces: t.faces.map(f => f.side) })),
     face_templates: [...site.face_templates]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(t => ({
         id: t.id,
         support_type_key: t.support_type_key,
         side: t.side,
         blocks: [...t.blocks]
-          .sort((a, b) => a.ordinal - b.ordinal || a.kind.localeCompare(b.kind))
+          .sort((a, b) => a.ordinal - b.ordinal || codePointCompare(a.kind, b.kind))
           .map(b => ({ kind: b.kind, ordinal: b.ordinal, region: b.region, config: b.config })),
       })),
     supports: [...supports]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(s => ({ id: s.id, node_id: s.node_id, support_type_key: s.support_type_key })),
     profile: {
       key: profile.key,
-      excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(),
+      excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(codePointCompare),
       require_accessible: profile.require_accessible,
     },
     information_levels: [...informationLevels]
-      .sort((a, b) => a.support_type_key.localeCompare(b.support_type_key))
+      .sort((a, b) => codePointCompare(a.support_type_key, b.support_type_key))
       .map(l => ({ key: l.support_type_key, levels: [...l.levels].sort((a, b) => a - b) })),
     rules,
     // A5.6 — les blocs saisis sur les faces des supports du tableau. Absents,
     // la clé l'est aussi : un site sans bloc d'instance garde son empreinte.
     ...instanceBlocksHashPart(site, supports),
-  });
+  }, { kind: 'site', id: site.site.id });
 }
 
 function instanceBlocksHashPart(
@@ -273,7 +279,7 @@ function instanceBlocksHashPart(
         kind: b.kind, free_text: b.free_text ?? null,
       }];
     })
-    .sort((a, b) => a.support_id.localeCompare(b.support_id)
-      || a.face_index - b.face_index || a.block_index - b.block_index || a.kind.localeCompare(b.kind));
+    .sort((a, b) => codePointCompare(a.support_id, b.support_id)
+      || a.face_index - b.face_index || a.block_index - b.block_index || codePointCompare(a.kind, b.kind));
   return blocks.length === 0 ? {} : { instance_blocks: blocks };
 }

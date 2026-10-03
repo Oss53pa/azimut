@@ -1,9 +1,13 @@
 /**
- * Calage mesuré d'un fond de plan — complément atelier, M1.4.
+ * Calage mesuré d'un fond de plan — M2 (partie M).
  *
- * Le calage à deux points (écran M2 de la tranche M, `plan-calibration` côté
- * atelier) donne une résolution et une orientation. Il ne dit rien de l'erreur
- * commise : un fond légèrement déformé, un scan de travers ou un plan
+ * « En complément du calage à deux points, qui reste le minimum, l'écran
+ * accepte un calage à n points homologues, ajusté et mesuré. Il produit un
+ * résidu, moyen et par point, qui donne la preuve chiffrée du critère 1 de
+ * cette section au lieu d'une vérification à la main. »
+ *
+ * Le calage à deux points donne une résolution et une orientation. Il ne dit
+ * rien de l'erreur commise : un fond légèrement déformé, un scan de travers ou un plan
  * d'architecte recomposé se calent sans que rien ne le signale.
  *
  * Le calage mesuré répond à cela. L'opérateur pose au moins trois paires de
@@ -22,15 +26,17 @@
  *
  * Cette séparation n'est pas de l'élégance. Un calage hors tolérance doit
  * rester affichable pour que l'opérateur voie *quel* point est en rouge et le
- * reprenne (M1.4). Un ajustement qui refuserait de rendre ses résidus ne
- * laisserait rien à corriger.
+ * reprenne. Un ajustement qui refuserait de rendre ses résidus ne laisserait
+ * rien à corriger.
  *
- * Aucun seuil n'est écrit ici. Les tolérances de résidu sont des arguments
- * obligatoires, sans valeur par défaut : la section 21 du complément en propose
- * (0,25 m en moyenne et 0,5 m par point, resserrées à 0,10 m et 0,20 m), mais
- * leur origine — norme opposable ou paramètre de produit — n'est pas tranchée.
- * Tant qu'elle ne l'est pas, INV-5 interdit de les inscrire dans le code, et un
- * défaut implicite trancherait en silence.
+ * **Nature des seuils, tranchée.** M2 (partie M) : « Les seuils de résidu sont
+ * des tolérances techniques, section D1.5, non des valeurs normatives. » INV-5
+ * ne les vise donc pas, et aucun paquet de règles n'a à les porter.
+ *
+ * Aucune valeur n'est pour autant écrite ici : le document n'en donne aucune,
+ * et les tolérances restent des arguments obligatoires, sans valeur par défaut.
+ * Un défaut implicite choisirait en silence un seuil de recette que personne
+ * n'a fixé.
  */
 import type { Point } from './geometry.js';
 import type { Finding, Outcome } from './outcome.js';
@@ -46,7 +52,7 @@ export type PlanPixelPoint = {
  * Une paire de points homologues : le même lieu physique, désigné une fois sur
  * le fond et une fois dans le repère métier du niveau (D1.1, mètres).
  */
-export type ControlPointPair = {
+export type CalibrationPointPair = {
   /** Identité stable, pour désigner le point fautif à l'opérateur. */
   readonly id: string;
   readonly source: PlanPixelPoint;
@@ -54,7 +60,7 @@ export type ControlPointPair = {
 };
 
 /**
- * Transformation affine du fond vers le repère métier, les six réels de M1.4 (complément atelier) :
+ * Transformation affine du fond vers le repère métier, six réels :
  *
  *   x_m = a·x_px + b·y_px + c
  *   y_m = d·x_px + e·y_px + f
@@ -73,7 +79,7 @@ export type AffineTransform = {
 };
 
 /** Résidu d'un point homologue : l'écart que l'ajustement laisse. */
-export type ControlPointResidual = {
+export type CalibrationPointResidual = {
   readonly id: string;
   readonly residual_m: number;
 };
@@ -81,10 +87,10 @@ export type ControlPointResidual = {
 export type MeasuredCalibration = {
   readonly transform: AffineTransform;
   /** Un résidu par paire, dans l'ordre où les paires ont été fournies. */
-  readonly residuals: readonly ControlPointResidual[];
+  readonly residuals: readonly CalibrationPointResidual[];
   readonly mean_residual_m: number;
   readonly max_residual_m: number;
-  readonly control_point_count: number;
+  readonly calibration_point_count: number;
 };
 
 /** Tolérances de recette d'un calage. Fournies par l'appelant, jamais devinées. */
@@ -94,7 +100,7 @@ export type ResidualTolerance = {
 };
 
 /**
- * Trois paires au minimum, comme M1.4 (complément atelier) le demande : en deçà, l'affine n'est pas
+ * Trois paires au minimum : en deçà, l'affine n'est pas
  * déterminée.
  *
  * Mais trois paires ne suffisent pas à *mesurer*. Chaque paire donne deux
@@ -107,13 +113,13 @@ export type ResidualTolerance = {
  * degrés de liberté restent pour le porter. `fitMeasuredCalibration` le
  * signale.
  */
-export const MIN_CONTROL_POINTS = 3;
+export const MIN_CALIBRATION_POINTS = 3;
 
 /**
  * Nombre de paires à partir duquel le résidu mesure quelque chose. Ce n'est pas
  * un seuil de recette, c'est le rang à partir duquel le système est surdéterminé.
  */
-export const MEASURING_CONTROL_POINTS = MIN_CONTROL_POINTS + 1;
+export const MEASURING_CALIBRATION_POINTS = MIN_CALIBRATION_POINTS + 1;
 
 /**
  * Garde d'alignement. Après centrage, `det / (Suu · Svv)` vaut le sinus carré
@@ -140,7 +146,7 @@ type Centroid = {
   readonly ty: number;
 };
 
-function centroidOf(pairs: readonly ControlPointPair[]): Centroid {
+function centroidOf(pairs: readonly CalibrationPointPair[]): Centroid {
   let sx = 0;
   let sy = 0;
   let tx = 0;
@@ -169,9 +175,9 @@ function centroidOf(pairs: readonly ControlPointPair[]): Centroid {
  * second membre : une seule passe sur les points suffit aux sept sommes.
  */
 export function fitMeasuredCalibration(
-  pairs: readonly ControlPointPair[],
+  pairs: readonly CalibrationPointPair[],
 ): Outcome<MeasuredCalibration> {
-  if (pairs.length < MIN_CONTROL_POINTS) {
+  if (pairs.length < MIN_CALIBRATION_POINTS) {
     return {
       ok: false,
       findings: [
@@ -179,8 +185,8 @@ export function fitMeasuredCalibration(
           code: 'CALIB.CONTROL_POINTS_INSUFFICIENT',
           severity: 'blocking',
           entity: null,
-          params: { count: pairs.length, minimum: MIN_CONTROL_POINTS },
-          ruleRef: 'atelier-M1.4',
+          params: { count: pairs.length, minimum: MIN_CALIBRATION_POINTS },
+          ruleRef: 'partieM-M2',
         },
       ],
     };
@@ -221,7 +227,7 @@ export function fitMeasuredCalibration(
           severity: 'blocking',
           entity: null,
           params: { count: pairs.length },
-          ruleRef: 'atelier-M1.4',
+          ruleRef: 'partieM-M2',
         },
       ],
     };
@@ -240,7 +246,7 @@ export function fitMeasuredCalibration(
     f: centroid.ty - d * centroid.sx - e * centroid.sy,
   };
 
-  const residuals: ControlPointResidual[] = [];
+  const residuals: CalibrationPointResidual[] = [];
   let total = 0;
   let max = 0;
   for (const pair of pairs) {
@@ -252,13 +258,13 @@ export function fitMeasuredCalibration(
   }
 
   const warnings: Finding[] = [];
-  if (pairs.length < MEASURING_CONTROL_POINTS) {
+  if (pairs.length < MEASURING_CALIBRATION_POINTS) {
     warnings.push({
       code: 'CALIB.RESIDUAL_NOT_MEASURED',
       severity: 'warning',
       entity: null,
-      params: { count: pairs.length, measuring_minimum: MEASURING_CONTROL_POINTS },
-      ruleRef: 'atelier-M1.4',
+      params: { count: pairs.length, measuring_minimum: MEASURING_CALIBRATION_POINTS },
+      ruleRef: 'partieM-M2',
     });
   }
 
@@ -269,7 +275,7 @@ export function fitMeasuredCalibration(
       residuals,
       mean_residual_m: total / pairs.length,
       max_residual_m: max,
-      control_point_count: pairs.length,
+      calibration_point_count: pairs.length,
     },
     warnings,
   };
@@ -279,7 +285,7 @@ export function fitMeasuredCalibration(
  * Confronte un calage ajusté à ses tolérances de recette.
  *
  * Rend une anomalie par point hors tolérance, en plus de celle du résidu moyen,
- * pour que l'écran sache lesquels marquer (M1.4, complément atelier). Une liste vide vaut calage
+ * pour que l'écran sache lesquels marquer (M2, partie M). Une liste vide vaut calage
  * accepté. Les résidus sont rapportés en millimètres entiers, par D1.4 : un
  * résidu s'annonce au millimètre, pas avec quinze décimales.
  *
@@ -307,21 +313,25 @@ export function auditCalibrationResiduals(
         mean_residual_mm: roundMm(calibration.mean_residual_m * 1000),
         tolerance_mm: roundMm(tolerance.mean_m * 1000),
       },
-      ruleRef: 'atelier-M1.4',
+      ruleRef: 'partieM-M2',
     });
   }
 
   for (const residual of calibration.residuals) {
     if (residual.residual_m > tolerance.point_m) {
+      // La nature désignée est la paire, et non une table. L'identité portée
+      // est celle que l'appelant a donnée à la paire — côté atelier, celle du
+      // nœud servant d'amer : nommer ici une table ferait passer un
+      // identifiant de nœud pour la clé d'une ligne qui n'existe pas.
       findings.push({
         code: 'CALIB.RESIDUAL_POINT_EXCEEDED',
         severity: 'blocking',
-        entity: { kind: 'control_point', id: residual.id },
+        entity: { kind: 'calibration_pair', id: residual.id },
         params: {
           residual_mm: roundMm(residual.residual_m * 1000),
           tolerance_mm: roundMm(tolerance.point_m * 1000),
         },
-        ruleRef: 'atelier-M1.4',
+        ruleRef: 'partieM-M2',
       });
     }
   }

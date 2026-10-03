@@ -1,10 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import type { Finding } from '@azimut/core-model';
-import { computeGraphHash } from '@azimut/engine-graph';
+import { computeGraphHash as computeGraphHashOutcome } from '@azimut/engine-graph';
 import {
   graphIsValidated, writeGraphValidation,
 } from '../graph-validation-commands.js';
 import type { ValidationRecord } from '../graph-validation-commands.js';
+
+/** L'empreinte du graphe, ou l'échec de l'essai si elle est refusée (D2.2). */
+function computeGraphHash(graph: Parameters<typeof computeGraphHashOutcome>[0]): string {
+  const hash = computeGraphHashOutcome(graph);
+  if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+  return hash.value;
+}
 import { EMPTY_SESSION, applyToSession } from '../session-store.js';
 import type { SessionState } from '../session-store.js';
 import { readSessionGraph } from '../session-graph.js';
@@ -154,7 +161,7 @@ describe('D7.2 — l’empreinte du graphe de la session', () => {
     const graph = readSessionGraph(store([{ id: 'n-1', x: 1, y: 2 }]));
     expect(graph.nodes).toHaveLength(1);
     expect(graph.unreadable).toEqual([]);
-    expect(computeGraphHash(graph)).toMatch(/^[0-9a-f]{64}$/);
+    expect(computeGraphHash(graph)).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 
   it('deux calculs sur le même graphe donnent la même empreinte', () => {
@@ -177,6 +184,17 @@ describe('D7.2 — l’empreinte du graphe de la session', () => {
       { id: 'n-2', x: 3, y: 4 }, { id: 'n-1', x: 1, y: 2 },
     ]));
     expect(computeGraphHash(forward)).toBe(computeGraphHash(backward));
+  });
+
+  it('D7.2 — un passage enregistré sous l’ancienne forme ne vaut plus, sans conversion', () => {
+    // L'ancienne forme n'avait pas de préfixe : aucun enregistrement fait avant
+    // l'alignement ne peut égaler une empreinte d'aujourd'hui. Il n'est pas
+    // converti ; la validation se rejoue, comme M02.W11 le prévoit.
+    const graph = readSessionGraph(store([{ id: 'n-1', x: 1, y: 2 }]));
+    const current = computeGraphHash(graph);
+    const former = current.slice('sha256:'.length);
+    expect(graphIsValidated([{ graphHash: former, ranAt: STAMP, passed: true }], current))
+      .toBe(false);
   });
 
   it('une ligne illisible est comptée, jamais devinée', () => {

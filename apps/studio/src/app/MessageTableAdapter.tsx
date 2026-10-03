@@ -97,11 +97,11 @@ export function MessageTableAdapter({ siteId, actor }: {
 
   const focusedRow = filtered.rows.find(row => row.line.id === selection.focusedId) ?? null;
 
-  // A5.2 — le paquet de règles du site. Son absence est un bandeau, jamais un
-  // blocage : R14 et N2.8 disent que le plafond de M02.W9 ne s'applique alors
-  // pas et que l'écran le dit.
-  const rulesPackBound = rowsOf(session.state, 'site')
-    .some(row => row.id === siteId && typeof row.values['rules_pack_id'] === 'string');
+  // A5.8 — le paquet de règles du site, lu dans la table de rattachement qui
+  // fait foi. Son absence est un bandeau, jamais un blocage : R14 et N2.8
+  // disent que le plafond de M02.W9 ne s'applique alors pas et que l'écran le dit.
+  const rulesPackBound = rowsOf(session.state, 'site_rules_binding')
+    .some(row => row.values['site_id'] === siteId);
 
   const state: ScreenState = read === null ? { kind: 'empty' } : { kind: 'ready' };
 

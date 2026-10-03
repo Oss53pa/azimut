@@ -24,6 +24,7 @@ import { SIGNAGE_FR, SIGNAGE_EN } from './messages/signage.js';
 import { CATALOGUE_FR, CATALOGUE_EN } from './messages/catalogue.js';
 import { DATA_SOURCE_FR, DATA_SOURCE_EN } from './messages/data-source.js';
 import { WORKSHOP_SCREENS_FR, WORKSHOP_SCREENS_EN } from './messages/workshop-screens.js';
+import { WORKSHOP_STRUCTURE_FR, WORKSHOP_STRUCTURE_EN } from './messages/workshop-structure.js';
 import { SESSION_FR, SESSION_EN } from './messages/session.js';
 import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
 import { SHELL_FR, SHELL_EN } from './messages/shell.js';
@@ -43,7 +44,7 @@ import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages
 import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-data.js';
 import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
 import { CLIENTS_FR, CLIENTS_EN } from './messages/clients.js';
-import { WALL_PLAN_ENTRY_FR, WALL_PLAN_ENTRY_EN } from './messages/wall-plan-entry.js';
+import { FORM_NOTICES_FR, FORM_NOTICES_EN } from './messages/form-notices.js';
 import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js';
 import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
 
@@ -61,6 +62,7 @@ export const MESSAGES_FR = {
   ...CATALOGUE_FR,
   ...DATA_SOURCE_FR,
   ...WORKSHOP_SCREENS_FR,
+  ...WORKSHOP_STRUCTURE_FR,
   ...SESSION_FR,
   ...MESSAGE_TABLE_FR,
   ...SHELL_FR,
@@ -80,7 +82,7 @@ export const MESSAGES_FR = {
   ...PRODUCTION_DATA_FR,
   ...CLOSURES_FR,
   ...CLIENTS_FR,
-  ...WALL_PLAN_ENTRY_FR,
+  ...FORM_NOTICES_FR,
   ...SUPPORT_FACES_FR,
   ...FACE_BLOCKS_FR,
 } as const;
@@ -101,6 +103,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...CATALOGUE_EN,
   ...DATA_SOURCE_EN,
   ...WORKSHOP_SCREENS_EN,
+  ...WORKSHOP_STRUCTURE_EN,
   ...SESSION_EN,
   ...MESSAGE_TABLE_EN,
   ...SHELL_EN,
@@ -120,7 +123,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...PRODUCTION_DATA_EN,
   ...CLOSURES_EN,
   ...CLIENTS_EN,
-  ...WALL_PLAN_ENTRY_EN,
+  ...FORM_NOTICES_EN,
   ...SUPPORT_FACES_EN,
   ...FACE_BLOCKS_EN,
 };

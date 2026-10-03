@@ -1,5 +1,6 @@
 import { type JSX } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import type { AsyncState, RepositoryError, SiteRepository, SiteSummary } from '../data/index.js';
 import {
   Panel, StateBanner, Note, DataTable, Tag,
@@ -41,7 +42,7 @@ export function SiteGate(
     {
       id: 'pack',
       header: t('gate.col.rulespack'),
-      cell: s => s.rules_pack_id ?? t('gate.nopack'),
+      cell: s => rulesPackLabel(s.rules_bindings) ?? t('gate.nopack'),
     },
     {
       id: 'open',

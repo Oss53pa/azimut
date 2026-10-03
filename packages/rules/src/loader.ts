@@ -1,15 +1,11 @@
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Outcome, Finding } from '@azimut/core-model';
 import { rulesPackSchema, manifestSchema } from './schema.js';
 import { loadPackDirectoryParsed } from './pack-directory.js';
 import { groupAndCheckAmbiguity } from './rule-resolution.js';
+import { rulesPackEmpreinte } from './pack-empreinte.js';
 import type { LoadedRulesPack } from './rule-resolution.js';
-
-function computeChecksum(content: string): string {
-  return createHash('sha256').update(content).digest('hex');
-}
 
 export type LoadRulesPackOptions = {
   /** Runtime environment. A TEST-jurisdiction pack loads only when 'test'. */
@@ -31,7 +27,6 @@ export function loadRulesPack(
     return loadRulesPackFromDirectory(source, options.environment ?? 'production');
   }
   const json = source;
-  const checksum = computeChecksum(json);
 
   let raw: unknown;
   try {
@@ -68,6 +63,11 @@ export function loadRulesPack(
   const groupResult = groupAndCheckAmbiguity(pack.rules);
   if (!groupResult.ok) return groupResult;
 
+  // D7.2 — l'identité du paquet est son empreinte canonique, calculée par la
+  // même fonction que celle d'un paquet de répertoire.
+  const checksum = rulesPackEmpreinte([{ content: raw }], pack.key);
+  if (!checksum.ok) return checksum;
+
   return {
     ok: true,
     value: {
@@ -76,7 +76,7 @@ export function loadRulesPack(
       jurisdiction: pack.jurisdiction,
       effective_from: pack.effective_from,
       source_ref: pack.source_ref,
-      checksum,
+      checksum: checksum.value,
       rules: groupResult.value,
     },
     warnings: [],

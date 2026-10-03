@@ -1,6 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
-import { EMPTY_INSPECTION_REGISTRY, type InspectionFinding } from '@azimut/core-model';
+import { EMPTY_INSPECTION_REGISTRY, type InspectionFinding, codePointCompare } from '@azimut/core-model';
 import { loadInspection, useRegistry } from '../data/index.js';
 import { RegistryStatus } from './register/RegistryStatus.js';
 import {
@@ -34,7 +34,7 @@ export function OpsIncidentsView({ siteKey }: OpsIncidentsViewProps): JSX.Elemen
   if (state.status !== 'ready') return <RegistryStatus state={state} />;
   const nature = (k: string): string => { const key = natureKey(k); return key === null ? k : t(key); };
   const rows = [...state.registry.findings].sort((a, b) =>
-    (a.severity === b.severity ? 0 : a.severity === 'blocking' ? -1 : 1) || a.id.localeCompare(b.id));
+    (a.severity === b.severity ? 0 : a.severity === 'blocking' ? -1 : 1) || codePointCompare(a.id, b.id));
   const visible = filter === ALL ? rows : rows.filter(o => o.severity === filter);
   const selected = rows.find(o => o.id === selectedId) ?? visible[0] ?? null;
   const blocking = rows.filter(o => o.severity === 'blocking').length;

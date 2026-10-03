@@ -93,6 +93,26 @@ non plus — elle n'en retire que les clés étrangères.
 0047_a5_7_installed_support_columns
 0048_h8_work_order_cost_minor
 0049_a5_6_face_block_legacy_optional
+0050_m01_s2_control_point_image_px
+0051_a4_migrations_registry_in_schema
+0052_m01_s2_drop_control_point
+0053_a5_11_site_fact_status
+0054_a5_8_charter_rule_text_kinds
+0055_a5_2_footprint_parking_space
+0056_a5_11_site_fact_target
+0057_a5_2_zone_footprint_ids
+0058_a5_3_parking_space_extension
+0059_s_37_drop_parking_uncovered_area
+0060_s_35_drop_parking
+0061_drop_vehicle_gate
+0062_a5_4_pictogram_function_key
+0063_a5_4_function_scope_by_registry
+0064_a5_4_safety_pictogram_requires_pack
+0065_a5_8_rules_binding_role
+0066_a5_2_drop_site_rules_pack_id
+0067_a12_3_audit_log_insert_only
+0068_a5_2_plan_source_content_kind
+0069_o11_temporary_closure
 ```
 
 ## Règle pour la suite
@@ -154,3 +174,56 @@ raison qui n'a rien de métier.
 
 `pnpm test:rls` lance la même suite : c'est elle que ce script annonçait sans
 l'avoir.
+
+## Étanchéité par PostgREST
+
+A10.4 nº 2 veut l'étanchéité « y compris par canal indirect », et A6.1 nomme
+ces canaux : message d'erreur, compteur, temps de réponse. Aucun n'est
+traversé par une connexion SQL directe. L'application parle à PostgREST, qui
+décide du rôle depuis un jeton, expose un schéma, rend des compteurs en
+en-tête et formule ses propres messages. La suite
+`a10-4-etancheite-postgrest.db.test.ts` passe donc par ce chemin.
+
+Elle ne s'exécute que si `AZIMUT_TEST_POSTGREST` désigne un binaire PostgREST.
+Sans lui, elle est ignorée plutôt que fausse : un essai d'étanchéité qui
+passerait sans avoir rien interrogé serait pire que son absence.
+
+Deux rôles sont posés une fois, par un compte d'administration, parce que le
+propriétaire de la base n'a pas le droit d'en créer :
+
+```sql
+CREATE ROLE anon NOLOGIN NOINHERIT;
+CREATE ROLE authenticator LOGIN NOINHERIT;
+GRANT anon, authenticated TO authenticator;
+GRANT USAGE ON SCHEMA azimut TO anon;
+```
+
+`auth.uid()` est installé par la suite elle-même. C'est un objet de la
+plateforme, que Supabase fournit en production et que la base de développement
+n'a pas ; sa définition reproduit celle de Supabase, la revendication `sub` du
+jeton. Il n'entre dans aucune migration : la partie Q le range du côté de la
+plateforme, pas du produit.
+
+Le rôle n'a pas de mot de passe : la base de développement est jointe en
+`trust` depuis le bouclage. Sur une installation qui en demande un, il se pose
+localement et se porte dans `AZIMUT_TEST_POSTGREST_DB_URI` — jamais dans le
+dépôt, que A2.4 et A6.3 interdisent l'un et l'autre.
+
+```
+AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:5433/azimut' \
+AZIMUT_TEST_POSTGREST_DB_URI='postgres://authenticator@127.0.0.1:5433/azimut' \
+AZIMUT_TEST_JWT_SECRET="$(openssl rand -hex 32)" \
+AZIMUT_TEST_POSTGREST=/chemin/vers/postgrest \
+pnpm test:rls
+```
+
+`AZIMUT_TEST_JWT_SECRET` est le secret de signature des jetons du banc. Aucune
+valeur n'est écrite dans le dépôt et aucune valeur de repli n'existe : un
+secret par défaut signerait avec une valeur connue de tout lecteur du dépôt.
+
+Sans `AZIMUT_TEST_POSTGREST`, la suite d'étanchéité se saute : c'est la
+tolérance d'un poste qui n'a pas le binaire, et elle s'arrête là. Une chaîne
+dont c'est le travail pose en plus `AZIMUT_REQUIRE_POSTGREST=1`, et un binaire
+manquant la fait alors échouer au lieu de la sauter — un essai qu'aucune chaîne
+n'exécute n'existe pas. La chaîne d'A13.2 le pose, et installe PostgREST
+12.2.3, version figée et empreinte vérifiée.

@@ -1,10 +1,11 @@
 import type {
   SiteData,
   Point,
+  GraphNode,
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg } from '@azimut/core-model';
+import { roundSvg, parkingSpacesOfLevel, pointInPolygon } from '@azimut/core-model';
 
 export type EvacuationTheme = {
   readonly background: string;
@@ -127,15 +128,38 @@ export function renderEvacuationPlan(
 
   const warnings: Finding[] = [];
 
-  const footprints = site.footprints.filter(
-    (f) => f.level_id === levelId,
-  );
   const nodes = site.graph.nodes.filter(
     (n) => n.level_id === levelId,
   );
   const nodeIdSet = new Set(nodes.map((n) => n.id));
   const edges = site.graph.edges.filter(
     (e) => nodeIdSet.has(e.from_node_id) && nodeIdSet.has(e.to_node_id),
+  );
+
+  // S-39 — « plan d'évacuation : la place n'y apparaît pas, sauf si elle porte
+  // un cheminement d'évacuation ». Un plan d'évacuation montre par où l'on
+  // sort ; un parking dessiné place par place l'encombre de deux cents
+  // rectangles qui ne disent rien de la sortie.
+  //
+  // « Porter un cheminement » se lit sur la donnée : une place le porte quand
+  // un nœud d'une arête d'évacuation se trouve dans son tracé. C'est le seul
+  // rattachement que le modèle permet — ni l'arête ni l'empreinte ne se
+  // désignent l'une l'autre — et il suffit : un cheminement qui traverse un
+  // parking y a forcément un nœud, faute de quoi il n'y passe pas.
+  const spaces = parkingSpacesOfLevel(site, levelId, []).spaces;
+  const evacuationPoints = site.graph.edges
+    .filter((e) => e.evacuation_route)
+    .flatMap((e) => [e.from_node_id, e.to_node_id])
+    .map((id) => site.graph.nodes.find((n) => n.id === id))
+    .filter((n): n is GraphNode => n !== undefined && n.level_id === levelId)
+    .map((n) => n.position);
+
+  const footprints = site.footprints.filter(
+    (f) => f.level_id === levelId
+      && (!spaces.has(f.id)
+        || evacuationPoints.some(
+          (p) => pointInPolygon(p, f.geometry.vertices),
+        )),
   );
 
   const allPoints: Point[] = [];

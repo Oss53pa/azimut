@@ -5,17 +5,19 @@ import {
   refBroken,
   refAdversarial,
   refMultilevel,
+  refRetail,
   siteChecksum,
 } from '../index.js';
 import { siteOrigin, firstCalibration } from '@azimut/core-model';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
-    expect(allReferenceSites.size).toBe(4);
+    expect(allReferenceSites.size).toBe(5);
     expect(allReferenceSites.get('ref-minimal')).toBe(refMinimal);
     expect(allReferenceSites.get('ref-broken')).toBe(refBroken);
     expect(allReferenceSites.get('ref-adversarial')).toBe(refAdversarial);
     expect(allReferenceSites.get('ref-multilevel')).toBe(refMultilevel);
+    expect(allReferenceSites.get('ref-retail')).toBe(refRetail);
   });
 
   for (const [key, site] of allReferenceSites) {
@@ -24,7 +26,7 @@ describe('reference sites', () => {
         const c1 = siteChecksum(site);
         const c2 = siteChecksum(site);
         expect(c1).toBe(c2);
-        expect(c1).toMatch(/^[a-f0-9]{64}$/);
+        expect(c1).toMatch(/^sha256:[a-f0-9]{64}$/);
       });
 
       it('has required top-level fields', () => {
@@ -133,6 +135,89 @@ describe('ref-broken specifics', () => {
       (e) => !edgesWithVl.has(e.id),
     );
     expect(crossWithoutVl.length).toBeGreaterThan(0);
+  });
+});
+
+/**
+ * C1 — « `ref-retail` : commerce multibâtiment, 5 niveaux. Accès indépendants,
+ * lobby commun, horaires distincts par bâtiment, une liaison inter-bâtiments
+ * couverte et une non couverte. »
+ *
+ * Ce qui se vérifie ici est la donnée : que le site porte bien ce que C1 lui
+ * assigne. Ce que le moteur en fait — l'absence d'anomalie bloquante, et la
+ * levée de `GRAPH.BUILDING_LINK_MISSING` sur son contre-exemple — se vérifie
+ * dans `engine-graph`, qui ne peut pas être appelé d'ici : c'est lui qui
+ * dépend de ce paquet, et non l'inverse (A4.1).
+ */
+describe('ref-retail specifics (C1)', () => {
+  it('porte deux bâtiments et cinq niveaux', () => {
+    expect(refRetail.buildings).toHaveLength(2);
+    expect(refRetail.levels).toHaveLength(5);
+  });
+
+  it('donne à chaque bâtiment un accès propre et ses propres horaires', () => {
+    for (const building of refRetail.buildings) {
+      expect(building.independent_access, building.id).toBe(true);
+      expect(Object.keys(building.opening_hours ?? {}).length).toBeGreaterThan(0);
+    }
+    const [galerie, annexe] = refRetail.buildings;
+    expect(galerie?.opening_hours).not.toEqual(annexe?.opening_hours);
+  });
+
+  /**
+   * M4 (partie M) fait hériter la largeur d'une arête du bâtiment. Deux
+   * bâtiments déclarant la même largeur ne prouveraient pas que l'héritage
+   * lit le bon.
+   */
+  it('déclare deux largeurs d’arête différentes', () => {
+    const widths = refRetail.buildings.map(b => b.default_edge_width_m);
+    expect(widths).toEqual([2.4, 1.1]);
+  });
+
+  it('porte une liaison inter-bâtiments couverte et une non couverte', () => {
+    const links = refRetail.graph.building_links;
+    expect(links).toHaveLength(2);
+    expect(links.map(l => l.sheltered).sort()).toEqual([false, true]);
+    for (const link of links) {
+      expect(link.from_building_id).not.toBe(link.to_building_id);
+      const edge = refRetail.graph.edges.find(e => e.id === link.edge_id);
+      expect(edge, link.edge_id).toBeDefined();
+    }
+  });
+
+  /**
+   * M01.S10 — la ligne est exigée de **toute** arête entre deux bâtiments. Que
+   * les deux du site en portent une est ce qui en fait le contre-exemple ; une
+   * troisième arête entre bâtiments, non doublée, le rendrait fautif.
+   */
+  it('ne laisse aucune arête entre bâtiments sans sa ligne', () => {
+    const buildingOfLevel = new Map(refRetail.levels.map(l => [l.id, l.building_id]));
+    const buildingOfNode = new Map(refRetail.graph.nodes
+      .map(n => [n.id, buildingOfLevel.get(n.level_id)]));
+    const linked = new Set(refRetail.graph.building_links.map(l => l.edge_id));
+
+    const crossing = refRetail.graph.edges.filter(e =>
+      buildingOfNode.get(e.from_node_id) !== buildingOfNode.get(e.to_node_id));
+    expect(crossing.map(e => e.id).sort()).toEqual(['e-rt-parvis', 'e-rt-passerelle']);
+    expect(crossing.filter(e => !linked.has(e.id))).toEqual([]);
+  });
+});
+
+/**
+ * C1 — « Chaque cas de détection de `validateGraph` dispose d'un site qui le
+ * déclenche et d'un site voisin qui ne le déclenche pas. » Le site qui
+ * déclenche `GRAPH.BUILDING_LINK_MISSING` est `ref-broken`.
+ */
+describe('ref-broken specifics — M01.S10', () => {
+  it('porte une arête entre bâtiments sans sa ligne', () => {
+    const buildingOfLevel = new Map(refBroken.levels.map(l => [l.id, l.building_id]));
+    const buildingOfNode = new Map(refBroken.graph.nodes
+      .map(n => [n.id, buildingOfLevel.get(n.level_id)]));
+    const crossing = refBroken.graph.edges.filter(e =>
+      buildingOfNode.get(e.from_node_id) !== buildingOfNode.get(e.to_node_id));
+
+    expect(crossing.map(e => e.id)).toEqual(['e-brk-cross-building']);
+    expect(refBroken.graph.building_links).toEqual([]);
   });
 });
 

@@ -132,7 +132,7 @@ export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>>
   'calibration.levels.note': 'The calibration shown here is the stored one, not the measure in progress: that measure is not written anywhere yet. A level with no calibrated background plan is a blocking anomaly (N1.4).',
   'calibration.note': 'Footprint tracing stays refused until the orientation is entered: a footprint drawn on an unoriented background is wrong with nothing to signal it.',
 
-  // M2 bis (partie M) — measured calibration (complément atelier, M1.4)
+  // M2 bis (partie M) — n-point calibration, section M2
   'measured.section': 'Measured calibration',
   'measured.panel.surface': 'Landmark surface',
   'measured.panel.surface.note': '{placed} of {total} placed',

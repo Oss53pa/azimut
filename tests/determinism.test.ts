@@ -11,7 +11,7 @@ import type { IsoOptions, IsoTheme, IsoMultiLevelMode } from '@azimut/engine-iso
 import { renderFace, resolveFaceContent } from '@azimut/engine-graph';
 import type { FaceTheme, RenderFaceOptions } from '@azimut/engine-graph';
 import { computeRoute } from '@azimut/engine-graph';
-import { computeInputsHash, computeContentHash } from '@azimut/engine-graph';
+import { computeInputsHash, resolvedFaceContentHash } from '@azimut/engine-graph';
 import {
   buildFileName,
   buildArchiveName,
@@ -28,8 +28,8 @@ const floorTheme: FloorPlanTheme = {
   footprint_stroke: 'tok-fp-stroke',
   parking_fill: 'tok-park-fill',
   parking_stroke: 'tok-park-stroke',
-  uncovered_fill: 'tok-unc-fill',
-  uncovered_stroke: 'tok-unc-stroke',
+  undigitized_fill: 'tok-undig-fill',
+  undigitized_stroke: 'tok-undig-stroke',
   edge_stroke: 'tok-edge',
   edge_evacuation_stroke: 'tok-evac',
   node_fill: 'tok-node',
@@ -51,6 +51,8 @@ const floorOpts: FloorPlanOptions = {
 
 const orientedTheme: OrientedPlanTheme = {
   background: 'tok-bg',
+  parking_fill: 'tok-park-fill',
+  parking_stroke: 'tok-park-stroke',
   footprint_fill: 'tok-fp-fill',
   footprint_stroke: 'tok-fp-stroke',
   edge_stroke: 'tok-edge',
@@ -259,16 +261,19 @@ describe('INV-4 — deterministic rendering', () => {
 
   it('computeInputsHash produces identical output across runs', () => {
     const profile = getProfile('standard');
-    const results = Array.from({ length: RUNS }, () =>
-      computeInputsHash(refMultilevel, profile),
-    );
+    const results = Array.from({ length: RUNS }, () => {
+      const hash = computeInputsHash(refMultilevel, profile);
+      if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+      return hash.value;
+    });
     const first = results[0];
+    expect(first).toMatch(/^sha256:[0-9a-f]{64}$/);
     for (let i = 1; i < RUNS; i++) {
       expect(results[i]).toBe(first);
     }
   });
 
-  it('computeContentHash produces identical output across runs', () => {
+  it('the content empreinte (D7.2, single implementation) is identical across runs', () => {
     const template = getTemplate('ftpl-dir-front');
     const profile = getProfile('standard');
     const resolved = resolveFaceContent(
@@ -277,18 +282,20 @@ describe('INV-4 — deterministic rendering', () => {
     expect(resolved.ok).toBe(true);
     if (!resolved.ok) return;
 
-    const results = Array.from({ length: RUNS }, () =>
-      computeContentHash({
-        resolved: resolved.value,
-        template,
-        charter_id: null,
-        charter_version: null,
-        rules_pack_id: null,
-        rules_pack_version: null,
+    const results = Array.from({ length: RUNS }, () => {
+      const hash = resolvedFaceContentHash(resolved.value, template, {
+        template_version: '1',
+        rules_packs: {
+          base: { key: 'international', version: '2026.1' },
+          overlay: { key: 'pays', version: '2026.1' },
+        },
         active_langs: ['fr', 'en'],
         dimensions: { width_mm: 600, height_mm: 400 },
-      }),
-    );
+        pictogram_ids: [],
+      });
+      if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+      return hash.value;
+    });
     const first = results[0];
     for (let i = 1; i < RUNS; i++) {
       expect(results[i]).toBe(first);

@@ -13,6 +13,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type SiteOrgRow = { readonly id: string; readonly org_id: string };
 
@@ -108,7 +109,7 @@ export async function loadWayfindingRegistry(
       if (!isInformationLevelRank(row.level)) throw drift('information_level', `niveau ${String(row.level)}`);
       return { typology_key: key, level: row.level };
     })
-    .sort((a, b) => a.typology_key.localeCompare(b.typology_key) || a.level - b.level);
+    .sort((a, b) => codePointCompare(a.typology_key, b.typology_key) || a.level - b.level);
 
   return { zones, naming_rules, information_levels };
 }

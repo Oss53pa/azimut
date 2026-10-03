@@ -15,6 +15,7 @@ type ProjectSwitcherProps = {
 };
 
 function Badge({ name }: { readonly name: string }): JSX.Element {
+  const { lang } = useI18n();
   return (
     <span aria-hidden="true" style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -22,7 +23,7 @@ function Badge({ name }: { readonly name: string }): JSX.Element {
       background: 'var(--text-primary)', color: 'var(--surface-panel)',
       fontSize: TEXT.small, fontWeight: 500,
     }}>
-      {siteInitials(name)}
+      {siteInitials(name, lang)}
     </span>
   );
 }

@@ -1,14 +1,15 @@
 import type {
-  SiteData,
   GraphNode,
   Edge,
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import type { GraphScope } from './graph-scope.js';
 import { destinationNodeMissingFindings } from './validate-directory.js';
 import { buildAdjacency, bfs } from './graph-traversal.js';
 import {
   crossLevelWithoutVlFindings,
+  crossBuildingWithoutLinkFindings,
   verticalLinkMisalignedFindings,
   destinationNotReachedFromEveryEntranceFindings,
   multiLevelWithoutAnyVlFindings,
@@ -152,7 +153,7 @@ function unreachableFromEntranceFindings(
 }
 
 function unreachableDestinationFindings(
-  site: SiteData,
+  site: GraphScope,
   reachableFromEntrance: Set<string>,
 ): Finding[] {
   const findings: Finding[] = [];
@@ -211,7 +212,7 @@ function deadEndFindings(
 }
 
 export function validateGraph(
-  site: SiteData,
+  site: GraphScope,
 ): Outcome<ValidationResult> {
   const { nodes, edges } = site.graph;
 
@@ -223,6 +224,7 @@ export function validateGraph(
     ...unreachableFromEntranceFindings(nodes, edges),
     ...crossLevelWithoutVlFindings(site),
     ...verticalLinkMisalignedFindings(site),
+    ...crossBuildingWithoutLinkFindings(site),
     ...destinationNotReachedFromEveryEntranceFindings(site),
     ...deadEndFindings(nodes, edges),
     ...multiLevelWithoutAnyVlFindings(site),

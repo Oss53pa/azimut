@@ -1,5 +1,5 @@
 /**
- * Calage mesuré, côté atelier — complément atelier M1.4, écran M2.
+ * Calage à n points, côté atelier — section M2 (partie M).
  *
  * Le moteur d'ajustement vit dans `core-model` et ne connaît que des paires de
  * coordonnées. Ce module fait le pont avec ce que l'opérateur manipule à
@@ -14,10 +14,10 @@
 import {
   fitMeasuredCalibration,
   auditCalibrationResiduals,
-  MIN_CONTROL_POINTS,
+  MIN_CALIBRATION_POINTS,
 } from '@azimut/core-model';
 import type {
-  ControlPointPair,
+  CalibrationPointPair,
   Finding,
   GraphNode,
   MeasuredCalibration,
@@ -27,7 +27,7 @@ import type {
   SiteData,
 } from '@azimut/core-model';
 
-export { MIN_CONTROL_POINTS };
+export { MIN_CALIBRATION_POINTS };
 
 /**
  * Natures de nœud utilisables comme amer.
@@ -79,12 +79,12 @@ export function landmarkNodes(site: SiteData, levelId: string): readonly GraphNo
  * le calcul, et le signaler comme une anomalie de calage désignerait la
  * mauvaise cause.
  */
-export function buildControlPairs(
+export function buildCalibrationPairs(
   site: SiteData,
   drafts: readonly PairDraft[],
-): readonly ControlPointPair[] {
+): readonly CalibrationPointPair[] {
   const byId = new Map(site.graph.nodes.map((node) => [node.id, node]));
-  const pairs: ControlPointPair[] = [];
+  const pairs: CalibrationPointPair[] = [];
   for (const draft of drafts) {
     const node = byId.get(draft.node_id);
     if (node === undefined) continue;
@@ -106,9 +106,9 @@ export function evaluateMeasuredCalibration(
   drafts: readonly PairDraft[],
   tolerance: ResidualTolerance | null,
 ): MeasuredCalibrationState {
-  const pairs = buildControlPairs(site, drafts);
+  const pairs = buildCalibrationPairs(site, drafts);
   const result = fitMeasuredCalibration(pairs);
-  const missing = Math.max(MIN_CONTROL_POINTS - pairs.length, 0);
+  const missing = Math.max(MIN_CALIBRATION_POINTS - pairs.length, 0);
 
   if (!result.ok) {
     return {

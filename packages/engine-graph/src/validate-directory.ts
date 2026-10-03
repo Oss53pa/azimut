@@ -3,6 +3,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import type { GraphScope } from './graph-scope.js';
 
 export type DirectoryValidationResult = {
   readonly total_destinations: number;
@@ -18,7 +19,7 @@ export type DirectoryValidationResult = {
  * l'appelait — or aucun code de production n'appelle `validateDirectory`. La
  * détection existait donc sans jamais s'exécuter.
  */
-export function destinationNodeMissingFindings(site: SiteData): Finding[] {
+export function destinationNodeMissingFindings(site: GraphScope): Finding[] {
   const nodeIds = new Set(site.graph.nodes.map((n) => n.id));
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>

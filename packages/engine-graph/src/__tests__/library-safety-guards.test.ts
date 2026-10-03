@@ -10,7 +10,7 @@ import { refMinimal } from '@azimut/testkit';
 // bibliothèque (INV-3).
 describe('T-1.8 INV-3 guardSafetyRegistry', () => {
   it('blocks mutation of a safety pictogram', () => {
-    const result = guardSafetyRegistry(refMinimal, [
+    const result = guardSafetyRegistry(refMinimal.pictograms, [
       {
         pictogram_id: 'picto-fire-exit-safety',
         field: 'svg_path',
@@ -28,7 +28,7 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
   });
 
   it('allows mutation of a wayfinding pictogram', () => {
-    const result = guardSafetyRegistry(refMinimal, [
+    const result = guardSafetyRegistry(refMinimal.pictograms, [
       {
         pictogram_id: 'picto-office-wayfinding',
         field: 'svg_path',
@@ -40,7 +40,7 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
   });
 
   it('ignores mutation of unknown pictogram', () => {
-    const result = guardSafetyRegistry(refMinimal, [
+    const result = guardSafetyRegistry(refMinimal.pictograms, [
       {
         pictogram_id: 'picto-unknown',
         field: 'svg_path',
@@ -52,14 +52,14 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
   });
 
   it('accepts empty mutations array', () => {
-    const result = guardSafetyRegistry(refMinimal, []);
+    const result = guardSafetyRegistry(refMinimal.pictograms, []);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings).toEqual([]);
   });
 
   it('blocks only safety in mixed safety+wayfinding batch', () => {
-    const result = guardSafetyRegistry(refMinimal, [
+    const result = guardSafetyRegistry(refMinimal.pictograms, [
       {
         pictogram_id: 'picto-office-wayfinding',
         field: 'svg_path',
@@ -82,7 +82,7 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
   });
 
   it('multiple mutations on same safety pictogram produce multiple findings', () => {
-    const result = guardSafetyRegistry(refMinimal, [
+    const result = guardSafetyRegistry(refMinimal.pictograms, [
       { pictogram_id: 'picto-fire-exit-safety', field: 'svg_path', old_value: 'M0 0', new_value: 'M1 1' },
       { pictogram_id: 'picto-fire-exit-safety', field: 'source', old_value: 'internal', new_value: 'external' },
     ]);
@@ -97,7 +97,7 @@ describe('T-1.8 INV-3 guardSafetyRegistry', () => {
 
 describe('T-1.8 INV-3 guardSafetyDeletion', () => {
   it('blocks deletion of a safety pictogram', () => {
-    const result = guardSafetyDeletion(refMinimal, [
+    const result = guardSafetyDeletion(refMinimal.pictograms, [
       'picto-fire-exit-safety',
     ]);
     expect(result.ok).toBe(false);
@@ -106,21 +106,21 @@ describe('T-1.8 INV-3 guardSafetyDeletion', () => {
   });
 
   it('allows deletion of a wayfinding pictogram', () => {
-    const result = guardSafetyDeletion(refMinimal, [
+    const result = guardSafetyDeletion(refMinimal.pictograms, [
       'picto-office-wayfinding',
     ]);
     expect(result.ok).toBe(true);
   });
 
   it('accepts empty pictogram ids array', () => {
-    const result = guardSafetyDeletion(refMinimal, []);
+    const result = guardSafetyDeletion(refMinimal.pictograms, []);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.warnings).toEqual([]);
   });
 
   it('blocks only safety in mixed safety+wayfinding deletion batch', () => {
-    const result = guardSafetyDeletion(refMinimal, [
+    const result = guardSafetyDeletion(refMinimal.pictograms, [
       'picto-office-wayfinding',
       'picto-fire-exit-safety',
     ]);
@@ -132,7 +132,7 @@ describe('T-1.8 INV-3 guardSafetyDeletion', () => {
   });
 
   it('ignores unknown pictogram ids', () => {
-    const result = guardSafetyDeletion(refMinimal, [
+    const result = guardSafetyDeletion(refMinimal.pictograms, [
       'picto-nonexistent',
     ]);
     expect(result.ok).toBe(true);

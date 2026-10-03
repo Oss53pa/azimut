@@ -7,15 +7,14 @@
  * client citées en texte ; elles ne s'appliquent jamais à l'interface (F1.3),
  * et aucune ne peut toucher le registre de sécurité (INV-3).
  *
- * Les énumérés recopient les CHECK de 0006 ; un test structurel vérifie que
- * les deux listes coïncident.
+ * Les énumérés recopient les CHECK de la base ; un test structurel vérifie que
+ * les listes coïncident. Les natures de règle et la règle elle-même viennent de
+ * `charter-rules.ts`, seule définition : A5.8 en compte sept depuis la
+ * migration 0054, et une seconde liste à cinq les aurait contredites.
  */
 import type { LexiconSeverity } from './lexicon.js';
-
-export const CHARTER_RULE_KINDS = [
-  'adjacency_forbidden', 'min_logo_width', 'background_allowed', 'proportion', 'signature_usage',
-] as const;
-export type CharterRuleKind = (typeof CHARTER_RULE_KINDS)[number];
+import { CHARTER_RULE_KINDS } from './charter-rules.js';
+import type { CharterRule } from './charter-rules.js';
 
 export const LEXICON_LANGS = ['fr', 'en'] as const;
 export type LexiconLang = (typeof LEXICON_LANGS)[number];
@@ -37,13 +36,6 @@ export type CharterTypeface = {
   readonly weight: number;
   /** Taille minimale propre à la charte, donnée client : pas un seuil normatif. */
   readonly min_size_mm: number;
-};
-
-export type CharterRule = {
-  readonly id: string;
-  readonly kind: CharterRuleKind;
-  /** Paramètres JSON, rendus tels quels : aucun moteur ne les interprète encore. */
-  readonly params: Readonly<Record<string, unknown>>;
 };
 
 export type CharterLexiconEntry = {
@@ -72,7 +64,7 @@ export type CharterRegistry = {
 
 export const EMPTY_CHARTER_REGISTRY: CharterRegistry = { charters: [] };
 
-export function isCharterRuleKind(value: string): value is CharterRuleKind {
+export function isCharterRuleKind(value: string): value is CharterRule['kind'] {
   return (CHARTER_RULE_KINDS as readonly string[]).includes(value);
 }
 

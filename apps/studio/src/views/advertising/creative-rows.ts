@@ -12,6 +12,7 @@ import type { AdCreative, AdCreativeVerdict, AdSanitationState, Finding } from '
 import { guardCreativeAgainstSpec, type Creative, type CreativeSpec } from '../../domain/ad-creative-control.js';
 import type { CreativeIntake } from '../../domain/ad-creative-intake.js';
 import type { ReceivedCreative } from '../../data/index.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type CreativeRow = {
   readonly creative: Creative;
@@ -68,5 +69,5 @@ export function creativeRows(
   return [
     ...storedCreatives.map(c => stored(c, spec)),
     ...reception.map(r => received(r, byId.get(r.creative.id), spec)),
-  ].sort((a, b) => a.creative.id.localeCompare(b.creative.id));
+  ].sort((a, b) => codePointCompare(a.creative.id, b.creative.id));
 }

@@ -2,6 +2,7 @@ import {
   uuid, text, timestamp, integer, jsonb, boolean, numeric, date,
   uniqueIndex, index,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
 import { site } from './site.js';
@@ -26,8 +27,26 @@ export const pictogram = azimut.table('pictogram', {
   standard_ref: text('standard_ref').notNull(),
   svg_path: text('svg_path').notNull(),
   registry: text('registry').notNull(),
+  function_key: text('function_key'),
+  // Référence à `rules_pack`, posée en base par la migration 0063. Déclarée
+  // sans `.references()`, pour ne pas faire dépendre ce fichier de celui des
+  // chartes.
+  rules_pack_id: uuid('rules_pack_id'),
 }, (t) => [
   index('idx_pictogram_org').on(t.org_id),
+  // A5.4 : portée d'unicité d'une fonction, l'organisation pour le registre
+  // d'orientation, le paquet de règles pour celui de sécurité. Migration 0063,
+  // qui dit aussi pourquoi `org_id` reste dans la seconde clé et pourquoi les
+  // valeurs nulles y sont égales entre elles.
+  uniqueIndex('uq_pictogram_function_wayfinding')
+    .on(t.org_id, t.function_key)
+    .where(sql`registry = 'wayfinding' AND function_key IS NOT NULL`),
+  // La base pose en plus NULLS NOT DISTINCT, que le constructeur d'index de
+  // Drizzle n'exprime pas. La migration fait foi ; ce fichier ne sert qu'à
+  // composer des requêtes.
+  uniqueIndex('uq_pictogram_function_safety')
+    .on(t.org_id, t.rules_pack_id, t.function_key)
+    .where(sql`registry = 'safety' AND function_key IS NOT NULL`),
 ]);
 
 export const destination = azimut.table('destination', {

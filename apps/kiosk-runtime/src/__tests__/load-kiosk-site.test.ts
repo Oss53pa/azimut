@@ -3,6 +3,7 @@ import { refMultilevel } from '@azimut/testkit';
 import { canonicalSerialize } from '@azimut/core-model';
 import type { SiteData } from '@azimut/core-model';
 import { loadKioskSite } from '../load-kiosk-site.js';
+import type { KioskSite } from '../load-kiosk-site.js';
 import { searchDestinations } from '../search-destinations.js';
 import { computeWayfinding } from '../wayfinding-session.js';
 
@@ -74,6 +75,18 @@ describe('D10.5 — loadKioskSite rehydrates a SiteData from the tree', () => {
     expect(loaded.pictograms).toEqual(refMultilevel.pictograms);
     expect(loaded.travel_profiles).toEqual(refMultilevel.travel_profiles);
     expect(loaded.levels).toEqual(refMultilevel.levels);
+  });
+
+  it('A5.8 — ne porte aucun rattachement : le champ est absent, pas vide', () => {
+    // Une liste vide dirait « site sans paquet ». Le paquet de borne ne
+    // transporte simplement pas les rattachements ; le site chargé ne doit donc
+    // pas en avoir, ni au typage ni à l'exécution.
+    type PorteLesRattachements = 'rules_bindings' extends keyof KioskSite ? true : false;
+    const porte: PorteLesRattachements = false;
+    expect(porte).toBe(false);
+
+    const loaded = loadKioskSite(kioskDataFiles(refMultilevel));
+    expect(Object.keys(loaded)).not.toContain('rules_bindings');
   });
 
   it('does not ship panel-authoring collections', () => {

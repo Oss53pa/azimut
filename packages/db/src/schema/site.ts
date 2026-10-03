@@ -17,7 +17,8 @@ export const site = azimut.table('site', {
   // Q5 — entité juridique émettrice. Facultative à la création, requise avant
   // l'émission de la première facture : elle ne sert qu'à facturer.
   legal_entity_id: uuid('legal_entity_id'),
-  rules_pack_id: uuid('rules_pack_id'),
+  // A5.8 — le paquet d'un site n'est plus une colonne : `site_rules_binding`
+  // fait foi, et la migration 0066 a retiré `rules_pack_id`.
   // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
   // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
@@ -106,6 +107,11 @@ export const zone = azimut.table('zone', {
   // A5.2 — `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
   // socle, à ne pas confondre avec la zone d'orientation du module 02.
   kind: text('kind').notNull(),
+  // A5.2, version 17 — « empreintes couvertes par la zone, appartenance
+  // déclarée et non calculée, comme pour la zone d'orientation de la partie H ».
+  // Migration 0057. La base garantit le type du contenant ; la forme des
+  // éléments se valide à la frontière, comme pour `footprint.geometry`.
+  footprint_ids: jsonb('footprint_ids').notNull().default([]),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -118,6 +124,9 @@ export const planSource = azimut.table('plan_source', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   storage_path: text('storage_path').notNull(),
   media_type: text('media_type').notNull(),
+  // A5.2 — nature réelle du contenu, constatée à l'import (migration 0068,
+  // qui porte aussi la contrainte des trois valeurs).
+  content_kind: text('content_kind').notNull(),
   uploaded_at: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_plan_source_org').on(t.org_id),
@@ -138,7 +147,7 @@ export const planCalibration = azimut.table('plan_calibration', {
   // tirée. Nullable : le calage par points mesurés n'en produit pas.
   reference_distance_m: numeric('reference_distance_m'),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
-  // Complément atelier M1.4 : transformation affine ajustée par moindres
+  // Section M2 (partie M), calage à n points : transformation affine ajustée par moindres
   // carrés. Nulles tant que le plan n'est calé qu'à deux points.
   affine_a: numeric('affine_a'),
   affine_b: numeric('affine_b'),
@@ -161,26 +170,6 @@ export const planCalibration = azimut.table('plan_calibration', {
   uniqueIndex('uq_plan_calibration_plan_source').on(t.plan_source_id),
 ]);
 
-/**
- * Complément atelier M1.4 : les points homologues qui fondent le calage
- * mesuré. `residual_m` est calculé par l'ajustement, jamais saisi.
- */
-export const controlPoint = azimut.table('control_point', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  calibration_id: uuid('calibration_id').notNull().references(() => planCalibration.id, { onDelete: 'cascade' }),
-  source_x_px: numeric('source_x_px').notNull(),
-  source_y_px: numeric('source_y_px').notNull(),
-  target_x_m: numeric('target_x_m').notNull(),
-  target_y_m: numeric('target_y_m').notNull(),
-  residual_m: numeric('residual_m'),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_control_point_org').on(t.org_id),
-  index('idx_control_point_calibration').on(t.calibration_id),
-]);
-
 export const opening = azimut.table('opening', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
@@ -194,19 +183,43 @@ export const opening = azimut.table('opening', {
 ]);
 
 /**
- * Complément atelier M3 — un fait vérifié du site. `source` et `recorded_on`
- * sont obligatoires : une affirmation sans provenance ne se conteste pas.
+ * A5.11, règle M01.S11 — un fait déclaré du site.
+ *
+ * « site_fact (id, org_id, site_id, key, value jsonb, status, source_ref,
+ * declared_by, declared_at) », `status in ('existing','proposal','to_verify')`.
+ * La migration 0053 a aligné la table sur cette déclaration.
+ *
+ * `source_ref` et `declared_at` sont obligatoires : une affirmation sans
+ * provenance ne se conteste pas. `status` l'est aussi, et sans valeur par
+ * défaut : « un fait de statut `proposal` ne s'affiche jamais comme un
+ * existant », et un défaut à `existing` publierait toute proposition.
+ *
+ * Deux écarts assumés avec A5.11, qui ne les tranche pas : `declared_by` est
+ * nullable, un fait antérieur à la colonne n'ayant pas d'auteur connu ; et
+ * `declared_at` garde le type `date`, ce qui est consigné étant un jour de
+ * constatation et non un instant.
  */
 export const siteFact = azimut.table('site_fact', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   key: text('key').notNull(),
-  value: text('value').notNull(),
-  source: text('source').notNull(),
+  value: jsonb('value').notNull(),
+  status: text('status').notNull(),
+  source_ref: text('source_ref').notNull(),
   // Colonne `date` en base : la déclarer `text` rendrait un `Date` typé
   // `string`, et les comparaisons de chaînes qui la trient échoueraient.
-  recorded_on: date('recorded_on').notNull(),
+  declared_at: date('declared_at').notNull(),
+  declared_by: uuid('declared_by'),
+  // A5.11 — l'objet sur lequel le fait porte, facultatif. Renseigné, le fait
+  // porte sur cet objet ; vide, sur le site entier. Les deux colonnes sont
+  // entières ou absentes ensemble : `site_fact_target_complete`, migration 0056.
+  //
+  // `target_kind` n'est pas un énuméré fermé, comme `audit_log.entity` et
+  // `attachment.entity_kind`. Aucune clé étrangère sur `target_id` : une
+  // référence polymorphe ne peut pas en porter.
+  target_kind: text('target_kind'),
+  target_id: uuid('target_id'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
@@ -226,8 +239,12 @@ export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
 ]);
 
 /**
- * Complément atelier M16 — ce qu'une source affirme d'un objet, à une date.
- * Deux affirmations divergentes sur la même clé font un écart, pas un fait.
+ * Ce qu'une source affirme d'un objet, à une date. Deux affirmations
+ * divergentes sur la même clé font un écart, pas un fait.
+ *
+ * A5.11, règle M01.S11 : « Un écart entre deux sources reste ouvert et visible
+ * tant qu'il n'est pas tranché. » La règle est au cahier des charges, la table
+ * n'y est pas — voir `TABLES_WITHOUT_DECLARED_OWNER`.
  */
 export const sourceClaim = azimut.table('source_claim', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -263,66 +280,23 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
   index('idx_discrepancy_decision_org').on(t.org_id),
 ]);
 
-/** Complément atelier M2 — un parking, avec sa capacité annoncée et sa source. */
-export const parking = azimut.table('parking', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
-  geometry: jsonb('geometry').notNull(),
-  name: text('name').notNull(),
-  free: boolean('free').notNull(),
-  declared_capacity: integer('declared_capacity').notNull(),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_parking_org').on(t.org_id),
-]);
-
+// A5.3, section S8 — extension d'une empreinte de nature `parking_space`, une
+// ligne par empreinte, sur le modèle de `vertical_link` qui étend une arête.
+// Ne porte que ce que l'empreinte générique n'a pas à porter : le type de place
+// et son repère de travée. Migration 0058.
 export const parkingSpace = azimut.table('parking_space', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
-  kind: text('kind').notNull(),
+  footprint_id: uuid('footprint_id').notNull()
+    .references(() => footprint.id, { onDelete: 'cascade' }),
+  space_kind: text('space_kind').notNull(),
   row_label: text('row_label').notNull(),
-  geometry: jsonb('geometry'),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   index('idx_parking_space_org').on(t.org_id),
-  index('idx_parking_space_parking').on(t.parking_id),
-]);
-
-/** Là où le plan source s'arrête : sans elle, aucune extrapolation n'est visible. */
-export const parkingUncoveredArea = azimut.table('parking_uncovered_area', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  parking_id: uuid('parking_id').notNull().references(() => parking.id, { onDelete: 'cascade' }),
-  geometry: jsonb('geometry'),
-  reason: text('reason').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_parking_uncovered_org').on(t.org_id),
-  index('idx_parking_uncovered_parking').on(t.parking_id),
-]);
-
-export const vehicleGate = azimut.table('vehicle_gate', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
-  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
-  code: text('code').notNull(),
-  role: text('role').notNull(),
-  width_m: numeric('width_m').notNull(),
-  position: jsonb('position').notNull(),
-  status: text('status').notNull(),
-  source: text('source').notNull(),
-  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [
-  index('idx_vehicle_gate_org').on(t.org_id),
+  index('idx_parking_space_footprint').on(t.footprint_id),
+  uniqueIndex('parking_space_footprint_unique').on(t.footprint_id),
 ]);
 
 /**

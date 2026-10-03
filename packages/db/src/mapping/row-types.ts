@@ -31,13 +31,26 @@ export type SiteRow = {
   readonly timezone: string;
   /** Q5 — entité juridique émettrice, NULL tant que rien n'est facturé. */
   readonly legal_entity_id: string | null;
-  readonly rules_pack_id: string | null;
   /** M01.S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
   readonly origin_x_m: string | null;
   readonly origin_y_m: string | null;
   /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
   readonly active_langs: readonly string[] | null;
   readonly reference_elevation_m: string | null;
+};
+
+/**
+ * A5.8 — le rattachement d'un site à un paquet de règles, socle ou surcouche.
+ * Cette table fait foi : le site ne porte plus de colonne de paquet.
+ */
+export type SiteRulesBindingRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly site_id: string;
+  readonly rules_pack_id: string;
+  /** `base` ou `overlay`, contrainte en base (migration 0065). */
+  readonly role: string;
+  readonly bound_at: TimestampValue;
 };
 
 export type BuildingRow = {
@@ -66,6 +79,7 @@ export type PlanSourceRow = {
   readonly level_id: string;
   readonly storage_path: string;
   readonly media_type: string;
+  readonly content_kind: string;
   readonly uploaded_at: TimestampValue;
 };
 
@@ -123,8 +137,18 @@ export type EdgeRow = {
   readonly direction: string;
   readonly evacuation_route: boolean;
   readonly length_m: string;
-  /** A5.3 — `jsonb`, forme libre du point de vue de la base ; lue par `readEdgeAvailability`. */
-  readonly availability: unknown;
+};
+
+/** O11 — `temporary_closure` (migration 0069). Bornes `timestamp` sans fuseau. */
+export type TemporaryClosureRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly site_id: string;
+  /** `jsonb`, tableau d'identifiants d'arêtes. */
+  readonly edge_ids: unknown;
+  readonly from_at: string;
+  readonly to_at: string;
+  readonly reason: string;
 };
 
 export type VerticalLinkRow = {
@@ -134,6 +158,16 @@ export type VerticalLinkRow = {
   readonly kind: string;
   readonly capacity: number;
   readonly accessible: boolean;
+};
+
+/** M01.S10 — le passage entre deux bâtiments, et s'il est couvert. */
+export type BuildingLinkRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly edge_id: string;
+  readonly from_building_id: string;
+  readonly to_building_id: string;
+  readonly sheltered: boolean;
 };
 
 export type CategoryRow = {
@@ -152,6 +186,8 @@ export type PictogramRow = {
   readonly standard_ref: string;
   readonly svg_path: string;
   readonly registry: string;
+  readonly function_key: string | null;
+  readonly rules_pack_id: string | null;
 };
 
 export type DestinationRow = {
@@ -247,53 +283,31 @@ export type SupportVersionRow = {
 };
 
 /** Toutes les lignes d'un site, telles qu'un chemin de lecture les rassemble. */
-/** Complément atelier M2 — lignes du stationnement. */
-export type ParkingRow = {
-  readonly id: string;
-  readonly org_id: string;
-  readonly level_id: string;
-  readonly geometry: unknown;
-  readonly name: string;
-  readonly free: boolean;
-  readonly declared_capacity: number;
-  readonly status: string;
-  readonly source: string;
-};
 
+/** A5.3 — l'extension d'une empreinte de place : une ligne par empreinte. */
 export type ParkingSpaceRow = {
   readonly id: string;
   readonly org_id: string;
-  readonly parking_id: string;
-  readonly kind: string;
+  readonly footprint_id: string;
+  readonly space_kind: string;
   readonly row_label: string;
-  readonly geometry: unknown;
-  readonly status: string;
-  readonly source: string;
 };
 
-export type ParkingUncoveredAreaRow = {
-  readonly id: string;
-  readonly org_id: string;
-  readonly parking_id: string;
-  readonly geometry: unknown;
-  readonly reason: string;
-};
-
-export type VehicleGateRow = {
+/** A5.2 — une zone du socle, avec les empreintes qu'elle déclare couvrir. */
+export type ZoneRow = {
   readonly id: string;
   readonly org_id: string;
   readonly level_id: string;
-  readonly code: string;
-  readonly role: string;
-  readonly width_m: string;
-  readonly position: unknown;
-  readonly status: string;
-  readonly source: string;
+  readonly name: string;
+  readonly kind: string;
+  /** `jsonb`, validé en forme à l'assemblage : la base n'en garantit que le type. */
+  readonly footprint_ids: unknown;
 };
 
 export type SiteRowSet = {
   readonly organization: OrganizationRow;
   readonly site: SiteRow;
+  readonly rules_bindings: readonly SiteRulesBindingRow[];
   readonly buildings: readonly BuildingRow[];
   readonly levels: readonly LevelRow[];
   readonly plan_sources: readonly PlanSourceRow[];
@@ -303,6 +317,7 @@ export type SiteRowSet = {
   readonly nodes: readonly NodeRow[];
   readonly edges: readonly EdgeRow[];
   readonly vertical_links: readonly VerticalLinkRow[];
+  readonly building_links: readonly BuildingLinkRow[];
   readonly categories: readonly CategoryRow[];
   readonly pictograms: readonly PictogramRow[];
   readonly destinations: readonly DestinationRow[];
@@ -313,8 +328,8 @@ export type SiteRowSet = {
   readonly support_faces: readonly SupportFaceRow[];
   readonly content_blocks: readonly SupportContentBlockRow[];
   readonly support_versions: readonly SupportVersionRow[];
-  readonly parkings: readonly ParkingRow[];
+  readonly zones: readonly ZoneRow[];
   readonly parking_spaces: readonly ParkingSpaceRow[];
-  readonly parking_uncovered: readonly ParkingUncoveredAreaRow[];
-  readonly vehicle_gates: readonly VehicleGateRow[];
+  /** O11 — facultatif : un chargeur qui ne lit pas la table n'en rend aucune. */
+  readonly temporary_closures?: readonly TemporaryClosureRow[];
 };

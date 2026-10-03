@@ -8,6 +8,7 @@
 import type { AdBooking, AdPlacement, Finding } from '@azimut/core-model';
 import { guardPlacementBookings, type BookingState } from '../../domain/ad-planning.js';
 import { monthsFrom, stateAt, type MonthKey } from './occupancy.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type InventoryRow = {
   readonly placement: AdPlacement;
@@ -33,7 +34,7 @@ const HELD: ReadonlySet<BookingState> = new Set<BookingState>(['occupied', 'rese
 export function currentAdvertiser(bookings: readonly AdBooking[], placementId: string, todayIso: string): string | null {
   const next = bookings
     .filter(b => b.placement_id === placementId && HELD.has(b.state) && b.to_date >= todayIso)
-    .sort((a, b) => a.from_date.localeCompare(b.from_date) || a.id.localeCompare(b.id))[0];
+    .sort((a, b) => codePointCompare(a.from_date, b.from_date) || codePointCompare(a.id, b.id))[0];
   return next?.advertiser_name ?? null;
 }
 
@@ -48,7 +49,7 @@ export function inventoryRows(
   const findings = guarded.ok ? guarded.warnings : guarded.findings;
 
   return [...placements]
-    .sort((a, b) => a.code.localeCompare(b.code) || a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.code, b.code) || codePointCompare(a.id, b.id))
     .map((placement): InventoryRow => {
       const states = months.map(m => stateAt(bookings, placement.id, m));
       const freeIndex = states.findIndex(s => s === 'free');
@@ -61,7 +62,7 @@ export function inventoryRows(
         firstFree: freeIndex === -1 ? null : (months[freeIndex] ?? null),
         bookings: bookings
           .filter(b => b.placement_id === placement.id)
-          .sort((a, b) => a.from_date.localeCompare(b.from_date) || a.id.localeCompare(b.id)),
+          .sort((a, b) => codePointCompare(a.from_date, b.from_date) || codePointCompare(a.id, b.id)),
         conflicts: findings.filter(f => f.params['placement_id'] === placement.id),
       };
     });

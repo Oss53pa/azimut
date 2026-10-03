@@ -1,45 +1,48 @@
 /**
  * M2 (partie M), étape 1 — le fond de plan.
  *
- * « Fichier | dépôt ou sélection | PDF, PNG, JPG, DWG. 60 Mo maximum |
+ * « Fichier | dépôt ou sélection | PDF vectoriel, DXF, PNG, JPG. 60 Mo maximum |
  * `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` »
  * « Page | sélecteur | si PDF multipage, requis | `IMPORT.PAGE_REQUIRED` »
+ * « Le DWG n'est pas accepté. »
+ * Version 28 : « Le format se juge sur le contenu, jamais sur l'extension ni
+ * sur le type annoncé. Un fichier dont le contenu ne correspond à aucun des
+ * formats acceptés est refusé. »
  *
  * Les deux valeurs que M2 (partie M) donne — quatre formats, 60 Mo — sont des contraintes
  * d'interface et non des valeurs d'origine normative : elles bornent ce que le
  * poste accepte de téléverser, elles ne décident d'aucune conformité. Elles
  * restent donc ici, nommées, et non dans un paquet de règles (INV-5).
  */
-import type { Finding, Outcome } from '@azimut/core-model';
+import type { Finding, Outcome, PlanContentKind } from '@azimut/core-model';
+import { contentKindOf, planPrecisionWarnings, precisionOfPage } from './plan-content.js';
+import type { PlanInspection } from './plan-content.js';
 
 /** M2 (partie M) : « 60 Mo maximum ». */
 export const MAX_PLAN_BYTES = 60 * 1024 * 1024;
 
 /**
- * M2 (partie M) : « PDF, PNG, JPG, DWG ». Le type est jugé sur le type de média quand le
- * navigateur en donne un, sur l'extension sinon — un DWG n'a pas de type de
- * média enregistré, et beaucoup de navigateurs rendent une chaîne vide.
+ * M2 (partie M) : « PDF vectoriel, DXF, PNG, JPG ». Chaque format porte le type
+ * de média que le produit enregistre : celui du contenu reconnu, et non celui
+ * que le navigateur annonce. Qu'un PDF soit vectoriel se juge sur ses tracés
+ * (`plan-content.ts`), et non sur son format.
  */
 export const ACCEPTED_PLAN_FORMATS = [
-  { key: 'pdf', mediaTypes: ['application/pdf'], extensions: ['.pdf'] },
-  { key: 'png', mediaTypes: ['image/png'], extensions: ['.png'] },
-  { key: 'jpg', mediaTypes: ['image/jpeg'], extensions: ['.jpg', '.jpeg'] },
-  { key: 'dwg', mediaTypes: ['image/vnd.dwg', 'application/acad'], extensions: ['.dwg'] },
+  { key: 'pdf', mediaType: 'application/pdf' },
+  { key: 'png', mediaType: 'image/png' },
+  { key: 'jpg', mediaType: 'image/jpeg' },
+  { key: 'dxf', mediaType: 'image/vnd.dxf' },
 ] as const;
 
 export type PlanFormatKey = (typeof ACCEPTED_PLAN_FORMATS)[number]['key'];
 
-/** Ce que l'écran sait du fichier déposé. */
+/**
+ * Ce que l'écran sait du fichier déposé. Ni son extension ni son type annoncé
+ * n'y figurent : le contenu seul en décide, par `PlanInspection`.
+ */
 export type PlanFile = {
   readonly name: string;
   readonly byteSize: number;
-  /** Type de média, éventuellement vide : le navigateur ne le donne pas toujours. */
-  readonly mediaType: string;
-  /**
-   * Nombre de pages, pour un PDF. `null` quand le fichier n'est pas paginé ou
-   * que le compte n'est pas encore connu.
-   */
-  readonly pageCount: number | null;
   /** Page retenue, une fois choisie. */
   readonly page: number | null;
 };
@@ -50,20 +53,24 @@ export type AcceptedPlan = {
   readonly byteSize: number;
   /** La page retenue, ou 1 pour un document d'une seule page. */
   readonly page: number;
+  /** A5.2 : la nature du contenu, enregistrée sur la source de plan. */
+  readonly contentKind: PlanContentKind;
 };
 
 /**
- * Juge un fichier déposé. Rend toutes les anomalies ensemble : M7.5 (partie M)
- * veut qu'un refus n'efface pas le travail en cours, et découvrir les défauts
- * un par un ferait reprendre le dépôt autant de fois.
+ * Juge un fichier déposé sur son contenu. Rend toutes les anomalies ensemble :
+ * M7.5 (partie M) veut qu'un refus n'efface pas le travail en cours, et
+ * découvrir les défauts un par un ferait reprendre le dépôt autant de fois.
+ *
+ * Un fond accepté porte, en avertissement, `IMPORT.RASTER_PRECISION_LIMITED`
+ * quand son contenu n'a pas de tracé lisible. Version 29 : c'est la page
+ * retenue qui en décide, et non le fichier entier.
  */
-export function acceptPlanFile(file: PlanFile): Outcome<AcceptedPlan> {
+export function acceptPlanFile(file: PlanFile, inspection: PlanInspection): Outcome<AcceptedPlan> {
   const findings: Finding[] = [];
 
-  const format = formatOf(file);
-  if (format === null) {
+  if (inspection.format === null) {
     findings.push(finding('IMPORT.FORMAT_UNSUPPORTED', {
-      given: file.mediaType === '' ? extensionOf(file.name) : file.mediaType,
       accepted: ACCEPTED_PLAN_FORMATS.map(f => f.key).join(','),
     }));
   }
@@ -75,55 +82,50 @@ export function acceptPlanFile(file: PlanFile): Outcome<AcceptedPlan> {
     }));
   }
 
-  // « Si PDF multipage, requis. » Un document d'une seule page n'a pas de page
-  // à choisir, et la demander serait une question sans objet.
-  const multipage = file.pageCount !== null && file.pageCount > 1;
-  if (multipage && file.page === null) {
-    findings.push(finding('IMPORT.PAGE_REQUIRED', { pages: file.pageCount ?? 0 }));
-  }
-  if (multipage && file.page !== null
-      && (file.page < 1 || file.page > (file.pageCount ?? 0))) {
-    findings.push(finding('IMPORT.PAGE_REQUIRED', {
-      given: file.page,
-      pages: file.pageCount ?? 0,
-    }));
-  }
+  findings.push(...pageFindings(file.page, inspection.pageCount));
 
-  if (findings.length > 0 || format === null) {
+  if (findings.length > 0 || inspection.format === null) {
     return { ok: false, findings };
   }
 
+  const page = file.page ?? 1;
+  const precision = precisionOfPage(inspection, page);
   return {
     ok: true,
     value: {
-      format,
-      mediaType: file.mediaType === '' ? defaultMediaType(format) : file.mediaType,
+      format: inspection.format,
+      mediaType: mediaTypeOf(inspection.format),
       byteSize: file.byteSize,
-      page: file.page ?? 1,
+      page,
+      contentKind: contentKindOf(precision),
     },
-    warnings: [],
+    warnings: [...planPrecisionWarnings(precision, file.name)],
   };
 }
 
-function formatOf(file: PlanFile): PlanFormatKey | null {
-  const extension = extensionOf(file.name);
-  for (const candidate of ACCEPTED_PLAN_FORMATS) {
-    const byMediaType = file.mediaType !== ''
-      && (candidate.mediaTypes as readonly string[]).includes(file.mediaType);
-    const byExtension = (candidate.extensions as readonly string[]).includes(extension);
-    if (byMediaType || byExtension) return candidate.key;
+/**
+ * « Si PDF multipage, requis. » Un document d'une seule page n'a pas de page
+ * à choisir, et la demander serait une question sans objet.
+ */
+function pageFindings(page: number | null, pageCount: number | null): Finding[] {
+  if (pageCount === null || pageCount <= 1) return [];
+  if (page === null) return [finding('IMPORT.PAGE_REQUIRED', { pages: pageCount })];
+  if (!Number.isInteger(page) || page < 1 || page > pageCount) {
+    return [finding('IMPORT.PAGE_REQUIRED', { given: page, pages: pageCount })];
   }
-  return null;
+  return [];
 }
 
-function defaultMediaType(format: PlanFormatKey): string {
-  const found = ACCEPTED_PLAN_FORMATS.find(f => f.key === format);
-  return found?.mediaTypes[0] ?? 'application/octet-stream';
+function mediaTypeOf(format: PlanFormatKey): string {
+  return ACCEPTED_PLAN_FORMATS.find(f => f.key === format)?.mediaType ?? 'application/octet-stream';
 }
 
-function extensionOf(name: string): string {
-  const dot = name.lastIndexOf('.');
-  return dot < 0 ? '' : name.slice(dot).toLowerCase();
+/**
+ * Le fichier n'a pas pu être lu : aucun contenu n'a été reconnu, et un
+ * contenu qui ne correspond à aucun format accepté est refusé.
+ */
+export function unreadablePlanInspection(): PlanInspection {
+  return { format: null, pageCount: null, pages: [] };
 }
 
 function finding(code: string, params: Record<string, string | number>): Finding {

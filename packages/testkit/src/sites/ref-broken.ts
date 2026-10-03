@@ -12,13 +12,14 @@ export const refBroken: SiteData = {
     name: 'Site cassé',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    rules_pack_id: null,
     // M01.S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
     // `origin_x_m` / `origin_y_m` sont absents. Ce n'est pas l'origine (0, 0).
     // N1.2 — site bilingue. L'altitude du niveau de référence n'est pas
     // relevée : les altitudes de niveau restent justes, elles sont relatives.
     active_langs: ['fr', 'en'],
   },
+  // A5.8 — aucun paquet rattaché.
+  rules_bindings: [],
   buildings: [
     {
       id: 'bldg-brk-001',
@@ -26,6 +27,21 @@ export const refBroken: SiteData = {
       site_id: 'site-broken-001',
       name: 'Bâtiment A',
       independent_access: true,
+    },
+    /**
+     * M01.S10 — le second bâtiment, et le cas que ce site porte pour la règle :
+     * une arête le relie au bâtiment A, et aucune ligne `building_link` ne la
+     * double. `GRAPH.BUILDING_LINK_MISSING` se lève dessus.
+     *
+     * Le contre-exemple est `ref-retail`, qui porte deux arêtes entre
+     * bâtiments, chacune avec sa ligne, une couverte et une non couverte.
+     */
+    {
+      id: 'bldg-brk-002',
+      org_id: 'org-test-001',
+      site_id: 'site-broken-001',
+      name: 'Bâtiment B',
+      independent_access: false,
     },
   ],
   levels: [
@@ -45,6 +61,14 @@ export const refBroken: SiteData = {
       ordinal: 1,
       elevation_m: 3,
     },
+    {
+      id: 'lvl-brk-b-rdc',
+      org_id: 'org-test-001',
+      building_id: 'bldg-brk-002',
+      name: 'Bâtiment B, RDC',
+      ordinal: 0,
+      elevation_m: 0,
+    },
   ],
   /**
    * N1.4 — les deux situations que `CALIB.LEVEL_NOT_CALIBRATED` recouvre :
@@ -60,6 +84,7 @@ export const refBroken: SiteData = {
       level_id: 'lvl-brk-rdc',
       storage_path: 'plans/site-broken-001/lvl-brk-rdc.png',
       media_type: 'image/png',
+      content_kind: 'raster',
       uploaded_at: '2026-01-05T09:00:00.000Z',
     },
   ],
@@ -185,6 +210,14 @@ export const refBroken: SiteData = {
         position: { x_m: 0, y_m: 0 },
         label: 'Palier R+1',
       },
+      {
+        id: 'n-brk-b-hall',
+        org_id: 'org-test-001',
+        level_id: 'lvl-brk-b-rdc',
+        kind: 'junction',
+        position: { x_m: 200, y_m: 0 },
+        label: 'Hall du bâtiment B',
+      },
     ],
     edges: [
       {
@@ -235,8 +268,30 @@ export const refBroken: SiteData = {
         evacuation_route: false,
         length_m: 3,
       },
+      /**
+       * M01.S10 — l'arête entre deux bâtiments à laquelle la ligne manque.
+       *
+       * Elle franchit aussi une limite de niveau, et c'est inévitable : un
+       * niveau appartient à un bâtiment, donc deux nœuds de bâtiments
+       * différents sont toujours sur deux niveaux différents. Les deux
+       * anomalies se lèvent ensemble, ce qui est exact — il manque ici les
+       * deux lignes.
+       */
+      {
+        id: 'e-brk-cross-building',
+        org_id: 'org-test-001',
+        from_node_id: 'n-brk-entrance',
+        to_node_id: 'n-brk-b-hall',
+        width_m: 1.4,
+        slope_pct: 0,
+        accessible: true,
+        direction: 'both',
+        evacuation_route: false,
+        length_m: 200,
+      },
     ],
     vertical_links: [],
+    building_links: [],
   },
   categories: [
     {
@@ -256,6 +311,8 @@ export const refBroken: SiteData = {
       standard_ref: 'WF-001',
       svg_path: 'M10 10h20v20H10z',
       registry: 'wayfinding',
+      function_key: null,
+      rules_pack_id: null,
     },
   ],
   destinations: [
@@ -301,8 +358,5 @@ export const refBroken: SiteData = {
   content_blocks: [],
   support_versions: [],
   face_templates: [],
-  parkings: [],
   parking_spaces: [],
-  parking_uncovered: [],
-  vehicle_gates: [],
 };

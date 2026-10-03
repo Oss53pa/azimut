@@ -1,4 +1,4 @@
-import type { SiteData } from '@azimut/core-model';
+import type { Finding, Outcome, SiteData } from '@azimut/core-model';
 import { assembleKioskPackage } from '@azimut/engine-package';
 import { buildKioskTree, buildKioskTreeFromStore } from './build-kiosk-tree.js';
 import type { KioskAppAssets } from './build-kiosk-tree.js';
@@ -21,8 +21,11 @@ export type BuildKioskPackageContext = {
   /**
    * Resolve the kiosk tree files, keyed by relative path. In production this
    * reads compiled artifacts from storage; in tests it returns fixture bytes.
+   *
+   * D10.0 — an Outcome, not a bare map: the renders the tree embarks carry
+   * anomalies, and a success alone would swallow them.
    */
-  readonly resolveKioskFiles: () => Promise<ReadonlyMap<string, Uint8Array>>;
+  readonly resolveKioskFiles: () => Promise<Outcome<ReadonlyMap<string, Uint8Array>>>;
   /** Site content version stamped on the manifest. */
   readonly version: number;
   /** Active languages of the site. */
@@ -55,6 +58,11 @@ export type BuildKioskPackageResult = {
   readonly total_size_bytes: number;
   readonly built_at: string;
   readonly network_clean: boolean;
+  /**
+   * D10.0 — the anomalies of the renders and of the assembly, never dropped.
+   * Empty when the package carries none.
+   */
+  readonly findings: readonly Finding[];
   /** Present only when a storage sink persisted the package. */
   readonly storage_path?: string;
   /** Present only when a storage sink persisted the package. */
@@ -121,7 +129,12 @@ export function createBuildKioskPackageHandler(
         ? payload['built_at']
         : new Date().toISOString();
 
-    const files = await resolveKioskFiles();
+    const resolved = await resolveKioskFiles();
+    if (!resolved.ok) {
+      const codes = resolved.findings.map((f) => f.code).join(', ');
+      throw new Error(`Kiosk package rendering refused: ${codes}`);
+    }
+    const files = resolved.value;
 
     const result = assembleKioskPackage({
       siteId: site.site.id,
@@ -168,6 +181,7 @@ export function createBuildKioskPackageHandler(
       total_size_bytes: totalSize,
       built_at: manifest.builtAt,
       network_clean: true,
+      findings: [...resolved.warnings, ...result.warnings],
       ...(storagePath !== undefined ? { storage_path: storagePath } : {}),
       ...(checksum !== undefined ? { checksum } : {}),
     };

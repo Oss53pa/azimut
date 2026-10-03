@@ -154,7 +154,8 @@ describe('buildingIsolatedFindings', () => {
 
   it('flags the isolated building but not the linked one', () => {
     // bldg-002 has no independent access AND no link → isolated.
-    // bldg-001 has independent access → not flagged.
+    // bldg-001 has independent access and no link either, on a site that now
+    // holds two buildings → signalled, not refused (T-1.5).
     const site: SiteData = {
       ...refMinimal,
       buildings: [
@@ -180,8 +181,50 @@ describe('buildingIsolatedFindings', () => {
       ],
     };
     const findings = buildingIsolatedFindings(site);
-    expect(findings.length).toBe(1);
-    expect(findings[0]?.entity?.id).toBe('bldg-002');
+    expect(findings.map((f) => [f.entity?.id, f.code])).toEqual([
+      ['bldg-001', 'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY'],
+      ['bldg-002', 'GRAPH.BUILDING_ISOLATED'],
+    ]);
+    // T-1.5 : « signalé, pas refusé ». Ni l'un ni l'autre n'est bloquant.
+    expect(findings.every((f) => f.severity === 'warning')).toBe(true);
+  });
+
+  /**
+   * T-1.5 : « Un bâtiment à accès indépendant sans liaison est signalé, pas
+   * refusé. » Le contrôle l'écartait avant tout constat : un site dont un
+   * bâtiment n'était relié à rien passait sans un mot dès que la case était
+   * cochée.
+   */
+  it('signale le bâtiment que son seul accès propre relie au site', () => {
+    const site: SiteData = {
+      ...refMinimal,
+      buildings: [
+        ...refMinimal.buildings,
+        {
+          id: 'bldg-002',
+          org_id: 'org-test-001',
+          site_id: refMinimal.site.id,
+          name: 'Annexe',
+          independent_access: true,
+        },
+      ],
+    };
+    const findings = buildingIsolatedFindings(site);
+    expect(findings.map((f) => f.code)).toEqual([
+      'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY',
+      'GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY',
+    ]);
+    expect(findings.every((f) => f.severity === 'warning')).toBe(true);
+  });
+
+  /**
+   * Le contre-exemple : un site d'un seul bâtiment n'a pas de « reste du
+   * site » auquel se relier, et un avertissement que tout site simple
+   * porterait ne signalerait plus rien.
+   */
+  it('ne signale pas l’unique bâtiment d’un site', () => {
+    expect(refMinimal.buildings.length).toBe(1);
+    expect(buildingIsolatedFindings(refMinimal)).toEqual([]);
   });
 
   it('findings are sorted by building id', () => {

@@ -14,6 +14,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type InstalledRow = {
   readonly id: string;
@@ -113,7 +114,7 @@ export async function loadMaintenanceRegistry(
       surveyed_by: r.surveyed_by,
       surveyed_at: r.surveyed_at,
     }))
-    .sort((a, b) => a.support_id.localeCompare(b.support_id) || a.installed_at.localeCompare(b.installed_at) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.support_id, b.support_id) || codePointCompare(a.installed_at, b.installed_at) || codePointCompare(a.id, b.id));
 
   const divergences = divergenceRows
     .map((r): RecordedDivergence => {
@@ -129,7 +130,7 @@ export async function loadMaintenanceRegistry(
         detail: detailOf(r.detail),
       };
     })
-    .sort((a, b) => b.detected_at.localeCompare(a.detected_at) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(b.detected_at, a.detected_at) || codePointCompare(a.id, b.id));
 
   const work_orders = orderRows
     .map((r): WorkOrder => {
@@ -143,7 +144,7 @@ export async function loadMaintenanceRegistry(
         closed_at: r.closed_at,
       };
     })
-    .sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(b.created_at, a.created_at) || codePointCompare(a.id, b.id));
 
   return { installed, divergences, work_orders };
 }

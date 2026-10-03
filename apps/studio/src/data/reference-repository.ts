@@ -43,7 +43,7 @@ export function createReferenceRepository(): SiteRepository {
           org_id: site.organization.id,
           name: site.site.name,
           country_code: site.site.country_code,
-          rules_pack_id: site.site.rules_pack_id,
+          rules_bindings: site.rules_bindings,
         });
       }
       summaries.sort((a, b) => a.name.localeCompare(b.name));

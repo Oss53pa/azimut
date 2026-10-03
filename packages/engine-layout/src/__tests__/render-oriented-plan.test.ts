@@ -6,6 +6,8 @@ import type { GraphNode, Destination } from '@azimut/core-model';
 
 const theme: OrientedPlanTheme = {
   background: 'tok-bg',
+  parking_fill: 'tok-park-fill',
+  parking_stroke: 'tok-park-stroke',
   footprint_fill: 'tok-fp-fill',
   footprint_stroke: 'tok-fp-stroke',
   edge_stroke: 'tok-edge',

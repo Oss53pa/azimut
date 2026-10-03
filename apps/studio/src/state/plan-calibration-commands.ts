@@ -82,6 +82,8 @@ export function calibrationCommands(
       level_id: write.levelId,
       storage_path: write.storagePath,
       media_type: plan.mediaType,
+      // A5.2 : la nature du contenu, constatée à l'import (M2, partie M).
+      content_kind: plan.contentKind,
     },
   });
   if (!source.ok) return { ok: false, findings: source.findings };

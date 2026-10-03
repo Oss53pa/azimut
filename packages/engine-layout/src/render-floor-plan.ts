@@ -3,27 +3,36 @@ import type {
   GraphNode,
   Edge,
   Footprint,
-  Parking,
-  UncoveredArea,
   Destination,
+  PlanContext,
   Point,
   Outcome,
   Finding,
 } from '@azimut/core-model';
 import {
-  roundSvg, countsAsDigitised, PUBLISHABLE_STATUSES,
+  roundSvg, parkingSpacesOfLevel, accessibleSpaceMark,
 } from '@azimut/core-model';
+import { accessibleMarkSvg } from './parking-mark.js';
+
+/**
+ * L'épaisseur de trait d'une place — S-39, « contour léger ».
+ *
+ * Plus fin que celui d'une empreinte de bâti, qui vaut 1. Une place est un
+ * marquage au sol, elle ne doit pas concurrencer visuellement une cellule
+ * commerciale sur le même plan.
+ */
+const PARKING_STROKE_WIDTH = 0.5;
 
 export type FloorPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
-  /** Complément atelier M2 — emprise de parking, distincte d'un bâtiment. */
+  /** Place de stationnement, distincte d'un bâtiment. */
   readonly parking_fill: string;
   readonly parking_stroke: string;
-  /** Zone que le plan source ne couvre pas : ni vide, ni relevée. */
-  readonly uncovered_fill: string;
-  readonly uncovered_stroke: string;
+  /** Surface non numérisée : ni vide, ni relevée place par place (S-37). */
+  readonly undigitized_fill: string;
+  readonly undigitized_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -44,9 +53,27 @@ export type FloorPlanOptions = {
 };
 
 export type FloorPlanData = {
+  /** Les empreintes du niveau qui ne sont pas des places de stationnement. */
   readonly footprints: readonly Footprint[];
-  readonly parkings: readonly Parking[];
-  readonly uncovered: readonly UncoveredArea[];
+  /**
+   * Les places d'un parking, au sens de S-35 : une empreinte de nature
+   * `parking_space` déclarée par une zone de nature `parking`. Séparées des
+   * autres empreintes parce qu'elles se dessinent avant elles, et autrement.
+   */
+  readonly parkings: readonly Footprint[];
+  /**
+   * Celles de ces places qu'un fait marque non numérisées — S-37. Ce ne sont
+   * pas des emplacements mais des surfaces, et le plan doit les montrer comme
+   * telles, faute de quoi un parking à demi relevé se lit comme un parking à
+   * demi vide.
+   */
+  readonly undigitized: readonly Footprint[];
+  /**
+   * Celles de ces places que l'extension d'A5.3 dit accessibles — S-39. Elles
+   * sont déjà dans l'une des deux listes ci-dessus ; celle-ci dit seulement
+   * lesquelles portent la marque normalisée.
+   */
+  readonly accessible: readonly Footprint[];
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly destinations: readonly Destination[];
@@ -71,7 +98,7 @@ function computeBounds(
   let hasPoints = false;
 
   // Tout ce qui se dessine se cadre. Une emprise de parking déborde presque
-  // toujours du bâti, et une zone non couverte peut border la page : les
+  // toujours du bâti, et une surface non numérisée peut border la page : les
   // omettre du cadrage les ferait sortir du plan, silencieusement. La règle
   // tient parce qu'il n'y a plus qu'une liste, et non une boucle par famille
   // qu'on oublierait d'allonger.
@@ -154,8 +181,9 @@ function nodeRadius(kind: string): number {
 function filterLevelData(
   site: SiteData,
   levelId: string,
+  context: PlanContext,
 ): FloorPlanData {
-  const footprints = site.footprints.filter(
+  const levelFootprints = site.footprints.filter(
     (f) => f.level_id === levelId,
   );
   const nodes = site.graph.nodes.filter(
@@ -168,24 +196,40 @@ function filterLevelData(
   const destinations = site.destinations.filter(
     (d) => nodeIdSet.has(d.node_id),
   );
-  // Un parking retiré sort du plan, parce qu'il sort des livrables (P1, complément atelier) : le
-  // modèle le garde en base pour l'historique, pas pour l'imprimer. Le dessiner
-  // en pointillé le rendrait indiscernable d'une proposition, qui est l'inverse
-  // — quelque chose qui n'existe pas encore, et non qui n'existe plus.
-  const parkings = site.parkings.filter(
-    (p) => p.level_id === levelId && countsAsDigitised(p.provenance.status),
-  );
-  const parkingIds = new Set(parkings.map((p) => p.id));
-  const uncovered = site.parking_uncovered.filter(
-    (a) => parkingIds.has(a.parking_id),
-  );
-  return { footprints, parkings, uncovered, nodes, edges, destinations };
+  const view = parkingSpacesOfLevel(site, levelId, context.facts ?? []);
+
+  const parkings: Footprint[] = [];
+  const undigitized: Footprint[] = [];
+  const accessible: Footprint[] = [];
+  const plain: Footprint[] = [];
+  for (const footprint of levelFootprints) {
+    if (!view.spaces.has(footprint.id)) {
+      plain.push(footprint);
+      continue;
+    }
+    if (view.undigitized.has(footprint.id)) undigitized.push(footprint);
+    else parkings.push(footprint);
+    if (view.accessible.has(footprint.id)) accessible.push(footprint);
+  }
+
+  return {
+    footprints: plain, parkings, undigitized, accessible,
+    nodes, edges, destinations,
+  };
 }
 
 export function renderFloorPlan(
   site: SiteData,
   levelId: string,
   options: FloorPlanOptions,
+  /**
+   * Ce que le plan lit en plus de la scène : les faits d'A5.11 et le
+   * pictogramme normalisé d'une place accessible. Facultatif et vide par
+   * défaut — un appelant qui ne passe rien obtient un plan où toute place est
+   * une place ordinaire et sans marque, ce qui est le rendu d'un site qui ne
+   * déclare ni l'un ni l'autre.
+   */
+  context: PlanContext = {},
 ): Outcome<string> {
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
@@ -199,11 +243,11 @@ export function renderFloorPlan(
     return { ok: false, findings: [f] };
   }
 
-  const data = filterLevelData(site, levelId);
+  const data = filterLevelData(site, levelId, context);
   const outlines: (readonly Point[])[] = [
     ...data.footprints.map((f) => f.geometry.vertices),
     ...data.parkings.map((p) => p.geometry.vertices),
-    ...data.uncovered.flatMap((a) => (a.geometry ? [a.geometry.vertices] : [])),
+    ...data.undigitized.map((a) => a.geometry.vertices),
   ];
   const bounds = computeBounds(outlines, data.nodes);
   const warnings: Finding[] = [];
@@ -252,8 +296,8 @@ export function renderFloorPlan(
     ` fill="${esc(options.theme.background)}" />`,
   );
 
-  // Les parkings d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
-  // après recouvrirait une empreinte par une emprise.
+  // Les places d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
+  // après recouvrirait une empreinte de bâti par une place.
   const sortedParkings = [...data.parkings].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
@@ -265,32 +309,27 @@ export function renderFloorPlan(
         return `${p.x},${p.y}`;
       })
       .join(' ');
-    // Contour pointillé pour tout ce qui n'est pas un existant (section 20 du
-    // complément). Un trait plein affirme ; un pointillé montre sans affirmer,
-    // ce qui est exactement ce que P1 (complément atelier) demande d'une proposition.
-    const dashed = !PUBLISHABLE_STATUSES.includes(park.provenance.status);
     parts.push(
       `<polygon points="${points}"` +
       ` fill="${esc(options.theme.parking_fill)}"` +
       ` stroke="${esc(options.theme.parking_stroke)}"` +
-      ` stroke-width="1"` +
-      (dashed ? ` stroke-dasharray="6 4"` : '') +
-      ` />`,
+      ` stroke-width="${PARKING_STROKE_WIDTH}" />`,
     );
   }
 
-  // Les zones non couvertes juste après les emprises, avant le bâti : elles
+  // Les surfaces non numérisées juste après les places, avant le bâti : elles
   // qualifient le sol qu'elles recouvrent.
   //
-  // Une zone sans tracé ne se dessine pas, et c'est une limite assumée : le
-  // plan reste alors muet sur une incomplétude que le contrôle, lui, connaît.
-  // Dessiner une zone dont on ignore l'étendue reviendrait à inventer la limite
-  // que le relevé n'a pas trouvée.
-  const sortedUncovered = [...data.uncovered].sort(
+  // Elles ont toujours un tracé, désormais : ce sont des empreintes, et A5.2
+  // exige d'une empreinte un polygone fermé d'au moins trois sommets. La limite
+  // de l'ancien modèle — une surface déclarée hors des empreintes pouvait
+  // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait — tombe avec
+  // lui.
+  const sortedUndigitized = [...data.undigitized].sort(
     (a, b) => a.id.localeCompare(b.id),
   );
-  for (const area of sortedUncovered) {
-    const verts = area.geometry?.vertices ?? [];
+  for (const area of sortedUndigitized) {
+    const verts = area.geometry.vertices;
     if (verts.length < 3) continue;
     const points = verts
       .map((v) => {
@@ -300,11 +339,39 @@ export function renderFloorPlan(
       .join(' ');
     parts.push(
       `<polygon points="${points}"` +
-      ` fill="${esc(options.theme.uncovered_fill)}"` +
-      ` stroke="${esc(options.theme.uncovered_stroke)}"` +
-      ` stroke-width="1"` +
+      ` fill="${esc(options.theme.undigitized_fill)}"` +
+      ` stroke="${esc(options.theme.undigitized_stroke)}"` +
+      ` stroke-width="${PARKING_STROKE_WIDTH}"` +
       ` stroke-dasharray="2 3" />`,
     );
+  }
+
+  // S-39 — la marque d'une place accessible, après les places et les surfaces,
+  // avant le bâti. Elle est dessinée par-dessus la place qu'elle qualifie.
+  //
+  // La fonction n'est demandée que s'il y a une place à marquer : un niveau
+  // sans place accessible ne réclame rien, et n'a donc rien à signaler.
+  // Demandée et non désignée, la marque est omise et l'avertissement porté au
+  // rendu ; demandée et ambiguë, le plan refuse — choisir entre deux
+  // pictogrammes serait décider à la place de celui qui a désigné.
+  if (data.accessible.length > 0) {
+    const mark = accessibleSpaceMark(site);
+    if (mark.finding !== null) {
+      if (mark.finding.severity === 'blocking') {
+        return { ok: false, findings: [mark.finding] };
+      }
+      warnings.push(mark.finding);
+    }
+    if (mark.pictogram !== null) {
+      for (const space of [...data.accessible].sort(
+        (a, b) => a.id.localeCompare(b.id),
+      )) {
+        const projected = space.geometry.vertices.map((v) => tx(v, t));
+        parts.push(accessibleMarkSvg(
+          space, projected, mark.pictogram, options.theme.text_primary,
+        ));
+      }
+    }
   }
 
   const sortedFootprints = [...data.footprints].sort(

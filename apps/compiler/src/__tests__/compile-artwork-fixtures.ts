@@ -25,6 +25,16 @@ export const context: CompileContext = {
   creation_date: new Date('2024-06-15T12:00:00Z'),
 };
 
+/**
+ * Le site de référence, sans paquet rattaché.
+ *
+ * `refMultilevel` est rattaché au paquet d'essai depuis que sa place accessible
+ * porte une marque désignée dans ce paquet (A5.4, S-39). Un essai qui éprouve
+ * le cas du site sans paquet le dit donc ici, au lieu de le tenir d'un état du
+ * site de référence qui n'est plus le sien.
+ */
+export const unboundSite = { ...refMultilevel, rules_bindings: [] };
+
 export function makeJob(payload: Record<string, unknown>): Job {
   return {
     id: 'job-compile-001',

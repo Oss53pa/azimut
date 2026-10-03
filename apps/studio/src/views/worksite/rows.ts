@@ -7,6 +7,7 @@
  */
 import type { FabricationLot, Finding, RecordedReserve } from '@azimut/core-model';
 import { auditInstallReserves } from '../../domain/install-reserves.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type ReserveRow = {
   readonly reserve: RecordedReserve;
@@ -29,7 +30,7 @@ export function openReserveFindings(reserves: readonly RecordedReserve[]): reado
 export function reserveRows(reserves: readonly RecordedReserve[]): readonly ReserveRow[] {
   const findings = openReserveFindings(reserves);
   return [...reserves]
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.id, b.id))
     .map(reserve => ({
       reserve,
       finding: findings.find(f => f.entity?.id === reserve.id) ?? null,
@@ -39,7 +40,7 @@ export function reserveRows(reserves: readonly RecordedReserve[]): readonly Rese
 export function lotRows(lots: readonly FabricationLot[], reserves: readonly RecordedReserve[]): readonly LotRow[] {
   const rows = reserveRows(reserves);
   return [...lots]
-    .sort((a, b) => a.code.localeCompare(b.code) || a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.code, b.code) || codePointCompare(a.id, b.id))
     .map(lot => {
       const own = rows.filter(r => r.reserve.lot_id === lot.id);
       return { lot, reserves: own, open: own.filter(r => r.finding !== null).length };

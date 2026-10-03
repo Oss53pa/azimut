@@ -2,6 +2,7 @@ import { type JSX, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useSiteVocabulary } from '../context/useSiteVocabulary.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { rulesPackLabel } from '../state/rules-pack-label.js';
 import { runChecks, validateGraph, validateGeometry, validateDirectory, validateSupports } from '@azimut/engine-graph';
 import type { Finding, SiteData, SiteVocabulary } from '@azimut/core-model';
 import { downloadText } from '../components/download.js';
@@ -139,7 +140,7 @@ export function ChecksView(): JSX.Element {
         <span style={{ fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
           {t('validation.ranat', {
             site: site.site.name,
-            pack: site.site.rules_pack_id ?? t('validation.nopack'),
+            pack: rulesPackLabel(site.rules_bindings) ?? t('validation.nopack'),
           })}
         </span>
       </ScreenHeader>
@@ -185,7 +186,6 @@ export function ChecksView(): JSX.Element {
         <div style={{ marginTop: SPACE.md }}>
           <StateBanner
             severity="blocking"
-            code={vocabulary.errorCode ?? undefined}
             message={t('validation.vocabfailed.message')}
             hint={t('validation.vocabfailed.hint')}
           />

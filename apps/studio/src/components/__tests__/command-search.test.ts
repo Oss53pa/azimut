@@ -50,8 +50,8 @@ describe('La recherche « aller à »', () => {
 
 describe('La pastille du projet', () => {
   it('prend deux initiales', () => {
-    expect(siteInitials('Centre Grand-Sud')).toBe('CG');
-    expect(siteInitials('hôpital')).toBe('H');
-    expect(siteInitials('  gare  du nord ')).toBe('GD');
+    expect(siteInitials('Centre Grand-Sud', 'fr')).toBe('CG');
+    expect(siteInitials('hôpital', 'fr')).toBe('H');
+    expect(siteInitials('  gare  du nord ', 'fr')).toBe('GD');
   });
 });

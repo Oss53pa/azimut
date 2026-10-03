@@ -18,6 +18,13 @@ import type {
 } from '../message-schedule.js';
 import { generateMessageSchedule } from '../message-schedule-generate.js';
 
+/** L'empreinte des entrées, ou l'échec de l'essai si elle est refusée (D2.2). */
+function inputsHashOf(inputs: Parameters<typeof computeScheduleInputsHash>[0]): string {
+  const hash = computeScheduleInputsHash(inputs);
+  if (!hash.ok) throw new Error(hash.findings.map(f => f.code).join(', '));
+  return hash.value;
+}
+
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
@@ -277,7 +284,7 @@ describe('H2.5 — empreinte des entrées', () => {
   };
 
   it('est stable pour des entrées identiques', () => {
-    expect(computeScheduleInputsHash(base)).toBe(computeScheduleInputsHash(base));
+    expect(inputsHashOf(base)).toBe(inputsHashOf(base));
   });
 
   it('change quand l’annuaire change', () => {
@@ -287,22 +294,22 @@ describe('H2.5 — empreinte des entrées', () => {
         i === 0 ? { ...n, value: `${n.value} modifié` } : n,
       ),
     };
-    expect(computeScheduleInputsHash({ ...base, site: renamed }))
-      .not.toBe(computeScheduleInputsHash(base));
+    expect(inputsHashOf({ ...base, site: renamed }))
+      .not.toBe(inputsHashOf(base));
   });
 
   it('change quand un support est ajouté', () => {
-    expect(computeScheduleInputsHash({
+    expect(inputsHashOf({
       ...base,
       supports: [...SUPPORTS, { id: 'sup-2', node_id: 'n-ml-hall', support_type_key: 'directional' }],
-    })).not.toBe(computeScheduleInputsHash(base));
+    })).not.toBe(inputsHashOf(base));
   });
 
   it('change quand un principe de wayfinding change', () => {
-    expect(computeScheduleInputsHash({
+    expect(inputsHashOf({
       ...base,
       rules: { max_destinations_per_face: 4 },
-    })).not.toBe(computeScheduleInputsHash(base));
+    })).not.toBe(inputsHashOf(base));
   });
 
   it('ne dépend pas de l’ordre des entrées reçues', () => {
@@ -311,7 +318,7 @@ describe('H2.5 — empreinte des entrées', () => {
       destinations: [...SITE.destinations].reverse(),
       destination_names: [...SITE.destination_names].reverse(),
     };
-    expect(computeScheduleInputsHash({ ...base, site: reversed }))
-      .toBe(computeScheduleInputsHash(base));
+    expect(inputsHashOf({ ...base, site: reversed }))
+      .toBe(inputsHashOf(base));
   });
 });

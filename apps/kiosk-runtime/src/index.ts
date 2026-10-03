@@ -1,4 +1,5 @@
 export { loadKioskSite } from './load-kiosk-site.js';
+export type { KioskSite } from './load-kiosk-site.js';
 export { searchDestinations } from './search-destinations.js';
 export type { SearchResult } from './search-destinations.js';
 export { computeWayfinding } from './wayfinding-session.js';

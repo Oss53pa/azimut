@@ -53,7 +53,7 @@ export function HeaderBar({ onNavigate, onOpenSearch, sites, currentSiteId, onOp
   const publishable = gate.publishable;
 
   const publishTitle = gate.vocabularyRefusal === 'failed'
-    ? t('header.publish.unreadable', { code: vocabulary.errorCode ?? '—' })
+    ? t('header.publish.unreadable')
     : gate.vocabularyRefusal === 'loading'
       ? t('header.publish.loading')
       : blocking.length > 0

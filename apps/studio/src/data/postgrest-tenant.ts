@@ -12,6 +12,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type RegulationRow = {
   readonly id: string; readonly effective_from: string;
@@ -73,7 +74,7 @@ export async function loadTenantRegistry(config: PostgrestConfig, siteId: string
       allowed_lighting: strings(T, 'allowed_lighting', r.allowed_lighting),
       forbidden_features: strings(T, 'forbidden_features', r.forbidden_features),
     }))
-    .sort((a, b) => a.effective_from.localeCompare(b.effective_from) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.effective_from, b.effective_from) || codePointCompare(a.id, b.id));
 
   const dossiers = dossierRows
     .map((r): TenantSignDossier => {
@@ -82,10 +83,10 @@ export async function loadTenantRegistry(config: PostgrestConfig, siteId: string
         id: r.id, destination_id: r.destination_id, state: r.state, submitted_on: r.submitted_on,
         height_mm: r.height_mm, overhang_mm: r.overhang_mm, material: r.material, lighting: r.lighting,
         features: strings('tenant_sign_dossier', 'features', r.features),
-        parts: [...(partsBy.get(r.id) ?? [])].sort((a, b) => a.key.localeCompare(b.key)),
+        parts: [...(partsBy.get(r.id) ?? [])].sort((a, b) => codePointCompare(a.key, b.key)),
       };
     })
-    .sort((a, b) => a.submitted_on.localeCompare(b.submitted_on) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.submitted_on, b.submitted_on) || codePointCompare(a.id, b.id));
 
   return { regulations, dossiers };
 }

@@ -4,7 +4,7 @@
  * déclarée en base ou non. Une face déclarée au-delà du nombre prévu reste
  * listée, marquée hors typologie, pour ne pas disparaître en silence.
  */
-import { supportFaceCount, type SiteData, type Support, type SupportFace } from '@azimut/core-model';
+import { supportFaceCount, type SiteData, type Support, type SupportFace, codePointCompare } from '@azimut/core-model';
 
 export type FaceSlot = {
   readonly support: Support;
@@ -25,7 +25,7 @@ export function faceSlots(site: SiteData): readonly FaceSlot[] {
   for (const b of site.content_blocks) blocksByFace.set(b.face_id, (blocksByFace.get(b.face_id) ?? 0) + 1);
 
   return [...site.supports]
-    .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id) || a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.code ?? a.id, b.code ?? b.id) || codePointCompare(a.id, b.id))
     .flatMap(support => {
       const count = supportFaceCount(site, support.id);
       const declared = site.support_faces.filter(f => f.support_id === support.id);

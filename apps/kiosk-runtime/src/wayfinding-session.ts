@@ -1,11 +1,11 @@
 import type {
-  SiteData,
   TravelProfile,
   Outcome,
   Finding,
 } from '@azimut/core-model';
 import { computeRoute } from '@azimut/engine-graph';
 import type { Route } from '@azimut/engine-graph';
+import type { KioskSite } from './load-kiosk-site.js';
 
 export type WayfindingLang = 'fr' | 'en';
 
@@ -103,7 +103,7 @@ export type WayfindingOptions = {
 };
 
 export function computeWayfinding(
-  site: SiteData,
+  site: KioskSite,
   profile: TravelProfile,
   fromNodeId: string,
   toNodeId: string,

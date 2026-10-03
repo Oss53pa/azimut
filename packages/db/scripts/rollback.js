@@ -19,28 +19,31 @@ const migrationsDir = join(import.meta.dirname, '..', 'migrations');
 const sql = postgres(url);
 
 try {
-  const exists = await sql`
-    SELECT EXISTS (
-      SELECT FROM information_schema.tables
-      WHERE table_name = '_migrations'
-    ) AS ok
-  `;
+  // A4 : le registre est dans le schéma de l'application, en nom pleinement
+  // qualifié. Ce script interrogeait `_migrations` sans qualification, donc
+  // par le chemin de recherche, donc le schéma par défaut — où la migration
+  // 0051 ne l'a justement plus laissé. Il annonçait alors « aucune table de
+  // migrations » et rendait zéro : un retour en arrière qui ne fait rien et
+  // se déclare réussi. Le code de sortie fait foi, et il disait le contraire
+  // de ce qui s'était passé.
+  const [registry] = await sql`SELECT to_regclass('azimut._migrations') AS oid`;
 
-  if (!exists[0]?.ok) {
-    console.log('No migrations table found. Nothing to roll back.');
-    process.exit(0);
+  if (registry?.oid === null || registry?.oid === undefined) {
+    // Absence de registre : ce n'est pas « rien à défaire », c'est une base
+    // dont on ne sait pas ce qu'elle porte. Rendre zéro ferait passer
+    // l'ignorance pour un travail achevé.
+    console.error(
+      'azimut._migrations est absente : cette base n’a jamais été migrée, ou '
+      + 'son registre est ailleurs. Rien n’a été défait.',
+    );
+    process.exit(1);
   }
 
   const rows = await sql`
-    SELECT name FROM _migrations ORDER BY id DESC LIMIT 1
+    SELECT name FROM azimut._migrations ORDER BY id DESC LIMIT 1
   `;
 
-  if (rows.length === 0) {
-    console.log('No migrations to roll back.');
-    process.exit(0);
-  }
-
-  const name = rows[0]?.name;
+  const name = rows.length === 0 ? undefined : rows[0]?.name;
   if (!name) {
     console.log('No migrations to roll back.');
     process.exit(0);
@@ -58,7 +61,7 @@ try {
   const content = readFileSync(downFile, 'utf-8');
   await sql.begin(async (tx) => {
     await tx.unsafe(content);
-    await tx`DELETE FROM _migrations WHERE name = ${name}`;
+    await tx`DELETE FROM azimut._migrations WHERE name = ${name}`;
   });
   console.log(`Rolled back: ${name}`);
 } finally {

@@ -13,6 +13,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type LotRow = { readonly id: string; readonly code: string; readonly manufacturer_name: string; readonly state: string };
 type SlotRow = { readonly id: string; readonly zone_label: string; readonly planned_on: string | null; readonly night_work: boolean };
@@ -76,21 +77,21 @@ export async function loadWorksiteRegistry(
         support_ids: byLot.get(r.id) ?? [],
       };
     })
-    .sort((a, b) => a.code.localeCompare(b.code) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.code, b.code) || codePointCompare(a.id, b.id));
 
   const slots = slotRows
     .map((r): InstallSlot => ({
       id: r.id, zone_label: r.zone_label, planned_on: r.planned_on, night_work: r.night_work,
       support_ids: bySlot.get(r.id) ?? [],
     }))
-    .sort((a, b) => (a.planned_on ?? '9999').localeCompare(b.planned_on ?? '9999') || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.planned_on ?? '9999', b.planned_on ?? '9999') || codePointCompare(a.id, b.id));
 
   const reserves = reserveRows
     .map((r): RecordedReserve => ({
       id: r.id, support_id: r.support_id, lot_id: r.lot_id, observation_key: r.observation_key,
       observed_by: r.observed_by, observed_at: r.observed_at, lifted_at: r.lifted_at, photo_path: r.photo_path,
     }))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   return { lots, slots, reserves };
 }

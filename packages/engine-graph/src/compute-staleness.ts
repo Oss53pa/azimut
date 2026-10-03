@@ -1,6 +1,9 @@
-import type { SiteData, TravelProfile, FaceTemplate } from '@azimut/core-model';
+import type {
+  BoundRulesPacks, FaceTemplate, Finding, Outcome, SiteData, TravelProfile,
+} from '@azimut/core-model';
+import { computeFaceContentHash } from '@azimut/core-model';
 import { resolveFaceContent } from './resolve-face.js';
-import { computeContentHash } from './compute-hashes.js';
+import type { ResolvedFace } from './resolve-face.js';
 
 /**
  * D7.3 — Staleness engine.
@@ -12,21 +15,49 @@ import { computeContentHash } from './compute-hashes.js';
  * mechanism behind the operating promise: a destination change marks exactly
  * the faces that mention it, never more, never fewer.
  *
- * The comparison is pure hash equality; the strictness of D7.1's content_hash
- * composition is what makes the stale set exact.
+ * D7.2 — the hash is the single one, `computeFaceContentHash` from core-model.
+ * This module only maps a resolved face into its input.
  */
-export type FaceHashDescriptor = {
+
+/** What, besides the resolved content, enters a face's content_hash (T-2.14a §3.1). */
+export type FaceHashContext = {
+  /** The template's version; its key is the template id. */
+  readonly template_version: string;
+  readonly charter?: { readonly id: string; readonly version: string };
+  /** D7.1 — base and overlay, each with its key and version. */
+  readonly rules_packs: BoundRulesPacks;
+  readonly active_langs: readonly string[];
+  readonly dimensions: { readonly width_mm: number; readonly height_mm: number };
+  readonly pictogram_ids: readonly string[];
+};
+
+/**
+ * The content_hash of a resolved face, through the single implementation.
+ * Refuses as it does: no bound pack, invalid dimensions, unserializable content.
+ */
+export function resolvedFaceContentHash(
+  resolved: ResolvedFace,
+  template: FaceTemplate,
+  context: FaceHashContext,
+): Outcome<string> {
+  return computeFaceContentHash({
+    blocks: resolved.blocks.map(block => block.content),
+    template: { key: template.id, version: context.template_version },
+    ...(context.charter === undefined ? {} : { charter: context.charter }),
+    rules_packs: context.rules_packs,
+    active_langs: context.active_langs,
+    width_mm: context.dimensions.width_mm,
+    height_mm: context.dimensions.height_mm,
+    pictogram_ids: context.pictogram_ids,
+  });
+}
+
+export type FaceHashDescriptor = FaceHashContext & {
   /** Opaque identifier of the face (e.g. support id + side). */
   readonly id: string;
   readonly node_id: string;
   readonly template: FaceTemplate;
   readonly profile: TravelProfile;
-  readonly charter_id: string | null;
-  readonly charter_version: string | null;
-  readonly rules_pack_id: string | null;
-  readonly rules_pack_version: string | null;
-  readonly active_langs: readonly string[];
-  readonly dimensions: { readonly width_mm: number; readonly height_mm: number };
   /** content_hash recorded at the last compilation of this face. */
   readonly previous_content_hash: string;
 };
@@ -45,41 +76,36 @@ export type StalenessReport = {
   readonly stale_count: number;
 };
 
+/**
+ * The stale faces of a site, or a refusal.
+ *
+ * A face whose content no longer resolves is stale: its content changed. A
+ * face whose hash cannot be computed is not: nothing can be said of it, and
+ * D7.2 forbids a partial empreinte. The report is then refused, each refusal
+ * naming its face (A7).
+ */
 export function computeStaleFaces(
   site: SiteData,
   faces: readonly FaceHashDescriptor[],
-): StalenessReport {
+): Outcome<StalenessReport> {
   const results: FaceStaleness[] = [];
   const staleIds: string[] = [];
+  const refusals: Finding[] = [];
 
   for (const face of faces) {
-    const resolved = resolveFaceContent(
-      site,
-      face.template,
-      face.node_id,
-      face.profile,
-    );
-
-    let current: string | null;
-    let stale: boolean;
+    const resolved = resolveFaceContent(site, face.template, face.node_id, face.profile);
+    let current: string | null = null;
     if (resolved.ok) {
-      current = computeContentHash({
-        resolved: resolved.value,
-        template: face.template,
-        charter_id: face.charter_id,
-        charter_version: face.charter_version,
-        rules_pack_id: face.rules_pack_id,
-        rules_pack_version: face.rules_pack_version,
-        active_langs: face.active_langs,
-        dimensions: face.dimensions,
-      });
-      stale = current !== face.previous_content_hash;
-    } else {
-      // The face no longer resolves — its content has effectively changed.
-      current = null;
-      stale = true;
+      const hash = resolvedFaceContentHash(resolved.value, face.template, face);
+      if (!hash.ok) {
+        refusals.push(...hash.findings.map(f => ({
+          ...f, entity: { kind: 'support_face', id: face.id },
+        })));
+        continue;
+      }
+      current = hash.value;
     }
-
+    const stale = current === null || current !== face.previous_content_hash;
     results.push({
       id: face.id,
       previous_content_hash: face.previous_content_hash,
@@ -89,5 +115,10 @@ export function computeStaleFaces(
     if (stale) staleIds.push(face.id);
   }
 
-  return { faces: results, stale_ids: staleIds, stale_count: staleIds.length };
+  if (refusals.length > 0) return { ok: false, findings: refusals };
+  return {
+    ok: true,
+    value: { faces: results, stale_ids: staleIds, stale_count: staleIds.length },
+    warnings: [],
+  };
 }

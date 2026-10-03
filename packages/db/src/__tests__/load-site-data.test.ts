@@ -10,6 +10,7 @@ import {
 } from '../schema/signage.js';
 import { organization } from '../schema/org.js';
 import { site, building, level } from '../schema/site.js';
+import { siteRulesBinding } from '../schema/charters.js';
 import { node } from '../schema/graph.js';
 
 type SupportRow = typeof support.$inferSelect;
@@ -204,8 +205,12 @@ describe('loadSiteData (full path, stubbed db)', () => {
       [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
       [site, [{
         id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
-        rules_pack_id: 'rp-1',
       }]],
+      // A5.8 — les paquets viennent de la table de rattachement, qui fait foi.
+      [siteRulesBinding, [
+        { id: 'rb-1', org_id: 'org-1', site_id: 'site-1', rules_pack_id: 'rp-1', role: 'base', bound_at: new Date() },
+        { id: 'rb-2', org_id: 'org-1', site_id: 'site-1', rules_pack_id: 'rp-2', role: 'overlay', bound_at: new Date() },
+      ]],
       [building, [{
         id: 'b-1', org_id: 'org-1', site_id: 'site-1', name: 'B', independent_access: true,
       }]],
@@ -244,7 +249,10 @@ describe('loadSiteData (full path, stubbed db)', () => {
     const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
 
     expect(result.site.id).toBe('site-1');
-    expect(result.site.rules_pack_id).toBe('rp-1');
+    expect(result.rules_bindings).toEqual([
+      { id: 'rb-1', rules_pack_id: 'rp-1', role: 'base' },
+      { id: 'rb-2', rules_pack_id: 'rp-2', role: 'overlay' },
+    ]);
     expect(result.support_types).toHaveLength(1);
     expect(result.support_types[0]?.key).toBe('directional');
     expect(result.support_types[0]?.template_key).toBe('ftpl-dir');
@@ -268,10 +276,11 @@ describe('loadSiteData (full path, stubbed db)', () => {
     const byTable = new Map<object, unknown[]>([
       [organization, [{ id: 'org-1', name: 'Org', slug: 'org' }]],
       [site, [{
-        id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR', rules_pack_id: null,
+        id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
       }]],
     ]);
     const result = await loadSiteData(stubDb(byTable), 'org-1', 'site-1');
+    expect(result.rules_bindings).toEqual([]);
     expect(result.supports).toEqual([]);
     expect(result.buildings).toEqual([]);
   });

@@ -39,18 +39,20 @@ const COLUMNS_NOT_IN_ROW: Readonly<Record<string, string>> = {
   'support.deleted_at':
     'Suppression logique, même raison que pour `site`.',
   'plan_calibration.affine_a':
-    'Calage mesuré (M1.4, complément atelier) : les six réels de l’affine ne passent pas par `loadSiteData`, qui sert `SiteData`, et `SiteData` ne porte aucun calage. Le studio les lit par son propre dépôt.',
-  'plan_calibration.affine_b': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
-  'plan_calibration.affine_c': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
-  'plan_calibration.affine_d': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
-  'plan_calibration.affine_e': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
-  'plan_calibration.affine_f': 'Calage mesuré (M1.4, complément atelier), même raison que `affine_a`.',
+    'Calage à n points (section M2, partie M) : les six réels de l’affine ne passent pas par `loadSiteData`, qui sert `SiteData`, et `SiteData` ne porte aucun calage. Le studio les lit par son propre dépôt.',
+  'plan_calibration.affine_b': 'Calage à n points (section M2, partie M), même raison que `affine_a`.',
+  'plan_calibration.affine_c': 'Calage à n points (section M2, partie M), même raison que `affine_a`.',
+  'plan_calibration.affine_d': 'Calage à n points (section M2, partie M), même raison que `affine_a`.',
+  'plan_calibration.affine_e': 'Calage à n points (section M2, partie M), même raison que `affine_a`.',
+  'plan_calibration.affine_f': 'Calage à n points (section M2, partie M), même raison que `affine_a`.',
   'plan_calibration.mean_residual_m':
-    'Résidu moyen du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
+    'Résidu moyen du calage à n points (section M2, partie M) : lu par le studio, non par `loadSiteData`.',
   'plan_calibration.max_residual_m':
-    'Résidu maximal du calage mesuré (M1.4, complément atelier) : lu par le studio, non par `loadSiteData`.',
+    'Résidu maximal du calage à n points (section M2, partie M) : lu par le studio, non par `loadSiteData`.',
   'travel_profile.weights':
     'Pondérations de profil en JSON, que le calcul d’itinéraire ne lit pas encore.',
+  'edge.availability':
+    'Horaires de disponibilité hebdomadaires en JSON (fiche d’arête, O11) : aucun moteur ne les lit encore. Les fermetures temporaires vivent dans `temporary_closure` (0069).',
   'support_content_block.config':
     'Configuration de bloc en JSON ; A5.6 lui a substitué `binding` et `free_text`, que le type porte.',
   'support.kind':

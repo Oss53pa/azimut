@@ -7,6 +7,7 @@ const CONTEXT: CreationContext = {
   siteId: 'site-1',
   buildingId: 'building-1',
   levelId: 'level-1',
+  bindingId: 'binding-1',
   existingNames: ['Centre commercial du Port'],
   // Q9 — un extrait du référentiel. Les contrôles de pays et de fuseau s'y
   // adossent ; l'essai n'a pas besoin des 249 lignes pour les exercer.
@@ -131,6 +132,28 @@ describe('M1 (partie M) — création d’un site', () => {
       expect(r.ok).toBe(true);
       if (r.ok) expect(r.warnings).toEqual([]);
     });
+
+    it('rattache le paquet choisi en socle, et non plus dans une colonne du site', () => {
+      // A5.8, version 22 : la table de rattachement fait foi, et A5.2 retire
+      // la colonne du site.
+      const r = createSiteCommands(DRAFT, CONTEXT);
+      expect(r.ok).toBe(true);
+      if (!r.ok) return;
+      const tables = r.value.map(c => c.table);
+      expect(tables).toEqual(['site', 'building', 'level', 'site_rules_binding']);
+      const binding = r.value.find(c => c.table === 'site_rules_binding');
+      expect(binding?.after).toEqual({
+        id: 'binding-1', org_id: CONTEXT.orgId, site_id: 'site-1',
+        rules_pack_id: 'fr-erp-2026', role: 'base',
+      });
+      const siteRow = r.value.find(c => c.table === 'site');
+      expect(siteRow?.after).not.toHaveProperty('rules_pack_id');
+    });
+
+    it('n’écrit aucun rattachement sans paquet choisi', () => {
+      const r = createSiteCommands({ ...DRAFT, rulesPackId: null }, CONTEXT);
+      expect(r.ok && r.value.map(c => c.table)).toEqual(['site', 'building', 'level']);
+    });
   });
 
   /**
@@ -223,7 +246,9 @@ describe('M1 (partie M) — création d’un site', () => {
  */
 describe('M1 (partie M) — le site naît avec un bâtiment et un niveau', () => {
   it('rend trois commandes, dans l’ordre des dépendances', () => {
-    const r = createSiteCommands(DRAFT, CONTEXT);
+    // Sans paquet choisi : le rattachement, facultatif, est une quatrième
+    // commande, essayée à part (A5.8).
+    const r = createSiteCommands({ ...DRAFT, rulesPackId: null }, CONTEXT);
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.value.map(c => c.table)).toEqual(['site', 'building', 'level']);
   });

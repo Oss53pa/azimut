@@ -2,6 +2,8 @@ export type { Finding, Outcome } from './outcome.js';
 export type { Point, Polygon } from './geometry.js';
 export {
   FOOTPRINT_KINDS, CELL_FOOTPRINT_KIND, isCellFootprint, isFootprintKind,
+  PARKING_SPACE_FOOTPRINT_KIND, isParkingSpaceFootprint,
+  PARKING_ZONE_KIND, isParkingZone,
   ZONE_KINDS, isSiteZoneKind, OPENING_KINDS, isOpeningKind,
 } from './site.js';
 export type { SiteZoneKind, OpeningKind } from './site.js';
@@ -10,14 +12,14 @@ export {
   fitMeasuredCalibration,
   auditCalibrationResiduals,
   applyAffine,
-  MIN_CONTROL_POINTS,
-  MEASURING_CONTROL_POINTS,
+  MIN_CALIBRATION_POINTS,
+  MEASURING_CALIBRATION_POINTS,
 } from './affine-calibration.js';
 export type {
   PlanPixelPoint,
-  ControlPointPair,
+  CalibrationPointPair,
   AffineTransform,
-  ControlPointResidual,
+  CalibrationPointResidual,
   MeasuredCalibration,
   ResidualTolerance,
 } from './affine-calibration.js';
@@ -25,9 +27,9 @@ export { edgeLengthBetween, computeEdgeLengths } from './edge-length.js';
 export type { EdgeEnd, EdgeLengthInput } from './edge-length.js';
 export {
   isUsableScale, calibratedLevelIds, siteOrigin, guardSiteOrigin,
-  firstCalibration,
+  firstCalibration, PLAN_CONTENT_KINDS, isPlanContentKind,
 } from './plan.js';
-export type { PlanSource, PlanCalibration, SiteOriginBearer } from './plan.js';
+export type { PlanSource, PlanCalibration, PlanContentKind, SiteOriginBearer } from './plan.js';
 export { ACTIVE_LANGS, isActiveLang, readActiveLangs } from './lang.js';
 export type { ActiveLang } from './lang.js';
 export {
@@ -66,9 +68,47 @@ export {
 } from './tolerance.js';
 export { normalizeAzimuth } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
-export type { SiteFact, ForbiddenWord } from './site-facts.js';
+export type {
+  CharterRule, CharterRuleKind, CharterRuleResolution, ForbiddenCharacterRange,
+} from './charter-rules.js';
+export {
+  CHARTER_RULE_KINDS, resolveForbiddenCharacters, resolveMaxSentenceWords,
+} from './charter-rules.js';
+export type { SiteFact, ForbiddenWord, FactStatus, FactValue, FactTarget } from './site-facts.js';
+export {
+  DECLARED_FACT_KEYS, PARKING_CAPACITY_KEY, PARKING_FREE_KEY,
+  PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
+  isFactKeyShape, factKeyDeclaration,
+  factValueMatchesType, factValueFault, declaredInteger, declaredText,
+} from './fact-keys.js';
+export type { FactValueType, FactKeyDeclaration, FactValueFault } from './fact-keys.js';
+export {
+  parkingSpacesOfLevel, accessibleSpaceMark, footprintCentre,
+  ACCESSIBLE_SPACE_KIND, NO_PARKING_SPACES, PICTOGRAM_GRID_UNITS,
+} from './parking-view.js';
+export type { ParkingSpaceView, PlanContext, AccessibleMark } from './parking-view.js';
+export {
+  RULES_PACK_ROLES, boundPackId, packsByPrecedence, isBound, rulesPacksInRoleOrder,
+} from './rules-bindings.js';
+export type {
+  RulesPackIdentity, BoundRulesPacks, RoleTaggedRulesPack,
+} from './rules-bindings.js';
+export {
+  ACCESSIBLE_FUNCTION_KEY, DECLARED_PICTOGRAM_FUNCTIONS, isFunctionKeyShape,
+  pictogramFunctionDeclaration, resolvePictogramFunction, pictogramFunctionFinding,
+  siteScope,
+} from './pictogram-functions.js';
+export type {
+  PictogramFunctionDeclaration, PictogramFunctionResolution, PictogramScope,
+} from './pictogram-functions.js';
+export {
+  FACT_STATUSES, PUBLISHABLE_FACT_STATUSES, factValueText,
+  PARKING_FACT_TARGET_KIND, factsFor,
+} from './site-facts.js';
 export { detectDiscrepancies, markIfOpen } from './source-claims.js';
 export { EMPTY_VOCABULARY } from './site-vocabulary.js';
+export { PARKING_SPACE_KINDS, isParkingSpaceKind } from './parking.js';
+export type { ParkingSpace, ParkingSpaceKind } from './parking.js';
 export {
   EMPTY_WAYFINDING_REGISTRY, ORIENTATION_ZONE_KINDS, NAMING_TARGETS, NAMING_SCOPES, INFORMATION_LEVELS,
   isOrientationZoneKind, isNamingTarget, isNamingScope, isInformationLevelRank,
@@ -78,11 +118,11 @@ export type {
   InformationLevelBinding, InformationLevelRank,
 } from './wayfinding-registry.js';
 export {
-  EMPTY_CHARTER_REGISTRY, CHARTER_RULE_KINDS, LEXICON_LANGS, LEXICON_SEVERITIES,
+  EMPTY_CHARTER_REGISTRY, LEXICON_LANGS, LEXICON_SEVERITIES,
   isCharterRuleKind, isLexiconLang, isLexiconSeverity,
 } from './charter-registry.js';
 export type {
-  CharterRegistry, SiteCharter, CharterColorEntry, CharterTypeface, CharterRule, CharterRuleKind,
+  CharterRegistry, SiteCharter, CharterColorEntry, CharterTypeface,
   CharterLexiconEntry, LexiconLang,
 } from './charter-registry.js';
 export {
@@ -123,19 +163,19 @@ export type {
   TenantRegistry, TenantSignRegulation, TenantSignDossier, TenantSignPart, TenantDossierState,
 } from './tenant-registry.js';
 export {
-  readEdgeAvailability, isClosedAt, closuresOverlapping, isLocalInstant, CLOSURE_REASONS, isClosureReason,
-} from './edge-availability.js';
-export type { EdgeAvailability, EdgeClosure, ClosureReason } from './edge-availability.js';
+  isLocalInstant, localInstantOf, sortClosures, isActiveAt, closedEdgesAt, closuresOverlapping,
+} from './temporary-closure.js';
+export type { TemporaryClosure } from './temporary-closure.js';
 export {
-  serializeEdgeAvailability, validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
-} from './edge-closure-commands.js';
-export type { ClosureDraft, ClosureEnvironment } from './edge-closure-commands.js';
+  validateClosureDraft, declareClosureCommand, withdrawClosureCommand,
+} from './temporary-closure-commands.js';
+export type { ClosureDraft, ClosureEnvironment } from './temporary-closure-commands.js';
+export {
+  FORM_NOTICE_KEYS, notice, refusedBy, asFormOutcome, asList,
+} from './form-notice.js';
+export type { FormNotice, FormNoticeKey, FormOutcome } from './form-notice.js';
 export { validateLegalEntityDraft, declareLegalEntityCommand } from './legal-entity-commands.js';
 export type { LegalEntityDraft, LegalEntityEnvironment } from './legal-entity-commands.js';
-export {
-  WALL_PLAN_BLOCK_KIND, wallPlanBlocks, declareWallPlanCommands, withdrawWallPlanCommand,
-} from './wall-plan-commands.js';
-export type { WallPlanEnvironment } from './wall-plan-commands.js';
 export {
   supportFaceCount, validateFaceDraft, declareFaceCommand, updateFaceCommand,
 } from './support-face-commands.js';
@@ -150,11 +190,6 @@ export {
   instanceBlocksOf, freeTextsOf, chooseSlot,
 } from './face-template-slots.js';
 export type { SlotChoice } from './face-template-slots.js';
-export { PUBLISHABLE_STATUSES, countsAsDigitised } from './parking.js';
-export type {
-  ObjectStatus, Provenance, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea,
-} from './parking.js';
-export type { VehicleGate } from './site.js';
 export { resolveBoundParagraph, literalNumbers } from './bound-text.js';
 export type {
   TextSegment, BoundParagraph, BindingValues, ResolvedParagraph,
@@ -163,8 +198,10 @@ export type {
 export type { SiteVocabulary } from './site-vocabulary.js';
 export type { SourceClaim, Discrepancy, DiscrepancyDecision } from './source-claims.js';
 export type { LexiconTerm, LexiconMatch, LexiconSeverity } from './lexicon.js';
-export { canonicalSerialize, sha256Hex, sha256Binary, contentHash } from './hash.js';
-export { canonicalContentJson, empreinte } from './empreinte.js';
+export { canonicalSerialize, sha256Hex, sha256Binary } from './hash.js';
+export { canonicalContentJson, codePointCompare, empreinte, empreinteOutcome } from './empreinte.js';
+export { computeFaceContentHash } from './face-content-hash.js';
+export type { FaceContentHashInput } from './face-content-hash.js';
 export {
   transliterate,
   sanitizeSegment,
@@ -172,7 +209,7 @@ export {
   buildArchiveName,
 } from './file-naming.js';
 export type { FileNameParts, ArchiveNameParts } from './file-naming.js';
-export { ERROR_CATALOG } from './error-catalog.js';
+export { ERROR_CATALOG, ANOMALY_DOMAINS } from './error-catalog.js';
 export type { ErrorCode } from './error-catalog.js';
 export {
   ERROR_MESSAGES_FR,
@@ -220,9 +257,12 @@ export type {
   Edge,
   VerticalLinkKind,
   VerticalLink,
+  BuildingLink,
   Category,
   PictogramRegistry,
   Pictogram,
+  RulesPackRole,
+  SiteRulesBinding,
   OccupancyStatus,
   Destination,
   DestinationName,
@@ -244,15 +284,31 @@ export type {
   FaceTemplate,
   TravelProfile,
   SiteGraph,
+  SiteZone,
   SiteData,
 } from './site.js';
 export { longestVariant, textExpansionFindings } from './text-expansion.js';
 export type { LongestVariantResult } from './text-expansion.js';
 export {
+  guardSafetyRegistry, guardSafetyCreation, guardSafetyDeletion,
+} from './safety-registry.js';
+export type {
+  PictogramRegistryEntry, PictogramMutation, PictogramCreation,
+} from './safety-registry.js';
+export {
   guardExportExcludesSketch,
   isSketchCollection,
   SKETCH_COLLECTIONS,
 } from './sketch-export.js';
+export {
+  VIEW_LAYER_KEYS, SKETCH_LAYER_KEY, isViewLayerKey,
+  stackedLayers, screenLayerKeys, printLayerKeys, auditViewLayers,
+  WORK_COLOUR_TARGET_KINDS, isWorkColourTargetKind, isWorkColourHex,
+  workColoursOf, activeWorkColourCount,
+} from './view-layers.js';
+export type {
+  ViewLayer, ViewLayerKey, WorkColour, WorkColourTargetKind,
+} from './view-layers.js';
 export {
   meterToPixel,
   pixelToMeter,
@@ -286,6 +342,7 @@ export {
 export type { ModuleKey } from './module-ownership.js';
 export {
   COMMAND_OPERATIONS,
+  listValue,
   buildCommand,
   ownsTable,
   inverseCommand,
@@ -299,7 +356,7 @@ export type {
   CommandDraft,
 } from './site-commands.js';
 export { RETIRED_CODES } from './error-catalog.js';
-export { segmentsProperlyIntersect, isSelfIntersecting } from './geometry.js';
+export { segmentsProperlyIntersect, isSelfIntersecting, pointInPolygon } from './geometry.js';
 export {
   occupancyHistory, occupantsOn, isInForceOn, previousOccupancy,
 } from './occupancy.js';

@@ -1,5 +1,5 @@
 import { type JSX, useMemo, useState } from 'react';
-import { supportTypologyOf, type Support } from '@azimut/core-model';
+import { supportTypologyOf, type Support, codePointCompare } from '@azimut/core-model';
 import { deriveDecisionPoints } from '@azimut/engine-graph';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -40,7 +40,7 @@ export function PlacementView(): JSX.Element {
     const faces = new Map<string, number>();
     for (const f of site.support_faces) faces.set(f.support_id, (faces.get(f.support_id) ?? 0) + 1);
     return [...site.supports]
-      .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id))
+      .sort((a, b) => codePointCompare(a.code ?? a.id, b.code ?? b.id))
       .map(support => ({
         support,
         levelId: labels.nodeLevel(support.node_id),

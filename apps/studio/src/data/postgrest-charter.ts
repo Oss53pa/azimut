@@ -14,6 +14,7 @@ import {
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type CharterRow = {
   readonly id: string;
@@ -86,30 +87,30 @@ export async function loadCharterRegistry(
     created_at: c.created_at,
     colors: (colors.get(c.id) ?? [])
       .map((r): CharterColorEntry => ({ id: r.id, key: r.key, hex: r.hex, usage: r.usage }))
-      .sort((a, b) => a.key.localeCompare(b.key) || a.id.localeCompare(b.id)),
+      .sort((a, b) => codePointCompare(a.key, b.key) || codePointCompare(a.id, b.id)),
     typefaces: (typefaces.get(c.id) ?? [])
       .map((r): CharterTypeface => {
         const size = Number(r.min_size_mm);
         if (!Number.isFinite(size)) throw drift('charter_typeface', `min_size_mm « ${String(r.min_size_mm)} »`);
         return { id: r.id, key: r.key, family: r.family, weight: r.weight, min_size_mm: size };
       })
-      .sort((a, b) => a.key.localeCompare(b.key) || a.id.localeCompare(b.id)),
+      .sort((a, b) => codePointCompare(a.key, b.key) || codePointCompare(a.id, b.id)),
     rules: (rules.get(c.id) ?? [])
       .map((r): CharterRule => {
         if (!isCharterRuleKind(r.kind)) throw drift('charter_rule', `kind « ${r.kind} »`);
         return { id: r.id, kind: r.kind, params: paramsOf(r.params) };
       })
-      .sort((a, b) => a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id)),
+      .sort((a, b) => codePointCompare(a.kind, b.kind) || codePointCompare(a.id, b.id)),
     lexicon: (lexicon.get(c.id) ?? [])
       .map((r): CharterLexiconEntry => {
         if (!isLexiconLang(r.lang)) throw drift('lexicon_term', `lang « ${r.lang} »`);
         if (!isLexiconSeverity(r.severity)) throw drift('lexicon_term', `severity « ${r.severity} »`);
         return { id: r.id, lang: r.lang, term: r.term, severity: r.severity };
       })
-      .sort((a, b) => a.lang.localeCompare(b.lang) || a.term.localeCompare(b.term) || a.id.localeCompare(b.id)),
+      .sort((a, b) => codePointCompare(a.lang, b.lang) || codePointCompare(a.term, b.term) || codePointCompare(a.id, b.id)),
   }));
 
   // Ordre stable : la plus récente d'abord, l'identifiant départage.
-  charters.sort((a, b) => b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id));
+  charters.sort((a, b) => codePointCompare(b.created_at, a.created_at) || codePointCompare(a.id, b.id));
   return { charters };
 }

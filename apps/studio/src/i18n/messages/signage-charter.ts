@@ -57,7 +57,9 @@ export const SIGNAGE_CHARTER_FR = {
   'charter.rule.background_allowed': 'Fonds admis',
   'charter.rule.proportion': 'Proportion',
   'charter.rule.signature_usage': 'Usage de la signature',
-  'charter.rule.note': 'Paramètres cités tels que saisis : aucun moteur ne les applique encore aux faces.',
+  'charter.rule.forbidden_character': 'Caractères interdits',
+  'charter.rule.max_sentence_words': 'Longueur maximale de phrase',
+  'charter.rule.note': 'Paramètres cités tels que saisis. Les caractères interdits et la longueur de phrase sont jugés par l’audit ; les autres règles ne s’appliquent encore à aucune face.',
   'charter.note': 'La charte du site sert au contenu des faces et des bornes, jamais à l’interface de conception (F1.3). Elle ne peut modifier ni une couleur ni un pictogramme du registre de sécurité (INV-3).',
 } as const;
 
@@ -113,6 +115,8 @@ export const SIGNAGE_CHARTER_EN: Readonly<Record<keyof typeof SIGNAGE_CHARTER_FR
   'charter.rule.background_allowed': 'Allowed backgrounds',
   'charter.rule.proportion': 'Proportion',
   'charter.rule.signature_usage': 'Signature usage',
-  'charter.rule.note': 'Parameters quoted as entered: no engine applies them to faces yet.',
+  'charter.rule.forbidden_character': 'Forbidden characters',
+  'charter.rule.max_sentence_words': 'Maximum sentence length',
+  'charter.rule.note': 'Parameters quoted as entered. Forbidden characters and sentence length are judged by the audit; the other rules apply to no face yet.',
   'charter.note': 'The site charter serves face and kiosk content, never the design interface (F1.3). It can change neither a colour nor a pictogram of the safety register (INV-3).',
 };

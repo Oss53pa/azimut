@@ -9,22 +9,25 @@
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
 import {
-  readActiveLangs, readOpeningHours, readEdgeAvailability, computeEdgeLengths,
+  readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
+  isParkingSpaceKind, isPlanContentKind,
 } from '@azimut/core-model';
 import type {
   FootprintKind,
   SiteData,
   Organization, Site, Building, Level, Footprint, Volume,
-  GraphNode, Edge, VerticalLink, Category, Pictogram,
+  GraphNode, Edge, VerticalLink, BuildingLink, Category, Pictogram,
   Destination, DestinationName, TravelProfile,
-  PlanSource, PlanCalibration,
+  PlanSource, PlanCalibration, PlanContentKind,
   NodeKind, EdgeDirection, VerticalLinkKind, OccupancyStatus,
-  PictogramRegistry, Parking, ParkingSpace, ParkingSpaceKind, UncoveredArea, VehicleGate,
-  ObjectStatus, Point, Polygon,
+  PictogramRegistry, SiteZone, SiteZoneKind, ParkingSpace, ParkingSpaceKind,
+  SiteRulesBinding,
 } from '@azimut/core-model';
 import type {
   SiteRowSet, } from './row-types.js';
 import { num, isoString, asStringArray } from './row-scalars.js';
+import { mapRulesBindingRows } from './map-rules-bindings.js';
+import { mapClosureRows } from './map-closure-rows.js';
 import {
   mapSupportTypologyRow, mapSupportFaceRow, mapContentBlockRow,
   mapSupportVersionRow, mapSupportRow,
@@ -35,29 +38,36 @@ export {
 };
 
 /**
- * Un statut que le code ne reconnaît pas ne devient jamais `existant`.
+ * La nature d'une zone, ou la plus neutre des natures d'A5.2.
  *
- * `existant` est le seul statut qui autorise un objet à paraître dans un
- * livrable (P1, complément atelier). Une valeur mal orthographiée en base, ou venue d'une version
- * ultérieure du modèle, doit donc retomber sur un statut qui retient l'objet,
- * pas sur celui qui le publie. `a_verifier` dit exactement cela : on ne sait
- * pas, quelqu'un doit regarder.
+ * Une valeur que le modèle ne connaît pas ne doit pas se faire passer pour un
+ * parking : la nature commande les contrôles du domaine `PARK`, et retomber
+ * sur `parking` inventerait un parking là où la base dit autre chose.
+ * `technical` est le choix inverse — une zone que rien ne réclame.
  */
-function toObjectStatus(raw: string): ObjectStatus {
-  switch (raw) {
-    case 'existant':
-    case 'proposition':
-    case 'retire':
-      return raw;
-    default:
-      return 'a_verifier';
-  }
+function toZoneKind(raw: string): SiteZoneKind {
+  return isSiteZoneKind(raw) ? raw : 'technical';
 }
 
+/**
+ * Le type d'une place, ou le plus neutre des cinq d'A5.3.
+ *
+ * `standard` est le défaut juste : une valeur inconnue lue comme `accessible`
+ * ferait compter une place réservée qui n'existe pas, ce qu'un plan d'accueil
+ * afficherait ensuite sans le revérifier.
+ */
 function toSpaceKind(raw: string): ParkingSpaceKind {
-  return raw === 'pmr' || raw === 'livraison' ? raw : 'standard';
+  return isParkingSpaceKind(raw) ? raw : 'standard';
 }
 
+/**
+ * La nature du contenu d'un fond, ou `undetermined`. M2 (partie M) : un contenu
+ * qui n'a pas été lu n'est « jamais présumé vectoriel » ; une valeur inconnue
+ * n'a pas davantage été lue. La contrainte de la migration 0068 l'exclut déjà.
+ */
+function toPlanContentKind(raw: string): PlanContentKind {
+  return isPlanContentKind(raw) ? raw : 'undetermined';
+}
 
 /**
  * Assemble le modèle du site depuis ses lignes.
@@ -82,7 +92,6 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     ...(rows.site.legal_entity_id !== null
       ? { legal_entity_id: rows.site.legal_entity_id }
       : {}),
-    rules_pack_id: rows.site.rules_pack_id,
     // M01.S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
     // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
     ...(rows.site.origin_x_m !== null && rows.site.origin_y_m !== null
@@ -129,6 +138,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     level_id: p.level_id,
     storage_path: p.storage_path,
     media_type: p.media_type,
+    content_kind: toPlanContentKind(p.content_kind),
     uploaded_at: isoString(p.uploaded_at),
   }));
 
@@ -196,24 +206,18 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
    */
   const edgeLengths = computeEdgeLengths({ levels, nodes, edges: rows.edges });
 
-  const edges: Edge[] = rows.edges.map(e => {
-    // A5.3 — une disponibilité illisible est gardée comme telle : un contrôle
-    // la signale, et à un instant donné l'arête compte pour fermée.
-    const availability = readEdgeAvailability(e.availability);
-    return {
-      id: e.id,
-      org_id: e.org_id,
-      from_node_id: e.from_node_id,
-      to_node_id: e.to_node_id,
-      width_m: num(e.width_m),
-      slope_pct: num(e.slope_pct),
-      accessible: e.accessible,
-      direction: e.direction as EdgeDirection,
-      evacuation_route: e.evacuation_route,
-      length_m: edgeLengths.get(e.id) ?? num(e.length_m),
-      ...(availability !== undefined ? { availability } : {}),
-    };
-  });
+  const edges: Edge[] = rows.edges.map(e => ({
+    id: e.id,
+    org_id: e.org_id,
+    from_node_id: e.from_node_id,
+    to_node_id: e.to_node_id,
+    width_m: num(e.width_m),
+    slope_pct: num(e.slope_pct),
+    accessible: e.accessible,
+    direction: e.direction as EdgeDirection,
+    evacuation_route: e.evacuation_route,
+    length_m: edgeLengths.get(e.id) ?? num(e.length_m),
+  }));
 
   const verticalLinks: VerticalLink[] = rows.vertical_links.map(v => ({
     id: v.id,
@@ -222,6 +226,15 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     kind: v.kind as VerticalLinkKind,
     capacity: v.capacity,
     accessible: v.accessible,
+  }));
+
+  const buildingLinks: BuildingLink[] = rows.building_links.map(b => ({
+    id: b.id,
+    org_id: b.org_id,
+    edge_id: b.edge_id,
+    from_building_id: b.from_building_id,
+    to_building_id: b.to_building_id,
+    sheltered: b.sheltered,
   }));
 
   const categories: Category[] = rows.categories.map(c => ({
@@ -240,6 +253,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     standard_ref: p.standard_ref,
     svg_path: p.svg_path,
     registry: p.registry as PictogramRegistry,
+    function_key: p.function_key,
+    rules_pack_id: p.rules_pack_id,
   }));
 
   const destinations: Destination[] = rows.destinations.map(d => ({
@@ -274,63 +289,46 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     honor_hours: p.honor_hours,
   }));
 
-  // Complément atelier M2 — stationnement.
-  const parkings: Parking[] = rows.parkings.map(p => ({
-    id: p.id,
-    org_id: p.org_id,
-    level_id: p.level_id,
-    geometry: p.geometry as Parking['geometry'],
-    name: p.name,
-    free: p.free,
-    declared_capacity: p.declared_capacity,
-    provenance: { status: toObjectStatus(p.status), source: p.source },
-  }));
-
+  // A5.2, version 18 — les zones du socle. Elles n'étaient pas assemblées : une
+  // zone ne portait qu'un nom et une nature, et aucun moteur ne les lisait.
+  // `footprint_ids` et la section S8 changent cela — un parking **est** une
+  // zone, et les contrôles du domaine `PARK` n'ont plus d'autre source.
+  // A5.3 — ce que les empreintes de place portent en plus. Une ligne par
+  // empreinte ; une empreinte sans ligne reste une place standard sans repère
+  // de travée, comme une arête sans `vertical_link` reste une arête.
   const parkingSpaces: ParkingSpace[] = rows.parking_spaces.map(s => ({
     id: s.id,
     org_id: s.org_id,
-    parking_id: s.parking_id,
-    kind: toSpaceKind(s.kind),
-    row: s.row_label,
-    provenance: { status: toObjectStatus(s.status), source: s.source },
-    // Colonne facultative : absente du modèle plutôt que présente et vide,
-    // comme les autres champs optionnels de ce module.
-    ...(s.geometry === null || s.geometry === undefined
-      ? {}
-      : { geometry: s.geometry as Polygon }),
+    footprint_id: s.footprint_id,
+    space_kind: toSpaceKind(s.space_kind),
+    row_label: s.row_label,
   }));
 
-  const parkingUncovered: UncoveredArea[] = rows.parking_uncovered.map(a => ({
-    id: a.id,
-    org_id: a.org_id,
-    parking_id: a.parking_id,
-    reason: a.reason,
-    ...(a.geometry === null || a.geometry === undefined
-      ? {}
-      : { geometry: a.geometry as Polygon }),
+  const zones: SiteZone[] = rows.zones.map(z => ({
+    id: z.id,
+    org_id: z.org_id,
+    level_id: z.level_id,
+    name: z.name,
+    kind: toZoneKind(z.kind),
+    footprint_ids: asStringArray(z.footprint_ids) ?? [],
   }));
 
-  const vehicleGates: VehicleGate[] = rows.vehicle_gates.map(g => ({
-    id: g.id,
-    org_id: g.org_id,
-    level_id: g.level_id,
-    code: g.code,
-    role: g.role,
-    width_m: num(g.width_m),
-    position: g.position as Point,
-    provenance: { status: toObjectStatus(g.status), source: g.source },
-  }));
+  // A5.8 — les paquets du site, depuis la table qui fait foi.
+  const rulesBindings: SiteRulesBinding[] = mapRulesBindingRows(rows.rules_bindings);
 
   return {
     organization,
     site,
+    rules_bindings: rulesBindings,
     buildings,
     levels,
     plan_sources: planSources,
     plan_calibrations: planCalibrations,
     footprints,
     volumes,
-    graph: { nodes, edges, vertical_links: verticalLinks },
+    graph: {
+      nodes, edges, vertical_links: verticalLinks, building_links: buildingLinks,
+    },
     categories,
     pictograms,
     destinations,
@@ -342,9 +340,8 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     content_blocks: rows.content_blocks.map(mapContentBlockRow),
     support_versions: rows.support_versions.map(mapSupportVersionRow),
     face_templates: [],
-    parkings,
+    zones,
     parking_spaces: parkingSpaces,
-    parking_uncovered: parkingUncovered,
-    vehicle_gates: vehicleGates,
+    temporary_closures: mapClosureRows(rows.temporary_closures ?? []),
   };
 }

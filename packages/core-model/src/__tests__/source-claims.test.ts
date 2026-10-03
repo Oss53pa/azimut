@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { detectDiscrepancies, markIfOpen } from '../source-claims.js';
 import type { SourceClaim } from '../source-claims.js';
 
-/** Le cas du complément : la charte dit trois niveaux, les plans en montrent deux. */
+/** Le cas d'école : la charte dit trois niveaux, les plans en montrent deux. */
 const NIVEAUX: SourceClaim[] = [
   { key: 'niveaux_parking', source: 'Charte', value: '3', recorded_on: '2026-01-10' },
   { key: 'niveaux_parking', source: 'Plans architecte', value: '2', recorded_on: '2026-05-04' },

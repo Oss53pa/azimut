@@ -5,7 +5,7 @@ import { computeCalibration } from '../../domain/plan-calibration.js';
 import type { AcceptedPlan } from '../plan-import.js';
 
 const PLAN: AcceptedPlan = {
-  format: 'pdf', mediaType: 'application/pdf', byteSize: 2048, page: 1,
+  format: 'pdf', mediaType: 'application/pdf', byteSize: 2048, page: 1, contentKind: 'raster',
 };
 
 const WRITE: CalibrationWrite = {
@@ -53,6 +53,15 @@ describe('M2 (partie M) — écriture du calage', () => {
         'plan_calibration_point', 'plan_calibration_point',
         'site',
       ]);
+    }
+  });
+
+  /** A5.2, version 28 : la nature du contenu, constatée à l'import, s'enregistre. */
+  it('écrit la nature du contenu sur la source de plan', () => {
+    for (const contentKind of ['vector', 'raster', 'undetermined'] as const) {
+      const r = calibrationCommands({ ...PLAN, contentKind }, calibration(), ORIGIN_FREE, WRITE);
+      expect(r.ok).toBe(true);
+      if (r.ok) expect(r.value[0]?.after?.['content_kind']).toBe(contentKind);
     }
   });
 

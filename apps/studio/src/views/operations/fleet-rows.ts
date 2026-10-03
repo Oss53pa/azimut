@@ -6,6 +6,7 @@
 import type {
   InstalledSupport, MaintenanceRegistry, RecordedDivergence, SiteData, Support,
 } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 export type FleetRow = {
   readonly support: Support;
@@ -39,10 +40,10 @@ export function fleetRows(site: SiteData, registry: MaintenanceRegistry): readon
     else bucket.push(pose);
   }
   return [...site.supports]
-    .sort((a, b) => (a.code ?? a.id).localeCompare(b.code ?? b.id))
+    .sort((a, b) => codePointCompare(a.code ?? a.id, b.code ?? b.id))
     .map((support): FleetRow => {
       const poses = [...(posesBySupport.get(support.id) ?? [])]
-        .sort((a, b) => a.installed_at.localeCompare(b.installed_at) || a.id.localeCompare(b.id));
+        .sort((a, b) => codePointCompare(a.installed_at, b.installed_at) || codePointCompare(a.id, b.id));
       const divergences = registry.divergences.filter(d => d.support_id === support.id);
       return { support, poses, divergences, openDivergences: divergences.filter(isOpen).length };
     });

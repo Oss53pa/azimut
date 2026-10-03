@@ -2,7 +2,10 @@ import type { Discrepancy, DiscrepancyDecision, Finding, SourceClaim } from '@az
 import { detectDiscrepancies } from '@azimut/core-model';
 
 /**
- * Audit des écarts entre sources — complément atelier, M16.
+ * Audit des écarts entre sources — A5.11, règle M01.S11.
+ *
+ * « Un écart entre deux sources reste ouvert et visible tant qu'il n'est pas
+ * tranché. »
  *
  * Un écart ouvert est signalant, pas bloquant, et c'est délibéré : bloquer
  * arrêterait la production sur une question qui n'a pas de réponse technique.
@@ -44,7 +47,7 @@ export function auditSourceClaims(
         sources: discrepancy.claims.map((claim) => claim.source).join(', '),
         claim_count: discrepancy.claims.length,
       },
-      ruleRef: 'atelier-M16',
+      ruleRef: 'M01.S11',
     });
   }
 

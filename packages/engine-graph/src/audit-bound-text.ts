@@ -4,7 +4,10 @@ import type {
 import { literalNumbers, resolveBoundParagraph } from '@azimut/core-model';
 
 /**
- * Contrôle du texte lié d'un document — complément atelier, M15.
+ * Contrôle du texte lié d'un document — A5.11, règle M01.S11.
+ *
+ * « Un nombre affiché dans un livrable provient d'un fait ou d'un calcul,
+ * jamais d'un littéral écrit dans un gabarit. »
  *
  * Trois anomalies. La liaison qui désigne un champ inexistant est une faute du
  * document ; celle qui désigne un champ vide est une donnée qui manque ; le
@@ -55,7 +58,7 @@ export function auditBoundText(
             source: missing.binding.source,
             field: missing.binding.field,
           },
-          ruleRef: 'atelier-M15',
+          ruleRef: 'M01.S11',
         });
       }
     }
@@ -68,7 +71,7 @@ export function auditBoundText(
         entity: { kind: 'paragraph', id: paragraph.id },
         // Les nombres vus, pour que le rédacteur juge sans relire la phrase.
         params: { numbers: numbers.join(', '), count: numbers.length },
-        ruleRef: 'atelier-M15',
+        ruleRef: 'M01.S11',
       });
     }
   }

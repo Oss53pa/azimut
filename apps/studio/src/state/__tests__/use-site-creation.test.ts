@@ -52,7 +52,7 @@ describe('M1 (partie M) — de la saisie à l’écriture', () => {
   function build(draft = DRAFT, timestamp = '2026-09-21T10:00:00.000Z') {
     return createSiteCommands(draft, {
       ...ENV,
-      siteId: 'site-1', buildingId: 'building-1', levelId: 'level-1',
+      siteId: 'site-1', buildingId: 'building-1', levelId: 'level-1', bindingId: 'binding-1',
       timestamp,
     });
   }
@@ -112,7 +112,7 @@ describe('M1 (partie M) — de la saisie à l’écriture', () => {
   it('les identifiants viennent de l’appelant, jamais du calcul', () => {
     const next = ids();
     const a = createSiteCommands(DRAFT, {
-      ...ENV, siteId: next(), buildingId: next(), levelId: next(),
+      ...ENV, siteId: next(), buildingId: next(), levelId: next(), bindingId: next(),
       timestamp: '2026-09-21T10:00:00.000Z',
     });
     expect(a.ok).toBe(true);

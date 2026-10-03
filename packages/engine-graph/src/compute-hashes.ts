@@ -1,10 +1,9 @@
 import type {
+  Outcome,
   SiteData,
   TravelProfile,
-  FaceTemplate,
 } from '@azimut/core-model';
-import { contentHash } from '@azimut/core-model';
-import type { ResolvedFace } from './resolve-face.js';
+import { codePointCompare, empreinteOutcome } from '@azimut/core-model';
 
 function pickNodeFields(
   node: SiteData['graph']['nodes'][number],
@@ -51,7 +50,7 @@ function pickProfileFields(
 ): Record<string, unknown> {
   return {
     key: profile.key,
-    excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(),
+    excluded_edge_kinds: [...profile.excluded_edge_kinds].sort(codePointCompare),
     require_accessible: profile.require_accessible,
     honor_hours: profile.honor_hours,
   };
@@ -63,6 +62,20 @@ function pickProfileFields(
  * D7.1 ne fait qu'une différence entre les deux empreintes du graphe : le
  * profil. Le reste est identique, et l'écrire deux fois ferait deux empreintes
  * qui divergeraient au premier champ ajouté d'un seul côté.
+ *
+ * **Les liaisons entre bâtiments n'y entrent pas**, et D7.1 dit pourquoi :
+ * « aucun calcul de parcours ne lit aujourd'hui leur attribut de passage
+ * couvert ». Une empreinte d'invalidation ne porte que ce dont un résultat
+ * dépend ; y mettre une donnée qu'aucun calcul ne lit ferait recalculer tous
+ * les parcours d'un site à chaque fois qu'on déclare une passerelle couverte,
+ * sans qu'un seul change.
+ *
+ * **Réserve, et elle est du document :** « Le jour où un profil en tiendrait
+ * compte, elles devraient y entrer, faute de quoi un changement de passage
+ * laisserait des parcours faux en cache. » Le jour où un profil préférera les
+ * cheminements couverts — une option de `travel_profile`, un coût qui lit
+ * `sheltered` — ce module est le premier à reprendre, avant le profil
+ * lui-même. `compute-hashes.test.ts` garde cette réserve visible.
  */
 function graphParts(graph: SiteData['graph']): {
   nodes: Record<string, unknown>[];
@@ -71,25 +84,36 @@ function graphParts(graph: SiteData['graph']): {
 } {
   return {
     nodes: [...graph.nodes]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickNodeFields),
     edges: [...graph.edges]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickEdgeFields),
     vertical_links: [...graph.vertical_links]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map(pickVerticalLinkFields),
   };
 }
 
+/**
+ * D7.1 et D7.2 — l'empreinte des entrées d'un parcours, pour l'invalidation du
+ * cache. Elle suit la forme canonique commune à toutes les empreintes du
+ * produit : chaînes en NFC, champ absent omis, `sha256:` en tête.
+ *
+ * Une empreinte enregistrée sous l'ancienne forme ne se convertit pas : elle
+ * cesse de correspondre, et le parcours se recalcule (D7.2).
+ *
+ * Une valeur non hachable est refusée par `DATA.HASH_INPUT_INVALID` (D2.2).
+ * Les ensembles sont triés par point de code, jamais par la locale (A9).
+ */
 export function computeInputsHash(
   site: SiteData,
   profile: TravelProfile,
-): string {
-  return contentHash({
+): Outcome<string> {
+  return empreinteOutcome({
     ...graphParts(site.graph),
     profile: pickProfileFields(profile),
-  });
+  }, { kind: 'site', id: site.site.id });
 }
 
 /**
@@ -104,42 +128,14 @@ export function computeInputsHash(
  * Le profil en est exclu parce que la complétude n'en dépend pas : un graphe
  * n'est pas complet pour un profil et incomplet pour un autre.
  *
+ * Elle suit la forme canonique de D7.2, commune à toutes les empreintes. Un
+ * enregistrement fait sous l'ancienne forme ne se convertit pas : il ne
+ * correspond plus au graphe, et ne vaut plus, comme M02.W11 le prévoit.
+ *
  * Elle prend le graphe et non le site : c'est tout ce dont D7.2 a besoin, et
  * exiger un `SiteData` entier obligerait l'appelant à en fabriquer une coquille
  * là où il n'a qu'un graphe.
  */
-export function computeGraphHash(graph: SiteData['graph']): string {
-  return contentHash(graphParts(graph));
-}
-
-export type ContentHashInput = {
-  readonly resolved: ResolvedFace;
-  readonly template: FaceTemplate;
-  /** Charter identity — the charter itself, per D7.1 "charte et sa version". */
-  readonly charter_id: string | null;
-  readonly charter_version: string | null;
-  /** Rules pack identity, per D7.1 "paquet de règles et sa version". */
-  readonly rules_pack_id: string | null;
-  readonly rules_pack_version: string | null;
-  readonly active_langs: readonly string[];
-  readonly dimensions: {
-    readonly width_mm: number;
-    readonly height_mm: number;
-  };
-};
-
-export function computeContentHash(
-  input: ContentHashInput,
-): string {
-  return contentHash({
-    resolved: input.resolved,
-    template_id: input.template.id,
-    template_blocks: input.template.blocks,
-    charter_id: input.charter_id,
-    charter_version: input.charter_version,
-    rules_pack_id: input.rules_pack_id,
-    rules_pack_version: input.rules_pack_version,
-    active_langs: [...input.active_langs].sort(),
-    dimensions: input.dimensions,
-  });
+export function computeGraphHash(graph: SiteData['graph']): Outcome<string> {
+  return empreinteOutcome(graphParts(graph));
 }

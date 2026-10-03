@@ -11,6 +11,12 @@ import {
   NODE_KINDS, EDGE_DIRECTIONS, SLOPE_MIN_PCT, SLOPE_MAX_PCT,
 } from '../state/graph-input.js';
 import type { EdgeDirection, EdgeRemedy } from '../state/graph-input.js';
+import { GRAPH_TOOLS } from '../state/graph-shortcuts.js';
+import type { GraphTool } from '../state/graph-shortcuts.js';
+import { AxisFields } from './AxisFields.js';
+import type { AxisReport } from './AxisFields.js';
+import { VerticalLinkFields } from './VerticalLinkFields.js';
+import type { VerticalLinkFieldsProps } from './VerticalLinkFields.js';
 
 /**
  * M4 (partie M) — écran de saisie du graphe.
@@ -22,15 +28,6 @@ import type { EdgeDirection, EdgeRemedy } from '../state/graph-input.js';
  * (M7.3, partie M) : « Un champ de longueur saisissable serait une source
  * permanente d'incohérence. »
  */
-export const GRAPH_TOOLS = [
-  { tool: 'node', key: 'N', labelKey: 'graph.tool.node' },
-  { tool: 'edge', key: 'E', labelKey: 'graph.tool.edge' },
-  { tool: 'axis', key: 'X', labelKey: 'graph.tool.axis' },
-  { tool: 'vertical_link', key: 'L', labelKey: 'graph.tool.vertical_link' },
-] as const;
-
-export type GraphTool = (typeof GRAPH_TOOLS)[number]['tool'];
-
 export type NodeSelection = {
   readonly kind: 'node';
   readonly nodeKind: NodeKind;
@@ -68,15 +65,66 @@ export type GraphScreenProps = {
   readonly onApplyRemedy: () => void;
   readonly nodeCount: number;
   readonly edgeCount: number;
+  /** T-1.5 : les liaisons verticales qui touchent ce niveau. */
+  readonly linkCount: number;
   /**
    * M4 (partie M), outil « Nœud » : « Le type se choisit avant le geste,
-   * jamais après. » Le geste se fait au pointeur dans la zone de travail, et
-   * au clavier par cette action — E6.2 : « Toute opération réalisable au
-   * pointeur l'est au clavier, y compris le dessin. »
+   * jamais après. » Le type que portera le prochain nœud posé, et le moyen de
+   * le changer. Il était absent : l'écran posait des carrefours, et le type ne
+   * se choisissait qu'après coup dans le panneau de propriétés, c'est-à-dire
+   * exactement ce que la règle écarte. Un site entier pouvait ainsi être saisi
+   * sans une entrée, et la validation le refusait sans que l'écran ait jamais
+   * offert de faire autrement.
+   */
+  readonly nextNodeKind: NodeKind;
+  readonly onNextNodeKind: (kind: NodeKind) => void;
+  /**
+   * Le geste se fait au pointeur dans la zone de travail, et au clavier par
+   * cette action — E6.2 : « Toute opération réalisable au pointeur l'est au
+   * clavier, y compris le dessin. »
    */
   readonly onPlaceNode: () => void;
   /** Outil « Arête » : relie les nœuds posés, deux à deux. */
   readonly onDrawEdges: () => void;
+  /**
+   * M4 (partie M), outil « Axe de circulation » : « Tracé continu produisant
+   * nœuds et arêtes en une passe. »
+   *
+   * Les points se saisissent numériquement, comme les sommets d'une empreinte
+   * dans M3 (partie M) : c'est le moyen le plus précis, et le seul accessible
+   * au clavier tant que la zone de travail n'est pas construite.
+   */
+  readonly axis: readonly Point[];
+  readonly onAxisPoint: (index: number, coordinate: 'x_m' | 'y_m', value: number | null) => void;
+  readonly onAxisAdd: () => void;
+  readonly onAxisRemove: () => void;
+  readonly onAxisDraw: () => void;
+  /** Ce que la dernière passe a produit, ou `null` si aucune n'a eu lieu. */
+  readonly axisReport: AxisReport | null;
+  /**
+   * M4 (partie M) — « Propriétés d'un nœud », « Propriétés d'une arête ».
+   *
+   * Les deux panneaux existaient et n'étaient jamais atteints : la sélection
+   * restait nulle, et aucun geste ne la posait. Libellé, position, largeur,
+   * pente, sens et cheminement d'évacuation étaient spécifiés et inopérants.
+   *
+   * L'application est explicite plutôt qu'à la frappe : une commande par
+   * caractère saisi remplirait la pile d'annulation d'un geste par touche, ce
+   * que E5.2 écarte — « les commandes d'un même geste continu sont regroupées
+   * en une seule entrée annulable ».
+   */
+  readonly onApplyProperties: () => void;
+  readonly propertiesDirty: boolean;
+  /**
+   * T-1.5 et M4 (partie M), outil « Liaison verticale ».
+   *
+   * Les champs ne s'affichent que sous cet outil : une liaison verticale se
+   * décide en la construisant, et un panneau permanent ferait croire qu'elle
+   * accompagne tout tracé.
+   */
+  readonly verticalLink: VerticalLinkFieldsProps;
+  /** Le niveau que l'écran édite, et ceux entre lesquels il navigue. */
+  readonly levelName: string;
   readonly children?: JSX.Element;
 };
 
@@ -90,8 +138,10 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
   }));
 
   const status: readonly StatusItem[] = [
+    { id: 'level', label: t('graph.level.current'), value: props.levelName },
     { id: 'nodes', label: t('graph.status.nodes'), value: String(props.nodeCount) },
     { id: 'edges', label: t('graph.status.edges'), value: String(props.edgeCount) },
+    { id: 'links', label: t('graph.status.links'), value: String(props.linkCount) },
   ];
 
   return (
@@ -123,6 +173,15 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
             <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
               {props.selection === null && (
                 <p style={{ margin: 0, color: 'var(--text-muted)' }}>{t('graph.no_selection')}</p>
+              )}
+              {props.selection !== null && (
+                <Button
+                  rank="primary"
+                  onClick={props.onApplyProperties}
+                  disabled={!props.propertiesDirty}
+                >
+                  {t('graph.action.apply')}
+                </Button>
               )}
 
               {props.selection?.kind === 'node' && (
@@ -224,7 +283,15 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: SPACE.sm }}>
+        <div style={{ display: 'flex', gap: SPACE.sm, alignItems: 'flex-end' }}>
+          {/* M4 (partie M) : le type précède le geste, et se lit à côté de lui. */}
+          <SelectField
+            label={t('graph.node.kind.next')}
+            value={props.nextNodeKind}
+            options={NODE_KINDS.map(kind => ({ value: kind, label: t(nodeKindKey(kind)) }))}
+            onChange={value => { props.onNextNodeKind(value as NodeKind); }}
+            hint={t('graph.node.kind.next.hint')}
+          />
           <Button rank="primary" onClick={props.onPlaceNode}>
             {t('graph.action.place_node')}
           </Button>
@@ -237,6 +304,19 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
             {t('graph.action.draw_edges')}
           </Button>
         </div>
+
+        {props.tool === 'axis' && (
+          <AxisFields
+            axis={props.axis}
+            onPoint={props.onAxisPoint}
+            onAdd={props.onAxisAdd}
+            onRemove={props.onAxisRemove}
+            onDraw={props.onAxisDraw}
+            report={props.axisReport}
+          />
+        )}
+
+        {props.tool === 'vertical_link' && <VerticalLinkFields {...props.verticalLink} />}
 
         <StatusBar items={status} />
       </div>
@@ -251,3 +331,7 @@ function nodeKindKey(kind: NodeKind): `graph.node.kind.${NodeKind}` {
 function directionKey(direction: EdgeDirection): `graph.edge.direction.${EdgeDirection}` {
   return `graph.edge.direction.${direction}`;
 }
+
+export type { GraphTool } from '../state/graph-shortcuts.js';
+export { GRAPH_TOOLS } from '../state/graph-shortcuts.js';
+export type { AxisReport } from './AxisFields.js';

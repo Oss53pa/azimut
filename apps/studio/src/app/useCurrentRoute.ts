@@ -16,3 +16,16 @@ export function useCurrentRoute(): Route {
   return route;
 }
 
+
+/**
+ * Change de route sans recharger la page.
+ *
+ * `pushState` ne lève aucun événement : le navigateur le réserve aux retours
+ * arrière. Sans le `popstate` posé ici, l'adresse changerait et l'écran
+ * resterait celui d'avant — une navigation qui ne navigue pas.
+ */
+export function navigateTo(path: string): void {
+  if (typeof history === 'undefined' || path === location.pathname) return;
+  history.pushState(null, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}

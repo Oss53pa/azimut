@@ -47,7 +47,7 @@ function makeContext(
 ): BuildKioskPackageContext {
   return {
     site: refMinimal,
-    resolveKioskFiles: async () => files,
+    resolveKioskFiles: async () => ({ ok: true, value: files, warnings: [] }),
     version: 42,
     langs: ['fr', 'en'],
     minRuntime: '1.0.0',

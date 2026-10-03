@@ -8,6 +8,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
+import { parkingSpacesOfLevel } from '@azimut/core-model';
 import {
   type IsoTransform,
   type LevelGeom,
@@ -72,8 +73,14 @@ function filterLevelData(
     (f) => f.level_id === levelId,
   );
   const fpIds = new Set(footprints.map((f) => f.id));
+  // S-39 — « vue isométrique : la place reste au sol, sans volume ». Un volume
+  // rattaché à une empreinte de place est donc écarté du rendu, et l'empreinte
+  // tombe parmi celles qui se dessinent à plat. La donnée n'est pas modifiée,
+  // c'est la vue qui refuse de l'élever : un parking dressé en relief masque
+  // le bâti derrière lui et ne dit rien de vrai.
+  const spaces = parkingSpacesOfLevel(site, levelId, []).spaces;
   const volumes = site.volumes.filter(
-    (v) => fpIds.has(v.footprint_id),
+    (v) => fpIds.has(v.footprint_id) && !spaces.has(v.footprint_id),
   );
   const nodes = site.graph.nodes.filter(
     (n) => n.level_id === levelId,

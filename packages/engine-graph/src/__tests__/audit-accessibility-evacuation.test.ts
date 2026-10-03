@@ -205,7 +205,7 @@ describe('auditEvacuation', () => {
   it('handles empty graph without crashing', () => {
     const emptySite: SiteData = {
       ...refMinimal,
-      graph: { nodes: [], edges: [], vertical_links: [] },
+      graph: { nodes: [], edges: [], vertical_links: [], building_links: [] },
     };
     const result = auditEvacuation(emptySite);
     expect(result.ok).toBe(true);

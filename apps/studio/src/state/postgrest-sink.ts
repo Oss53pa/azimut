@@ -34,7 +34,7 @@ export function createPostgrestSink(
   return async (commands: readonly EntityCommand[]): Promise<Outcome<unknown>> => {
     if (commands.length === 0) return { ok: true, value: null, warnings: [] };
 
-    const body = JSON.stringify({ commands: commands.map(toPayload) });
+    const body = JSON.stringify({ commands: commands.map(commandPayload) });
     let response: Response;
     try {
       response = await fetchImpl(`${config.url}/rpc/apply_commands`, {
@@ -66,8 +66,12 @@ export function createPostgrestSink(
  * La forme que la fonction de base attend : l'opération, la table, la ligne, et
  * les deux états. Le module et l'horodatage restent au poste — la base ne les
  * lit pas, et les envoyer laisserait croire qu'elle s'en sert.
+ *
+ * Exportée pour que l'essai de base applique exactement ce que le poste
+ * envoie. Une forme éprouvée ailleurs qu'à l'endroit où elle est construite ne
+ * prouve rien.
  */
-function toPayload(command: EntityCommand) {
+export function commandPayload(command: EntityCommand) {
   return {
     operation: command.operation,
     table: command.table,

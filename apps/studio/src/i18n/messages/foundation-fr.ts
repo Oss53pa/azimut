@@ -133,7 +133,7 @@ export const FOUNDATION_FR = {
   'calibration.levels.note': "Le calage lu ici est celui qui est enregistré, pas celui de la mesure en cours : la mesure ci-dessus n'est encore écrite nulle part. Un niveau sans plan calé est une anomalie bloquante (N1.4).",
   'calibration.note': "Le tracé des empreintes reste refusé tant que l'orientation n'est pas saisie : une empreinte tracée sur un fond non orienté est fausse sans que rien ne le signale.",
 
-  // M2 bis — calage mesuré (complément atelier, M1.4)
+  // M2 bis — calage à n points (section M2, partie M)
   'measured.section': 'Calage mesuré',
   'measured.panel.surface': 'Surface des amers',
   'measured.panel.surface.note': '{placed} posé(s) sur {total}',

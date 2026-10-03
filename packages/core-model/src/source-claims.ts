@@ -1,5 +1,8 @@
 /**
- * Écarts entre sources — complément atelier, M16.
+ * Écarts entre sources — A5.11, règle M01.S11.
+ *
+ * « Un écart entre deux sources reste ouvert et visible tant qu'il n'est pas
+ * tranché. »
  *
  * `site_fact` porte une clé unique par site, volontairement : deux valeurs pour
  * « parking gratuit » ne se départagent pas toutes seules, et les stocker toutes
@@ -10,7 +13,7 @@
  * trois niveaux de parking, les plans en montrent deux. Tant que deux
  * affirmations divergent, il n'y a pas de fait, il y a un écart.
  *
- * Ce que le module garantit, et qui est le point de M16 : un écart ouvert ne
+ * Ce que le module garantit, et qui est le point de la règle : un écart ouvert ne
  * disparaît pas des livrables. Une valeur est retenue pour que la production
  * continue, et elle sort marquée « à confirmer ». Le silence serait le seul
  * comportement dangereux : il ferait lire la valeur retenue comme une valeur

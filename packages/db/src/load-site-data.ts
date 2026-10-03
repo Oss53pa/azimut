@@ -5,9 +5,10 @@ import type { SiteData } from '@azimut/core-model';
 import { organization } from './schema/org.js';
 import {
   site, building, level, footprint, volume, planSource, planCalibration,
-  parking, parkingSpace, parkingUncoveredArea, vehicleGate,
+  zone, parkingSpace,
 } from './schema/site.js';
-import { node, edge, verticalLink } from './schema/graph.js';
+import { siteRulesBinding } from './schema/charters.js';
+import { node, edge, verticalLink, buildingLink, temporaryClosure } from './schema/graph.js';
 import {
   category, pictogram, destination, destinationName,
   travelProfile,
@@ -38,6 +39,12 @@ export async function loadSiteData(
     .select()
     .from(building)
     .where(eq(building.site_id, siteId));
+
+  // A5.8 — la table de rattachement fait foi pour les paquets du site.
+  const bindingRows = await db
+    .select()
+    .from(siteRulesBinding)
+    .where(eq(siteRulesBinding.site_id, siteId));
   const buildingIds = buildingRows.map((b) => b.id);
 
   const levelRows = buildingIds.length > 0
@@ -89,9 +96,15 @@ export async function loadSiteData(
   const destIds = destRows.map((d) => d.id);
   const supportIds = supportRows.map((s) => s.id);
 
-  const [vlinkRows, dnameRows, faceRows, versionRows] = await Promise.all([
+  const [vlinkRows, blinkRows, dnameRows, faceRows, versionRows] = await Promise.all([
     edgeIds.length > 0
       ? db.select().from(verticalLink).where(inArray(verticalLink.edge_id, edgeIds))
+      : Promise.resolve([]),
+    // M01.S10 : les liaisons inter-bâtiments se lisent par leurs arêtes, comme
+    // les liaisons verticales. La table existait en base sans que rien ne la
+    // charge, et la règle qui la rend obligatoire n'avait donc rien à lire.
+    edgeIds.length > 0
+      ? db.select().from(buildingLink).where(inArray(buildingLink.edge_id, edgeIds))
       : Promise.resolve([]),
     destIds.length > 0
       ? db.select().from(destinationName).where(inArray(destinationName.destination_id, destIds))
@@ -109,30 +122,26 @@ export async function loadSiteData(
     ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
     : [];
 
-  // Complément atelier M2 — stationnement. Les places et les zones non
-  // couvertes pendent aux parkings : sans parking, aucune requête.
-  const [parkingRows, gateRows] = await Promise.all([
+  // A5.2 — les zones du socle. Elles pendent au niveau, comme les empreintes
+  // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et c'est
+  // par ici que les contrôles du domaine `PARK` le voient désormais.
+  const [zoneRows, parkingSpaceRows, closureRows] = await Promise.all([
     levelIds.length > 0
-      ? db.select().from(parking).where(inArray(parking.level_id, levelIds))
+      ? db.select().from(zone).where(inArray(zone.level_id, levelIds))
       : Promise.resolve([]),
-    levelIds.length > 0
-      ? db.select().from(vehicleGate).where(inArray(vehicleGate.level_id, levelIds))
+    // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+    footprintIds.length > 0
+      ? db.select().from(parkingSpace)
+        .where(inArray(parkingSpace.footprint_id, footprintIds))
       : Promise.resolve([]),
-  ]);
-  const parkingIds = parkingRows.map((p) => p.id);
-
-  const [parkingSpaceRows, uncoveredRows] = await Promise.all([
-    parkingIds.length > 0
-      ? db.select().from(parkingSpace).where(inArray(parkingSpace.parking_id, parkingIds))
-      : Promise.resolve([]),
-    parkingIds.length > 0
-      ? db.select().from(parkingUncoveredArea).where(inArray(parkingUncoveredArea.parking_id, parkingIds))
-      : Promise.resolve([]),
+    // O11 — les fermetures temporaires du site.
+    db.select().from(temporaryClosure).where(eq(temporaryClosure.site_id, siteId)),
   ]);
 
   return assembleSiteData({
     organization: orgRow,
     site: siteRow,
+    rules_bindings: bindingRows,
     buildings: buildingRows,
     levels: levelRows,
     plan_sources: planSourceRows,
@@ -142,6 +151,7 @@ export async function loadSiteData(
     nodes: nodeRows,
     edges: edgeRows,
     vertical_links: vlinkRows,
+    building_links: blinkRows,
     categories: catRows,
     pictograms: pictoRows,
     destinations: destRows,
@@ -152,9 +162,8 @@ export async function loadSiteData(
     support_faces: faceRows,
     content_blocks: blockRows,
     support_versions: versionRows,
-    parkings: parkingRows,
+    zones: zoneRows,
     parking_spaces: parkingSpaceRows,
-    parking_uncovered: uncoveredRows,
-    vehicle_gates: gateRows,
+    temporary_closures: closureRows,
   });
 }

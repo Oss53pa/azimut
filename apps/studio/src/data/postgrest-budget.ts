@@ -9,6 +9,7 @@
 import type { BudgetRegistry, BudgetLine, CostReference, Money } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
 import { query, type PostgrestConfig } from './postgrest-http.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type CostRow = {
   readonly id: string;
@@ -69,7 +70,7 @@ export async function loadBudgetRegistry(config: PostgrestConfig, siteId: string
       unit_cost: money('cost_reference', r.unit_cost_minor, r.currency),
       since: r.since,
     }))
-    .sort((a, b) => a.typology_key.localeCompare(b.typology_key) || a.substrate_key.localeCompare(b.substrate_key) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.typology_key, b.typology_key) || codePointCompare(a.substrate_key, b.substrate_key) || codePointCompare(a.id, b.id));
 
   const budget_lines = lineRows
     .map((r): BudgetLine => ({
@@ -80,7 +81,7 @@ export async function loadBudgetRegistry(config: PostgrestConfig, siteId: string
       quoted: money('budget_line', r.quoted_minor, r.currency),
       actual: money('budget_line', r.actual_minor, r.currency),
     }))
-    .sort((a, b) => a.phase_key.localeCompare(b.phase_key) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.phase_key, b.phase_key) || codePointCompare(a.id, b.id));
 
   return { cost_references, budget_lines };
 }

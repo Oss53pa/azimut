@@ -25,7 +25,7 @@ export type CompileContext = {
   readonly rules_pack?: LoadedRulesPack;
   /**
    * Optional pack corpus. When no explicit `rules_pack` is given, the pack the
-   * site is bound to (A5.8 `site_rules_binding` / `Site.rules_pack_id`) is
+   * site is bound to (A5.8 `site_rules_binding`, socle and overlay) is
    * resolved from this index. A site with no binding — or a binding absent from
    * the corpus — surfaces `RULES.PACK_NOT_BOUND` and skips the check; it does
    * not abort artwork production. The index's source (database vs file corpus)

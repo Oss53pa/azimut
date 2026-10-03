@@ -4,60 +4,29 @@ import { ERROR_CATALOG, ANOMALY_DOMAINS, RETIRED_CODES } from '../error-catalog.
 /**
  * D2.1 — « Domaines autorisés, et eux seuls. »
  *
- * La liste s'accumule d'un document à l'autre : D2.1 en pose neuf, E17 en
- * ajoute quatre, G8 deux, H12 six, I6 trois, J8 cinq, et la partie M un. Trente
- * en tout, et aucun autre.
+ * Ce qui se vérifie ici tient au seul catalogue du dépôt. Que la liste des
+ * domaines tienne dans celle de D2.1, et que le catalogue se recoupe avec
+ * celui du consolidé dans les deux sens, se vérifie contre le document
+ * lui-même dans `tests/catalogue-consolide.test.ts` : une liste recopiée à la
+ * main aurait vieilli sans que personne s'en aperçoive, ce qui est arrivé.
  *
- * `NET` n'était autorisé par aucun d'eux. Il figurait pourtant au catalogue,
- * attribué à la « tranche M » — une attribution fausse, la partie M ne le
- * nommant nulle part. C'était aussi une erreur de catégorie : D2.2 réserve le
- * catalogue aux anomalies produites par un moteur, et un moteur n'a ni réseau
- * ni base (A4.1).
- *
- * Ce contrôle existe pour que cela ne se reproduise pas sans qu'on le voie.
+ * `NET` n'était autorisé par aucun document. Il figurait pourtant au
+ * catalogue, attribué à la « tranche M » — une attribution fausse. C'était
+ * aussi une erreur de catégorie : D2.2 réserve le catalogue aux anomalies
+ * produites par un moteur, et un moteur n'a ni réseau ni base (A4.1).
  */
 describe('D2.1 — domaines autorisés, et eux seuls', () => {
-  /**
-   * La liste vient des documents, pas du code. La comparer à celle du
-   * catalogue est le seul moyen de voir un domaine ajouté sans mandat.
-   *
-   * `PARK` et `DOC` viennent du complément « atelier », versé sans faire foi
-   * contre les quatorze. Ils sont tolérés et nommés comme tels.
-   */
-  const FROM_DOCUMENTS = new Set([
-    // D2.1
-    'GRAPH', 'GEOM', 'LAYOUT', 'RULES', 'CHARTER', 'IMPORT', 'PACKAGE', 'SECURITY', 'DATA',
-    // E17
-    'EDIT', 'ASSET', 'TYPO', 'COLOR',
-    // G8
-    'RENDER', 'FONT',
-    // H12
-    'WAYFIND', 'FLOW', 'AD', 'TENANT', 'INSTALL', 'COST',
-    // I6
-    'ASSIST', 'MODULE', 'SURVEY',
-    // J8
-    'INK', 'SKETCH', 'REVIEW', 'PICTO', 'LIBRARY',
-    // Partie M
-    'CALIB',
-    // Complément « atelier », versé sans faire foi contre les quatorze.
-    'PARK', 'DOC',
-  ]);
-
-  it('aucun domaine du catalogue n’est absent des documents', () => {
-    const sans = [...ANOMALY_DOMAINS].filter(d => !FROM_DOCUMENTS.has(d)).sort();
-    expect(sans).toEqual([]);
-  });
-
   it('`NET` n’est ni un domaine ni un préfixe de code', () => {
     expect([...ANOMALY_DOMAINS]).not.toContain('NET');
     const codes = Object.keys(ERROR_CATALOG).filter(c => c.startsWith('NET.'));
     expect(codes).toEqual([]);
   });
 
-  it('tout code du catalogue porte un domaine autorisé', () => {
+  it('tout code du catalogue porte un domaine déclaré', () => {
+    const declares = new Set<string>(ANOMALY_DOMAINS);
     const hors = Object.keys(ERROR_CATALOG)
       .map(code => code.split('.')[0] ?? '')
-      .filter(domain => !FROM_DOCUMENTS.has(domain));
+      .filter(domain => !declares.has(domain));
     expect([...new Set(hors)].sort()).toEqual([]);
   });
 });
@@ -79,9 +48,14 @@ describe('D2.1 — les codes retirés restent réservés', () => {
     }
   });
 
-  it('les six codes retirés sont ceux attendus', () => {
+  it('les neuf codes retirés sont ceux attendus', () => {
     expect(Object.keys(RETIRED_CODES).sort()).toEqual([
       'CALIB.NORTH_MISSING',
+      // Retirés par l'éditeur : trois états d'écran de F7, que D2.2 ne
+      // catalogue pas, le catalogue étant réservé aux anomalies de moteur.
+      'DATA.VOCABULARY_UNREADABLE',
+      'EDIT.NOTHING_TO_REDO',
+      'EDIT.NOTHING_TO_UNDO',
       'NET.FORBIDDEN',
       'NET.NOT_FOUND',
       'NET.OFFLINE',

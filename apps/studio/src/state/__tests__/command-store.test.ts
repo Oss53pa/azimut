@@ -143,11 +143,28 @@ describe('annulation et rétablissement', () => {
     expect(canRedo(c.state)).toBe(false);
   });
 
-  it('annuler sans rien à annuler ne fait rien et le dit', async () => {
-    const { sink } = accepting();
+  /**
+   * Une pile vide n'est pas un refus : c'est un geste qui n'a pas eu lieu.
+   * Le code d'anomalie qui portait ce cas a été retiré du catalogue par
+   * l'éditeur, D2.2 le réservant aux anomalies produites par un moteur, et F7
+   * en faisant un état d'écran. `applied` porte le fait, et l'état ne bouge
+   * pas.
+   */
+  it('annuler sans rien à annuler ne fait rien, et n’est pas une anomalie', async () => {
+    const { sink, seen } = accepting();
     const r = await undo(EMPTY_STORE, sink, T2);
-    expect(r.outcome.ok).toBe(false);
-    if (!r.outcome.ok) expect(r.outcome.findings[0]?.code).toBe('EDIT.NOTHING_TO_UNDO');
+    expect(r.applied).toBe(false);
+    expect(r.outcome.ok).toBe(true);
+    expect(r.state).toBe(EMPTY_STORE);
+    // Rien n'est écrit : le puits n'est pas même appelé.
+    expect(seen).toEqual([]);
+  });
+
+  it('rétablir sans rien à rétablir ne fait rien non plus', async () => {
+    const { sink } = accepting();
+    const r = await redo(EMPTY_STORE, sink, T2);
+    expect(r.applied).toBe(false);
+    expect(r.outcome.ok).toBe(true);
   });
 });
 
@@ -180,7 +197,7 @@ describe('E5.3 — la synchronisation vide la pile', () => {
     const { sink } = accepting();
     const state = (await apply(EMPTY_STORE, sink, [cmd('s1')])).state;
     const r = await undo(afterSync(state), sink, '2026-09-21T10:00:05.000Z');
-    expect(r.outcome.ok).toBe(false);
-    if (!r.outcome.ok) expect(r.outcome.findings[0]?.code).toBe('EDIT.NOTHING_TO_UNDO');
+    expect(r.applied).toBe(false);
+    expect(r.outcome.ok).toBe(true);
   });
 });

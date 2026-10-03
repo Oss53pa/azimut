@@ -3,6 +3,7 @@ import { computeWayfinding } from '../wayfinding-session.js';
 import { refMultilevel } from '@azimut/testkit';
 import type { SiteData, TravelProfile } from '@azimut/core-model';
 import type { WayfindingOptions } from '../wayfinding-session.js';
+import type { KioskSite } from '../load-kiosk-site.js';
 
 const stdP: TravelProfile = refMultilevel.travel_profiles.find(
   (p) => p.key === 'standard',
@@ -15,7 +16,7 @@ const accP: TravelProfile = refMultilevel.travel_profiles.find(
 /** Compact wayfinding call — returns value or throws. */
 function wf(
   from: string, to: string,
-  opts?: { site?: SiteData; profile?: TravelProfile; lang?: WayfindingOptions['lang'] },
+  opts?: { site?: KioskSite; profile?: TravelProfile; lang?: WayfindingOptions['lang'] },
 ) {
   const result = computeWayfinding(
     opts?.site ?? refMultilevel, opts?.profile ?? stdP, from, to,
@@ -129,11 +130,11 @@ describe('computeWayfinding', () => {
   describe('junction collapsing', () => {
     // Site with: entrance -> junct1 -> junct2 -> junct3 -> dest
     // Three consecutive junction nodes should collapse into one step.
-    const corridorSite: SiteData = {
+    const corridorSite: KioskSite = {
       organization: { id: 'org1', name: 'Test', slug: 'test' },
       site: {
         id: 's1', org_id: 'org1', name: 'Corridor', country_code: 'FR',
-        timezone: 'Europe/Paris', rules_pack_id: null, active_langs: ['fr'],
+        timezone: 'Europe/Paris', active_langs: ['fr'],
       },
       buildings: [{ id: 'b1', org_id: 'org1', site_id: 's1', name: 'B1', independent_access: true }],
       levels: [{
@@ -168,6 +169,7 @@ describe('computeWayfinding', () => {
           { id: 'e4', org_id: 'org1', from_node_id: 'n-j3', to_node_id: 'n-dest', width_m: 2, slope_pct: 0, accessible: true, direction: 'both', evacuation_route: false, length_m: 10 },
         ],
         vertical_links: [],
+    building_links: [],
       },
       categories: [{ id: 'cat1', org_id: 'org1', sector_key: 'tertiary', code: 'office', parent_id: null }],
       pictograms: [],
@@ -183,10 +185,7 @@ describe('computeWayfinding', () => {
       content_blocks: [],
       support_versions: [],
       face_templates: [],
-      parkings: [],
       parking_spaces: [],
-      parking_uncovered: [],
-      vehicle_gates: [],
     };
 
     const cP = corridorSite.travel_profiles[0] as TravelProfile;
@@ -232,7 +231,7 @@ describe('computeWayfinding', () => {
         id, org_id: 'org1', from_node_id: from, to_node_id: to,
         width_m: 2, slope_pct: 0, accessible: true, direction: 'both' as const, evacuation_route: false, length_m: 10,
       });
-      const site: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+      const site: KioskSite = { ...corridorSite, graph: { ...corridorSite.graph,
         nodes: corridorSite.graph.nodes.filter((n) => ['n-ent', 'n-j1', 'n-dest'].includes(n.id)),
         edges: [makeEdge('e1', 'n-ent', 'n-j1'), makeEdge('e2', 'n-j1', 'n-dest')],
       } };
@@ -245,7 +244,7 @@ describe('computeWayfinding', () => {
     });
 
     it('zero-distance junction run uses continueTowards instead of continueFor', () => {
-      const zeroSite: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+      const zeroSite: KioskSite = { ...corridorSite, graph: { ...corridorSite.graph,
         edges: corridorSite.graph.edges.map((e) =>
           ['e2', 'e3'].includes(e.id) ? { ...e, length_m: 0 } : e,
         ),
@@ -267,7 +266,7 @@ describe('computeWayfinding', () => {
     });
 
     it('trailing zero-distance run uses continueTowards', () => {
-      const zeroSite: SiteData = { ...corridorSite, graph: { ...corridorSite.graph,
+      const zeroSite: KioskSite = { ...corridorSite, graph: { ...corridorSite.graph,
         edges: corridorSite.graph.edges.map((e) =>
           ['e2', 'e3'].includes(e.id) ? { ...e, length_m: 0 } : e,
         ),

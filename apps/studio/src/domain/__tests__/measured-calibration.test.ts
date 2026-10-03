@@ -3,7 +3,7 @@ import { refMultilevel } from '@azimut/testkit';
 import type { GraphNode, SiteData } from '@azimut/core-model';
 import {
   landmarkNodes,
-  buildControlPairs,
+  buildCalibrationPairs,
   evaluateMeasuredCalibration,
   LANDMARK_NODE_KINDS,
   type PairDraft,
@@ -64,16 +64,16 @@ describe('landmarkNodes', () => {
   });
 });
 
-describe('buildControlPairs', () => {
+describe('buildCalibrationPairs', () => {
   it('prend la position de l’amer comme cible, jamais une saisie', () => {
-    const pairs = buildControlPairs(refMultilevel, [exactDraft(refMultilevel, 'n-ml-entrance')]);
+    const pairs = buildCalibrationPairs(refMultilevel, [exactDraft(refMultilevel, 'n-ml-entrance')]);
     expect(pairs).toHaveLength(1);
     expect(pairs[0]?.target).toEqual({ x_m: 20, y_m: 0 });
     expect(pairs[0]?.id).toBe('n-ml-entrance');
   });
 
   it('écarte sans bruit un amer disparu du graphe', () => {
-    const pairs = buildControlPairs(refMultilevel, [
+    const pairs = buildCalibrationPairs(refMultilevel, [
       exactDraft(refMultilevel, 'n-ml-entrance'),
       { node_id: 'n-supprimé', source: { x_px: 1, y_px: 2 } },
     ]);

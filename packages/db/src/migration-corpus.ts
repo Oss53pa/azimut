@@ -42,24 +42,54 @@ export function allUpSql(): string {
 }
 
 /**
- * Les tables du schéma `azimut` créées par le corpus, et pour chacune si le
- * corps de sa définition porte une colonne `org_id`.
+ * Les tables du schéma `azimut` que le corpus laisse en place, et pour chacune
+ * si le corps de sa définition porte une colonne `org_id`.
+ *
+ * Le corpus se rejoue migration par migration, et non d'un seul bloc : une
+ * table supprimée sort de la carte, et une table recréée plus tard y revient
+ * avec sa nouvelle définition. Lire la seule concaténation ferait dire au
+ * corpus qu'une table supprimée existe encore — c'est-à-dire décrire un
+ * schéma que la base n'a plus, et réclamer pour elle une politique, un
+ * propriétaire ou une infraction déclarée.
  *
  * La définition s'arrête à la parenthèse fermante de premier niveau, ce qui
  * suffit ici : aucune `CREATE TABLE` du corpus n'imbrique de sous-requête.
  */
 export function createdTables(): ReadonlyMap<string, boolean> {
-  const sql = allUpSql();
   const found = new Map<string, boolean>();
-  const pattern = /CREATE TABLE (?:IF NOT EXISTS )?azimut\.([a-z_]+)\s*\(/g;
 
-  for (const match of sql.matchAll(pattern)) {
-    const table = match[1];
-    if (table === undefined) continue;
-    const bodyStart = match.index + match[0].length;
-    found.set(table, bodyOf(sql, bodyStart).includes('org_id'));
+  for (const migration of upMigrations()) {
+    const sql = migration.sql;
+    for (const match of sql.matchAll(/CREATE TABLE (?:IF NOT EXISTS )?azimut\.([a-z_]+)\s*\(/g)) {
+      const table = match[1];
+      if (table === undefined) continue;
+      const bodyStart = match.index + match[0].length;
+      found.set(table, bodyOf(sql, bodyStart).includes('org_id'));
+    }
+    for (const table of droppedIn(sql)) found.delete(table);
   }
   return found;
+}
+
+/** Les tables du schéma `azimut` qu'une migration supprime. */
+function droppedIn(sql: string): readonly string[] {
+  const names: string[] = [];
+  for (const m of sql.matchAll(/DROP TABLE (?:IF EXISTS )?azimut\.([a-z_]+)/g)) {
+    if (m[1] !== undefined) names.push(m[1]);
+  }
+  return names;
+}
+
+/**
+ * Retire d'un ensemble les tables que le corpus ne laisse pas en place.
+ *
+ * Une politique, un `ENABLE` ou un `FORCE` posés sur une table depuis
+ * supprimée ne disent plus rien du schéma : la ligne de migration subsiste
+ * dans le corpus, l'objet non.
+ */
+function stillCreated(names: Iterable<string>): ReadonlySet<string> {
+  const alive = createdTables();
+  return new Set([...names].filter(name => alive.has(name)));
 }
 
 /** Le corps d'une définition de table, de `start` à sa parenthèse fermante. */
@@ -89,13 +119,13 @@ export function tablesWithPolicy(): ReadonlySet<string> {
     if (m[1] !== undefined) named.add(m[1]);
   }
   for (const name of namesInArray('tables')) named.add(name);
-  return named;
+  return stillCreated(named);
 }
 
 /** Les tables sur lesquelles le corpus active la sécurité par ligne. */
 export function tablesWithRlsEnabled(): ReadonlySet<string> {
   const direct = tablesMatching(/ALTER TABLE azimut\.([a-z_]+)\s+ENABLE ROW LEVEL SECURITY/g);
-  return new Set([...direct, ...namesInArray('enabled_tables')]);
+  return stillCreated([...direct, ...namesInArray('enabled_tables')]);
 }
 
 /**
@@ -106,7 +136,7 @@ export function tablesWithRlsEnabled(): ReadonlySet<string> {
  */
 export function tablesWithRlsForced(): ReadonlySet<string> {
   const direct = tablesMatching(/ALTER TABLE azimut\.([a-z_]+)\s+FORCE ROW LEVEL SECURITY/g);
-  return new Set([...direct, ...namesInArray('forced_tables')]);
+  return stillCreated([...direct, ...namesInArray('forced_tables')]);
 }
 
 function tablesMatching(pattern: RegExp): ReadonlySet<string> {

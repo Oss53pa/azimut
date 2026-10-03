@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { runChecks } from '../run-checks.js';
-import { refAdversarial, refBroken, refMinimal, refMultilevel } from '@azimut/testkit';
+import { refAdversarial, refBroken, refMinimal, refMultilevel, refRetail } from '@azimut/testkit';
 import { calibratedLevelIds, isUsableScale } from '@azimut/core-model';
 import type { Finding, PlanCalibration, PlanSource, SiteData } from '@azimut/core-model';
 
@@ -22,6 +22,7 @@ function source(id: string, levelId: string): PlanSource {
     level_id: levelId,
     storage_path: `plans/${id}.png`,
     media_type: 'image/png',
+    content_kind: 'raster',
     uploaded_at: '2026-01-05T09:00:00.000Z',
   };
 }
@@ -44,9 +45,13 @@ function calibration(id: string, sourceId: string, scale: number): PlanCalibrati
  * situations, les trois autres sites sont calés.
  */
 describe('N1.4 — un niveau sans plan calé est bloquant', () => {
-  it('signale les deux niveaux de ref-broken, ni plus ni moins', () => {
+  it('signale les trois niveaux de ref-broken, ni plus ni moins', () => {
     const found = notCalibrated(refBroken);
-    expect(found.map(f => f.entity?.id)).toEqual(['lvl-brk-r1', 'lvl-brk-rdc']);
+    // `lvl-brk-b-rdc` est venu avec le second bâtiment que M01.S10 demande à
+    // ce site. Il n'est pas calé non plus : `ref-broken` n'a aucun calage, et
+    // lui en donner un ferait porter un repère à un site qui n'en a pas.
+    expect(found.map(f => f.entity?.id))
+      .toEqual(['lvl-brk-b-rdc', 'lvl-brk-r1', 'lvl-brk-rdc']);
   });
 
   it('distingue le fond non calé du fond absent par plan_source_count', () => {
@@ -63,13 +68,15 @@ describe('N1.4 — un niveau sans plan calé est bloquant', () => {
       expect(finding.severity).toBe('blocking');
       expect(finding.entity?.kind).toBe('level');
       expect(finding.ruleRef).toBe('N1.4');
-      expect(finding.params['building_id']).toBe('bldg-brk-001');
+      expect(finding.params['building_id']).toBe(
+        finding.entity?.id === 'lvl-brk-b-rdc' ? 'bldg-brk-002' : 'bldg-brk-001');
     }
   });
 
   it('ne signale rien sur les sites dont les niveaux sont calés', () => {
     expect(notCalibrated(refMinimal)).toHaveLength(0);
     expect(notCalibrated(refMultilevel)).toHaveLength(0);
+    expect(notCalibrated(refRetail)).toHaveLength(0);
     expect(notCalibrated(refAdversarial)).toHaveLength(0);
   });
 
@@ -93,7 +100,10 @@ describe('N1.4 — ce qui vaut, ou non, pour un calage', () => {
       ...refBroken,
       plan_calibrations: [calibration('cal-brk-rdc', 'ps-brk-rdc', 0.05)],
     };
-    expect(notCalibrated(site).map(f => f.entity?.id)).toEqual(['lvl-brk-r1']);
+    // `lvl-brk-b-rdc`, du second bâtiment, n'a pas de fond non plus : il reste
+    // signalé, ce qui est le fait, et n'entre pas dans ce que le cas éprouve.
+    expect(notCalibrated(site).map(f => f.entity?.id))
+      .toEqual(['lvl-brk-b-rdc', 'lvl-brk-r1']);
   });
 
   it('refuse une échelle nulle, négative ou non finie comme calage', () => {

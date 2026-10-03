@@ -141,6 +141,9 @@ importers:
         specifier: ^3.4.9
         version: 3.4.9
     devDependencies:
+      '@types/node':
+        specifier: ^26.4.1
+        version: 26.4.1
       drizzle-kit:
         specifier: ^0.31.10
         version: 0.31.10
@@ -247,6 +250,9 @@ importers:
       '@azimut/core-model':
         specifier: workspace:*
         version: link:../packages/core-model
+      '@azimut/design-tokens':
+        specifier: workspace:*
+        version: link:../packages/design-tokens
       '@azimut/engine-graph':
         specifier: workspace:*
         version: link:../packages/engine-graph

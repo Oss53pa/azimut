@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { sha256Hex } from '@azimut/core-model';
 import { loadPackDirectory } from '../pack-directory.js';
+import { computeRulesPackChecksum } from '../pack-empreinte.js';
+
+/**
+ * L'empreinte d'un paquet, calculée par la fonction du produit (D7.2). Un
+ * fichier illisible n'en a pas : la valeur rendue alors n'est jamais comparée,
+ * le chargeur refusant le fichier avant l'empreinte.
+ */
+function checksumOf(key: string, files: readonly string[], contents: Record<string, string>): string {
+  const checksum = computeRulesPackChecksum(key, files, contents);
+  return checksum.ok ? checksum.value : 'sha256:illisible';
+}
 
 function makeRuleFile(rules: unknown[]): string {
   return JSON.stringify(rules);
@@ -11,8 +22,7 @@ function makeManifest(
   overrides?: Record<string, unknown>,
 ) {
   const fileNames = Object.keys(files);
-  const content = fileNames.map((f) => files[f]).join('');
-  const checksum = `sha256:${sha256Hex(content)}`;
+  const checksum = checksumOf('international', fileNames, files);
   return JSON.stringify({
     key: 'international',
     version: '2026.1',
@@ -84,7 +94,7 @@ describe('D3.1 — loadPackDirectory', () => {
 
   it('rejects when a listed file is missing', () => {
     const files = { 'legibility.json': legibilityRules };
-    const checksum = `sha256:${sha256Hex(legibilityRules + '')}`;
+    const checksum = checksumOf('test', ['legibility.json'], files);
     const manifest = JSON.stringify({
       key: 'test', version: '1.0', jurisdiction: 'FR',
       effective_from: '2026-01-01', files: ['legibility.json', 'missing.json'],
@@ -172,7 +182,7 @@ describe('D3.1 — loadPackDirectory', () => {
   });
 
   it('reports multiple missing files', () => {
-    const checksum = `sha256:${sha256Hex('')}`;
+    const checksum = checksumOf('test', [], {});
     const manifest = JSON.stringify({
       key: 'test', version: '1.0', jurisdiction: 'FR',
       effective_from: '2026-01-01',
@@ -219,5 +229,32 @@ describe('D3.1 — loadPackDirectory', () => {
     const rule = loaded?.[0];
     expect(rule?.kind).toBe('formula');
     expect(rule?.notes).toBe('Based on reading distance formula');
+  });
+});
+
+describe('D7.2 — l’empreinte d’un paquet suit la forme canonique commune', () => {
+  it('ne dépend ni des espaces ni de l’ordre des clés d’un fichier', () => {
+    const compact = { 'rules.json': JSON.stringify([{ a: 1, b: 'é' }]) };
+    const spaced = { 'rules.json': '[ { "b": "é", "a": 1 } ]' };
+    expect(checksumOf('k', ['rules.json'], spaced)).toBe(checksumOf('k', ['rules.json'], compact));
+  });
+
+  it('change avec le nom d’un fichier ou l’ordre des fichiers', () => {
+    const a = JSON.stringify([{ x: 1 }]);
+    const b = JSON.stringify([{ y: 2 }]);
+    const base = checksumOf('k', ['a.json', 'b.json'], { 'a.json': a, 'b.json': b });
+    expect(checksumOf('k', ['b.json', 'a.json'], { 'a.json': a, 'b.json': b })).not.toBe(base);
+    expect(checksumOf('k', ['a2.json', 'b.json'], { 'a2.json': a, 'b.json': b })).not.toBe(base);
+  });
+
+  it('un manifeste écrit sous l’ancienne forme n’est pas converti : son paquet est refusé', () => {
+    const files = { 'rules.json': legibilityRules };
+    // L'ancienne forme : le condensé des octets des fichiers mis bout à bout.
+    const former = `sha256:${sha256Hex(legibilityRules)}`;
+    const manifest = makeManifest(files, { checksum: former });
+    const result = loadPackDirectory(manifest, files);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.findings[0]?.code).toBe('RULES.PACK_CHECKSUM_MISMATCH');
   });
 });

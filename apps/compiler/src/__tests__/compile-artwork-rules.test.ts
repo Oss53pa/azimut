@@ -4,7 +4,7 @@ import type { CompileContext } from '../compile-artwork.js';
 import type { FaceTheme } from '@azimut/engine-graph';
 import { refMultilevel } from '@azimut/testkit';
 import { loadRulesPack, buildRulesPackIndex } from '@azimut/rules/loader';
-import { context, makeJob } from './compile-artwork-fixtures.js';
+import { context, makeJob, unboundSite } from './compile-artwork-fixtures.js';
 
 // Suite de compile-artwork.test.ts : contraste, paquet de règles, registre.
 describe('T-2.12 createArtworkHandler', () => {
@@ -56,7 +56,7 @@ describe('T-2.12 createArtworkHandler', () => {
     });
 
     it('runs no contrast check when no pack is bound', async () => {
-      const ctx: CompileContext = { ...context, theme: hexTheme(GREY_LOW) };
+      const ctx: CompileContext = { ...context, site: unboundSite, theme: hexTheme(GREY_LOW) };
       const result = await createArtworkHandler(ctx)(job);
       expect(result['contrast_finding_count']).toBe(0);
     });
@@ -85,7 +85,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     const boundSite = {
       ...refMultilevel,
-      site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+      rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
     };
 
     const job = makeJob({
@@ -107,7 +107,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     it('surfaces PACK_NOT_BOUND and skips the check for an unbound site', async () => {
       const ctx: CompileContext = {
-        ...context, theme: hexTheme(GREY_LOW), rules_pack_index: index,
+        ...context, site: unboundSite, theme: hexTheme(GREY_LOW), rules_pack_index: index,
       };
       const result = await createArtworkHandler(ctx)(job);
       expect(result['pack_bound']).toBe(false);
@@ -117,7 +117,7 @@ describe('T-2.12 createArtworkHandler', () => {
 
     it('still produces artwork despite an unresolved binding', async () => {
       const ctx: CompileContext = {
-        ...context, theme: hexTheme(GREY_LOW), rules_pack_index: index,
+        ...context, site: unboundSite, theme: hexTheme(GREY_LOW), rules_pack_index: index,
       };
       const result = await createArtworkHandler(ctx)(job);
       expect((result['svg_length'] as number)).toBeGreaterThan(0);
@@ -150,7 +150,7 @@ describe('T-2.12 createArtworkHandler', () => {
     function siteWithSupportRegistry(registry: 'safety' | 'wayfinding'): typeof refMultilevel {
       return {
         ...refMultilevel,
-        site: { ...refMultilevel.site, rules_pack_id: PACK_ID },
+        rules_bindings: [{ id: 'rb-essai', rules_pack_id: PACK_ID, role: 'base' as const }],
         supports: refMultilevel.supports.map((s) =>
           s.id === 'sup-001' ? { ...s, registry } : s,
         ),

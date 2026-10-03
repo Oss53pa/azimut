@@ -1,15 +1,23 @@
 import type {
   SiteData,
   Point,
+  PlanContext,
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg } from '@azimut/core-model';
+import { roundSvg, parkingSpacesOfLevel, accessibleSpaceMark } from '@azimut/core-model';
+import { accessibleMarkSvg } from './parking-mark.js';
+
+/** L'épaisseur de trait d'une place — S-39, « contour léger ». */
+const PARKING_STROKE_WIDTH = 0.5;
 
 export type OrientedPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
+  /** Place de stationnement — S-39, contour léger, distinct du bâti. */
+  readonly parking_fill: string;
+  readonly parking_stroke: string;
   readonly edge_stroke: string;
   readonly edge_evacuation_stroke: string;
   readonly node_fill: string;
@@ -147,6 +155,11 @@ export function renderOrientedPlan(
   site: SiteData,
   levelId: string,
   options: OrientedPlanOptions,
+  /**
+   * Ce que le plan lit en plus de la scène — voir `renderFloorPlan`. S-39
+   * impose au plan orienté le même traitement des places qu'au plan de niveau.
+   */
+  context: PlanContext = {},
 ): Outcome<string> {
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
@@ -178,13 +191,24 @@ export function renderOrientedPlan(
     (d) => nodeIdSet.has(d.node_id),
   );
 
+  // S-39 — les places se dessinent autrement que le bâti, et de la même façon
+  // qu'au plan de niveau. La lecture est commune aux quatre vues.
+  const view = parkingSpacesOfLevel(site, levelId, context.facts ?? []);
+
   const allRotated: Point[] = [];
   const rotatedFootprints = footprints.map((fp) => {
     const verts = fp.geometry.vertices.map((v) =>
       rotateAndFlip(v, center, rot),
     );
     allRotated.push(...verts);
-    return { id: fp.id, vertices: verts, kind: fp.kind };
+    return {
+      id: fp.id,
+      vertices: verts,
+      kind: fp.kind,
+      footprint: fp,
+      is_space: view.spaces.has(fp.id),
+      is_accessible: view.accessible.has(fp.id),
+    };
   });
 
   const rotatedNodes = nodes.map((n) => {
@@ -246,10 +270,33 @@ export function renderOrientedPlan(
       .join(' ');
     parts.push(
       `<polygon points="${points}"` +
-      ` fill="${esc(options.theme.footprint_fill)}"` +
-      ` stroke="${esc(options.theme.footprint_stroke)}"` +
-      ` stroke-width="1" />`,
+      ` fill="${esc(fp.is_space ? options.theme.parking_fill : options.theme.footprint_fill)}"` +
+      ` stroke="${esc(fp.is_space ? options.theme.parking_stroke : options.theme.footprint_stroke)}"` +
+      ` stroke-width="${fp.is_space ? PARKING_STROKE_WIDTH : 1}" />`,
     );
+  }
+
+  // S-39 — la marque d'une place accessible, après les empreintes. Même
+  // traitement qu'au plan de niveau : la fonction n'est demandée que s'il y a
+  // une place à marquer, non désignée la marque est omise et signalée,
+  // ambiguë le plan refuse.
+  const accessibleFp = sortedFp.filter((fp) => fp.is_accessible);
+  if (accessibleFp.length > 0) {
+    const mark = accessibleSpaceMark(site);
+    if (mark.finding !== null) {
+      if (mark.finding.severity === 'blocking') {
+        return { ok: false, findings: [mark.finding] };
+      }
+      warnings.push(mark.finding);
+    }
+    if (mark.pictogram !== null) {
+      for (const fp of accessibleFp) {
+        const projected = fp.vertices.map((v) => tx(v, t));
+        parts.push(accessibleMarkSvg(
+          fp.footprint, projected, mark.pictogram, options.theme.text_primary,
+        ));
+      }
+    }
   }
 
   if (options.show_edges) {

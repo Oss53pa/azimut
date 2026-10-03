@@ -4,7 +4,7 @@ import { useI18n } from '../../i18n/useI18n.js';
 import {
   evaluateMeasuredCalibration,
   landmarkNodes,
-  MIN_CONTROL_POINTS,
+  MIN_CALIBRATION_POINTS,
   type PairDraft,
 } from '../../domain/measured-calibration.js';
 import {
@@ -28,7 +28,7 @@ type ResidualRow = {
 };
 
 /**
- * Calage mesuré — complément atelier M1.4, section de l'écran M2.
+ * Calage à n points — section M2 (partie M), et section de l'écran M2.
  *
  * L'opérateur arme un amer, le pose sur le fond, recommence. L'ajustement
  * tourne à chaque pose et rend ses résidus.
@@ -148,7 +148,7 @@ export function MeasuredCalibrationPanel(
       value: String(drafts.length),
       note: state.missing_pairs > 0
         ? t('measured.metric.pairs.missing', { count: state.missing_pairs })
-        : t('measured.metric.pairs.note', { minimum: MIN_CONTROL_POINTS }),
+        : t('measured.metric.pairs.note', { minimum: MIN_CALIBRATION_POINTS }),
     },
     {
       id: 'mean',

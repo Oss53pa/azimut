@@ -5,7 +5,7 @@ import { levelRows } from '../register/site-sheet-rows.js';
 
 describe('Module 01 — lignes de la fiche de site', () => {
   const site: SiteData = refMultilevel;
-  const rows = levelRows(site);
+  const rows = levelRows(site, 'fr');
 
   it('rend un niveau par ligne, rangés par bâtiment puis par rang', () => {
     expect(rows).toHaveLength(site.levels.length);
@@ -34,7 +34,7 @@ describe('Module 01 — lignes de la fiche de site', () => {
 
   it('dit « plan absent » sans fond, « non calé » sans calage exploitable', () => {
     const bare: SiteData = { ...site, plan_sources: [], plan_calibrations: [] };
-    expect(levelRows(bare).every(r => r.planState === 'absent' && r.planFile === null)).toBe(true);
+    expect(levelRows(bare, 'fr').every(r => r.planState === 'absent' && r.planFile === null)).toBe(true);
 
     const level = site.levels[0];
     if (level === undefined) return;
@@ -42,17 +42,17 @@ describe('Module 01 — lignes de la fiche de site', () => {
       ...bare,
       plan_sources: [{
         id: 'ps-1', org_id: level.org_id, level_id: level.id,
-        storage_path: 'org/site/plans/rdc.pdf', media_type: 'application/pdf',
+        storage_path: 'org/site/plans/rdc.pdf', media_type: 'application/pdf', content_kind: 'vector',
         uploaded_at: '2026-09-01T10:00:00Z',
       }],
     };
-    const row = levelRows(withSource).find(r => r.id === level.id);
+    const row = levelRows(withSource, 'fr').find(r => r.id === level.id);
     expect(row?.planState).toBe('uncalibrated');
     expect(row?.planFile).toBe('rdc.pdf');
     expect(row?.updatedAt).toBe('2026-09-01T10:00:00Z');
   });
 
   it('rend deux fois la même chose pour les mêmes données (INV-4)', () => {
-    expect(levelRows(site)).toEqual(rows);
+    expect(levelRows(site, 'fr')).toEqual(rows);
   });
 });

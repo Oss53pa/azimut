@@ -243,6 +243,7 @@ describe('auditCoverage — zero decision points', () => {
           },
         ],
         vertical_links: [],
+        building_links: [],
       },
     };
     const result = auditCoverage(linearSite, stdProfile, []);

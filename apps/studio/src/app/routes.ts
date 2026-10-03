@@ -12,6 +12,7 @@
 /** Les cinq écrans de la tranche, par leur chemin (partie M). */
 export const M_ROUTES = [
   { screen: 'sites', pattern: '/sites' },
+  { screen: 'record', pattern: '/sites/:siteId' },
   { screen: 'plan', pattern: '/sites/:siteId/levels/:levelId/plan' },
   { screen: 'footprints', pattern: '/sites/:siteId/levels/:levelId/footprints' },
   { screen: 'graph', pattern: '/sites/:siteId/levels/:levelId/graph' },
@@ -25,7 +26,7 @@ export type MScreen = (typeof M_ROUTES)[number]['screen'];
  * « Chemin. `/sites/:siteId/wayfinding/messages` ».
  *
  * Il est à part de `M_ROUTES` parce qu'il ne vient pas de la partie M et
- * n'entre pas dans la chaîne que M8 chronomètre.
+ * n'entre pas dans la chaîne que M8 (partie M) chronomètre.
  */
 export const R_ROUTE = {
   screen: 'messages',
@@ -34,6 +35,8 @@ export const R_ROUTE = {
 
 export type Route =
   | { readonly screen: 'sites' }
+  /** M1bis (partie M) : fiche de site, bâtiments et niveaux. */
+  | { readonly screen: 'record'; readonly siteId: string }
   | { readonly screen: 'plan'; readonly siteId: string; readonly levelId: string }
   | { readonly screen: 'footprints'; readonly siteId: string; readonly levelId: string }
   | { readonly screen: 'graph'; readonly siteId: string; readonly levelId: string }
@@ -55,6 +58,12 @@ export function parseRoute(pathname: string): Route {
 
   if (segments.length === 1 && segments[0] === 'sites') {
     return { screen: 'sites' };
+  }
+
+  // M1bis (partie M) : `/sites/:siteId`. Deux segments, ce qui la sépare de la
+  // liste comme des écrans d'atelier sans ambiguïté.
+  if (segments.length === 2 && segments[0] === 'sites') {
+    return { screen: 'record', siteId: decode(segments[1]) };
   }
 
   if (segments.length === 3 && segments[0] === 'sites' && segments[2] === 'validation') {
@@ -83,6 +92,8 @@ export function buildPath(route: Route): string {
   switch (route.screen) {
     case 'sites':
       return '/sites';
+    case 'record':
+      return `/sites/${encode(route.siteId)}`;
     case 'validation':
       return `/sites/${encode(route.siteId)}/validation`;
     case 'messages':
@@ -109,6 +120,7 @@ export function tranchePath(
 ): string {
   switch (step) {
     case 'sites': return buildPath({ screen: 'sites' });
+    case 'record': return buildPath({ screen: 'record', siteId });
     case 'validation': return buildPath({ screen: 'validation', siteId });
     default: return buildPath({ screen: step, siteId, levelId });
   }
@@ -116,6 +128,9 @@ export function tranchePath(
 
 /** L'ordre de la chaîne, que le parcours de M8 (partie M) suit. */
 export const TRANCHE_ORDER: readonly MScreen[] = [
+  // La fiche de site n'entre pas dans la chaîne chronométrée : le parcours
+  // du critère 1 de M8 (partie M) part d'un site vide et n'ajoute ni
+  // bâtiment ni niveau. Elle est atteignable, elle n'est pas une étape.
   'sites', 'plan', 'footprints', 'graph', 'validation',
 ];
 

@@ -3,12 +3,13 @@ import { refMinimal } from '@azimut/testkit';
 import type { DestinationName, SiteData, SiteFact } from '@azimut/core-model';
 import { auditSiteFacts } from '../audit-site-facts.js';
 
-/** Le fait de référence du complément : le parking de Cosmos Angré est gratuit. */
+/** Le fait de référence : le parking du site d'essai est gratuit. */
 const PARKING_GRATUIT: SiteFact = {
   key: 'parking_gratuit',
-  value: 'oui',
-  source: 'Décision de la Direction, 12 mars 2026',
-  recorded_on: '2026-03-12',
+  value: true,
+  status: 'existing',
+  source_ref: 'Décision de la Direction, 12 mars 2026',
+  declared_at: '2026-03-12',
   forbidden: [
     { lang: 'fr', term: 'paiement' },
     { lang: 'fr', term: 'payant' },
@@ -29,7 +30,7 @@ function named(entries: readonly (readonly [string, DestinationName['lang'], str
   return { ...refMinimal, destination_names };
 }
 
-describe('auditSiteFacts (M3, QC-05)', () => {
+describe('auditSiteFacts — A5.11, un texte contre les faits du site', () => {
   it('ne rend rien quand aucun texte ne contredit un fait', () => {
     const report = auditSiteFacts(named([['n-1', 'fr', 'Parking visiteurs']]), [PARKING_GRATUIT]);
     expect(report.findings).toEqual([]);
@@ -49,7 +50,9 @@ describe('auditSiteFacts (M3, QC-05)', () => {
     const report = auditSiteFacts(named([['n-1', 'fr', 'Caisse de parking']]), [PARKING_GRATUIT]);
     const [finding] = report.findings;
     expect(finding?.params['fact']).toBe('parking_gratuit');
-    expect(finding?.params['fact_value']).toBe('oui');
+    // La valeur est un booléen JSON depuis qu'A5.11 porte `value` en `jsonb` ;
+    // l'anomalie la rend en texte, `params` n'admettant que chaîne et nombre.
+    expect(finding?.params['fact_value']).toBe('true');
     expect(finding?.params['fact_source']).toBe('Décision de la Direction, 12 mars 2026');
   });
 
@@ -99,8 +102,9 @@ describe('auditSiteFacts (M3, QC-05)', () => {
     const autre: SiteFact = {
       key: 'acces_barriere',
       value: 'aucune barrière',
-      source: 'Relevé du 3 avril 2026',
-      recorded_on: '2026-04-03',
+      status: 'existing',
+      source_ref: 'Relevé du 3 avril 2026',
+      declared_at: '2026-04-03',
       forbidden: [{ lang: 'fr', term: 'barrière' }],
     };
     const site = named([['n-1', 'fr', 'Barrière et paiement']]);
@@ -108,6 +112,88 @@ describe('auditSiteFacts (M3, QC-05)', () => {
     expect(report.findings.map((f) => f.params['fact']))
       .toEqual(['acces_barriere', 'parking_gratuit']);
     expect(JSON.stringify(auditSiteFacts(site, [autre, PARKING_GRATUIT])))
+      .toBe(JSON.stringify(report));
+  });
+});
+
+/**
+ * A5.11 — « Tout fait du site porte sa source et son statut. Un fait de statut
+ * `proposal` ne s'affiche jamais comme un existant. »
+ *
+ * Les deux codes viennent du catalogue et changent de porteur : D2.2 les
+ * définit au niveau du fait, `PARK.SOURCE_MISSING` en toutes lettres, et ils se
+ * levaient sur les objets de stationnement faute d'une colonne pour porter le
+ * statut d'un fait. La migration 0053 l'a ajoutée.
+ */
+describe('A5.11 — le statut et la source d’un fait', () => {
+  const sansSource: SiteFact = {
+    key: 'capacite_annoncee',
+    value: 89,
+    status: 'existing',
+    source_ref: '   ',
+    declared_at: '2026-03-12',
+    forbidden: [],
+  };
+  const proposition: SiteFact = {
+    key: 'surface_commercialisable',
+    value: 12400,
+    status: 'proposal',
+    source_ref: 'Étude de programmation',
+    declared_at: '2026-04-01',
+    forbidden: [],
+  };
+  const aVerifier: SiteFact = { ...proposition, key: 'places_livraison', status: 'to_verify' };
+  const site = named([['n-1', 'fr', 'Parking visiteurs']]);
+
+  it('refuse un fait sans source, dans les deux modes', () => {
+    for (const forDeliverable of [false, true]) {
+      const report = auditSiteFacts(site, [sansSource], forDeliverable);
+      const finding = report.findings.find((f) => f.code === 'PARK.SOURCE_MISSING');
+      expect(finding?.severity).toBe('blocking');
+      expect(finding?.entity).toEqual({ kind: 'site_fact', id: 'capacite_annoncee' });
+      expect(finding?.params['status']).toBe('existing');
+      expect(finding?.ruleRef).toBe('M01.S11');
+    }
+  });
+
+  it('tolère une proposition à l’atelier : c’est un état de travail', () => {
+    const report = auditSiteFacts(site, [proposition, aVerifier]);
+    expect(report.findings).toEqual([]);
+  });
+
+  it('refuse la même proposition portée à un livrable', () => {
+    const report = auditSiteFacts(site, [proposition], true);
+    const [finding] = report.findings;
+    expect(finding?.code).toBe('PARK.PROPOSAL_AS_EXISTING');
+    expect(finding?.severity).toBe('blocking');
+    expect(finding?.entity).toEqual({ kind: 'site_fact', id: 'surface_commercialisable' });
+    expect(finding?.params['status']).toBe('proposal');
+    expect(finding?.ruleRef).toBe('M01.S11');
+  });
+
+  /**
+   * `to_verify` tombe du même côté que `proposal`, et pour une raison plus
+   * forte : une valeur qu'on n'a pas pu confirmer, affichée sans réserve, se
+   * lit comme une valeur confirmée.
+   */
+  it('refuse aussi un fait à vérifier porté à un livrable', () => {
+    const codes = auditSiteFacts(site, [aVerifier], true).findings.map((f) => f.code);
+    expect(codes).toEqual(['PARK.PROPOSAL_AS_EXISTING']);
+  });
+
+  it('laisse passer un existant sourcé, au livrable comme à l’atelier', () => {
+    const acquis: SiteFact = { ...proposition, status: 'existing' };
+    expect(auditSiteFacts(site, [acquis], true).findings).toEqual([]);
+  });
+
+  it('rend un ordre stable : par clé, quel que soit l’ordre reçu', () => {
+    const facts = [proposition, sansSource, aVerifier];
+    const report = auditSiteFacts(site, facts, true);
+    // `capacite_annoncee` est un existant sans source : une anomalie, non deux.
+    expect(report.findings.map((f) => f.params['fact'])).toEqual([
+      'capacite_annoncee', 'places_livraison', 'surface_commercialisable',
+    ]);
+    expect(JSON.stringify(auditSiteFacts(site, [...facts].reverse(), true)))
       .toBe(JSON.stringify(report));
   });
 });

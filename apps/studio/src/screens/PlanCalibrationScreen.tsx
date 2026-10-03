@@ -1,14 +1,14 @@
 import { type JSX } from 'react';
 import {
   Panel, ScreenStates, NumericField, AngleField, Button, StatusBar,
-  StateBanner, Tag, SPACE, TEXT,
+  StateBanner, Tag, SPACE, TEXT, DIMENSIONLESS,
 } from '../components/ui/index.js';
 import type { ScreenState, StatusItem } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
-import { CALIBRATION_STEPS } from '../state/use-plan-calibration.js';
-import type { CalibrationDraft, CalibrationStep } from '../state/use-plan-calibration.js';
+import { CALIBRATION_STEPS, blockingReason } from '../state/plan-calibration-steps.js';
+import type { CalibrationDraft, CalibrationStep } from '../state/plan-calibration-steps.js';
 import { CALIBRATION_SHORTCUTS } from '../state/calibration-shortcuts.js';
 import { MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
 import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
@@ -25,6 +25,12 @@ import { ConsequenceDialog } from './ConsequenceDialog.js';
  * et voir d'un coup d'œil où il en est. L'étape courante se déduit de la
  * saisie (`stepOf`), elle n'est pas rangée à part.
  */
+/** Un point de calage en cours de saisie : chaque coordonnée peut manquer. */
+export type PartialPoint = {
+  readonly x_px: number | null;
+  readonly y_px: number | null;
+};
+
 export type PlanCalibrationScreenProps = {
   readonly state: ScreenState;
   readonly draft: CalibrationDraft;
@@ -33,9 +39,37 @@ export type PlanCalibrationScreenProps = {
   readonly warnings: readonly Finding[];
   readonly busy: boolean;
   readonly calibrated: boolean;
-  readonly onPickFile: (file: PlanFile) => void;
+  /**
+   * Le fichier déposé, décrit, et son contenu. M2 (partie M), version 27 :
+   * la précision du fond se juge sur le contenu, jamais sur l'extension ;
+   * l'écran le transmet sans le lire.
+   */
+  readonly onPickFile: (file: PlanFile, content: Blob) => void;
+  /**
+   * M2 (partie M) : « Page | sélecteur | si PDF multipage, requis ». Le nombre
+   * de pages lu dans le contenu du fond ; `null` pour un fond d'une seule page
+   * ou qui n'est pas un PDF. Le champ ne paraît que pour un PDF multipage.
+   */
+  readonly pageCount: number | null;
+  readonly page: number | null;
+  readonly onPage: (page: number | null) => void;
   /** M2 (partie M), action « Remplacer le fond ». */
   readonly onReplaceFile?: ((file: PlanFile) => void) | undefined;
+  /**
+   * Les deux points de calage, en coordonnées de l'image du fond.
+   *
+   * Portés coordonnée par coordonnée, et non comme des points : une abscisse
+   * saisie avant son ordonnée ne fait pas encore un point, et si l'écran ne
+   * gardait que les points complets, la première des deux valeurs saisies
+   * disparaîtrait du champ à la frappe suivante.
+   *
+   * Un point à demi saisi n'est pas pour autant un point à l'origine. C'est
+   * l'appelant qui en décide, et il ne le complète pas.
+   */
+  readonly pointA: PartialPoint;
+  readonly pointB: PartialPoint;
+  readonly onPointA: (coordinate: 'x_px' | 'y_px', value: number | null) => void;
+  readonly onPointB: (coordinate: 'x_px' | 'y_px', value: number | null) => void;
   readonly onDistance: (metres: number | null) => void;
   readonly onAzimuth: (degrees: number | null) => void;
   readonly onRecalibrate: () => void;
@@ -53,6 +87,7 @@ export type PlanCalibrationScreenProps = {
 export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.Element {
   const { t, lang } = useI18n();
   const { draft, step, findings, busy, calibrated } = props;
+  const blocked = blockingReason(draft);
 
   function messageFor(...codes: readonly string[]): string | undefined {
     const found = findings.find(f => codes.includes(f.code));
@@ -83,6 +118,20 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
       <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.lg }}>
         <StepTrail current={step} />
 
+        {/*
+          M2 (partie M), état « Partiel » : « Fond chargé, calage incomplet :
+          le tracé reste inaccessible et l'écran dit pourquoi. »
+
+          Il ne le disait pas. Les trois libellés étaient traduits dans les
+          deux langues et affichés nulle part, et l'opérateur voyait un écran
+          qui ne se débloquait pas sans savoir ce qu'il lui manquait. Le motif
+          se déduit de la saisie, comme l'étape, plutôt que d'être rangé à
+          part : deux sources pour un même fait divergent toujours.
+        */}
+        {blocked !== null && draft.plan !== null && !calibrated && (
+          <StateBanner severity="info" message={t(blockedKey(blocked))} />
+        )}
+
         {/* Étape 1 — le fond. */}
         <Panel title={t('calib.step.plan')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, padding: SPACE.md }}>
@@ -99,13 +148,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
               onChange={event => {
                 const file = event.target.files?.[0];
                 if (file === undefined) return;
-                props.onPickFile({
-                  name: file.name,
-                  byteSize: file.size,
-                  mediaType: file.type,
-                  pageCount: null,
-                  page: null,
-                });
+                props.onPickFile({ name: file.name, byteSize: file.size, page: null }, file);
               }}
             />
             {draft.plan !== null && (
@@ -125,20 +168,26 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
                   onChange={event => {
                     const file = event.target.files?.[0];
                     if (file === undefined) return;
-                    props.onReplaceFile?.({
-                      name: file.name,
-                      byteSize: file.size,
-                      mediaType: file.type,
-                      pageCount: null,
-                      page: null,
-                    });
+                    props.onReplaceFile?.({ name: file.name, byteSize: file.size, page: null });
                   }}
                 />
               </>
             )}
-            <Anomaly message={messageFor(
-              'IMPORT.FORMAT_UNSUPPORTED', 'IMPORT.FILE_TOO_LARGE', 'IMPORT.PAGE_REQUIRED',
-            )} />
+            {props.pageCount !== null && props.pageCount > 1 && (
+              <NumericField
+                label={t('calib.plan.page')}
+                unit={DIMENSIONLESS}
+                value={props.page}
+                onChange={props.onPage}
+                step={1}
+                min={1}
+                max={props.pageCount}
+                hint={t('calib.plan.pages', { pages: String(props.pageCount) })}
+                error={messageFor('IMPORT.PAGE_REQUIRED')}
+                disabled={busy}
+              />
+            )}
+            <Anomaly message={messageFor('IMPORT.FORMAT_UNSUPPORTED', 'IMPORT.FILE_TOO_LARGE')} />
           </div>
         </Panel>
 
@@ -148,6 +197,50 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
             <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
               {t('calib.scale.hint')}
             </p>
+            {/*
+              M7.2 (partie M) : « Toute valeur saisissable au pointeur l'est
+              aussi au clavier, en numérique, dans le panneau et non dans un
+              menu secondaire. » M2 pose les deux points au clic dans la zone
+              de travail ; leur équivalent au clavier manquait, et l'écran
+              n'avait aucun moyen de les recevoir. L'adaptateur y suppléait en
+              posant deux points d'office à la validation — c'est-à-dire en
+              écrivant en base des points de calage que personne n'avait posés.
+            */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm }}>
+              <NumericField
+                label={t('calib.scale.point_a_x')}
+                unit={t('unit.pixel')}
+                value={props.pointA.x_px}
+                onChange={value => { props.onPointA('x_px', value); }}
+                step={1}
+                disabled={busy || draft.plan === null}
+              />
+              <NumericField
+                label={t('calib.scale.point_a_y')}
+                unit={t('unit.pixel')}
+                value={props.pointA.y_px}
+                onChange={value => { props.onPointA('y_px', value); }}
+                step={1}
+                disabled={busy || draft.plan === null}
+              />
+              <NumericField
+                label={t('calib.scale.point_b_x')}
+                unit={t('unit.pixel')}
+                value={props.pointB.x_px}
+                onChange={value => { props.onPointB('x_px', value); }}
+                step={1}
+                disabled={busy || draft.plan === null}
+              />
+              <NumericField
+                label={t('calib.scale.point_b_y')}
+                unit={t('unit.pixel')}
+                value={props.pointB.y_px}
+                onChange={value => { props.onPointB('y_px', value); }}
+                step={1}
+                disabled={busy || draft.plan === null}
+                hint={t('calib.scale.points.hint')}
+              />
+            </div>
             <NumericField
               label={t('calib.scale.distance')}
               unit={t('unit.metre')}
@@ -253,6 +346,14 @@ function Anomaly({ message }: { readonly message: string | undefined }): JSX.Ele
   return message === undefined
     ? null
     : <StateBanner severity="blocking" message={message} />;
+}
+
+function blockedKey(
+  step: CalibrationStep,
+): 'calib.blocked.plan' | 'calib.blocked.scale' | 'calib.blocked.orientation' {
+  return step === 'plan' ? 'calib.blocked.plan'
+    : step === 'scale' ? 'calib.blocked.scale'
+      : 'calib.blocked.orientation';
 }
 
 function stepKey(step: CalibrationStep): 'calib.step.plan' | 'calib.step.scale' | 'calib.step.orientation' {

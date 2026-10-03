@@ -224,6 +224,13 @@ export function generateMessageSchedule(
     });
   }
 
+  // D7.2 et D2.2 — un tableau sans empreinte d'entrées ne se versionne pas :
+  // sa péremption ne pourrait jamais se juger.
+  const inputsHash = computeScheduleInputsHash({
+    site, supports, profile, informationLevels, rules,
+  });
+  if (!inputsHash.ok) return inputsHash;
+
   return {
     ok: true,
     value: {
@@ -234,9 +241,7 @@ export function generateMessageSchedule(
       // exige M02.W11.
       state: 'draft',
       generated_at,
-      inputs_hash: computeScheduleInputsHash({
-        site, supports, profile, informationLevels, rules,
-      }),
+      inputs_hash: inputsHash.value,
       lines,
     },
     warnings,

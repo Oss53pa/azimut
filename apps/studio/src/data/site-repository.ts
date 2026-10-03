@@ -10,8 +10,8 @@
  */
 import type { AdvertisingData } from './advertising-data.js';
 import type {
-  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, TenantRegistry, SiteData, SiteVocabulary, WayfindingRegistry,
-  WorksiteRegistry,
+  BudgetRegistry, CharterRegistry, InspectionRegistry, MaintenanceRegistry, TenantRegistry, SiteData,
+  SiteRulesBinding, SiteVocabulary, WayfindingRegistry, WorksiteRegistry,
 } from '@azimut/core-model';
 
 export type SiteSummary = {
@@ -19,7 +19,8 @@ export type SiteSummary = {
   readonly org_id: string;
   readonly name: string;
   readonly country_code: string;
-  readonly rules_pack_id: string | null;
+  /** A5.8 — les paquets rattachés, socle et surcouche, depuis la table qui fait foi. */
+  readonly rules_bindings: readonly SiteRulesBinding[];
 };
 
 /**

@@ -1,11 +1,10 @@
 export { validateGraph } from './validate-graph.js';
 export type { ValidationResult } from './validate-graph.js';
+export type { GraphScope } from './graph-scope.js';
 export { buildAdjacency, buildDirectedAdjacency, bfs } from './graph-traversal.js';
 export { computeRoute } from './compute-route.js';
 export type { RouteOptions } from './compute-route.js';
-export { checkEdgeAvailability } from './checks/edge-availability.js';
-export { checkInstanceBlocks } from './checks/instance-blocks.js';
-export type { Route } from './compute-route.js';
+export type { Route, RouteSite } from './compute-route.js';
 export { RouteCache } from './route-cache.js';
 export { deriveDecisionPoints } from './decision-points.js';
 export type { DecisionPoint } from './decision-points.js';
@@ -29,6 +28,8 @@ export type { CheckableText } from './site-texts.js';
 export { auditSourceClaims } from './audit-source-claims.js';
 export type { SourceDiscrepancyReport } from './audit-source-claims.js';
 export { auditParking } from './audit-parking.js';
+export { auditParkingZones } from './audit-parking-zones.js';
+export type { ParkingZoneReport } from './audit-parking-zones.js';
 export type { ParkingReport, ParkingInput } from './audit-parking.js';
 export { auditBoundText } from './audit-bound-text.js';
 export type { DocumentTextReport } from './audit-bound-text.js';
@@ -86,12 +87,12 @@ export type {
   PictogramCreation,
 } from './validate-library.js';
 export { computeQuantities, quantityReportToCsv } from './compute-quantities.js';
-export { auditTypography, FORBIDDEN_CHARACTERS } from './audit-typography.js';
+export { auditTypography } from './audit-typography.js';
 export {
-  auditSentenceLength, splitSentences, countWords, MAX_WORDS_PER_SENTENCE,
+  auditSentenceLength, splitSentences, countWords,
 } from './audit-sentence-length.js';
 export type { SentenceLengthReport } from './audit-sentence-length.js';
-export type { TypographyReport, ForbiddenCharacterRange } from './audit-typography.js';
+export type { TypographyReport } from './audit-typography.js';
 export { runChecks } from './run-checks.js';
 export type {
   CheckReport, SiteVocabulary, CheckMode, CheckOptions,
@@ -109,7 +110,7 @@ export type { CharHeightInput } from '@azimut/rules';
 export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/rules';
 // buildRulesPackIndex lit le disque : il reste sur @azimut/rules/loader,
 // sinon le studio l'embarquerait et son build casserait.
-export { resolveSiteRulesPack } from '@azimut/rules';
+export { resolveSiteRulesPack, boundRulesPackIdentities } from '@azimut/rules';
 // I5.4 / N5.2-R7 — le paquet de règles publicitaires. Même raison que ci-dessus :
 // le studio l'atteint par ici, sans dépendre du chargeur qui lit le disque.
 export { guardAdRulesPack } from '@azimut/rules';
@@ -121,9 +122,8 @@ export type { FaceDimensions } from './compile-template.js';
 export type { FaceTheme, RenderFaceOptions } from './render-face.js';
 export { validateProofs } from './validate-proofs.js';
 export type { ProofValidationResult } from './validate-proofs.js';
-export { computeGraphHash, computeInputsHash, computeContentHash } from './compute-hashes.js';
-export type { ContentHashInput } from './compute-hashes.js';
-export { computeStaleFaces } from './compute-staleness.js';
+export { computeGraphHash, computeInputsHash } from './compute-hashes.js';
+export { computeStaleFaces, resolvedFaceContentHash } from './compute-staleness.js';
 export type {
   FaceHashDescriptor,
   FaceStaleness,

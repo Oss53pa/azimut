@@ -9,7 +9,7 @@
  * peut établir — le superflu et le non couvert. Rien n'est inventé pour
  * remplir les colonnes d'orientation et de taille.
  */
-import { supportTypologyOf, type SiteData, type TravelProfile } from '@azimut/core-model';
+import { supportTypologyOf, type SiteData, type TravelProfile, codePointCompare } from '@azimut/core-model';
 import { reconcile, deriveDecisionPoints } from '@azimut/engine-graph';
 import type { SurveyedSupport, ExpectedSupport, ReconciliationReport } from '@azimut/engine-graph';
 
@@ -25,7 +25,7 @@ export function divergenceReport(site: SiteData, profile: TravelProfile): Reconc
   const firstType = site.support_types[0];
 
   const surveyed: readonly SurveyedSupport[] = [...site.supports]
-    .sort((a, b) => a.id.localeCompare(b.id))
+    .sort((a, b) => codePointCompare(a.id, b.id))
     .map((support): SurveyedSupport => {
       const type = supportTypologyOf(site.support_types, support) ?? firstType;
       const face = type?.faces[0];

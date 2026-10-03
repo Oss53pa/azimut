@@ -13,9 +13,26 @@ import { controlStyle } from './tokens.js';
  * clavier, en numérique, dans le panneau et non dans un menu secondaire. »
  * C'est ce champ qui tient cette promesse partout où un geste pose une valeur.
  */
+/**
+ * Ce que porte un champ numérique qui ne mesure rien.
+ *
+ * F6.1 dit : « Un champ numérique affiche toujours son unité. Un **champ
+ * dimensionnel** sans unité affichée est refusé en revue. » Le type rendait
+ * l'unité obligatoire pour tous, ce qui est plus strict que la règle : le rang
+ * d'un niveau (M1bis, partie M) est un ordinal, il n'a pas de dimension et
+ * aucune unité ne lui convient.
+ *
+ * Ce jeton le déclare en toutes lettres, là où `''` l'aurait tu. Il ne
+ * s'emploie que pour un rang ou un décompte, jamais pour une grandeur.
+ */
+export const DIMENSIONLESS = '\u0000dimensionless';
+
 export type NumericFieldProps = {
   readonly label: string;
-  /** Obligatoire (F6.1). Écrire `''` serait un contournement. */
+  /**
+   * Obligatoire (F6.1). Écrire `''` serait un contournement ; un champ sans
+   * dimension porte `DIMENSIONLESS`, qui dit la même chose sans le cacher.
+   */
   readonly unit: string;
   readonly value: number | null;
   readonly onChange: (value: number | null) => void;
@@ -34,7 +51,13 @@ export function NumericField({
   disabled = false, computed = false,
 }: NumericFieldProps): JSX.Element {
   return (
-    <FieldShell label={label} unit={unit} error={error} hint={hint} computed={computed}>
+    <FieldShell
+      label={label}
+      unit={unit === DIMENSIONLESS ? undefined : unit}
+      error={error}
+      hint={hint}
+      computed={computed}
+    >
       {({ inputId, describedBy }) => (
         <input
           id={inputId}

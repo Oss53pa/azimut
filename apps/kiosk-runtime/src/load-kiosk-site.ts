@@ -9,6 +9,7 @@ import type {
   GraphNode,
   Edge,
   VerticalLink,
+  BuildingLink,
   Category,
   Pictogram,
   Destination,
@@ -30,6 +31,17 @@ import type {
  * Throws on a missing file or a structurally invalid document. Byte integrity
  * is the package manifest's responsibility (D10.2); this loader guards shape.
  */
+
+/**
+ * A5.8 — le site tel qu'une borne le connaît : sans rattachement aux paquets
+ * de règles. Le champ est absent, et non vide : une liste vide dirait « site
+ * sans paquet », ce qui est faux, alors que le paquet de borne ne transporte
+ * simplement pas les rattachements. Un code qui voudrait résoudre une fonction
+ * de pictogramme sur la borne n'a donc rien à lire, et le typage le refuse
+ * avant l'essai : tout ce qui s'y dessine a été composé à la construction du
+ * paquet, marques comprises.
+ */
+export type KioskSite = Omit<SiteData, 'rules_bindings'>;
 
 import { computeEdgeLengths } from '@azimut/core-model';
 
@@ -81,7 +93,7 @@ function readObject(
 
 export function loadKioskSite(
   files: ReadonlyMap<string, Uint8Array>,
-): SiteData {
+): KioskSite {
   const graphDoc = readJson(files, 'data/graph.json');
   const directoryDoc = readJson(files, 'data/directory.json');
   const sceneDoc = readJson(files, 'data/scene.json');
@@ -108,6 +120,10 @@ export function loadKioskSite(
       'vertical_links',
       'data/graph.json',
     ) as VerticalLink[],
+    // M01.S10. Le paquet d'un site antérieur à la règle ne porte pas la clé :
+    // une liste vide vaut « aucune liaison inter-bâtiments », ce qui est exact
+    // pour un site à un seul bâtiment et détecté par la validation sinon.
+    building_links: (graphDoc['building_links'] ?? []) as BuildingLink[],
   };
 
   return {
@@ -117,6 +133,8 @@ export function loadKioskSite(
       'data/site.json',
     ) as unknown as Organization,
     site: readObject(identityDoc, 'site', 'data/site.json') as unknown as Site,
+    // A5.8 — pas de `rules_bindings` : voir KioskSite. Le champ manque, il
+    // n'est pas vide.
     buildings: readArray(sceneDoc, 'buildings', 'data/scene.json') as Building[],
     levels,
     footprints: readArray(
@@ -168,9 +186,6 @@ export function loadKioskSite(
     // Le paquet de borne ne porte pas le stationnement : une borne montre un
     // itinéraire, elle ne compte pas les places. Le jour où un plan de borne en
     // aura besoin, c'est le paquet qu'il faudra étendre, pas ce défaut.
-    parkings: [],
     parking_spaces: [],
-    parking_uncovered: [],
-    vehicle_gates: [],
   };
 }

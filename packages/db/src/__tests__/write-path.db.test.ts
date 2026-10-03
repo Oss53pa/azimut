@@ -3,7 +3,7 @@ import postgres from 'postgres';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
 import {
-  buildCommand, declareClosureCommand, withdrawClosureCommand, readEdgeAvailability, type Edge, type EntityCommand,
+  buildCommand, withdrawClosureCommand, type EntityCommand, type TemporaryClosure,
 } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
@@ -206,15 +206,17 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
   });
 
   /**
-   * A5.3 — une fermeture se déclare par une commande `update` sur
-   * `edge.availability`, écrite en texte et reçue en jsonb, puis se retire.
+   * O11 et 0069 — une fermeture temporaire s'écrit dans `temporary_closure`,
+   * se relit telle qu'écrite, reste invisible d'une autre organisation, et se
+   * retire. La base refuse une plage inversée et une liste d'arêtes vide.
    */
-  it('déclare puis retire une fermeture d’arête, relue telle qu’écrite', async () => {
-    const { commands } = creation('00ee04', ORG);
+  it('déclare puis retire une fermeture temporaire, relue telle qu’écrite', async () => {
+    const { site, commands } = creation('00ee04', ORG);
     const level = 'a7000000-0000-0000-0000-00000000ee04';
     const n1 = 'a8000000-0000-0000-0000-00000000ee04';
     const n2 = 'a8000000-0000-0000-0000-00000000ee05';
     const edgeId = 'a9000000-0000-0000-0000-00000000ee04';
+    const closureId = 'ad000000-0000-0000-0000-00000000ee04';
     await callAs(ALICE, [
       ...commands,
       ...[n1, n2].map(id => ({ operation: 'create', table: 'node', id,
@@ -222,46 +224,44 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
       { operation: 'create', table: 'edge', id: edgeId,
         after: { id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: '2', length_m: '5' } },
     ]);
-    const edge: Edge = {
-      id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: 2, slope_pct: 0,
-      accessible: true, direction: 'both', evacuation_route: false, length_m: 5,
+    const closure: TemporaryClosure = {
+      id: closureId, org_id: ORG, site_id: site, edge_ids: [edgeId],
+      from_at: '2026-10-12T00:00:00', to_at: '2026-10-16T23:59:59', reason: 'Travaux',
     };
-    const payload = (c: EntityCommand) => ({ operation: c.operation, table: c.table, id: c.id, before: c.before, after: c.after });
-    const availability = async (): Promise<unknown> => db.transaction(async (tx) => {
+    const create = (c: TemporaryClosure) => ({ operation: 'create', table: 'temporary_closure', id: c.id,
+      after: { id: c.id, org_id: c.org_id, site_id: c.site_id, edge_ids: JSON.stringify(c.edge_ids),
+        from_at: c.from_at, to_at: c.to_at, reason: c.reason } });
+    const read = async (userId: string): Promise<readonly Record<string, unknown>[]> => db.transaction(async (tx) => {
       await tx.execute(sql`set local role authenticated`);
-      await tx.execute(sql`select set_config('azimut.current_user_id', ${ALICE}, true)`);
-      const rows = await tx.execute(sql`select availability from azimut.edge where id = ${edgeId}`);
-      return rows[0]?.['availability'];
+      await tx.execute(sql`select set_config('azimut.current_user_id', ${userId}, true)`);
+      return [...await tx.execute(sql`select edge_ids, to_char(from_at, 'YYYY-MM-DD"T"HH24:MI:SS') as from_at,
+        to_char(to_at, 'YYYY-MM-DD"T"HH24:MI:SS') as to_at, reason
+        from azimut.temporary_closure where id = ${closureId}`)];
     });
 
-    const declared = declareClosureCommand(edge,
-      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works' },
-      { timestamp: '2026-09-26T00:00:00.000Z', declaredBy: null });
-    if (!declared.ok) throw new Error(JSON.stringify(declared.findings));
-    await callAs(ALICE, [payload(declared.value)]);
-    const read = readEdgeAvailability(await availability());
-    expect(read).toEqual({ readable: true, closures: [
-      { from: '2026-10-12T00:00:00', to: '2026-10-16T23:59:59', reason_key: 'works', declared_by: null },
-    ] });
+    await callAs(ALICE, [create(closure)]);
+    expect(await read(ALICE)).toEqual([
+      { edge_ids: [edgeId], from_at: '2026-10-12T00:00:00', to_at: '2026-10-16T23:59:59', reason: 'Travaux' },
+    ]);
+    expect(await read(BOB)).toEqual([]);
 
-    // Bob n'écrit pas sur l'arête d'une autre organisation : la ligne lui est invisible.
-    await callAs(BOB, [payload(declared.value)]);
-    expect(readEdgeAvailability(await availability())).toEqual(read);
+    const other = 'ad000000-0000-0000-0000-00000000ee05';
+    await expect(callAs(ALICE, [create({ ...closure, id: other, to_at: '2026-10-01T00:00:00' })])).rejects.toThrow();
+    await expect(callAs(ALICE, [create({ ...closure, id: other, edge_ids: [] })])).rejects.toThrow();
 
-    const closure = read?.readable === true ? read.closures[0] : undefined;
-    if (closure === undefined || read === undefined) throw new Error('fermeture absente');
-    const withdrawn = withdrawClosureCommand({ ...edge, availability: read }, closure, '2026-09-26T00:00:01.000Z');
-    if (!withdrawn.ok) throw new Error(JSON.stringify(withdrawn.findings));
+    const withdrawn = withdrawClosureCommand(closure, '2026-09-28T00:00:01.000Z');
+    if (!withdrawn.ok) throw new Error(JSON.stringify(withdrawn.notices));
+    const payload = (c: EntityCommand) => ({ operation: c.operation, table: c.table, id: c.id, before: c.before, after: c.after });
     await callAs(ALICE, [payload(withdrawn.value)]);
-    expect(await availability()).toBeNull();
+    expect(await read(ALICE)).toEqual([]);
   });
 
   /**
-   * T-2.9 et 0049 — un plan mural s'écrit selon A5.6 : une face sans `side`,
-   * un bloc `map` sans `ordinal`. Un bloc sans aucune position est refusé, et
-   * le bloc se retire en laissant sa face.
+   * A5.6 et 0049 — une face et un bloc s'écrivent selon A5.6 : une face sans
+   * `side`, un bloc sans `ordinal`. Un bloc sans aucune position est refusé,
+   * et le bloc se retire en laissant sa face.
    */
-  it('écrit une face et un bloc de plan mural sans les colonnes héritées, puis retire le bloc', async () => {
+  it('écrit une face et un bloc sans les colonnes héritées, puis retire le bloc', async () => {
     const { site, commands } = creation('00ee06', ORG);
     const level = 'a7000000-0000-0000-0000-00000000ee06';
     const node = 'a8000000-0000-0000-0000-00000000ee06';

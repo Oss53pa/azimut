@@ -9,19 +9,21 @@
  * Le schéma n'est pas `public` : chaque requête le nomme par l'en-tête
  * `Accept-Profile`, ce qui évite de dépendre du schéma par défaut du service.
  */
-import { assembleSiteData } from '@azimut/db/mapping';
+import { assembleSiteData, mapRulesBindingRows } from '@azimut/db/mapping';
 import type {
-  BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
+  BuildingLinkRow, BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
   FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
-  PlanCalibrationRow, PlanSourceRow, SiteRow,
+  PlanCalibrationRow, PlanSourceRow, SiteRow, SiteRulesBindingRow,
   SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
-  ParkingRow, ParkingSpaceRow, ParkingUncoveredAreaRow, VehicleGateRow,
+  ZoneRow, ParkingSpaceRow, TemporaryClosureRow,
 } from '@azimut/db/mapping';
 import type {
   SiteData, SiteVocabulary, LexiconTerm, LexiconSeverity,
-  SiteFact, SourceClaim, DiscrepancyDecision,
+  CharterRule, CharterRuleKind,
+  SiteFact, FactStatus, FactValue, FactTarget, SourceClaim, DiscrepancyDecision,
 } from '@azimut/core-model';
+import { canonicalSerialize, CHARTER_RULE_KINDS } from '@azimut/core-model';
 import {
   RepositoryError,
   type SiteRepository, type SiteSummary,
@@ -37,10 +39,7 @@ import { loadInspectionRegistry } from './postgrest-inspection.js';
 import { loadAdvertisingData } from './postgrest-advertising.js';
 import { loadTenantRegistry } from './postgrest-tenant.js';
 
-type SiteListRow = Pick<
-  SiteRow,
-  'id' | 'org_id' | 'name' | 'country_code' | 'rules_pack_id'
->;
+type SiteListRow = Pick<SiteRow, 'id' | 'org_id' | 'name' | 'country_code'>;
 
 export type { PostgrestConfig } from './postgrest-http.js';
 
@@ -61,6 +60,12 @@ type CountryRow = {
 
 type LegalEntityRow = { readonly id: string; readonly legal_name: string };
 
+type CharterRuleRow = {
+  readonly id: string;
+  readonly kind: string;
+  readonly params: unknown;
+};
+
 type LexiconTermRow = {
   readonly lang: string;
   readonly term: string;
@@ -70,9 +75,21 @@ type LexiconTermRow = {
 type SiteFactRow = {
   readonly id: string;
   readonly key: string;
-  readonly value: string;
-  readonly source: string;
-  readonly recorded_on: string;
+  /** Colonne `jsonb` depuis la migration 0053 : ce qui arrive est du JSON, pas du texte. */
+  readonly value: unknown;
+  readonly status: string;
+  readonly source_ref: string;
+  readonly declared_at: string;
+  readonly declared_by: string | null;
+  /**
+   * A5.11, version 17 — la cible du fait. Les deux colonnes sont nulles
+   * ensemble ou renseignées ensemble, `site_fact_target_complete` le garantit
+   * en base. Le mappage ne s'y fie pas pour autant : une base antérieure à la
+   * migration 0056 rendrait `undefined`, et une moitié de cible se lit comme
+   * un fait de site plutôt que comme une cible incomplète.
+   */
+  readonly target_kind: string | null;
+  readonly target_id: string | null;
 };
 
 type ForbiddenWordRow = {
@@ -107,6 +124,84 @@ function toSeverity(raw: string): LexiconSeverity {
   return raw === 'discouraged' ? 'discouraged' : 'forbidden';
 }
 
+/**
+ * Une règle de charte, lue depuis `charter_rule` — A5.8.
+ *
+ * **Ce dépôt ne valide pas les paramètres, et c'est délibéré.** Une règle dont
+ * les paramètres ne se lisent pas était écartée ici, ce qui faisait retomber
+ * son contrôle parmi les non exercés : un site dont la charte est cassée se
+ * lisait alors comme un site sans charte. D2.2 tranche autrement en inscrivant
+ * `CHARTER.RULE_MALFORMED` — « une règle déclarée et cassée bloque, parce
+ * qu'elle a été voulue ». La règle traverse donc telle quelle, et ce sont les
+ * résolveurs de `core-model` qui la refusent, avec une anomalie qui la nomme.
+ *
+ * Deux choses sont tout de même vérifiées, parce qu'elles ne relèvent pas des
+ * paramètres : la nature doit être l'une des sept d'A5.8, ce que la contrainte
+ * de la base garantit depuis la migration 0054 ; et `params` doit être un
+ * objet, la colonne pouvant porter n'importe quel `jsonb`. Un `params` qui n'en
+ * est pas un devient l'objet vide, que le résolveur signalera comme illisible
+ * plutôt que de le taire.
+ */
+function toCharterRule(row: CharterRuleRow): CharterRule | null {
+  if (!CHARTER_RULE_KINDS.includes(row.kind as CharterRuleKind)) return null;
+  const raw: unknown = row.params;
+  const params = typeof raw === 'object' && raw !== null && !Array.isArray(raw)
+    ? raw as Readonly<Record<string, unknown>>
+    : {};
+  return { id: row.id, kind: row.kind as CharterRuleKind, params };
+}
+
+/**
+ * Un statut de fait inconnu vaut `to_verify`.
+ *
+ * Même motif que la sévérité ci-dessus, et il est plus fort ici : `existing`
+ * est le seul statut qu'un livrable a le droit de montrer comme un fait
+ * (A5.11, règle M01.S11). Une valeur mal orthographiée en base, ou venue d'une
+ * version ultérieure du modèle, doit donc retomber sur le statut qui retient,
+ * jamais sur celui qui publie. `to_verify` dit exactement cela : on ne sait
+ * pas, quelqu'un doit regarder.
+ */
+function toFactStatus(raw: string): FactStatus {
+  return raw === 'existing' || raw === 'proposal' ? raw : 'to_verify';
+}
+
+/**
+ * Ce que `jsonb` rend, ramené aux trois scalaires du modèle.
+ *
+ * Une valeur structurée — tableau, objet — entre comme sa sérialisation
+ * canonique plutôt que d'être refusée : la refuser perdrait le fait entier, et
+ * avec lui les mots qu'il interdit. `null` n'arrive pas, la base l'interdit
+ * par contrainte, et s'il arrivait quand même il vaut la chaîne vide, que le
+ * contrôle de non-vacuité verra.
+ */
+function toFactValue(raw: unknown): FactValue {
+  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') return raw;
+  if (raw === null || raw === undefined) return '';
+  return canonicalSerialize(raw);
+}
+
+/**
+ * La cible d'un fait, ou rien.
+ *
+ * Une cible est entière ou absente, et la base le garantit. Ce mappage ne s'y
+ * fie pas : il exige les deux valeurs, non nulles et non blanches, et rend
+ * `{}` autrement. Une moitié de cible se lit alors comme un fait du site
+ * entier, qui est le sens le plus prudent — l'autre lecture attribuerait un
+ * fait à un objet que rien ne nomme.
+ *
+ * Le champ est omis plutôt que rendu `undefined` : `exactOptionalPropertyTypes`
+ * distingue les deux, et `SiteFact.target` déclare l'absence, non la présence
+ * d'une valeur indéfinie.
+ */
+function toFactTarget(
+  row: { readonly target_kind: string | null; readonly target_id: string | null },
+): { readonly target?: FactTarget } {
+  const kind = row.target_kind ?? '';
+  const id = row.target_id ?? '';
+  if (kind.trim() === '' || id.trim() === '') return {};
+  return { target: { kind, id } };
+}
+
 function firstOrThrow<Row>(rows: readonly Row[], table: string, id: string): Row {
   const row = rows[0];
   if (row === undefined) {
@@ -124,17 +219,18 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // La projection est plus étroite que `SiteRow` : la liste n'a besoin que
       // de quoi nommer un site. Le type dit exactement les colonnes demandées,
       // sinon il promettrait des champs que la réponse ne porte pas.
-      const rows = await query<SiteListRow>(
-        config,
-        'site',
-        'select=id,org_id,name,country_code,rules_pack_id&order=name.asc',
-      );
+      // A5.8 — les paquets viennent de la table de rattachement, qui fait foi,
+      // en une seule requête : le cloisonnement de la base en borne la portée.
+      const [rows, bindings] = await Promise.all([
+        query<SiteListRow>(config, 'site', 'select=id,org_id,name,country_code&order=name.asc'),
+        query<SiteRulesBindingRow>(config, 'site_rules_binding', 'order=site_id.asc,role.asc'),
+      ]);
       return rows.map((row): SiteSummary => ({
         id: row.id,
         org_id: row.org_id,
         name: row.name,
         country_code: row.country_code,
-        rules_pack_id: row.rules_pack_id,
+        rules_bindings: mapRulesBindingRows(bindings.filter(b => b.site_id === row.id)),
       }));
     },
 
@@ -147,7 +243,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       );
       const organization = firstOrThrow(orgRows, 'organization', site.org_id);
 
-      const buildings = await query<BuildingRow>(config, 'building', `site_id=eq.${siteId}`);
+      const [buildings, rulesBindings] = await Promise.all([
+        query<BuildingRow>(config, 'building', `site_id=eq.${siteId}`),
+        query<SiteRulesBindingRow>(config, 'site_rules_binding', `site_id=eq.${siteId}`),
+      ]);
       const levels = await queryIn<LevelRow>(
         config, 'level', 'building_id', buildings.map(b => b.id),
       );
@@ -182,9 +281,11 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
       const supportIds = supports.map(s => s.id);
 
-      const [verticalLinks, destinationNames, supportFaces, supportVersions] =
+      const [verticalLinks, buildingLinks, destinationNames, supportFaces, supportVersions] =
         await Promise.all([
           queryIn<VerticalLinkRow>(config, 'vertical_link', 'edge_id', edges.map(e => e.id)),
+          // M01.S10, même chemin que les liaisons verticales : par l'arête.
+          queryIn<BuildingLinkRow>(config, 'building_link', 'edge_id', edges.map(e => e.id)),
           queryIn<DestinationNameRow>(
             config, 'destination_name', 'destination_id', destinations.map(d => d.id),
           ),
@@ -192,28 +293,26 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<SupportVersionRow>(config, 'support_version', 'support_id', supportIds),
         ]);
 
-      // Complément atelier M2 — stationnement. Les portails et les parkings
-      // pendent aux niveaux, les places et les zones non couvertes aux
-      // parkings : deux vagues, comme pour les faces et leurs blocs.
-      const [contentBlocks, parkings, vehicleGates] = await Promise.all([
+      // A5.2 — les zones du socle, qui pendent au niveau comme les empreintes
+      // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et
+      // c'est par ici que les contrôles du domaine `PARK` le voient.
+      const [contentBlocks, zones, parkingSpaces, temporaryClosures] = await Promise.all([
         queryIn<SupportContentBlockRow>(
           config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
         ),
-        queryIn<ParkingRow>(config, 'parking', 'level_id', levelIds),
-        queryIn<VehicleGateRow>(config, 'vehicle_gate', 'level_id', levelIds),
-      ]);
-
-      const parkingIds = parkings.map(p => p.id);
-      const [parkingSpaces, parkingUncovered] = await Promise.all([
-        queryIn<ParkingSpaceRow>(config, 'parking_space', 'parking_id', parkingIds),
-        queryIn<ParkingUncoveredAreaRow>(
-          config, 'parking_uncovered_area', 'parking_id', parkingIds,
+        queryIn<ZoneRow>(config, 'zone', 'level_id', levelIds),
+        // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+        queryIn<ParkingSpaceRow>(
+          config, 'parking_space', 'footprint_id', footprints.map(f => f.id),
         ),
+        // O11 — les fermetures temporaires du site.
+        query<TemporaryClosureRow>(config, 'temporary_closure', `site_id=eq.${siteId}`),
       ]);
 
       return assembleSiteData({
         organization,
         site,
+        rules_bindings: rulesBindings,
         buildings,
         levels,
         plan_sources: planSources,
@@ -223,6 +322,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         nodes,
         edges,
         vertical_links: verticalLinks,
+        building_links: buildingLinks,
         categories,
         pictograms,
         destinations,
@@ -233,10 +333,9 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         support_faces: supportFaces,
         content_blocks: contentBlocks,
         support_versions: supportVersions,
-        parkings,
+        zones,
         parking_spaces: parkingSpaces,
-        parking_uncovered: parkingUncovered,
-        vehicle_gates: vehicleGates,
+        temporary_closures: temporaryClosures,
       });
     },
 
@@ -260,7 +359,9 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         // étrangère est déjà le mode employé partout ailleurs dans ce fichier.
         query<CharterRow>(config, 'charter', `select=id&site_id=eq.${siteId}`),
         query<SiteFactRow>(
-          config, 'site_fact', `select=id,key,value,source,recorded_on&site_id=eq.${siteId}`,
+          config,
+          'site_fact',
+          `select=id,key,value,status,source_ref,declared_at,declared_by,target_kind,target_id&site_id=eq.${siteId}`,
         ),
         query<SourceClaimRow>(
           config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
@@ -272,7 +373,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         ),
       ]);
 
-      const [lexiconRows, wordRows] = await Promise.all([
+      const [charterRuleRows, lexiconRows, wordRows] = await Promise.all([
+        queryIn<CharterRuleRow>(
+          config, 'charter_rule', 'charter_id', charters.map(c => c.id),
+        ),
         queryIn<LexiconTermRow>(
           config, 'lexicon_term', 'charter_id', charters.map(c => c.id),
         ),
@@ -289,6 +393,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         else bucket.push(word);
       }
 
+      const charter_rules: CharterRule[] = charterRuleRows
+        .map(toCharterRule)
+        .filter((rule): rule is CharterRule => rule !== null);
+
       const lexicon: LexiconTerm[] = lexiconRows.map(row => ({
         lang: row.lang,
         term: row.term,
@@ -297,9 +405,12 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
       const facts: SiteFact[] = factRows.map(row => ({
         key: row.key,
-        value: row.value,
-        source: row.source,
-        recorded_on: row.recorded_on,
+        value: toFactValue(row.value),
+        status: toFactStatus(row.status),
+        source_ref: row.source_ref,
+        declared_at: row.declared_at,
+        ...(row.declared_by === null ? {} : { declared_by: row.declared_by }),
+        ...toFactTarget(row),
         forbidden: wordsByFact.get(row.id) ?? [],
       }));
 
@@ -319,7 +430,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         };
       }
 
-      return { lexicon, facts, claims, decisions };
+      return { charter_rules, lexicon, facts, claims, decisions };
     },
 
     loadWayfindingRegistry(siteId: string) {

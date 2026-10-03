@@ -1,4 +1,5 @@
 import {
+  closedEdgesAt,
   isLocalInstant,
   type SiteData,
   type Edge,
@@ -15,6 +16,14 @@ export type Route = {
   readonly cost: number;
 };
 
+/**
+ * Ce qu'un calcul d'itinéraire lit d'un site : son graphe (A7.1,
+ * `computeRoute(graph, profile, from, to)`), et ses fermetures temporaires
+ * quand on lui donne un instant (O11). Un site de borne, qui ne porte pas les
+ * rattachements aux paquets de règles, s'y passe donc tel quel.
+ */
+export type RouteSite = Pick<SiteData, 'graph' | 'temporary_closures'>;
+
 type AdjEntry = {
   readonly neighbor: string;
   readonly edge_id: string;
@@ -26,9 +35,9 @@ function edgeCost(edge: Edge): number {
 }
 
 function buildWeightedAdj(
-  site: SiteData,
+  site: RouteSite,
   profile: TravelProfile,
-  at: string | undefined,
+  closedEdges: ReadonlySet<string>,
 ): Map<string, AdjEntry[]> {
   const adj = new Map<string, AdjEntry[]>();
   const nodeKindMap = new Map<string, string>();
@@ -44,7 +53,7 @@ function buildWeightedAdj(
 
     const cost = edgeCost(edge);
 
-    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds, at)) {
+    if (isEdgeTraversableFrom(edge, edge.from_node_id, profile, nodeKindMap, excludedKinds, closedEdges)) {
       const list = adj.get(edge.from_node_id);
       if (list) {
         list.push({
@@ -55,7 +64,7 @@ function buildWeightedAdj(
       }
     }
 
-    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds, at)) {
+    if (isEdgeTraversableFrom(edge, edge.to_node_id, profile, nodeKindMap, excludedKinds, closedEdges)) {
       const list = adj.get(edge.to_node_id);
       if (list) {
         list.push({
@@ -144,33 +153,29 @@ function dijkstra(
 
 export type RouteOptions = {
   /**
-   * A5.3 — instant, heure locale du site (`AAAA-MM-JJTHH:MM:SS`), auquel les
-   * fermetures déclarées comptent. Absent, elles ne comptent pas : c'est le
-   * cas de tout rendu durable. L'appelant lit l'horloge, jamais le moteur.
+   * O11 — instant, heure locale du site (`AAAA-MM-JJTHH:MM:SS`), auquel les
+   * fermetures temporaires comptent : « pendant la fermeture, les parcours
+   * sont recalculés sans ces arêtes ». Absent, elles ne comptent pas : c'est
+   * le cas de tout rendu durable. L'appelant lit l'horloge, jamais le moteur,
+   * et valide l'instant avant de le passer.
    */
   readonly at?: string;
 };
 
 export function computeRoute(
-  site: SiteData,
+  site: RouteSite,
   profile: TravelProfile,
   from: string,
   to: string,
   options: RouteOptions = {},
 ): Outcome<Route> {
   const { at } = options;
+  // Un instant mal formé est une faute de l'appelant, pas une anomalie du
+  // site : l'écran le refuse à la saisie, le moteur ne le reçoit pas.
   if (at !== undefined && !isLocalInstant(at)) {
-    return {
-      ok: false,
-      findings: [{
-        code: 'GRAPH.ROUTE_INSTANT_INVALID',
-        severity: 'blocking',
-        entity: null,
-        params: { at },
-        ruleRef: 'A5.3',
-      }],
-    };
+    throw new RangeError(`computeRoute : instant hors du format local du site (${at})`);
   }
+  const closedEdges = at === undefined ? new Set<string>() : closedEdgesAt(site.temporary_closures ?? [], at);
 
   if (from === to) {
     return {
@@ -216,7 +221,7 @@ export function computeRoute(
     };
   }
 
-  const adj = buildWeightedAdj(site, profile, at);
+  const adj = buildWeightedAdj(site, profile, closedEdges);
   const route = dijkstra(adj, from, to);
 
   if (route === null) {

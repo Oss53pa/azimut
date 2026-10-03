@@ -8,6 +8,7 @@
  * dans son annuaire. Un site sans destination n'a donc pas de dossier.
  */
 import type { SiteData, TenantRegistry, TenantSignDossier } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 type DemoProject = Omit<TenantSignDossier, 'destination_id'>;
 
@@ -42,7 +43,7 @@ const PROJECTS: readonly DemoProject[] = [
 ];
 
 export function referenceTenant(site: SiteData): TenantRegistry {
-  const destinations = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+  const destinations = [...site.destinations].sort((a, b) => codePointCompare(a.id, b.id));
   const dossiers = PROJECTS.flatMap((project, i): TenantSignDossier[] => {
     const destination = destinations[i];
     return destination === undefined ? [] : [{ ...project, destination_id: destination.id }];

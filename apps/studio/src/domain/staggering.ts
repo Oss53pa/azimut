@@ -20,6 +20,7 @@ import {
   type JalonnementSequence,
   type MessageSchedule,
 } from '@azimut/engine-graph';
+import { codePointCompare } from '@azimut/core-model';
 
 export type StaggeringStep = {
   readonly nodeId: string;
@@ -68,8 +69,8 @@ export function staggeringPlan(
 
   const origins = site.graph.nodes
     .filter(n => n.kind === 'entrance')
-    .sort((a, b) => a.id.localeCompare(b.id));
-  const destinations = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
+  const destinations = [...site.destinations].sort((a, b) => codePointCompare(a.id, b.id));
 
   const sequences: StaggeringSequence[] = [];
   for (const origin of origins) {

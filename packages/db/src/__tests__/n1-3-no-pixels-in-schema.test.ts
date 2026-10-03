@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { allUpSql } from '../migration-corpus.js';
+import { allUpSql, createdTables } from '../migration-corpus.js';
 
 /**
  * M01.S2 : « Aucune coordonnée **de géométrie du site** n'est stockée en
@@ -22,24 +22,18 @@ import { allUpSql } from '../migration-corpus.js';
 const COORDINATE_IN_PIXELS = /(^|_)[xy]_px$/;
 
 /**
- * Infraction constatée, déclarée, et non corrigée ici.
+ * Infractions constatées et déclarées : aucune.
  *
- * `control_point` vient de la migration `0018_atelier_m1_4_measured_calibration`,
- * écrite d'après le complément « atelier ». Ce document ne fait plus foi
- * depuis la consolidation, et M01.S2 ne souffre aucune exception : « Aucune
- * coordonnée en pixels n'est stockée. »
+ * `control_point` était la dernière. Elle portait des pixels hors des deux
+ * tables que M01.S2 autorise, et la migration 0052 l'a supprimée : une seule
+ * table de points de calage subsiste, `plan_calibration_point`, celle de
+ * A5.2.
  *
- * La retirer est une migration destructrice, donc un cas d'arrêt de A2.2,
- * point 7. Elle est donc nommée ici plutôt que corrigée en silence : le garde
- * refuse toute occurrence nouvelle, et celle-ci reste visible jusqu'à
- * l'arbitrage.
+ * Le registre reste, vide. Le supprimer avec sa dernière entrée ferait de la
+ * prochaine infraction une ligne à réinventer sous la pression d'un essai
+ * rouge, au lieu d'une déclaration motivée à écrire ici.
  */
-const DECLARED_BREACHES: Readonly<Record<string, string>> = {
-  'control_point.source_x_px':
-    'Migration 0018, complément « atelier », document sans autorité depuis la consolidation. Retrait destructeur : A2.2 point 7.',
-  'control_point.source_y_px':
-    'Migration 0018, même origine et même motif que `source_x_px`.',
-};
+const DECLARED_BREACHES: Readonly<Record<string, string>> = {};
 
 /**
  * Les deux tables que A5.2 autorise nommément à porter des pixels.
@@ -77,7 +71,24 @@ function migratedColumns(): ReadonlyMap<string, readonly string[]> {
     for (const added of (altered[2] ?? '').matchAll(/ADD COLUMN ([a-z_][a-z0-9_]*)/g)) {
       table.push(added[1] ?? '');
     }
+    // Un renommage change le nom sans créer de colonne. L'ignorer laisserait
+    // le garde juger le schéma d'après le nom d'origine, donc d'après un état
+    // que la base n'a plus — et une colonne renommée en pixels passerait.
+    for (const renamed of (altered[2] ?? '').matchAll(
+      /RENAME COLUMN ([a-z_][a-z0-9_]*) TO ([a-z_][a-z0-9_]*)/g,
+    )) {
+      const at = table.indexOf(renamed[1] ?? '');
+      if (at >= 0) table[at] = renamed[2] ?? '';
+    }
     out.set(altered[1] ?? '', table);
+  }
+
+  // Une table supprimée ne porte plus de colonne. Sans ce retrait, le garde
+  // jugerait le schéma sur des définitions que la base n'a plus, et une
+  // infraction refermée par suppression resterait à déclarer indéfiniment.
+  const alive = createdTables();
+  for (const table of [...out.keys()]) {
+    if (!alive.has(table)) out.delete(table);
   }
   return out;
 }
@@ -122,6 +133,13 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
       expect(columns, `${declared} : déclarée en infraction mais absente du schéma`)
         .toContain(declared);
     }
+  });
+
+  it('le schéma ne porte plus qu’une table de points de calage', () => {
+    const tables = migratedColumns();
+    expect(tables.has('control_point'), 'supprimée par la migration 0052').toBe(false);
+    expect([...tables.get('plan_calibration_point') ?? []])
+      .toEqual(expect.arrayContaining(['ordinal', 'image_x_px', 'image_y_px']));
   });
 
   it('la mesure reconnaît une colonne fautive, sinon elle ne mesure rien', () => {

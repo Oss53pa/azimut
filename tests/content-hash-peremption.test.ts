@@ -2,9 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { refMultilevel } from '@azimut/testkit';
 import { resolveFaceContent } from '@azimut/engine-graph';
 import type { ResolvedFace } from '@azimut/engine-graph';
-import { computeFaceContentHash } from '@azimut/engine-layout';
-import type { FaceContentHashInput } from '@azimut/engine-layout';
-import type { FaceTemplate, SiteData, TravelProfile } from '@azimut/core-model';
+import { computeFaceContentHash } from '@azimut/core-model';
+import type { FaceContentHashInput, FaceTemplate, SiteData, TravelProfile } from '@azimut/core-model';
 
 const profile = refMultilevel.travel_profiles.find((p) => p.key === 'standard') as TravelProfile;
 
@@ -25,7 +24,7 @@ function inputOf(template: FaceTemplate, face: ResolvedFace): FaceContentHashInp
   return {
     blocks: face.blocks.map((b) => b.content),
     template: { key: template.id, version: '1' },
-    rules_pack: { key: 'intl', version: '2026.1' },
+    rules_packs: { base: { key: 'intl', version: '2026.1' } },
     active_langs: ['fr', 'en'], width_mm: 600, height_mm: 400,
     pictogram_ids: [],
   };

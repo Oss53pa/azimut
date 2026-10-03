@@ -9,6 +9,7 @@
  */
 import type { SiteData, TravelProfile } from '@azimut/core-model';
 import { computeRoute } from '@azimut/engine-graph';
+import { codePointCompare } from '@azimut/core-model';
 
 export type ProfileRoutes = {
   readonly profileId: string;
@@ -26,8 +27,8 @@ export type ProfileRoutes = {
 
 function lengths(site: SiteData, profile: TravelProfile, at: string | undefined): Map<string, number | null> {
   const out = new Map<string, number | null>();
-  const origins = site.graph.nodes.filter(n => n.kind === 'entrance').sort((a, b) => a.id.localeCompare(b.id));
-  const destinations = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+  const origins = site.graph.nodes.filter(n => n.kind === 'entrance').sort((a, b) => codePointCompare(a.id, b.id));
+  const destinations = [...site.destinations].sort((a, b) => codePointCompare(a.id, b.id));
   for (const origin of origins) {
     for (const destination of destinations) {
       if (destination.node_id === origin.id) continue;

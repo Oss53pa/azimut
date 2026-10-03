@@ -1,6 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import {
-  declareLegalEntityCommand, getErrorMessage, type ErrorCode, type Finding, type LegalEntityDraft,
+  declareLegalEntityCommand, type Finding, type FormNotice, type LegalEntityDraft,
 } from '@azimut/core-model';
 import { Button, StateBanner, SPACE, TEXT, LABEL_STYLE } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -22,9 +22,10 @@ type DialogState = {
   readonly open: boolean;
   readonly busy: boolean;
   readonly findings: readonly Finding[];
+  readonly notices: readonly FormNotice[];
 };
 
-const CLOSED: DialogState = { open: false, busy: false, findings: [] };
+const CLOSED: DialogState = { open: false, busy: false, findings: [], notices: [] };
 
 /**
  * Q5 — les clients de l'organisation, sous la liste des sites : leurs
@@ -36,7 +37,7 @@ export function ClientsSection({
 }: ClientsSectionProps): JSX.Element {
   const { t, lang } = useI18n();
   const [dialog, setDialog] = useState<DialogState>(CLOSED);
-  const [done, setDone] = useState<{ readonly warnings: readonly Finding[] } | null>(null);
+  const [done, setDone] = useState(false);
 
   const list = entities.status === 'ready' ? entities.value : [];
   const countryOptions: readonly ClientCountryOption[] = useMemo(
@@ -49,7 +50,7 @@ export function ClientsSection({
   );
 
   async function submit(draft: LegalEntityDraft): Promise<void> {
-    setDialog(previous => ({ ...previous, busy: true, findings: [] }));
+    setDialog(previous => ({ ...previous, busy: true, findings: [], notices: [] }));
     const outcome = declareLegalEntityCommand(draft, {
       orgId,
       newId: () => crypto.randomUUID(),
@@ -58,7 +59,7 @@ export function ClientsSection({
       existingNames: list.map(entity => entity.legal_name),
     });
     if (!outcome.ok) {
-      setDialog(previous => ({ ...previous, busy: false, findings: outcome.findings }));
+      setDialog(previous => ({ ...previous, busy: false, findings: outcome.findings, notices: outcome.notices }));
       return;
     }
     const written = await sink([outcome.value]);
@@ -67,7 +68,7 @@ export function ClientsSection({
       return;
     }
     setDialog(CLOSED);
-    setDone({ warnings: outcome.warnings });
+    setDone(true);
     onCreated();
   }
 
@@ -75,16 +76,13 @@ export function ClientsSection({
     <section aria-label={t('clients.title')} style={{ display: 'grid', gap: SPACE.sm, padding: '16px 24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: SPACE.md }}>
         <h2 style={{ ...LABEL_STYLE, margin: 0 }}>{t('clients.title')}</h2>
-        <Button rank="secondary" onClick={() => { setDone(null); setDialog({ ...CLOSED, open: true }); }}>
+        <Button rank="secondary" onClick={() => { setDone(false); setDialog({ ...CLOSED, open: true }); }}>
           {t('clients.create.open')}
         </Button>
       </div>
       <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('clients.intro')}</p>
 
-      {done !== null && <StateBanner severity="valid" message={t('clients.create.done')} />}
-      {done?.warnings.map(w => (
-        <StateBanner key={w.code} severity="warning" code={w.code} message={getErrorMessage(w.code as ErrorCode, lang) ?? w.code} />
-      ))}
+      {done && <StateBanner severity="valid" message={t('clients.create.done')} />}
 
       {entities.status === 'loading' && <p style={{ margin: 0, fontSize: TEXT.small }}>{t('clients.loading')}</p>}
       {entities.status === 'failed' && <StateBanner severity="blocking" message={t('clients.failed')} />}
@@ -101,6 +99,7 @@ export function ClientsSection({
         <NewClientDialog
           countries={countryOptions}
           findings={dialog.findings}
+          notices={dialog.notices}
           busy={dialog.busy}
           onSubmit={draft => { void submit(draft); }}
           onClose={() => { setDialog(CLOSED); }}

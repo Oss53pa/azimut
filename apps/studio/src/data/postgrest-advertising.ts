@@ -13,6 +13,7 @@ import {
 import { RepositoryError } from './site-repository.js';
 import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
 import type { AdvertisingData } from './advertising-data.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type PlacementRow = {
   readonly id: string; readonly code: string; readonly level_id: string; readonly node_id: string | null;
@@ -62,7 +63,7 @@ export async function loadAdvertisingData(config: PostgrestConfig, siteId: strin
       id: r.id, code: r.code, level_id: r.level_id, node_id: r.node_id, typology_key: r.typology_key,
       area_m2: finite('ad_placement', 'area_m2', r.area_m2),
     }))
-    .sort((a, b) => a.code.localeCompare(b.code) || a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.code, b.code) || codePointCompare(a.id, b.id));
 
   const bookings = bookingRows
     .map((r): AdBooking => {
@@ -72,11 +73,11 @@ export async function loadAdvertisingData(config: PostgrestConfig, siteId: strin
         advertiser_name: r.advertiser_name,
       };
     })
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const options = optionRows
     .map((r): AdOption => ({ id: r.id, placement_id: r.placement_id, expires_at: r.expires_at }))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const creatives = creativeRows
     .map((r): AdCreative => {
@@ -89,7 +90,7 @@ export async function loadAdvertisingData(config: PostgrestConfig, siteId: strin
         storage_path: r.storage_path, sanitation: r.sanitation, verdict: r.verdict, received_at: r.received_at,
       };
     })
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   return {
     registry: { ...EMPTY_AD_REGISTRY, placements, bookings, options, creatives },

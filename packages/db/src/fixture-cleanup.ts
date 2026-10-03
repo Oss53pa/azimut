@@ -57,16 +57,18 @@ export async function deleteOrgFixture(
   const order = dependencyOrder(scoped, await foreignKeys(read));
   const toClear = order.filter(table => !isInsertOnly(table));
 
-  await assertInsertOnlyEmpty(read, order, ids);
-
   // `organization` ne porte pas `org_id` : elle est la racine, et se retire en
-  // dernier, une fois que plus rien ne la référence.
+  // dernier, une fois que plus rien ne la référence. Les tables en insertion
+  // seule entrent dans la bascule sans entrer dans les suppressions : leur
+  // décompte doit se lire hors cloisonnement, sans quoi il rendrait zéro et le
+  // retrait échouerait plus loin, sur une clé, au lieu de se signaler ici.
   const visited = [...toClear, ROOT];
-  const forced = await forcedTables(read, visited);
+  const forced = await forcedTables(read, [...order, ROOT]);
   for (const table of forced) {
     await run(`alter table azimut.${table} no force row level security`);
   }
   try {
+    await assertInsertOnlyEmpty(read, order, ids);
     for (const table of toClear) {
       await run(`delete from azimut.${table} where org_id in (${ids})`);
     }

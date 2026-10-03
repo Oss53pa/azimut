@@ -1,7 +1,8 @@
 import { type JSX, useMemo, useState } from 'react';
-import { auditEvacuation, checkEdgeAvailability } from '@azimut/engine-graph';
+import { auditEvacuation } from '@azimut/engine-graph';
 import { renderEvacuationPlan, type EvacuationStats } from '@azimut/engine-layout';
 import type { Finding } from '@azimut/core-model';
+import { isBound } from '@azimut/core-model';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { ViewId } from '../views.js';
@@ -12,6 +13,7 @@ import {
 import { FindingList } from './message-schedule/FindingList.js';
 import { siteLabels } from './register/labels.js';
 import { formatNumber } from './register/format.js';
+import { closuresOnEvacuation } from './closures/closure-rows.js';
 import { EVACUATION_PREVIEW_THEME, PLAN_PREVIEW_FONT_FAMILY } from './plans/plan-preview.js';
 
 type EvacuationViewProps = {
@@ -47,16 +49,14 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
     return audit.ok ? audit.value.uncovered_nodes : [];
   }, [site]);
 
-  // A5.3 — le plan, imprimé et durable, ne voit pas les fermetures ; le
-  // contrôle les montre, pour qu'une décision humaine soit prise sur la période.
-  const closureFindings = useMemo(
-    () => checkEdgeAvailability(site).filter(f => f.code === 'GRAPH.EVACUATION_EDGE_CLOSURE'),
-    [site],
-  );
+  // O11 — le plan, imprimé et durable, ne voit pas les fermetures
+  // temporaires ; l'écran les montre, pour qu'une décision humaine soit prise
+  // sur la période. Ce n'est pas une anomalie de moteur : aucun code.
+  const evacuationClosures = useMemo(() => closuresOnEvacuation(site), [site]);
 
   // T-2.10 : un plan d'évacuation ne se produit que sous un paquet de règles
   // rattaché. Sans lui, aucun rendu n'est tenté, pas même un aperçu.
-  const bound = site.site.rules_pack_id !== null;
+  const bound = isBound(site.rules_bindings);
 
   const plans = useMemo<readonly LevelPlan[]>(() => (!bound ? [] : site.levels.map(level => {
     const rendered = renderEvacuationPlan(site, level.id, {
@@ -138,14 +138,15 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
   return (
     <div>
       {header}
-      {closureFindings.length > 0 && (
+      {evacuationClosures.length > 0 && (
         <div style={{ marginBottom: SPACE.lg }}>
           <StateBanner
             severity="warning"
-            code="GRAPH.EVACUATION_EDGE_CLOSURE"
-            message={t('evacuation.closures', { count: closureFindings.length })}
+            message={t('evacuation.closures', { count: evacuationClosures.length })}
           >
-            <FindingList findings={closureFindings} empty="" />
+            <ul style={{ margin: 0, paddingLeft: SPACE.lg }}>
+              {evacuationClosures.map(c => <li key={c.id}>{`${c.from_at} → ${c.to_at} · ${c.reason}`}</li>)}
+            </ul>
           </StateBanner>
         </div>
       )}

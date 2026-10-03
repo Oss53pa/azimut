@@ -23,7 +23,7 @@
     "postgres": "^3.4.9"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.config.json",
     "build": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node scripts/migrate.js",
@@ -32,6 +32,7 @@
     "db:seed:reference": "node scripts/seed-reference.js"
   },
   "devDependencies": {
+    "@types/node": "^26.4.1",
     "drizzle-kit": "^0.31.10"
   }
 }

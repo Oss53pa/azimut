@@ -1,4 +1,3 @@
-import { sha256Hex } from '@azimut/core-model';
 import type { Outcome, Finding } from '@azimut/core-model';
 import {
   manifestSchema,
@@ -8,6 +7,7 @@ import {
 } from './schema.js';
 import type { LoadedRulesPack } from './rule-resolution.js';
 import { groupAndCheckAmbiguity } from './rule-resolution.js';
+import { computeRulesPackChecksum } from './pack-empreinte.js';
 
 /**
  * Load a pack from its manifest JSON string and rule-file contents. Parses and
@@ -61,23 +61,8 @@ export function loadPackDirectoryParsed(
   manifest: Manifest,
   ruleFileContents: Readonly<Record<string, string>>,
 ): Outcome<LoadedRulesPack> {
-  const contentForChecksum = manifest.files
-    .map((f) => ruleFileContents[f] ?? '')
-    .join('');
-  const computed = `sha256:${sha256Hex(contentForChecksum)}`;
-  if (computed !== manifest.checksum) {
-    return {
-      ok: false,
-      findings: [{
-        code: 'RULES.PACK_CHECKSUM_MISMATCH',
-        severity: 'blocking',
-        entity: null,
-        params: { expected: manifest.checksum, computed },
-        ruleRef: null,
-      }],
-    };
-  }
-
+  // D3.4 — un fichier annoncé et introuvable se nomme d'abord : l'empreinte
+  // d'un paquet incomplet ne dirait rien de plus qu'un écart.
   const missingFiles: Finding[] = [];
   for (const fileName of manifest.files) {
     if (!(fileName in ruleFileContents)) {
@@ -92,6 +77,23 @@ export function loadPackDirectoryParsed(
   }
   if (missingFiles.length > 0) {
     return { ok: false, findings: missingFiles };
+  }
+
+  // D3.4 et D7.2 — l'intégrité, dans la forme canonique commune.
+  const checksum = computeRulesPackChecksum(manifest.key, manifest.files, ruleFileContents);
+  if (!checksum.ok) return checksum;
+  const computed = checksum.value;
+  if (computed !== manifest.checksum) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'RULES.PACK_CHECKSUM_MISMATCH',
+        severity: 'blocking',
+        entity: null,
+        params: { expected: manifest.checksum, computed },
+        ruleRef: null,
+      }],
+    };
   }
 
   const extraFiles = Object.keys(ruleFileContents).filter(

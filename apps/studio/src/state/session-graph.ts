@@ -10,54 +10,25 @@
  * empreinte calculée sur un graphe amputé vaudrait pour un graphe qui
  * n'existe pas, et validerait ce que personne n'a saisi.
  */
-import type { Edge, GraphNode, VerticalLink } from '@azimut/core-model';
+import type { BuildingLink, Edge, GraphNode, VerticalLink } from '@azimut/core-model';
 import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
+import { text, numeric, boolean, structured, point } from './row-values.js';
 
 export type SessionGraph = {
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly vertical_links: readonly VerticalLink[];
+  /** M01.S10 — les passages entre bâtiments que la session porte. */
+  readonly building_links: readonly BuildingLink[];
   /** Identifiants des lignes que le magasin porte et qui n'ont pas pu être lues. */
   readonly unreadable: readonly string[];
 };
 
-function text(values: Readonly<Record<string, unknown>>, key: string): string | null {
-  const value = values[key];
-  return typeof value === 'string' ? value : null;
-}
-
-function numeric(values: Readonly<Record<string, unknown>>, key: string): number | null {
-  const value = values[key];
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
-    return Number(value);
-  }
-  return null;
-}
-
-function boolean(values: Readonly<Record<string, unknown>>, key: string): boolean {
-  const value = values[key];
-  return value === true || value === 'true';
-}
-
-function point(raw: string | null): { x_m: number; y_m: number } | null {
-  if (raw === null) return null;
-  try {
-    const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== 'object' || parsed === null) return null;
-    const { x_m, y_m } = parsed as { x_m?: unknown; y_m?: unknown };
-    if (typeof x_m !== 'number' || typeof y_m !== 'number') return null;
-    return { x_m, y_m };
-  } catch {
-    return null;
-  }
-}
-
 function readNode(row: StoredRow): GraphNode | null {
   const kind = text(row.values, 'kind');
   const levelId = text(row.values, 'level_id');
-  const position = point(text(row.values, 'position'));
+  const position = point(structured(row.values, 'position'));
   if (kind === null || levelId === null || position === null) return null;
   return {
     id: row.id,
@@ -107,6 +78,21 @@ function readVerticalLink(row: StoredRow): VerticalLink | null {
   };
 }
 
+function readBuildingLink(row: StoredRow): BuildingLink | null {
+  const edgeId = text(row.values, 'edge_id');
+  const from = text(row.values, 'from_building_id');
+  const to = text(row.values, 'to_building_id');
+  if (edgeId === null || from === null || to === null) return null;
+  return {
+    id: row.id,
+    org_id: text(row.values, 'org_id') ?? '',
+    edge_id: edgeId,
+    from_building_id: from,
+    to_building_id: to,
+    sheltered: boolean(row.values, 'sheltered'),
+  };
+}
+
 export function readSessionGraph(session: SessionState): SessionGraph {
   const unreadable: string[] = [];
 
@@ -124,6 +110,7 @@ export function readSessionGraph(session: SessionState): SessionGraph {
     nodes: collect('node', readNode),
     edges: collect('edge', readEdge),
     vertical_links: collect('vertical_link', readVerticalLink),
+    building_links: collect('building_link', readBuildingLink),
     unreadable,
   };
 }

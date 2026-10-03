@@ -1,0 +1,137 @@
+import { empreinte } from './empreinte.js';
+import { roundMm } from './round.js';
+import { rulesPacksInRoleOrder } from './rules-bindings.js';
+import type { BoundRulesPacks } from './rules-bindings.js';
+import type { Finding, Outcome } from './outcome.js';
+
+/**
+ * T-2.14a §3 et D7.2 — l'empreinte de contenu d'une face résolue, et la seule.
+ *
+ * D7.2 : « Une seule implantation. L'empreinte est calculée par une seule
+ * fonction, employée par tous les appelants. Deux implantations équivalentes
+ * aujourd'hui divergeront demain, et l'invariant 4 repose sur elles. » Elle vit
+ * ici, dans `core-model`, parce que deux moteurs l'emploient — la composition
+ * et la péremption — et qu'aucun moteur ne dépend d'un autre (A4.1). L'annexe
+ * T, §2, y range déjà la fonction d'empreinte.
+ *
+ * T-2.14a §3 — Content empreinte of a resolved face.
+ *
+ * Exactly seven elements go into the hash (§3.1): the resolved content block by
+ * block in order, the template key and version, the charter id and version, the
+ * rules packs bound to the site — base and overlay, each with its key and
+ * version, in role order (§3.1.4, D7.1) —, the active languages (sorted), the computed
+ * dimensions in whole millimetres, and the referenced pictogram ids (sorted).
+ *
+ * Everything else is excluded (§3.2): support and face ids, any timestamp,
+ * author/reviewer ids, the version number, the artwork path, the version state,
+ * and the placement inputs (render order, azimuth, reading distance) — these
+ * only influence the computed dimensions, which are already in the hash.
+ *
+ * The input is self-contained on purpose: the caller maps its resolved face
+ * into this shape (one entry per block, in block order, carrying that block's
+ * resolved content as plain data).
+ */
+export type FaceContentHashInput = {
+  /** Resolved content of each block, in block order (§3.1.1). */
+  readonly blocks: readonly unknown[];
+  /** Template key and version (§3.1.2) — both, or neither is representable. */
+  readonly template: { readonly key: string; readonly version: string };
+  /** Charter id and version (§3.1.3); the whole pair omitted from the hash when absent. */
+  readonly charter?: { readonly id: string; readonly version: string };
+  /**
+   * §3.1.4 and D7.1 — the packs bound to the site, base and overlay, each with
+   * its key and version. Both bindings enter the hash, never the result of
+   * their merge. No pack at all is a blocking anomaly (§8).
+   */
+  readonly rules_packs: BoundRulesPacks;
+  /** Active languages of the face (§3.1.5); sorted here. */
+  readonly active_langs: readonly string[];
+  /** Computed dimensions in millimetres (§3.1.6); rounded here, null/≤0 is an error (§8). */
+  readonly width_mm: number | null;
+  readonly height_mm: number | null;
+  /** Referenced pictogram ids (§3.1.7); sorted here. */
+  readonly pictogram_ids: readonly string[];
+};
+
+function blocking(code: string, params: Record<string, string | number>): Finding {
+  return { code, severity: 'blocking', entity: null, params, ruleRef: null };
+}
+
+/**
+ * D1.4 — round a computed dimension to whole millimetres through the single
+ * rounding module, or `null` when it is absent, non-finite, zero or negative.
+ * The dimension enters the hash rounded, not rejected for being non-integer:
+ * §3.1.6 hashes "les dimensions calculées en millimètres entiers".
+ */
+function normDim(value: number | null): number | null {
+  if (value === null || !Number.isFinite(value)) return null;
+  const mm = roundMm(value);
+  return mm > 0 ? mm : null;
+}
+
+/** Render a rejected dimension for a finding param: the finite number itself, or
+ * the literal text 'NaN'/'Infinity'/'-Infinity'/'null' (a non-finite number
+ * would JSON-serialize to null and lose the reason). */
+function dimParam(value: number | null): string | number {
+  if (value === null) return 'null';
+  return Number.isFinite(value) ? value : String(value);
+}
+
+/**
+ * Compute the content empreinte of a face, or a blocking finding when it cannot
+ * be computed. Refuses (no hash) when the rules pack is absent (§8), when a
+ * computed dimension is null, zero or negative after rounding (§8), or when the
+ * resolved content cannot be canonically serialized (§4) — refusing is the
+ * correct behaviour, an empreinte on incomplete data would be worse than none.
+ */
+export function computeFaceContentHash(
+  input: FaceContentHashInput,
+): Outcome<string> {
+  const packs = rulesPacksInRoleOrder(input.rules_packs);
+  if (packs.length === 0 || packs.some(pack => pack.key === '')) {
+    return { ok: false, findings: [blocking('RULES.PACK_NOT_BOUND', {})] };
+  }
+  const width_mm = normDim(input.width_mm);
+  const height_mm = normDim(input.height_mm);
+  if (width_mm === null || height_mm === null) {
+    // Report the raw value; a non-finite one (NaN/±Infinity) is not caught by
+    // `?? 'null'` and JSON-serializes to null downstream, so render it as text.
+    return {
+      ok: false,
+      findings: [blocking('DATA.FACE_DIMENSIONS_INVALID', {
+        width_mm: dimParam(input.width_mm),
+        height_mm: dimParam(input.height_mm),
+      })],
+    };
+  }
+
+  // The object carries only the seven §3.1 elements. `empreinte` omits any
+  // absent field (charter), so a face with no charter and a face whose charter
+  // pair is absent hash identically (§4.3 / §5). Unordered sets are sorted;
+  // block order is preserved.
+  const value = {
+    blocks: input.blocks,
+    template: { key: input.template.key, version: input.template.version },
+    charter: input.charter !== undefined
+      ? { id: input.charter.id, version: input.charter.version }
+      : undefined,
+    rules_packs: packs,
+    langs: [...input.active_langs].sort(),
+    dimensions: { width_mm, height_mm },
+    pictograms: [...input.pictogram_ids].sort(),
+  };
+
+  // §4 canonical serialization throws on non-plain / non-finite / null-valued
+  // content the type system cannot exclude (blocks are `unknown`). Turn that
+  // into a blocking Outcome rather than letting it escape as an exception.
+  try {
+    return { ok: true, value: empreinte(value), warnings: [] };
+  } catch (err) {
+    return {
+      ok: false,
+      findings: [blocking('DATA.FACE_CONTENT_UNSERIALIZABLE', {
+        detail: err instanceof Error ? err.message : String(err),
+      })],
+    };
+  }
+}

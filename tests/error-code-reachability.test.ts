@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ERROR_CATALOG } from '@azimut/core-model';
+import { ERROR_CATALOG, ANOMALY_DOMAINS } from '@azimut/core-model';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -97,6 +97,25 @@ function stripComments(source: string): string {
 
 const CODE_LITERAL = /'([A-Z][A-Z0-9_]*\.[A-Z0-9_]+)'/g;
 
+/**
+ * Ce que le balayage textuel prend pour un code sans en être un.
+ *
+ * Le motif cherche une chaîne en majuscules séparée par un point, et deux
+ * familles y répondent sans être des anomalies : les références de section
+ * citées en `ruleRef`, `A5.3` ou `M02.W11`, et les codes de règle d'un paquet,
+ * `LEGIBILITY.MIN_CHAR_HEIGHT` ou `CONTRAST.MIN_TEXT_ON_BACKGROUND`, qui
+ * vivent dans un autre espace de noms (D3.3).
+ *
+ * Le départage se fait sur le domaine : D2.1 fixe la liste fermée des domaines
+ * d'anomalie, et `ANOMALY_DOMAINS` la porte. Écarter par le domaine plutôt que
+ * par une liste d'exceptions évite qu'un vrai code nouveau passe au travers
+ * parce que personne n'a pensé à l'inscrire.
+ */
+function isAnomalyCode(code: string): boolean {
+  const domain = code.slice(0, code.indexOf('.'));
+  return (ANOMALY_DOMAINS as readonly string[]).includes(domain);
+}
+
 describe('D2 — tout code du catalogue est levé, ou déclaré non levé et motivé', () => {
   // Le catalogue se lit comme un objet, non comme du texte. Le balayage
   // textuel prenait aussi les codes de `RETIRED_CODES` pour des déclarations,
@@ -142,6 +161,34 @@ describe('D2 — tout code du catalogue est levé, ou déclaré non levé et mot
     const unknown = listed.filter(code => !declared.includes(code));
     expect(unknown, `Codes inscrits mais absents du catalogue D2 :\n${unknown.join('\n')}`)
       .toHaveLength(0);
+  });
+
+  /**
+   * Le sens qui manquait.
+   *
+   * L'essai vérifiait qu'un code du catalogue est levé. Il ne vérifiait pas
+   * qu'un code levé est au catalogue, et `DATA.TIMEZONE_REQUIRED` est passé
+   * par ce trou : levé par le formulaire de création de M1 (partie M) depuis
+   * l'origine, absent du catalogue, donc sans entrée de dictionnaire — l'écran
+   * affichait le code brut à l'opérateur.
+   *
+   * D2.2 : « Toute anomalie produite par un moteur figure dans ce catalogue.
+   * Ajouter un code demande une entrée ici dans le même commit. » Le contrôle
+   * rend la règle opposable dans les deux sens.
+   */
+  it('aucun code levé ne manque au catalogue', () => {
+    const declaredSet = new Set(declared);
+    const undeclared = [...raised]
+      .filter(code => isAnomalyCode(code) && !declaredSet.has(code))
+      .sort();
+    expect(
+      undeclared,
+      'Codes levés par le code de production et absents du catalogue D2 :\n'
+      + undeclared.join('\n')
+      + '\n\nUn code hors catalogue n’a ni gravité déclarée ni libellé : l’écran '
+      + 'montre le code brut. Inscrivez-le au catalogue et aux deux dictionnaires, '
+      + 'dans le même commit.',
+    ).toHaveLength(0);
   });
 
   it('chaque raison inscrite dit quelque chose', () => {
