@@ -18,6 +18,7 @@
 
 import type { Finding, Outcome } from '@azimut/core-model';
 import type { MessageSchedule, ScheduleState } from './message-schedule.js';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Déclencheurs et table de transition
@@ -260,14 +261,14 @@ function approveConditions(
 ): Finding[] {
   const findings: Finding[] = [];
 
-  for (const id of [...context.openAnnotationIds].sort((a, b) => a.localeCompare(b))) {
+  for (const id of [...context.openAnnotationIds].sort((a, b) => codePointCompare(a, b))) {
     findings.push(refusal('REVIEW.ANNOTATION_OPEN', {}, {
       kind: 'review_annotation', id,
     }, 'R12'));
   }
 
   const stale = (context.schedule?.lines ?? []).filter(line => line.stale);
-  for (const line of [...stale].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const line of [...stale].sort((a, b) => codePointCompare(a.id, b.id))) {
     findings.push(refusal('WAYFIND.SCHEDULE_STALE', {
       support_id: line.support_id,
     }, { kind: 'message_line', id: line.id }, 'R12', 'warning'));

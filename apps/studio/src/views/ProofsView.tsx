@@ -2,7 +2,7 @@ import { type JSX, useMemo } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { composeFace } from '@azimut/engine-graph';
-import { admittedEvents } from '@azimut/core-model';
+import { admittedEvents, codePointCompare } from '@azimut/core-model';
 import type { SupportVersionEvent } from '@azimut/core-model';
 import type { FaceTemplate, SupportVersionState, SupportVersion } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
@@ -69,7 +69,7 @@ export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
       }));
     }
     return [...site.face_templates]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map((template): FaceStatus => {
         const result = composeFace({
           site,
@@ -214,7 +214,7 @@ export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
         <Panel title={t('proofs.panel.versions')} note={t('proofs.panel.versions.note')} padded={false}>
           <DataTable
             columns={versionColumns}
-            rows={[...versions].sort((a, b) => a.support_id.localeCompare(b.support_id) || a.version - b.version)}
+            rows={[...versions].sort((a, b) => codePointCompare(a.support_id, b.support_id) || a.version - b.version)}
             rowKey={v => v.id}
             empty={t('proofs.versions.empty')}
           />

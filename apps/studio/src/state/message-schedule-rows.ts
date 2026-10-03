@@ -13,6 +13,7 @@
 import type { MessageLine, MessageSchedule } from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 import type { Exclusion } from './message-schedule-commands.js';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Identifiant stable — partie R, sections R5 et R11
@@ -119,7 +120,7 @@ function stateOf(
 }
 
 function compareRows(a: ScheduleRow, b: ScheduleRow): number {
-  const byId = (a.stableId ?? a.line.support_id).localeCompare(b.stableId ?? b.line.support_id);
+  const byId = codePointCompare(a.stableId ?? a.line.support_id, b.stableId ?? b.line.support_id);
   if (byId !== 0) return byId;
   return a.line.face_index - b.line.face_index || a.line.block_index - b.line.block_index;
 }
@@ -168,14 +169,14 @@ export type FilteredRows = {
  * plage `̀`–`ͯ` retire ensuite. Une recherche de « gare » trouve
  * ainsi « Garé » sans qu'aucune table d'équivalence ne soit écrite à la main.
  */
-export function foldForSearch(value: string): string {
+export function foldForSearch(value: string, lang: string): string {
   return value
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .toLocaleLowerCase('fr');
+    .toLocaleLowerCase(lang);
 }
 
-function searchableText(row: ScheduleRow): string {
+function searchableText(row: ScheduleRow, lang: string): string {
   const parts: string[] = [
     row.stableId ?? '',
     row.supportCode ?? '',
@@ -184,15 +185,16 @@ function searchableText(row: ScheduleRow): string {
   for (const entry of row.line.entries) {
     for (const written of Object.values(entry.text)) parts.push(written);
   }
-  return foldForSearch(parts.join(' '));
+  return foldForSearch(parts.join(' '), lang);
 }
 
 export function applyFilters(
   rows: readonly ScheduleRow[],
   filters: ScheduleFilters,
+  lang: string,
 ): FilteredRows {
-  const needle = foldForSearch(filters.search.trim());
-  const kept = rows.filter(row => matches(row, filters, needle));
+  const needle = foldForSearch(filters.search.trim(), lang);
+  const kept = rows.filter(row => matches(row, filters, needle, lang));
   return {
     rows: kept,
     hidden: rows.length - kept.length,
@@ -204,6 +206,7 @@ function matches(
   row: ScheduleRow,
   filters: ScheduleFilters,
   needle: string,
+  lang: string,
 ): boolean {
   // R9 : masquées par défaut, visibles par le filtre « Écartées ».
   if (row.state === 'excluded' && !filters.showExcluded) return false;
@@ -227,7 +230,7 @@ function matches(
 
   if (filters.staleOnly && row.state !== 'stale') return false;
   if (filters.anomaliesOnly && row.findings.length === 0) return false;
-  if (needle !== '' && !searchableText(row).includes(needle)) return false;
+  if (needle !== '' && !searchableText(row, lang).includes(needle)) return false;
 
   return true;
 }
@@ -297,7 +300,7 @@ export function groupRows(
   }
 
   return [...groups.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a, b) => codePointCompare(a[0], b[0]))
     .map(([key, list]) => ({
       key,
       heading: key === UNATTACHED ? null : key,

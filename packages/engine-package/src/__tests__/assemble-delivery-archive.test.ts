@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { assembleDeliveryArchive } from '../assemble-delivery-archive.js';
 import type { DeliveryItem } from '../assemble-delivery-archive.js';
+import { codePointCompare } from '@azimut/core-model';
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();
@@ -66,7 +67,7 @@ describe('D11 — assembleDeliveryArchive', () => {
     expect(index.quantities).toEqual(QUANTITIES);
     // Entries are sorted by file name.
     const names = index.entries.map((e) => e.file_name);
-    expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
+    expect(names).toEqual([...names].sort((a, b) => codePointCompare(a, b)));
   });
 
   it('is deterministic regardless of input order (INV-4)', () => {

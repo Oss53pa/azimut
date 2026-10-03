@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * J4 — Revision annotations carry a reviewer's remark on a face, a support or a
@@ -31,7 +32,7 @@ export function guardReviewClosure(
   annotations: readonly ReviewAnnotation[],
 ): Outcome<null> {
   const findings: Finding[] = [];
-  const sorted = [...annotations].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...annotations].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const annotation of sorted) {
     if (annotation.state === 'open') {

@@ -1,5 +1,6 @@
 import type { Finding, Outcome } from './outcome.js';
 import type { FontAsset } from './font-embedding.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * G5.1 / G5.2 — Font registry checks beyond embedding.
@@ -41,7 +42,7 @@ export function guardFontMetrics(
   records: readonly FontMetricsRecord[],
 ): Outcome<null> {
   const findings: Finding[] = [];
-  const sorted = [...records].sort((a, b) => a.font_id.localeCompare(b.font_id));
+  const sorted = [...records].sort((a, b) => codePointCompare(a.font_id, b.font_id));
 
   for (const record of sorted) {
     const reason = metricsReason(record);
@@ -72,7 +73,7 @@ export function auditFontLicences(
   fonts: readonly FontAsset[],
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...fonts].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...fonts].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const font of sorted) {
     if (font.licence_kind === 'unknown') {

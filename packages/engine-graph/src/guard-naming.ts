@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H2.2 — A site is oriented first by how it is named. Naming rules are declared
@@ -46,7 +47,7 @@ export function guardNamingCollisions(
   const findings: Finding[] = [];
   for (const members of groups.values()) {
     if (members.length < 2) continue;
-    const sortedMembers = [...members].sort((a, b) => a.id.localeCompare(b.id));
+    const sortedMembers = [...members].sort((a, b) => codePointCompare(a.id, b.id));
     const collidingIds = sortedMembers.map((m) => m.id).join(',');
     for (const entity of sortedMembers) {
       findings.push({
@@ -63,7 +64,7 @@ export function guardNamingCollisions(
     }
   }
 
-  findings.sort((a, b) => (a.entity?.id ?? '').localeCompare(b.entity?.id ?? ''));
+  findings.sort((a, b) => codePointCompare(a.entity?.id ?? '', b.entity?.id ?? ''));
 
   if (findings.length > 0) {
     return { ok: false, findings };

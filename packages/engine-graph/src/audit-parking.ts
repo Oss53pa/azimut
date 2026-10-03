@@ -2,9 +2,7 @@ import type {
   Finding, Footprint, SiteZone, SiteFact,
 } from '@azimut/core-model';
 import {
-  isParkingZone, isParkingSpaceFootprint, declaredInteger, declaredText,
-  PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY,
-  PUBLISHABLE_FACT_STATUSES,
+  isParkingZone, isParkingSpaceFootprint, declaredInteger, declaredText, PARKING_CAPACITY_KEY, PARKING_UNDIGITIZED_SPACES_KEY, PARKING_UNDIGITIZED_REASON_KEY, PUBLISHABLE_FACT_STATUSES, codePointCompare,
 } from '@azimut/core-model';
 
 /**
@@ -143,7 +141,7 @@ export function auditParking(
 
   const parkings = input.zones
     .filter(zone => isParkingZone(zone.kind))
-    .sort((l, r) => l.id.localeCompare(r.id));
+    .sort((l, r) => codePointCompare(l.id, r.id));
   const spaces = new Map(input.footprints
     .filter(footprint => isParkingSpaceFootprint(footprint.kind))
     .map(footprint => [footprint.id, footprint]));
@@ -232,7 +230,7 @@ function unexplainedSurfaces(
   facts: readonly SiteFact[],
 ): readonly Finding[] {
   const findings: Finding[] = [];
-  for (const id of [...spaces.keys()].sort((l, r) => l.localeCompare(r))) {
+  for (const id of [...spaces.keys()].sort((l, r) => codePointCompare(l, r))) {
     const target = { kind: 'footprint', id };
     const declared = declaredInteger(facts, PARKING_UNDIGITIZED_SPACES_KEY, target);
     if (declared === null) continue;
@@ -282,6 +280,6 @@ function unpublishableFacts(
       params: { status: fact.status, key: fact.key },
       ruleRef: 'M01.S11',
     }))
-    .sort((l, r) => l.entity.id.localeCompare(r.entity.id)
-      || String(l.params['key']).localeCompare(String(r.params['key'])));
+    .sort((l, r) => codePointCompare(l.entity.id, r.entity.id)
+      || codePointCompare(String(l.params['key']), String(r.params['key'])));
 }

@@ -4,6 +4,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 export type ProofValidationResult = {
   readonly total_proofs: number;
@@ -28,7 +29,7 @@ export function validateProofs(
   }
 
   const sortedProofs = [...proofs].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const proof of sortedProofs) {

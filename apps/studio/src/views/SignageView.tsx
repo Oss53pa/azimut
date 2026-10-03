@@ -3,7 +3,7 @@ import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { guardCharterOnSafety, checkFaceContentFit } from '@azimut/engine-graph';
 import type { CharterApplication, TextMeasure } from '@azimut/engine-graph';
-import { supportTypologyOf, type Finding } from '@azimut/core-model';
+import { supportTypologyOf, type Finding, codePointCompare } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import {
   ScreenHeader, MetricRow, Panel, PanelGrid, Note, Tag,
@@ -52,7 +52,7 @@ export function SignageView({ onNavigate }: SignageViewProps): JSX.Element {
   const { t, lang } = useI18n();
 
   const templates = useMemo(
-    () => [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id)),
+    () => [...site.face_templates].sort((a, b) => codePointCompare(a.id, b.id)),
     [site],
   );
   const [selectedId, setSelectedId] = useState(templates[0]?.id ?? '');

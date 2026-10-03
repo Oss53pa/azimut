@@ -1,4 +1,4 @@
-import { buildFileName, buildArchiveName, canonicalSerialize } from '@azimut/core-model';
+import { buildFileName, buildArchiveName, canonicalSerialize, codePointCompare } from '@azimut/core-model';
 import type { FileNameParts, Outcome, Finding } from '@azimut/core-model';
 
 /**
@@ -152,7 +152,7 @@ export function assembleDeliveryArchive(
   }
 
   // Deterministic order: by file name.
-  const sorted = [...named].sort((a, b) => a.name.localeCompare(b.name));
+  const sorted = [...named].sort((a, b) => codePointCompare(a.name, b.name));
 
   const entries: DeliveryIndexEntry[] = [];
   let totalBytes = 0;

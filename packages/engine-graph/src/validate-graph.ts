@@ -17,6 +17,7 @@ import {
   buildingIsolatedFindings,
   missingDestinationNameFindings,
 } from './checks-structure.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type ValidationResult = {
   readonly valid: boolean;
@@ -136,7 +137,7 @@ function unreachableFromEntranceFindings(
   }
 
   const findings: Finding[] = [];
-  const sorted = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...nodes].sort((a, b) => codePointCompare(a.id, b.id));
   for (const n of sorted) {
     if (n.kind === 'entrance') continue;
     if (!reachable.has(n.id)) {
@@ -158,7 +159,7 @@ function unreachableDestinationFindings(
 ): Finding[] {
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     if (!reachableFromEntrance.has(dest.node_id)) {
@@ -195,7 +196,7 @@ function deadEndFindings(
   ]);
 
   const findings: Finding[] = [];
-  const sorted = [...nodes].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...nodes].sort((a, b) => codePointCompare(a.id, b.id));
   for (const n of sorted) {
     const d = degree.get(n.id) ?? 0;
     if (d === 1 && !justified.has(n.kind)) {

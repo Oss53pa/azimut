@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * I5.6 — Tour surveys are captured offline (an installable web app, reusing the
@@ -23,7 +24,7 @@ export type SurveyRecord = {
 export function auditSurveySync(
   surveys: readonly SurveyRecord[],
 ): Outcome<null> {
-  const sorted = [...surveys].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...surveys].sort((a, b) => codePointCompare(a.id, b.id));
   const warnings: Finding[] = [];
 
   for (const survey of sorted) {

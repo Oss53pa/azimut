@@ -2,13 +2,14 @@ import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { renderPreview } from './signage/face-preview.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export function FacesView(): JSX.Element {
   const site = useSiteData();
   const { t, lang } = useI18n();
 
   const templates = useMemo(
-    () => [...site.face_templates].sort((a, b) => a.id.localeCompare(b.id)),
+    () => [...site.face_templates].sort((a, b) => codePointCompare(a.id, b.id)),
     [site],
   );
 

@@ -8,6 +8,7 @@ import {
   ScreenHeader, MetricRow, Panel, DataTable, Tag, Note, StateBanner,
   SPACE, type Metric, type Column,
 } from '../components/ui/index.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type PortfolioViewProps = {
   readonly currentKey: string;
@@ -52,7 +53,7 @@ function auditSite(site: SiteData): readonly Finding[] {
  * faire semblant.
  */
 export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const repository = useMemo(() => appRepository(), []);
   const { state, loaded, total } = useAllSites(repository);
 
@@ -79,8 +80,8 @@ export function PortfolioView({ currentKey, onOpenSite }: PortfolioViewProps): J
         rulesPack: rulesPackLabel(site.rules_bindings),
       });
     }
-    return out.sort((a, b) => a.name.localeCompare(b.name));
-  }, [state]);
+    return out.sort((a, b) => a.name.localeCompare(b.name, lang) || codePointCompare(a.key, b.key));
+  }, [state, lang]);
 
   const totals = lines.reduce(
     (acc, line) => ({

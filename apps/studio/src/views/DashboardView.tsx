@@ -6,7 +6,7 @@ import { evaluatePublishGate } from '../publish-gate.js';
 import type { Finding } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import { guardPlacementBookings, auditOptionExpiry } from '../domain/ad-planning.js';
-import { EMPTY_INSPECTION_REGISTRY, EMPTY_WORKSITE_REGISTRY } from '@azimut/core-model';
+import { EMPTY_INSPECTION_REGISTRY, EMPTY_WORKSITE_REGISTRY, codePointCompare } from '@azimut/core-model';
 import { EMPTY_ADVERTISING_DATA, loadAdvertising, loadInspection, loadWorksite, useRegistry } from '../data/index.js';
 import { syncFindings } from './operations/rounds.js';
 import { openReserveFindings } from './worksite/rows.js';
@@ -241,5 +241,5 @@ const SEVERITY_RANK: Readonly<Record<string, number>> = {
 
 function bySeverity(a: Finding, b: Finding): number {
   return (SEVERITY_RANK[a.severity] ?? 3) - (SEVERITY_RANK[b.severity] ?? 3)
-    || a.code.localeCompare(b.code);
+    || codePointCompare(a.code, b.code);
 }

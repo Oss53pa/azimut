@@ -19,6 +19,7 @@ import type {
   MessageSchedule,
   WayfindingRules,
 } from './message-schedule.js';
+import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Péremption
@@ -109,7 +110,7 @@ export function checkMessageSchedule(
   const max = rules.max_destinations_per_face;
   if (max !== null) {
     const counts = countDestinationsPerFace(schedule.lines);
-    const keys = [...counts.keys()].sort((a, b) => a.localeCompare(b));
+    const keys = [...counts.keys()].sort((a, b) => codePointCompare(a, b));
     for (const key of keys) {
       const count = counts.get(key) ?? 0;
       if (count <= max) continue;
@@ -129,7 +130,7 @@ export function checkMessageSchedule(
   for (const line of schedule.lines) {
     if (line.information_level === null) supportsWithoutLevel.add(line.support_id);
   }
-  for (const supportId of [...supportsWithoutLevel].sort((a, b) => a.localeCompare(b))) {
+  for (const supportId of [...supportsWithoutLevel].sort((a, b) => codePointCompare(a, b))) {
     findings.push({
       code: 'WAYFIND.NO_INFORMATION_LEVEL',
       severity: 'blocking',

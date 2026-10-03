@@ -5,6 +5,7 @@ import type {
   Outcome,
 } from '@azimut/core-model';
 import { isEdgeTraversableFrom, buildExcludedKindsSet } from './edge-traversal.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type DecisionPoint = {
   readonly node_id: string;
@@ -45,7 +46,7 @@ export function deriveDecisionPoints(
 
   const points: DecisionPoint[] = [];
   const sorted = [...site.graph.nodes].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   for (const n of sorted) {

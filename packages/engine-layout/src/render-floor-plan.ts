@@ -10,7 +10,7 @@ import type {
   Finding,
 } from '@azimut/core-model';
 import {
-  roundSvg, parkingSpacesOfLevel, accessibleSpaceMark,
+  roundSvg, parkingSpacesOfLevel, accessibleSpaceMark, codePointCompare,
 } from '@azimut/core-model';
 import { accessibleMarkSvg } from './parking-mark.js';
 
@@ -299,7 +299,7 @@ export function renderFloorPlan(
   // Les places d'abord : c'est le sol, les bâtiments s'y posent. Les dessiner
   // après recouvrirait une empreinte de bâti par une place.
   const sortedParkings = [...data.parkings].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const park of sortedParkings) {
     if (park.geometry.vertices.length < 3) continue;
@@ -326,7 +326,7 @@ export function renderFloorPlan(
   // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait — tombe avec
   // lui.
   const sortedUndigitized = [...data.undigitized].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const area of sortedUndigitized) {
     const verts = area.geometry.vertices;
@@ -364,7 +364,7 @@ export function renderFloorPlan(
     }
     if (mark.pictogram !== null) {
       for (const space of [...data.accessible].sort(
-        (a, b) => a.id.localeCompare(b.id),
+        (a, b) => codePointCompare(a.id, b.id),
       )) {
         const projected = space.geometry.vertices.map((v) => tx(v, t));
         parts.push(accessibleMarkSvg(
@@ -375,7 +375,7 @@ export function renderFloorPlan(
   }
 
   const sortedFootprints = [...data.footprints].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const fp of sortedFootprints) {
     const points = fp.geometry.vertices
@@ -395,7 +395,7 @@ export function renderFloorPlan(
   if (options.show_edges) {
     const nodeMap = new Map(data.nodes.map((n) => [n.id, n]));
     const sortedEdges = [...data.edges].sort(
-      (a, b) => a.id.localeCompare(b.id),
+      (a, b) => codePointCompare(a.id, b.id),
     );
     for (const e of sortedEdges) {
       const from = nodeMap.get(e.from_node_id);
@@ -417,7 +417,7 @@ export function renderFloorPlan(
   }
 
   const sortedNodes = [...data.nodes].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
   for (const n of sortedNodes) {
     const p = tx(n.position, t);
@@ -436,7 +436,7 @@ export function renderFloorPlan(
   if (options.show_destinations) {
     const sortedDests = [...data.destinations].sort(
       (a, b) => a.display_priority - b.display_priority
-        || a.id.localeCompare(b.id),
+        || codePointCompare(a.id, b.id),
     );
     for (const d of sortedDests) {
       const node = data.nodes.find((n) => n.id === d.node_id);

@@ -15,6 +15,7 @@ import {
   SPACE, TEXT, LABEL_STYLE, type Metric, type Column, type ScreenAction,
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type ExposureRow = {
   readonly destination_id: string;
@@ -61,7 +62,7 @@ export function CustomerFlowsView(): JSX.Element {
     [site],
   );
   const typologies = useMemo(
-    () => [...site.support_types].sort((a, b) => a.key.localeCompare(b.key)),
+    () => [...site.support_types].sort((a, b) => codePointCompare(a.key, b.key)),
     [site],
   );
 
@@ -124,7 +125,7 @@ export function CustomerFlowsView(): JSX.Element {
 
   const rows = useMemo<readonly ExposureRow[]>(() =>
     [...site.destinations]
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map((d): ExposureRow => ({
         destination_id: d.id,
         occupant: d.occupant_name,

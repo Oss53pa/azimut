@@ -1,5 +1,6 @@
 import type { Destination, DestinationName } from '@azimut/core-model';
 import type { KioskSite } from './load-kiosk-site.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type SearchResult = {
   readonly destination: Destination;
@@ -97,7 +98,7 @@ export function searchDestinations(
     : site.destination_names;
 
   const sortedNames = [...filteredNames].sort(
-    (a, b) => a.id.localeCompare(b.id),
+    (a, b) => codePointCompare(a.id, b.id),
   );
 
   for (const dn of sortedNames) {
@@ -117,7 +118,7 @@ export function searchDestinations(
   results.sort(
     (a, b) => b.score - a.score
       || a.destination.display_priority - b.destination.display_priority
-      || a.destination.id.localeCompare(b.destination.id),
+      || codePointCompare(a.destination.id, b.destination.id),
   );
 
   return results.slice(0, maxResults);

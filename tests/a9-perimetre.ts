@@ -80,19 +80,3 @@ export function studioFiles(): { readonly producing: string[]; readonly interfac
   const producing = all.filter(file => feedsEmpreinte(readFileSync(file, 'utf8')));
   return { producing, interface: all.filter(file => !producing.includes(file)) };
 }
-
-/** Un relevé `{ fichier: nombre }`, chaque nombre entier et positif. */
-export function readBaseline(path: string): Map<string, number> {
-  const raw: unknown = JSON.parse(readFileSync(path, 'utf8'));
-  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
-    throw new Error(`Relevé ${path} illisible : un objet { fichier: nombre } est attendu.`);
-  }
-  const baseline = new Map<string, number>();
-  for (const [file, value] of Object.entries(raw)) {
-    if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
-      throw new Error(`Relevé ${path} : ${file} doit porter un entier positif.`);
-    }
-    baseline.set(file, value);
-  }
-  return baseline;
-}

@@ -1,5 +1,5 @@
 import type { SiteData, Outcome, Finding, SiteVocabulary } from '@azimut/core-model';
-import { isParkingZone } from '@azimut/core-model';
+import { isParkingZone, codePointCompare } from '@azimut/core-model';
 import { checkNamingCollisions } from './checks/naming.js';
 import {
   checkDuplicateDisplayName,
@@ -183,7 +183,7 @@ export function runChecks(
   return {
     ok: true,
     value: {
-      checks_run: run.sort((a, b) => a.localeCompare(b)),
+      checks_run: run.sort((a, b) => codePointCompare(a, b)),
       checks_skipped: [
         'adjacence_chromatique',
         'contraste',
@@ -191,7 +191,7 @@ export function runChecks(
       ],
       // Trié, comme les exercés : l'ordre d'un rapport ne dit rien de l'ordre
       // dans lequel le code a posé ses questions (A9).
-      checks_undeclared: undeclared.sort((a, b) => a.localeCompare(b)),
+      checks_undeclared: undeclared.sort((a, b) => codePointCompare(a, b)),
       findings,
     },
     warnings: [],

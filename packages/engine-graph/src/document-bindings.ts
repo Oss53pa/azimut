@@ -1,7 +1,6 @@
 import type { BindingCatalogue, BindingValues, SiteData, SiteFact } from '@azimut/core-model';
 import {
-  factValueText, isParkingZone, isParkingSpaceFootprint, declaredInteger,
-  PARKING_CAPACITY_KEY, PARKING_FREE_KEY, PARKING_UNDIGITIZED_SPACES_KEY,
+  factValueText, isParkingZone, isParkingSpaceFootprint, declaredInteger, PARKING_CAPACITY_KEY, PARKING_FREE_KEY, PARKING_UNDIGITIZED_SPACES_KEY, codePointCompare,
 } from '@azimut/core-model';
 
 /**
@@ -55,7 +54,7 @@ export function buildDocumentBindings(
   // pris au hasard dans la liste.
   const parkings = (site.zones ?? [])
     .filter(zone => isParkingZone(zone.kind))
-    .sort((l, r) => l.id.localeCompare(r.id));
+    .sort((l, r) => codePointCompare(l.id, r.id));
   const first = parkings[0];
   if (first !== undefined) {
     // Le compte des places est celui des empreintes tracées : une empreinte
@@ -96,7 +95,7 @@ export function buildDocumentBindings(
   // contredire, et c'est l'anomalie qui nomme le fait à réviser.
   const factFields: string[] = [];
   const factValues: Record<string, string> = {};
-  for (const fact of [...facts].sort((l, r) => l.key.localeCompare(r.key))) {
+  for (const fact of [...facts].sort((l, r) => codePointCompare(l.key, r.key))) {
     factFields.push(fact.key);
     factValues[fact.key] = factValueText(fact.value);
   }

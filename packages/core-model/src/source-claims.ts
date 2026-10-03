@@ -20,6 +20,7 @@
  * vérifiée.
  */
 
+import { codePointCompare } from './empreinte.js';
 /** Ce qu'une source affirme d'un objet, à une date. */
 export type SourceClaim = {
   /** L'objet dont on parle : la même clé que celle d'un fait du site. */
@@ -56,8 +57,8 @@ export type Discrepancy = {
 
 function byRecency(left: SourceClaim, right: SourceClaim): number {
   // Plus récent d'abord ; à date égale, la source départage pour rester stable.
-  return right.recorded_on.localeCompare(left.recorded_on)
-    || left.source.localeCompare(right.source);
+  return codePointCompare(right.recorded_on, left.recorded_on)
+    || codePointCompare(left.source, right.source);
 }
 
 /**
@@ -89,7 +90,7 @@ export function detectDiscrepancies(
 
   const discrepancies: Discrepancy[] = [];
 
-  for (const key of [...byKey.keys()].sort((a, b) => a.localeCompare(b))) {
+  for (const key of [...byKey.keys()].sort((a, b) => codePointCompare(a, b))) {
     const bucket = byKey.get(key) ?? [];
     const values = new Set(bucket.map((claim) => claim.value));
     if (values.size < 2) continue;
@@ -106,8 +107,8 @@ export function detectDiscrepancies(
     discrepancies.push({
       key,
       claims: [...bucket].sort((left, right) =>
-        left.source.localeCompare(right.source)
-        || left.recorded_on.localeCompare(right.recorded_on),
+        codePointCompare(left.source, right.source)
+        || codePointCompare(left.recorded_on, right.recorded_on),
       ),
       retained_value: retained.value,
       retained_source: retained.source,

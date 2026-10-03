@@ -5,6 +5,7 @@ import type { SiteSummary } from '../data/index.js';
 import type { ViewId } from '../views.js';
 import { Icon } from './Icon.js';
 import { siteInitials } from './site-initials.js';
+import { sitesByName } from '../state/site-order.js';
 import { SPACE, TEXT, LABEL_STYLE } from './ui/index.js';
 
 type ProjectSwitcherProps = {
@@ -42,7 +43,7 @@ const MENU_ITEM: React.CSSProperties = {
  */
 export function ProjectSwitcher({ sites, currentId, onOpenSite, onNavigate }: ProjectSwitcherProps): JSX.Element {
   const site = useSiteData();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
 
@@ -99,7 +100,7 @@ export function ProjectSwitcher({ sites, currentId, onOpenSite, onNavigate }: Pr
           borderRadius: 6, boxShadow: 'var(--shadow-float)', padding: SPACE.xs,
         }}>
           <div style={{ ...LABEL_STYLE, padding: '8px 12px 4px' }}>{t('shell.project.menu')}</div>
-          {sites.map(s => (
+          {sitesByName(sites, lang).map(s => (
             <button
               key={s.id}
               type="button"

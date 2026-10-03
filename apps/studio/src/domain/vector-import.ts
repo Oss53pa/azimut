@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * G7.2 — Reprise of a client's existing vector files. The only honest path is
@@ -23,7 +24,7 @@ export function auditVectorImports(
   imports: readonly VectorImport[],
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...imports].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...imports].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const imported of sorted) {
     warnings.push({

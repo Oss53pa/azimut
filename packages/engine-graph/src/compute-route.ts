@@ -1,10 +1,5 @@
 import {
-  closedEdgesAt,
-  isLocalInstant,
-  type SiteData,
-  type Edge,
-  type TravelProfile,
-  type Outcome,
+  closedEdgesAt, isLocalInstant, type SiteData, type Edge, type TravelProfile, type Outcome, codePointCompare,
 } from '@azimut/core-model';
 import { isEdgeTraversableFrom, buildExcludedKindsSet } from './edge-traversal.js';
 
@@ -111,7 +106,7 @@ function dijkstra(
     if (!neighbors) continue;
 
     const sortedNeighbors = [...neighbors].sort((a, b) =>
-      a.edge_id.localeCompare(b.edge_id),
+      codePointCompare(a.edge_id, b.edge_id),
     );
 
     for (const entry of sortedNeighbors) {

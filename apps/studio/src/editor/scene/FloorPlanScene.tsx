@@ -11,7 +11,7 @@
 
 import { type JSX, useMemo } from 'react';
 import type { SiteData, Footprint, GraphNode, Edge, Destination } from '@azimut/core-model';
-import { formatSvg } from '@azimut/core-model';
+import { formatSvg, codePointCompare } from '@azimut/core-model';
 import { useI18n } from '../../i18n/useI18n.js';
 
 // ---------------------------------------------------------------------------
@@ -42,22 +42,22 @@ type LevelData = {
 function extractLevelData(site: SiteData, levelId: string): LevelData {
   const footprints = site.footprints
     .filter((f) => f.level_id === levelId)
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const nodes = site.graph.nodes
     .filter((n) => n.level_id === levelId)
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const nodeIdSet = new Set(nodes.map((n) => n.id));
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
 
   const edges = site.graph.edges
     .filter((e) => nodeIdSet.has(e.from_node_id) && nodeIdSet.has(e.to_node_id))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 
   const destinations = site.destinations
     .filter((d) => nodeIdSet.has(d.node_id))
-    .sort((a, b) => a.display_priority - b.display_priority || a.id.localeCompare(b.id));
+    .sort((a, b) => a.display_priority - b.display_priority || codePointCompare(a.id, b.id));
 
   return { footprints, nodes, edges, destinations, nodeMap };
 }

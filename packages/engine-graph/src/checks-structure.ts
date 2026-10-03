@@ -1,6 +1,6 @@
 import type { Finding, GraphNode } from '@azimut/core-model';
 import type { GraphScope } from './graph-scope.js';
-import { POINT_COINCIDENCE_M, roundHalfAwayFromZero } from '@azimut/core-model';
+import { POINT_COINCIDENCE_M, roundHalfAwayFromZero, codePointCompare } from '@azimut/core-model';
 import { buildDirectedAdjacency, bfs } from './graph-traversal.js';
 import { buildExcludedKindsSet, isEdgeTraversableFrom } from './edge-traversal.js';
 
@@ -19,7 +19,7 @@ export function crossLevelWithoutVlFindings(
 
   const findings: Finding[] = [];
   const sorted = [...site.graph.edges].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const e of sorted) {
     const fromLevel = nodeLevelMap.get(e.from_node_id);
@@ -75,7 +75,7 @@ export function multiLevelWithoutAnyVlFindings(
 
   const findings: Finding[] = [];
   const sortedBuildings = [...site.buildings].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const building of sortedBuildings) {
     const levels = buildingLevels.get(building.id);
@@ -129,7 +129,7 @@ export function multiLevelWithoutAccessibleVlFindings(
 
   const findings: Finding[] = [];
   const sortedBuildings = [...site.buildings].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const building of sortedBuildings) {
     const levels = buildingLevels.get(building.id);
@@ -178,7 +178,7 @@ export function crossBuildingWithoutLinkFindings(site: GraphScope): Finding[] {
   const linked = new Set(site.graph.building_links.map(link => link.edge_id));
 
   const findings: Finding[] = [];
-  for (const edge of [...site.graph.edges].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const edge of [...site.graph.edges].sort((a, b) => codePointCompare(a.id, b.id))) {
     const from = nodeBuilding.get(edge.from_node_id);
     const to = nodeBuilding.get(edge.to_node_id);
     if (from === undefined || to === undefined || from === to) continue;
@@ -240,7 +240,7 @@ export function buildingIsolatedFindings(
 
   const findings: Finding[] = [];
   const sortedBuildings = [...site.buildings].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   // Un site d'un seul bâtiment n'a pas de « reste du site » auquel se relier.
   // Signaler son unique bâtiment ferait porter un avertissement à tout site
@@ -302,7 +302,7 @@ export function missingDestinationNameFindings(
 
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   const activeLangs = [...langs].sort();
   for (const dest of sorted) {
@@ -360,7 +360,7 @@ export function verticalLinkMisalignedFindings(
 
   const findings: Finding[] = [];
   const sorted = [...site.graph.vertical_links].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const link of sorted) {
     if (link.kind === 'escalator' || link.kind === 'ramp') continue;
@@ -474,7 +474,7 @@ export function destinationNotReachedFromEveryEntranceFindings(
   const nodeIds = new Set(nodes.map((n) => n.id));
 
   const findings: Finding[] = [];
-  const sorted = [...site.destinations].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...site.destinations].sort((a, b) => codePointCompare(a.id, b.id));
   for (const dest of sorted) {
     if (!nodeIds.has(dest.node_id)) continue;
     const reached = reachedBy.get(dest.node_id) ?? [];
@@ -524,5 +524,5 @@ function entrancesUsedByAProfile(site: GraphScope): GraphNode[] {
       site.graph.edges.some(edge =>
         (edge.from_node_id === entrance.id || edge.to_node_id === entrance.id)
         && isEdgeTraversableFrom(edge, entrance.id, profile, nodeKinds, excluded))))
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 }

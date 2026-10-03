@@ -1,4 +1,4 @@
-import { sha256Binary } from '@azimut/core-model';
+import { sha256Binary, codePointCompare } from '@azimut/core-model';
 import type { Outcome, Finding } from '@azimut/core-model';
 import type { PackageManifest } from './assemble-package.js';
 
@@ -29,7 +29,7 @@ export function verifyPackage(
   const findings: Finding[] = [];
 
   const sortedArtifacts = [...manifest.artifacts].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   let verifiedCount = 0;

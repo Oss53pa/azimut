@@ -1,4 +1,5 @@
 import type { Outcome, Finding } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * J5.2 — A pictogram is a monolinear vector drawing; raster content has no
@@ -33,7 +34,7 @@ export function guardPictogramsVector(
   pictograms: readonly PictogramSvg[],
 ): Outcome<null> {
   const findings: Finding[] = [];
-  const sorted = [...pictograms].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...pictograms].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const picto of sorted) {
     const form = rasterFormIn(picto.svg);

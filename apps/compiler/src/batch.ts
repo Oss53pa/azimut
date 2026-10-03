@@ -3,6 +3,7 @@ import type { Job } from './job.js';
 import type { JobQueue } from './queue.js';
 import type { JobHandler } from './worker.js';
 import { processNextJob } from './worker.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type BatchItem = {
   readonly item_id: string;
@@ -44,7 +45,7 @@ export async function runBatch(
   const { org_id, kind, queue, handler, now, max_attempts } = options;
   const results: BatchResult[] = [];
   const sortedItems = [...items].sort((a, b) =>
-    a.item_id.localeCompare(b.item_id),
+    codePointCompare(a.item_id, b.item_id),
   );
 
   let created = 0;
@@ -135,7 +136,7 @@ export async function runBatch(
     succeeded,
     failed,
     results: results.sort((a, b) =>
-      a.item_id.localeCompare(b.item_id),
+      codePointCompare(a.item_id, b.item_id),
     ),
   };
 }

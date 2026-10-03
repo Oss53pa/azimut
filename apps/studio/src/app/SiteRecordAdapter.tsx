@@ -10,9 +10,11 @@ import {
   buildingCommands, levelCommands, renameCommands, deleteLevelCommands,
 } from '../state/site-structure.js';
 import { SiteRecordScreen } from '../screens/SiteRecordScreen.js';
+import { useI18n } from '../i18n/useI18n.js';
 import type {
   BuildingRow, LevelRow, BuildingForm, LevelForm,
 } from '../screens/SiteRecordScreen.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * M1bis (partie M) — l'adaptateur de la fiche de site.
@@ -37,7 +39,8 @@ export function SiteRecordScreenAdapter({ session, siteId }: {
   const [levelForm, setLevelForm] = useState<LevelForm | null>(null);
   const [pendingDeletion, setPendingDeletion] = useState<LevelRow | null>(null);
 
-  const buildings = readStructure(session);
+  const { lang } = useI18n();
+  const buildings = readStructure(session, lang);
   const siteName = text(rowsOf(session.state, 'site')[0]?.values ?? {}, 'name') ?? siteId;
   const write = { orgId: ORG_OF_SESSION, siteId, timestamp: session.now() };
 
@@ -179,7 +182,7 @@ const DEFAULT_LEVEL_NAME = 'RDC';
  * L'ordre est celui du nom de bâtiment, puis du rang, l'identifiant
  * départageant : deux lectures d'un même magasin rendent la même liste (A9).
  */
-function readStructure(session: TrancheSession): readonly BuildingRow[] {
+function readStructure(session: TrancheSession, lang: string): readonly BuildingRow[] {
   const levels = rowsOf(session.state, 'level').flatMap(row => {
     const buildingId = text(row.values, 'building_id');
     const name = text(row.values, 'name');
@@ -202,7 +205,7 @@ function readStructure(session: TrancheSession): readonly BuildingRow[] {
     const own = levels
       .filter(entry => entry.buildingId === row.id)
       .map(entry => entry.level)
-      .sort((a, b) => a.ordinal - b.ordinal || a.id.localeCompare(b.id));
+      .sort((a, b) => a.ordinal - b.ordinal || codePointCompare(a.id, b.id));
     return [{
       id: row.id,
       name,
@@ -211,7 +214,8 @@ function readStructure(session: TrancheSession): readonly BuildingRow[] {
       levels: own,
     }];
   });
-  return out.sort((a, b) => a.name.localeCompare(b.name) || a.id.localeCompare(b.id));
+  // Les noms de bâtiment sont du texte affiché : langue active (A9).
+  return out.sort((a, b) => a.name.localeCompare(b.name, lang) || codePointCompare(a.id, b.id));
 }
 
 /** Combien de lignes d'une table se rattachent à ce niveau. */

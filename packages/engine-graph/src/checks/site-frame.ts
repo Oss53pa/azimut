@@ -1,5 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
-import { calibratedLevelIds, firstCalibration, siteOrigin } from '@azimut/core-model';
+import { calibratedLevelIds, firstCalibration, siteOrigin, codePointCompare } from '@azimut/core-model';
 
 /**
  * N1.4 — un niveau sans plan calé est une anomalie bloquante.
@@ -23,7 +23,7 @@ export function checkLevelCalibrated(site: SiteData): Finding[] {
   }
 
   const findings: Finding[] = [];
-  const sorted = [...site.levels].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...site.levels].sort((a, b) => codePointCompare(a.id, b.id));
   for (const level of sorted) {
     if (calibrated.has(level.id)) continue;
     findings.push({

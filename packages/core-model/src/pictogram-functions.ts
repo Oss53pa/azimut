@@ -1,6 +1,7 @@
 import type { Pictogram, PictogramRegistry, SiteData } from './site.js';
 import { packsByPrecedence } from './rules-bindings.js';
 import type { Finding } from './outcome.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * Le vocabulaire des fonctions de pictogramme — A5.4.
@@ -151,7 +152,7 @@ function carrying(
     .filter(picto => keep(picto)
       && picto.function_key === functionKey
       && picto.svg_path.trim() !== '')
-    .sort((a, b) => a.id.localeCompare(b.id));
+    .sort((a, b) => codePointCompare(a.id, b.id));
 }
 
 /** La résolution à l'intérieur d'une seule portée d'unicité. */

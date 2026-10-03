@@ -6,6 +6,7 @@
  * the caller applies the results via Command (E5).
  */
 
+import { codePointCompare } from '@azimut/core-model';
 // ---------------------------------------------------------------------------
 // Bounding box for alignment
 // ---------------------------------------------------------------------------
@@ -85,11 +86,11 @@ export function computeDistribution(
     if (axis === 'horizontal') {
       const ca = (a.minX_m + a.maxX_m) / 2;
       const cb = (b.minX_m + b.maxX_m) / 2;
-      return ca - cb || a.id.localeCompare(b.id);
+      return ca - cb || codePointCompare(a.id, b.id);
     }
     const ca = (a.minY_m + a.maxY_m) / 2;
     const cb = (b.minY_m + b.maxY_m) / 2;
-    return ca - cb || a.id.localeCompare(b.id);
+    return ca - cb || codePointCompare(a.id, b.id);
   });
 
   const first = sorted[0];

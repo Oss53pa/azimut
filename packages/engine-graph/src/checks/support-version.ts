@@ -1,4 +1,5 @@
 import type { SiteData, Finding } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * N4.3 — règle M04.G7. « Une version approuvée est immuable. Une correction crée
@@ -44,10 +45,10 @@ export function checkApprovedVersionImmutable(site: SiteData): Finding[] {
     });
   };
 
-  const supportIds = [...bySupport.keys()].sort((a, b) => a.localeCompare(b));
+  const supportIds = [...bySupport.keys()].sort((a, b) => codePointCompare(a, b));
   for (const supportId of supportIds) {
     const versions = [...(bySupport.get(supportId) ?? [])]
-      .sort((a, b) => a.id.localeCompare(b.id));
+      .sort((a, b) => codePointCompare(a.id, b.id));
 
     const approved = versions.filter(v => v.state === 'approved');
     if (approved.length > 1) {

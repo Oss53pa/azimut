@@ -9,7 +9,7 @@
  * le modèle d'A5.3 l'exige, jamais parce qu'il apprécierait le résultat.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand } from '@azimut/core-model';
+import { buildCommand, codePointCompare } from '@azimut/core-model';
 
 const MODULE = '01-socle';
 
@@ -98,7 +98,7 @@ export function graphIsValidated(
   records: readonly ValidationRecord[],
   currentGraphHash: string,
 ): boolean {
-  const latest = [...records].sort((a, b) => b.ranAt.localeCompare(a.ranAt))[0];
+  const latest = [...records].sort((a, b) => codePointCompare(b.ranAt, a.ranAt))[0];
   if (latest === undefined) return false;
   return latest.passed && latest.graphHash === currentGraphHash;
 }

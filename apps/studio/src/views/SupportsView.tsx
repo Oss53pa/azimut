@@ -11,6 +11,7 @@ import {
 } from '../components/ui/index.js';
 import { FindingList } from './message-schedule/FindingList.js';
 import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
+import { codePointCompare } from '@azimut/core-model';
 
 type SupportsViewProps = {
   readonly onNavigate: (view: ViewId) => void;
@@ -49,7 +50,7 @@ export function SupportsView({ onNavigate }: SupportsViewProps): JSX.Element {
 
   const rows = useMemo<readonly TypeRow[]>(() =>
     [...site.support_types]
-      .sort((a, b) => a.key.localeCompare(b.key))
+      .sort((a, b) => codePointCompare(a.key, b.key))
       .map((type): TypeRow => ({
         type,
         templates: site.face_templates.filter(tpl => tpl.support_type_key === type.key).length,

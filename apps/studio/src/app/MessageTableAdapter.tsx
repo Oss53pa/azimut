@@ -15,9 +15,11 @@ import type { ScheduleActor } from '../state/message-schedule-permissions.js';
 import { diffSchedules, triggersFrom } from '@azimut/engine-graph';
 import type { ScheduleState } from '@azimut/engine-graph';
 import { MessageTableScreen } from '../screens/MessageTableScreen.js';
+import { useI18n } from '../i18n/useI18n.js';
 import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import type { ScreenState } from '../components/ui/index.js';
 import { permissionOfTrigger } from '../state/message-schedule-permissions.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * Partie R — le branchement de l'écran du tableau des messages.
@@ -80,7 +82,9 @@ export function MessageTableAdapter({ siteId, actor }: {
     });
   }, [read, supportCodes]);
 
-  const filtered = useMemo(() => applyFilters(rows, filters), [rows, filters]);
+  // R6.3 (partie R) : la recherche plie la casse dans la langue active, déclarée (A9).
+  const { lang } = useI18n();
+  const filtered = useMemo(() => applyFilters(rows, filters, lang), [rows, filters, lang]);
 
   const groups = useMemo(
     () => groupRows(filtered.rows, grouping, {
@@ -235,7 +239,7 @@ function emptySchedule(siteId: string): {
 
 function optionsOf(values: readonly string[]): readonly { value: string; label: string }[] {
   return [...new Set(values)]
-    .sort((a, b) => a.localeCompare(b))
+    .sort((a, b) => codePointCompare(a, b))
     .map(value => ({ value, label: value }));
 }
 

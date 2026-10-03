@@ -3,6 +3,7 @@ import type {
   Finding,
   Outcome,
 } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 export type SupportValidationResult = {
   readonly total_support_types: number;
@@ -14,7 +15,7 @@ function duplicateTypeKeyFindings(site: SiteData): Finding[] {
   const seen = new Map<string, string>();
   const findings: Finding[] = [];
   const sorted = [...site.support_types].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const st of sorted) {
     const existing = seen.get(st.key);
@@ -36,7 +37,7 @@ function duplicateTypeKeyFindings(site: SiteData): Finding[] {
 function faceCountMismatchFindings(site: SiteData): Finding[] {
   const findings: Finding[] = [];
   const sorted = [...site.support_types].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const st of sorted) {
     if (st.faces.length !== st.face_count) {
@@ -59,7 +60,7 @@ function templateTypeNotFoundFindings(site: SiteData): Finding[] {
   const typeKeys = new Set(site.support_types.map((st) => st.key));
   const findings: Finding[] = [];
   const sorted = [...site.face_templates].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const tpl of sorted) {
     if (!typeKeys.has(tpl.support_type_key)) {
@@ -85,7 +86,7 @@ function templateSideNotFoundFindings(site: SiteData): Finding[] {
   }
   const findings: Finding[] = [];
   const sorted = [...site.face_templates].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const tpl of sorted) {
     const sides = typeSides.get(tpl.support_type_key);
@@ -109,7 +110,7 @@ function templateSideNotFoundFindings(site: SiteData): Finding[] {
 function blockRegionFindings(site: SiteData): Finding[] {
   const findings: Finding[] = [];
   const sorted = [...site.face_templates].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const tpl of sorted) {
     for (const block of tpl.blocks) {

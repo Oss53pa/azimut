@@ -17,6 +17,7 @@
 
 import { lineFingerprint } from './message-schedule.js';
 import type { MessageEntry, MessageLine, MessageSchedule } from './message-schedule.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /** R11 — les quatre marques, et elles seules. */
 export const LINE_CHANGES = ['added', 'removed', 'modified', 'unchanged'] as const;
@@ -142,7 +143,7 @@ export function diffSchedules(
   const comparedById = new Map(compared.lines.map(line => [line.id, line]));
 
   const ids = [...new Set([...referenceById.keys(), ...comparedById.keys()])]
-    .sort((a, b) => a.localeCompare(b));
+    .sort((a, b) => codePointCompare(a, b));
 
   const lines = ids.map((id): LineDiff => {
     const before = referenceById.get(id) ?? null;

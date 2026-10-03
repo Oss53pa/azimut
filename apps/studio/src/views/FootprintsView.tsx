@@ -2,7 +2,7 @@ import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { validateGeometry, runChecks } from '@azimut/engine-graph';
-import { polygonArea, isCellFootprint } from '@azimut/core-model';
+import { polygonArea, isCellFootprint, codePointCompare } from '@azimut/core-model';
 import type { Finding, Footprint } from '@azimut/core-model';
 import type { ViewId } from '../views.js';
 import {
@@ -64,7 +64,7 @@ export function FootprintsView({ onNavigate }: FootprintsViewProps): JSX.Element
 
     return [...site.footprints]
       .filter(f => levelId === '' || f.level_id === levelId)
-      .sort((a, b) => a.id.localeCompare(b.id))
+      .sort((a, b) => codePointCompare(a.id, b.id))
       .map((footprint): FootprintRow => ({
         footprint,
         level: levelNames.get(footprint.level_id) ?? footprint.level_id,

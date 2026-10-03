@@ -1,5 +1,6 @@
 import { type JSX } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
+import { sitesByName } from '../state/site-order.js';
 import { rulesPackLabel } from '../state/rules-pack-label.js';
 import type { AsyncState, RepositoryError, SiteRepository, SiteSummary } from '../data/index.js';
 import {
@@ -26,7 +27,7 @@ type SiteGateProps = {
 export function SiteGate(
   { repository, siteState, listState, onOpenSite, onRetry }: SiteGateProps,
 ): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
 
   const failure: RepositoryError | null =
     siteState.status === 'failed' ? siteState.error
@@ -34,7 +35,7 @@ export function SiteGate(
         : null;
 
   const loading = siteState.status === 'loading' || listState.status === 'loading';
-  const sites = listState.status === 'ready' ? listState.value : [];
+  const sites = listState.status === 'ready' ? sitesByName(listState.value, lang) : [];
 
   const columns: readonly Column<SiteSummary>[] = [
     { id: 'name', header: t('gate.col.name'), cell: s => s.name },

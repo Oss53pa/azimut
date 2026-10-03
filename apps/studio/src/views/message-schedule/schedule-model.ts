@@ -20,6 +20,7 @@ import {
 } from '@azimut/engine-graph';
 import { trialPlacement, placedSupports } from '../../domain/trial-placement.js';
 import { jalonnementFromSchedule, orientationNames } from '../../domain/wayfinding-checks.js';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * Horodatage de génération. Fourni par l'appelant, jamais lu dans un moteur
@@ -130,7 +131,7 @@ export function declaredInformationLevels(
   bindings: readonly InformationLevelBinding[] = [],
 ): readonly TypologyInformationLevels[] {
   return [...site.support_types]
-    .sort((a, b) => a.key.localeCompare(b.key))
+    .sort((a, b) => codePointCompare(a.key, b.key))
     .map((type): TypologyInformationLevels => ({
       support_type_key: type.key,
       levels: bindings

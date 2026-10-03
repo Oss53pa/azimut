@@ -4,6 +4,7 @@ import type {
   Outcome,
 } from '@azimut/core-model';
 import type { GraphScope } from './graph-scope.js';
+import { codePointCompare } from '@azimut/core-model';
 
 export type DirectoryValidationResult = {
   readonly total_destinations: number;
@@ -23,7 +24,7 @@ export function destinationNodeMissingFindings(site: GraphScope): Finding[] {
   const nodeIds = new Set(site.graph.nodes.map((n) => n.id));
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     if (!nodeIds.has(dest.node_id)) {
@@ -45,7 +46,7 @@ function destNodeWrongKindFindings(site: SiteData): Finding[] {
   );
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     const kind = nodeKind.get(dest.node_id);
@@ -66,7 +67,7 @@ function destFootprintNotFoundFindings(site: SiteData): Finding[] {
   const fpIds = new Set(site.footprints.map((f) => f.id));
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dest of sorted) {
     if (!fpIds.has(dest.footprint_id)) {
@@ -131,7 +132,7 @@ function missingNameFindings(site: SiteData): Finding[] {
 
   const findings: Finding[] = [];
   const sorted = [...site.destinations].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   const activeLangs = [...langs].sort();
   for (const dest of sorted) {
@@ -154,7 +155,7 @@ function missingNameFindings(site: SiteData): Finding[] {
 function emptyNameFindings(site: SiteData): Finding[] {
   const findings: Finding[] = [];
   const sorted = [...site.destination_names].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dn of sorted) {
     if (dn.value.trim() === '') {
@@ -174,7 +175,7 @@ function orphanNameFindings(site: SiteData): Finding[] {
   const destIds = new Set(site.destinations.map((d) => d.id));
   const findings: Finding[] = [];
   const sorted = [...site.destination_names].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   for (const dn of sorted) {
     if (!destIds.has(dn.destination_id)) {

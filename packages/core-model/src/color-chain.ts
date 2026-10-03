@@ -1,5 +1,6 @@
 import type { Finding, Outcome } from './outcome.js';
 import { roundHalfAwayFromZero } from './round.js';
+import { codePointCompare } from './empreinte.js';
 
 /**
  * G6 — Colour chain. A charter colour is not a value but a bundle of
@@ -83,7 +84,7 @@ export function auditColorReferences(
   colors: readonly CharterColor[],
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...colors].sort((x, y) => x.id.localeCompare(y.id));
+  const sorted = [...colors].sort((x, y) => codePointCompare(x.id, y.id));
 
   for (const color of sorted) {
     const hasReference =

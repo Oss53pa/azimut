@@ -84,7 +84,8 @@ export const EMPTY_STRUCTURE: StructureContext = {
  * Même règle que pour le nom d'un site (M1, partie M).
  */
 function normalise(value: string): string {
-  return value.trim().toLocaleLowerCase('fr');
+  // A9 : un pliage d'unicité ne dépend d'aucune langue.
+  return value.trim().toLowerCase();
 }
 
 function finding(code: string, params: Record<string, string | number>): Finding {

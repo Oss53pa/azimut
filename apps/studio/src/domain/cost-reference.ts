@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H8 — Budget and estimation rest on a historised unit cost per typology (and
@@ -19,7 +20,7 @@ export function auditCostReferences(
   pricedTypologies: ReadonlySet<string>,
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const unique = [...new Set(referencedTypologies)].sort((a, b) => a.localeCompare(b));
+  const unique = [...new Set(referencedTypologies)].sort((a, b) => codePointCompare(a, b));
 
   for (const typology of unique) {
     if (!pricedTypologies.has(typology)) {

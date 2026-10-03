@@ -1,4 +1,5 @@
 import type { SiteData, Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 export type CharterApplication = {
   readonly target_id: string;
@@ -18,8 +19,8 @@ export function guardCharterOnSafety(
 ): Outcome<null> {
   const findings: Finding[] = [];
   const sorted = [...applications].sort((a, b) =>
-    a.target_id.localeCompare(b.target_id) ||
-    a.change_kind.localeCompare(b.change_kind),
+    codePointCompare(a.target_id, b.target_id) ||
+    codePointCompare(a.change_kind, b.change_kind),
   );
 
   for (const app of sorted) {

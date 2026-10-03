@@ -1,4 +1,5 @@
 import type { Finding, Outcome } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 
 /**
  * H4.3 / H4.4 — Advertising placement planning. A placement carries a calendar
@@ -52,7 +53,7 @@ export function guardPlacementBookings(
   const committed = bookings.filter((b) => COMMITTED.has(b.state));
   const findings: Finding[] = [];
 
-  const sorted = [...committed].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...committed].sort((a, b) => codePointCompare(a.id, b.id));
   for (const booking of sorted) {
     const conflicting = sorted
       .filter(
@@ -98,7 +99,7 @@ export function auditOptionExpiry(
   at: string,
 ): Outcome<null> {
   const warnings: Finding[] = [];
-  const sorted = [...options].sort((a, b) => a.id.localeCompare(b.id));
+  const sorted = [...options].sort((a, b) => codePointCompare(a.id, b.id));
 
   for (const option of sorted) {
     if (option.expires_at <= at) {

@@ -7,8 +7,7 @@ import type {
   Point,
 } from '@azimut/core-model';
 import {
-  POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2, signedArea,
-  isSelfIntersecting, segmentsProperlyIntersect,
+  POINT_COINCIDENCE_M, POLYGON_MIN_AREA_M2, signedArea, isSelfIntersecting, segmentsProperlyIntersect, codePointCompare,
 } from '@azimut/core-model';
 
 export type GeometryValidationResult = {
@@ -231,9 +230,9 @@ function footprintsOverlapFindings(
   const reported = new Set<string>();
 
   for (const [, group] of [...byLevel.entries()].sort((a, b) =>
-    a[0].localeCompare(b[0]),
+    codePointCompare(a[0], b[0]),
   )) {
-    const sorted = [...group].sort((a, b) => a.id.localeCompare(b.id));
+    const sorted = [...group].sort((a, b) => codePointCompare(a.id, b.id));
     const bboxes = sorted.map((fp) => bbox(fp.geometry.vertices));
 
     for (let i = 0; i < sorted.length; i++) {
@@ -280,10 +279,10 @@ export function validateGeometry(
   site: SiteData,
 ): Outcome<GeometryValidationResult> {
   const sortedFootprints = [...site.footprints].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
   const sortedVolumes = [...site.volumes].sort((a, b) =>
-    a.id.localeCompare(b.id),
+    codePointCompare(a.id, b.id),
   );
 
   const polygons = polygonalObjects(sortedFootprints);
