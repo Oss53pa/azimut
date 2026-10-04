@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { meterToPixel } from '@azimut/core-model';
-import { imageMatrix, imageToWorld, isDisplayableImage, levelPlan } from '../plan-placement.js';
+import { imageToWorld, isDisplayableImage, levelPlan } from '../plan-placement.js';
+import { affineToView, toView } from '../../viewport/view-transform.js';
 import type { PlanPlacement } from '../plan-placement.js';
 
 const placement = (north_azimuth_deg: number): PlanPlacement => ({
@@ -27,17 +27,19 @@ describe('J1.4 — le plan calé dans le repère du site', () => {
     expect(close(p.x_m, 0) && close(p.y_m, 1)).toBe(true);
   });
 
-  it('la matrice SVG pose chaque pixel là où la vue pose son point du site', () => {
+  it('la matrice SVG, tirée de la transformation unique, pose chaque pixel là où la vue pose son point', () => {
     const view = { centerX_m: 3, centerY_m: -2, scale_px_per_m: 25, rotationDeg: 0 };
     const viewport = { width_px: 800, height_px: 600 };
     for (const azimuth of [0, 37, 90, 211]) {
-      const m = /matrix\(([^)]+)\)/.exec(imageMatrix(placement(azimuth), view, viewport))?.[1]
+      const local = (p: { readonly x: number; readonly y: number }) =>
+        imageToWorld({ x_px: p.x, y_px: p.y }, placement(azimuth));
+      const m = /matrix\(([^)]+)\)/.exec(affineToView(local, view, viewport))?.[1]
         ?.split(',').map(Number) ?? [];
       const [a = 0, b = 0, c = 0, d = 0, e = 0, f = 0] = m;
       for (const px of [{ x_px: 0, y_px: 0 }, { x_px: 640, y_px: 480 }, { x_px: 100, y_px: 200 }]) {
-        const screen = meterToPixel(imageToWorld(px, placement(azimuth)), view, viewport);
-        expect(Math.abs(a * px.x_px + c * px.y_px + e - screen.x)).toBeLessThan(0.01);
-        expect(Math.abs(b * px.x_px + d * px.y_px + f - screen.y)).toBeLessThan(0.01);
+        const screen = toView(imageToWorld(px, placement(azimuth)), view, viewport);
+        expect(Math.abs(a * px.x_px + c * px.y_px + e - screen.x_px)).toBeLessThan(0.01);
+        expect(Math.abs(b * px.x_px + d * px.y_px + f - screen.y_px)).toBeLessThan(0.01);
       }
     }
   });

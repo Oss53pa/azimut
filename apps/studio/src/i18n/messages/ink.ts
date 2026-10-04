@@ -20,6 +20,10 @@ export const INK_FR = {
   'ink.graph.not_tool': 'Choisissez l’outil Nœud pour poser d’un point appuyé, ou l’outil Arête pour relier deux nœuds d’un trait.',
   'ink.graph.tap_expected': 'L’outil Nœud attend un point appuyé, à l’endroit du nœud.',
   'ink.graph.edge_expected': 'L’outil Arête attend un trait qui part d’un nœud et arrive sur un autre.',
+  'ink.view.controls': 'Vue de la zone de travail',
+  'ink.view.zoom_in': 'Zoom avant',
+  'ink.view.zoom_out': 'Zoom arrière',
+  'ink.view.refit': 'Recadrer sur le contenu',
 };
 
 export const INK_EN: Readonly<Record<keyof typeof INK_FR, string>> = {
@@ -38,4 +42,8 @@ export const INK_EN: Readonly<Record<keyof typeof INK_FR, string>> = {
   'ink.graph.not_tool': 'Choose the Node tool to place a node with a tap, or the Edge tool to join two nodes with a stroke.',
   'ink.graph.tap_expected': 'The Node tool expects a tap, where the node goes.',
   'ink.graph.edge_expected': 'The Edge tool expects a stroke that starts on one node and ends on another.',
+  'ink.view.controls': 'Work area view',
+  'ink.view.zoom_in': 'Zoom in',
+  'ink.view.zoom_out': 'Zoom out',
+  'ink.view.refit': 'Fit to content',
 };

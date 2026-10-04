@@ -37,7 +37,7 @@ export type GraphInkInputs = {
 };
 
 export function useGraphInk(inputs: GraphInkInputs): {
-  readonly zone: (view: Omit<GraphViewProps, 'ink' | 'frame'>) => JSX.Element;
+  readonly zone: (view: Omit<GraphViewProps, 'ink' | 'frame' | 'viewKey'>) => JSX.Element;
 } {
   const { session, levelId, tool, nextNodeKind, inheritedWidthM, levelNodes, onFindings } = inputs;
   const { t } = useI18n();
@@ -92,7 +92,7 @@ export function useGraphInk(inputs: GraphInkInputs): {
   return {
     zone: view => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, height: '100%' }}>
-        <GraphView {...view} ink={ink} frame={frame} />
+        <GraphView {...view} ink={ink} frame={frame} viewKey={`graphe:${levelId}`} />
         {notice !== null && <StateBanner severity="info" message={t(notice)} />}
       </div>
     ),

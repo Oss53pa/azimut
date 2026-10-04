@@ -1,10 +1,12 @@
-import { type JSX, useEffect, useMemo, useRef, useState } from 'react';
+import { type JSX, useEffect, useRef, useState } from 'react';
 import type { Point } from '@azimut/core-model';
 import { Button, StateBanner, SPACE, TEXT } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
-import { fitToContent, toMetres, toView } from '../viewport/view-transform.js';
+import { affineToView, toMetres, toView } from '../viewport/view-transform.js';
 import type { ViewState, Viewport } from '../viewport/view-transform.js';
-import { imageMatrix, imageToWorld } from '../domain/plan-placement.js';
+import { useZoneView } from '../viewport/use-zone-view.js';
+import { ZoneViewControls } from './ZoneViewControls.js';
+import { imageToWorld } from '../domain/plan-placement.js';
 import type { PlanPlacement } from '../domain/plan-placement.js';
 import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
@@ -32,6 +34,8 @@ export type PlanBackground = {
 };
 
 export type InkWorkZoneProps = {
+  /** Clé de mémoire de la vue : la zone et son niveau (E3.3). */
+  readonly viewKey: string;
   readonly footprints: readonly { readonly id: string; readonly outline: readonly Point[] }[];
   readonly draft: readonly Point[];
   /** Le dernier trait, tant que l'arbitrage n'est pas clos. */
@@ -86,10 +90,12 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
   // cours : un cadrage qui bouge pendant qu'on trace rend le geste imprévisible.
   const opening = useRef(props.draft).current;
   const { background, footprints } = props;
-  const view = useMemo(() => {
-    const anchor = background !== null ? corners(background) : footprints.flatMap(f => f.outline);
-    return fitToContent(anchor.length > 0 ? anchor : opening, { width_px: width, height_px: ZONE_HEIGHT_PX });
-  }, [background, footprints, opening, width]);
+  const anchor = background !== null ? corners(background) : footprints.flatMap(f => f.outline);
+  const surface = useRef<SVGSVGElement>(null);
+  const zone = useZoneView({
+    memoryKey: props.viewKey, viewport, fitTo: anchor.length > 0 ? anchor : opening, surface,
+  });
+  const { view } = zone;
 
   const { handlers, live } = useStrokeCapture({
     viewWidth_px: viewport.width_px,
@@ -101,21 +107,24 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm }}>
+      <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
       <div ref={host} style={{ width: '100%' }}>
         <svg
+          ref={surface}
           role="img"
           aria-label={t('ink.zone.label')}
           width={width}
           height={ZONE_HEIGHT_PX}
           style={{ display: 'block', background: 'var(--surface-canvas)', touchAction: 'none', cursor: 'crosshair' }}
-          {...handlers}
+          {...zone.intercept(handlers)}
         >
-          {props.background !== null && (
+          {background !== null && (
             <image
-              href={props.background.href}
-              width={props.background.width_px}
-              height={props.background.height_px}
-              transform={imageMatrix(props.background.placement, view, viewport)}
+              href={background.href}
+              width={background.width_px}
+              height={background.height_px}
+              transform={affineToView(
+                p => imageToWorld({ x_px: p.x, y_px: p.y }, background.placement), view, viewport)}
               opacity={0.6}
               preserveAspectRatio="none"
             />

@@ -59,6 +59,7 @@ export function useFootprintInk(
 
   const zone = (
     <InkWorkZone
+      viewKey={`empreintes:${levelId}`}
       footprints={footprints}
       draft={vertices}
       ghost={ghost}

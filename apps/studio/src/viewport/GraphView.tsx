@@ -1,4 +1,4 @@
-import { type JSX, useMemo } from 'react';
+import { type JSX, useMemo, useRef } from 'react';
 import type { Edge, GraphNode, Point } from '@azimut/core-model';
 import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
 import { pathLength } from '../editor/ink/stroke-geometry.js';
@@ -6,7 +6,9 @@ import { RECOGNITION_THRESHOLDS } from '../editor/ink/recognition-thresholds.js'
 import type { StrokeCaptureOptions } from '../editor/ink/use-stroke-capture.js';
 import { NODE_SHAPE, edgeStroke } from '../state/graph-encoding.js';
 import type { NodeShape } from '../state/graph-encoding.js';
-import { fitToContent, toMetres, toView } from './view-transform.js';
+import { toMetres, toView } from './view-transform.js';
+import { useZoneView } from './use-zone-view.js';
+import { ZoneViewControls } from '../screens/ZoneViewControls.js';
 import type { ViewPoint, Viewport } from './view-transform.js';
 import { useI18n } from '../i18n/useI18n.js';
 
@@ -80,6 +82,8 @@ export type GraphViewProps = {
    * ailleurs que là où le précédent l'annonçait.
    */
   readonly frame?: readonly Point[];
+  /** Clé de mémoire de la vue : la zone et son niveau (E3.3). */
+  readonly viewKey?: string;
 };
 
 const IDLE_INK: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'> = {
@@ -90,10 +94,14 @@ const IDLE_INK: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'> = {
 export function GraphView(props: GraphViewProps): JSX.Element {
   const { t } = useI18n();
   const { frame } = props;
-  const view = useMemo(
-    () => fitToContent([...(frame ?? []), ...props.nodes.map(n => n.position)], VIEWPORT),
-    [props.nodes, frame],
-  );
+  const surface = useRef<SVGSVGElement>(null);
+  const zone = useZoneView({
+    memoryKey: props.viewKey ?? null,
+    viewport: VIEWPORT,
+    fitTo: [...(frame ?? []), ...props.nodes.map(n => n.position)],
+    surface,
+  });
+  const { view } = zone;
   const ink = props.ink ?? IDLE_INK;
   const { handlers, live } = useStrokeCapture({
     viewWidth_px: VIEWPORT.width_px,
@@ -126,7 +134,12 @@ export function GraphView(props: GraphViewProps): JSX.Element {
   }, [props.nodes, view]);
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    {props.ink !== undefined && (
+      <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
+    )}
     <svg
+      ref={surface}
       role="group"
       aria-label={t('graph.view.label')}
       viewBox={`0 0 ${String(VIEWPORT.width_px)} ${String(VIEWPORT.height_px)}`}
@@ -136,7 +149,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
         border: '1px solid var(--border-strong)',
         ...(props.ink === undefined ? {} : { touchAction: 'none' }),
       }}
-      {...(props.ink === undefined ? {} : handlers)}
+      {...(props.ink === undefined ? {} : zone.intercept(handlers))}
     >
       {props.edges.map(edge => {
         const from = placed.get(edge.from_node_id);
@@ -221,6 +234,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
           strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
       )}
     </svg>
+    </div>
   );
 }
 

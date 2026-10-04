@@ -12,6 +12,7 @@
  * dernier moment, et nulle part ailleurs.
  */
 import type { Point } from '@azimut/core-model';
+import { ZOOM_STEP_FACTOR } from '@azimut/core-model';
 
 /** E3.2 — l'état de vue. */
 export type ViewState = {
@@ -102,4 +103,50 @@ export function fitToContent(
     scale_px_per_m: clampScale(scale),
     rotationDeg: 0,
   };
+}
+
+/**
+ * E3.3 — un cran de zoom autour d'un point de la vue, qui reste sous le
+ * pointeur. Le facteur par cran est la constante nommée du modèle
+ * (`ZOOM_STEP_FACTOR`) ; l'échelle reste dans ses bornes, et un zoom qui les
+ * dépasserait laisse la vue telle quelle au lieu de la déformer.
+ */
+export function zoomAround(view: ViewState, viewport: Viewport, pivot: ViewPoint, steps: number): ViewState {
+  const scale = clampScale(view.scale_px_per_m * ZOOM_STEP_FACTOR ** steps);
+  if (scale === view.scale_px_per_m) return view;
+  const anchored = toMetres(pivot, view, viewport);
+  const next = { ...view, scale_px_per_m: scale };
+  const drifted = toMetres(pivot, next, viewport);
+  return {
+    ...next,
+    centerX_m: next.centerX_m + (anchored.x_m - drifted.x_m),
+    centerY_m: next.centerY_m + (anchored.y_m - drifted.y_m),
+  };
+}
+
+/** E3.3 — un déplacement de vue, en pixels. Il ne touche aucune donnée. */
+export function panBy(view: ViewState, dx_px: number, dy_px: number): ViewState {
+  return {
+    ...view,
+    centerX_m: view.centerX_m - dx_px / view.scale_px_per_m,
+    centerY_m: view.centerY_m + dy_px / view.scale_px_per_m,
+  };
+}
+
+/**
+ * La matrice SVG qui porte un repère local (pixels d'une image, par exemple)
+ * jusqu'au repère de vue, à partir de la fonction qui place ce repère dans le
+ * repère métier. Elle passe par `toView` : la conversion reste celle de ce
+ * module (E3.1), et la matrice n'en est que la forme affine.
+ */
+export function affineToView(
+  local: (p: { readonly x: number; readonly y: number }) => Point,
+  view: ViewState,
+  viewport: Viewport,
+): string {
+  const o = toView(local({ x: 0, y: 0 }), view, viewport);
+  const ex = toView(local({ x: 1, y: 0 }), view, viewport);
+  const ey = toView(local({ x: 0, y: 1 }), view, viewport);
+  const terms = [ex.x_px - o.x_px, ex.y_px - o.y_px, ey.x_px - o.x_px, ey.y_px - o.y_px, o.x_px, o.y_px];
+  return `matrix(${terms.map(n => Number(n.toFixed(6))).join(',')})`;
 }

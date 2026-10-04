@@ -1,4 +1,4 @@
-import type { Point, ViewState, ViewportSize } from '@azimut/core-model';
+import type { Point } from '@azimut/core-model';
 
 /**
  * J1.4 (partie J) — le plan calé, posé dans le repère du site.
@@ -33,24 +33,6 @@ export function imageToWorld(px: { readonly x_px: number; readonly y_px: number 
     x_m: vx * Math.cos(r) - vy * Math.sin(r),
     y_m: vx * Math.sin(r) + vy * Math.cos(r),
   };
-}
-
-/**
- * La matrice SVG qui pose l'image, en pixels de l'image, sur l'écran de la
- * vue. Vue sans rotation : l'atelier n'en emploie pas (E3).
- */
-export function imageMatrix(placement: PlanPlacement, view: ViewState, viewport: ViewportSize): string {
-  const r = (placement.north_azimuth_deg * Math.PI) / 180;
-  const k = view.scale_px_per_m * placement.scale_m_per_px;
-  const cos = Math.cos(r); const sin = Math.sin(r);
-  const { x_px: ax, y_px: ay } = placement.anchor_px;
-  const a = k * cos;
-  const b = -k * sin;
-  const c = k * sin;
-  const d = k * cos;
-  const e = -k * (cos * ax + sin * ay) - view.scale_px_per_m * view.centerX_m + viewport.width_px / 2;
-  const f = k * (sin * ax - cos * ay) + view.scale_px_per_m * view.centerY_m + viewport.height_px / 2;
-  return `matrix(${[a, b, c, d, e, f].map(n => Number(n.toFixed(6))).join(',')})`;
 }
 
 type Row = { readonly table: string; readonly id: string; readonly values: Readonly<Record<string, unknown>> };

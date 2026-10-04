@@ -197,3 +197,51 @@ test.describe('J1.2 (partie J) — le réseau de circulation tracé dans l’ate
     await expect(page.getByText(/L’outil Arête attend un trait|The Edge tool expects a stroke/)).toBeVisible();
   });
 });
+
+test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail', () => {
+  async function draftBox(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+    const box = await page.getByTestId('ink-draft').boundingBox();
+    if (box === null) throw new Error('contour introuvable');
+    return box;
+  }
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(FOOTPRINTS);
+    await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
+  });
+
+  test('la molette zoome autour du pointeur ; les boutons font de même au clavier', async ({ page }) => {
+    const before = await draftBox(page);
+    const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
+    if (zone === null) throw new Error('zone');
+    await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2);
+    await page.mouse.wheel(0, -100);
+    await expect.poll(async () => (await draftBox(page)).width).toBeGreaterThan(before.width * 1.1);
+
+    await page.getByRole('button', { name: /Recadrer sur le contenu|Fit to content/ }).click();
+    await expect.poll(async () => Math.round((await draftBox(page)).width)).toBe(Math.round(before.width));
+
+    await page.getByRole('button', { name: /^Zoom arrière$|^Zoom out$/ }).click();
+    await expect.poll(async () => (await draftBox(page)).width).toBeLessThan(before.width * 0.9);
+  });
+
+  test('le bouton du milieu déplace la vue sans rien tracer', async ({ page }) => {
+    const before = await draftBox(page);
+    const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
+    if (zone === null) throw new Error('zone');
+    await page.mouse.move(zone.x + 100, zone.y + 100);
+    await page.mouse.down({ button: 'middle' });
+    await page.mouse.move(zone.x + 160, zone.y + 130, { steps: 5 });
+    await page.mouse.up({ button: 'middle' });
+    await expect.poll(async () => Math.round((await draftBox(page)).x - before.x)).toBe(60);
+    await expect(page.getByRole('status').filter({ hasText: /Forme reconnue|Recognised shape/ })).toHaveCount(0);
+  });
+
+  test('la vue se retrouve au rechargement, pour ce niveau', async ({ page }) => {
+    await page.getByRole('button', { name: /^Zoom avant$|^Zoom in$/ }).click();
+    const zoomed = await draftBox(page);
+    await page.reload();
+    await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
+    await expect.poll(async () => Math.round((await draftBox(page)).width)).toBe(Math.round(zoomed.width));
+  });
+});
