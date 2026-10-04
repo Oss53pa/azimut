@@ -83,8 +83,11 @@ export function useFootprintInk(
       sketch={sketch.strokes}
       sketchToolbar={sketch.toolbar}
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
-      onStroke={(points, pointer, pxPerMeter, pressures) => {
-        if (sketch.active) { sketch.onStroke(points, pressures, pxPerMeter); return; }
+      onStroke={(points, pointer, pxPerMeter, detail) => {
+        if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter); return; }
+        // J1.5 — la gomme du stylet n'efface que l'esquisse : une empreinte se
+        // retire par une commande, jamais d'un frottement.
+        if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
         const out = strokeToFootprint(points, {
           tool, pointer, pxPerMeter, strictness: 'normal', footprints,
         });

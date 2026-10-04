@@ -1,5 +1,6 @@
 import { type JSX, useMemo, useState } from 'react';
 import type { Point } from '@azimut/core-model';
+import type { StrokeDetail } from '../editor/ink/use-stroke-capture.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import { SketchToolbar } from '../screens/SketchToolbar.js';
 import type { SketchPen } from '../screens/SketchToolbar.js';
@@ -25,7 +26,7 @@ export type SketchInk = {
   readonly toolbar: JSX.Element;
   /** Les traits à montrer : aucun quand la couche est masquée. */
   readonly strokes: readonly SketchStroke[];
-  readonly onStroke: (points: readonly Point[], pressures: readonly number[], pxPerMeter: number) => void;
+  readonly onStroke: (points: readonly Point[], detail: StrokeDetail, pxPerMeter: number) => void;
 };
 
 /** Le nom donné à la couche créée au premier trait. */
@@ -53,11 +54,13 @@ export function useSketchInk(
     if (built.ok) write([built.value]);
   }
 
-  function onStroke(points: readonly Point[], pressures: readonly number[], pxPerMeter: number): void {
+  function onStroke(points: readonly Point[], detail: StrokeDetail, pxPerMeter: number): void {
     if (!visible) { onNotice('ink.sketch.hidden'); return; }
     if (sketch.layer?.locked === true) { onNotice('ink.sketch.locked'); return; }
     const timestamp = session.now();
-    if (pen === 'eraser') {
+    // J1.5 — le bout gomme ou le bouton latéral du stylet gomment, quel que
+    // soit l'outil choisi.
+    if (pen === 'eraser' || detail.eraser) {
       const touched = strokesTouched(points, sketch.strokes, ERASER_REACH_PX / pxPerMeter);
       if (touched.length === 0) { onNotice('ink.sketch.nothing_erased'); return; }
       const out = eraseCommands(touched, { orgId: ORG_OF_SESSION, timestamp });
@@ -68,7 +71,7 @@ export function useSketchInk(
       sketch.layer ?? { newId: session.newId(), name: DEFAULT_LAYER_NAME },
       {
         id: session.newId(), tool: pen, color,
-        points: points.map((p, i) => ({ x_m: p.x_m, y_m: p.y_m, p: pressures[i] ?? 0 })),
+        points: points.map((p, i) => ({ x_m: p.x_m, y_m: p.y_m, p: detail.pressures[i] ?? 0 })),
       },
       { orgId: ORG_OF_SESSION, siteId: session.siteId, levelId, timestamp },
     );

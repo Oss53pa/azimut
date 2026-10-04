@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { Point } from '@azimut/core-model';
 import { INITIAL_ARBITER, arbitrate } from './pointer-arbiter.js';
 import type { ArbiterState, PointerPhase } from './pointer-arbiter.js';
-import { canTraceFreely, pointerKindOf } from './pointer-kind.js';
+import { canTraceFreely, isPenEraser, pointerKindOf } from './pointer-kind.js';
 import type { PointerKind } from './pointer-kind.js';
 
 /**
@@ -36,9 +36,17 @@ export type StrokeCaptureOptions = {
    */
   readonly onStroke: (
     points: readonly Point[], pointer: PointerKind, pxPerMeter: number, origin: Element | null,
-    pressures: readonly number[],
+    detail: StrokeDetail,
   ) => void;
   readonly onTouchRefused: () => void;
+};
+
+/** Ce que le trait porte en plus de son tracé. */
+export type StrokeDetail = {
+  /** La pression lue à chaque point, de 0 à 1. */
+  readonly pressures: readonly number[];
+  /** Le geste a été fait du bout gomme ou bouton latéral enfoncé (J1.5). */
+  readonly eraser: boolean;
 };
 
 type PointerEventLike = {
@@ -50,6 +58,8 @@ type PointerEventLike = {
   readonly clientY: number;
   /** La pression sous la pointe, de 0 à 1 ; 0 quand le pointeur ne la signale pas. */
   readonly pressure?: number;
+  /** Les boutons enfoncés, au sens de `PointerEvent.buttons`. */
+  readonly buttons?: number;
   readonly currentTarget: Element;
 };
 
@@ -68,6 +78,7 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
   const arbiter = useRef<ArbiterState>(INITIAL_ARBITER);
   const stroke = useRef<{
     pointerId: number; kind: PointerKind; points: Point[]; pressures: number[]; origin: Element | null;
+    eraser: boolean;
   } | null>(null);
   const [live, setLive] = useState<readonly Point[] | null>(null);
 
@@ -106,6 +117,7 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
         const origin = event.target instanceof Element ? event.target : null;
         stroke.current = {
           pointerId: event.pointerId, kind, points: [at(event)], pressures: [event.pressure ?? 0], origin,
+          eraser: isPenEraser(kind, event.buttons ?? 0),
         };
         setLive(stroke.current.points);
       },
@@ -124,7 +136,8 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
         stroke.current = null;
         setLive(null);
         options.onStroke(
-          done.points, done.kind, options.scale_px_per_m * ratio(event), done.origin, done.pressures,
+          done.points, done.kind, options.scale_px_per_m * ratio(event), done.origin,
+          { pressures: done.pressures, eraser: done.eraser },
         );
       },
       onPointerCancel: event => {

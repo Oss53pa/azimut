@@ -6,9 +6,14 @@ import { affineToView, toMetres, toView } from '../viewport/view-transform.js';
 import type { ViewState, Viewport } from '../viewport/view-transform.js';
 import { useZoneView } from '../viewport/use-zone-view.js';
 import { ZoneViewControls } from './ZoneViewControls.js';
+import { BackdropControls } from './BackdropControls.js';
+import { recallBackdrop, rememberBackdrop } from '../viewport/backdrop-settings.js';
+import type { BackdropSettings } from '../viewport/backdrop-settings.js';
+import { browserStore } from '../viewport/view-memory.js';
 import { imageToWorld } from '../domain/plan-placement.js';
 import type { PlanPlacement } from '../domain/plan-placement.js';
 import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
+import type { StrokeDetail } from '../editor/ink/use-stroke-capture.js';
 import type { SketchStroke } from '../state/sketch.js';
 import { SketchStrokes } from './SketchStrokes.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
@@ -49,7 +54,7 @@ export type InkWorkZoneProps = {
   readonly alternative: string | null;
   readonly onAlternative: () => void;
   readonly onStroke: (
-    points: readonly Point[], pointer: PointerKind, pxPerMeter: number, pressures: readonly number[],
+    points: readonly Point[], pointer: PointerKind, pxPerMeter: number, detail: StrokeDetail,
   ) => void;
   /** La couche d'esquisse du niveau, sous le travail (J3) ; vide si masquée. */
   readonly sketch: readonly SketchStroke[];
@@ -105,12 +110,19 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
   });
   const { view } = zone;
 
+  // J1.4 — opacité du fond et formes tracées, mémorisées par zone et niveau.
+  const [backdrop, setBackdrop] = useState<BackdropSettings>(() => recallBackdrop(props.viewKey, browserStore()));
+  const changeBackdrop = (next: BackdropSettings): void => {
+    setBackdrop(next);
+    rememberBackdrop(props.viewKey, next, browserStore());
+  };
+
   const { handlers, live } = useStrokeCapture({
     viewWidth_px: viewport.width_px,
     scale_px_per_m: view.scale_px_per_m,
     toMetres: at => toMetres(at, view, viewport),
-    onStroke: (points, pointer, pxPerMeter, _origin, pressures) => {
-      props.onStroke(points, pointer, pxPerMeter, pressures);
+    onStroke: (points, pointer, pxPerMeter, _origin, detail) => {
+      props.onStroke(points, pointer, pxPerMeter, detail);
     },
     onTouchRefused: props.onTouchRefused,
   });
@@ -118,6 +130,8 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm }}>
       {props.sketchToolbar}
+      <BackdropControls id={`fond-${props.viewKey}`} settings={backdrop} hasBackground={background !== null}
+        onChange={changeBackdrop} />
       <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
       <div ref={host} style={{ width: '100%' }}>
         <svg
@@ -136,13 +150,14 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
               height={background.height_px}
               transform={affineToView(
                 p => imageToWorld({ x_px: p.x, y_px: p.y }, background.placement), view, viewport)}
-              opacity={0.6}
+              opacity={backdrop.opacity}
               preserveAspectRatio="none"
             />
           )}
-          {props.footprints.map(f => (
+          {backdrop.showShapes && props.footprints.map(f => (
             <path
               key={f.id}
+              data-testid="ink-footprint"
               d={pathOf(f.outline, view, viewport, true)}
               fill="var(--surface-panel)"
               fillOpacity={0.5}

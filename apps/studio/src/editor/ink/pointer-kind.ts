@@ -54,3 +54,18 @@ export function toleranceFor(kind: PointerKind): PointerTolerance {
 export function canTraceFreely(kind: PointerKind): boolean {
   return kind !== 'touch';
 }
+
+/** `PointerEvent.buttons` : le bouton latéral du stylet. */
+const PEN_BARREL_BUTTON = 2;
+/** `PointerEvent.buttons` : le bout gomme d'un stylet retourné. */
+const PEN_ERASER_BUTTON = 32;
+
+/**
+ * J1.5 (partie J) — « Bouton latéral du stylet, s'il existe : gomme.
+ * Retournement du stylet, si le matériel le signale : gomme également. »
+ *
+ * Lu à la pose du stylet : le geste entier est alors un geste de gomme.
+ */
+export function isPenEraser(kind: PointerKind, buttons: number): boolean {
+  return kind === 'pen' && (buttons & (PEN_BARREL_BUTTON | PEN_ERASER_BUTTON)) !== 0;
+}

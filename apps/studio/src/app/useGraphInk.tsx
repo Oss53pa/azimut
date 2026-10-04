@@ -55,7 +55,8 @@ export function useGraphInk(inputs: GraphInkInputs): {
 
   const ink: NonNullable<GraphViewProps['ink']> = {
     onTouchRefused: () => { setNotice('ink.touch_refused'); },
-    onStroke: (points, pointer, pxPerMeter) => {
+    onStroke: (points, pointer, pxPerMeter, _origin, detail) => {
+      if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
       const out = strokeToGraph(points, {
         tool, pointer, pxPerMeter, strictness: 'normal',
         nodes: levelNodes.map(n => ({ id: n.id, at: n.position })),
