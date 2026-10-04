@@ -2184,3 +2184,53 @@ reconnaissance. L'essai du stylet vérifie désormais aussi la sélection.
 sur une base remise à zéro : `test` à 4 553, `test:visual` à 14, `test:rls` à
 83, `test:determinism` à 11, `test:e2e` à 147 (145 plus les 2 du graphe),
 `build` sans erreur.
+
+## Zoom et déplacement dans les zones de travail (E3.3)
+
+Prérequis pour décalquer finement un vrai plan. Rien n'était à décider : la
+partie E le fixe.
+
+**Le module de transformation unique** (`viewport/view-transform.ts`, E3.1)
+porte désormais les opérations de vue :
+
+- un cran de zoom autour d'un point, au facteur nommé `ZOOM_STEP_FACTOR`,
+  borné, la vue restant immobile hors bornes ;
+- le déplacement ;
+- `affineToView`, qui tire la matrice de pose du plan de `toView`.
+
+Le placement du plan calculait auparavant sa propre conversion vers la vue
+(`imageMatrix`), contre E3.1 : il est retiré, et la pose du fond passe par
+la transformation unique.
+
+**Navigation** (`viewport/use-zone-view.ts`), commune aux deux zones :
+
+- molette autour du pointeur ;
+- déplacement au bouton du milieu ou espace enfoncée, sans rien tracer ;
+- boutons « Zoom avant », « Zoom arrière » et « Recadrer sur le contenu »
+  pour le clavier (E6.2).
+
+La vue suit son contenu (le fond de plan arrive après l'ouverture) tant que
+l'utilisateur ne l'a pas bougée. Elle n'entre ni dans l'historique ni dans le
+modèle. Elle est mémorisée par zone et par niveau dans le stockage du
+navigateur (`view-memory.ts`). Une valeur illisible ou hors bornes est
+ignorée, et un stockage refusé ne casse rien.
+
+**Essais.**
+
+- Unitaires : 4 pour le zoom et le déplacement, 4 pour la mémoire.
+- De bout en bout, 3 de plus dans `j1-trace-stylet.spec.ts` :
+  - la molette zoome, le recadrage revient, le zoom arrière s'applique ;
+  - le bouton du milieu déplace la vue de 60 pixels, sans rien tracer ;
+  - la vue se retrouve au rechargement.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 du premier coup (chain42), sur
+une base remise à zéro : `test` à 4 561, `test:visual` à 14, `test:rls` à 83,
+`test:determinism` à 11, `test:e2e` à 150 (accessibilité axe de M3 et M4
+comprise, avec les nouveaux boutons), `build` sans erreur.
+
+### Reste ouvert après la navigation
+
+- La navigation au doigt (G3.3) attend que l'éditeur tranche la contradiction
+  de J1.5.
+- `rotationDeg` reste à 0 dans les ateliers : l'aperçu orienté de D6 n'est
+  pas leur affaire.
