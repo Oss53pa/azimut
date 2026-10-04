@@ -76,9 +76,25 @@ export type TrancheSession = {
   readonly acceptResume: () => void;
   /** Repartir sans lui. L'état local est effacé, jamais fusionné. */
   readonly discardResume: () => void;
+  /** Le site du parcours, tel que la route le donne. */
+  readonly siteId: string;
   /** Un identifiant neuf, tiré ici pour que les calculs n'en tirent aucun. */
   readonly newId: () => string;
   readonly now: () => string;
+  /**
+   * J1.4 — les images des plans calés, par source de plan, le temps de la
+   * session. Le fichier n'est encore téléversé nulle part : sans cette
+   * mémoire, le fond du décalque disparaîtrait dès la sortie de l'écran de
+   * calage. Elle ne survit pas au rechargement, et l'atelier le dit.
+   */
+  readonly planImages: ReadonlyMap<string, PlanImage>;
+  readonly keepPlanImage: (planSourceId: string, image: PlanImage) => void;
+};
+
+/** Le contenu d'un plan importé, tel que lu à l'import. */
+export type PlanImage = {
+  readonly mediaType: string;
+  readonly bytes: Uint8Array;
 };
 
 /**
@@ -132,6 +148,10 @@ export function useTrancheSession(
   // E5.2 — la pile d'annulation du site en cours. Le `ref` porte l'état
   // courant, pour qu'un second geste parte du premier et non du dernier rendu.
   const [storeState, setStore] = useState<StoreState>(EMPTY_STORE);
+  const [planImages, setPlanImages] = useState<ReadonlyMap<string, PlanImage>>(new Map());
+  const keepPlanImage = useCallback((planSourceId: string, image: PlanImage): void => {
+    setPlanImages(previous => new Map(previous).set(planSourceId, image));
+  }, []);
   const store = useRef<StoreState>(EMPTY_STORE);
 
   /**
@@ -297,7 +317,10 @@ export function useTrancheSession(
     acceptResume,
     discardResume,
     count: useCallback((table: string) => countOf(state, table), [state]),
+    siteId: context.siteId,
     newId,
     now: useCallback(() => new Date().toISOString(), []),
+    planImages,
+    keepPlanImage,
   };
 }

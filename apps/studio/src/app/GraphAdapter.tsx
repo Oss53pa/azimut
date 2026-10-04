@@ -13,7 +13,7 @@ import { inheritedEdgeWidthM } from '../state/edge-width.js';
 import { graphToolForKey } from '../state/graph-shortcuts.js';
 import { useVerticalLinkTool } from './useVerticalLinkTool.js';
 import { updateNodeCommands, updateEdgeCommands } from '../state/graph-update-commands.js';
-import { GraphView } from '../viewport/GraphView.js';
+import { useGraphInk } from './useGraphInk.js';
 import type { GraphSelection } from '../viewport/GraphView.js';
 import type { StoredRow } from '../state/session-store.js';
 import { GraphScreen } from '../screens/GraphScreen.js';
@@ -177,6 +177,8 @@ export function GraphScreenAdapter({ session, levelId }: {
     && onLevel.has(String(r.values['from_node_id'] ?? ''))
     && onLevel.has(String(r.values['to_node_id'] ?? '')));
   const levelNodes = graph.nodes.filter(node => node.level_id === levelId);
+  // J1.2 — le réseau tracé au stylet : point appuyé, nœud ; trait, arête.
+  const ink = useGraphInk({ session, levelId, tool, nextNodeKind, inheritedWidthM, levelNodes, onFindings: setFindings });
   const levelEdges = graph.edges.filter(edge =>
     onLevel.has(edge.from_node_id) && onLevel.has(edge.to_node_id));
   const levelLinks = graph.vertical_links.filter(vlink =>
@@ -371,12 +373,7 @@ export function GraphScreenAdapter({ session, levelId }: {
         par leur forme et les arêtes par leur trait : c'est cette vue qui le
         rend, depuis l'encodage en donnée.
       */}
-      <GraphView
-        nodes={levelNodes}
-        edges={levelEdges}
-        selected={chosen}
-        onSelect={select}
-      />
+      {ink.zone({ nodes: levelNodes, edges: levelEdges, selected: chosen, onSelect: select })}
     </GraphScreen>
   );
 }

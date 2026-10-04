@@ -129,7 +129,9 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   '09-budget': ['cost_reference', 'budget_line'],
   '10-portefeuille': [],
   '11-transverse': [],
-  '12-atelier': [],
+  // L (fiche du module 12) : « Possède. `sketch_layer`, `sketch_stroke` »
+  // (J3.4, migration 0072).
+  '12-atelier': ['sketch_layer', 'sketch_stroke'],
 };
 
 // ---------------------------------------------------------------------------

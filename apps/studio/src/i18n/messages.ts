@@ -26,6 +26,7 @@ import { DATA_SOURCE_FR, DATA_SOURCE_EN } from './messages/data-source.js';
 import { WORKSHOP_SCREENS_FR, WORKSHOP_SCREENS_EN } from './messages/workshop-screens.js';
 import { WORKSHOP_STRUCTURE_FR, WORKSHOP_STRUCTURE_EN } from './messages/workshop-structure.js';
 import { SESSION_FR, SESSION_EN } from './messages/session.js';
+import { INK_FR, INK_EN } from './messages/ink.js';
 import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
 import { SHELL_FR, SHELL_EN } from './messages/shell.js';
 import { REGISTER_FR, REGISTER_EN } from './messages/register.js';
@@ -64,6 +65,7 @@ export const MESSAGES_FR = {
   ...WORKSHOP_SCREENS_FR,
   ...WORKSHOP_STRUCTURE_FR,
   ...SESSION_FR,
+  ...INK_FR,
   ...MESSAGE_TABLE_FR,
   ...SHELL_FR,
   ...REGISTER_FR,
@@ -105,6 +107,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...WORKSHOP_SCREENS_EN,
   ...WORKSHOP_STRUCTURE_EN,
   ...SESSION_EN,
+  ...INK_EN,
   ...MESSAGE_TABLE_EN,
   ...SHELL_EN,
   ...REGISTER_EN,

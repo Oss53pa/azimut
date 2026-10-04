@@ -23,6 +23,7 @@ import {
   type SiteSummary,
   type CountrySummary,
   type LegalEntitySummary,
+  type SketchRows,
 } from './site-repository.js';
 
 /**
@@ -140,6 +141,14 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve(referenceTenant(site));
+    },
+
+    /** Le jeu de référence ne porte aucune esquisse. */
+    loadSketch(siteId: string): Promise<SketchRows> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve({ layers: [], strokes: [] });
     },
 
     /**

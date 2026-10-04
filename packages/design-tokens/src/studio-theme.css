@@ -94,6 +94,13 @@
   --az-tool-preview: var(--accent);
   --az-selection-handle: var(--text-primary);
 
+  /* Sketch layer palette (J3.2) — one value for both themes: the work area
+     keeps a light ground in both (F5) */
+  --sketch-graphite: #3B4048;
+  --sketch-brick: #A34A2D;
+  --sketch-ultramarine: #3341A6;
+  --sketch-fir: #2D5A44;
+
   /* Habillage layer roles (E9) — roles, never direct colours */
   --az-decoration-fill: var(--surface-sunken);
   --az-decoration-stroke: var(--border-strong);

@@ -11,6 +11,7 @@ import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { countOf } from '../state/session-store.js';
 import type { StoredRow } from '../state/session-store.js';
 import { FootprintsScreen } from '../screens/FootprintsScreen.js';
+import { useFootprintInk } from './useFootprintInk.js';
 import type { SeriesDraft } from '../screens/FootprintsScreen.js';
 
 /**
@@ -62,6 +63,9 @@ export function FootprintsScreenAdapter({ session, levelId }: {
   const [reference, setReference] = useState<Reference | null>(null);
 
   const drawn = countOf(session.state, 'footprint');
+  // J1 — la zone de travail au stylet : un trait lu remplace le contour en
+  // cours, que `close` ferme comme une saisie au clavier.
+  const ink = useFootprintInk(session, levelId, tool, vertices, setVertices);
 
   function codesOnLevel(): readonly string[] {
     return session.state.rows
@@ -89,6 +93,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       setReference({ ...draft, vertices: accepted.value.vertices });
       setUnitCode('');
       setVertices(DEFAULT_FOOTPRINT);
+      ink.settle();
     })();
   }
 
@@ -170,7 +175,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       event.preventDefault();
       if (action === 'close_polygon') close();
       if (action === 'duplicate') duplicate();
-      if (action === 'abandon_drawing') { setVertices(DEFAULT_FOOTPRINT); setFindings([]); }
+      if (action === 'abandon_drawing') { setVertices(DEFAULT_FOOTPRINT); setFindings([]); ink.settle(); }
       if (action === 'remove_last_vertex') {
         setVertices(previous => previous.slice(0, -1));
       }
@@ -198,14 +203,16 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       warnings={warnings}
       footprintCount={drawn}
       onClose={close}
-      onAbandon={() => { setVertices(DEFAULT_FOOTPRINT); setFindings([]); }}
+      onAbandon={() => { setVertices(DEFAULT_FOOTPRINT); setFindings([]); ink.settle(); }}
       series={series}
       onSeries={(field, value) => {
         setSeries(previous => ({ ...previous, [field]: value ?? 0 }));
       }}
       seriesReference={reference?.unitCode ?? null}
       onDuplicate={duplicate}
-    />
+    >
+      {ink.zone}
+    </FootprintsScreen>
   );
 }
 

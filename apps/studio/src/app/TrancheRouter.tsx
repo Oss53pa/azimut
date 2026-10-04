@@ -66,7 +66,10 @@ function TrancheWorkspace({ route }: {
   const repository = useMemo(() => appRepository(), []);
   const load = useCallback(async () => {
     try {
-      return sessionFromSite(await repository.loadSite(route.siteId));
+      const [site, sketch] = await Promise.all([
+        repository.loadSite(route.siteId), repository.loadSketch(route.siteId),
+      ]);
+      return sessionFromSite(site, sketch);
     } catch (cause: unknown) {
       if (isRepositoryError(cause) && cause.failure === 'not_found') return null;
       throw cause;

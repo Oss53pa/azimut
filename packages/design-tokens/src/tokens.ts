@@ -60,6 +60,26 @@ export const stateColorsInstrument = {
   'state-info': '#79ACDF',
 } as const;
 
+/**
+ * J3.2 — la palette de la couche d'esquisse : quatre couleurs de feutre.
+ *
+ * « Palette de couleurs propre à l'esquisse, sans aucun rapport avec les
+ * jetons d'interface ni avec les chartes clients, précisément pour qu'une
+ * esquisse ne puisse jamais être confondue avec un contenu validé. »
+ *
+ * Une seule valeur par couleur, quel que soit le thème : l'esquisse se pose
+ * sur la zone de travail, qui reste en fond clair dans les deux (F5). Les
+ * clés sont celles que `sketch_stroke.color` accepte (migration 0072).
+ */
+export const sketchPalette = {
+  'sketch-graphite': '#3B4048',
+  'sketch-brick': '#A34A2D',
+  'sketch-ultramarine': '#3341A6',
+  'sketch-fir': '#2D5A44',
+} as const;
+
+export type SketchTokenKey = keyof typeof sketchPalette;
+
 /** Backward-compatible alias — Papier state colors. */
 export const stateColors = stateColorsPapier;
 

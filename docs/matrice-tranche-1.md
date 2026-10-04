@@ -2027,3 +2027,296 @@ donc `dist/main.js`, en mode SSR, sans minification, avec sa carte de sources.
 verrouillage mis à jour, en mode figé. Résultats : `test` à 4 507, `test:visual` à 14,
 `test:rls` à 83, `test:determinism` à 11, `test:e2e` à 138, et `build`, qui
 construit `dist/main.js` (586 ko), sans erreur.
+
+## Stylet : socle et décalque dans l'atelier des empreintes (J1, G3)
+
+Demande de l'utilisatrice : tracer au stylet dans Azimut. Elle a choisi de
+commencer par le socle et le décalque. Le fond est un plan en image pour
+l'instant ; le rendu des PDF fera l'objet d'une décision à part.
+
+**Ce que le cahier permet et refuse.**
+
+- Il permet :
+  - le stylet comme méthode de saisie : la forme reconnue est quantifiée et
+    devient une donnée ordinaire (J0, J1) ;
+  - l'esquisse libre (J3) ;
+  - l'annotation de revue (J4) ;
+  - l'éditeur de pictogrammes d'orientation (J5).
+- Il refuse :
+  - un panneau dessiné à la main (INV-1, INV-2) ;
+  - toute modification depuis la vue 3D (S-6) ;
+  - un parcours dessiné à la main, puisqu'il est calculé depuis le réseau,
+    qui lui se trace au stylet.
+
+**Socle** (`apps/studio/src/editor/ink/`, fonctions pures, 26 essais) :
+
+- type de pointeur et tolérances de G3.2 ;
+- refus du tracé au doigt (G3.1) ;
+- rejet de la paume (G3.4) : le doigt est ignoré tant que le stylet touche
+  ou a signalé sa présence depuis moins de 1,5 s, l'heure venant de
+  l'événement ;
+- reconnaissance des formes de J1.2 et redressement d'un bloc de J1.3 ;
+- candidates rangées, quantifiées au millimètre, sans lecture de la
+  pression ; la suppression n'est jamais proposée en premier.
+
+**Décalque dans M3.** L'atelier n'avait pas de zone de travail : seule la
+saisie numérique existait.
+
+- La zone montre :
+  - le plan calé en fond, s'il est en image ;
+  - les empreintes du niveau ;
+  - le contour en cours, à l'accent ;
+  - le trait d'origine en filigrane jusqu'à la clôture.
+- Un trait au stylet ou à la souris est lu selon l'outil actif :
+  - la cellule préfère le rectangle ;
+  - le polygone libre préfère le polygone ;
+  - le rectangle n'accepte que le rectangle.
+- La lecture retenue remplace le contour en cours. Elle se modifie au clavier
+  dans le panneau et se ferme comme une saisie. L'autre lecture se prend en
+  un geste.
+- Le doigt est refusé avec son motif. Un outil qui ne trace pas le dit.
+
+**Placement du plan** (`domain/plan-placement.ts`, 7 essais) : le plan se
+déduit du calage déjà enregistré (échelle, azimut, points de la mesure). Le
+cahier ne fixait pas quel pixel de l'image correspond à l'origine du site.
+Décision de l'utilisatrice : le point A du calage. L'image elle-même est
+gardée par la session depuis le calage, le temps de la session, puisque le
+téléversement n'existe pas encore. Après rechargement, la zone le dit.
+
+**Essais de bout en bout** (`j1-trace-stylet.spec.ts`, 7 cas) :
+
+- un rectangle à main levée devient le contour en cours, sur les axes ;
+- le contour se ferme comme une saisie, et le trait d'origine s'efface ;
+- un outil qui ne trace pas le dit ;
+- le doigt est refusé ;
+- la paume est ignorée pendant le survol du stylet ;
+- sans plan calé, la zone le dit ;
+- l'image calée est posée en fond, et après rechargement la zone dit que le
+  fichier n'est plus gardé.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0, sur une base remise à zéro
+(75 migrations) : `test` à 4 547 (essais de la reconnaissance, du placement et
+de l'atelier compris), `test:visual` à 14, `test:rls` à 83, `test:determinism`
+à 11, `test:e2e` à 145 (138 plus les 7 du tracé), `build` sans erreur. Un
+premier passage avait échoué sur le contrôle des citations de règle : quatre
+commentaires citaient M2, M3 ou M7.10 sans leur partie ; corrigé.
+
+### Reste ouvert après le décalque
+
+**Contradiction dans J1.5 (A2.2, cas 3), signalée à l'éditeur du cahier.**
+J1.5 admet le déplacement et le zoom à deux doigts « pendant que le stylet
+dessine ». La même section dit tout contact tactile ignoré dès qu'un stylet
+est détecté. Aucune des deux lectures n'est appliquée : pendant que le
+stylet est actif, le doigt ne trace ni ne sélectionne, et la navigation au
+doigt n'est pas construite.
+
+**Réglages choisis**, paramètres d'ergonomie et non valeurs normatives :
+
+- les seuils des trois niveaux d'intensité ;
+- le pas de 15° des angles remarquables (E, « valeur réglable ») ;
+- 1,5 s d'inactivité du stylet.
+
+L'intensité n'est pas encore mémorisée par utilisateur (J1.3) : elle est au
+niveau intermédiaire.
+
+**Encore à construire** :
+
+- le rendu des PDF en fond (décision de bibliothèque, A2.2 cas 4) ;
+- le téléversement du plan ;
+- les trois réglages du fond (J1.4) ;
+- le zoom et le déplacement dans la zone ;
+- la couche d'esquisse (J3) ;
+- l'annotation de revue (J4) ;
+- l'éditeur de pictogrammes (J5) ;
+- la vue isométrique (S1).
+
+## Stylet : le réseau de circulation dans l'atelier du graphe (J1.2)
+
+Suite du socle, dans l'option choisie par l'utilisatrice. Le parcours se
+calcule depuis ce réseau, il ne se dessine jamais à la main (INV-1).
+
+**Gestes reconnus dans la vue du graphe.**
+
+- Outil « Nœud » : un point appuyé pose un nœud du type choisi avant le geste
+  (J1.2). Un point appuyé sur un nœud déjà posé le sélectionne, sans en
+  poser un second par-dessus.
+- Outil « Arête » : un trait qui part d'un nœud et arrive sur un autre les
+  relie. L'arête prend la largeur héritée du bâtiment et passe par le même
+  jugement que l'outil au clavier (`acceptEdge`).
+- Chaque geste est une commande annulable.
+- Les outils Axe et Liaison verticale ne lisent pas le trait et le disent.
+- Un trait mal formé dit ce que l'outil attend.
+
+**Construction.**
+
+- La capture du trait est commune aux deux ateliers
+  (`editor/ink/use-stroke-capture.ts`). Elle ramène les coordonnées au repère
+  de la vue quand la feuille de style la met à l'échelle, et remet l'échelle
+  réelle de l'écran à la reconnaissance.
+- La vue du graphe s'ajuste sur les empreintes du niveau et les nœuds : un
+  cadrage qui suivrait le seul nœud posé ferait tomber le suivant ailleurs
+  que là où on l'a tracé.
+- La logique est dans `state/graph-ink.ts` (6 essais) ; l'écriture dans
+  `app/useGraphInk.tsx`, à part pour garder l'adaptateur du graphe sous
+  400 lignes (A2.4).
+
+**Essais de bout en bout** (2 cas de plus dans `j1-trace-stylet.spec.ts`,
+passés trois fois de suite) :
+
+- deux points appuyés posent deux nœuds, un troisième sur un nœud n'en pose
+  pas, et un trait de l'un à l'autre trace l'arête ;
+- un trait qui ne part d'aucun nœud est refusé avec son motif.
+
+En les écrivant, la course de M7.8 est réapparue : une touche frappée avant
+que l'atelier soit monté. L'essai attend désormais la barre d'outils et
+vérifie l'outil actif avant de tracer.
+
+**Régression attrapée par la chaîne, puis corrigée.** Le premier passage
+(chain40) a fait échouer six essais de M4 : en mode tracé, la vue capturait le
+pointeur dès l'appui, le clic n'atteignait plus le nœud ou l'arête, et la
+sélection ne se faisait plus. Un point appuyé sur une arête aurait même posé
+un nœud dessus. La capture remet désormais l'élément sous le pointeur au
+moment de l'appui : un point appuyé sur un nœud ou une arête est une
+sélection, et seul un vrai trait, ou un point appuyé dans le vide, va à la
+reconnaissance. L'essai du stylet vérifie désormais aussi la sélection.
+
+**Chaîne A13.2.** Après correction (chain41), les neuf étapes sortent à 0
+sur une base remise à zéro : `test` à 4 553, `test:visual` à 14, `test:rls` à
+83, `test:determinism` à 11, `test:e2e` à 147 (145 plus les 2 du graphe),
+`build` sans erreur.
+
+## Zoom et déplacement dans les zones de travail (E3.3)
+
+Prérequis pour décalquer finement un vrai plan. Rien n'était à décider : la
+partie E le fixe.
+
+**Le module de transformation unique** (`viewport/view-transform.ts`, E3.1)
+porte désormais les opérations de vue :
+
+- un cran de zoom autour d'un point, au facteur nommé `ZOOM_STEP_FACTOR`,
+  borné, la vue restant immobile hors bornes ;
+- le déplacement ;
+- `affineToView`, qui tire la matrice de pose du plan de `toView`.
+
+Le placement du plan calculait auparavant sa propre conversion vers la vue
+(`imageMatrix`), contre E3.1 : il est retiré, et la pose du fond passe par
+la transformation unique.
+
+**Navigation** (`viewport/use-zone-view.ts`), commune aux deux zones :
+
+- molette autour du pointeur ;
+- déplacement au bouton du milieu ou espace enfoncée, sans rien tracer ;
+- boutons « Zoom avant », « Zoom arrière » et « Recadrer sur le contenu »
+  pour le clavier (E6.2).
+
+La vue suit son contenu (le fond de plan arrive après l'ouverture) tant que
+l'utilisateur ne l'a pas bougée. Elle n'entre ni dans l'historique ni dans le
+modèle. Elle est mémorisée par zone et par niveau dans le stockage du
+navigateur (`view-memory.ts`). Une valeur illisible ou hors bornes est
+ignorée, et un stockage refusé ne casse rien.
+
+**Essais.**
+
+- Unitaires : 4 pour le zoom et le déplacement, 4 pour la mémoire.
+- De bout en bout, 3 de plus dans `j1-trace-stylet.spec.ts` :
+  - la molette zoome, le recadrage revient, le zoom arrière s'applique ;
+  - le bouton du milieu déplace la vue de 60 pixels, sans rien tracer ;
+  - la vue se retrouve au rechargement.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 du premier coup (chain42), sur
+une base remise à zéro : `test` à 4 561, `test:visual` à 14, `test:rls` à 83,
+`test:determinism` à 11, `test:e2e` à 150 (accessibilité axe de M3 et M4
+comprise, avec les nouveaux boutons), `build` sans erreur.
+
+### Reste ouvert après la navigation
+
+- La navigation au doigt (G3.3) attend que l'éditeur tranche la contradiction
+  de J1.5.
+- `rotationDeg` reste à 0 dans les ateliers : l'aperçu orienté de D6 n'est
+  pas leur affaire.
+
+## Couche d'esquisse dans la zone de travail (J3)
+
+Décisions prises avec l'utilisateur : J3.4 complété par la règle de A5
+(`updated_at`, `deleted_at` sur les deux tables), et une palette d'esquisse
+de quatre couleurs de feutre — graphite, brique, outremer, sapin — portée par
+des jetons `sketch-*` distincts de ceux de l'interface et des chartes (J3.2).
+
+**Base** (migration 0072, commit à part) :
+
+- `sketch_layer` et `sketch_stroke`, sous cloisonnement forcé ;
+- outil et couleur bornés en base ;
+- `points` en `jsonb`, tracé et pression tels quels ;
+- l'auteur est pris en base (`owner_id` par défaut `current_user_id()`).
+
+Le module 12 est propriétaire des deux tables.
+
+**Studio.**
+
+- `state/sketch.ts` :
+  - le premier trait crée la couche du niveau dans le même geste ;
+  - la gomme supprime logiquement les traits touchés, d'un seul geste ;
+  - la couche se masque et se remontre ;
+  - la pression module l'épaisseur et l'opacité, et le marqueur reste
+    translucide d'un bloc.
+- La capture de trait remet désormais la pression lue à chaque point. Seule
+  l'esquisse la garde.
+- Dans la zone de travail des empreintes, le bouton « Esquisser » détourne le
+  trait vers la couche : il n'est ni lu, ni redressé, ni quantifié (J3.3).
+  Hors de ce mode, l'esquisse reste affichée sous le travail.
+- La relecture depuis le dépôt passe par `loadSketch`, à part de `loadSite` :
+  l'esquisse n'entre jamais dans `SiteData`, que lisent moteurs et
+  compilateur.
+
+**Contrôle automatisé sur les exports (J3.3)** — `tests/j3-3-esquisse-hors-livrable.test.ts` :
+
+- `SiteData` ne porte aucune esquisse ;
+- ni les moteurs, ni le compilateur, ni le paquet de borne, ni la couche
+  d'accès (hors schéma), ni les règles ne nomment les tables ou leurs
+  lectures ;
+- dans le studio, seule une liste blanche de fichiers de l'atelier le peut.
+
+**Défaut trouvé en chemin.** Le client `postgres` sérialise en « faux » toute
+valeur non booléenne passée à une colonne booléenne, la chaîne `'true'`
+comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
+`false`). L'esquisse écrit de vrais booléens, et un essai en base le vérifie.
+
+**Essais.**
+
+- Unitaires : 6 pour l'esquisse, 3 pour la palette, 6 pour le contrôle J3.3.
+- En base (`test:rls`) : 5, dont le cloisonnement, la gomme, le masquage et
+  le refus d'une couleur hors palette.
+- De bout en bout, 6 dans `j3-esquisse.spec.ts` :
+  - le trait gardé tel quel, dans sa couleur ;
+  - le même trait lu comme une forme hors mode esquisse ;
+  - la pression du stylet qui épaissit le trait ;
+  - la gomme ;
+  - le masquage ;
+  - l'annulation.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain43), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 576 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 156 |
+| `build` | sans erreur |
+
+### Reste ouvert après l'esquisse
+
+- La promotion (entourer une esquisse et demander sa conversion, J3.3)
+  n'est pas faite.
+- L'inclinaison qui module la largeur du marqueur (J3.2) n'est pas faite :
+  J3.4 ne prévoit pas de la conserver dans `points`. C'est un choix de modèle
+  à faire trancher (A2.2).
+- L'esquisse n'est proposée que dans l'atelier des empreintes, pas encore
+  dans celui du graphe.
+- L'auteur et la date sont en base mais pas encore affichés.
+- Le verrouillage de couche est lu et respecté, mais aucun bouton ne le pose.
+- `graph-update-commands.ts` écrit encore `'true'`/`'false'` en chaînes.
+  Le studio passe par PostgREST, qui les convertit bien ; le chemin
+  `applyCommands` les enregistrerait à faux.

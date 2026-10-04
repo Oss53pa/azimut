@@ -1,8 +1,14 @@
-import { type JSX, useMemo } from 'react';
-import type { Edge, GraphNode } from '@azimut/core-model';
+import { type JSX, useMemo, useRef } from 'react';
+import type { Edge, GraphNode, Point } from '@azimut/core-model';
+import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
+import { pathLength } from '../editor/ink/stroke-geometry.js';
+import { RECOGNITION_THRESHOLDS } from '../editor/ink/recognition-thresholds.js';
+import type { StrokeCaptureOptions } from '../editor/ink/use-stroke-capture.js';
 import { NODE_SHAPE, edgeStroke } from '../state/graph-encoding.js';
 import type { NodeShape } from '../state/graph-encoding.js';
-import { fitToContent, toView } from './view-transform.js';
+import { toMetres, toView } from './view-transform.js';
+import { useZoneView } from './use-zone-view.js';
+import { ZoneViewControls } from '../screens/ZoneViewControls.js';
 import type { ViewPoint, Viewport } from './view-transform.js';
 import { useI18n } from '../i18n/useI18n.js';
 
@@ -65,14 +71,62 @@ export type GraphViewProps = {
   readonly edges: readonly Edge[];
   readonly selected: GraphSelection | null;
   readonly onSelect: (selection: GraphSelection) => void;
+  /**
+   * J1 (partie J) — le tracé au stylet ou à la souris dans la vue. Absent, la
+   * vue ne fait que montrer et sélectionner.
+   */
+  readonly ink?: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'>;
+  /**
+   * Ce sur quoi la vue s'ajuste, en plus des nœuds : les empreintes du niveau.
+   * Sans lui, la vue suivrait chaque nœud posé, et un point appuyé tomberait
+   * ailleurs que là où le précédent l'annonçait.
+   */
+  readonly frame?: readonly Point[];
+  /** Clé de mémoire de la vue : la zone et son niveau (E3.3). */
+  readonly viewKey?: string;
+};
+
+const IDLE_INK: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'> = {
+  onStroke: () => undefined,
+  onTouchRefused: () => undefined,
 };
 
 export function GraphView(props: GraphViewProps): JSX.Element {
   const { t } = useI18n();
-  const view = useMemo(
-    () => fitToContent(props.nodes.map(n => n.position), VIEWPORT),
-    [props.nodes],
-  );
+  const { frame } = props;
+  const surface = useRef<SVGSVGElement>(null);
+  const zone = useZoneView({
+    memoryKey: props.viewKey ?? null,
+    viewport: VIEWPORT,
+    fitTo: [...(frame ?? []), ...props.nodes.map(n => n.position)],
+    surface,
+  });
+  const { view } = zone;
+  const ink = props.ink ?? IDLE_INK;
+  const { handlers, live } = useStrokeCapture({
+    viewWidth_px: VIEWPORT.width_px,
+    scale_px_per_m: view.scale_px_per_m,
+    toMetres: at => toMetres(at, view, VIEWPORT),
+    // Un point appuyé sur un nœud ou une arête est une sélection, comme un clic
+    // hors tracé : la capture du pointeur détourne le clic vers la vue, et le
+    // geste poserait sinon un nœud sur l'arête que l'on voulait choisir.
+    onStroke: (points, pointer, pxPerMeter, origin, pressures) => {
+      const item = origin?.closest('[data-select-kind]') ?? null;
+      const tap = pathLength(points) * pxPerMeter <= RECOGNITION_THRESHOLDS.normal.tap_px;
+      const kind = item?.getAttribute('data-select-kind');
+      const id = item?.getAttribute('data-select-id');
+      if (tap && (kind === 'node' || kind === 'edge') && typeof id === 'string') {
+        props.onSelect({ kind, id });
+        return;
+      }
+      ink.onStroke(points, pointer, pxPerMeter, origin, pressures);
+    },
+    onTouchRefused: ink.onTouchRefused,
+  });
+  const livePath = live === null ? '' : live.map((p, i) => {
+    const v = toView(p, view, VIEWPORT);
+    return `${i === 0 ? 'M' : 'L'}${v.x_px.toFixed(2)},${v.y_px.toFixed(2)}`;
+  }).join(' ');
   const placed = useMemo(() => {
     const at = new Map<string, ViewPoint>();
     for (const node of props.nodes) at.set(node.id, toView(node.position, view, VIEWPORT));
@@ -80,7 +134,12 @@ export function GraphView(props: GraphViewProps): JSX.Element {
   }, [props.nodes, view]);
 
   return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    {props.ink !== undefined && (
+      <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
+    )}
     <svg
+      ref={surface}
       role="group"
       aria-label={t('graph.view.label')}
       viewBox={`0 0 ${String(VIEWPORT.width_px)} ${String(VIEWPORT.height_px)}`}
@@ -88,7 +147,9 @@ export function GraphView(props: GraphViewProps): JSX.Element {
         width: '100%', height: '100%',
         background: 'var(--surface-canvas)',
         border: '1px solid var(--border-strong)',
+        ...(props.ink === undefined ? {} : { touchAction: 'none' }),
       }}
+      {...(props.ink === undefined ? {} : zone.intercept(handlers))}
     >
       {props.edges.map(edge => {
         const from = placed.get(edge.from_node_id);
@@ -123,6 +184,8 @@ export function GraphView(props: GraphViewProps): JSX.Element {
               })}
               aria-pressed={chosen}
               points={hitArea(from, to)}
+              data-select-kind="edge"
+              data-select-id={edge.id}
               fill="transparent"
               style={{ cursor: 'pointer' }}
               onClick={() => { props.onSelect({ kind: 'edge', id: edge.id }); }}
@@ -152,6 +215,8 @@ export function GraphView(props: GraphViewProps): JSX.Element {
               y: node.position.y_m.toFixed(3),
             })}
             aria-pressed={chosen}
+            data-select-kind="node"
+            data-select-id={node.id}
             style={{ cursor: 'pointer' }}
             onClick={() => { props.onSelect({ kind: 'node', id: node.id }); }}
             onKeyDown={event => {
@@ -164,7 +229,12 @@ export function GraphView(props: GraphViewProps): JSX.Element {
           </g>
         );
       })}
+      {livePath !== '' && (
+        <path d={livePath} fill="none" stroke="var(--text-primary)" strokeWidth={1.5}
+          strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
+      )}
     </svg>
+    </div>
   );
 }
 
