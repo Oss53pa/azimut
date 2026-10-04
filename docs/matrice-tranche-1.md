@@ -1982,13 +1982,6 @@ réelle, cette insertion était refusée. Il passe désormais par
 
 ### Reste ouvert après le point d'entrée
 
-**L'exécution en production.** Le code s'exécute en TypeScript à travers les
-paquets de l'espace de travail, qui exportent leurs sources. Node ne sait pas
-les charger seul, parce que les imports en `.js` désignent des fichiers
-`.ts`. Le lancement réel ci-dessus est passé par `vite-node`, déjà présent
-comme dépendance de vitest et réservé à l'essai. Il reste à choisir comment le
-service s'exécute dans son conteneur (A3.1).
-
 **Les quatre autres gestionnaires** (`compile_artworks`, `audit_site`,
 `export_quantities`, plans muraux) reçoivent encore un site figé à leur
 construction.
@@ -1997,3 +1990,40 @@ construction.
 
 - `docs/note-editeur-types-de-travaux.md`, pour l'éditeur du cahier ;
 - `docs/note-base-studio-deploye.md`, pour l'utilisatrice.
+
+## Exécution du service : un seul module construit par Vite
+
+Voie retenue par l'utilisatrice, entre trois proposées : un seul fichier
+construit par Vite. Les deux voies écartées étaient `tsx`, bibliothèque
+nouvelle, et la compilation de chaque paquet vers `dist/`.
+
+Node ne sait pas charger les sources de l'espace de travail : leurs imports en
+`.js` désignent des fichiers `.ts`. `apps/compiler/vite.config.ts` construit
+donc `dist/main.js`, en mode SSR, sans minification, avec sa carte de sources.
+
+- Les paquets `@azimut/*` et leurs dépendances (`postgres`, `drizzle-orm`,
+  `zod`) y sont rassemblés.
+- Le module n'importe plus que des modules intégrés à Node. Il se lance par
+  `node dist/main.js` (`pnpm --filter @azimut/compiler start`) et n'a besoin
+  d'aucun `node_modules` à côté de lui.
+- Vite était déjà dans le dépôt, pour le studio. Il entre comme dépendance de
+  développement du service, à la même version.
+- `pnpm build` construit désormais le module, la CI aussi.
+- `vite.config.ts` entre dans le contrôle de types des fichiers de
+  configuration.
+
+**Essai du module construit**, sur la base configurée comme en CI
+(propriétaire non superutilisateur) :
+
+- sans configuration, code 2 et la liste des quatre variables ;
+- un travail `build_kiosk_package` déposé par un utilisateur est pris ;
+- les neuf fichiers du paquet sont écrits : programme, données, `maps/level-0.svg`
+  et `manifest.json` ;
+- la ligne `kiosk_package` est enregistrée sous le demandeur ;
+- le travail passe à `succeeded` à la première tentative ;
+- SIGTERM donne un arrêt propre et le code 0.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0, dont `install` sur le fichier de
+verrouillage mis à jour, en mode figé. Résultats : `test` à 4 507, `test:visual` à 14,
+`test:rls` à 83, `test:determinism` à 11, `test:e2e` à 138, et `build`, qui
+construit `dist/main.js` (586 ko), sans erreur.
