@@ -2234,3 +2234,89 @@ comprise, avec les nouveaux boutons), `build` sans erreur.
   de J1.5.
 - `rotationDeg` reste à 0 dans les ateliers : l'aperçu orienté de D6 n'est
   pas leur affaire.
+
+## Couche d'esquisse dans la zone de travail (J3)
+
+Décisions prises avec l'utilisateur : J3.4 complété par la règle de A5
+(`updated_at`, `deleted_at` sur les deux tables), et une palette d'esquisse
+de quatre couleurs de feutre — graphite, brique, outremer, sapin — portée par
+des jetons `sketch-*` distincts de ceux de l'interface et des chartes (J3.2).
+
+**Base** (migration 0072, commit à part) :
+
+- `sketch_layer` et `sketch_stroke`, sous cloisonnement forcé ;
+- outil et couleur bornés en base ;
+- `points` en `jsonb`, tracé et pression tels quels ;
+- l'auteur est pris en base (`owner_id` par défaut `current_user_id()`).
+
+Le module 12 est propriétaire des deux tables.
+
+**Studio.**
+
+- `state/sketch.ts` :
+  - le premier trait crée la couche du niveau dans le même geste ;
+  - la gomme supprime logiquement les traits touchés, d'un seul geste ;
+  - la couche se masque et se remontre ;
+  - la pression module l'épaisseur et l'opacité, et le marqueur reste
+    translucide d'un bloc.
+- La capture de trait remet désormais la pression lue à chaque point. Seule
+  l'esquisse la garde.
+- Dans la zone de travail des empreintes, le bouton « Esquisser » détourne le
+  trait vers la couche : il n'est ni lu, ni redressé, ni quantifié (J3.3).
+  Hors de ce mode, l'esquisse reste affichée sous le travail.
+- La relecture depuis le dépôt passe par `loadSketch`, à part de `loadSite` :
+  l'esquisse n'entre jamais dans `SiteData`, que lisent moteurs et
+  compilateur.
+
+**Contrôle automatisé sur les exports (J3.3)** — `tests/j3-3-esquisse-hors-livrable.test.ts` :
+
+- `SiteData` ne porte aucune esquisse ;
+- ni les moteurs, ni le compilateur, ni le paquet de borne, ni la couche
+  d'accès (hors schéma), ni les règles ne nomment les tables ou leurs
+  lectures ;
+- dans le studio, seule une liste blanche de fichiers de l'atelier le peut.
+
+**Défaut trouvé en chemin.** Le client `postgres` sérialise en « faux » toute
+valeur non booléenne passée à une colonne booléenne, la chaîne `'true'`
+comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
+`false`). L'esquisse écrit de vrais booléens, et un essai en base le vérifie.
+
+**Essais.**
+
+- Unitaires : 6 pour l'esquisse, 3 pour la palette, 6 pour le contrôle J3.3.
+- En base (`test:rls`) : 5, dont le cloisonnement, la gomme, le masquage et
+  le refus d'une couleur hors palette.
+- De bout en bout, 6 dans `j3-esquisse.spec.ts` :
+  - le trait gardé tel quel, dans sa couleur ;
+  - le même trait lu comme une forme hors mode esquisse ;
+  - la pression du stylet qui épaissit le trait ;
+  - la gomme ;
+  - le masquage ;
+  - l'annulation.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain43), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 576 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 156 |
+| `build` | sans erreur |
+
+### Reste ouvert après l'esquisse
+
+- La promotion (entourer une esquisse et demander sa conversion, J3.3)
+  n'est pas faite.
+- L'inclinaison qui module la largeur du marqueur (J3.2) n'est pas faite :
+  J3.4 ne prévoit pas de la conserver dans `points`. C'est un choix de modèle
+  à faire trancher (A2.2).
+- L'esquisse n'est proposée que dans l'atelier des empreintes, pas encore
+  dans celui du graphe.
+- L'auteur et la date sont en base mais pas encore affichés.
+- Le verrouillage de couche est lu et respecté, mais aucun bouton ne le pose.
+- `graph-update-commands.ts` écrit encore `'true'`/`'false'` en chaînes.
+  Le studio passe par PostgREST, qui les convertit bien ; le chemin
+  `applyCommands` les enregistrerait à faux.
