@@ -223,14 +223,20 @@ test.describe('M7.8 (partie M) — le focus est distinct de la sélection', () =
    */
   test('le focus est un contour, la sélection un fond', async ({ page }) => {
     await page.goto(FOOTPRINTS);
+    // L'atelier rendu avant la frappe : sous un processeur lent, la page est
+    // chargée avant que React ait monté la barre d'outils, et Tab laissait le
+    // focus sur `body`, sans contour. L'essai jugeait alors l'ordonnancement,
+    // pas l'interface.
+    await expect(page.getByRole('button', { pressed: true })).toHaveCount(1);
     await page.keyboard.press('Tab');
 
     const focus = await page.evaluate(() => {
       const el = document.activeElement;
       if (el === null) return null;
       const s = getComputedStyle(el);
-      return { style: s.outlineStyle, width: s.outlineWidth, offset: s.outlineOffset };
+      return { tag: el.tagName, style: s.outlineStyle, width: s.outlineWidth, offset: s.outlineOffset };
     });
+    expect(focus?.tag, 'la frappe n’a porté le focus sur aucun élément').not.toBe('BODY');
     expect(focus?.style, 'le focus n’a pas de contour').not.toBe('none');
     expect(focus?.offset, 'le contour de focus n’est pas détaché').not.toBe('0px');
   });
