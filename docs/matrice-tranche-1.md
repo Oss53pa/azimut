@@ -2125,9 +2125,62 @@ niveau intermédiaire.
 - le téléversement du plan ;
 - les trois réglages du fond (J1.4) ;
 - le zoom et le déplacement dans la zone ;
-- le tracé au stylet dans l'atelier du graphe : un point appuyé devient un
-  nœud, un trait entre deux nœuds une arête ;
 - la couche d'esquisse (J3) ;
 - l'annotation de revue (J4) ;
 - l'éditeur de pictogrammes (J5) ;
 - la vue isométrique (S1).
+
+## Stylet : le réseau de circulation dans l'atelier du graphe (J1.2)
+
+Suite du socle, dans l'option choisie par l'utilisatrice. Le parcours se
+calcule depuis ce réseau, il ne se dessine jamais à la main (INV-1).
+
+**Gestes reconnus dans la vue du graphe.**
+
+- Outil « Nœud » : un point appuyé pose un nœud du type choisi avant le geste
+  (J1.2). Un point appuyé sur un nœud déjà posé le sélectionne, sans en
+  poser un second par-dessus.
+- Outil « Arête » : un trait qui part d'un nœud et arrive sur un autre les
+  relie. L'arête prend la largeur héritée du bâtiment et passe par le même
+  jugement que l'outil au clavier (`acceptEdge`).
+- Chaque geste est une commande annulable.
+- Les outils Axe et Liaison verticale ne lisent pas le trait et le disent.
+- Un trait mal formé dit ce que l'outil attend.
+
+**Construction.**
+
+- La capture du trait est commune aux deux ateliers
+  (`editor/ink/use-stroke-capture.ts`). Elle ramène les coordonnées au repère
+  de la vue quand la feuille de style la met à l'échelle, et remet l'échelle
+  réelle de l'écran à la reconnaissance.
+- La vue du graphe s'ajuste sur les empreintes du niveau et les nœuds : un
+  cadrage qui suivrait le seul nœud posé ferait tomber le suivant ailleurs
+  que là où on l'a tracé.
+- La logique est dans `state/graph-ink.ts` (6 essais) ; l'écriture dans
+  `app/useGraphInk.tsx`, à part pour garder l'adaptateur du graphe sous
+  400 lignes (A2.4).
+
+**Essais de bout en bout** (2 cas de plus dans `j1-trace-stylet.spec.ts`,
+passés trois fois de suite) :
+
+- deux points appuyés posent deux nœuds, un troisième sur un nœud n'en pose
+  pas, et un trait de l'un à l'autre trace l'arête ;
+- un trait qui ne part d'aucun nœud est refusé avec son motif.
+
+En les écrivant, la course de M7.8 est réapparue : une touche frappée avant
+que l'atelier soit monté. L'essai attend désormais la barre d'outils et
+vérifie l'outil actif avant de tracer.
+
+**Régression attrapée par la chaîne, puis corrigée.** Le premier passage
+(chain40) a fait échouer six essais de M4 : en mode tracé, la vue capturait le
+pointeur dès l'appui, le clic n'atteignait plus le nœud ou l'arête, et la
+sélection ne se faisait plus. Un point appuyé sur une arête aurait même posé
+un nœud dessus. La capture remet désormais l'élément sous le pointeur au
+moment de l'appui : un point appuyé sur un nœud ou une arête est une
+sélection, et seul un vrai trait, ou un point appuyé dans le vide, va à la
+reconnaissance. L'essai du stylet vérifie désormais aussi la sélection.
+
+**Chaîne A13.2.** Après correction (chain41), les neuf étapes sortent à 0
+sur une base remise à zéro : `test` à 4 553, `test:visual` à 14, `test:rls` à
+83, `test:determinism` à 11, `test:e2e` à 147 (145 plus les 2 du graphe),
+`build` sans erreur.
