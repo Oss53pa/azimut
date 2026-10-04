@@ -33,3 +33,4 @@ export { costReference, budgetLine } from './budget.js';
 export { inspectionRound, inspectionFinding } from './inspection.js';
 export { adPlacement, adBooking, adOption, adCreative } from './advertising.js';
 export { tenantSignRegulation, tenantSignDossier, tenantSignPart } from './tenant.js';
+export { sketchLayer, sketchStroke } from './sketch.js';

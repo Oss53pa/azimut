@@ -12,6 +12,9 @@ import type { PointerKind } from './pointer-kind.js';
  * déplacements, et s'achève à sa levée : il est alors remis à l'appelant, en
  * mètres, avec le type du pointeur et l'échelle à laquelle il a été vu.
  *
+ * La pression lue à chaque point est remise avec le trait : seule l'esquisse
+ * la garde (J3.2), la reconnaissance de forme l'ignore.
+ *
  * L'arbitre écarte la paume pendant que le stylet est actif (G3.4) ; le doigt,
  * qui ne trace pas (G3.1), est refusé, et l'appelant en dit le motif (G3.5).
  *
@@ -33,6 +36,7 @@ export type StrokeCaptureOptions = {
    */
   readonly onStroke: (
     points: readonly Point[], pointer: PointerKind, pxPerMeter: number, origin: Element | null,
+    pressures: readonly number[],
   ) => void;
   readonly onTouchRefused: () => void;
 };
@@ -44,6 +48,8 @@ type PointerEventLike = {
   readonly timeStamp: number;
   readonly clientX: number;
   readonly clientY: number;
+  /** La pression sous la pointe, de 0 à 1 ; 0 quand le pointeur ne la signale pas. */
+  readonly pressure?: number;
   readonly currentTarget: Element;
 };
 
@@ -61,7 +67,7 @@ export type StrokeCapture = {
 export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
   const arbiter = useRef<ArbiterState>(INITIAL_ARBITER);
   const stroke = useRef<{
-    pointerId: number; kind: PointerKind; points: Point[]; origin: Element | null;
+    pointerId: number; kind: PointerKind; points: Point[]; pressures: number[]; origin: Element | null;
   } | null>(null);
   const [live, setLive] = useState<readonly Point[] | null>(null);
 
@@ -98,7 +104,9 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
           // capture pas : le trait se suit alors sans capture.
         }
         const origin = event.target instanceof Element ? event.target : null;
-        stroke.current = { pointerId: event.pointerId, kind, points: [at(event)], origin };
+        stroke.current = {
+          pointerId: event.pointerId, kind, points: [at(event)], pressures: [event.pressure ?? 0], origin,
+        };
         setLive(stroke.current.points);
       },
       onPointerMove: event => {
@@ -106,6 +114,7 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
         const drawing = current !== null && current.pointerId === event.pointerId;
         if (admit(event, drawing ? 'move' : 'hover') === null || !drawing) return;
         current.points.push(at(event));
+        current.pressures.push(event.pressure ?? 0);
         setLive([...current.points]);
       },
       onPointerUp: event => {
@@ -114,7 +123,9 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
         if (done === null || done.pointerId !== event.pointerId) return;
         stroke.current = null;
         setLive(null);
-        options.onStroke(done.points, done.kind, options.scale_px_per_m * ratio(event), done.origin);
+        options.onStroke(
+          done.points, done.kind, options.scale_px_per_m * ratio(event), done.origin, done.pressures,
+        );
       },
       onPointerCancel: event => {
         admit(event, 'cancel');

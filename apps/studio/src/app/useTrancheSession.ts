@@ -76,6 +76,8 @@ export type TrancheSession = {
   readonly acceptResume: () => void;
   /** Repartir sans lui. L'état local est effacé, jamais fusionné. */
   readonly discardResume: () => void;
+  /** Le site du parcours, tel que la route le donne. */
+  readonly siteId: string;
   /** Un identifiant neuf, tiré ici pour que les calculs n'en tirent aucun. */
   readonly newId: () => string;
   readonly now: () => string;
@@ -315,6 +317,7 @@ export function useTrancheSession(
     acceptResume,
     discardResume,
     count: useCallback((table: string) => countOf(state, table), [state]),
+    siteId: context.siteId,
     newId,
     now: useCallback(() => new Date().toISOString(), []),
     planImages,

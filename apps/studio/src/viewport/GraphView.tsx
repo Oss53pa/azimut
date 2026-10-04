@@ -110,7 +110,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
     // Un point appuyé sur un nœud ou une arête est une sélection, comme un clic
     // hors tracé : la capture du pointeur détourne le clic vers la vue, et le
     // geste poserait sinon un nœud sur l'arête que l'on voulait choisir.
-    onStroke: (points, pointer, pxPerMeter, origin) => {
+    onStroke: (points, pointer, pxPerMeter, origin, pressures) => {
       const item = origin?.closest('[data-select-kind]') ?? null;
       const tap = pathLength(points) * pxPerMeter <= RECOGNITION_THRESHOLDS.normal.tap_px;
       const kind = item?.getAttribute('data-select-kind');
@@ -119,7 +119,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
         props.onSelect({ kind, id });
         return;
       }
-      ink.onStroke(points, pointer, pxPerMeter, origin);
+      ink.onStroke(points, pointer, pxPerMeter, origin, pressures);
     },
     onTouchRefused: ink.onTouchRefused,
   });

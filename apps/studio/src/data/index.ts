@@ -9,7 +9,7 @@ export {
 } from './site-repository.js';
 export type {
   SiteRepository, SiteSummary, RepositoryKind, RepositoryFailure,
-  CountrySummary, LegalEntitySummary,
+  CountrySummary, LegalEntitySummary, SketchRows,
 } from './site-repository.js';
 export {
   useSite, useSiteList, useAllSites, useSiteVocabularyLoad, useWayfindingRegistryLoad,

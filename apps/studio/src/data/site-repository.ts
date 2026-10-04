@@ -51,6 +51,12 @@ export type LegalEntitySummary = {
   readonly legal_name: string;
 };
 
+/** J3 — les lignes d'esquisse d'un site, colonnes de la base. */
+export type SketchRows = {
+  readonly layers: readonly (Readonly<Record<string, unknown>> & { readonly id: string })[];
+  readonly strokes: readonly (Readonly<Record<string, unknown>> & { readonly id: string })[];
+};
+
 export const REPOSITORY_KINDS = ['reference', 'postgrest'] as const;
 export type RepositoryKind = (typeof REPOSITORY_KINDS)[number];
 
@@ -115,6 +121,12 @@ export type SiteRepository = {
    * pièces (0046). Le dépôt de référence sert un jeu de démonstration.
    */
   loadTenantRegistry(siteId: string): Promise<TenantRegistry>;
+  /**
+   * J3 — la couche d'esquisse du site, telle que la base la porte. À part du
+   * site : une esquisse n'entre dans aucun calcul ni aucun livrable (J3.3).
+   * Un dépôt qui n'en porte pas rend une couche vide.
+   */
+  loadSketch(siteId: string): Promise<SketchRows>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

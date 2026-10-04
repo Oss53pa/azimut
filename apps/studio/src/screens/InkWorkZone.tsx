@@ -9,6 +9,8 @@ import { ZoneViewControls } from './ZoneViewControls.js';
 import { imageToWorld } from '../domain/plan-placement.js';
 import type { PlanPlacement } from '../domain/plan-placement.js';
 import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
+import type { SketchStroke } from '../state/sketch.js';
+import { SketchStrokes } from './SketchStrokes.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
 
 /**
@@ -46,7 +48,13 @@ export type InkWorkZoneProps = {
   readonly recognized: string | null;
   readonly alternative: string | null;
   readonly onAlternative: () => void;
-  readonly onStroke: (points: readonly Point[], pointer: PointerKind, pxPerMeter: number) => void;
+  readonly onStroke: (
+    points: readonly Point[], pointer: PointerKind, pxPerMeter: number, pressures: readonly number[],
+  ) => void;
+  /** La couche d'esquisse du niveau, sous le travail (J3) ; vide si masquée. */
+  readonly sketch: readonly SketchStroke[];
+  /** Les outils de l'esquisse, posés au-dessus de la zone. */
+  readonly sketchToolbar?: JSX.Element | undefined;
   readonly onTouchRefused: () => void;
 };
 
@@ -101,12 +109,15 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
     viewWidth_px: viewport.width_px,
     scale_px_per_m: view.scale_px_per_m,
     toMetres: at => toMetres(at, view, viewport),
-    onStroke: props.onStroke,
+    onStroke: (points, pointer, pxPerMeter, _origin, pressures) => {
+      props.onStroke(points, pointer, pxPerMeter, pressures);
+    },
     onTouchRefused: props.onTouchRefused,
   });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm }}>
+      {props.sketchToolbar}
       <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
       <div ref={host} style={{ width: '100%' }}>
         <svg
@@ -139,6 +150,8 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
               strokeWidth={1}
             />
           ))}
+          <SketchStrokes strokes={props.sketch} scale_px_per_m={view.scale_px_per_m}
+            project={p => toView(p, view, viewport)} />
           {props.ghost !== null && (
             <path d={pathOf(props.ghost, view, viewport, false)} fill="none"
               stroke="var(--text-muted)" strokeOpacity={0.5} strokeWidth={1.5} strokeLinecap="round" />

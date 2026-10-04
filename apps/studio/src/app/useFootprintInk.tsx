@@ -10,6 +10,7 @@ import type { FootprintArbitration, FootprintShape } from '../state/footprint-in
 import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import { usePlanBackground } from './usePlanBackground.js';
+import { useSketchInk } from './useSketchInk.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -47,6 +48,8 @@ export function useFootprintInk(
   const [ghost, setGhost] = useState<readonly Point[] | null>(null);
   const [notice, setNotice] = useState<UiMessageKey | null>(null);
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
+  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture.
+  const sketch = useSketchInk(session, levelId, setNotice);
 
   const footprints = useMemo(
     () => footprintsOfLevel(session.state, levelId).map(f => ({ id: f.id, outline: f.geometry.vertices })),
@@ -77,8 +80,11 @@ export function useFootprintInk(
         const shape = currentReading(next);
         if (shape !== null) onVertices(shape.vertices);
       }}
+      sketch={sketch.strokes}
+      sketchToolbar={sketch.toolbar}
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
-      onStroke={(points, pointer, pxPerMeter) => {
+      onStroke={(points, pointer, pxPerMeter, pressures) => {
+        if (sketch.active) { sketch.onStroke(points, pressures, pxPerMeter); return; }
         const out = strokeToFootprint(points, {
           tool, pointer, pxPerMeter, strictness: 'normal', footprints,
         });

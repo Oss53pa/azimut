@@ -18,6 +18,14 @@ import type { SiteData } from '@azimut/core-model';
 import type { SessionState, StoredRow } from './session-store.js';
 import { EMPTY_SESSION } from './session-store.js';
 
+/** J3 — les lignes d'esquisse relues à part du site. */
+export type SketchRows = {
+  readonly layers: readonly (Readonly<Record<string, unknown>> & Identified)[];
+  readonly strokes: readonly (Readonly<Record<string, unknown>> & Identified)[];
+};
+
+const NO_SKETCH: SketchRows = { layers: [], strokes: [] };
+
 /** Une entité du modèle, telle que le magasin la garde. */
 type Identified = { readonly id: string };
 
@@ -63,6 +71,15 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
  * La file est vide et l'état est en ligne : ce qui vient du dépôt y est déjà,
  * et le remettre en file le réécrirait.
  */
-export function sessionFromSite(site: SiteData): SessionState {
-  return { ...EMPTY_SESSION, rows: sessionRowsFromSite(site) };
+export function sessionFromSite(site: SiteData, sketch: SketchRows = NO_SKETCH): SessionState {
+  return {
+    ...EMPTY_SESSION,
+    rows: [
+      ...sessionRowsFromSite(site),
+      // J3 — l'esquisse vient à part : elle n'est pas du site que le
+      // compilateur lit (J3.3), mais l'atelier la montre.
+      ...rowsFor('sketch_layer', sketch.layers),
+      ...rowsFor('sketch_stroke', sketch.strokes),
+    ],
+  };
 }
