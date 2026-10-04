@@ -2320,3 +2320,60 @@ comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
 - `graph-update-commands.ts` écrit encore `'true'`/`'false'` en chaînes.
   Le studio passe par PostgREST, qui les convertit bien ; le chemin
   `applyCommands` les enregistrerait à faux.
+
+## Réglages du fond de décalque et gomme du stylet (J1.4, J1.5)
+
+Rien n'était à décider : J1.4 et J1.5 les fixent.
+
+**J1.4, les trois réglages du fond.**
+
+- L'opacité du plan calé se règle au curseur, par pas de 10 %. Elle part de
+  60 %, la valeur que la zone appliquait jusque-là.
+- Les formes déjà tracées se montrent ou se masquent d'une case.
+- Les deux réglages sont des préférences de travail, comme la position de vue
+  (E3.3). Ils sont gardés dans le stockage du navigateur, par zone et par
+  niveau, et n'entrent ni dans la base ni dans l'historique
+  (`viewport/backdrop-settings.ts`). Une valeur illisible est ignorée champ
+  par champ.
+- Le verrouillage du fond est acquis par construction : la zone n'offre aucun
+  geste qui déplace le fond, que seul le calage pose. Aucune bascule inerte
+  n'est ajoutée.
+
+**J1.5, la gomme du stylet.**
+
+- Le bout gomme d'un stylet retourné (`buttons` 32) et le bouton latéral
+  (`buttons` 2) sont lus à la pose (`isPenEraser`). Le geste entier est alors
+  un geste de gomme.
+- En mode esquisse, il efface quel que soit l'outil choisi.
+- Hors esquisse, dans l'atelier des empreintes comme dans celui du graphe, il
+  ne touche à rien et le dit : une forme se retire par une commande, jamais
+  d'un frottement.
+
+**Essais.**
+
+- Unitaires : 3 pour les réglages, 2 pour la lecture des boutons.
+- De bout en bout, 5 dans `j1-reglages-stylet.spec.ts` :
+  - l'opacité appliquée au plan ;
+  - les formes masquées, et le réglage retrouvé au rechargement ;
+  - le bout gomme ;
+  - le bouton latéral ;
+  - le refus hors esquisse.
+
+### Reste ouvert après les réglages
+
+- L'appui long pour le menu contextuel (J1.5) : le contenu du menu n'est pas
+  spécifié.
+- Les deux doigts pendant le tracé (J1.5) attendent que la contradiction
+  signalée à l'éditeur soit tranchée.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain44), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 581 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 161 |
+| `build` | sans erreur |
