@@ -153,3 +153,14 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
     unreadable,
   };
 }
+
+/**
+ * J1 — les empreintes d'un niveau, telles que la zone de travail les montre et
+ * que la reconnaissance les connaît (un trait qui barre ou entoure une forme).
+ * Une ligne illisible n'est pas montrée : `graphScopeFromSession` la signale.
+ */
+export function footprintsOfLevel(session: SessionState, levelId: string): readonly Footprint[] {
+  return collect(session, 'footprint', readFootprint, [])
+    .filter(f => f.level_id === levelId)
+    .sort((a, b) => codePointCompare(a.id, b.id));
+}

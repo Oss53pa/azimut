@@ -38,6 +38,8 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   const [pointA, setPointA] = useState<PartialPoint>(NO_POINT);
   const [pointB, setPointB] = useState<PartialPoint>(NO_POINT);
   const [pending, setPending] = useState<ReplacementVerdict | null>(null);
+  /** J1.4 — le contenu lu à l'import, gardé pour le fond du décalque. */
+  const [content, setContent] = useState<Uint8Array | null>(null);
   const [findings, setFindings] = useState<readonly Finding[]>([]);
   // M2 (partie M), versions 27 et 28 : le fond se juge sur son contenu, lu
   // une fois au dépôt. Le fichier et ce que son contenu dit de lui restent
@@ -77,8 +79,13 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
         setWarnings([]);
         setPicked(null);
         setDraft(previous => ({ ...previous, plan: null }));
+        setContent(null);
         void content.arrayBuffer()
-          .then(buffer => inspectPlanContent(new Uint8Array(buffer)))
+          .then(buffer => {
+            const bytes = new Uint8Array(buffer);
+            if (reading === contentReading.current) setContent(bytes);
+            return inspectPlanContent(bytes);
+          })
           .catch(() => unreadablePlanInspection())
           .then(inspection => {
             if (reading !== contentReading.current) return;
@@ -104,6 +111,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
         setPicked(null);
         setPending(null);
         setDraft(EMPTY_DRAFT);
+        setContent(null);
         setPointA(NO_POINT);
         setPointB(NO_POINT);
         setCalibrated(false);
@@ -154,13 +162,14 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           });
           if (!measured.ok) { setFindings(measured.findings); setBusy(false); return; }
 
+          const planSourceId = session.newId();
           const commands = calibrationCommands(draft.plan, measured.value, {
             site: {}, proposed: { x_m: 0, y_m: 0 },
           }, {
             orgId: ORG_OF_SESSION,
             siteId,
             levelId,
-            planSourceId: session.newId(),
+            planSourceId,
             calibrationId: session.newId(),
             storagePath: `plans/${siteId}/${levelId}`,
             // A5.2 — les deux points de la mesure, dans l'ordre de pose.
@@ -174,6 +183,9 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           if (!commands.ok) { setFindings(commands.findings); setBusy(false); return; }
 
           await session.write(commands.value);
+          if (content !== null) {
+            session.keepPlanImage(planSourceId, { mediaType: draft.plan.mediaType, bytes: content });
+          }
           setFindings([]);
           setCalibrated(true);
           setBusy(false);
