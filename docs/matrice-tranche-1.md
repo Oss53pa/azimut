@@ -2027,3 +2027,107 @@ donc `dist/main.js`, en mode SSR, sans minification, avec sa carte de sources.
 verrouillage mis à jour, en mode figé. Résultats : `test` à 4 507, `test:visual` à 14,
 `test:rls` à 83, `test:determinism` à 11, `test:e2e` à 138, et `build`, qui
 construit `dist/main.js` (586 ko), sans erreur.
+
+## Stylet : socle et décalque dans l'atelier des empreintes (J1, G3)
+
+Demande de l'utilisatrice : tracer au stylet dans Azimut. Elle a choisi de
+commencer par le socle et le décalque. Le fond est un plan en image pour
+l'instant ; le rendu des PDF fera l'objet d'une décision à part.
+
+**Ce que le cahier permet et refuse.**
+
+- Il permet :
+  - le stylet comme méthode de saisie : la forme reconnue est quantifiée et
+    devient une donnée ordinaire (J0, J1) ;
+  - l'esquisse libre (J3) ;
+  - l'annotation de revue (J4) ;
+  - l'éditeur de pictogrammes d'orientation (J5).
+- Il refuse :
+  - un panneau dessiné à la main (INV-1, INV-2) ;
+  - toute modification depuis la vue 3D (S-6) ;
+  - un parcours dessiné à la main, puisqu'il est calculé depuis le réseau,
+    qui lui se trace au stylet.
+
+**Socle** (`apps/studio/src/editor/ink/`, fonctions pures, 26 essais) :
+
+- type de pointeur et tolérances de G3.2 ;
+- refus du tracé au doigt (G3.1) ;
+- rejet de la paume (G3.4) : le doigt est ignoré tant que le stylet touche
+  ou a signalé sa présence depuis moins de 1,5 s, l'heure venant de
+  l'événement ;
+- reconnaissance des formes de J1.2 et redressement d'un bloc de J1.3 ;
+- candidates rangées, quantifiées au millimètre, sans lecture de la
+  pression ; la suppression n'est jamais proposée en premier.
+
+**Décalque dans M3.** L'atelier n'avait pas de zone de travail : seule la
+saisie numérique existait.
+
+- La zone montre :
+  - le plan calé en fond, s'il est en image ;
+  - les empreintes du niveau ;
+  - le contour en cours, à l'accent ;
+  - le trait d'origine en filigrane jusqu'à la clôture.
+- Un trait au stylet ou à la souris est lu selon l'outil actif :
+  - la cellule préfère le rectangle ;
+  - le polygone libre préfère le polygone ;
+  - le rectangle n'accepte que le rectangle.
+- La lecture retenue remplace le contour en cours. Elle se modifie au clavier
+  dans le panneau et se ferme comme une saisie. L'autre lecture se prend en
+  un geste.
+- Le doigt est refusé avec son motif. Un outil qui ne trace pas le dit.
+
+**Placement du plan** (`domain/plan-placement.ts`, 7 essais) : le plan se
+déduit du calage déjà enregistré (échelle, azimut, points de la mesure). Le
+cahier ne fixait pas quel pixel de l'image correspond à l'origine du site.
+Décision de l'utilisatrice : le point A du calage. L'image elle-même est
+gardée par la session depuis le calage, le temps de la session, puisque le
+téléversement n'existe pas encore. Après rechargement, la zone le dit.
+
+**Essais de bout en bout** (`j1-trace-stylet.spec.ts`, 7 cas) :
+
+- un rectangle à main levée devient le contour en cours, sur les axes ;
+- le contour se ferme comme une saisie, et le trait d'origine s'efface ;
+- un outil qui ne trace pas le dit ;
+- le doigt est refusé ;
+- la paume est ignorée pendant le survol du stylet ;
+- sans plan calé, la zone le dit ;
+- l'image calée est posée en fond, et après rechargement la zone dit que le
+  fichier n'est plus gardé.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0, sur une base remise à zéro
+(75 migrations) : `test` à 4 547 (essais de la reconnaissance, du placement et
+de l'atelier compris), `test:visual` à 14, `test:rls` à 83, `test:determinism`
+à 11, `test:e2e` à 145 (138 plus les 7 du tracé), `build` sans erreur. Un
+premier passage avait échoué sur le contrôle des citations de règle : quatre
+commentaires citaient M2, M3 ou M7.10 sans leur partie ; corrigé.
+
+### Reste ouvert après le décalque
+
+**Contradiction dans J1.5 (A2.2, cas 3), signalée à l'éditeur du cahier.**
+J1.5 admet le déplacement et le zoom à deux doigts « pendant que le stylet
+dessine ». La même section dit tout contact tactile ignoré dès qu'un stylet
+est détecté. Aucune des deux lectures n'est appliquée : pendant que le
+stylet est actif, le doigt ne trace ni ne sélectionne, et la navigation au
+doigt n'est pas construite.
+
+**Réglages choisis**, paramètres d'ergonomie et non valeurs normatives :
+
+- les seuils des trois niveaux d'intensité ;
+- le pas de 15° des angles remarquables (E, « valeur réglable ») ;
+- 1,5 s d'inactivité du stylet.
+
+L'intensité n'est pas encore mémorisée par utilisateur (J1.3) : elle est au
+niveau intermédiaire.
+
+**Encore à construire** :
+
+- le rendu des PDF en fond (décision de bibliothèque, A2.2 cas 4) ;
+- le téléversement du plan ;
+- les trois réglages du fond (J1.4) ;
+- le zoom et le déplacement dans la zone ;
+- le tracé au stylet dans l'atelier du graphe : un point appuyé devient un
+  nœud, un trait entre deux nœuds une arête ;
+- la couche d'esquisse (J3) ;
+- l'annotation de revue (J4) ;
+- l'éditeur de pictogrammes (J5) ;
+- la vue isométrique (S1).
