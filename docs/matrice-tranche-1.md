@@ -1936,3 +1936,64 @@ garde, la file en base non.
 `job.kind` ne les listent, donc un tel travail ne peut pas être inséré.
 L'écart est entre le code et le cahier des charges, et il revient à l'éditeur
 du cahier de le trancher.
+
+## Point d'entrée du service de compilation
+
+Voie retenue par l'utilisatrice : le paquet de borne d'abord. Les autres
+gestionnaires passeront dans une tâche suivante.
+
+**`main.ts` et `service.ts`.**
+
+- Le service lit sa configuration dans l'environnement :
+  - `AZIMUT_COMPILER_DATABASE_URL` ;
+  - `AZIMUT_KIOSK_BUNDLE_DIR` ;
+  - `AZIMUT_PACKAGE_DIR` ;
+  - `AZIMUT_KIOSK_MIN_RUNTIME` ;
+  - les cadences, facultatives.
+- Une configuration incomplète est refusée au démarrage avec le code 2. Le
+  message nomme tout ce qui manque.
+- La boucle prend les travaux de la file en base jusqu'à SIGTERM ou SIGINT. Un
+  arrêt n'interrompt jamais un travail, puis la connexion est fermée.
+- Un seul gestionnaire est branché : `build_kiosk_package`. Un travail d'un
+  autre type est remis en file avec la raison, sans arrêter le service.
+
+**L'enregistreur du paquet sous le demandeur.** `dbKioskPackageRecorder`
+insérait la ligne `kiosk_package` sans identité. Sous FORCE, sur toute base
+réelle, cette insertion était refusée. Il passe désormais par
+`insertKioskPackageAs`, sous l'identité du demandeur.
+
+**Essais.**
+
+- Configuration : 5 cas.
+- Service assemblé comme en production, contre la base réelle (2 cas) :
+  - un travail déposé par un utilisateur est pris, le site est lu sous son
+    identité, le paquet est écrit dans le répertoire et la ligne
+    `kiosk_package` est enregistrée sous la même identité ;
+  - un travail sans gestionnaire est remis en file avec la raison.
+- Lancement réel sur la base configurée comme en CI :
+  - sans configuration, code 2 et la liste des quatre variables ;
+  - avec configuration, la file est interrogée, SIGTERM donne un arrêt
+    propre, le code 0, et aucune connexion ne reste ouverte.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 : `test` à 4 507 essais
+(4 502 plus les 5 de la configuration), `test:visual` à 14, `test:rls` à 83
+(81 plus les 2 du service assemblé), `test:determinism` à 11, `test:e2e` à
+138, `build` sans erreur, sur une base remise à zéro (75 migrations).
+
+### Reste ouvert après le point d'entrée
+
+**L'exécution en production.** Le code s'exécute en TypeScript à travers les
+paquets de l'espace de travail, qui exportent leurs sources. Node ne sait pas
+les charger seul, parce que les imports en `.js` désignent des fichiers
+`.ts`. Le lancement réel ci-dessus est passé par `vite-node`, déjà présent
+comme dépendance de vitest et réservé à l'essai. Il reste à choisir comment le
+service s'exécute dans son conteneur (A3.1).
+
+**Les quatre autres gestionnaires** (`compile_artworks`, `audit_site`,
+`export_quantities`, plans muraux) reçoivent encore un site figé à leur
+construction.
+
+**Deux notes de décision** :
+
+- `docs/note-editeur-types-de-travaux.md`, pour l'éditeur du cahier ;
+- `docs/note-base-studio-deploye.md`, pour l'utilisatrice.
