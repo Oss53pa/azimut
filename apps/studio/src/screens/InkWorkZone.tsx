@@ -6,9 +6,7 @@ import { fitToContent, toMetres, toView } from '../viewport/view-transform.js';
 import type { ViewState, Viewport } from '../viewport/view-transform.js';
 import { imageMatrix, imageToWorld } from '../domain/plan-placement.js';
 import type { PlanPlacement } from '../domain/plan-placement.js';
-import { INITIAL_ARBITER, arbitrate } from '../editor/ink/pointer-arbiter.js';
-import type { ArbiterState, PointerPhase } from '../editor/ink/pointer-arbiter.js';
-import { canTraceFreely, pointerKindOf } from '../editor/ink/pointer-kind.js';
+import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
 
 /**
@@ -93,21 +91,13 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
     return fitToContent(anchor.length > 0 ? anchor : opening, { width_px: width, height_px: ZONE_HEIGHT_PX });
   }, [background, footprints, opening, width]);
 
-  const arbiter = useRef<ArbiterState>(INITIAL_ARBITER);
-  const stroke = useRef<{ pointerId: number; kind: PointerKind; points: Point[] } | null>(null);
-  const [live, setLive] = useState<readonly Point[] | null>(null);
-
-  function admit(event: React.PointerEvent<SVGSVGElement>, phase: PointerPhase): PointerKind | null {
-    const kind = pointerKindOf(event.pointerType);
-    const out = arbitrate(arbiter.current, { kind, phase, pointerId: event.pointerId, at_ms: event.timeStamp });
-    arbiter.current = out.state;
-    return out.accept ? kind : null;
-  }
-
-  function at(event: React.PointerEvent<SVGSVGElement>): Point {
-    const box = event.currentTarget.getBoundingClientRect();
-    return toMetres({ x_px: event.clientX - box.left, y_px: event.clientY - box.top }, view, viewport);
-  }
+  const { handlers, live } = useStrokeCapture({
+    viewWidth_px: viewport.width_px,
+    scale_px_per_m: view.scale_px_per_m,
+    toMetres: at => toMetres(at, view, viewport),
+    onStroke: props.onStroke,
+    onTouchRefused: props.onTouchRefused,
+  });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm }}>
@@ -118,33 +108,7 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
           width={width}
           height={ZONE_HEIGHT_PX}
           style={{ display: 'block', background: 'var(--surface-canvas)', touchAction: 'none', cursor: 'crosshair' }}
-          onPointerDown={event => {
-            const kind = admit(event, 'down');
-            if (kind === null) return;
-            if (!canTraceFreely(kind)) { props.onTouchRefused(); return; }
-            event.currentTarget.setPointerCapture?.(event.pointerId);
-            stroke.current = { pointerId: event.pointerId, kind, points: [at(event)] };
-            setLive(stroke.current.points);
-          }}
-          onPointerMove={event => {
-            const drawing = stroke.current !== null && stroke.current.pointerId === event.pointerId;
-            if (admit(event, drawing ? 'move' : 'hover') === null || !drawing || stroke.current === null) return;
-            stroke.current.points.push(at(event));
-            setLive([...stroke.current.points]);
-          }}
-          onPointerUp={event => {
-            admit(event, 'up');
-            const done = stroke.current;
-            if (done === null || done.pointerId !== event.pointerId) return;
-            stroke.current = null;
-            setLive(null);
-            props.onStroke(done.points, done.kind, view.scale_px_per_m);
-          }}
-          onPointerCancel={event => {
-            admit(event, 'cancel');
-            stroke.current = null;
-            setLive(null);
-          }}
+          {...handlers}
         >
           {props.background !== null && (
             <image

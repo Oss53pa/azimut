@@ -17,6 +17,9 @@ export const INK_FR = {
   'ink.background.none': 'Aucun plan calé pour ce niveau : la zone n’a pas de fond.',
   'ink.background.not_image': 'Le fond de ce plan n’est pas encore affiché : seuls les plans en image (PNG, JPEG) le sont aujourd’hui.',
   'ink.background.not_kept': 'Le fichier du plan n’est gardé que pendant la session où il a été calé : rechargez-le depuis l’écran de calage pour retrouver le fond.',
+  'ink.graph.not_tool': 'Choisissez l’outil Nœud pour poser d’un point appuyé, ou l’outil Arête pour relier deux nœuds d’un trait.',
+  'ink.graph.tap_expected': 'L’outil Nœud attend un point appuyé, à l’endroit du nœud.',
+  'ink.graph.edge_expected': 'L’outil Arête attend un trait qui part d’un nœud et arrive sur un autre.',
 };
 
 export const INK_EN: Readonly<Record<keyof typeof INK_FR, string>> = {
@@ -32,4 +35,7 @@ export const INK_EN: Readonly<Record<keyof typeof INK_FR, string>> = {
   'ink.background.none': 'No calibrated plan for this level: the area has no background.',
   'ink.background.not_image': 'This plan is not shown as a background yet: only image plans (PNG, JPEG) are today.',
   'ink.background.not_kept': 'The plan file is only kept during the session in which it was calibrated: load it again from the calibration screen to see the background.',
+  'ink.graph.not_tool': 'Choose the Node tool to place a node with a tap, or the Edge tool to join two nodes with a stroke.',
+  'ink.graph.tap_expected': 'The Node tool expects a tap, where the node goes.',
+  'ink.graph.edge_expected': 'The Edge tool expects a stroke that starts on one node and ends on another.',
 };

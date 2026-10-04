@@ -139,3 +139,61 @@ test.describe('J1.4 (partie J) — le plan calé sert de fond de décalque', () 
     await expect(page.getByText(/n’est gardé que pendant la session|only kept during the session/)).toBeVisible();
   });
 });
+
+test.describe('J1.2 (partie J) — le réseau de circulation tracé dans l’atelier du graphe', () => {
+  const GRAPH = `/sites/${SITE}/levels/${LEVEL}/graph`;
+  const VIEW = /Graphe du niveau|Level graph/;
+
+  async function centreOf(page: Page, index: number): Promise<{ x: number; y: number }> {
+    const node = page.getByRole('group', { name: VIEW }).getByRole('button', { name: /Nœud|Node/ }).nth(index);
+    const box = await node.boundingBox();
+    if (box === null) throw new Error('nœud introuvable');
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+  }
+
+  test('un point appuyé pose un nœud ; un trait d’un nœud à l’autre les relie', async ({ page }) => {
+    await page.goto(GRAPH);
+    const view = page.getByRole('group', { name: VIEW });
+    const box = await view.boundingBox();
+    if (box === null) throw new Error('vue introuvable');
+
+    await page.mouse.click(box.x + box.width * 0.25, box.y + box.height * 0.5);
+    await expect(page.getByText(/Nœuds\s*1|Nodes\s*1/)).toBeVisible();
+    await page.mouse.click(box.x + box.width * 0.75, box.y + box.height * 0.5);
+    await expect(page.getByText(/Nœuds\s*2|Nodes\s*2/)).toBeVisible();
+
+    // Un point appuyé sur un nœud posé le sélectionne, sans en poser un second.
+    const first = await centreOf(page, 0);
+    await page.mouse.click(first.x, first.y);
+    await expect(page.getByText(/Nœuds\s*2|Nodes\s*2/)).toBeVisible();
+    await expect(page.getByRole('group', { name: VIEW }).getByRole('button', { name: /Nœud|Node/, pressed: true }))
+      .toHaveCount(1);
+
+    await page.keyboard.press('e');
+    await expect(page.getByRole('button', { name: /Arête E|Edge E/, pressed: true })).toBeVisible();
+    const a = await centreOf(page, 0);
+    const b = await centreOf(page, 1);
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move((a.x + b.x) / 2, (a.y + b.y) / 2 + 12, { steps: 10 });
+    await page.mouse.move(b.x, b.y, { steps: 10 });
+    await page.mouse.up();
+    await expect(page.getByText(/Arêtes\s*1|Edges\s*1/)).toBeVisible();
+  });
+
+  test('l’outil Arête dit ce qu’il attend d’un trait qui ne part d’aucun nœud', async ({ page }) => {
+    await page.goto(GRAPH);
+    // L'atelier rendu avant la frappe : sinon la touche part avant que
+    // l'écran l'écoute (même course que celle de M7.8, partie M).
+    await expect(page.getByRole('button', { name: /Nœud N|Node N/, pressed: true })).toBeVisible();
+    await page.keyboard.press('e');
+    await expect(page.getByRole('button', { name: /Arête E|Edge E/, pressed: true })).toBeVisible();
+    const box = await page.getByRole('group', { name: VIEW }).boundingBox();
+    if (box === null) throw new Error('vue introuvable');
+    await page.mouse.move(box.x + 50, box.y + 50);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 250, box.y + 80, { steps: 10 });
+    await page.mouse.up();
+    await expect(page.getByText(/L’outil Arête attend un trait|The Edge tool expects a stroke/)).toBeVisible();
+  });
+});
