@@ -115,6 +115,7 @@ non plus — elle n'en retire que les clés étrangères.
 0069_o11_temporary_closure
 0070_a6_1_job_requested_by
 0071_t0_11_job_dispatch
+0072_j3_4_sketch_layer
 ```
 
 ## Règle pour la suite
