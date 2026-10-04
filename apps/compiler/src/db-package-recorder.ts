@@ -1,4 +1,4 @@
-import { insertKioskPackage } from '@azimut/db';
+import { insertKioskPackageAs } from '@azimut/db';
 import type { PostgresJsDatabase } from '@azimut/db';
 import type { KioskPackageRecord } from './persist-kiosk-package.js';
 
@@ -8,15 +8,19 @@ import type { KioskPackageRecord } from './persist-kiosk-package.js';
  * persistKioskPackage) to the DB insert in @azimut/db, supplying the org from
  * the job. Injected into the build_kiosk_package handler as its `recordPackage`
  * port, so the compiler stays free of any live database handle at its core.
+ *
+ * A6.1 — the row is written as the job's requester: under FORCE ROW LEVEL
+ * SECURITY, an insert without identity is refused.
  */
 export type PackageRecorder = (
   record: KioskPackageRecord,
   orgId: string,
+  requestedBy: string,
 ) => Promise<void>;
 
 export function dbKioskPackageRecorder(db: PostgresJsDatabase): PackageRecorder {
-  return async (record: KioskPackageRecord, orgId: string): Promise<void> => {
-    await insertKioskPackage(db, {
+  return async (record: KioskPackageRecord, orgId: string, requestedBy: string): Promise<void> => {
+    await insertKioskPackageAs(db, requestedBy, {
       org_id: orgId,
       site_id: record.site_id,
       version: record.version,

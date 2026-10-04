@@ -1,5 +1,8 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { kioskPackage } from './schema/kiosks.js';
+import { setSessionIdentity } from './write-path.js';
+
+type PackageWriter<TSchema extends Record<string, unknown>> = Pick<PostgresJsDatabase<TSchema>, 'insert'>;
 
 /**
  * D10 — Insert input for a built kiosk package, mirroring the `kiosk_package`
@@ -21,8 +24,8 @@ export type KioskPackageInsert = {
  * Insert a `kiosk_package` row and return its generated id. The caller owns the
  * transaction boundary; this performs a single insert.
  */
-export async function insertKioskPackage(
-  db: PostgresJsDatabase,
+export async function insertKioskPackage<TSchema extends Record<string, unknown> = Record<string, never>>(
+  db: PackageWriter<TSchema>,
   input: KioskPackageInsert,
 ): Promise<{ id: string }> {
   const [row] = await db
@@ -44,4 +47,22 @@ export async function insertKioskPackage(
     throw new Error('insert kiosk_package returned no row');
   }
   return { id: row.id };
+}
+
+/**
+ * A6.1 — enregistre le paquet sous l'identité du demandeur du travail.
+ *
+ * Sous `FORCE ROW LEVEL SECURITY`, une insertion sans identité est refusée :
+ * le service de compilation écrit ce que son demandeur aurait pu écrire, dans
+ * une transaction qui pose l'identité et la retire.
+ */
+export async function insertKioskPackageAs<TSchema extends Record<string, unknown> = Record<string, never>>(
+  db: PostgresJsDatabase<TSchema>,
+  userId: string,
+  input: KioskPackageInsert,
+): Promise<{ id: string }> {
+  return db.transaction(async (tx) => {
+    await setSessionIdentity(tx, { userId });
+    return insertKioskPackage(tx, input);
+  });
 }

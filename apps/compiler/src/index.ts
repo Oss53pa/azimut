@@ -2,6 +2,7 @@ export type { Job, JobKind, JobState, JobTrace } from './job.js';
 export type { JobQueue } from './queue.js';
 export {
   MemoryQueue,
+  MAX_ATTEMPTS,
   RETRY_BACKOFF_SECONDS,
   retryBackoffMs,
   STALL_TIMEOUT_MS,
@@ -97,3 +98,10 @@ export {
   REQUESTER_CANNOT_WRITE,
 } from './db-queue.js';
 export type { DbWorkerQueueOptions } from './db-queue.js';
+export {
+  readServiceConfig,
+  createService,
+  serviceHandlers,
+  kioskPackagePath,
+} from './service.js';
+export type { ServiceConfig, ServiceEnv, ConfigOutcome, Service } from './service.js';
