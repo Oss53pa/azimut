@@ -3,5 +3,10 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["playwright.config.ts", "vitest.config.ts", "vitest.db.config.ts"]
+  "include": [
+    "playwright.config.ts",
+    "vitest.config.ts",
+    "vitest.db.config.ts",
+    "apps/compiler/vite.config.ts"
+  ]
 }
