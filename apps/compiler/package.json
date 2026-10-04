@@ -20,10 +20,12 @@
   },
   "devDependencies": {
     "@azimut/rules": "workspace:*",
-    "@azimut/testkit": "workspace:*"
+    "@azimut/testkit": "workspace:*",
+    "vite": "^5.4.2"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit && vite build",
+    "start": "node dist/main.js"
   }
 }

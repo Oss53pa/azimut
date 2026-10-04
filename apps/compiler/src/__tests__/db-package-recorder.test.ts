@@ -3,14 +3,29 @@ import type { PostgresJsDatabase } from '@azimut/db';
 import { dbKioskPackageRecorder } from '../db-package-recorder.js';
 import type { KioskPackageRecord } from '../persist-kiosk-package.js';
 
-function stubDb(captured: { values?: Record<string, unknown> }): PostgresJsDatabase {
+type Captured = { values?: Record<string, unknown>; identityStatements?: number; inTransaction?: boolean };
+
+/** A database whose transaction runs the callback on a recording stand-in. */
+function stubDb(captured: Captured): PostgresJsDatabase {
   const chain = {
     values(obj: Record<string, unknown>) {
       captured.values = obj;
       return { returning: () => Promise.resolve([{ id: 'pkg-1' }]) };
     },
   };
-  return { insert: () => chain } as unknown as PostgresJsDatabase;
+  const tx = {
+    execute: () => {
+      captured.identityStatements = (captured.identityStatements ?? 0) + 1;
+      return Promise.resolve([]);
+    },
+    insert: () => {
+      captured.inTransaction = true;
+      return chain;
+    },
+  };
+  return {
+    transaction: (fn: (t: typeof tx) => Promise<unknown>) => fn(tx),
+  } as unknown as PostgresJsDatabase;
 }
 
 const record: KioskPackageRecord = {
@@ -24,10 +39,14 @@ const record: KioskPackageRecord = {
 
 describe('dbKioskPackageRecorder', () => {
   it('inserts a row combining the record with the supplied org', async () => {
-    const captured: { values?: Record<string, unknown> } = {};
+    const captured: Captured = {};
     const recorder = dbKioskPackageRecorder(stubDb(captured));
 
-    await recorder(record, 'org-42');
+    await recorder(record, 'org-42', 'user-42');
+
+    // A6.1 — role and identity set inside the transaction, then the insert.
+    expect(captured.identityStatements).toBe(2);
+    expect(captured.inTransaction).toBe(true);
 
     expect(captured.values).toMatchObject({
       org_id: 'org-42',

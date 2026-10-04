@@ -169,7 +169,11 @@ export function createBuildKioskPackageHandler(
       storagePath = record.storage_path;
       checksum = record.checksum;
       if (recordPackage) {
-        await recordPackage(record, job.org_id);
+        // A6.1 — the row is written as the requester; none, none written.
+        if (job.requested_by === null || job.requested_by === '') {
+          throw new Error('build_kiosk_package job has no requester (requested_by)');
+        }
+        await recordPackage(record, job.org_id, job.requested_by);
       }
     }
 

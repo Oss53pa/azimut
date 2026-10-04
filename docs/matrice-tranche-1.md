@@ -1936,3 +1936,94 @@ garde, la file en base non.
 `job.kind` ne les listent, donc un tel travail ne peut pas être inséré.
 L'écart est entre le code et le cahier des charges, et il revient à l'éditeur
 du cahier de le trancher.
+
+## Point d'entrée du service de compilation
+
+Voie retenue par l'utilisatrice : le paquet de borne d'abord. Les autres
+gestionnaires passeront dans une tâche suivante.
+
+**`main.ts` et `service.ts`.**
+
+- Le service lit sa configuration dans l'environnement :
+  - `AZIMUT_COMPILER_DATABASE_URL` ;
+  - `AZIMUT_KIOSK_BUNDLE_DIR` ;
+  - `AZIMUT_PACKAGE_DIR` ;
+  - `AZIMUT_KIOSK_MIN_RUNTIME` ;
+  - les cadences, facultatives.
+- Une configuration incomplète est refusée au démarrage avec le code 2. Le
+  message nomme tout ce qui manque.
+- La boucle prend les travaux de la file en base jusqu'à SIGTERM ou SIGINT. Un
+  arrêt n'interrompt jamais un travail, puis la connexion est fermée.
+- Un seul gestionnaire est branché : `build_kiosk_package`. Un travail d'un
+  autre type est remis en file avec la raison, sans arrêter le service.
+
+**L'enregistreur du paquet sous le demandeur.** `dbKioskPackageRecorder`
+insérait la ligne `kiosk_package` sans identité. Sous FORCE, sur toute base
+réelle, cette insertion était refusée. Il passe désormais par
+`insertKioskPackageAs`, sous l'identité du demandeur.
+
+**Essais.**
+
+- Configuration : 5 cas.
+- Service assemblé comme en production, contre la base réelle (2 cas) :
+  - un travail déposé par un utilisateur est pris, le site est lu sous son
+    identité, le paquet est écrit dans le répertoire et la ligne
+    `kiosk_package` est enregistrée sous la même identité ;
+  - un travail sans gestionnaire est remis en file avec la raison.
+- Lancement réel sur la base configurée comme en CI :
+  - sans configuration, code 2 et la liste des quatre variables ;
+  - avec configuration, la file est interrogée, SIGTERM donne un arrêt
+    propre, le code 0, et aucune connexion ne reste ouverte.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 : `test` à 4 507 essais
+(4 502 plus les 5 de la configuration), `test:visual` à 14, `test:rls` à 83
+(81 plus les 2 du service assemblé), `test:determinism` à 11, `test:e2e` à
+138, `build` sans erreur, sur une base remise à zéro (75 migrations).
+
+### Reste ouvert après le point d'entrée
+
+**Les quatre autres gestionnaires** (`compile_artworks`, `audit_site`,
+`export_quantities`, plans muraux) reçoivent encore un site figé à leur
+construction.
+
+**Deux notes de décision** :
+
+- `docs/note-editeur-types-de-travaux.md`, pour l'éditeur du cahier ;
+- `docs/note-base-studio-deploye.md`, pour l'utilisatrice.
+
+## Exécution du service : un seul module construit par Vite
+
+Voie retenue par l'utilisatrice, entre trois proposées : un seul fichier
+construit par Vite. Les deux voies écartées étaient `tsx`, bibliothèque
+nouvelle, et la compilation de chaque paquet vers `dist/`.
+
+Node ne sait pas charger les sources de l'espace de travail : leurs imports en
+`.js` désignent des fichiers `.ts`. `apps/compiler/vite.config.ts` construit
+donc `dist/main.js`, en mode SSR, sans minification, avec sa carte de sources.
+
+- Les paquets `@azimut/*` et leurs dépendances (`postgres`, `drizzle-orm`,
+  `zod`) y sont rassemblés.
+- Le module n'importe plus que des modules intégrés à Node. Il se lance par
+  `node dist/main.js` (`pnpm --filter @azimut/compiler start`) et n'a besoin
+  d'aucun `node_modules` à côté de lui.
+- Vite était déjà dans le dépôt, pour le studio. Il entre comme dépendance de
+  développement du service, à la même version.
+- `pnpm build` construit désormais le module, la CI aussi.
+- `vite.config.ts` entre dans le contrôle de types des fichiers de
+  configuration.
+
+**Essai du module construit**, sur la base configurée comme en CI
+(propriétaire non superutilisateur) :
+
+- sans configuration, code 2 et la liste des quatre variables ;
+- un travail `build_kiosk_package` déposé par un utilisateur est pris ;
+- les neuf fichiers du paquet sont écrits : programme, données, `maps/level-0.svg`
+  et `manifest.json` ;
+- la ligne `kiosk_package` est enregistrée sous le demandeur ;
+- le travail passe à `succeeded` à la première tentative ;
+- SIGTERM donne un arrêt propre et le code 0.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0, dont `install` sur le fichier de
+verrouillage mis à jour, en mode figé. Résultats : `test` à 4 507, `test:visual` à 14,
+`test:rls` à 83, `test:determinism` à 11, `test:e2e` à 138, et `build`, qui
+construit `dist/main.js` (586 ko), sans erreur.

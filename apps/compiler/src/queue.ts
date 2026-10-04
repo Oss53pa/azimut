@@ -6,6 +6,9 @@ import type { Job, JobTrace } from './job.js';
  */
 export const RETRY_BACKOFF_SECONDS: readonly number[] = [5, 30, 120];
 
+/** D9.2 — attempts before a job is failed for good. */
+export const MAX_ATTEMPTS = 3;
+
 /** Backoff in milliseconds before retrying after the given (1-based) attempt. */
 export function retryBackoffMs(attempt: number): number {
   const idx = Math.max(1, attempt) - 1;
