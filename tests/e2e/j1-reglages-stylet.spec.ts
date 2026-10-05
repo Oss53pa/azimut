@@ -160,3 +160,16 @@ test.describe('J1.2 (partie J) — le trait barrant une empreinte', () => {
     await expect(page.getByText(/Empreinte supprimée|Footprint deleted/)).toHaveCount(0);
   });
 });
+
+test.describe('J1.3 (partie J) — le niveau de redressement', () => {
+  test('se règle, se retrouve au rechargement, et vaut dans l’atelier du graphe', async ({ page }) => {
+    await page.goto(FOOTPRINTS);
+    const select = page.getByLabel(/^(Redressement|Straightening)$/);
+    await expect(select).toHaveValue('normal');
+    await select.selectOption('strict');
+    await page.reload();
+    await expect(page.getByLabel(/^(Redressement|Straightening)$/)).toHaveValue('strict');
+    await navigate(page, `/sites/${SITE}/levels/${LEVEL}/graph`);
+    await expect(page.getByLabel(/^(Redressement|Straightening)$/)).toHaveValue('strict');
+  });
+});

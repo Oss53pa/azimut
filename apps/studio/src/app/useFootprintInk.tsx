@@ -14,6 +14,7 @@ import { usePlanBackground } from './usePlanBackground.js';
 import { strikeFootprints } from '../state/footprint-strike.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { useSketchInk } from './useSketchInk.js';
+import { useStrictness } from '../editor/ink/use-strictness.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -25,8 +26,8 @@ import type { TrancheSession } from './useTrancheSession.js';
  * contour : le trait d'origine disparaît alors, et seule la forme quantifiée
  * reste (J0).
  *
- * L'intensité du redressement est au niveau intermédiaire. J1.3 la veut
- * mémorisée par utilisateur, ce que le studio ne sait pas encore faire.
+ * L'intensité du redressement est celle que l'utilisateur a retenue (J1.3),
+ * intermédiaire par défaut.
  */
 export type FootprintInk = {
   readonly zone: JSX.Element;
@@ -54,10 +55,13 @@ export function useFootprintInk(
   } | null>(null);
   const setNotice = (key: UiMessageKey | null): void => { setMessage(key === null ? null : { key }); };
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
+  // J1.3 — le niveau de redressement retenu par l'utilisateur.
+  const straightening = useStrictness(`redressement-empreintes-${levelId}`);
+
   /** Un tracé lu comme une saisie d'empreinte : un trait, ou une esquisse promue. */
   function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
     const out = strokeToFootprint(points, {
-      tool, pointer, pxPerMeter, strictness: 'normal', footprints,
+      tool, pointer, pxPerMeter, strictness: straightening.level, footprints,
     });
     if (out.kind === 'strike') {
       setArbitration(null); setGhost(null);
@@ -126,7 +130,7 @@ export function useFootprintInk(
       }}
       sketch={sketch.strokes}
       sketchSelected={sketch.selected}
-      sketchToolbar={sketch.toolbar}
+      sketchToolbar={<>{straightening.control}{sketch.toolbar}</>}
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
       onStroke={(points, pointer, pxPerMeter, detail) => {
         if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter, pointer); return; }

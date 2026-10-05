@@ -12,6 +12,7 @@ import type { GraphTool } from '../state/graph-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
 import { useSketchInk } from './useSketchInk.js';
+import { useStrictness } from '../editor/ink/use-strictness.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
@@ -55,10 +56,13 @@ export function useGraphInk(inputs: GraphInkInputs): {
     onFindings([]);
   }
 
+  // J1.3 — le niveau de redressement retenu par l'utilisateur.
+  const straightening = useStrictness(`redressement-graphe-${levelId}`);
+
   /** Un tracé lu comme une saisie du réseau : un trait, ou une esquisse promue (J3.3). */
   function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
     const out = strokeToGraph(points, {
-      tool, pointer, pxPerMeter, strictness: 'normal',
+      tool, pointer, pxPerMeter, strictness: straightening.level,
       nodes: levelNodes.map(n => ({ id: n.id, at: n.position })),
     });
     const scope = { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() };
@@ -106,7 +110,10 @@ export function useGraphInk(inputs: GraphInkInputs): {
     zone: view => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, height: '100%' }}>
         <GraphView {...view} ink={ink} frame={frame} viewKey={`graphe:${levelId}`}
-          sketch={{ strokes: sketch.strokes, selected: sketch.selected, toolbar: sketch.toolbar }} />
+          sketch={{
+            strokes: sketch.strokes, selected: sketch.selected,
+            toolbar: <>{straightening.control}{sketch.toolbar}</>,
+          }} />
         {notice !== null && <StateBanner severity="info" message={t(notice)} />}
       </div>
     ),
