@@ -3,21 +3,26 @@ import type { Point, ViewState, ViewportSize } from '@azimut/core-model';
 import { pixelToMeter } from '@azimut/core-model';
 import type { ShapeCommandData } from './command-integration.js';
 import type { ToolId } from './tool-state.js';
-import { strokeToEditorEllipse } from './ink/editor-ellipse.js';
+import { strokeToEditorEllipse, strokeToEditorRect } from './ink/editor-shapes.js';
 import { recallStrictness } from './ink/strictness-memory.js';
 import { browserStore } from '../viewport/view-memory.js';
 
 /**
  * J1 et J1.2 (partie J) — le stylet dans l'éditeur d'habillage.
  *
- * Avec l'outil Ellipse, le stylet trace à main levée : le trait apparaît tel
- * quel, puis il est lu à la levée (J1.1) et devient une ellipse, cercle si
- * proche. La souris garde le geste de l'éditeur, le cadre tiré d'un coin à
+ * Avec l'outil Ellipse ou Rectangle, le stylet trace à main levée : le trait
+ * apparaît tel quel, puis il est lu à la levée (J1.1) et devient la forme de
+ * l'outil — une ellipse, cercle si proche ; un rectangle. La souris garde le geste de l'éditeur, le cadre tiré d'un coin à
  * l'autre (E7.1) : les deux saisies coexistent, aucune ne remplace l'autre.
  *
  * Le niveau de redressement est celui que l'utilisateur a retenu (J1.3).
  */
-export type EditorInkNotice = 'ellipse_done' | 'ellipse_circle' | 'ellipse_oblique' | 'ellipse_unrecognized';
+export type EditorInkNotice =
+  | 'ellipse_done' | 'ellipse_circle' | 'ellipse_oblique' | 'ellipse_unrecognized'
+  | 'rect_done' | 'rect_oblique' | 'rect_unrecognized';
+
+/** Les outils de l'éditeur que le stylet trace à main levée. */
+const INK_TOOLS: readonly ToolId[] = ['ellipse', 'rectangle'];
 
 type InkEvent = {
   readonly pointerType: string;
@@ -51,7 +56,7 @@ export function useEditorInk(options: {
   return {
     live,
     down: event => {
-      if (event.pointerType !== 'pen' || event.button !== 0 || options.tool !== 'ellipse') return false;
+      if (event.pointerType !== 'pen' || event.button !== 0 || !INK_TOOLS.includes(options.tool)) return false;
       try { event.currentTarget.setPointerCapture(event.pointerId); } catch {
         // Un pointeur inconnu du navigateur ne se capture pas : le trait se suit sans.
       }
@@ -71,9 +76,14 @@ export function useEditorInk(options: {
       if (done === null || done.pointerId !== event.pointerId) return false;
       stroke.current = null;
       setLive(null);
-      const reading = strokeToEditorEllipse(done.points, {
-        pxPerMeter: options.view.scale_px_per_m, strictness: recallStrictness(browserStore()),
-      });
+      const context = { pxPerMeter: options.view.scale_px_per_m, strictness: recallStrictness(browserStore()) };
+      if (options.tool === 'rectangle') {
+        const rect = strokeToEditorRect(done.points, context);
+        if (rect.kind === 'rect') options.onCommit(rect.data);
+        options.onNotice(rect.kind === 'rect' ? 'rect_done' : rect.kind === 'oblique' ? 'rect_oblique' : 'rect_unrecognized');
+        return true;
+      }
+      const reading = strokeToEditorEllipse(done.points, context);
       if (reading.kind === 'ellipse') {
         options.onCommit(reading.data);
         options.onNotice(reading.circle ? 'ellipse_circle' : 'ellipse_done');

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Point } from '@azimut/core-model';
-import { strokeToEditorEllipse } from '../editor-ellipse.js';
+import { strokeToEditorEllipse, strokeToEditorRect } from '../editor-shapes.js';
 
 /** Un ovale tracé à main levée : centre, demi-axes, inclinaison, tremblé. */
 function oval(cx: number, cy: number, rx: number, ry: number, tilt_deg: number, wobble = 0.02): readonly Point[] {
@@ -44,5 +44,42 @@ describe('J1.2 — cercle et ovale dans l’éditeur d’habillage', () => {
   it('un trait qui n’est pas rond n’est pas lu', () => {
     const line = [{ x_m: 0, y_m: 0 }, { x_m: 5, y_m: 0.1 }, { x_m: 10, y_m: 0 }];
     expect(strokeToEditorEllipse(line, context).kind).toBe('unrecognized');
+  });
+});
+
+/** Un rectangle tracé à main levée, tourné de `tilt_deg`, coins un peu ronds. */
+function sketchRect(w: number, h: number, tilt_deg: number): readonly Point[] {
+  const t = (tilt_deg * Math.PI) / 180;
+  const corners = [[0, 0], [w, 0.05], [w + 0.04, h], [0.03, h - 0.02], [0.02, 0.03]] as const;
+  const out: Point[] = [];
+  for (let i = 0; i < corners.length - 1; i++) {
+    const [x0, y0] = corners[i] ?? [0, 0];
+    const [x1, y1] = corners[i + 1] ?? [0, 0];
+    for (let k = 0; k < 10; k++) {
+      const x = x0 + ((x1 - x0) * k) / 10;
+      const y = y0 + ((y1 - y0) * k) / 10;
+      out.push({ x_m: 2 + x * Math.cos(t) - y * Math.sin(t), y_m: 3 + x * Math.sin(t) + y * Math.cos(t) });
+    }
+  }
+  const [x, y] = corners[corners.length - 1] ?? [0, 0];
+  out.push({ x_m: 2 + x * Math.cos(t) - y * Math.sin(t), y_m: 3 + x * Math.sin(t) + y * Math.cos(t) });
+  return out;
+}
+
+describe('J1.2 — le rectangle dans l’éditeur d’habillage', () => {
+  it('un rectangle approximatif devient un rectangle posé sur les axes', () => {
+    const out = strokeToEditorRect(sketchRect(6, 3, 2), context);
+    expect(out.kind).toBe('rect');
+    if (out.kind !== 'rect') return;
+    expect(out.data.corner.x_m - out.data.origin.x_m).toBeCloseTo(6, 0);
+    expect(out.data.corner.y_m - out.data.origin.y_m).toBeCloseTo(3, 0);
+  });
+
+  it('un rectangle franchement de biais n’est pas redressé d’office', () => {
+    expect(strokeToEditorRect(sketchRect(6, 3, 30), context).kind).toBe('oblique');
+  });
+
+  it('un ovale n’est pas un rectangle', () => {
+    expect(strokeToEditorRect(oval(0, 0, 4, 2, 0), context).kind).toBe('unrecognized');
   });
 });
