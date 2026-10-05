@@ -2432,3 +2432,82 @@ il ne fait que choisir. Il n'est proposé que là où l'atelier sait convertir.
   l'esquisse l'est.
 - Le cercle et l'ovale (J1.2) ne sont pas reconnus : une empreinte reste un
   polygone.
+
+## Stylet : graphe, trait barrant, redressement, ellipse (J3, J1.2, J1.3)
+
+Deux décisions de l'utilisateur, prises le 2026-10-05 :
+
+- **J1.3**, le niveau de redressement est mémorisé dans le stockage du
+  navigateur, comme la position de vue (E3.3). Aucune table n'est ajoutée.
+- **Cercle et ovale**, la décision a été déléguée (« choisis la meilleure
+  solution »). L'ellipse va à l'éditeur d'habillage, où elle est une forme.
+  Une empreinte reste un polygone, ce qui évite de fixer un nombre de sommets
+  arbitraire. La nature de la forme vient de l'outil actif (J2).
+
+**L'esquisse dans l'atelier du graphe (J3, J3.3).**
+
+- La couche d'esquisse est celle du niveau : ce qui est esquissé dans un
+  atelier se voit dans l'autre.
+- Mêmes outils, même lasso.
+- Une esquisse promue y est lue comme un trait du réseau : tracée d'un nœud
+  à un autre avec l'outil Arête, elle les relie.
+
+**Le trait barrant (J1.2).**
+
+- Un trait ouvert qui barre une ou plusieurs empreintes les supprime, d'un
+  seul geste annulable, quel que soit l'outil (`state/footprint-strike.ts`).
+- La commande porte la ligne, colonne par colonne, et l'annulation la
+  rétablit telle qu'elle était. Un essai en base le vérifie, ainsi que le
+  refus pour une autre organisation.
+- Une empreinte que d'autres lignes citent (volume, destination…) n'est pas
+  supprimée. La base les emporterait par ses clés étrangères et l'annulation
+  ne les rendrait pas : c'est la règle du niveau peuplé, appliquée au barré.
+  L'écran nomme l'empreinte et le nombre d'éléments qui la citent.
+
+**Le redressement (J1.3).** Strict, intermédiaire ou permissif, réglé dans
+les deux ateliers et retrouvé à la session suivante. L'éditeur d'habillage
+lit le même réglage. Tant que le studio n'ouvre aucune session
+d'authentification, l'utilisateur est le profil du navigateur.
+
+**Cercle et ovale (J1.2).**
+
+- Dans l'éditeur d'habillage, avec l'outil Ellipse, le stylet trace à main
+  levée. À la levée, le trait devient une ellipse posée sur les axes, cercle
+  si proche.
+- Un ovale de biais au-delà de l'écart admis sur un axe n'est pas redressé
+  d'office, et l'éditeur le dit.
+- La souris garde le cadre tiré d'un coin à l'autre (E7.1).
+
+**Essais.**
+
+- Unitaires :
+  - 3 pour le barré ;
+  - 2 pour la mémoire du redressement ;
+  - 5 pour la lecture de l'ellipse.
+- En base : 2 pour le barré (`footprint-strike.db.test.ts`).
+- De bout en bout :
+  - 2 dans `j3-esquisse-graphe.spec.ts` ;
+  - 3 de plus dans `j1-reglages-stylet.spec.ts` (barré et annulation, trait
+    qui ne barre rien, redressement retrouvé d'un atelier à l'autre) ;
+  - 2 dans `j1-ellipse-habillage.spec.ts`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain46), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 595 |
+| `test:visual` | 14 |
+| `test:rls` | 90 |
+| `test:determinism` | 11 |
+| `test:e2e` | 171 |
+| `build` | sans erreur |
+
+### Reste ouvert après ce lot
+
+- Le barré n'agit que sur les empreintes. Dans l'atelier du graphe, un nœud
+  ou une arête se retire par le panneau.
+- Le stylet n'entre dans l'éditeur d'habillage que par l'outil Ellipse. Le
+  rectangle et le polygone y gardent le geste de la souris.
+- La clé du redressement prendra l'identifiant de l'utilisateur quand le
+  studio ouvrira une session d'authentification.
