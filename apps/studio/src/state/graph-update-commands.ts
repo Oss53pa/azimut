@@ -38,10 +38,6 @@ export type EdgeEdit = {
   readonly evacuationRoute: boolean;
 };
 
-function bool(value: boolean): string {
-  return value ? 'true' : 'false';
-}
-
 /**
  * Les commandes d'une modification de nœud, longueurs d'arêtes comprises.
  *
@@ -137,16 +133,16 @@ export function updateEdgeCommands(
     before: {
       width_m: String(before.width_m),
       slope_pct: String(before.slope_pct),
-      accessible: bool(before.accessible),
+      accessible: before.accessible,
       direction: before.direction,
-      evacuation_route: bool(before.evacuation_route),
+      evacuation_route: before.evacuation_route,
     },
     after: {
       width_m: String(edit.widthM),
       slope_pct: String(edit.slopePct),
-      accessible: bool(edit.accessible),
+      accessible: edit.accessible,
       direction: edit.direction,
-      evacuation_route: bool(edit.evacuationRoute),
+      evacuation_route: edit.evacuationRoute,
     },
   });
   if (!built.ok) return { ok: false, findings: built.findings };

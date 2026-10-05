@@ -120,8 +120,8 @@ describe('M4 (partie M) — modification d’une arête', () => {
     if (!outcome.ok) throw new Error('la modification doit être acceptée');
     const after = outcome.value[0]?.after ?? {};
     expect(after['width_m']).toBe('2.2');
-    expect(after['accessible']).toBe('false');
-    expect(after['evacuation_route']).toBe('true');
+    expect(after['accessible']).toBe(false);
+    expect(after['evacuation_route']).toBe(true);
     expect(after['direction']).toBe('forward');
     expect(Object.keys(after)).not.toContain('length_m');
   });
