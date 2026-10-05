@@ -1,6 +1,7 @@
 import { type JSX, useMemo, useState } from 'react';
 import type { Point } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import type { PointerKind } from '../editor/ink/pointer-kind.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import { InkWorkZone } from '../screens/InkWorkZone.js';
 import {
@@ -48,8 +49,29 @@ export function useFootprintInk(
   const [ghost, setGhost] = useState<readonly Point[] | null>(null);
   const [notice, setNotice] = useState<UiMessageKey | null>(null);
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
-  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture.
-  const sketch = useSketchInk(session, levelId, setNotice);
+  /** Un tracé lu comme une saisie d'empreinte : un trait, ou une esquisse promue. */
+  function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
+    const out = strokeToFootprint(points, {
+      tool, pointer, pxPerMeter, strictness: 'normal', footprints,
+    });
+    if (out.kind === 'not_tracing_tool') {
+      setArbitration(null); setGhost(null); setNotice('ink.not_tracing_tool');
+      return;
+    }
+    if (out.kind === 'unrecognized') {
+      setArbitration(null); setGhost(out.ghost); setNotice('ink.unrecognized');
+      return;
+    }
+    setArbitration(out.arbitration);
+    setGhost(out.arbitration.ghost);
+    setNotice(null);
+    const shape = currentReading(out.arbitration);
+    if (shape !== null) onVertices(shape.vertices);
+  }
+
+  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture ;
+  // une esquisse promue (J3.3) revient ici et se lit comme un trait.
+  const sketch = useSketchInk(session, levelId, setNotice, read);
 
   const footprints = useMemo(
     () => footprintsOfLevel(session.state, levelId).map(f => ({ id: f.id, outline: f.geometry.vertices })),
@@ -81,29 +103,15 @@ export function useFootprintInk(
         if (shape !== null) onVertices(shape.vertices);
       }}
       sketch={sketch.strokes}
+      sketchSelected={sketch.selected}
       sketchToolbar={sketch.toolbar}
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
       onStroke={(points, pointer, pxPerMeter, detail) => {
-        if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter); return; }
+        if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter, pointer); return; }
         // J1.5 — la gomme du stylet n'efface que l'esquisse : une empreinte se
         // retire par une commande, jamais d'un frottement.
         if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
-        const out = strokeToFootprint(points, {
-          tool, pointer, pxPerMeter, strictness: 'normal', footprints,
-        });
-        if (out.kind === 'not_tracing_tool') {
-          setArbitration(null); setGhost(null); setNotice('ink.not_tracing_tool');
-          return;
-        }
-        if (out.kind === 'unrecognized') {
-          setArbitration(null); setGhost(out.ghost); setNotice('ink.unrecognized');
-          return;
-        }
-        setArbitration(out.arbitration);
-        setGhost(out.arbitration.ghost);
-        setNotice(null);
-        const shape = currentReading(out.arbitration);
-        if (shape !== null) onVertices(shape.vertices);
+        read(points, pointer, pxPerMeter);
       }}
     />
   );

@@ -58,6 +58,8 @@ export type InkWorkZoneProps = {
   ) => void;
   /** La couche d'esquisse du niveau, sous le travail (J3) ; vide si masquée. */
   readonly sketch: readonly SketchStroke[];
+  /** Les traits d'esquisse choisis au lasso (J3.3). */
+  readonly sketchSelected?: readonly string[] | undefined;
   /** Les outils de l'esquisse, posés au-dessus de la zone. */
   readonly sketchToolbar?: JSX.Element | undefined;
   readonly onTouchRefused: () => void;
@@ -165,7 +167,7 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
               strokeWidth={1}
             />
           ))}
-          <SketchStrokes strokes={props.sketch} scale_px_per_m={view.scale_px_per_m}
+          <SketchStrokes strokes={props.sketch} scale_px_per_m={view.scale_px_per_m} selected={props.sketchSelected}
             project={p => toView(p, view, viewport)} />
           {props.ghost !== null && (
             <path d={pathOf(props.ghost, view, viewport, false)} fill="none"
