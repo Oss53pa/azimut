@@ -2547,3 +2547,45 @@ l'atelier de l'inventer : le point est laissé à l'éditeur du cahier.
 | `test:determinism` | 11 |
 | `test:e2e` | 172 |
 | `build` | sans erreur |
+
+## Booléens : le chemin d'écriture refuse ce qu'il écrirait faux
+
+Décision de l'utilisateur du 2026-10-05 : corriger le défaut constaté pendant
+l'esquisse.
+
+**Le défaut.** Le client `postgres` sérialise une valeur destinée à une
+colonne booléenne par `x === true ? 't' : 'f'`. La chaîne `'true'` s'écrivait
+donc « faux », sans erreur (sonde du 2026-10-04 : `'true'` et `'false'`
+stockés tous deux à faux). `graph-update-commands.ts` écrivait l'accessibilité
+et le cheminement d'évacuation d'une arête en chaînes. Le studio passe par
+PostgREST, qui convertit correctement, mais le chemin `applyCommands` les
+aurait enregistrés à faux.
+
+**La correction.**
+
+- `packages/db/src/column-types.ts` lit les colonnes booléennes dans le
+  schéma Drizzle déclaré, que l'essai de dérive tient d'accord avec les
+  migrations.
+- `applyCommands` refuse toute valeur autre qu'un booléen ou `null` pour ces
+  colonnes. L'écriture entière est refusée, comme tout refus du dépôt
+  (`EDIT.WRITE_REFUSED`). Aucun nouveau code d'anomalie n'est ajouté.
+- `graph-update-commands.ts` écrit de vrais booléens. C'était le seul endroit
+  du code qui écrivait des booléens en chaînes.
+
+**Essais.**
+
+- 3 unitaires dans `boolean-columns.test.ts` : la table des colonnes, le refus
+  d'une chaîne (rien ne part après l'identité), le passage d'un vrai booléen.
+- L'essai du panneau d'arête attend désormais de vrais booléens.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain48), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 601 |
+| `test:visual` | 14 |
+| `test:rls` | 90 |
+| `test:determinism` | 11 |
+| `test:e2e` | 172 |
+| `build` | sans erreur |
