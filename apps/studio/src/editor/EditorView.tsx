@@ -252,6 +252,7 @@ export function EditorView(): JSX.Element {
             onToolChange={setToolState}
             onReady={handleCanvasReady}
             onGestureCommit={operations.commitShape}
+            onInkNotice={notice => { setAnnouncement(t(`editor.ink.${notice}`)); }}
             onPointerSnap={setSnap}
             ariaLabel={t('editor.canvas.aria', { level: levelName })}
           >

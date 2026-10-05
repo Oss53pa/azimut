@@ -40,6 +40,8 @@ import type { SnapResult } from './snap.js';
 import type { ShapeCommandData } from './command-integration.js';
 import { previewToData } from './command-integration.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { useEditorInk } from './use-editor-ink.js';
+import type { EditorInkNotice } from './use-editor-ink.js';
 
 // ---------------------------------------------------------------------------
 // Public API — exposed via onReady callback
@@ -79,6 +81,8 @@ type EditorCanvasProps = {
   readonly onPointerSnap?: ((snap: SnapResult) => void) | undefined;
   /** Accessibility label for the SVG viewport. */
   readonly ariaLabel?: string | undefined;
+  /** J1 — what a stylus stroke produced, to be announced (E6.3). */
+  readonly onInkNotice?: ((notice: EditorInkNotice) => void) | undefined;
 };
 
 // ---------------------------------------------------------------------------
@@ -113,6 +117,7 @@ export function EditorCanvas({
   onGestureCommit,
   onPointerSnap,
   ariaLabel,
+  onInkNotice,
 }: EditorCanvasProps): JSX.Element {
   const { t } = useI18n();
   const svgLabel = ariaLabel ?? t('editor.canvas.default');
@@ -237,6 +242,13 @@ export function EditorCanvas({
     dispatchToolRaw({ type: 'reset_gesture' });
   }, [toolState.phase, toolState.preview]);
 
+  // ---- Stylus (J1): freehand ellipse with the Ellipse tool ----
+  const ink = useEditorInk({
+    tool: toolState.currentTool, view, viewport,
+    onCommit: data => { commitRef.current?.(data); },
+    onNotice: notice => { onInkNotice?.(notice); },
+  });
+
   // ---- Snap reporting (E8) ----
   useEffect(() => { onPointerSnap?.(snapResult); }, [snapResult, onPointerSnap]);
 
@@ -263,9 +275,10 @@ export function EditorCanvas({
       panOrigin.current = { x: e.clientX, y: e.clientY };
       return;
     }
+    if (ink.down(e)) return;
     // Forward to tool gesture
     toolPointerDown(e);
-  }, [isPanMode, toolPointerDown]);
+  }, [isPanMode, toolPointerDown, ink]);
 
   const handlePointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (panOrigin.current !== null) {
@@ -276,8 +289,9 @@ export function EditorCanvas({
       dispatchView({ type: 'pan', dx_px: dx, dy_px: dy });
       return;
     }
+    if (ink.move(e)) return;
     toolPointerMove(e);
-  }, [toolPointerMove]);
+  }, [toolPointerMove, ink]);
 
   const handlePointerUp = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (panOrigin.current !== null) {
@@ -285,8 +299,9 @@ export function EditorCanvas({
       panOrigin.current = null;
       return;
     }
+    if (ink.up(e)) return;
     toolPointerUp(e);
-  }, [toolPointerUp]);
+  }, [toolPointerUp, ink]);
 
   // ---- Keyboard: space for pan (gesture modifier, not a shortcut) ----
   // Zoom +/- is handled centrally by useShortcuts (E16).
@@ -346,6 +361,11 @@ export function EditorCanvas({
           <g transform={transform}>
             {children}
             <ToolPreviewRenderer preview={toolState.preview} />
+            {ink.live !== null && (
+              <polyline data-testid="editor-ink-live" fill="none" stroke="var(--text-primary)"
+                strokeWidth={1.5 / view.scale_px_per_m} strokeLinecap="round" strokeLinejoin="round"
+                points={ink.live.map(p => `${String(p.x_m)},${String(p.y_m)}`).join(' ')} />
+            )}
           </g>
           {/* Overlay layer (pixel-space) */}
           <g data-layer="overlay">
