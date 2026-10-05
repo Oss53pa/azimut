@@ -2508,6 +2508,42 @@ d'authentification, l'utilisateur est le profil du navigateur.
 - Le barré n'agit que sur les empreintes. Dans l'atelier du graphe, un nœud
   ou une arête se retire par le panneau.
 - Le stylet n'entre dans l'éditeur d'habillage que par l'outil Ellipse. Le
-  rectangle et le polygone y gardent le geste de la souris.
+  rectangle et le polygone y gardent le geste de la souris. *Le rectangle est
+  fait depuis : voir la section « Rectangle au stylet ».*
 - La clé du redressement prendra l'identifiant de l'utilisateur quand le
   studio ouvrira une session d'authentification.
+
+## Rectangle au stylet dans l'éditeur d'habillage (J1.2)
+
+« Rectangle approximatif : rectangle, angles droits. » Rien n'était à
+décider : c'est la même règle que l'ellipse.
+
+- Avec l'outil Rectangle, le stylet trace à main levée. À la levée, le trait
+  devient un rectangle posé sur les axes.
+- Un rectangle tracé de biais au-delà de l'écart admis sur un axe n'est pas
+  redressé d'office, et l'éditeur le dit.
+- La souris garde le cadre tiré d'un coin à l'autre.
+- La lecture des formes de l'habillage est réunie dans
+  `editor/ink/editor-shapes.ts`.
+
+**Le barré dans l'atelier du graphe n'est pas fait, à dessein.** M4 ne
+spécifie aucune suppression de nœud ni d'arête. En retirer un toucherait la
+validation du graphe et le tableau des messages (M02.W8). Ce n'est pas à
+l'atelier de l'inventer : le point est laissé à l'éditeur du cahier.
+
+**Essais.**
+
+- Unitaires : 3 de plus dans `editor-shapes.test.ts`.
+- De bout en bout : 1 de plus dans `j1-ellipse-habillage.spec.ts`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain47), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 598 |
+| `test:visual` | 14 |
+| `test:rls` | 90 |
+| `test:determinism` | 11 |
+| `test:e2e` | 172 |
+| `build` | sans erreur |
