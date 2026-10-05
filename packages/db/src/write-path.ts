@@ -19,6 +19,7 @@ import { sql } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import type { EntityCommand, Outcome, Finding, ColumnValue } from '@azimut/core-model';
 import { changedColumns } from '@azimut/core-model';
+import { booleanColumnsOf } from './column-types.js';
 
 /**
  * Ce que le chemin d'écriture attend d'une base : exécuter, et ouvrir une
@@ -105,6 +106,7 @@ export async function setSessionIdentity(
 
 async function applyOne(tx: Executor, command: EntityCommand): Promise<void> {
   const table = qualifiedTable(command.table);
+  assertBooleans(command);
 
   if (command.operation === 'create') {
     const row = command.after ?? {};
@@ -129,6 +131,24 @@ async function applyOne(tx: Executor, command: EntityCommand): Promise<void> {
     set ${assignments(changed, changed.map(n => after[n] ?? null))}
     where id = ${command.id}
   `);
+}
+
+/**
+ * Une colonne booléenne ne reçoit qu'un booléen ou `null`.
+ *
+ * Le client `postgres` écrit « faux » toute autre valeur destinée à une
+ * colonne booléenne, la chaîne `'true'` comprise, sans erreur. Une commande
+ * qui porterait `'true'` changerait donc la donnée en silence : elle est
+ * refusée, et l'écriture entière avec elle, comme tout refus du dépôt.
+ */
+function assertBooleans(command: EntityCommand): void {
+  const booleans = booleanColumnsOf(command.table);
+  if (booleans.size === 0) return;
+  for (const [name, value] of Object.entries(command.after ?? {})) {
+    if (booleans.has(name) && value !== null && typeof value !== 'boolean') {
+      throw new Error(`valeur non booléenne pour ${command.table}.${name}`);
+    }
+  }
 }
 
 /**
