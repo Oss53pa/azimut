@@ -126,3 +126,37 @@ test.describe('J1.5 (partie J) — la gomme du stylet', () => {
     await expect(page.getByRole('status').filter({ hasText: /Forme reconnue|Recognised shape/ })).toHaveCount(0);
   });
 });
+
+test.describe('J1.2 (partie J) — le trait barrant une empreinte', () => {
+  test('un trait qui barre une empreinte la supprime ; Ctrl+Z la rétablit', async ({ page }) => {
+    await page.goto(FOOTPRINTS);
+    await drawRectangle(page);
+    await page.getByLabel(/Code de cellule|Unit code/).fill('X01');
+    await page.getByRole('button', { name: /Fermer le polygone|Close polygon/ }).click();
+    await expect(page.getByTestId('ink-footprint')).toHaveCount(1);
+
+    const target = await page.getByTestId('ink-footprint').boundingBox();
+    if (target === null) throw new Error('empreinte introuvable');
+    const y = target.y + target.height / 2;
+    await page.mouse.move(target.x - 30, y);
+    await page.mouse.down();
+    await page.mouse.move(target.x + target.width + 30, y + 4, { steps: 15 });
+    await page.mouse.up();
+
+    await expect(page.getByTestId('ink-footprint')).toHaveCount(0);
+    await expect(page.getByText(/Empreinte supprimée d’un trait barrant|Footprint deleted with a strike-through/))
+      .toBeVisible();
+    await page.keyboard.press('Control+z');
+    await expect(page.getByTestId('ink-footprint')).toHaveCount(1);
+  });
+
+  test('un trait qui ne barre rien reste un trait non reconnu', async ({ page }) => {
+    await page.goto(FOOTPRINTS);
+    const box = await zoneBox(page);
+    await page.mouse.move(box.x + 20, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 24, { steps: 10 });
+    await page.mouse.up();
+    await expect(page.getByText(/Empreinte supprimée|Footprint deleted/)).toHaveCount(0);
+  });
+});

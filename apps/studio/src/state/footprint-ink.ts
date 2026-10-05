@@ -36,7 +36,9 @@ export type FootprintArbitration = {
 export type InkOutcome =
   | { readonly kind: 'applied'; readonly arbitration: FootprintArbitration }
   | { readonly kind: 'unrecognized'; readonly ghost: readonly Point[] }
-  | { readonly kind: 'not_tracing_tool' };
+  | { readonly kind: 'not_tracing_tool' }
+  /** J1.2 — « trait barrant une forme » : les empreintes à supprimer. */
+  | { readonly kind: 'strike'; readonly footprintIds: readonly string[] };
 
 const ORDER: Readonly<Record<FootprintTool, readonly FootprintShape['kind'][]>> = {
   cell: ['rectangle', 'polygon'],
@@ -84,9 +86,14 @@ export type StrokeContext = {
   readonly footprints: readonly InkShape[];
 };
 
-/** Ce qu'un trait achevé produit dans l'atelier des empreintes. */
+/**
+ * Ce qu'un trait achevé produit dans l'atelier des empreintes.
+ *
+ * Le trait qui barre une empreinte la supprime, quel que soit l'outil : ce
+ * n'est pas une forme à tracer mais un geste sur une forme existante, et un
+ * trait ouvert ne fait jamais une empreinte.
+ */
 export function strokeToFootprint(points: readonly Point[], context: StrokeContext): InkOutcome {
-  if (!isTracingTool(context.tool)) return { kind: 'not_tracing_tool' };
   const candidates = recognize(points, {
     pxPerMeter: context.pxPerMeter,
     strictness: context.strictness,
@@ -95,6 +102,9 @@ export function strokeToFootprint(points: readonly Point[], context: StrokeConte
     nodes: [],
     shapes: context.footprints,
   });
+  const strike = candidates.find(c => c.kind === 'strike');
+  if (strike?.kind === 'strike') return { kind: 'strike', footprintIds: strike.shapeIds };
+  if (!isTracingTool(context.tool)) return { kind: 'not_tracing_tool' };
   const readings = footprintReadings(candidates, context.tool);
   if (readings.length === 0) return { kind: 'unrecognized', ghost: points };
   return { kind: 'applied', arbitration: { readings, index: 0, ghost: points } };

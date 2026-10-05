@@ -11,6 +11,8 @@ import type { FootprintArbitration, FootprintShape } from '../state/footprint-in
 import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import { usePlanBackground } from './usePlanBackground.js';
+import { strikeFootprints } from '../state/footprint-strike.js';
+import { ORG_OF_SESSION } from './session-identity.js';
 import { useSketchInk } from './useSketchInk.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
@@ -47,13 +49,33 @@ export function useFootprintInk(
   const { t } = useI18n();
   const [arbitration, setArbitration] = useState<FootprintArbitration | null>(null);
   const [ghost, setGhost] = useState<readonly Point[] | null>(null);
-  const [notice, setNotice] = useState<UiMessageKey | null>(null);
+  const [message, setMessage] = useState<{
+    readonly key: UiMessageKey; readonly params?: Readonly<Record<string, string | number>>;
+  } | null>(null);
+  const setNotice = (key: UiMessageKey | null): void => { setMessage(key === null ? null : { key }); };
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
   /** Un tracé lu comme une saisie d'empreinte : un trait, ou une esquisse promue. */
   function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
     const out = strokeToFootprint(points, {
       tool, pointer, pxPerMeter, strictness: 'normal', footprints,
     });
+    if (out.kind === 'strike') {
+      setArbitration(null); setGhost(null);
+      const struck = strikeFootprints(session.state.rows, out.footprintIds, {
+        orgId: ORG_OF_SESSION, timestamp: session.now(),
+      });
+      if (struck.kind === 'referenced') {
+        setMessage({
+          key: 'ink.strike.referenced',
+          params: { code: struck.unitCode === '' ? '—' : struck.unitCode, count: struck.dependents },
+        });
+        return;
+      }
+      if (struck.kind === 'refused') { setNotice('ink.strike.refused'); return; }
+      setNotice('ink.strike.done');
+      void session.write(struck.commands);
+      return;
+    }
     if (out.kind === 'not_tracing_tool') {
       setArbitration(null); setGhost(null); setNotice('ink.not_tracing_tool');
       return;
@@ -90,7 +112,7 @@ export function useFootprintInk(
       ghost={ghost}
       background={background}
       notices={[
-        ...(notice === null ? [] : [t(notice)]),
+        ...(message === null ? [] : [t(message.key, message.params)]),
         ...(backgroundNotice === null ? [] : [t(backgroundNotice)]),
       ]}
       recognized={reading === null ? null : t('ink.recognized', { shape: label(reading) })}
