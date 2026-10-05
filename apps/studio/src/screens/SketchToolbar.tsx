@@ -12,7 +12,7 @@ import type { SketchColor, SketchTool } from '../state/sketch.js';
  * L'outil et la couleur actifs se lisent au texte et à l'état ARIA, jamais à
  * la seule teinte (M7.7, partie M) : chaque pastille porte son nom.
  */
-export type SketchPen = SketchTool | 'eraser';
+export type SketchPen = SketchTool | 'eraser' | 'lasso';
 
 export type SketchToolbarProps = {
   readonly active: boolean;
@@ -24,15 +24,20 @@ export type SketchToolbarProps = {
   readonly visible: boolean;
   readonly onVisible: (visible: boolean) => void;
   readonly strokeCount: number;
+  /** Le lasso n'est proposé que si l'atelier sait convertir (J3.3). */
+  readonly canLasso: boolean;
+  readonly selectedCount: number;
+  readonly onPromote: () => void;
 };
 
-const PENS: readonly SketchPen[] = [...SKETCH_TOOLS, 'eraser'];
+const PENS: readonly SketchPen[] = [...SKETCH_TOOLS, 'eraser', 'lasso'];
 
 const PEN_LABEL: Readonly<Record<SketchPen, UiMessageKey>> = {
   pencil: 'ink.sketch.tool.pencil',
   felt: 'ink.sketch.tool.felt',
   marker: 'ink.sketch.tool.marker',
   eraser: 'ink.sketch.tool.eraser',
+  lasso: 'ink.sketch.tool.lasso',
 };
 
 const COLOR_LABEL: Readonly<Record<SketchColor, UiMessageKey>> = {
@@ -63,12 +68,17 @@ export function SketchToolbar(props: SketchToolbarProps): JSX.Element {
           onClick={() => { props.onActive(!props.active); }}>
           {t('ink.sketch.mode')}
         </button>
-        {props.active && PENS.map(pen => (
+        {props.active && PENS.filter(pen => pen !== 'lasso' || props.canLasso).map(pen => (
           <button key={pen} type="button" aria-pressed={props.pen === pen} style={chip(props.pen === pen)}
             onClick={() => { props.onPen(pen); }}>
             {t(PEN_LABEL[pen])}
           </button>
         ))}
+        {props.active && props.selectedCount > 0 && (
+          <Button rank="primary" onClick={props.onPromote}>
+            {t('ink.sketch.promote', { count: props.selectedCount })}
+          </Button>
+        )}
         <Button rank="secondary" onClick={() => { props.onVisible(!props.visible); }}>
           {t(props.visible ? 'ink.sketch.hide' : 'ink.sketch.show')}
         </Button>

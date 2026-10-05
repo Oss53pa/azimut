@@ -107,6 +107,13 @@ export const EDITOR_FR = {
   'editor.announce.pasted': '{count} objet(s) collé(s).',
   'editor.announce.cut': '{count} objet(s) coupé(s).',
   'editor.paste.refused': 'Collage refusé : {code}.',
+  'editor.ink.ellipse_done': 'Ovale reconnu : ellipse posée.',
+  'editor.ink.ellipse_circle': 'Cercle reconnu : cercle posé.',
+  'editor.ink.ellipse_oblique': 'Ovale tracé de biais : l’ellipse de l’habillage est posée sur les axes. Retracez-le droit, ou tirez un cadre à la souris.',
+  'editor.ink.ellipse_unrecognized': 'Ce trait ne ressemble ni à un cercle ni à un ovale. Retracez-le.',
+  'editor.ink.rect_done': 'Rectangle reconnu : rectangle posé.',
+  'editor.ink.rect_oblique': 'Rectangle tracé de biais : le rectangle de l’habillage est posé sur les axes. Retracez-le droit, ou tirez un cadre à la souris.',
+  'editor.ink.rect_unrecognized': 'Ce trait ne ressemble pas à un rectangle. Retracez-le.',
 
   // Editor — decoration (habillage) accessible names
   'editor.decoration.area': "Zone d'habillage",
@@ -211,6 +218,13 @@ export const EDITOR_EN: Readonly<Record<keyof typeof EDITOR_FR, string>> = {
   'editor.announce.pasted': '{count} object(s) pasted.',
   'editor.announce.cut': '{count} object(s) cut.',
   'editor.paste.refused': 'Paste refused: {code}.',
+  'editor.ink.ellipse_done': 'Oval recognised: ellipse placed.',
+  'editor.ink.ellipse_circle': 'Circle recognised: circle placed.',
+  'editor.ink.ellipse_oblique': 'Oval drawn at an angle: decoration ellipses sit on the axes. Draw it straight, or drag a frame with the mouse.',
+  'editor.ink.ellipse_unrecognized': 'This stroke looks like neither a circle nor an oval. Draw it again.',
+  'editor.ink.rect_done': 'Rectangle recognised: rectangle placed.',
+  'editor.ink.rect_oblique': 'Rectangle drawn at an angle: decoration rectangles sit on the axes. Draw it straight, or drag a frame with the mouse.',
+  'editor.ink.rect_unrecognized': 'This stroke does not look like a rectangle. Draw it again.',
 
   'editor.decoration.area': 'Habillage area',
   'editor.decoration.path': 'Habillage path',

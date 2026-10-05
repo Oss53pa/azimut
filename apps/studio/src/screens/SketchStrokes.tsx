@@ -17,6 +17,8 @@ export function SketchStrokes(props: {
   readonly strokes: readonly SketchStroke[];
   readonly project: (point: Point) => { readonly x_px: number; readonly y_px: number };
   readonly scale_px_per_m: number;
+  /** Les traits choisis au lasso, cernés d'un halo pointillé. */
+  readonly selected?: readonly string[] | undefined;
 }): JSX.Element {
   return (
     <g data-testid="sketch-layer" pointerEvents="none">
@@ -25,9 +27,16 @@ export function SketchStrokes(props: {
         const marker = stroke.tool === 'marker';
         const at = stroke.points.map(props.project);
         const first = at[0];
+        const chosen = props.selected?.includes(stroke.id) === true;
         return (
           <g key={stroke.id} data-testid="sketch-stroke" data-sketch-tool={stroke.tool}
-            opacity={marker ? strokeStyle('marker', 0).opacity : 1}>
+            data-selected={chosen ? 'true' : undefined}>
+            {chosen && at.length > 1 && (
+              <polyline points={at.map(p => `${p.x_px.toFixed(2)},${p.y_px.toFixed(2)}`).join(' ')}
+                fill="none" stroke="var(--az-selection-handle)" strokeDasharray="4 3" strokeLinecap="round"
+                strokeWidth={stroke.width_base_m * props.scale_px_per_m + 6} strokeOpacity={0.5} />
+            )}
+            <g opacity={marker ? strokeStyle('marker', 0).opacity : 1}>
             {stroke.points.length === 1 && first !== undefined && (
               <circle cx={first.x_px} cy={first.y_px} fill={color}
                 r={(stroke.width_base_m * props.scale_px_per_m) / 2} />
@@ -45,6 +54,7 @@ export function SketchStrokes(props: {
                   strokeOpacity={marker ? 1 : style.opacity} />
               );
             })}
+            </g>
           </g>
         );
       })}

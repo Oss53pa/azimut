@@ -1,6 +1,7 @@
 import { type JSX, useMemo, useState } from 'react';
 import type { Point } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
+import type { PointerKind } from '../editor/ink/pointer-kind.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import { InkWorkZone } from '../screens/InkWorkZone.js';
 import {
@@ -10,7 +11,10 @@ import type { FootprintArbitration, FootprintShape } from '../state/footprint-in
 import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import { usePlanBackground } from './usePlanBackground.js';
+import { strikeFootprints } from '../state/footprint-strike.js';
+import { ORG_OF_SESSION } from './session-identity.js';
 import { useSketchInk } from './useSketchInk.js';
+import { useStrictness } from '../editor/ink/use-strictness.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -22,8 +26,8 @@ import type { TrancheSession } from './useTrancheSession.js';
  * contour : le trait d'origine disparaît alors, et seule la forme quantifiée
  * reste (J0).
  *
- * L'intensité du redressement est au niveau intermédiaire. J1.3 la veut
- * mémorisée par utilisateur, ce que le studio ne sait pas encore faire.
+ * L'intensité du redressement est celle que l'utilisateur a retenue (J1.3),
+ * intermédiaire par défaut.
  */
 export type FootprintInk = {
   readonly zone: JSX.Element;
@@ -46,10 +50,54 @@ export function useFootprintInk(
   const { t } = useI18n();
   const [arbitration, setArbitration] = useState<FootprintArbitration | null>(null);
   const [ghost, setGhost] = useState<readonly Point[] | null>(null);
-  const [notice, setNotice] = useState<UiMessageKey | null>(null);
+  const [message, setMessage] = useState<{
+    readonly key: UiMessageKey; readonly params?: Readonly<Record<string, string | number>>;
+  } | null>(null);
+  const setNotice = (key: UiMessageKey | null): void => { setMessage(key === null ? null : { key }); };
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
-  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture.
-  const sketch = useSketchInk(session, levelId, setNotice);
+  // J1.3 — le niveau de redressement retenu par l'utilisateur.
+  const straightening = useStrictness(`redressement-empreintes-${levelId}`);
+
+  /** Un tracé lu comme une saisie d'empreinte : un trait, ou une esquisse promue. */
+  function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
+    const out = strokeToFootprint(points, {
+      tool, pointer, pxPerMeter, strictness: straightening.level, footprints,
+    });
+    if (out.kind === 'strike') {
+      setArbitration(null); setGhost(null);
+      const struck = strikeFootprints(session.state.rows, out.footprintIds, {
+        orgId: ORG_OF_SESSION, timestamp: session.now(),
+      });
+      if (struck.kind === 'referenced') {
+        setMessage({
+          key: 'ink.strike.referenced',
+          params: { code: struck.unitCode === '' ? '—' : struck.unitCode, count: struck.dependents },
+        });
+        return;
+      }
+      if (struck.kind === 'refused') { setNotice('ink.strike.refused'); return; }
+      setNotice('ink.strike.done');
+      void session.write(struck.commands);
+      return;
+    }
+    if (out.kind === 'not_tracing_tool') {
+      setArbitration(null); setGhost(null); setNotice('ink.not_tracing_tool');
+      return;
+    }
+    if (out.kind === 'unrecognized') {
+      setArbitration(null); setGhost(out.ghost); setNotice('ink.unrecognized');
+      return;
+    }
+    setArbitration(out.arbitration);
+    setGhost(out.arbitration.ghost);
+    setNotice(null);
+    const shape = currentReading(out.arbitration);
+    if (shape !== null) onVertices(shape.vertices);
+  }
+
+  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture ;
+  // une esquisse promue (J3.3) revient ici et se lit comme un trait.
+  const sketch = useSketchInk(session, levelId, setNotice, read);
 
   const footprints = useMemo(
     () => footprintsOfLevel(session.state, levelId).map(f => ({ id: f.id, outline: f.geometry.vertices })),
@@ -68,7 +116,7 @@ export function useFootprintInk(
       ghost={ghost}
       background={background}
       notices={[
-        ...(notice === null ? [] : [t(notice)]),
+        ...(message === null ? [] : [t(message.key, message.params)]),
         ...(backgroundNotice === null ? [] : [t(backgroundNotice)]),
       ]}
       recognized={reading === null ? null : t('ink.recognized', { shape: label(reading) })}
@@ -81,26 +129,15 @@ export function useFootprintInk(
         if (shape !== null) onVertices(shape.vertices);
       }}
       sketch={sketch.strokes}
-      sketchToolbar={sketch.toolbar}
+      sketchSelected={sketch.selected}
+      sketchToolbar={<>{straightening.control}{sketch.toolbar}</>}
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
-      onStroke={(points, pointer, pxPerMeter, pressures) => {
-        if (sketch.active) { sketch.onStroke(points, pressures, pxPerMeter); return; }
-        const out = strokeToFootprint(points, {
-          tool, pointer, pxPerMeter, strictness: 'normal', footprints,
-        });
-        if (out.kind === 'not_tracing_tool') {
-          setArbitration(null); setGhost(null); setNotice('ink.not_tracing_tool');
-          return;
-        }
-        if (out.kind === 'unrecognized') {
-          setArbitration(null); setGhost(out.ghost); setNotice('ink.unrecognized');
-          return;
-        }
-        setArbitration(out.arbitration);
-        setGhost(out.arbitration.ghost);
-        setNotice(null);
-        const shape = currentReading(out.arbitration);
-        if (shape !== null) onVertices(shape.vertices);
+      onStroke={(points, pointer, pxPerMeter, detail) => {
+        if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter, pointer); return; }
+        // J1.5 — la gomme du stylet n'efface que l'esquisse : une empreinte se
+        // retire par une commande, jamais d'un frottement.
+        if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
+        read(points, pointer, pxPerMeter);
       }}
     />
   );

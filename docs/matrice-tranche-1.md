@@ -2309,7 +2309,8 @@ comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
 ### Reste ouvert après l'esquisse
 
 - La promotion (entourer une esquisse et demander sa conversion, J3.3)
-  n'est pas faite.
+  n'est pas faite. *Faite depuis : voir la section « Promotion d'une
+  esquisse ».*
 - L'inclinaison qui module la largeur du marqueur (J3.2) n'est pas faite :
   J3.4 ne prévoit pas de la conserver dans `points`. C'est un choix de modèle
   à faire trancher (A2.2).
@@ -2320,3 +2321,229 @@ comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
 - `graph-update-commands.ts` écrit encore `'true'`/`'false'` en chaînes.
   Le studio passe par PostgREST, qui les convertit bien ; le chemin
   `applyCommands` les enregistrerait à faux.
+
+## Réglages du fond de décalque et gomme du stylet (J1.4, J1.5)
+
+Rien n'était à décider : J1.4 et J1.5 les fixent.
+
+**J1.4, les trois réglages du fond.**
+
+- L'opacité du plan calé se règle au curseur, par pas de 10 %. Elle part de
+  60 %, la valeur que la zone appliquait jusque-là.
+- Les formes déjà tracées se montrent ou se masquent d'une case.
+- Les deux réglages sont des préférences de travail, comme la position de vue
+  (E3.3). Ils sont gardés dans le stockage du navigateur, par zone et par
+  niveau, et n'entrent ni dans la base ni dans l'historique
+  (`viewport/backdrop-settings.ts`). Une valeur illisible est ignorée champ
+  par champ.
+- Le verrouillage du fond est acquis par construction : la zone n'offre aucun
+  geste qui déplace le fond, que seul le calage pose. Aucune bascule inerte
+  n'est ajoutée.
+
+**J1.5, la gomme du stylet.**
+
+- Le bout gomme d'un stylet retourné (`buttons` 32) et le bouton latéral
+  (`buttons` 2) sont lus à la pose (`isPenEraser`). Le geste entier est alors
+  un geste de gomme.
+- En mode esquisse, il efface quel que soit l'outil choisi.
+- Hors esquisse, dans l'atelier des empreintes comme dans celui du graphe, il
+  ne touche à rien et le dit : une forme se retire par une commande, jamais
+  d'un frottement.
+
+**Essais.**
+
+- Unitaires : 3 pour les réglages, 2 pour la lecture des boutons.
+- De bout en bout, 5 dans `j1-reglages-stylet.spec.ts` :
+  - l'opacité appliquée au plan ;
+  - les formes masquées, et le réglage retrouvé au rechargement ;
+  - le bout gomme ;
+  - le bouton latéral ;
+  - le refus hors esquisse.
+
+### Reste ouvert après les réglages
+
+- L'appui long pour le menu contextuel (J1.5) : le contenu du menu n'est pas
+  spécifié.
+- Les deux doigts pendant le tracé (J1.5) attendent que la contradiction
+  signalée à l'éditeur soit tranchée.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain44), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 581 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 161 |
+| `build` | sans erreur |
+
+## Promotion d'une esquisse (J3.3)
+
+« Entourer une esquisse et demander sa conversion produit une forme reconnue,
+arbitrée et quantifiée comme n'importe quelle saisie. La promotion est
+explicite, jamais automatique. » Rien n'était à décider.
+
+**Deux temps, séparés.**
+
+1. L'outil « Entourer » de l'esquisse choisit les traits que le lasso entoure
+   entièrement (J1.2 : boucle autour de plusieurs formes, sélection). Les
+   traits choisis sont cernés d'un halo pointillé. Rien n'est converti.
+2. « Convertir en forme » remet les traits choisis, mis bout à bout, à
+   l'atelier des empreintes. Il les lit comme un trait : même reconnaissance,
+   même outil actif, même arbitrage, même quantification. Le résultat est le
+   contour en cours, que l'on ferme comme une saisie.
+
+**Mise bout à bout** (`state/sketch-promotion.ts`). L'enchaînement part du
+premier trait par identifiant. À chaque pas, il prend le trait dont une
+extrémité est la plus proche, retourné au besoin. Le tracé produit ne dépend
+donc que des traits choisis, jamais de l'ordre où ils ont été tracés (A9). La
+pression ne passe pas dans la saisie.
+
+**L'esquisse reste.** La promotion ne la modifie ni ne la retire : la forme
+est une saisie nouvelle. Le lasso est permis sur une couche verrouillée, car
+il ne fait que choisir. Il n'est proposé que là où l'atelier sait convertir.
+
+**Essais.**
+
+- Unitaires : 4.
+- De bout en bout, 3 dans `j3-promotion.spec.ts` :
+  - un rectangle esquissé, entouré puis converti, devient le contour en cours,
+    sur les axes, et l'esquisse reste ;
+  - quatre traits fermés se convertissent d'un seul tenant ;
+  - un lasso vide le dit.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain45), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 585 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 164 |
+| `build` | sans erreur |
+
+### Reste ouvert après la promotion
+
+- La promotion n'est proposée que dans l'atelier des empreintes, là où
+  l'esquisse l'est.
+- Le cercle et l'ovale (J1.2) ne sont pas reconnus : une empreinte reste un
+  polygone.
+
+## Stylet : graphe, trait barrant, redressement, ellipse (J3, J1.2, J1.3)
+
+Deux décisions de l'utilisateur, prises le 2026-10-05 :
+
+- **J1.3**, le niveau de redressement est mémorisé dans le stockage du
+  navigateur, comme la position de vue (E3.3). Aucune table n'est ajoutée.
+- **Cercle et ovale**, la décision a été déléguée (« choisis la meilleure
+  solution »). L'ellipse va à l'éditeur d'habillage, où elle est une forme.
+  Une empreinte reste un polygone, ce qui évite de fixer un nombre de sommets
+  arbitraire. La nature de la forme vient de l'outil actif (J2).
+
+**L'esquisse dans l'atelier du graphe (J3, J3.3).**
+
+- La couche d'esquisse est celle du niveau : ce qui est esquissé dans un
+  atelier se voit dans l'autre.
+- Mêmes outils, même lasso.
+- Une esquisse promue y est lue comme un trait du réseau : tracée d'un nœud
+  à un autre avec l'outil Arête, elle les relie.
+
+**Le trait barrant (J1.2).**
+
+- Un trait ouvert qui barre une ou plusieurs empreintes les supprime, d'un
+  seul geste annulable, quel que soit l'outil (`state/footprint-strike.ts`).
+- La commande porte la ligne, colonne par colonne, et l'annulation la
+  rétablit telle qu'elle était. Un essai en base le vérifie, ainsi que le
+  refus pour une autre organisation.
+- Une empreinte que d'autres lignes citent (volume, destination…) n'est pas
+  supprimée. La base les emporterait par ses clés étrangères et l'annulation
+  ne les rendrait pas : c'est la règle du niveau peuplé, appliquée au barré.
+  L'écran nomme l'empreinte et le nombre d'éléments qui la citent.
+
+**Le redressement (J1.3).** Strict, intermédiaire ou permissif, réglé dans
+les deux ateliers et retrouvé à la session suivante. L'éditeur d'habillage
+lit le même réglage. Tant que le studio n'ouvre aucune session
+d'authentification, l'utilisateur est le profil du navigateur.
+
+**Cercle et ovale (J1.2).**
+
+- Dans l'éditeur d'habillage, avec l'outil Ellipse, le stylet trace à main
+  levée. À la levée, le trait devient une ellipse posée sur les axes, cercle
+  si proche.
+- Un ovale de biais au-delà de l'écart admis sur un axe n'est pas redressé
+  d'office, et l'éditeur le dit.
+- La souris garde le cadre tiré d'un coin à l'autre (E7.1).
+
+**Essais.**
+
+- Unitaires :
+  - 3 pour le barré ;
+  - 2 pour la mémoire du redressement ;
+  - 5 pour la lecture de l'ellipse.
+- En base : 2 pour le barré (`footprint-strike.db.test.ts`).
+- De bout en bout :
+  - 2 dans `j3-esquisse-graphe.spec.ts` ;
+  - 3 de plus dans `j1-reglages-stylet.spec.ts` (barré et annulation, trait
+    qui ne barre rien, redressement retrouvé d'un atelier à l'autre) ;
+  - 2 dans `j1-ellipse-habillage.spec.ts`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain46), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 595 |
+| `test:visual` | 14 |
+| `test:rls` | 90 |
+| `test:determinism` | 11 |
+| `test:e2e` | 171 |
+| `build` | sans erreur |
+
+### Reste ouvert après ce lot
+
+- Le barré n'agit que sur les empreintes. Dans l'atelier du graphe, un nœud
+  ou une arête se retire par le panneau.
+- Le stylet n'entre dans l'éditeur d'habillage que par l'outil Ellipse. Le
+  rectangle et le polygone y gardent le geste de la souris. *Le rectangle est
+  fait depuis : voir la section « Rectangle au stylet ».*
+- La clé du redressement prendra l'identifiant de l'utilisateur quand le
+  studio ouvrira une session d'authentification.
+
+## Rectangle au stylet dans l'éditeur d'habillage (J1.2)
+
+« Rectangle approximatif : rectangle, angles droits. » Rien n'était à
+décider : c'est la même règle que l'ellipse.
+
+- Avec l'outil Rectangle, le stylet trace à main levée. À la levée, le trait
+  devient un rectangle posé sur les axes.
+- Un rectangle tracé de biais au-delà de l'écart admis sur un axe n'est pas
+  redressé d'office, et l'éditeur le dit.
+- La souris garde le cadre tiré d'un coin à l'autre.
+- La lecture des formes de l'habillage est réunie dans
+  `editor/ink/editor-shapes.ts`.
+
+**Le barré dans l'atelier du graphe n'est pas fait, à dessein.** M4 ne
+spécifie aucune suppression de nœud ni d'arête. En retirer un toucherait la
+validation du graphe et le tableau des messages (M02.W8). Ce n'est pas à
+l'atelier de l'inventer : le point est laissé à l'éditeur du cahier.
+
+**Essais.**
+
+- Unitaires : 3 de plus dans `editor-shapes.test.ts`.
+- De bout en bout : 1 de plus dans `j1-ellipse-habillage.spec.ts`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain47), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 598 |
+| `test:visual` | 14 |
+| `test:rls` | 90 |
+| `test:determinism` | 11 |
+| `test:e2e` | 172 |
+| `build` | sans erreur |
