@@ -1,5 +1,5 @@
 import { type JSX, useMemo, useState } from 'react';
-import type { Finding, GraphNode, NodeKind } from '@azimut/core-model';
+import type { Finding, GraphNode, NodeKind, Point } from '@azimut/core-model';
 import { StateBanner, SPACE } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
@@ -10,6 +10,8 @@ import { graphCommands } from '../state/graph-commands.js';
 import { strokeToGraph } from '../state/graph-ink.js';
 import type { GraphTool } from '../state/graph-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
+import type { PointerKind } from '../editor/ink/pointer-kind.js';
+import { useSketchInk } from './useSketchInk.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
@@ -37,7 +39,7 @@ export type GraphInkInputs = {
 };
 
 export function useGraphInk(inputs: GraphInkInputs): {
-  readonly zone: (view: Omit<GraphViewProps, 'ink' | 'frame' | 'viewKey'>) => JSX.Element;
+  readonly zone: (view: Omit<GraphViewProps, 'ink' | 'frame' | 'viewKey' | 'sketch'>) => JSX.Element;
 } {
   const { session, levelId, tool, nextNodeKind, inheritedWidthM, levelNodes, onFindings } = inputs;
   const { t } = useI18n();
@@ -53,47 +55,58 @@ export function useGraphInk(inputs: GraphInkInputs): {
     onFindings([]);
   }
 
+  /** Un tracé lu comme une saisie du réseau : un trait, ou une esquisse promue (J3.3). */
+  function read(points: readonly Point[], pointer: PointerKind, pxPerMeter: number): void {
+    const out = strokeToGraph(points, {
+      tool, pointer, pxPerMeter, strictness: 'normal',
+      nodes: levelNodes.map(n => ({ id: n.id, at: n.position })),
+    });
+    const scope = { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() };
+    if (out.kind === 'not_graph_tool') { setNotice('ink.graph.not_tool'); return; }
+    if (out.kind === 'unrecognized') {
+      setNotice(tool === 'node' ? 'ink.graph.tap_expected' : 'ink.graph.edge_expected');
+      return;
+    }
+    setNotice(null);
+    if (out.kind === 'on_existing_node') return;
+    if (out.kind === 'place_node') {
+      const id = session.newId();
+      const node = acceptNode({ kind: nextNodeKind, label: '', position: out.at });
+      void write(graphCommands([{ id, node }], [], [], scope, `node:${id}`));
+      return;
+    }
+    const from = levelNodes.find(n => n.id === out.fromNodeId);
+    const to = levelNodes.find(n => n.id === out.toNodeId);
+    if (from === undefined || to === undefined) return;
+    const edge = acceptEdge({
+      from: { nodeId: from.id, levelId, position: from.position, elevation_m: 0 },
+      to: { nodeId: to.id, levelId, position: to.position, elevation_m: 0 },
+      widthM: inheritedWidthM, slopePct: 0, accessible: true, direction: 'both',
+      evacuationRoute: false, hasVerticalLink: false,
+    });
+    if (!edge.ok) { onFindings(edge.findings); return; }
+    const id = session.newId();
+    void write(graphCommands([], [{ id, edge: edge.value }], [], scope, `edge:${id}`));
+  }
+
+  // J3 — la même couche d'esquisse que dans l'atelier des empreintes : elle
+  // est celle du niveau, pas celle d'un atelier.
+  const sketch = useSketchInk(session, levelId, setNotice, read);
+
   const ink: NonNullable<GraphViewProps['ink']> = {
     onTouchRefused: () => { setNotice('ink.touch_refused'); },
     onStroke: (points, pointer, pxPerMeter, _origin, detail) => {
+      if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter, pointer); return; }
       if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
-      const out = strokeToGraph(points, {
-        tool, pointer, pxPerMeter, strictness: 'normal',
-        nodes: levelNodes.map(n => ({ id: n.id, at: n.position })),
-      });
-      const scope = { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() };
-      if (out.kind === 'not_graph_tool') { setNotice('ink.graph.not_tool'); return; }
-      if (out.kind === 'unrecognized') {
-        setNotice(tool === 'node' ? 'ink.graph.tap_expected' : 'ink.graph.edge_expected');
-        return;
-      }
-      setNotice(null);
-      if (out.kind === 'on_existing_node') return;
-      if (out.kind === 'place_node') {
-        const id = session.newId();
-        const node = acceptNode({ kind: nextNodeKind, label: '', position: out.at });
-        void write(graphCommands([{ id, node }], [], [], scope, `node:${id}`));
-        return;
-      }
-      const from = levelNodes.find(n => n.id === out.fromNodeId);
-      const to = levelNodes.find(n => n.id === out.toNodeId);
-      if (from === undefined || to === undefined) return;
-      const edge = acceptEdge({
-        from: { nodeId: from.id, levelId, position: from.position, elevation_m: 0 },
-        to: { nodeId: to.id, levelId, position: to.position, elevation_m: 0 },
-        widthM: inheritedWidthM, slopePct: 0, accessible: true, direction: 'both',
-        evacuationRoute: false, hasVerticalLink: false,
-      });
-      if (!edge.ok) { onFindings(edge.findings); return; }
-      const id = session.newId();
-      void write(graphCommands([], [{ id, edge: edge.value }], [], scope, `edge:${id}`));
+      read(points, pointer, pxPerMeter);
     },
   };
 
   return {
     zone: view => (
       <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, height: '100%' }}>
-        <GraphView {...view} ink={ink} frame={frame} viewKey={`graphe:${levelId}`} />
+        <GraphView {...view} ink={ink} frame={frame} viewKey={`graphe:${levelId}`}
+          sketch={{ strokes: sketch.strokes, selected: sketch.selected, toolbar: sketch.toolbar }} />
         {notice !== null && <StateBanner severity="info" message={t(notice)} />}
       </div>
     ),

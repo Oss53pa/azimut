@@ -10,6 +10,8 @@ import { toMetres, toView } from './view-transform.js';
 import { useZoneView } from './use-zone-view.js';
 import { ZoneViewControls } from '../screens/ZoneViewControls.js';
 import type { ViewPoint, Viewport } from './view-transform.js';
+import { SketchStrokes } from '../screens/SketchStrokes.js';
+import type { SketchStroke } from '../state/sketch.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 /**
@@ -84,6 +86,12 @@ export type GraphViewProps = {
   readonly frame?: readonly Point[];
   /** Clé de mémoire de la vue : la zone et son niveau (E3.3). */
   readonly viewKey?: string;
+  /** J3 — la couche d'esquisse du niveau, sous le réseau, et ses outils. */
+  readonly sketch?: {
+    readonly strokes: readonly SketchStroke[];
+    readonly selected: readonly string[];
+    readonly toolbar: JSX.Element;
+  };
 };
 
 const IDLE_INK: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'> = {
@@ -135,6 +143,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    {props.sketch?.toolbar}
     {props.ink !== undefined && (
       <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
     )}
@@ -151,6 +160,10 @@ export function GraphView(props: GraphViewProps): JSX.Element {
       }}
       {...(props.ink === undefined ? {} : zone.intercept(handlers))}
     >
+      {props.sketch !== undefined && (
+        <SketchStrokes strokes={props.sketch.strokes} selected={props.sketch.selected}
+          scale_px_per_m={view.scale_px_per_m} project={p => toView(p, view, VIEWPORT)} />
+      )}
       {props.edges.map(edge => {
         const from = placed.get(edge.from_node_id);
         const to = placed.get(edge.to_node_id);
