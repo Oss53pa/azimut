@@ -2309,7 +2309,8 @@ comprise (sonde : `select 'true'::text` passé en paramètre booléen rend
 ### Reste ouvert après l'esquisse
 
 - La promotion (entourer une esquisse et demander sa conversion, J3.3)
-  n'est pas faite.
+  n'est pas faite. *Faite depuis : voir la section « Promotion d'une
+  esquisse ».*
 - L'inclinaison qui module la largeur du marqueur (J3.2) n'est pas faite :
   J3.4 ne prévoit pas de la conserver dans `points`. C'est un choix de modèle
   à faire trancher (A2.2).
@@ -2377,3 +2378,57 @@ Rien n'était à décider : J1.4 et J1.5 les fixent.
 | `test:determinism` | 11 |
 | `test:e2e` | 161 |
 | `build` | sans erreur |
+
+## Promotion d'une esquisse (J3.3)
+
+« Entourer une esquisse et demander sa conversion produit une forme reconnue,
+arbitrée et quantifiée comme n'importe quelle saisie. La promotion est
+explicite, jamais automatique. » Rien n'était à décider.
+
+**Deux temps, séparés.**
+
+1. L'outil « Entourer » de l'esquisse choisit les traits que le lasso entoure
+   entièrement (J1.2 : boucle autour de plusieurs formes, sélection). Les
+   traits choisis sont cernés d'un halo pointillé. Rien n'est converti.
+2. « Convertir en forme » remet les traits choisis, mis bout à bout, à
+   l'atelier des empreintes. Il les lit comme un trait : même reconnaissance,
+   même outil actif, même arbitrage, même quantification. Le résultat est le
+   contour en cours, que l'on ferme comme une saisie.
+
+**Mise bout à bout** (`state/sketch-promotion.ts`). L'enchaînement part du
+premier trait par identifiant. À chaque pas, il prend le trait dont une
+extrémité est la plus proche, retourné au besoin. Le tracé produit ne dépend
+donc que des traits choisis, jamais de l'ordre où ils ont été tracés (A9). La
+pression ne passe pas dans la saisie.
+
+**L'esquisse reste.** La promotion ne la modifie ni ne la retire : la forme
+est une saisie nouvelle. Le lasso est permis sur une couche verrouillée, car
+il ne fait que choisir. Il n'est proposé que là où l'atelier sait convertir.
+
+**Essais.**
+
+- Unitaires : 4.
+- De bout en bout, 3 dans `j3-promotion.spec.ts` :
+  - un rectangle esquissé, entouré puis converti, devient le contour en cours,
+    sur les axes, et l'esquisse reste ;
+  - quatre traits fermés se convertissent d'un seul tenant ;
+  - un lasso vide le dit.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain45), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 585 |
+| `test:visual` | 14 |
+| `test:rls` | 88 |
+| `test:determinism` | 11 |
+| `test:e2e` | 164 |
+| `build` | sans erreur |
+
+### Reste ouvert après la promotion
+
+- La promotion n'est proposée que dans l'atelier des empreintes, là où
+  l'esquisse l'est.
+- Le cercle et l'ovale (J1.2) ne sont pas reconnus : une empreinte reste un
+  polygone.
