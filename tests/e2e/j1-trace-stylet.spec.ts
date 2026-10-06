@@ -205,13 +205,30 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
     return box;
   }
 
+  /**
+   * Le contour une fois la zone posée. La zone part d'une largeur provisoire
+   * et se recadre quand elle connaît la sienne : sous charge, une mesure prise
+   * avant ce recadrage s'ajoutait au geste mesuré (112 px pour 60, chain53).
+   * On attend donc deux mesures égales avant de partir.
+   */
+  async function settledDraftBox(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+    let previous = await draftBox(page);
+    await expect.poll(async () => {
+      const now = await draftBox(page);
+      const same = now.x === previous.x && now.width === previous.width;
+      previous = now;
+      return same;
+    }).toBe(true);
+    return previous;
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
   });
 
   test('la molette zoome autour du pointeur ; les boutons font de même au clavier', async ({ page }) => {
-    const before = await draftBox(page);
+    const before = await settledDraftBox(page);
     const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
     if (zone === null) throw new Error('zone');
     await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2);
@@ -226,7 +243,7 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
   });
 
   test('le bouton du milieu déplace la vue sans rien tracer', async ({ page }) => {
-    const before = await draftBox(page);
+    const before = await settledDraftBox(page);
     const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
     if (zone === null) throw new Error('zone');
     await page.mouse.move(zone.x + 100, zone.y + 100);
@@ -238,8 +255,9 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
   });
 
   test('la vue se retrouve au rechargement, pour ce niveau', async ({ page }) => {
+    await settledDraftBox(page);
     await page.getByRole('button', { name: /^Zoom avant$|^Zoom in$/ }).click();
-    const zoomed = await draftBox(page);
+    const zoomed = await settledDraftBox(page);
     await page.reload();
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
     await expect.poll(async () => Math.round((await draftBox(page)).width)).toBe(Math.round(zoomed.width));
