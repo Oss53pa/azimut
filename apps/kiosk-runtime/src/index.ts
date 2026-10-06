@@ -9,3 +9,5 @@ export type {
   WayfindingResult,
   WayfindingOptions,
 } from './wayfinding-session.js';
+export { orientedItinerary } from './oriented-itinerary.js';
+export type { KioskPlacement, OrientedItineraryOptions } from './oriented-itinerary.js';
