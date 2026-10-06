@@ -54,7 +54,7 @@ describe('J4 — l’annotation en révision', () => {
       schedule: {
         site_id: 'site', version: 1, state: 'in_review', generated_at: '', inputs_hash: '', lines: [],
       },
-      findings: [], graphValidated: true, openAnnotationIds: open, rejectionReason: null, supersedingVersion: null,
+      findings: [], graphValidated: true, rulesPackBound: true, openAnnotationIds: open, rejectionReason: null, supersedingVersion: null,
     });
     expect(refused.ok).toBe(false);
     if (refused.ok) return;

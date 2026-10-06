@@ -67,6 +67,7 @@ function context(
     schedule: schedule('draft'),
     findings: [],
     graphValidated: true,
+    rulesPackBound: true,
     openAnnotationIds: [],
     rejectionReason: null,
     supersedingVersion: null,
@@ -219,12 +220,25 @@ describe('R12 — émettre pour revue', () => {
     if (!r.ok) expect(r.findings[0]?.ruleRef).toBe('M02.W11');
   });
 
-  it('les deux causes se cumulent, l’une ne masque pas l’autre', () => {
+  /** R14, correction 201 de l'annexe Z. */
+  it('sans paquet de règles rattaché, l’émission est refusée (R14)', () => {
+    const r = transitionSchedule('submit_for_review', context({ rulesPackBound: false }));
+    expect(r.ok).toBe(false);
+    expect(codes(r)).toEqual(['RULES.PACK_NOT_BOUND']);
+    if (!r.ok) expect(r.findings[0]?.ruleRef).toBe('R14');
+  });
+
+  it('sans paquet de règles, la génération reste possible (R12)', () => {
+    expect(transitionSchedule('generate', context({ schedule: null, rulesPackBound: false })).ok).toBe(true);
+  });
+
+  it('les causes se cumulent, l’une ne masque pas l’autre', () => {
     const r = transitionSchedule('submit_for_review', context({
       findings: [blocking('WAYFIND.NAMING_COLLISION')],
       graphValidated: false,
+      rulesPackBound: false,
     }));
-    expect(codes(r)).toEqual(['WAYFIND.NAMING_COLLISION', 'GRAPH.NOT_VALIDATED']);
+    expect(codes(r)).toEqual(['WAYFIND.NAMING_COLLISION', 'GRAPH.NOT_VALIDATED', 'RULES.PACK_NOT_BOUND']);
   });
 
   it('un tableau en revue ne se régénère pas', () => {
@@ -364,6 +378,7 @@ describe('R14 — cet écran ne crée aucun code', () => {
       'EDIT.CONTEXT_VIOLATION',
       'EDIT.COMMAND_SHAPE_INVALID',
       'GRAPH.NOT_VALIDATED',
+      'RULES.PACK_NOT_BOUND',
       'REVIEW.ANNOTATION_OPEN',
       'WAYFIND.SCHEDULE_STALE',
     ];
