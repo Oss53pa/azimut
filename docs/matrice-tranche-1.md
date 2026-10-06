@@ -2676,3 +2676,36 @@ vérifie deux choses :
 | `test:determinism` | 11 |
 | `test:e2e` | 175 |
 | `build` | sans erreur |
+
+## Émission pour revue sans paquet de règles : refusée (R14, annexe Z nº 201)
+
+**Le défaut.** `transitionSchedule` (`engine-graph`) laissait émettre pour
+revue le tableau d'un site sans paquet de règles rattaché. Son commentaire
+disait que R14 en fait « un bandeau et non un blocage ». Le cahier consolidé
+dit le contraire : R14, « Aucun paquet de règles | Bandeau […] Bloque
+l'émission pour revue », et l'annexe Z nº 201 consigne la correction. Le
+module avait été écrit avant la consolidation.
+
+**La correction.**
+
+- Le contexte de transition porte `rulesPackBound`.
+- Sans paquet rattaché, l'émission est refusée avec `RULES.PACK_NOT_BOUND`
+  (référence R14), qui est déjà au catalogue avec la gravité bloquante.
+- La génération reste possible sans paquet. R12 le dit : « possible sans
+  paquet de règles rattaché, avec le bandeau ».
+
+**Essais.** 2 de plus dans `message-schedule-state.test.ts` (refus de
+l'émission, génération permise). Le cumul des causes inclut désormais le
+paquet, et le contrôle « aucun code créé » liste `RULES.PACK_NOT_BOUND`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain50), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 613 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 175 |
+| `build` | sans erreur |
