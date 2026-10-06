@@ -66,6 +66,11 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
     // montrer le parcours d'un visiteur. En lecture : aucune commande ne les
     // écrit depuis l'atelier.
     ...rowsFor('travel_profile', site.travel_profiles),
+    // R12 — l'annuaire, que les conditions de l'émission pour revue lisent :
+    // la continuité du jalonnement (H2.4) et les collisions de nommage (H2.2)
+    // portent sur les destinations et leurs noms. En lecture, comme les profils.
+    ...rowsFor('destination', site.destinations),
+    ...rowsFor('destination_name', site.destination_names),
   ];
 }
 

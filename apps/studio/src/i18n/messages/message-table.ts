@@ -137,6 +137,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.error.cause': 'La génération a échoué.',
   'msgtable.error.recovery': 'La version précédente est conservée. Relancez la génération.',
   'msgtable.offline': 'Consultation et annotation possibles. Générer, émettre et approuver sont indisponibles.',
+  'msgtable.refused': 'La transition demandée est refusée. Chaque motif ci-dessous se corrige à sa source.',
   'msgtable.denied': 'Ce rôle ne consulte pas le tableau des messages.',
 
   // R15 — raccourcis
@@ -303,6 +304,7 @@ export const MESSAGE_TABLE_EN: Readonly<Record<keyof typeof MESSAGE_TABLE_FR, st
   'msgtable.error.cause': 'Generation failed.',
   'msgtable.error.recovery': 'The previous version is kept. Run the generation again.',
   'msgtable.offline': 'Consultation and annotation remain possible. Generate, submit and approve are unavailable.',
+  'msgtable.refused': 'The requested transition is refused. Each reason below is fixed at its source.',
   'msgtable.denied': 'This role does not consult the message schedule.',
 
   'msgtable.shortcuts': 'Shortcuts',

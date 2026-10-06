@@ -20,6 +20,11 @@ import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import type { ScreenState } from '../components/ui/index.js';
 import { permissionOfTrigger } from '../state/message-schedule-permissions.js';
 import { codePointCompare } from '@azimut/core-model';
+import type { Finding } from '@azimut/core-model';
+import { transitionCommands } from '../state/message-schedule-transitions.js';
+import {
+  graphValidatedForSite, rulesPackBoundIn, submissionConditions,
+} from '../state/schedule-submission.js';
 import { AnnotationPanel } from '../screens/message-table/AnnotationPanel.js';
 import {
   annotateCommands, annotationsOn, openAnnotationIdsOn, readAnnotations, replyCommand, setStateCommand,
@@ -56,6 +61,8 @@ export function MessageTableAdapter({ siteId, actor }: {
   const [showUnchanged, setShowUnchanged] = useState(false);
   const [referenceVersion, setReferenceVersion] = useState<number | null>(null);
   const [comparedVersion, setComparedVersion] = useState<number | null>(null);
+  // R12 — les refus de la dernière transition demandée, rendus tels quels.
+  const [refusals, setRefusals] = useState<readonly Finding[]>([]);
 
   const read = useMemo(
     () => readSchedule(session.state, siteId),
@@ -108,8 +115,10 @@ export function MessageTableAdapter({ siteId, actor }: {
   // A5.8 — le paquet de règles du site, lu dans la table de rattachement qui
   // fait foi. Son absence est un bandeau, jamais un blocage : R14 et N2.8
   // disent que le plafond de M02.W9 ne s'applique alors pas et que l'écran le dit.
-  const rulesPackBound = rowsOf(session.state, 'site_rules_binding')
-    .some(row => row.values['site_id'] === siteId);
+  const rulesPackBound = rulesPackBoundIn(session.state, siteId);
+  // M02.W11 — le dernier passage de validation du site, pour le graphe actuel.
+  const graphValidated = useMemo(
+    () => graphValidatedForSite(session.state, siteId), [session.state, siteId]);
 
   const state: ScreenState = read === null ? { kind: 'empty' } : { kind: 'ready' };
 
@@ -136,7 +145,9 @@ export function MessageTableAdapter({ siteId, actor }: {
   }, [comparing, reference, compared, session.state, siteId]);
 
   const scheduleState: ScheduleState | null = read?.schedule.state ?? null;
-  const actions = triggersFrom(scheduleState).filter(trigger => {
+  // R16 (partie R), hors ligne : « générer, émettre et approuver
+  // indisponibles et dits tels ». Les actions sont retirées et l'écran le dit.
+  const actions = !session.state.online ? [] : triggersFrom(scheduleState).filter(trigger => {
     const permission = permissionOfTrigger(trigger);
     return permission !== null && can(actor, permission);
   });
@@ -214,7 +225,25 @@ export function MessageTableAdapter({ siteId, actor }: {
       profilesAtDecisionPoint={[]}
       onOpenSource={() => { /* R7.3 — la navigation vers l'écran source */ }}
       actions={actions}
-      onTrigger={() => { /* R12 — les transitions relèvent de l'autre moitié */ }}
+      onTrigger={trigger => {
+        // R12 — l'émission pour revue. Générer relève de la moitié génération ;
+        // approuver et rejeter attendent un approbateur authentifié, et R2 les
+        // refuse au rôle de la session : ils ne sont jamais offerts ici.
+        if (trigger !== 'submit_for_review' || read === null) return;
+        const out = transitionCommands(
+          'submit_for_review',
+          { id: read.scheduleId, schedule: read.schedule },
+          submissionConditions(session.state, siteId, read.schedule, openAnnotationIds, LANGS),
+          null,
+          { orgId: ORG_OF_SESSION, timestamp: session.now(), decisionId: session.newId() },
+        );
+        if (!out.ok) { setRefusals(out.findings); return; }
+        setRefusals([]);
+        // `record` et non `write` : R12 ne ramène une version en revue au
+        // brouillon que par un rejet motivé. Une annulation le contournerait.
+        void session.record(out.value);
+      }}
+      refusals={refusals}
       canCompare={canCompare}
       onCompare={() => { setComparing(true); }}
       compare={comparing ? {
@@ -236,10 +265,7 @@ export function MessageTableAdapter({ siteId, actor }: {
       blockingCount={rows.filter(row => row.state === 'blocking').length}
       excludedCount={filtered.excluded}
       onRegenerate={() => { /* R12 — régénérer écrit */ }}
-      // La session ne porte aucun résultat de validation de complétude : le
-      // prérequis de M02.W11 n'est pas établi ici, et l'écran le dit plutôt
-      // que de le supposer passé.
-      graphValidated={false}
+      graphValidated={graphValidated}
       rulesPackBound={rulesPackBound}
       onOpenValidation={() => { /* lien vers l'écran de validation */ }}
       unreadableCount={read?.unreadable.length ?? 0}
