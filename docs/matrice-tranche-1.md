@@ -2920,3 +2920,118 @@ sur une base remise à zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 179 |
 | `build` | sans erreur |
+
+## Circuit de validation du tableau des messages : émission pour revue et décisions (R12, H11)
+
+Périmètre choisi par Oss53pa : brancher l'émission pour revue, créer la table des
+décisions et ses commandes. Les boutons Approuver et Rejeter restent absents. Le
+studio n'a pas d'authentification, et le rôle de sa session, `designer`, n'a pas
+le droit d'approuver (R2 : « celui qui génère ne peut pas approuver »). Une
+décision sans approbateur réel n'aurait pas de sens.
+
+- **Migration 0074**, dans un commit à part. Elle crée `message_schedule_approval`,
+  telle que H11 la définit. Elle est additive : aucune ligne existante n'est
+  touchée.
+  - Insertion seule, avec les quatre verrous d'A12.3.
+  - Clés en `RESTRICT` : une décision ne disparaît ni avec le site ni avec le
+    tableau qu'elle juge.
+  - Le rejet exige un motif non blanc.
+  - L'approbateur et la date sont pris en base. La politique d'insertion refuse
+    un `user_id` qui ne serait pas celui de la session.
+  - Aller, retour, aller passent sur `azimut_ci`.
+- **Enregistrement de la table.** Elle est déclarée au schéma drizzle et
+  attribuée au module 02 (L3). Elle entre dans la liste des tables en insertion
+  seule du retrait des décors d'essai. L'essai A12.3 la couvre désormais : sa
+  liste d'attente est vide.
+- **Commandes de transition.** Émettre pour revue, rejeter et approuver passent
+  tous par la machine de R12 (`transitionSchedule`), dont les refus sont rendus
+  tels quels.
+  - Chaque transition est un seul geste.
+  - Le rejet et l'approbation écrivent leur décision dans
+    `message_schedule_approval`, jamais dans `approval`.
+  - L'approbation fait passer la version approuvée précédente à `superseded`.
+- **« Émettre pour revue » à l'écran.** Les conditions sont lues dans la session :
+  - les anomalies de R14 qui bloquent l'émission : niveau d'information,
+    continuité (H2.4), nommage (H2.2) dans chaque langue active ;
+  - le dernier passage de validation du site, réussi et portant l'empreinte du
+    graphe actuel (M02.W11) ;
+  - le rattachement d'un paquet de règles.
+
+  Un refus est affiché avec ses codes. La transition s'enregistre sans
+  annulation possible, puisque R12 ne ramène une version en revue au brouillon
+  que par un rejet motivé.
+- **Prérequis de M02.W11.** Le bandeau n'est plus affiché d'office : il se lit
+  dans les passages de validation enregistrés.
+- **Hors ligne (R16).** Générer, émettre et approuver sont retirés, et l'écran
+  le dit.
+- **Annuaire.** Les destinations et leurs noms entrent dans la session, en
+  lecture, comme les profils de parcours.
+
+**Décisions prises.**
+
+- Le plafond de destinations par face n'est pas recontrôlé à l'émission. R14 en
+  fait le déclencheur de l'écartement, appliqué à la génération et tracé ligne
+  par ligne (M02.W9).
+- La politique d'insertion exige que l'approbateur soit l'utilisateur de la
+  session. Elle n'exige pas son rôle : aucune table du schéma ne juge encore un
+  rôle en base, et le relecteur externe (O7) n'a pas de modèle.
+
+**Essais.**
+
+- Base : 5 essais.
+  - L'approbateur et la date sont pris en base.
+  - Un rejet sans motif est refusé.
+  - Une décision hors de H11, ou sans empreinte, est refusée.
+  - Un approbateur forgé est refusé sous le rôle applicatif.
+  - Une décision ne se modifie pas, et le tableau qu'elle juge ne se supprime
+    pas sous elle.
+
+  L'essai A12.3 couvre la table.
+- Commandes : 7 essais.
+- Conditions : 8 essais. Ils portent sur la validation (absente, réussie, pour
+  un autre graphe, échec postérieur), la collision de nommage, le niveau
+  d'information et l'assemblage des conditions.
+- Bout en bout : 2 essais.
+  - Le refus est dit avec ses codes, sans changement d'état.
+  - Les prérequis remplis, la version passe en revue, l'action disparaît, et
+    ni Approuver ni Rejeter n'apparaissent.
+
+  Le premier passage du second essai a été refusé pour continuité rompue :
+  l'essai annonçait des destinations que rien n'atteignait. Le refus était
+  juste, et c'est le décor de l'essai qui a été corrigé.
+
+### Reste ouvert après l'émission pour revue
+
+- Approuver et rejeter à l'écran : il faut un approbateur authentifié (A6). La
+  confirmation de M7 règle 9 et la saisie du motif de rejet viendront avec eux.
+- La session ne recharge depuis la base ni les tableaux, ni les passages de
+  validation, ni les décisions. Hors du stockage local, l'écran est dans l'état
+  vide de R16.
+- La validation du graphe (écran M5) ne lit toujours pas l'annuaire de la
+  session. Ses contrôles de destination ne lèvent donc rien, comme avant.
+- Un essai de bout en bout des commandes de décision contre la base est à
+  écrire. Une décision écrite ne se supprime pas, si bien qu'un tel essai
+  laisserait ses lignes : il demande un décor qui ne soit jamais retiré.
+
+**Chaîne A13.2, premier passage (chain56) : `test` refusé, deux contrôles.**
+
+- Le contrôle des citations a refusé « R2 » seul, en deux endroits. Le jeton
+  est ambigu ; il est désormais cité « R2 (partie R) ».
+- Le contrôle des branchements a refusé `submissionFindings` : la fonction
+  était exportée, mais seul son essai l'appelait. Elle n'est plus exportée, et
+  l'essai passe par `submissionConditions`.
+
+Aucun des deux contrôles n'a été assoupli. La chaîne a été arrêtée, puis
+relancée entière.
+
+**Chaîne A13.2 (chain57).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 649 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
