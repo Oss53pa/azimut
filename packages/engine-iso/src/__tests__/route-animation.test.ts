@@ -30,7 +30,7 @@ const scene = {
 
 const options: RouteAnimationOptions = {
   width_px: 400, height_px: 240, padding_px: 16, stroke_px: 4, marker_px: 12, duration_s: 6,
-  theme: { background: '#ffffff', footprint_fill: '#eeeeee', footprint_stroke: '#999999', route: '#0055aa', marker: '#222222', marker_fill: '#ffffff' },
+  theme: { background: 'var(--fond)', footprint_fill: 'var(--empreinte)', footprint_stroke: 'var(--bord)', route: 'var(--trace)', marker: 'var(--marque)', marker_fill: 'var(--marque-fond)' },
 };
 
 const route = { path: ['entree', 'carrefour', 'ascenseur-0', 'ascenseur-1', 'boutique'] };
