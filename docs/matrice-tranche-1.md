@@ -3035,3 +3035,62 @@ zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 181 |
 | `build` | sans erreur |
+
+## Rechargement du circuit du tableau des messages depuis la base (R12, E5.4)
+
+Chantier choisi par Oss53pa. Avant lui, la session ne portait que ce que l'écran
+avait écrit lui-même. Hors du stockage local, l'écran du tableau était dans
+l'état vide de R16, et l'émission pour revue ne voyait aucun passage de
+validation enregistré. L'écran du tableau ne relisait d'ailleurs rien du dépôt.
+
+- **Lecture dans le dépôt.** Le dépôt gagne `loadScheduleRecords(siteId)`. Par
+  l'API REST, il lit les versions et les passages de validation du site, puis
+  les lignes et les décisions de ces versions. Le dépôt de référence rend des
+  listes vides, et refuse un site inconnu.
+- **Chargeur commun.** Un même chargeur, `loadSiteSession`, sert l'atelier et
+  l'écran du tableau. L'atelier seul y ajoute son esquisse : J3.3 la réserve à
+  l'atelier, et le garde-fou de J3.3 a refusé un premier chargeur qui la lisait
+  pour les deux. La liste de ce garde-fou n'a pas été touchée.
+- **Lecture des lignes.** Elle accepte les colonnes `jsonb` (`content`,
+  `exclusion_reason`) sous les deux formes : le texte que le chemin d'écriture
+  pose dans la session, et l'objet que la base rend.
+- **Dernier passage de validation.** Il se juge à l'instant, et non au texte de
+  l'horodatage : la base écrit `+00:00`, la session écrit `Z`.
+
+**Essais.**
+
+- Dépôt : 4 essais.
+  - Le dépôt de référence rend des listes vides.
+  - Un site inconnu est refusé.
+  - Les tables sont lues avec leurs filtres de site et de version.
+  - Sans version, ni lignes ni décisions ne sont demandées.
+- Session : 4 essais.
+  - Un tableau relu, aux colonnes en objets, se lit avec son écartement.
+  - Les décisions entrent dans la session.
+  - Un passage relu vaut pour le graphe actuel.
+  - Un passage plus récent l'emporte, malgré les deux écritures de l'instant.
+
+**Non vérifié.** La lecture contre un PostgREST réel n'a pas d'essai : le dépôt
+n'est éprouvé qu'avec un `fetch` simulé. Un tel essai laisserait en base des
+lignes en insertion seule (décisions, passages de validation) qu'aucun retrait
+ne peut ôter.
+
+**Constaté, non traité.**
+
+- `apps/studio/src/data/postgrest-repository.ts` dépassait déjà 400 lignes ; il
+  en gagne quatre.
+- Les annotations de révision (J4) ne se relisent toujours pas depuis la base.
+- La version approuvée ne montre pas encore son bandeau d'approbateur et de
+  date (R16).
+
+**Chaîne A13.2 (chain58).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 657 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
