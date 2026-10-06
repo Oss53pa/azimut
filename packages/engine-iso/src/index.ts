@@ -20,3 +20,14 @@ export {
   computeIsoTransform,
 } from './projection.js';
 export type { IsoPoint, IsoTransform, LevelGeom } from './projection.js';
+export { renderRouteAnimation } from './route-animation.js';
+export type {
+  RouteForAnimation,
+  RouteScene,
+  RouteAnimationTheme,
+  RouteAnimationOptions,
+  RouteMarkerRole,
+  RouteLevelFrame,
+  RouteLevelChange,
+  RouteAnimation,
+} from './route-animation.js';
