@@ -20,6 +20,8 @@ import { rowsOf } from './session-store.js';
 import type { Exclusion } from './message-schedule-commands.js';
 
 export type ReadSchedule = {
+  /** L'identifiant de stockage du tableau : les transitions de R12 l'écrivent. */
+  readonly scheduleId: string;
   readonly schedule: MessageSchedule;
   /** R9 — l'écartement de M02.W9, par identifiant stable de ligne. */
   readonly exclusions: ReadonlyMap<string, Exclusion>;
@@ -240,6 +242,7 @@ export function readSchedule(
   }
 
   return {
+    scheduleId: head.id,
     schedule: {
       site_id: siteId,
       version: storedVersion,
