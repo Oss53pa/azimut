@@ -24,6 +24,8 @@ import {
   type CountrySummary,
   type LegalEntitySummary,
   type SketchRows,
+  type ScheduleRecords,
+  NO_SCHEDULE_RECORDS,
 } from './site-repository.js';
 
 /**
@@ -149,6 +151,14 @@ export function createReferenceRepository(): SiteRepository {
         return Promise.reject(new RepositoryError('not_found', siteId));
       }
       return Promise.resolve({ layers: [], strokes: [] });
+    },
+
+    /** Le jeu de référence ne porte aucun tableau des messages enregistré. */
+    loadScheduleRecords(siteId: string): Promise<ScheduleRecords> {
+      if (!allReferenceSites.has(siteId)) {
+        return Promise.reject(new RepositoryError('not_found', siteId));
+      }
+      return Promise.resolve(NO_SCHEDULE_RECORDS);
     },
 
     /**

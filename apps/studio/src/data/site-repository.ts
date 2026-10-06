@@ -57,6 +57,25 @@ export type SketchRows = {
   readonly strokes: readonly (Readonly<Record<string, unknown>> & { readonly id: string })[];
 };
 
+type StoredValues = Readonly<Record<string, unknown>> & { readonly id: string };
+
+/**
+ * R12 — le circuit du tableau des messages, colonnes de la base : les
+ * versions du tableau, leurs lignes, les décisions prises sur elles, et les
+ * passages de la validation de complétude que l'émission pour revue lit
+ * (M02.W11). Ni le compilateur ni les moteurs ne les lisent par ici.
+ */
+export type ScheduleRecords = {
+  readonly schedules: readonly StoredValues[];
+  readonly lines: readonly StoredValues[];
+  readonly approvals: readonly StoredValues[];
+  readonly validations: readonly StoredValues[];
+};
+
+export const NO_SCHEDULE_RECORDS: ScheduleRecords = {
+  schedules: [], lines: [], approvals: [], validations: [],
+};
+
 export const REPOSITORY_KINDS = ['reference', 'postgrest'] as const;
 export type RepositoryKind = (typeof REPOSITORY_KINDS)[number];
 
@@ -127,6 +146,11 @@ export type SiteRepository = {
    * Un dépôt qui n'en porte pas rend une couche vide.
    */
   loadSketch(siteId: string): Promise<SketchRows>;
+  /**
+   * R12 — le circuit du tableau des messages, tel que la base le porte. Un
+   * dépôt qui n'en porte pas rend des listes vides.
+   */
+  loadScheduleRecords(siteId: string): Promise<ScheduleRecords>;
   /**
    * Q9 — les pays du référentiel global, triés par code.
    *

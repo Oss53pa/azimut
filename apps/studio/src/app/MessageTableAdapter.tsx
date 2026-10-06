@@ -1,5 +1,7 @@
-import { type JSX, useMemo, useState } from 'react';
+import { type JSX, useCallback, useMemo, useState } from 'react';
 import { useTrancheSession } from './useTrancheSession.js';
+import { loadSiteSession } from './site-session-loader.js';
+import { appRepository } from '../data/index.js';
 import { ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
 import { rowsOf } from '../state/session-store.js';
@@ -51,8 +53,11 @@ export function MessageTableAdapter({ siteId, actor }: {
 }): JSX.Element {
   // Même émetteur que l'atelier : réel si le dépôt est configuré, local sinon.
   const remote = useMemo(() => appSink() ?? undefined, []);
+  // R12 — ce que le dépôt porte du site et de son tableau, comme l'atelier.
+  const repository = useMemo(() => appRepository(), []);
+  const load = useCallback(() => loadSiteSession(repository, siteId), [repository, siteId]);
   const session = useTrancheSession(
-    { orgId: ORG_OF_SESSION, siteId, levelId: '' }, remote);
+    { orgId: ORG_OF_SESSION, siteId, levelId: '' }, remote, load);
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);

@@ -14,8 +14,8 @@ import { buildingNames } from '../state/session-buildings.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
-import { sessionFromSite } from '../state/session-from-site.js';
-import { appRepository, isRepositoryError } from '../data/index.js';
+import { appRepository } from '../data/index.js';
+import { loadSiteSession } from './site-session-loader.js';
 import { PlanScreenAdapter } from './PlanAdapter.js';
 import { FootprintsScreenAdapter } from './FootprintsAdapter.js';
 import { GraphScreenAdapter } from './GraphAdapter.js';
@@ -56,25 +56,12 @@ function TrancheWorkspace({ route }: {
   // émetteur local — le cas hors ligne de M8 (partie M) critère 3.
   const remote = useMemo(() => appSink() ?? undefined, []);
 
-  /**
-   * E5.4 — le second terme du choix de reprise : ce que le dépôt porte.
-   *
-   * Un site que le dépôt ne connaît pas rend `null` plutôt qu'une défaillance :
-   * c'est le cas d'un site créé hors ligne, et l'atelier s'ouvre alors vide.
-   * Toute autre défaillance remonte, et la session la signale.
-   */
+  // E5.4 — le second terme du choix de reprise : ce que le dépôt porte.
   const repository = useMemo(() => appRepository(), []);
-  const load = useCallback(async () => {
-    try {
-      const [site, sketch] = await Promise.all([
-        repository.loadSite(route.siteId), repository.loadSketch(route.siteId),
-      ]);
-      return sessionFromSite(site, sketch);
-    } catch (cause: unknown) {
-      if (isRepositoryError(cause) && cause.failure === 'not_found') return null;
-      throw cause;
-    }
-  }, [repository, route.siteId]);
+  // J3 — l'atelier, seul, relit l'esquisse avec le site (J3.3).
+  const load = useCallback(
+    () => loadSiteSession(repository, route.siteId, id => repository.loadSketch(id)),
+    [repository, route.siteId]);
 
   const session = useTrancheSession({
     orgId: ORG_OF_SESSION,

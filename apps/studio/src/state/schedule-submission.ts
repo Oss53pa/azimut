@@ -61,11 +61,15 @@ function directoryOf(session: SessionState): Pick<WayfindingCheckSite, 'destinat
 /** M02.W11 — le dernier passage du site est-il réussi, et pour ce graphe-ci ? */
 function graphValidatedIn(session: SessionState, siteId: string, graphHash: string | null): boolean {
   if (graphHash === null) return false;
+  // L'instant, et non le texte : un passage relu de la base porte `+00:00`
+  // là où un passage écrit dans la session porte `Z`.
+  const instant = (row: { readonly values: Readonly<Record<string, unknown>> }): number => {
+    const at = Date.parse(text(row.values, 'ran_at') ?? '');
+    return Number.isNaN(at) ? -Infinity : at;
+  };
   const runs = rowsOf(session, 'graph_validation')
     .filter(row => text(row.values, 'site_id') === siteId)
-    .sort((a, b) =>
-      codePointCompare(text(b.values, 'ran_at') ?? '', text(a.values, 'ran_at') ?? '')
-      || codePointCompare(b.id, a.id));
+    .sort((a, b) => instant(b) - instant(a) || codePointCompare(b.id, a.id));
   const last = runs[0];
   if (last === undefined) return false;
   return boolean(last.values, 'passed') && text(last.values, 'graph_hash') === graphHash;

@@ -15,6 +15,8 @@
  * ce qui a fait écrire `category_id` dans une table qui n'en a pas.
  */
 import type { SiteData } from '@azimut/core-model';
+import type { ScheduleRecords } from '../data/site-repository.js';
+import { NO_SCHEDULE_RECORDS } from '../data/site-repository.js';
 import type { SessionState, StoredRow } from './session-store.js';
 import { EMPTY_SESSION } from './session-store.js';
 
@@ -80,7 +82,11 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
  * La file est vide et l'état est en ligne : ce qui vient du dépôt y est déjà,
  * et le remettre en file le réécrirait.
  */
-export function sessionFromSite(site: SiteData, sketch: SketchRows = NO_SKETCH): SessionState {
+export function sessionFromSite(
+  site: SiteData,
+  sketch: SketchRows = NO_SKETCH,
+  records: ScheduleRecords = NO_SCHEDULE_RECORDS,
+): SessionState {
   return {
     ...EMPTY_SESSION,
     rows: [
@@ -89,6 +95,13 @@ export function sessionFromSite(site: SiteData, sketch: SketchRows = NO_SKETCH):
       // compilateur lit (J3.3), mais l'atelier la montre.
       ...rowsFor('sketch_layer', sketch.layers),
       ...rowsFor('sketch_stroke', sketch.strokes),
+      // R12 — le circuit du tableau des messages, à part du site lui aussi :
+      // les versions, leurs lignes, les décisions, et les passages de
+      // validation que l'émission pour revue lit (M02.W11).
+      ...rowsFor('graph_validation', records.validations),
+      ...rowsFor('message_schedule', records.schedules),
+      ...rowsFor('message_line', records.lines),
+      ...rowsFor('message_schedule_approval', records.approvals),
     ],
   };
 }
