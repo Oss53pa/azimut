@@ -2847,3 +2847,76 @@ sur une base remise à zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 179 |
 | `build` | sans erreur |
+
+## Itinéraire sur le plan orienté de la borne (partie P, écran Itinéraire ; D10.3, D6.2)
+
+Périmètre choisi par Oss53pa : le calcul seul, sans écran. La borne n'a pas
+encore d'application (`index.html`, `app.js`) : le socle des écrans du totem
+est l'élément « Socle d'orientation, écrans P5 » de la section P15, incrément
+3, taille L, et n'est pas entrepris ici.
+
+- La rotation de D6.2 passe dans `core-model` : `orientationDegForAzimuth`
+  et `orientForDisplay`. Le plan mural (`renderOrientedPlan`) et
+  l'itinéraire de la borne font le même calcul. `engine-layout` réexporte
+  `orientationDegForAzimuth`, son API ne change pas.
+- Le composeur du parcours animé (`renderRouteAnimation`) quitte
+  `engine-iso` pour `engine-graph`. Il ne résout aucune fonction de
+  pictogramme (A5.8), et la borne, qui ne dépend d'aucun moteur de rendu,
+  peut l'employer. Il prend une orientation facultative : sans elle, le plan
+  est nord en haut, à l'octet près comme avant ; avec elle, le plan est tourné
+  selon D6.2 autour de la position de l'usager.
+- La borne gagne `orientedItinerary(site, borne, profil, chemin, options)` :
+  le tracé animé sur son plan orienté, depuis son nœud et son azimut (D10.3),
+  un tronçon par niveau, les points de décision mis en évidence, et
+  l'équivalent statique de chaque tronçon. Une borne placée sur un nœud
+  inconnu est refusée par `DATA.KIOSK_CONFIG_INVALID`.
+- L'atelier du graphe lit le composeur dans `engine-graph` et ne dépend plus
+  d'`engine-iso`.
+- Le commentaire de l'essai A5.8 de la borne disait que tout ce qui se dessine
+  sur une borne est composé à la construction du paquet. Il dit maintenant que
+  c'est vrai de ce qui porte un pictogramme, et que le tracé, lui, se compose à
+  l'exécution. Les assertions de l'essai ne changent pas : la borne ne dépend
+  toujours ni d'`engine-iso`, ni d'`engine-layout`, ni des règles.
+
+**Décision prise.** Tous les tronçons d'un itinéraire sont tournés de
+l'azimut de la borne, y compris ceux des autres niveaux. Le visiteur garde le
+même repère d'un niveau à l'autre. Le cahier des charges ne dit rien de
+l'orientation d'un niveau où la borne n'est pas.
+
+**Essais.**
+
+- `engine-graph`, 3 : le test décisif de D6.4 sur le tracé (tourné vers
+  l'est, le point situé à l'est est plus haut ; tourné vers l'ouest, il est
+  plus bas) ; nord en haut et est à droite sans orientation ; orientation
+  d'azimut nul identique à l'octet au plan nord en haut.
+- `kiosk-runtime`, 5 : D6.4 sur un itinéraire du site de référence
+  multiniveau (la destination devant la borne est dans la moitié haute,
+  derrière elle dans la basse) ; départ à la borne et équivalent statique
+  sans animation ; points de décision marqués ; déterminisme ; nœud inconnu
+  refusé.
+- Essai par mutation : l'azimut passé brut, sans `orientationDegForAzimuth`,
+  fait échouer l'essai D6.4 de la borne.
+- Le rendu nord en haut a été comparé à l'octet avec l'ancien composeur
+  d'`engine-iso`, sur une scène à coordonnées non entières.
+
+### Reste ouvert après l'itinéraire de la borne
+
+- Les écrans du totem (P5) : attente, accueil, recherche, fiche, itinéraire,
+  mode accessible. C'est le socle de l'incrément 3.
+- Le code à scanner pour emporter l'itinéraire, élément « Passage au
+  téléphone » de la section P15.
+- La vue en plan simplifié à la place de l'isométrie, en mode accessible (P5.6) :
+  le tracé est déjà en vue de dessus. Rien n'est à faire tant que l'écran
+  n'existe pas.
+
+**Chaîne A13.2 (chain55).** Les neuf étapes sortent à 0 au premier passage,
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 634 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
