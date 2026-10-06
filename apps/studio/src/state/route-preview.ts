@@ -59,7 +59,7 @@ export type PlannedRoute = {
   /** Le type de chaque nœud du chemin : il dit le moyen d'un changement de niveau. */
   readonly nodeKinds: ReadonlyMap<string, string>;
   readonly cost: number;
-  /** P5.5 — les étapes écrites, sous forme neutre : l'interface les dit. */
+  /** Partie P, écran Itinéraire — les étapes écrites, sous forme neutre : l'interface les dit. */
   readonly steps: readonly RouteStep[];
   readonly totalDistance_m: number;
 };

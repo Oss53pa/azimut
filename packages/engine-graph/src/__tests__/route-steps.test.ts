@@ -31,7 +31,7 @@ const route = {
   edges: ['e1', 'e2', 'e3', 'e4', 'e5', 'e6'],
 };
 
-describe('P5.5 — les étapes écrites, sous forme neutre', () => {
+describe('Partie P, écran Itinéraire — les étapes écrites, sous forme neutre', () => {
   it('chaque étape porte un code et ses paramètres, jamais une phrase (A7)', () => {
     const out = routeSteps(graph, route);
     expect(out.steps.map(s => s.instruction.key)).toEqual([

@@ -66,7 +66,7 @@ test.describe('L3.1 (partie L) — le parcours d’un visiteur', () => {
     await expect(page.getByText(/Niveau Rez-de-chaussée — tronçon 1 sur 2/)).toBeVisible();
     await expect(page.getByText(/Changement de niveau : ascenseur, vers Étage 1/)).toBeVisible();
 
-    // P5.5 — les étapes écrites, dans la langue active, venues du moteur.
+    // Partie P, écran Itinéraire — les étapes écrites, dans la langue active, venues du moteur.
     const steps = page.getByRole('list', { name: /Étapes, 32 m au total/ });
     await expect(steps.getByRole('listitem')).toHaveText([
       'Depuis Entrée nord',

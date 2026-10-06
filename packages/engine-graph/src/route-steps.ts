@@ -2,7 +2,7 @@ import type { SiteGraph } from '@azimut/core-model';
 import type { Route } from './compute-route.js';
 
 /**
- * P5.5 (partie P) — les étapes écrites d'un itinéraire, sous forme neutre.
+ * Partie P, écran Itinéraire — les étapes écrites d'un itinéraire, sous forme neutre.
  *
  * « Étapes écrites, courtes, dans la langue active. Changement de niveau
  * signalé explicitement, avec le moyen. » Un moteur ne produit jamais de texte

@@ -60,7 +60,7 @@ const INSTRUCTIONS: Record<WayfindingLang, InstructionTemplates> = {
   },
 };
 
-/** Une étape neutre du moteur (P5.5), dite dans la langue de la borne. */
+/** Une étape neutre du moteur (partie P, écran Itinéraire), dite dans la langue de la borne. */
 function say(templates: InstructionTemplates, instruction: StepInstruction): string {
   switch (instruction.key) {
     case 'from': return templates.from(instruction.label);
@@ -95,7 +95,7 @@ export function computeWayfinding(
   }
 
   const route = routeResult.value;
-  // Les étapes viennent du moteur, sous forme neutre (P5.5, A7) : la borne
+  // Les étapes viennent du moteur, sous forme neutre (partie P, écran Itinéraire ; A7) : la borne
   // n'y met que ses mots.
   const computed = routeSteps(site.graph, route);
   const result: WayfindingResult = {
