@@ -1,5 +1,5 @@
 import type { Footprint, GraphNode, Level, Outcome, Point } from '@azimut/core-model';
-import { codePointCompare, formatSvg } from '@azimut/core-model';
+import { codePointCompare, formatSvg, orientForDisplay } from '@azimut/core-model';
 
 /**
  * A7.3 et L3.1 — `renderRouteAnimation(route, scene)` : le parcours animé.
@@ -20,6 +20,12 @@ import { codePointCompare, formatSvg } from '@azimut/core-model';
  * de l'animation, réglée par l'appelant, et répartie au prorata des longueurs.
  * Déterministe (INV-4) : même parcours, même scène, mêmes options, mêmes
  * octets.
+ *
+ * Sans orientation, le plan est vu nord en haut. Avec une orientation, il est
+ * tourné selon D6.2, comme le plan mural : c'est le plan orienté de la borne
+ * (D10.3, partie P, écran Itinéraire), où ce que le visiteur regarde est en
+ * haut. Le rendu ne résout aucune fonction de pictogramme (A5.8) : la borne
+ * peut le composer à l'exécution.
  */
 export type RouteForAnimation = {
   readonly path: readonly string[];
@@ -41,6 +47,13 @@ export type RouteAnimationTheme = {
   readonly marker_fill: string;
 };
 
+/** D6.2 — la rotation d'affichage et son centre, la position de l'usager. */
+export type RouteOrientation = {
+  readonly center: Point;
+  /** La valeur rendue par `orientationDegForAzimuth`, jamais l'azimut brut. */
+  readonly orientation_deg: number;
+};
+
 export type RouteAnimationOptions = {
   readonly width_px: number;
   readonly height_px: number;
@@ -50,6 +63,8 @@ export type RouteAnimationOptions = {
   /** Durée totale du tracé, en secondes, répartie entre les tronçons. */
   readonly duration_s: number;
   readonly theme: RouteAnimationTheme;
+  /** Absente : nord en haut. */
+  readonly orientation?: RouteOrientation;
 };
 
 export type RouteMarkerRole = 'start' | 'end' | 'decision' | 'level_exit' | 'level_entry';
@@ -98,10 +113,20 @@ function runsOf(nodes: readonly GraphNode[]): readonly Run[] {
 
 type Projector = (p: Point) => { readonly x: string; readonly y: string; readonly xn: number; readonly yn: number };
 
-/** Plan vu de dessus, nord en haut : l'axe des y du site monte, celui de l'écran descend. */
+const ORIGIN: Point = { x_m: 0, y_m: 0 };
+
+/**
+ * Plan vu de dessus. Les points passent d'abord dans le repère d'affichage de
+ * D6.2, où l'axe des y descend comme celui de l'écran ; sans orientation, la
+ * rotation est nulle et le plan est vu nord en haut.
+ */
 function projector(points: readonly Point[], options: RouteAnimationOptions): Projector {
-  const xs = points.map(p => p.x_m);
-  const ys = points.map(p => p.y_m);
+  const center = options.orientation?.center ?? ORIGIN;
+  const deg = options.orientation?.orientation_deg ?? 0;
+  const shown = (p: Point): Point => orientForDisplay(p, center, deg);
+  const turned = points.map(shown);
+  const xs = turned.map(p => p.x_m);
+  const ys = turned.map(p => p.y_m);
   const minX = Math.min(...xs); const maxX = Math.max(...xs);
   const minY = Math.min(...ys); const maxY = Math.max(...ys);
   const spanX = Math.max(maxX - minX, 1e-9);
@@ -112,8 +137,9 @@ function projector(points: readonly Point[], options: RouteAnimationOptions): Pr
   const offX = options.padding_px + (innerW - spanX * scale) / 2;
   const offY = options.padding_px + (innerH - spanY * scale) / 2;
   return p => {
-    const xn = offX + (p.x_m - minX) * scale;
-    const yn = offY + (maxY - p.y_m) * scale;
+    const q = shown(p);
+    const xn = offX + (q.x_m - minX) * scale;
+    const yn = offY + (q.y_m - minY) * scale;
     return { x: formatSvg(xn), y: formatSvg(yn), xn, yn };
   };
 }

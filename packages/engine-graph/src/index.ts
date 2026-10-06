@@ -257,3 +257,15 @@ export type {
 } from './guard-continuity.js';
 export { routeSteps } from './route-steps.js';
 export type { RouteStep, RouteSteps, StepInstruction } from './route-steps.js';
+export { renderRouteAnimation } from './route-animation.js';
+export type {
+  RouteForAnimation,
+  RouteScene,
+  RouteAnimationTheme,
+  RouteAnimationOptions,
+  RouteMarkerRole,
+  RouteLevelFrame,
+  RouteLevelChange,
+  RouteOrientation,
+  RouteAnimation,
+} from './route-animation.js';

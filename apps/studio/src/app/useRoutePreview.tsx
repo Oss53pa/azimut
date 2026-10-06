@@ -1,14 +1,13 @@
 import { type JSX, useMemo, useState } from 'react';
 import { codePointCompare, getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
-import type { RouteAnimationOptions } from '@azimut/engine-iso';
+import type { RouteAnimationOptions, StepInstruction } from '@azimut/engine-graph';
 import { Button, Panel, SelectField, StateBanner, SPACE, TEXT } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import { readSessionGraph } from '../state/session-graph.js';
 import { planRoute, profilesOfSession } from '../state/route-preview.js';
 import type { PlannedRoute } from '../state/route-preview.js';
-import type { StepInstruction } from '@azimut/engine-graph';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**

@@ -14,7 +14,6 @@
     "@azimut/db": "workspace:*",
     "@azimut/design-tokens": "workspace:*",
     "@azimut/engine-graph": "workspace:*",
-    "@azimut/engine-iso": "workspace:*",
     "@azimut/engine-layout": "workspace:*",
     "@azimut/testkit": "workspace:*",
     "react": "^18.3.1",

@@ -1,9 +1,7 @@
 import type { Finding, Level, Outcome, TravelProfile } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
-import { computeRoute, deriveDecisionPoints, routeSteps } from '@azimut/engine-graph';
-import type { RouteStep } from '@azimut/engine-graph';
-import { renderRouteAnimation } from '@azimut/engine-iso';
-import type { RouteAnimation, RouteAnimationOptions } from '@azimut/engine-iso';
+import { computeRoute, deriveDecisionPoints, renderRouteAnimation, routeSteps } from '@azimut/engine-graph';
+import type { RouteAnimation, RouteAnimationOptions, RouteStep } from '@azimut/engine-graph';
 import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
 import { readSessionGraph } from './session-graph.js';

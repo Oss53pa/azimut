@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { RouteAnimationOptions } from '@azimut/engine-iso';
+import type { RouteAnimationOptions } from '@azimut/engine-graph';
 import { planRoute, profilesOfSession } from '../route-preview.js';
 import type { SessionState, StoredRow } from '../session-store.js';
 

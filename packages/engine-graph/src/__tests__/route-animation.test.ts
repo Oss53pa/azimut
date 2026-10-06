@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Footprint, GraphNode, Level } from '@azimut/core-model';
+import { orientationDegForAzimuth } from '@azimut/core-model';
 import { renderRouteAnimation } from '../route-animation.js';
 import type { RouteAnimationOptions } from '../route-animation.js';
 
@@ -103,5 +104,47 @@ describe('A7.3 et L3.1 — le parcours animé', () => {
     expect(out.ok).toBe(false);
     if (out.ok) return;
     expect(out.findings[0]?.code).toBe('GRAPH.ROUTE_NODE_NOT_FOUND');
+  });
+});
+
+/** La position d'écran d'une marque, lue sur son centre. */
+function markAt(svg: string, nodeId: string): { readonly x: number; readonly y: number } {
+  const circle = new RegExp(`data-node="${nodeId}"[^>]*cx="([-\\d.]+)" cy="([-\\d.]+)"`).exec(svg);
+  if (circle === null) throw new Error(`marque absente : ${nodeId}`);
+  return { x: Number(circle[1]), y: Number(circle[2]) };
+}
+
+describe('D6.2 — le parcours sur un plan orienté', () => {
+  // Entrée en (0, 10), carrefour en (20, 10) : le carrefour, point de
+  // décision, est à l'est de l'usager.
+  const ground = { path: ['entree', 'carrefour', 'ascenseur-0'] };
+  const facing = (azimuth: number): RouteAnimationOptions => ({
+    ...options,
+    orientation: { center: { x_m: 0, y_m: 10 }, orientation_deg: orientationDegForAzimuth(azimuth) },
+  });
+
+  it('D6.4 — ce qui est devant l’usager est en haut, quel que soit son azimut', () => {
+    for (const [azimuth, ahead] of [[90, true], [270, false]] as const) {
+      const out = renderRouteAnimation(ground, scene, ['carrefour'], facing(azimuth));
+      if (!out.ok) throw new Error('rendu attendu');
+      const svg = out.value.frames[0]?.static_svg ?? '';
+      const start = markAt(svg, 'entree');
+      const east = markAt(svg, 'carrefour');
+      // Tourné vers l'est, le carrefour est devant, donc plus haut sur l'écran.
+      expect(east.y < start.y).toBe(ahead);
+    }
+  });
+
+  it('sans orientation, le nord est en haut et l’est à droite', () => {
+    const out = renderRouteAnimation(ground, scene, ['carrefour'], options);
+    if (!out.ok) throw new Error('rendu attendu');
+    const svg = out.value.frames[0]?.static_svg ?? '';
+    expect(markAt(svg, 'carrefour').x).toBeGreaterThan(markAt(svg, 'entree').x);
+  });
+
+  it('l’orientation d’azimut nul est le plan nord en haut, à l’octet', () => {
+    const plain = renderRouteAnimation(route, scene, ['carrefour'], options);
+    const north = renderRouteAnimation(route, scene, ['carrefour'], facing(0));
+    expect(JSON.stringify(north)).toBe(JSON.stringify(plain));
   });
 });
