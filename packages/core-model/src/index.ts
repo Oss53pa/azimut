@@ -66,7 +66,7 @@ export {
   POLYGON_MIN_AREA_M2,
   WEIGHT_SUM_TOLERANCE,
 } from './tolerance.js';
-export { normalizeAzimuth } from './angle.js';
+export { normalizeAzimuth, orientationDegForAzimuth, orientForDisplay } from './angle.js';
 export { findLexiconMatches } from './lexicon.js';
 export type {
   CharterRule, CharterRuleKind, CharterRuleResolution, ForbiddenCharacterRange,

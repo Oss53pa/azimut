@@ -5,7 +5,10 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg, parkingSpacesOfLevel, accessibleSpaceMark, codePointCompare } from '@azimut/core-model';
+import {
+  roundSvg, parkingSpacesOfLevel, accessibleSpaceMark, codePointCompare,
+  orientForDisplay, orientationDegForAzimuth,
+} from '@azimut/core-model';
 import { accessibleMarkSvg } from './parking-mark.js';
 
 /** L'épaisseur de trait d'une place — S-39, « contour léger ». */
@@ -48,15 +51,8 @@ export type OrientedPlanOptions = {
   readonly show_north_arrow: boolean;
 };
 
-/**
- * D6.2 — map a support's compass azimuth (D1.3, 0°=north, clockwise) to the
- * {@link OrientedPlanOptions.orientation_deg} that puts the support's facing
- * direction at the top of the plan. A support of azimuth 90° (facing east)
- * yields a plan where east is up. Normalized to [0, 360).
- */
-export function orientationDegForAzimuth(azimuthDeg: number): number {
-  return ((-azimuthDeg % 360) + 360) % 360;
-}
+/** D6.2 — défini dans core-model, partagé avec l'itinéraire de la borne. */
+export { orientationDegForAzimuth };
 
 function esc(s: string): string {
   return s
@@ -68,22 +64,6 @@ function esc(s: string): string {
 
 function degToRad(deg: number): number {
   return (deg * Math.PI) / 180;
-}
-
-function rotateAndFlip(
-  p: Point,
-  center: Point,
-  angleDeg: number,
-): Point {
-  const rad = degToRad(-angleDeg);
-  const cos = Math.cos(rad);
-  const sin = Math.sin(rad);
-  const dx = p.x_m - center.x_m;
-  const dy = p.y_m - center.y_m;
-  return {
-    x_m: center.x_m + dx * cos - dy * sin,
-    y_m: -(center.y_m + dx * sin + dy * cos),
-  };
 }
 
 type Bounds = { min: Point; max: Point };
@@ -198,7 +178,7 @@ export function renderOrientedPlan(
   const allRotated: Point[] = [];
   const rotatedFootprints = footprints.map((fp) => {
     const verts = fp.geometry.vertices.map((v) =>
-      rotateAndFlip(v, center, rot),
+      orientForDisplay(v, center, rot),
     );
     allRotated.push(...verts);
     return {
@@ -212,12 +192,12 @@ export function renderOrientedPlan(
   });
 
   const rotatedNodes = nodes.map((n) => {
-    const rp = rotateAndFlip(n.position, center, rot);
+    const rp = orientForDisplay(n.position, center, rot);
     allRotated.push(rp);
     return { ...n, position: rp };
   });
 
-  const rotatedViewer = rotateAndFlip(center, center, rot);
+  const rotatedViewer = orientForDisplay(center, center, rot);
   allRotated.push(rotatedViewer);
 
   const bounds = computeBounds(allRotated);
