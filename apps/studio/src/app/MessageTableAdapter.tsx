@@ -20,6 +20,10 @@ import { ResumeSessionDialog } from '../screens/ResumeSessionDialog.js';
 import type { ScreenState } from '../components/ui/index.js';
 import { permissionOfTrigger } from '../state/message-schedule-permissions.js';
 import { codePointCompare } from '@azimut/core-model';
+import { AnnotationPanel } from '../screens/message-table/AnnotationPanel.js';
+import {
+  annotateCommands, annotationsOn, openAnnotationIdsOn, readAnnotations, replyCommand, setStateCommand,
+} from '../state/review-annotation.js';
 
 /**
  * Partie R — le branchement de l'écran du tableau des messages.
@@ -137,6 +141,44 @@ export function MessageTableAdapter({ siteId, actor }: {
     return permission !== null && can(actor, permission);
   });
 
+  // R7.4 et J4 — les annotations de révision, relues dans la session. Celles
+  // qui restent ouvertes sur les lignes du tableau bloquent l'approbation
+  // (R12) : `transitionSchedule` les reçoit par `openAnnotationIds`.
+  const annotations = useMemo(() => readAnnotations(session.state.rows), [session.state.rows]);
+  const openAnnotationIds = openAnnotationIdsOn(annotations, rows.map(row => row.line.id));
+  const canAnnotate = can(actor, 'annotate');
+  // R8 — une remarque posée sur la sélection crée une annotation par ligne ;
+  // sans sélection, elle vise la ligne ouverte dans le détail.
+  const targets = selection.selectedIds.length > 0
+    ? [...selection.selectedIds].sort(codePointCompare)
+    : focusedRow === null ? [] : [focusedRow.line.id];
+  const write = { orgId: ORG_OF_SESSION, siteId, timestamp: session.now() };
+  const annotationPanel = focusedRow === null ? null : (
+    <AnnotationPanel
+      annotations={annotationsOn(annotations, { kind: 'message_line', id: focusedRow.line.id })}
+      canAnnotate={canAnnotate}
+      targetCount={targets.length}
+      online={session.state.online}
+      onAnnotate={note => {
+        const out = annotateCommands(
+          targets.map(id => ({ id: session.newId(), anchor: { kind: 'message_line' as const, id } })),
+          note, write,
+        );
+        if (out.kind !== 'written') return false;
+        void session.write(out.commands);
+        return true;
+      }}
+      onReply={(annotationId, body) => {
+        const command = replyCommand(annotationId, session.newId(), body, write);
+        if (command !== null) void session.write([command]);
+      }}
+      onSetState={(annotation, next) => {
+        const command = setStateCommand(annotation, next, write);
+        if (command !== null) void session.write([command]);
+      }}
+    />
+  );
+
   // E5.4 — l'écran partage le magasin de la session ; il en partage donc la
   // cérémonie de reprise. Adopter l'état local sans le demander parce que cet
   // écran ne l'écrit pas ferait deux comportements là où il n'y en a qu'un.
@@ -203,6 +245,8 @@ export function MessageTableAdapter({ siteId, actor }: {
       unreadableCount={read?.unreadable.length ?? 0}
       online={session.state.online}
       onEmptyAction={() => { /* R12 — générer écrit */ }}
+      annotationPanel={annotationPanel}
+      openAnnotationCount={openAnnotationIds.length}
     />
     {resume !== null && (
       <ResumeSessionDialog

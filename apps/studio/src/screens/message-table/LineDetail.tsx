@@ -13,11 +13,11 @@ import type { ScheduleRow } from '../../state/message-schedule-rows.js';
  * ligne : pourquoi cette ligne existe-t-elle ? »
  *
  * Quatre sections, dans l'ordre de R7 : justification, continuité, sources,
- * annotations. La continuité (R7.2) et les annotations (R7.4) demandent des
- * données que cette session ne charge pas — la séquence du plan de jalonnement
- * et les annotations de la partie J. Elles sont nommées comme absentes plutôt
- * qu'affichées vides : une continuité muette se lirait comme une continuité
- * vérifiée.
+ * annotations. La continuité (R7.2) demande la séquence du plan de jalonnement,
+ * que cette session ne charge pas : elle est nommée comme absente plutôt
+ * qu'affichée vide, une continuité muette se lirait comme une continuité
+ * vérifiée. Les annotations (R7.4, J4) sont celles de la partie J, posées et
+ * relues depuis le panneau que l'adaptateur fournit.
  */
 export type LineDetailProps = {
   readonly row: ScheduleRow | null;
@@ -26,6 +26,8 @@ export type LineDetailProps = {
   /** R7.3 — chaque source mène à l'écran où elle se corrige. */
   readonly onOpenSource: (source: SourceKey) => void;
   readonly lang: string;
+  /** R7.4 — le panneau des annotations de la ligne. */
+  readonly annotations?: JSX.Element | null | undefined;
 };
 
 /** R7.3 — les cinq sources dont une ligne dérive, et leur écran de correction. */
@@ -116,9 +118,11 @@ export function LineDetail(props: LineDetailProps): JSX.Element {
             </Section>
 
             <Section title={t('msgtable.detail.annotations')}>
-              <p style={{ margin: 0, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
-                {t('msgtable.detail.annotations.none')}
-              </p>
+              {props.annotations ?? (
+                <p style={{ margin: 0, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
+                  {t('msgtable.detail.annotations.none')}
+                </p>
+              )}
             </Section>
           </>
         )}
