@@ -1,10 +1,9 @@
 import type {
   TravelProfile,
   Outcome,
-  Finding,
 } from '@azimut/core-model';
-import { computeRoute } from '@azimut/engine-graph';
-import type { Route } from '@azimut/engine-graph';
+import { computeRoute, routeSteps } from '@azimut/engine-graph';
+import type { Route, StepInstruction } from '@azimut/engine-graph';
 import type { KioskSite } from './load-kiosk-site.js';
 
 export type WayfindingLang = 'fr' | 'en';
@@ -61,41 +60,19 @@ const INSTRUCTIONS: Record<WayfindingLang, InstructionTemplates> = {
   },
 };
 
-function buildInstruction(
-  templates: InstructionTemplates,
-  currentKind: string,
-  nextKind: string | null,
-  label: string,
-  isLevelChange: boolean,
-): string {
-  if (currentKind === 'entrance') {
-    return templates.from(label);
+/** Une étape neutre du moteur (P5.5), dite dans la langue de la borne. */
+function say(templates: InstructionTemplates, instruction: StepInstruction): string {
+  switch (instruction.key) {
+    case 'from': return templates.from(instruction.label);
+    case 'take_elevator': return templates.takeElevator(instruction.label);
+    case 'take_stairs': return templates.takeStairs(instruction.label);
+    case 'take_escalator': return templates.takeEscalator(instruction.label);
+    case 'pass_by': return templates.passby(instruction.label);
+    case 'arrival': return templates.arrival(instruction.label);
+    case 'continue_towards': return templates.continueTowards(instruction.label);
+    case 'go_through': return templates.goThrough(instruction.label);
+    case 'continue_for': return templates.continueFor(instruction.distance_m);
   }
-  if (currentKind === 'elevator') {
-    return isLevelChange
-      ? templates.takeElevator(label)
-      : templates.passby(label);
-  }
-  if (currentKind === 'stair') {
-    return isLevelChange
-      ? templates.takeStairs(label)
-      : templates.passby(label);
-  }
-  if (currentKind === 'escalator') {
-    return isLevelChange
-      ? templates.takeEscalator(label)
-      : templates.passby(label);
-  }
-  if (currentKind === 'destination_access') {
-    if (nextKind === null) {
-      return templates.arrival(label);
-    }
-    return templates.passby(label);
-  }
-  if (currentKind === 'junction' || currentKind === 'landing') {
-    return templates.continueTowards(label);
-  }
-  return templates.goThrough(label);
 }
 
 export type WayfindingOptions = {
@@ -118,134 +95,21 @@ export function computeWayfinding(
   }
 
   const route = routeResult.value;
-  const warnings: Finding[] = [...routeResult.warnings];
-
-  const nodeMap = new Map(
-    site.graph.nodes.map((n) => [n.id, n]),
-  );
-  const edgeMap = new Map(
-    site.graph.edges.map((e) => [e.id, e]),
-  );
-
-  const collapsible = new Set(['junction', 'landing']);
-
-  const rawSteps: WayfindingStep[] = [];
-  let levelChanges = 0;
-  let totalDistance = 0;
-
-  for (let i = 0; i < route.path.length; i++) {
-    const nodeId = route.path[i] as string;
-    const node = nodeMap.get(nodeId);
-    if (!node) continue;
-
-    const nextNodeId = i < route.path.length - 1
-      ? route.path[i + 1] as string
-      : null;
-    const nextNode = nextNodeId ? nodeMap.get(nextNodeId) : null;
-
-    const isLevelChange = nextNode !== null
-      && nextNode !== undefined
-      && nextNode.level_id !== node.level_id;
-
-    if (isLevelChange) {
-      levelChanges++;
-    }
-
-    const instruction = buildInstruction(
-      templates,
-      node.kind,
-      nextNode?.kind ?? null,
-      node.label,
-      isLevelChange,
-    );
-
-    rawSteps.push({
-      node_id: node.id,
-      label: node.label,
-      level_id: node.level_id,
-      kind: node.kind,
-      instruction,
-    });
-  }
-
-  for (const edgeId of route.edges) {
-    const edge = edgeMap.get(edgeId);
-    if (edge) {
-      totalDistance += edge.length_m;
-    }
-  }
-
-  // Collapse consecutive same-level junction/landing steps into
-  // a single "continue for X m" step to reduce noise.
-  const steps: WayfindingStep[] = [];
-  let runStart = -1;
-  let runDistance = 0;
-
-  for (let i = 0; i < rawSteps.length; i++) {
-    const step = rawSteps[i] as WayfindingStep;
-    const isCollapsible = collapsible.has(step.kind);
-    const prevStep = i > 0 ? rawSteps[i - 1] as WayfindingStep : null;
-    const sameLevel = prevStep !== null && prevStep.level_id === step.level_id;
-
-    if (isCollapsible && prevStep !== null && collapsible.has(prevStep.kind) && sameLevel) {
-      // Continuing a run — accumulate the edge distance.
-      const edgeId = route.edges[i - 1];
-      const edge = edgeId !== undefined ? edgeMap.get(edgeId) : undefined;
-      runDistance += edge?.length_m ?? 0;
-    } else {
-      // End previous run if any.
-      if (runStart >= 0 && runStart < i - 1) {
-        const lastInRun = rawSteps[i - 1] as WayfindingStep;
-        steps.push({
-          node_id: lastInRun.node_id,
-          label: lastInRun.label,
-          level_id: lastInRun.level_id,
-          kind: lastInRun.kind,
-          instruction: runDistance > 0
-            ? templates.continueFor(runDistance)
-            : lastInRun.instruction,
-        });
-      } else if (runStart >= 0) {
-        // Single-node run — keep original step.
-        steps.push(rawSteps[runStart] as WayfindingStep);
-      }
-
-      // Start new run or emit non-collapsible step.
-      if (isCollapsible) {
-        runStart = i;
-        // Start fresh run distance — include the edge leading to this node
-        // if the previous step was NOT collapsible.
-        runDistance = 0;
-      } else {
-        runStart = -1;
-        runDistance = 0;
-        steps.push(step);
-      }
-    }
-  }
-
-  // Flush trailing run.
-  if (runStart >= 0 && runStart < rawSteps.length - 1) {
-    const lastInRun = rawSteps[rawSteps.length - 1] as WayfindingStep;
-    steps.push({
-      node_id: lastInRun.node_id,
-      label: lastInRun.label,
-      level_id: lastInRun.level_id,
-      kind: lastInRun.kind,
-      instruction: runDistance > 0
-        ? templates.continueFor(runDistance)
-        : lastInRun.instruction,
-    });
-  } else if (runStart >= 0) {
-    steps.push(rawSteps[runStart] as WayfindingStep);
-  }
-
+  // Les étapes viennent du moteur, sous forme neutre (P5.5, A7) : la borne
+  // n'y met que ses mots.
+  const computed = routeSteps(site.graph, route);
   const result: WayfindingResult = {
     route,
-    steps,
-    total_distance_m: Math.round(totalDistance * 100) / 100,
-    level_changes: levelChanges,
+    steps: computed.steps.map(step => ({
+      node_id: step.node_id,
+      label: step.label,
+      level_id: step.level_id,
+      kind: step.kind,
+      instruction: say(templates, step.instruction),
+    })),
+    total_distance_m: computed.total_distance_m,
+    level_changes: computed.level_changes,
   };
 
-  return { ok: true, value: result, warnings };
+  return { ok: true, value: result, warnings: [...routeResult.warnings] };
 }

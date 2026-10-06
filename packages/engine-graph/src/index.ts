@@ -255,3 +255,5 @@ export type {
   JalonnementSequence,
   JalonnementStep,
 } from './guard-continuity.js';
+export { routeSteps } from './route-steps.js';
+export type { RouteStep, RouteSteps, StepInstruction } from './route-steps.js';

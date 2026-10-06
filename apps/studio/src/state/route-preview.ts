@@ -1,6 +1,7 @@
 import type { Finding, Level, Outcome, TravelProfile } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
-import { computeRoute, deriveDecisionPoints } from '@azimut/engine-graph';
+import { computeRoute, deriveDecisionPoints, routeSteps } from '@azimut/engine-graph';
+import type { RouteStep } from '@azimut/engine-graph';
 import { renderRouteAnimation } from '@azimut/engine-iso';
 import type { RouteAnimation, RouteAnimationOptions } from '@azimut/engine-iso';
 import type { SessionState, StoredRow } from './session-store.js';
@@ -58,6 +59,9 @@ export type PlannedRoute = {
   /** Le type de chaque nœud du chemin : il dit le moyen d'un changement de niveau. */
   readonly nodeKinds: ReadonlyMap<string, string>;
   readonly cost: number;
+  /** P5.5 — les étapes écrites, sous forme neutre : l'interface les dit. */
+  readonly steps: readonly RouteStep[];
+  readonly totalDistance_m: number;
 };
 
 /** Le parcours de `from` à `to` pour un profil, prêt à montrer. */
@@ -79,6 +83,7 @@ export function planRoute(
   );
   if (!animation.ok) return animation;
   const warnings: Finding[] = [...route.warnings, ...animation.warnings];
+  const steps = routeSteps(site.graph, route.value);
   return {
     ok: true,
     value: {
@@ -86,6 +91,8 @@ export function planRoute(
       levels: scope.levels,
       nodeKinds: new Map(graph.nodes.map(n => [n.id, n.kind])),
       cost: route.value.cost,
+      steps: steps.steps,
+      totalDistance_m: steps.total_distance_m,
     },
     warnings,
   };

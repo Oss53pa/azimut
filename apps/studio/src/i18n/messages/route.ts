@@ -22,6 +22,16 @@ export const ROUTE_FR = {
   'route.no_profile': 'Aucun profil de parcours déclaré pour ce site : le parcours ne se calcule pas sans profil, et l’atelier n’en invente pas.',
   'route.too_few_nodes': 'Posez au moins deux nœuds pour tracer un parcours.',
   'route.legend': 'Rond évidé : départ. Carré : arrivée. Rond plein : point de décision. Losange : changement de niveau.',
+  'route.steps': 'Étapes, {distance} m au total',
+  'route.step.from': 'Depuis {label}',
+  'route.step.take_elevator': 'Prendre l’ascenseur ({label})',
+  'route.step.take_stairs': 'Prendre l’escalier ({label})',
+  'route.step.take_escalator': 'Prendre l’escalier mécanique ({label})',
+  'route.step.pass_by': 'Passer devant {label}',
+  'route.step.arrival': 'Arrivée : {label}',
+  'route.step.continue_towards': 'Continuer vers {label}',
+  'route.step.go_through': 'Passer par {label}',
+  'route.step.continue_for': 'Continuer tout droit ({distance} m)',
 };
 
 export const ROUTE_EN: Readonly<Record<keyof typeof ROUTE_FR, string>> = {
@@ -45,4 +55,14 @@ export const ROUTE_EN: Readonly<Record<keyof typeof ROUTE_FR, string>> = {
   'route.no_profile': 'No travel profile is declared for this site: a route cannot be computed without one, and the workshop does not invent one.',
   'route.too_few_nodes': 'Place at least two nodes to trace a route.',
   'route.legend': 'Hollow circle: start. Square: destination. Filled circle: decision point. Diamond: level change.',
+  'route.steps': 'Steps, {distance} m in all',
+  'route.step.from': 'From {label}',
+  'route.step.take_elevator': 'Take the lift ({label})',
+  'route.step.take_stairs': 'Take the stairs ({label})',
+  'route.step.take_escalator': 'Take the escalator ({label})',
+  'route.step.pass_by': 'Pass by {label}',
+  'route.step.arrival': 'Arrival: {label}',
+  'route.step.continue_towards': 'Continue towards {label}',
+  'route.step.go_through': 'Go through {label}',
+  'route.step.continue_for': 'Continue straight ahead ({distance} m)',
 };

@@ -8,6 +8,7 @@ import type { UiMessageKey } from '../i18n/messages.js';
 import { readSessionGraph } from '../state/session-graph.js';
 import { planRoute, profilesOfSession } from '../state/route-preview.js';
 import type { PlannedRoute } from '../state/route-preview.js';
+import type { StepInstruction } from '@azimut/engine-graph';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -36,6 +37,18 @@ const MEANS: Readonly<Record<string, UiMessageKey>> = {
   elevator: 'route.means.elevator',
   stair: 'route.means.stair',
   escalator: 'route.means.escalator',
+};
+
+const STEP: Readonly<Record<StepInstruction['key'], UiMessageKey>> = {
+  from: 'route.step.from',
+  take_elevator: 'route.step.take_elevator',
+  take_stairs: 'route.step.take_stairs',
+  take_escalator: 'route.step.take_escalator',
+  pass_by: 'route.step.pass_by',
+  arrival: 'route.step.arrival',
+  continue_towards: 'route.step.continue_towards',
+  go_through: 'route.step.go_through',
+  continue_for: 'route.step.continue_for',
 };
 
 function prefersReducedMotion(): boolean {
@@ -120,6 +133,19 @@ export function useRoutePreview(session: TrancheSession): { readonly panel: JSX.
                 level: levelName(change.to_level_id),
               })} />
             )}
+            <h3 style={{ margin: 0, fontSize: TEXT.small }}>
+              {t('route.steps', { distance: Math.round(planned.totalDistance_m) })}
+            </h3>
+            <ol aria-label={t('route.steps', { distance: Math.round(planned.totalDistance_m) })}
+              style={{ margin: 0, paddingLeft: SPACE.lg, fontSize: TEXT.small }}>
+              {planned.steps.map((step, i) => (
+                <li key={`${step.node_id}:${String(i)}`}>
+                  {step.instruction.key === 'continue_for'
+                    ? t(STEP.continue_for, { distance: Math.round(step.instruction.distance_m) })
+                    : t(STEP[step.instruction.key], { label: step.instruction.label === '' ? step.kind : step.instruction.label })}
+                </li>
+              ))}
+            </ol>
             <div style={{ display: 'flex', gap: SPACE.sm, flexWrap: 'wrap', alignItems: 'center' }}>
               <Button rank="secondary" onClick={() => { setReplay(r => r + 1); }}>{t('route.replay')}</Button>
               {frame > 0 && (
