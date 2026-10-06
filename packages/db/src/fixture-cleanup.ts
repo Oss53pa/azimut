@@ -30,7 +30,9 @@ export type SqlReader = (text: string) => Promise<ReadonlyArray<Record<string, u
  * lignes de l'organisation : c'est le comportement qu'O15 attend d'une purge,
  * « une table restée peuplée bloque la purge et se signale ».
  */
-const INSERT_ONLY = ['audit_log', 'approval', 'graph_validation'] as const;
+const INSERT_ONLY = [
+  'audit_log', 'approval', 'graph_validation', 'message_schedule_approval',
+] as const;
 
 const ROOT = 'organization';
 
