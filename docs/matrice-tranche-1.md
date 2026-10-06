@@ -2589,3 +2589,90 @@ aurait enregistrés à faux.
 | `test:determinism` | 11 |
 | `test:e2e` | 172 |
 | `build` | sans erreur |
+
+## Annotation en révision (J4, R7.4)
+
+Décisions de l'utilisateur du 2026-10-06, sur proposition (A2.2, point 2 :
+J4 ne figure pas en A5) :
+
+- le modèle tel que proposé ;
+- la propriété au module 02, qui tient le tableau des messages et son circuit
+  d'approbation ;
+- pas de reconnaissance d'écriture : la remarque se saisit au clavier, et le
+  tracé au stylet est gardé tel quel.
+
+**Base** (migration 0073, commit à part, montée, descente et remontée
+éprouvées) :
+
+- `review_annotation` porte exactement une ancre parmi quatre clés
+  étrangères : ligne du tableau, face, support, zone. Elle n'est jamais
+  flottante, et la base garantit que l'entité existe.
+- Trois états. Le texte, ou le tracé facultatif, ou les deux ; une annotation
+  vide est refusée.
+- L'auteur est pris en base.
+- Un déclencheur signe la clôture (`resolved_by`, `resolved_at`) au passage à
+  traitée ou refusée, et l'efface à la réouverture. Le studio ne connaît pas
+  l'utilisateur, et une signature fournie par l'appelant se falsifierait.
+- `review_annotation_reply` porte le fil de réponses.
+- Les deux tables sont sous cloisonnement forcé.
+
+**Studio.**
+
+- `state/review-annotation.ts` porte les commandes et la lecture :
+  - une même remarque sur une sélection crée une annotation par ligne, en un
+    geste (R8) ;
+  - répondre ;
+  - traiter, refuser, rouvrir.
+- Le panneau R7.4 est dans le détail de ligne du tableau des messages :
+  - remarque au clavier, ou tracée au stylet dans un cadre qui garde la note
+    rapportée au cadre ;
+  - fil de réponses ;
+  - actions selon la permission « annoter » de R2. R2 ne dit pas qui clôt :
+    la même permission le permet.
+- Un bandeau `REVIEW.ANNOTATION_OPEN` dit l'approbation bloquée tant qu'une
+  annotation est ouverte. Les identifiants des annotations ouvertes sur les
+  lignes du tableau sont ceux que `transitionSchedule` attend
+  (`openAnnotationIds`) ; un essai montre le refus d'approbation qui en
+  résulte.
+
+**Hors des livrables.** Le contrôle `tests/j4-annotation-hors-livrable.test.ts`
+vérifie deux choses :
+
+- `SiteData` ne porte aucune annotation ;
+- seuls six fichiers nommés, chacun avec sa raison, peuvent nommer les tables
+  ou leur lecture.
+
+**Essais.**
+
+- Unitaires : 5 pour les commandes et la lecture, 5 pour le contrôle.
+- En base : 4 (auteur et tracé, signature et réouverture, fil et
+  cloisonnement, refus de l'annotation flottante, à deux ancres ou vide).
+- De bout en bout, 3 dans `j4-annotation.spec.ts` :
+  - remarque, bandeau, réponse, clôture ;
+  - note au stylet ;
+  - refus d'une remarque vide.
+
+### Reste ouvert après l'annotation
+
+- Les transitions du tableau des messages (émettre, approuver, rejeter) ne
+  sont pas câblées dans l'écran : le bouton « Approuver » ne fait rien, comme
+  avant ce lot. Le blocage tient dans `transitionSchedule`, que l'écran
+  appellera quand R12 sera câblé.
+- Les ancres sur une face, un support ou une zone sont prêtes en base et en
+  commandes, mais aucun écran ne les pose encore. Le circuit des bons à tirer
+  (module 04) en dépend.
+- Les annotations sont relues depuis la session locale. La relecture depuis
+  le dépôt viendra avec le chargement du tableau des messages lui-même, qui ne
+  passe pas encore par le dépôt.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain49), sur une base remise
+à zéro avec les 77 migrations :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 611 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 175 |
+| `build` | sans erreur |
