@@ -6,7 +6,7 @@ import type { SessionState, StoredRow } from '../session-store.js';
 import { sessionFromSite } from '../session-from-site.js';
 import { graphScopeFromSession } from '../session-scope.js';
 import {
-  graphValidatedForSite, rulesPackBoundIn, submissionConditions, submissionFindings,
+  graphValidatedForSite, rulesPackBoundIn, submissionConditions,
 } from '../schedule-submission.js';
 
 /**
@@ -33,6 +33,11 @@ function run(id: string, ranAt: string, passed: boolean, graphHash: string): Sto
     table: 'graph_validation', id,
     values: { id, site_id: SITE, ran_at: ranAt, passed, graph_hash: graphHash, blocking_count: passed ? 0 : 1 },
   };
+}
+
+/** Les anomalies que les conditions de l'émission rassemblent. */
+function submissionFindings(session: SessionState, s: MessageSchedule, langs: readonly string[]) {
+  return submissionConditions(session, SITE, s, [], langs).findings;
 }
 
 const schedule: MessageSchedule = {

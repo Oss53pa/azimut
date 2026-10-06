@@ -109,7 +109,7 @@ test.describe('R12 (partie R) — émettre pour revue', () => {
     await expect(page.getByText('En revue', { exact: true })).toBeVisible();
     await expect(page.getByText(/La transition demandée est refusée/)).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Émettre pour revue' })).toHaveCount(0);
-    // R2 : le rôle de la session n'approuve ni ne rejette.
+    // R2 (partie R) : le rôle de la session n'approuve ni ne rejette.
     await expect(page.getByRole('button', { name: 'Approuver' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Rejeter' })).toHaveCount(0);
   });

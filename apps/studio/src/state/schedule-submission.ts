@@ -83,7 +83,7 @@ export function graphValidatedForSite(session: SessionState, siteId: string): bo
 }
 
 /** Les anomalies de R14 qui bloquent l'émission, pour ce tableau. */
-export function submissionFindings(
+function submissionFindings(
   session: SessionState, schedule: MessageSchedule, langs: readonly string[],
 ): readonly Finding[] {
   const { scope } = graphScopeFromSession(session);

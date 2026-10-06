@@ -227,7 +227,7 @@ export function MessageTableAdapter({ siteId, actor }: {
       actions={actions}
       onTrigger={trigger => {
         // R12 — l'émission pour revue. Générer relève de la moitié génération ;
-        // approuver et rejeter attendent un approbateur authentifié, et R2 les
+        // approuver et rejeter attendent un approbateur authentifié, et R2 (partie R) les
         // refuse au rôle de la session : ils ne sont jamais offerts ici.
         if (trigger !== 'submit_for_review' || read === null) return;
         const out = transitionCommands(
