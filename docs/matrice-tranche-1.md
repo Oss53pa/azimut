@@ -2780,7 +2780,7 @@ l'essai n'écrit plus de couleur en dur.
   vue isométrique ne s'en servent pas encore.
 - Les étapes écrites (P5.5) existent dans la borne
   (`kiosk-runtime/wayfinding-session.ts`) mais ne sont pas reprises dans
-  l'atelier.
+  l'atelier. *Faites depuis : voir la section « Étapes écrites ».*
 - L'analyse commerciale des flux (H3) reste de l'incrément 5.
 
 **Chaîne A13.2.** Après correction, les neuf étapes sortent à 0 (chain52),
@@ -2789,6 +2789,59 @@ sur une base remise à zéro :
 | Étape | Résultat |
 | --- | --- |
 | `test` | 4 623 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
+
+## Étapes écrites d'un itinéraire, sous forme neutre (partie P, écran Itinéraire)
+
+« Étapes écrites, courtes, dans la langue active. Changement de niveau
+signalé explicitement, avec le moyen. »
+
+**Ce qui existait.** La borne (`kiosk-runtime/wayfinding-session.ts`) tirait
+les étapes du chemin avec ses phrases françaises et anglaises écrites dans le
+code. La règle n'était donc pas partageable, et l'atelier aurait dû la
+recopier.
+
+**Ce qui change.**
+
+- La règle passe dans le moteur de graphe : `routeSteps(graph, route)`. Elle
+  ne produit aucune phrase (A7) :
+  - une étape par nœud du chemin, avec un code (`from`, `take_elevator`,
+    `take_stairs`, `take_escalator`, `pass_by`, `arrival`,
+    `continue_towards`, `go_through`, `continue_for`) et ses paramètres ;
+  - les carrefours et paliers consécutifs d'un même niveau réunis en un
+    « continuer tout droit » qui porte la distance ;
+  - la distance totale et le nombre de changements de niveau.
+- La borne y met ses mots, à l'identique : ses 84 essais passent sans
+  changement.
+- L'atelier du graphe les dit dans la langue active, sous le parcours animé.
+
+**Essais.** 3 pour `routeSteps` (codes sans phrase, réunion avec distance,
+changement de niveau et distance totale). L'essai de bout en bout du parcours
+vérifie les cinq étapes affichées.
+
+**Chaîne A13.2, premier passage (chain53) : deux échecs.**
+
+- `test` : le contrôle des citations refusait « P5.5 ». Le jeton est ambigu,
+  et le contrôle n'accepte en qualificatif que les parties M, N, L et R. Les
+  citations nomment désormais « partie P, écran Itinéraire » ; le contrôle
+  n'est pas assoupli.
+- `test:e2e` : l'essai du bouton du milieu (E3.3) mesurait le contour avant
+  que la zone ne se recadre sur sa largeur réelle. Il trouvait 112 px pour 60.
+  C'est une course de l'essai, apparue sous la charge de la chaîne complète :
+  seul, il passe cinq fois sur cinq. Les trois essais de navigation attendent
+  désormais deux mesures égales avant de partir, et douze répétitions sur
+  quatre processus passent.
+
+**Chaîne A13.2.** Après correction, les neuf étapes sortent à 0 (chain54),
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 626 |
 | `test:visual` | 14 |
 | `test:rls` | 94 |
 | `test:determinism` | 11 |
