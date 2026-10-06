@@ -29,6 +29,7 @@ import { SESSION_FR, SESSION_EN } from './messages/session.js';
 import { INK_FR, INK_EN } from './messages/ink.js';
 import { MESSAGE_TABLE_FR, MESSAGE_TABLE_EN } from './messages/message-table.js';
 import { REVIEW_FR, REVIEW_EN } from './messages/review.js';
+import { ROUTE_FR, ROUTE_EN } from './messages/route.js';
 import { SHELL_FR, SHELL_EN } from './messages/shell.js';
 import { REGISTER_FR, REGISTER_EN } from './messages/register.js';
 import { WAYFINDING_REGISTER_FR, WAYFINDING_REGISTER_EN } from './messages/wayfinding-register.js';
@@ -69,6 +70,7 @@ export const MESSAGES_FR = {
   ...INK_FR,
   ...MESSAGE_TABLE_FR,
   ...REVIEW_FR,
+  ...ROUTE_FR,
   ...SHELL_FR,
   ...REGISTER_FR,
   ...WAYFINDING_REGISTER_FR,
@@ -112,6 +114,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...INK_EN,
   ...MESSAGE_TABLE_EN,
   ...REVIEW_EN,
+  ...ROUTE_EN,
   ...SHELL_EN,
   ...REGISTER_EN,
   ...WAYFINDING_REGISTER_EN,

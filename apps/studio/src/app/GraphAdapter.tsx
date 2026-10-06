@@ -14,6 +14,7 @@ import { graphToolForKey } from '../state/graph-shortcuts.js';
 import { useVerticalLinkTool } from './useVerticalLinkTool.js';
 import { updateNodeCommands, updateEdgeCommands } from '../state/graph-update-commands.js';
 import { useGraphInk } from './useGraphInk.js';
+import { useRoutePreview } from './useRoutePreview.js';
 import type { GraphSelection } from '../viewport/GraphView.js';
 import type { StoredRow } from '../state/session-store.js';
 import { GraphScreen } from '../screens/GraphScreen.js';
@@ -75,6 +76,8 @@ export function GraphScreenAdapter({ session, levelId }: {
   // la reçoivent ensemble.
   const inheritedWidthM = inheritedEdgeWidthM(session.state, levelId);
   const link = useVerticalLinkTool(session);
+  // L3.1 — le parcours d'un visiteur, sous la zone de travail.
+  const route = useRoutePreview(session);
 
   /**
    * M4 (partie M) donne une touche à chacun des quatre outils. La table
@@ -373,7 +376,10 @@ export function GraphScreenAdapter({ session, levelId }: {
         par leur forme et les arêtes par leur trait : c'est cette vue qui le
         rend, depuis l'encodage en donnée.
       */}
-      {ink.zone({ nodes: levelNodes, edges: levelEdges, selected: chosen, onSelect: select })}
+      <>
+        {ink.zone({ nodes: levelNodes, edges: levelEdges, selected: chosen, onSelect: select })}
+        {route.panel}
+      </>
     </GraphScreen>
   );
 }

@@ -62,6 +62,10 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
     ...rowsFor('node', site.graph.nodes),
     ...rowsFor('edge', site.graph.edges),
     ...rowsFor('vertical_link', site.graph.vertical_links),
+    // L3.1 — les profils de parcours, que l'atelier du graphe lit pour
+    // montrer le parcours d'un visiteur. En lecture : aucune commande ne les
+    // écrit depuis l'atelier.
+    ...rowsFor('travel_profile', site.travel_profiles),
   ];
 }
 

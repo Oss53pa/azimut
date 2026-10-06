@@ -1,0 +1,48 @@
+/**
+ * L3.1 et A7.3 — le parcours d'un visiteur, montré dans l'atelier du graphe.
+ */
+export const ROUTE_FR = {
+  'route.title': 'Parcours d’un visiteur',
+  'route.from': 'Départ',
+  'route.to': 'Arrivée',
+  'route.profile': 'Profil de parcours',
+  'route.trace': 'Tracer le parcours',
+  'route.replay': 'Rejouer',
+  'route.static': 'Vue statique',
+  'route.next_level': 'Niveau suivant',
+  'route.previous_level': 'Niveau précédent',
+  'route.frame': 'Niveau {level} — tronçon {index} sur {count}, {length} m',
+  'route.frame_label': 'Parcours sur le niveau {level}',
+  'route.change': 'Changement de niveau : {means}, vers {level}',
+  'route.means.elevator': 'ascenseur',
+  'route.means.stair': 'escalier',
+  'route.means.escalator': 'escalier mécanique',
+  'route.means.other': 'liaison verticale',
+  'route.decisions': '{count} point(s) de décision sur ce tronçon',
+  'route.no_profile': 'Aucun profil de parcours déclaré pour ce site : le parcours ne se calcule pas sans profil, et l’atelier n’en invente pas.',
+  'route.too_few_nodes': 'Posez au moins deux nœuds pour tracer un parcours.',
+  'route.legend': 'Rond évidé : départ. Carré : arrivée. Rond plein : point de décision. Losange : changement de niveau.',
+};
+
+export const ROUTE_EN: Readonly<Record<keyof typeof ROUTE_FR, string>> = {
+  'route.title': 'Visitor route',
+  'route.from': 'Start',
+  'route.to': 'Destination',
+  'route.profile': 'Travel profile',
+  'route.trace': 'Trace the route',
+  'route.replay': 'Replay',
+  'route.static': 'Static view',
+  'route.next_level': 'Next level',
+  'route.previous_level': 'Previous level',
+  'route.frame': 'Level {level} — leg {index} of {count}, {length} m',
+  'route.frame_label': 'Route on level {level}',
+  'route.change': 'Level change: {means}, to {level}',
+  'route.means.elevator': 'lift',
+  'route.means.stair': 'stairs',
+  'route.means.escalator': 'escalator',
+  'route.means.other': 'vertical link',
+  'route.decisions': '{count} decision point(s) on this leg',
+  'route.no_profile': 'No travel profile is declared for this site: a route cannot be computed without one, and the workshop does not invent one.',
+  'route.too_few_nodes': 'Place at least two nodes to trace a route.',
+  'route.legend': 'Hollow circle: start. Square: destination. Filled circle: decision point. Diamond: level change.',
+};
