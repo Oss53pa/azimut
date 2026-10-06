@@ -88,6 +88,10 @@ export type MessageTableScreenProps = {
   readonly unreadableCount: number;
   readonly online: boolean;
   readonly onEmptyAction: () => void;
+  /** R7.4 et J4 — le panneau des annotations de la ligne, dans le détail. */
+  readonly annotationPanel: JSX.Element | null;
+  /** R12 — les annotations ouvertes sur ce tableau, qui bloquent l'approbation. */
+  readonly openAnnotationCount: number;
 };
 
 export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element {
@@ -172,6 +176,7 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
               profilesAtDecisionPoint={props.profilesAtDecisionPoint}
               onOpenSource={props.onOpenSource}
               lang={props.langs[0] ?? 'fr'}
+              annotations={props.annotationPanel}
             />
           )}
         </div>
@@ -222,6 +227,13 @@ function Banners(props: MessageTableScreenProps): JSX.Element {
           code="WAYFIND.SCHEDULE_STALE"
           message={t('msgtable.banner.stale', { count: props.staleCount })}
           hint={t('msgtable.banner.stale.action')}
+        />
+      )}
+      {props.openAnnotationCount > 0 && (
+        <StateBanner
+          severity="blocking"
+          code="REVIEW.ANNOTATION_OPEN"
+          message={t('review.blocking', { count: props.openAnnotationCount })}
         />
       )}
       {props.unreadableCount > 0 && (
