@@ -114,6 +114,9 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   '02-wayfinding': [
     'orientation_zone', 'naming_rule', 'information_level',
     'wayfinding_sequence', 'message_schedule', 'message_line',
+    // J4 — l'annotation en révision, dans le circuit du tableau des messages
+    // (R7.4) ; décision de l'utilisateur, la partie L ne la nommant pas.
+    'review_annotation', 'review_annotation_reply',
   ],
   '03-parcours': ['travel_profile', 'route_cache', 'decision_point'],
   '04-signaletique': [
