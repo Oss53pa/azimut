@@ -2709,3 +2709,88 @@ paquet, et le contrôle « aucun code créé » liste `RULES.PACK_NOT_BOUND`.
 | `test:determinism` | 11 |
 | `test:e2e` | 175 |
 | `build` | sans erreur |
+
+## Parcours d'un visiteur : le parcours animé (L3.1, A7.3)
+
+Chantier choisi par l'utilisateur le 2026-10-06 : le parcours client. Dans le
+cahier, le « parcours client » au sens commercial (H3, module 03) est
+l'analyse des flux, de l'incrément 5. Ce qui répond au besoin de voir le
+chemin d'un visiteur sur le plan, c'est le parcours animé : INV-1, L3.1 et
+A7.3 (`renderRouteAnimation`). C'est lui qui est fait.
+
+**Moteur** (`engine-iso/src/route-animation.ts`) :
+
+- un tronçon par niveau traversé, dans l'ordre du chemin ;
+- un tracé progressif ;
+- des points de décision qui apparaissent quand le tracé les atteint ;
+- une marque par rôle, distincte par la forme et non par la couleur : départ
+  rond évidé, arrivée carrée, décision ronde pleine, changement de niveau en
+  losange ;
+- un équivalent statique sans mouvement par tronçon ;
+- les changements de niveau rendus à part, avec le nœud quitté et le nœud
+  atteint, dont le type dit le moyen.
+
+La durée est celle de l'animation, réglée par l'appelant et répartie au
+prorata des longueurs. Aucune vitesse de marche (INV-5), aucun texte dans le
+rendu (A7). Le rendu est déterministe, même avec les nœuds donnés dans un
+autre ordre.
+
+**Studio.** L'atelier du graphe a un panneau « Parcours d'un visiteur » :
+
+- départ, arrivée, profil, puis « Tracer le parcours » ;
+- le chemin est calculé par `computeRoute`, les points de décision par
+  `deriveDecisionPoints` (qui ne demande plus que le graphe) ;
+- lecture tronçon par tronçon, avec le niveau, la longueur, le nombre de
+  points de décision, et la transition dite au changement de niveau ;
+- « Rejouer », et une vue statique au choix, qui s'ouvre d'elle-même en mode
+  à animation réduite.
+
+Les profils de parcours entrent dans la session chargée du dépôt, en lecture.
+Aucun profil n'est inventé : un site qui n'en déclare pas le dit, et le
+parcours ne se calcule pas.
+
+**Essais.**
+
+- Moteur : 7 (tronçons, transition, répartition des durées, apparition des
+  points de décision, marques, statique sans mouvement, absence de texte,
+  déterminisme, nœud absent refusé).
+- Studio : 3 (profils lus et jamais inventés, parcours sur deux niveaux, refus
+  du moteur rendu tel quel).
+- De bout en bout, 4 dans `l3-parcours.spec.ts` :
+  - le tracé et la transition ;
+  - la vue statique ;
+  - l'animation réduite ;
+  - un site sans profil.
+
+**Défaut révélé, corrigé.** Le panneau a réduit la hauteur de la vue du
+graphe, devenue limitée par sa hauteur. La capture du trait convertissait les
+coordonnées d'écran par le seul rapport des largeurs, et ignorait donc le
+décalage du centrage : un trait tracé d'un nœud à l'autre tombait à côté. La
+première chaîne (chain51) l'a montré :
+
+- `test` : 1 échec, une couleur en dur dans l'essai du moteur ;
+- `test:e2e` : 2 échecs, les arêtes tracées au stylet.
+
+La capture passe désormais par la matrice d'écran du SVG (`getScreenCTM`), et
+l'essai n'écrit plus de couleur en dur.
+
+### Reste ouvert après le parcours animé
+
+- Le parcours n'est montré qu'en plan, dans l'atelier. La borne (P5.5) et la
+  vue isométrique ne s'en servent pas encore.
+- Les étapes écrites (P5.5) existent dans la borne
+  (`kiosk-runtime/wayfinding-session.ts`) mais ne sont pas reprises dans
+  l'atelier.
+- L'analyse commerciale des flux (H3) reste de l'incrément 5.
+
+**Chaîne A13.2.** Après correction, les neuf étapes sortent à 0 (chain52),
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 623 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
