@@ -3138,3 +3138,46 @@ zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 181 |
 | `build` | sans erreur |
+
+## Bandeau de version approuvée (R16)
+
+Chantier choisi par Oss53pa. R16 : « Version approuvée | Bandeau d'état
+indiquant l'approbateur et la date. Aucune action de génération sur cette
+version. »
+
+- La décision qui approuve la version affichée se lit dans les décisions
+  relues de la base : c'est la dernière décision `approved` de ce tableau,
+  jugée à l'instant.
+- Le bandeau dit la date, et l'approbateur par son identifiant : les huit
+  premiers caractères, puis la valeur complète à côté, comme pour l'empreinte
+  des entrées (R4).
+- Le modèle ne porte aucun nom d'utilisateur (A5.1). Une note à l'éditeur le
+  signale (`docs/note-editeur-nom-approbateur.md`) ; rien n'est ajouté au
+  modèle. Choix de l'utilisatrice, au titre de A2.2.
+- Si aucune décision n'est lue, le bandeau le dit au lieu d'inventer un
+  approbateur.
+- Aucune action de génération n'est offerte sur une version approuvée : la
+  machine de R12 n'en permet aucune depuis cet état.
+
+**Essais.**
+
+- Lecture de la décision : 3 essais.
+  - Sans décision, rien n'est inventé.
+  - Un rejet, ou la décision d'une autre version, ne compte pas.
+  - C'est la dernière approbation qui compte, jugée à l'instant.
+- Bout en bout : 2 essais.
+  - Le bandeau donne l'identifiant et la date, et n'offre aucune action de
+    génération, d'émission ni de décision.
+  - Sans décision lue, le bandeau le dit.
+
+**Chaîne A13.2 (chain60).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 662 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 183 |
+| `build` | sans erreur |
