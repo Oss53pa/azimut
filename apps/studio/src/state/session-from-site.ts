@@ -102,6 +102,10 @@ export function sessionFromSite(
       ...rowsFor('message_schedule', records.schedules),
       ...rowsFor('message_line', records.lines),
       ...rowsFor('message_schedule_approval', records.approvals),
+      // J4 — les annotations de révision et leur fil : le panneau R7.4 les
+      // montre, et une annotation ouverte bloque l'approbation (R12).
+      ...rowsFor('review_annotation', records.annotations),
+      ...rowsFor('review_annotation_reply', records.annotationReplies),
     ],
   };
 }

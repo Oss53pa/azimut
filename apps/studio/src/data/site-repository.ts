@@ -61,19 +61,22 @@ type StoredValues = Readonly<Record<string, unknown>> & { readonly id: string };
 
 /**
  * R12 — le circuit du tableau des messages, colonnes de la base : les
- * versions du tableau, leurs lignes, les décisions prises sur elles, et les
+ * versions du tableau, leurs lignes, les décisions prises sur elles, les
  * passages de la validation de complétude que l'émission pour revue lit
- * (M02.W11). Ni le compilateur ni les moteurs ne les lisent par ici.
+ * (M02.W11), et les annotations de révision avec leur fil (J4), qui bloquent
+ * l'approbation. Ni le compilateur ni les moteurs ne les lisent par ici.
  */
 export type ScheduleRecords = {
   readonly schedules: readonly StoredValues[];
   readonly lines: readonly StoredValues[];
   readonly approvals: readonly StoredValues[];
   readonly validations: readonly StoredValues[];
+  readonly annotations: readonly StoredValues[];
+  readonly annotationReplies: readonly StoredValues[];
 };
 
 export const NO_SCHEDULE_RECORDS: ScheduleRecords = {
-  schedules: [], lines: [], approvals: [], validations: [],
+  schedules: [], lines: [], approvals: [], validations: [], annotations: [], annotationReplies: [],
 };
 
 export const REPOSITORY_KINDS = ['reference', 'postgrest'] as const;

@@ -6,6 +6,7 @@ import { sessionFromSite } from '../session-from-site.js';
 import { graphScopeFromSession } from '../session-scope.js';
 import { readSchedule } from '../message-schedule-read.js';
 import { graphValidatedForSite } from '../schedule-submission.js';
+import { openAnnotationIdsOn, readAnnotations } from '../review-annotation.js';
 import type { SessionState } from '../session-store.js';
 
 /**
@@ -45,6 +46,17 @@ const records: ScheduleRecords = {
     id: 'g1', org_id: 'o', site_id: SITE, graph_hash: hash, passed: true,
     ran_at: '2026-10-05T07:00:00+00:00', blocking_count: 0, warning_count: 0,
   }],
+  annotations: [{
+    id: 'a1', org_id: 'o', site_id: SITE, message_line_id: 'l1', support_face_id: null,
+    support_id: null, zone_id: null, state: 'open', body: 'La flèche pointe à gauche',
+    ink: [[{ x: 0.1, y: 0.2, p: 0.5 }, { x: 0.3, y: 0.2, p: 0.6 }]],
+    author_id: 'u1', resolved_by: null, resolved_at: null,
+    created_at: '2026-10-05T10:00:00+00:00', updated_at: '2026-10-05T10:00:00+00:00', deleted_at: null,
+  }],
+  annotationReplies: [{
+    id: 'r1', org_id: 'o', annotation_id: 'a1', body: 'Vu', author_id: 'u2',
+    created_at: '2026-10-05T10:05:00+00:00', updated_at: '2026-10-05T10:05:00+00:00', deleted_at: null,
+  }],
 };
 
 describe('R12 — le circuit du tableau, relu de la base', () => {
@@ -61,6 +73,22 @@ describe('R12 — le circuit du tableau, relu de la base', () => {
 
   it('les décisions entrent dans la session', () => {
     expect(session.rows.filter(r => r.table === 'message_schedule_approval').map(r => r.id)).toEqual(['d1']);
+  });
+
+  it('l’annotation relue, tracé compris, garde son fil et bloque l’approbation', () => {
+    const annotations = readAnnotations(session.rows);
+    expect(annotations.map(a => [a.id, a.state, a.anchor.id])).toEqual([['a1', 'open', 'l1']]);
+    expect(annotations[0]?.ink?.[0]?.length).toBe(2);
+    expect(annotations[0]?.replies.map(r => r.body)).toEqual(['Vu']);
+    expect(openAnnotationIdsOn(annotations, ['l1'])).toEqual(['a1']);
+  });
+
+  it('une réponse écrite dans la session après la réponse relue vient après elle', () => {
+    const later = [...session.rows, {
+      table: 'review_annotation_reply', id: 'r0',
+      values: { id: 'r0', annotation_id: 'a1', body: 'Corrigé', created_at: '2026-10-05T10:05:00.500Z' },
+    }];
+    expect(readAnnotations(later)[0]?.replies.map(r => r.body)).toEqual(['Vu', 'Corrigé']);
   });
 
   it('le passage de validation relu vaut pour le graphe actuel', () => {

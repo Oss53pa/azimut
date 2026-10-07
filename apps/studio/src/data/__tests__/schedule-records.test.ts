@@ -24,7 +24,7 @@ describe('R12 — circuit du tableau, sites de référence', () => {
 
   it('rend des listes vides : aucun site de référence ne porte de tableau enregistré', async () => {
     expect(await repository.loadScheduleRecords('ref-multilevel'))
-      .toEqual({ schedules: [], lines: [], approvals: [], validations: [] });
+      .toEqual({ schedules: [], lines: [], approvals: [], validations: [], annotations: [], annotationReplies: [] });
   });
 
   it('refuse un site inconnu', async () => {
@@ -40,12 +40,23 @@ describe('R12 — circuit du tableau, API REST', () => {
       graph_validation: [{ id: 'g1', site_id: 'site-1', passed: true }],
       message_line: [{ id: 'l1', schedule_id: 'm1', content: { block_kind: 'arrow', entries: [] } }],
       message_schedule_approval: [{ id: 'd1', schedule_id: 'm1', decision: 'rejected' }],
+      review_annotation: [{ id: 'a1', site_id: 'site-1', state: 'open' }],
+      review_annotation_reply: [
+        { id: 'r1', annotation_id: 'a1', deleted_at: null },
+        { id: 'r2', annotation_id: 'a1', deleted_at: '2026-10-05T10:00:00+00:00' },
+      ],
     });
     const records = await createPostgrestRepository(config).loadScheduleRecords('site-1');
     expect(records.schedules.map(r => r.id)).toEqual(['m1']);
     expect(records.validations.map(r => r.id)).toEqual(['g1']);
     expect(records.lines.map(r => r.id)).toEqual(['l1']);
     expect(records.approvals.map(r => r.id)).toEqual(['d1']);
+    expect(records.annotations.map(r => r.id)).toEqual(['a1']);
+    // Une réponse supprimée ne se relit pas : la suppression est logique.
+    expect(records.annotationReplies.map(r => r.id)).toEqual(['r1']);
+    expect(calls.some(u => u.includes('/review_annotation?') && u.includes('site_id=eq.site-1')
+      && u.includes('deleted_at=is.null'))).toBe(true);
+    expect(calls.some(u => u.includes('/review_annotation_reply?') && u.includes('annotation_id=in.(a1)'))).toBe(true);
     expect(calls.some(u => u.includes('/message_schedule?') && u.includes('site_id=eq.site-1'))).toBe(true);
     expect(calls.some(u => u.includes('/graph_validation?') && u.includes('site_id=eq.site-1'))).toBe(true);
     expect(calls.some(u => u.includes('/message_line?') && u.includes('schedule_id=in.(m1)'))).toBe(true);
@@ -55,7 +66,8 @@ describe('R12 — circuit du tableau, API REST', () => {
   it('sans version enregistrée, ni lignes ni décisions ne sont demandées', async () => {
     const calls = stubTables({});
     const records = await createPostgrestRepository(config).loadScheduleRecords('site-1');
-    expect(records).toEqual({ schedules: [], lines: [], approvals: [], validations: [] });
+    expect(records).toEqual({ schedules: [], lines: [], approvals: [], validations: [], annotations: [], annotationReplies: [] });
     expect(calls.some(u => u.includes('/message_line?') || u.includes('/message_schedule_approval?'))).toBe(false);
+    expect(calls.some(u => u.includes('/review_annotation_reply?'))).toBe(false);
   });
 });
