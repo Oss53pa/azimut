@@ -18,7 +18,7 @@
  * ligne (M02.W9), non un blocage de l'émission.
  */
 import type { Finding, Outcome } from '@azimut/core-model';
-import { codePointCompare, isActiveLang } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 import {
   NO_WAYFINDING_RULES, checkMessageSchedule, computeGraphHash,
   guardNamingCollisions, guardWayfindingContinuity,
@@ -34,28 +34,6 @@ import type { TransitionConditions } from './message-schedule-transitions.js';
 
 function findingsOf(outcome: Outcome<null>): readonly Finding[] {
   return outcome.ok ? outcome.warnings : outcome.findings;
-}
-
-/** L'annuaire du site, tel que la session le porte. Une ligne illisible est écartée. */
-function directoryOf(session: SessionState): Pick<WayfindingCheckSite, 'destinations' | 'destination_names'> {
-  const destinations: WayfindingCheckSite['destinations'][number][] = [];
-  for (const row of rowsOf(session, 'destination')) {
-    const nodeId = text(row.values, 'node_id');
-    const occupant = text(row.values, 'occupant_name');
-    if (nodeId !== null && occupant !== null) {
-      destinations.push({ id: row.id, node_id: nodeId, occupant_name: occupant });
-    }
-  }
-  const names: WayfindingCheckSite['destination_names'][number][] = [];
-  for (const row of rowsOf(session, 'destination_name')) {
-    const destinationId = text(row.values, 'destination_id');
-    const lang = text(row.values, 'lang');
-    const value = text(row.values, 'value');
-    if (destinationId !== null && lang !== null && value !== null && isActiveLang(lang)) {
-      names.push({ destination_id: destinationId, lang, value });
-    }
-  }
-  return { destinations, destination_names: names };
 }
 
 /** M02.W11 — le dernier passage du site est-il réussi, et pour ce graphe-ci ? */
@@ -90,8 +68,10 @@ export function graphValidatedForSite(session: SessionState, siteId: string): bo
 function submissionFindings(
   session: SessionState, schedule: MessageSchedule, langs: readonly string[],
 ): readonly Finding[] {
+  // La portée de la validation porte l'annuaire de la session : les
+  // garde-fous de nommage et de continuité lisent la même lecture que M5.
   const { scope } = graphScopeFromSession(session);
-  const site: WayfindingCheckSite = { graph: scope.graph, levels: scope.levels, ...directoryOf(session) };
+  const site: WayfindingCheckSite = scope;
   const sequences = jalonnementFromSchedule(site, schedule);
   return [
     ...checkMessageSchedule(schedule, NO_WAYFINDING_RULES),

@@ -13,13 +13,15 @@
  * s'y rattachent ne lèvent rien — ce qui est exact : un site sans destination
  * n'a pas de destination non reliée.
  */
-import type { Building, Footprint, Level, Polygon } from '@azimut/core-model';
+import type {
+  Building, Destination, DestinationName, Footprint, Level, OccupancyStatus, Polygon,
+} from '@azimut/core-model';
 import type { GraphScope } from '@azimut/engine-graph';
 import type { SessionState, StoredRow } from './session-store.js';
 import { rowsOf } from './session-store.js';
 import { readSessionGraph } from './session-graph.js';
 import { text, numeric, boolean, structured, point } from './row-values.js';
-import { codePointCompare } from '@azimut/core-model';
+import { codePointCompare, isActiveLang } from '@azimut/core-model';
 
 export type SessionScope = {
   readonly scope: GraphScope;
@@ -109,6 +111,41 @@ function readBuilding(row: StoredRow): Building | null {
   };
 }
 
+const OCCUPANCY: readonly OccupancyStatus[] = ['occupied', 'vacant', 'reserved', 'under_fit_out'];
+
+function readDestination(row: StoredRow): Destination | null {
+  const footprintId = text(row.values, 'footprint_id');
+  const nodeId = text(row.values, 'node_id');
+  const categoryId = text(row.values, 'category_id');
+  const occupant = text(row.values, 'occupant_name');
+  const status = OCCUPANCY.find(s => s === text(row.values, 'occupancy_status'));
+  const priority = numeric(row.values, 'display_priority');
+  if (footprintId === null || nodeId === null || categoryId === null || occupant === null) return null;
+  if (status === undefined || priority === null) return null;
+  const from = text(row.values, 'valid_from');
+  const to = text(row.values, 'valid_to');
+  return {
+    id: row.id,
+    org_id: text(row.values, 'org_id') ?? '',
+    footprint_id: footprintId,
+    node_id: nodeId,
+    category_id: categoryId,
+    occupant_name: occupant,
+    occupancy_status: status,
+    display_priority: priority,
+    ...(from === null ? {} : { valid_from: from }),
+    ...(to === null ? {} : { valid_to: to }),
+  };
+}
+
+function readDestinationName(row: StoredRow): DestinationName | null {
+  const destinationId = text(row.values, 'destination_id');
+  const lang = text(row.values, 'lang');
+  const value = text(row.values, 'value');
+  if (destinationId === null || value === null || lang === null || !isActiveLang(lang)) return null;
+  return { id: row.id, org_id: text(row.values, 'org_id') ?? '', destination_id: destinationId, lang, value };
+}
+
 function collect<T>(
   session: SessionState,
   table: string,
@@ -138,11 +175,11 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
         vertical_links: graph.vertical_links,
         building_links: graph.building_links,
       },
-      // L'annuaire entre avec le module 02. Tant qu'il n'est pas là, la
-      // session n'en porte pas, et les contrôles de destination ne lèvent
-      // rien : un site sans destination n'a pas de destination non reliée.
-      destinations: [],
-      destination_names: [],
+      // L'annuaire, que la session relue du dépôt porte désormais (R12) : les
+      // contrôles de destination de M5 s'y appliquent. Une session qui n'en
+      // porte pas reste sans destination, et ces contrôles ne lèvent rien.
+      destinations: collect(session, 'destination', readDestination, unreadable),
+      destination_names: collect(session, 'destination_name', readDestinationName, unreadable),
       // Les profils de parcours viennent avec T-1.9. Sans eux,
       // `GRAPH.DESTINATION_ENTRANCE_COVERAGE` ne retient aucune entrée et ne
       // lève rien — l'éditeur a limité sa portée aux entrées qu'au moins un

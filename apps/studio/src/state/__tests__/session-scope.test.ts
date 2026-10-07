@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { refMinimal } from '@azimut/testkit';
+import { refMinimal, refMultilevel } from '@azimut/testkit';
 import { validateGraph } from '@azimut/engine-graph';
 import { graphScopeFromSession } from '../session-scope.js';
 import { sessionFromSite } from '../session-from-site.js';
@@ -90,14 +90,49 @@ describe('M5 (partie M) — ce que la session donne à valider', () => {
   });
 
   /**
-   * L'annuaire entre avec le module 02. Tant qu'il n'est pas là, la portée
-   * doit rester vide plutôt que d'être devinée depuis les empreintes : une
-   * destination inventée ferait lever `GRAPH.DESTINATION_UNLINKED` sur une
-   * entité que personne n'a saisie.
+   * L'annuaire relu du dépôt entre dans la portée tel quel, et les contrôles
+   * de destination de M5 s'y appliquent. Une session qui n'en porte pas reste
+   * sans destination : rien n'est deviné depuis les empreintes, car une
+   * destination inventée ferait lever une anomalie sur une entité que
+   * personne n'a saisie.
    */
-  it('ne porte aucune destination tant que l’annuaire n’existe pas', () => {
-    const { scope } = graphScopeFromSession(sessionFromSite(refMinimal));
+  it('porte l’annuaire du site tel que la session le relit', () => {
+    const { scope, unreadable } = graphScopeFromSession(sessionFromSite(refMultilevel));
+    expect(unreadable).toEqual([]);
+    expect(scope.destinations).toEqual(refMultilevel.destinations);
+    expect(scope.destination_names).toEqual(refMultilevel.destination_names);
+  });
+
+  it('M5 lève désormais l’anomalie d’une destination reliée à un nœud absent', () => {
+    const [first] = refMultilevel.destinations;
+    if (first === undefined) throw new Error('une destination attendue');
+    const base = sessionFromSite(refMultilevel);
+    const before = validateGraph(graphScopeFromSession(base).scope);
+    const codes = (o: typeof before): readonly string[] =>
+      (o.ok ? o.warnings : o.findings).map(f => f.code);
+    expect(codes(before)).not.toContain('GRAPH.DESTINATION_UNLINKED');
+    const broken: SessionState = {
+      ...base,
+      rows: base.rows.map(row => row.table === 'destination' && row.id === first.id
+        ? { ...row, values: { ...row.values, node_id: 'noeud-absent' } }
+        : row),
+    };
+    const after = validateGraph(graphScopeFromSession(broken).scope);
+    expect(codes(after)).toContain('GRAPH.DESTINATION_UNLINKED');
+  });
+
+  it('sans annuaire en session, n’invente aucune destination', () => {
+    const { scope } = graphScopeFromSession(EMPTY_SESSION);
     expect(scope.destinations).toEqual([]);
     expect(scope.destination_names).toEqual([]);
+  });
+
+  it('une destination illisible est écartée et comptée, jamais complétée', () => {
+    const { scope, unreadable } = graphScopeFromSession(sessionOf([{
+      table: 'destination', id: 'dest-sans-statut',
+      values: { org_id: 'org', footprint_id: 'f', node_id: 'n', category_id: 'c', occupant_name: 'Boutique', display_priority: 1 },
+    }]));
+    expect(scope.destinations).toEqual([]);
+    expect(unreadable).toEqual(['dest-sans-statut']);
   });
 });
