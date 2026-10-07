@@ -3181,3 +3181,37 @@ zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 183 |
 | `build` | sans erreur |
+
+## Aperçu du parcours : le calcul des points de décision n'est plus tu (L3.1)
+
+Chantier choisi par Oss53pa. L'aperçu du parcours, dans l'atelier du graphe,
+taisait deux choses :
+
+- un refus du calcul des points de décision, qu'il traitait comme un parcours
+  sans point de décision ;
+- les avertissements d'un tracé réussi, que l'écran effaçait.
+
+La borne, elle, rendait déjà le refus.
+
+- Un refus arrête le tracé et se dit avec ses codes.
+- Les avertissements accompagnent le tracé, chacun avec sa sévérité.
+
+Le moteur ne lève aujourd'hui ni refus ni avertissement sur ce calcul. Le
+défaut était donc latent ; l'essai simule les deux cas pour que l'aperçu les
+dise déjà le jour où le moteur en lèvera.
+
+**Essais.** 2 nouveaux essais : un refus arrête le tracé, un avertissement
+l'accompagne. L'essai par mutation le confirme : sur l'ancien code, les deux
+échouent.
+
+**Chaîne A13.2 (chain61).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 664 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 183 |
+| `build` | sans erreur |
