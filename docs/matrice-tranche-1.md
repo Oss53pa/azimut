@@ -3094,3 +3094,47 @@ zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 181 |
 | `build` | sans erreur |
+
+## Annotations de révision relues depuis la base (J4, R12)
+
+Chantier choisi par Oss53pa. Avant lui, les annotations de révision se
+perdaient à la réouverture d'un site, alors qu'une annotation ouverte bloque
+l'approbation (`REVIEW.ANNOTATION_OPEN`).
+
+- Le circuit du tableau relu depuis la base porte désormais les annotations du
+  site et leur fil. Ni les annotations supprimées ni les réponses supprimées
+  ne sont relues : la suppression est logique.
+- Une annotation ouverte relue bloque l'approbation, comme une annotation posée
+  dans la session. Son tracé au stylet, que la base rend sous forme de tableau,
+  se relit tel quel.
+- Le fil se trie à l'instant, et non au texte de l'horodatage. Une réponse
+  écrite dans la session après une réponse relue vient bien après elle.
+- Deux fichiers nomment désormais les tables d'annotation : le chargeur REST
+  du circuit et la session relue du dépôt. Le contrôle J4 les inscrit, chacun
+  avec sa raison, comme le contrôle J3.3 le fait pour l'esquisse. Ses
+  assertions ne changent pas : `SiteData` ne porte aucune annotation, et aucun
+  moteur, compilateur ni export ne les nomme.
+
+**Essais.**
+
+- Dépôt : la lecture des annotations est filtrée par site et sans les
+  supprimées, la réponse supprimée est écartée, et sans annotation aucune
+  réponse n'est demandée.
+- Session : 2 essais.
+  - L'annotation relue garde son tracé et son fil, et bloque l'approbation.
+  - Le fil mêle correctement les deux écritures de l'instant.
+
+**Non vérifié.** Comme pour le reste du circuit, la lecture contre un PostgREST
+réel n'a pas d'essai.
+
+**Chaîne A13.2 (chain59).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 659 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
