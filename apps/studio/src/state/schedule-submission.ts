@@ -69,7 +69,7 @@ function submissionFindings(
   session: SessionState, schedule: MessageSchedule, langs: readonly string[],
 ): readonly Finding[] {
   // La portée de la validation porte l'annuaire de la session : les
-  // garde-fous de nommage et de continuité lisent la même lecture que M5.
+  // garde-fous de nommage et de continuité lisent la même lecture que M5 (partie M).
   const { scope } = graphScopeFromSession(session);
   const site: WayfindingCheckSite = scope;
   const sequences = jalonnementFromSchedule(site, schedule);

@@ -91,7 +91,7 @@ describe('M5 (partie M) — ce que la session donne à valider', () => {
 
   /**
    * L'annuaire relu du dépôt entre dans la portée tel quel, et les contrôles
-   * de destination de M5 s'y appliquent. Une session qui n'en porte pas reste
+   * de destination de M5 (partie M) s'y appliquent. Une session qui n'en porte pas reste
    * sans destination : rien n'est deviné depuis les empreintes, car une
    * destination inventée ferait lever une anomalie sur une entité que
    * personne n'a saisie.

@@ -176,7 +176,7 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
         building_links: graph.building_links,
       },
       // L'annuaire, que la session relue du dépôt porte désormais (R12) : les
-      // contrôles de destination de M5 s'y appliquent. Une session qui n'en
+      // contrôles de destination de M5 (partie M) s'y appliquent. Une session qui n'en
       // porte pas reste sans destination, et ces contrôles ne lèvent rien.
       destinations: collect(session, 'destination', readDestination, unreadable),
       destination_names: collect(session, 'destination_name', readDestinationName, unreadable),
