@@ -24,6 +24,7 @@ import { permissionOfTrigger } from '../state/message-schedule-permissions.js';
 import { codePointCompare } from '@azimut/core-model';
 import type { Finding } from '@azimut/core-model';
 import { transitionCommands } from '../state/message-schedule-transitions.js';
+import { approvalOf } from '../state/schedule-decision.js';
 import {
   graphValidatedForSite, rulesPackBoundIn, submissionConditions,
 } from '../state/schedule-submission.js';
@@ -249,6 +250,7 @@ export function MessageTableAdapter({ siteId, actor }: {
         void session.record(out.value);
       }}
       refusals={refusals}
+      approval={read === null ? null : approvalOf(session.state, read.scheduleId)}
       canCompare={canCompare}
       onCompare={() => { setComparing(true); }}
       compare={comparing ? {

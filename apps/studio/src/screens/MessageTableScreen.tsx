@@ -96,6 +96,11 @@ export type MessageTableScreenProps = {
   readonly openAnnotationCount: number;
   /** R12 — les refus de la dernière transition demandée, chacun avec son code. */
   readonly refusals: readonly Finding[];
+  /**
+   * R16 — la décision qui approuve la version affichée, quand elle est
+   * approuvée. `null` si la décision n'est pas lue : l'écran le dit.
+   */
+  readonly approval: { readonly approverId: string; readonly decidedAt: string } | null;
 };
 
 export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element {
@@ -226,6 +231,20 @@ function Banners(props: MessageTableScreenProps): JSX.Element {
       {!props.online && (
         <StateBanner severity="info" message={t('msgtable.offline')} />
       )}
+      {props.schedule.state === 'approved' && (props.approval === null ? (
+        <StateBanner severity="info" message={t('msgtable.banner.approved.unread')} />
+      ) : (
+        <StateBanner
+          severity="info"
+          message={t('msgtable.banner.approved', {
+            // R4 (partie R), pour l'empreinte : huit premiers caractères, la
+            // valeur complète dite à côté. L'identifiant suit la même règle.
+            approver: props.approval.approverId.slice(0, 8),
+            date: props.approval.decidedAt,
+          })}
+          hint={t('msgtable.banner.approved.approver', { id: props.approval.approverId })}
+        />
+      ))}
       {!props.graphValidated && (
         <StateBanner
           severity="blocking"
