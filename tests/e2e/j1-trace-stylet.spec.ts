@@ -17,10 +17,38 @@ const FOOTPRINTS = `/sites/${SITE}/levels/${LEVEL}/footprints`;
 
 const ZONE = /Zone de travail : tracez au stylet|Work area: draw with a stylus/;
 
+/**
+ * La zone une fois posée : sa matrice d'écran ne bouge plus d'une mesure à la
+ * suivante. Tant que la zone se recadre sur son contenu, un trait capté à
+ * cheval sur deux cadrages se déforme et n'est plus reconnu ; c'est une course
+ * de l'essai, apparue sous la charge de la CI, et l'essai attend comme le
+ * ferait une main.
+ */
+async function settledZone(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+  const zone = page.getByRole('img', { name: ZONE });
+  const matrix = (): Promise<string> => zone.evaluate(el => {
+    const svg = el instanceof SVGGraphicsElement ? el : el.querySelector('svg');
+    const m = svg?.getScreenCTM();
+    const r = el.getBoundingClientRect();
+    return m === null || m === undefined
+      ? `${String(r.x)},${String(r.y)},${String(r.width)},${String(r.height)}`
+      : `${String(m.a)},${String(m.b)},${String(m.c)},${String(m.d)},${String(m.e)},${String(m.f)},${String(r.width)},${String(r.height)}`;
+  });
+  let previous = await matrix();
+  await expect.poll(async () => {
+    const now = await matrix();
+    const same = now === previous;
+    previous = now;
+    return same;
+  }).toBe(true);
+  const box = await zone.boundingBox();
+  if (box === null) throw new Error('zone introuvable');
+  return box;
+}
+
 /** Un rectangle tracé à main levée, en coordonnées de la zone. */
 async function drawRectangle(page: Page): Promise<void> {
-  const box = await page.getByRole('img', { name: ZONE }).boundingBox();
-  if (box === null) throw new Error('zone introuvable');
+  const box = await settledZone(page);
   const x0 = box.x + box.width * 0.3;
   const y0 = box.y + box.height * 0.3;
   const corners = [
