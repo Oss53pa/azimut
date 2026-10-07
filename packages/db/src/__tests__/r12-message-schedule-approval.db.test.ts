@@ -58,6 +58,19 @@ async function refusal(tx: postgres.TransactionSql, run: () => Promise<unknown>)
   return 'accepté';
 }
 
+/** Le refus levé, ou le nombre de lignes que la tentative a atteintes. */
+async function reached(
+  tx: postgres.TransactionSql, run: () => Promise<{ readonly count: number }>,
+): Promise<string> {
+  try {
+    let count = 0;
+    await tx.savepoint(async () => { count = (await run()).count; });
+    return `${String(count)} ligne(s) atteinte(s)`;
+  } catch (e: unknown) {
+    return e instanceof Error ? e.message : String(e);
+  }
+}
+
 describe('R12 — une décision sur un tableau, en base', () => {
   it('l’approbation prend l’approbateur et la date en base', async () => {
     await inRolledBack(async tx => {
@@ -109,9 +122,17 @@ describe('R12 — une décision sur un tableau, en base', () => {
     await inRolledBack(async tx => {
       await tx`insert into azimut.message_schedule_approval(org_id,schedule_id,decision,inputs_hash)
                values (${ORG},${SCHEDULE},'approved','sha256:entrees')`;
-      expect(await refusal(tx, () => tx`
+      // Deux barrages, selon le rôle, comme pour `audit_log` (A12.3) : sous le
+      // propriétaire soumis aux politiques, aucune ne lui ouvre la
+      // modification et la tentative n'atteint aucune ligne ; sous un rôle qui
+      // passe outre les politiques, le déclencheur la refuse. Dans les deux
+      // cas la décision reste intacte, et c'est ce qui est vérifié en dernier.
+      expect(await reached(tx, () => tx`
         update azimut.message_schedule_approval set decision = 'rejected', comment = 'après coup'
-        where schedule_id = ${SCHEDULE}`)).toMatch(/insert-only/);
+        where schedule_id = ${SCHEDULE}`)).toMatch(/insert-only|^0 ligne\(s\) atteinte\(s\)$/);
+      const kept = await tx<{ decision: string; comment: string | null }[]>`
+        select decision, comment from azimut.message_schedule_approval where schedule_id = ${SCHEDULE}`;
+      expect(kept).toEqual([{ decision: 'approved', comment: null }]);
       expect(await refusal(tx, () => tx`
         delete from azimut.message_schedule where id = ${SCHEDULE}`))
         .toMatch(/foreign key|insert-only/);
