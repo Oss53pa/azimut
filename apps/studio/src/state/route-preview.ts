@@ -73,14 +73,17 @@ export function planRoute(
   };
   const route = computeRoute(site, profile, from, to);
   if (!route.ok) return route;
+  // Un refus du calcul des points de décision n'est pas un parcours sans
+  // point de décision : il arrête le tracé et se dit, comme sur la borne.
   const decisions = deriveDecisionPoints(site, profile, []);
-  const decisionIds = decisions.ok ? decisions.value.map(d => d.node_id) : [];
+  if (!decisions.ok) return decisions;
+  const decisionIds = decisions.value.map(d => d.node_id);
   const { scope } = graphScopeFromSession(state);
   const animation = renderRouteAnimation(
     route.value, { nodes: graph.nodes, levels: scope.levels, footprints: scope.footprints }, decisionIds, options,
   );
   if (!animation.ok) return animation;
-  const warnings: Finding[] = [...route.warnings, ...animation.warnings];
+  const warnings: Finding[] = [...route.warnings, ...decisions.warnings, ...animation.warnings];
   const steps = routeSteps(site.graph, route.value);
   return {
     ok: true,

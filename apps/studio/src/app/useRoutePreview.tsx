@@ -80,7 +80,8 @@ export function useRoutePreview(session: TrancheSession): { readonly panel: JSX.
     if (profile === undefined || from === '' || to === '') return;
     const out = planRoute(session.state, profile, from, to, OPTIONS);
     if (!out.ok) { setPlanned(null); setFindings(out.findings); return; }
-    setPlanned(out.value); setFindings([]); setFrame(0); setReplay(r => r + 1);
+    // Un tracé réussi peut porter des avertissements : ils se disent aussi.
+    setPlanned(out.value); setFindings(out.warnings); setFrame(0); setReplay(r => r + 1);
   }
 
   const current = planned?.animation.frames[frame] ?? null;
@@ -106,7 +107,7 @@ export function useRoutePreview(session: TrancheSession): { readonly panel: JSX.
               <Button rank="primary" onClick={trace}>{t('route.trace')}</Button>
             </div>
             {findings.map(f => (
-              <StateBanner key={`${f.code}:${f.entity?.id ?? ''}`} severity="blocking" code={f.code}
+              <StateBanner key={`${f.code}:${f.entity?.id ?? ''}`} severity={f.severity} code={f.code}
                 message={getErrorMessage(f.code as ErrorCode, lang) ?? f.code} />
             ))}
           </>
