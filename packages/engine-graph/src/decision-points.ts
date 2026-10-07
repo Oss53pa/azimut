@@ -13,7 +13,9 @@ export type DecisionPoint = {
 };
 
 export function deriveDecisionPoints(
-  site: SiteData,
+  // Le graphe seul : un atelier qui ne tient que le graphe en session
+  // dérive les mêmes points qu'un site complet.
+  site: Pick<SiteData, 'graph'>,
   profile: TravelProfile,
   destinations: readonly Destination[],
 ): Outcome<readonly DecisionPoint[]> {

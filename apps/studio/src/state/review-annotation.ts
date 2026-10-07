@@ -51,6 +51,15 @@ function live(row: Row): boolean {
   return deleted === undefined || deleted === null || deleted === '';
 }
 
+/**
+ * L'instant d'un horodatage, et non son texte : une réponse relue de la base
+ * porte `+00:00` là où une réponse écrite dans la session porte `Z`.
+ */
+function instant(at: string): number {
+  const parsed = Date.parse(at);
+  return Number.isNaN(parsed) ? -Infinity : parsed;
+}
+
 function text(value: unknown): string {
   return typeof value === 'string' ? value : '';
 }
@@ -112,7 +121,7 @@ export function readAnnotations(rows: readonly Row[]): readonly ReviewAnnotation
       ink: inkOf(row.values['ink']),
       created_at: text(row.values['created_at']),
       replies: [...(replies.get(row.id) ?? [])].sort((a, b) =>
-        codePointCompare(a.created_at, b.created_at) || codePointCompare(a.id, b.id)),
+        instant(a.created_at) - instant(b.created_at) || codePointCompare(a.id, b.id)),
     });
   }
   return out;

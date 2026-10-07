@@ -21,6 +21,10 @@ const MARKERS = /\breview_annotation(?:_reply)?s?\b|\breadAnnotations\b|\breview
 const ALLOWED: Readonly<Record<string, string>> = {
   'apps/studio/src/state/review-annotation.ts': 'Les commandes et la lecture des annotations.',
   'apps/studio/src/app/MessageTableAdapter.tsx': 'Le panneau R7.4, qui les montre et les pose.',
+  'apps/studio/src/data/postgrest-schedule-records.ts':
+    'La relecture du circuit du tableau depuis la base, pour le panneau R7.4 et le blocage de R12.',
+  'apps/studio/src/state/session-from-site.ts':
+    'La session relue du dépôt, qui porte les lignes relues ; seul le panneau R7.4 les lit.',
   'packages/db/src/schema/review.ts': 'Le schéma déclaré des deux tables.',
   'packages/db/src/schema/index.ts': 'L’export du schéma.',
   'packages/core-model/src/module-ownership.ts': 'La propriété du module 02 (partie L).',

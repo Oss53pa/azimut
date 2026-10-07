@@ -17,10 +17,38 @@ const FOOTPRINTS = `/sites/${SITE}/levels/${LEVEL}/footprints`;
 
 const ZONE = /Zone de travail : tracez au stylet|Work area: draw with a stylus/;
 
+/**
+ * La zone une fois posée : sa matrice d'écran ne bouge plus d'une mesure à la
+ * suivante. Tant que la zone se recadre sur son contenu, un trait capté à
+ * cheval sur deux cadrages se déforme et n'est plus reconnu ; c'est une course
+ * de l'essai, apparue sous la charge de la CI, et l'essai attend comme le
+ * ferait une main.
+ */
+async function settledZone(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+  const zone = page.getByRole('img', { name: ZONE });
+  const matrix = (): Promise<string> => zone.evaluate(el => {
+    const svg = el instanceof SVGGraphicsElement ? el : el.querySelector('svg');
+    const m = svg?.getScreenCTM();
+    const r = el.getBoundingClientRect();
+    return m === null || m === undefined
+      ? `${String(r.x)},${String(r.y)},${String(r.width)},${String(r.height)}`
+      : `${String(m.a)},${String(m.b)},${String(m.c)},${String(m.d)},${String(m.e)},${String(m.f)},${String(r.width)},${String(r.height)}`;
+  });
+  let previous = await matrix();
+  await expect.poll(async () => {
+    const now = await matrix();
+    const same = now === previous;
+    previous = now;
+    return same;
+  }).toBe(true);
+  const box = await zone.boundingBox();
+  if (box === null) throw new Error('zone introuvable');
+  return box;
+}
+
 /** Un rectangle tracé à main levée, en coordonnées de la zone. */
 async function drawRectangle(page: Page): Promise<void> {
-  const box = await page.getByRole('img', { name: ZONE }).boundingBox();
-  if (box === null) throw new Error('zone introuvable');
+  const box = await settledZone(page);
   const x0 = box.x + box.width * 0.3;
   const y0 = box.y + box.height * 0.3;
   const corners = [
@@ -205,13 +233,30 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
     return box;
   }
 
+  /**
+   * Le contour une fois la zone posée. La zone part d'une largeur provisoire
+   * et se recadre quand elle connaît la sienne : sous charge, une mesure prise
+   * avant ce recadrage s'ajoutait au geste mesuré (112 px pour 60, chain53).
+   * On attend donc deux mesures égales avant de partir.
+   */
+  async function settledDraftBox(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
+    let previous = await draftBox(page);
+    await expect.poll(async () => {
+      const now = await draftBox(page);
+      const same = now.x === previous.x && now.width === previous.width;
+      previous = now;
+      return same;
+    }).toBe(true);
+    return previous;
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
   });
 
   test('la molette zoome autour du pointeur ; les boutons font de même au clavier', async ({ page }) => {
-    const before = await draftBox(page);
+    const before = await settledDraftBox(page);
     const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
     if (zone === null) throw new Error('zone');
     await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2);
@@ -226,7 +271,7 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
   });
 
   test('le bouton du milieu déplace la vue sans rien tracer', async ({ page }) => {
-    const before = await draftBox(page);
+    const before = await settledDraftBox(page);
     const zone = await page.getByRole('img', { name: ZONE }).boundingBox();
     if (zone === null) throw new Error('zone');
     await page.mouse.move(zone.x + 100, zone.y + 100);
@@ -238,8 +283,9 @@ test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail'
   });
 
   test('la vue se retrouve au rechargement, pour ce niveau', async ({ page }) => {
+    await settledDraftBox(page);
     await page.getByRole('button', { name: /^Zoom avant$|^Zoom in$/ }).click();
-    const zoomed = await draftBox(page);
+    const zoomed = await settledDraftBox(page);
     await page.reload();
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
     await expect.poll(async () => Math.round((await draftBox(page)).width)).toBe(Math.round(zoomed.width));

@@ -98,6 +98,8 @@ export type ScheduleTransitionContext = {
   readonly findings: readonly Finding[];
   /** M02.W11 : la validation de complétude du graphe est-elle passée ? */
   readonly graphValidated: boolean;
+  /** A5.8 : le site a-t-il un paquet de règles rattaché ? R14 en fait une condition d'émission. */
+  readonly rulesPackBound: boolean;
   /** Identifiants des annotations de révision ouvertes sur le tableau. */
   readonly openAnnotationIds: readonly string[];
   /** Motif du rejet. Obligatoire pour `reject`, ignoré ailleurs. */
@@ -141,13 +143,15 @@ function scheduleEntity(
  * Dit si un déclencheur est permis dans le contexte donné, et rend la
  * transition qu'il produirait.
  *
- * Refuse dans cinq cas, tous écrits dans la colonne « Condition » de R12 :
+ * Refuse dans six cas, écrits dans la colonne « Condition » de R12 et dans R14 :
  *
  *  · le couple état et déclencheur n'est pas dans la table, `EDIT.CONTEXT_VIOLATION` ;
  *  · une anomalie bloquante subsiste à l'émission pour revue, et ce sont ces
  *    anomalies-là qui sont rendues ;
  *  · la validation de complétude du graphe n'est pas passée, `GRAPH.NOT_VALIDATED`,
  *    règle M02.W11 ;
+ *  · aucun paquet de règles n'est rattaché au site à l'émission pour revue,
+ *    `RULES.PACK_NOT_BOUND` (R14) ;
  *  · une annotation de révision est ouverte à l'approbation, `REVIEW.ANNOTATION_OPEN` ;
  *  · une ligne est périmée à l'approbation, `WAYFIND.SCHEDULE_STALE`.
  *
@@ -155,9 +159,11 @@ function scheduleEntity(
  * R12 ne permet pas de lire : un rejet sans motif, un remplacement par une
  * version qui n'est pas ultérieure.
  *
- * Le rattachement d'un paquet de règles n'est pas une condition d'émission :
- * R12 renvoie à R14, qui en fait un bandeau et non un blocage, et N2.8 dit
- * que le plafond de M02.W9 ne s'exécute alors pas et le signale.
+ * Le rattachement d'un paquet de règles n'est pas une condition de
+ * génération (R12 : « possible sans paquet de règles rattaché »), mais il en
+ * est une d'émission : R14, « Aucun paquet de règles | Bandeau […] Bloque
+ * l'émission pour revue », correction 201 de l'annexe Z. Ce module disait le
+ * contraire, écrit avant la consolidation.
  */
 export function transitionSchedule(
   trigger: ScheduleTrigger,
@@ -212,7 +218,7 @@ function conditionsOf(
 
 /**
  * R12 : « Aucune anomalie bloquante, et validation de complétude du graphe
- * passée, règle M02.W11. »
+ * passée, règle M02.W11. » R14 y ajoute le paquet de règles rattaché.
  *
  * Les anomalies bloquantes sont rendues telles quelles : elles portent déjà
  * leur code, leur entité et leur référence, et les réécrire ici les
@@ -230,6 +236,12 @@ function submitConditions(
   // graphe incomplet reviendrait à faire valider une erreur.
   if (!context.graphValidated) {
     findings.push(refusal('GRAPH.NOT_VALIDATED', {}, entity, 'M02.W11'));
+  }
+
+  // R14, correction 201 de l'annexe Z : sans paquet, le plafond de M02.W9
+  // n'a pas été appliqué (N2.8) ; on ne fait pas relire un tableau qui l'ignore.
+  if (!context.rulesPackBound) {
+    findings.push(refusal('RULES.PACK_NOT_BOUND', {}, entity, 'R14'));
   }
 
   return findings;

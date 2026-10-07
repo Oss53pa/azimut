@@ -15,6 +15,8 @@
  * ce qui a fait écrire `category_id` dans une table qui n'en a pas.
  */
 import type { SiteData } from '@azimut/core-model';
+import type { ScheduleRecords } from '../data/site-repository.js';
+import { NO_SCHEDULE_RECORDS } from '../data/site-repository.js';
 import type { SessionState, StoredRow } from './session-store.js';
 import { EMPTY_SESSION } from './session-store.js';
 
@@ -62,6 +64,15 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
     ...rowsFor('node', site.graph.nodes),
     ...rowsFor('edge', site.graph.edges),
     ...rowsFor('vertical_link', site.graph.vertical_links),
+    // L3.1 — les profils de parcours, que l'atelier du graphe lit pour
+    // montrer le parcours d'un visiteur. En lecture : aucune commande ne les
+    // écrit depuis l'atelier.
+    ...rowsFor('travel_profile', site.travel_profiles),
+    // R12 — l'annuaire, que les conditions de l'émission pour revue lisent :
+    // la continuité du jalonnement (H2.4) et les collisions de nommage (H2.2)
+    // portent sur les destinations et leurs noms. En lecture, comme les profils.
+    ...rowsFor('destination', site.destinations),
+    ...rowsFor('destination_name', site.destination_names),
   ];
 }
 
@@ -71,7 +82,11 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
  * La file est vide et l'état est en ligne : ce qui vient du dépôt y est déjà,
  * et le remettre en file le réécrirait.
  */
-export function sessionFromSite(site: SiteData, sketch: SketchRows = NO_SKETCH): SessionState {
+export function sessionFromSite(
+  site: SiteData,
+  sketch: SketchRows = NO_SKETCH,
+  records: ScheduleRecords = NO_SCHEDULE_RECORDS,
+): SessionState {
   return {
     ...EMPTY_SESSION,
     rows: [
@@ -80,6 +95,17 @@ export function sessionFromSite(site: SiteData, sketch: SketchRows = NO_SKETCH):
       // compilateur lit (J3.3), mais l'atelier la montre.
       ...rowsFor('sketch_layer', sketch.layers),
       ...rowsFor('sketch_stroke', sketch.strokes),
+      // R12 — le circuit du tableau des messages, à part du site lui aussi :
+      // les versions, leurs lignes, les décisions, et les passages de
+      // validation que l'émission pour revue lit (M02.W11).
+      ...rowsFor('graph_validation', records.validations),
+      ...rowsFor('message_schedule', records.schedules),
+      ...rowsFor('message_line', records.lines),
+      ...rowsFor('message_schedule_approval', records.approvals),
+      // J4 — les annotations de révision et leur fil : le panneau R7.4 les
+      // montre, et une annotation ouverte bloque l'approbation (R12).
+      ...rowsFor('review_annotation', records.annotations),
+      ...rowsFor('review_annotation_reply', records.annotationReplies),
     ],
   };
 }

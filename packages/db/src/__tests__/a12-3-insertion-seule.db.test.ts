@@ -17,8 +17,11 @@ const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
 
 const INSERT_ONLY = ['audit_log', 'approval', 'graph_validation', 'message_schedule_approval'] as const;
 
-/** Tables d'A12.3 qui n'existent pas encore : la tranche 2 est suspendue. */
-const NOT_YET_CREATED = new Set<string>(['message_schedule_approval']);
+/**
+ * Tables d'A12.3 qui n'existent pas encore. `message_schedule_approval` en est
+ * sortie à sa création (0074) ; la liste reste, vide, pour la prochaine.
+ */
+const NOT_YET_CREATED = new Set<string>([]);
 
 const ORG = 'a1230000-0000-0000-0000-0000000000a1';
 const USER = 'a1230000-0000-0000-0000-0000000000b1';
@@ -40,7 +43,7 @@ beforeAll(async () => {
 afterAll(async () => { await sql.end(); });
 
 describe('A12.3 — les tables en insertion seule, en base', () => {
-  it('chaque table nommée existe, sauf celle que la tranche suspendue n’a pas créée', () => {
+  it('chaque table nommée existe, sauf celles qui attendent encore leur création', () => {
     const missing = INSERT_ONLY.filter(t => !existing.includes(t));
     expect(missing.filter(t => !NOT_YET_CREATED.has(t))).toEqual([]);
     // Le jour où elle naît, elle doit sortir de la liste d'attente : l'essai la

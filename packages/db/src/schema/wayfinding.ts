@@ -115,3 +115,24 @@ export const messageLine = azimut.table('message_line', {
   index('idx_message_line_org').on(t.org_id),
   index('idx_message_line_schedule').on(t.schedule_id),
 ]);
+
+/**
+ * R12 et H11 — les décisions sur un tableau (migration 0074). Insertion seule
+ * (A12.3) ; l'approbateur et la date sont pris en base, et un rejet porte
+ * toujours son motif dans `comment`.
+ */
+export const messageScheduleApproval = azimut.table('message_schedule_approval', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  schedule_id: uuid('schedule_id').notNull()
+    .references(() => messageSchedule.id, { onDelete: 'restrict' }),
+  user_id: uuid('user_id').notNull(),
+  // H11 : approved ou rejected. Et eux seuls.
+  decision: text('decision').notNull(),
+  comment: text('comment'),
+  decided_at: timestamp('decided_at', { withTimezone: true }).notNull().defaultNow(),
+  inputs_hash: text('inputs_hash').notNull(),
+}, (t) => [
+  index('idx_message_schedule_approval_org').on(t.org_id),
+  index('idx_message_schedule_approval_schedule').on(t.schedule_id, t.decided_at),
+]);

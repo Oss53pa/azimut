@@ -39,6 +39,7 @@ import { loadInspectionRegistry } from './postgrest-inspection.js';
 import { loadAdvertisingData } from './postgrest-advertising.js';
 import { loadTenantRegistry } from './postgrest-tenant.js';
 import { loadSketch } from './postgrest-sketch.js';
+import { loadScheduleRecords } from './postgrest-schedule-records.js';
 
 type SiteListRow = Pick<SiteRow, 'id' | 'org_id' | 'name' | 'country_code'>;
 
@@ -468,6 +469,10 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
 
     loadSketch(siteId: string) {
       return loadSketch(config, siteId);
+    },
+
+    loadScheduleRecords(siteId: string) {
+      return loadScheduleRecords(config, siteId);
     },
 
     /**

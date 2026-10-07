@@ -2676,3 +2676,542 @@ vérifie deux choses :
 | `test:determinism` | 11 |
 | `test:e2e` | 175 |
 | `build` | sans erreur |
+
+## Émission pour revue sans paquet de règles : refusée (R14, annexe Z nº 201)
+
+**Le défaut.** `transitionSchedule` (`engine-graph`) laissait émettre pour
+revue le tableau d'un site sans paquet de règles rattaché. Son commentaire
+disait que R14 en fait « un bandeau et non un blocage ». Le cahier consolidé
+dit le contraire : R14, « Aucun paquet de règles | Bandeau […] Bloque
+l'émission pour revue », et l'annexe Z nº 201 consigne la correction. Le
+module avait été écrit avant la consolidation.
+
+**La correction.**
+
+- Le contexte de transition porte `rulesPackBound`.
+- Sans paquet rattaché, l'émission est refusée avec `RULES.PACK_NOT_BOUND`
+  (référence R14), qui est déjà au catalogue avec la gravité bloquante.
+- La génération reste possible sans paquet. R12 le dit : « possible sans
+  paquet de règles rattaché, avec le bandeau ».
+
+**Essais.** 2 de plus dans `message-schedule-state.test.ts` (refus de
+l'émission, génération permise). Le cumul des causes inclut désormais le
+paquet, et le contrôle « aucun code créé » liste `RULES.PACK_NOT_BOUND`.
+
+**Chaîne A13.2.** Les neuf étapes sortent à 0 (chain50), sur une base remise
+à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 613 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 175 |
+| `build` | sans erreur |
+
+## Parcours d'un visiteur : le parcours animé (L3.1, A7.3)
+
+Chantier choisi par l'utilisateur le 2026-10-06 : le parcours client. Dans le
+cahier, le « parcours client » au sens commercial (H3, module 03) est
+l'analyse des flux, de l'incrément 5. Ce qui répond au besoin de voir le
+chemin d'un visiteur sur le plan, c'est le parcours animé : INV-1, L3.1 et
+A7.3 (`renderRouteAnimation`). C'est lui qui est fait.
+
+**Moteur** (`engine-iso/src/route-animation.ts`) :
+
+- un tronçon par niveau traversé, dans l'ordre du chemin ;
+- un tracé progressif ;
+- des points de décision qui apparaissent quand le tracé les atteint ;
+- une marque par rôle, distincte par la forme et non par la couleur : départ
+  rond évidé, arrivée carrée, décision ronde pleine, changement de niveau en
+  losange ;
+- un équivalent statique sans mouvement par tronçon ;
+- les changements de niveau rendus à part, avec le nœud quitté et le nœud
+  atteint, dont le type dit le moyen.
+
+La durée est celle de l'animation, réglée par l'appelant et répartie au
+prorata des longueurs. Aucune vitesse de marche (INV-5), aucun texte dans le
+rendu (A7). Le rendu est déterministe, même avec les nœuds donnés dans un
+autre ordre.
+
+**Studio.** L'atelier du graphe a un panneau « Parcours d'un visiteur » :
+
+- départ, arrivée, profil, puis « Tracer le parcours » ;
+- le chemin est calculé par `computeRoute`, les points de décision par
+  `deriveDecisionPoints` (qui ne demande plus que le graphe) ;
+- lecture tronçon par tronçon, avec le niveau, la longueur, le nombre de
+  points de décision, et la transition dite au changement de niveau ;
+- « Rejouer », et une vue statique au choix, qui s'ouvre d'elle-même en mode
+  à animation réduite.
+
+Les profils de parcours entrent dans la session chargée du dépôt, en lecture.
+Aucun profil n'est inventé : un site qui n'en déclare pas le dit, et le
+parcours ne se calcule pas.
+
+**Essais.**
+
+- Moteur : 7 (tronçons, transition, répartition des durées, apparition des
+  points de décision, marques, statique sans mouvement, absence de texte,
+  déterminisme, nœud absent refusé).
+- Studio : 3 (profils lus et jamais inventés, parcours sur deux niveaux, refus
+  du moteur rendu tel quel).
+- De bout en bout, 4 dans `l3-parcours.spec.ts` :
+  - le tracé et la transition ;
+  - la vue statique ;
+  - l'animation réduite ;
+  - un site sans profil.
+
+**Défaut révélé, corrigé.** Le panneau a réduit la hauteur de la vue du
+graphe, devenue limitée par sa hauteur. La capture du trait convertissait les
+coordonnées d'écran par le seul rapport des largeurs, et ignorait donc le
+décalage du centrage : un trait tracé d'un nœud à l'autre tombait à côté. La
+première chaîne (chain51) l'a montré :
+
+- `test` : 1 échec, une couleur en dur dans l'essai du moteur ;
+- `test:e2e` : 2 échecs, les arêtes tracées au stylet.
+
+La capture passe désormais par la matrice d'écran du SVG (`getScreenCTM`), et
+l'essai n'écrit plus de couleur en dur.
+
+### Reste ouvert après le parcours animé
+
+- Le parcours n'est montré qu'en plan, dans l'atelier. La borne (P5.5) et la
+  vue isométrique ne s'en servent pas encore.
+- Les étapes écrites (P5.5) existent dans la borne
+  (`kiosk-runtime/wayfinding-session.ts`) mais ne sont pas reprises dans
+  l'atelier. *Faites depuis : voir la section « Étapes écrites ».*
+- L'analyse commerciale des flux (H3) reste de l'incrément 5.
+
+**Chaîne A13.2.** Après correction, les neuf étapes sortent à 0 (chain52),
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 623 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
+
+## Étapes écrites d'un itinéraire, sous forme neutre (partie P, écran Itinéraire)
+
+« Étapes écrites, courtes, dans la langue active. Changement de niveau
+signalé explicitement, avec le moyen. »
+
+**Ce qui existait.** La borne (`kiosk-runtime/wayfinding-session.ts`) tirait
+les étapes du chemin avec ses phrases françaises et anglaises écrites dans le
+code. La règle n'était donc pas partageable, et l'atelier aurait dû la
+recopier.
+
+**Ce qui change.**
+
+- La règle passe dans le moteur de graphe : `routeSteps(graph, route)`. Elle
+  ne produit aucune phrase (A7) :
+  - une étape par nœud du chemin, avec un code (`from`, `take_elevator`,
+    `take_stairs`, `take_escalator`, `pass_by`, `arrival`,
+    `continue_towards`, `go_through`, `continue_for`) et ses paramètres ;
+  - les carrefours et paliers consécutifs d'un même niveau réunis en un
+    « continuer tout droit » qui porte la distance ;
+  - la distance totale et le nombre de changements de niveau.
+- La borne y met ses mots, à l'identique : ses 84 essais passent sans
+  changement.
+- L'atelier du graphe les dit dans la langue active, sous le parcours animé.
+
+**Essais.** 3 pour `routeSteps` (codes sans phrase, réunion avec distance,
+changement de niveau et distance totale). L'essai de bout en bout du parcours
+vérifie les cinq étapes affichées.
+
+**Chaîne A13.2, premier passage (chain53) : deux échecs.**
+
+- `test` : le contrôle des citations refusait « P5.5 ». Le jeton est ambigu,
+  et le contrôle n'accepte en qualificatif que les parties M, N, L et R. Les
+  citations nomment désormais « partie P, écran Itinéraire » ; le contrôle
+  n'est pas assoupli.
+- `test:e2e` : l'essai du bouton du milieu (E3.3) mesurait le contour avant
+  que la zone ne se recadre sur sa largeur réelle. Il trouvait 112 px pour 60.
+  C'est une course de l'essai, apparue sous la charge de la chaîne complète :
+  seul, il passe cinq fois sur cinq. Les trois essais de navigation attendent
+  désormais deux mesures égales avant de partir, et douze répétitions sur
+  quatre processus passent.
+
+**Chaîne A13.2.** Après correction, les neuf étapes sortent à 0 (chain54),
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 626 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
+
+## Itinéraire sur le plan orienté de la borne (partie P, écran Itinéraire ; D10.3, D6.2)
+
+Périmètre choisi par Oss53pa : le calcul seul, sans écran. La borne n'a pas
+encore d'application (`index.html`, `app.js`) : le socle des écrans du totem
+est l'élément « Socle d'orientation, écrans P5 » de la section P15, incrément
+3, taille L, et n'est pas entrepris ici.
+
+- La rotation de D6.2 passe dans `core-model` : `orientationDegForAzimuth`
+  et `orientForDisplay`. Le plan mural (`renderOrientedPlan`) et
+  l'itinéraire de la borne font le même calcul. `engine-layout` réexporte
+  `orientationDegForAzimuth`, son API ne change pas.
+- Le composeur du parcours animé (`renderRouteAnimation`) quitte
+  `engine-iso` pour `engine-graph`. Il ne résout aucune fonction de
+  pictogramme (A5.8), et la borne, qui ne dépend d'aucun moteur de rendu,
+  peut l'employer. Il prend une orientation facultative : sans elle, le plan
+  est nord en haut, à l'octet près comme avant ; avec elle, le plan est tourné
+  selon D6.2 autour de la position de l'usager.
+- La borne gagne `orientedItinerary(site, borne, profil, chemin, options)` :
+  le tracé animé sur son plan orienté, depuis son nœud et son azimut (D10.3),
+  un tronçon par niveau, les points de décision mis en évidence, et
+  l'équivalent statique de chaque tronçon. Une borne placée sur un nœud
+  inconnu est refusée par `DATA.KIOSK_CONFIG_INVALID`.
+- L'atelier du graphe lit le composeur dans `engine-graph` et ne dépend plus
+  d'`engine-iso`.
+- Le commentaire de l'essai A5.8 de la borne disait que tout ce qui se dessine
+  sur une borne est composé à la construction du paquet. Il dit maintenant que
+  c'est vrai de ce qui porte un pictogramme, et que le tracé, lui, se compose à
+  l'exécution. Les assertions de l'essai ne changent pas : la borne ne dépend
+  toujours ni d'`engine-iso`, ni d'`engine-layout`, ni des règles.
+
+**Décision prise.** Tous les tronçons d'un itinéraire sont tournés de
+l'azimut de la borne, y compris ceux des autres niveaux. Le visiteur garde le
+même repère d'un niveau à l'autre. Le cahier des charges ne dit rien de
+l'orientation d'un niveau où la borne n'est pas.
+
+**Essais.**
+
+- `engine-graph`, 3 : le test décisif de D6.4 sur le tracé (tourné vers
+  l'est, le point situé à l'est est plus haut ; tourné vers l'ouest, il est
+  plus bas) ; nord en haut et est à droite sans orientation ; orientation
+  d'azimut nul identique à l'octet au plan nord en haut.
+- `kiosk-runtime`, 5 : D6.4 sur un itinéraire du site de référence
+  multiniveau (la destination devant la borne est dans la moitié haute,
+  derrière elle dans la basse) ; départ à la borne et équivalent statique
+  sans animation ; points de décision marqués ; déterminisme ; nœud inconnu
+  refusé.
+- Essai par mutation : l'azimut passé brut, sans `orientationDegForAzimuth`,
+  fait échouer l'essai D6.4 de la borne.
+- Le rendu nord en haut a été comparé à l'octet avec l'ancien composeur
+  d'`engine-iso`, sur une scène à coordonnées non entières.
+
+### Reste ouvert après l'itinéraire de la borne
+
+- Les écrans du totem (P5) : attente, accueil, recherche, fiche, itinéraire,
+  mode accessible. C'est le socle de l'incrément 3.
+- Le code à scanner pour emporter l'itinéraire, élément « Passage au
+  téléphone » de la section P15.
+- La vue en plan simplifié à la place de l'isométrie, en mode accessible (P5.6) :
+  le tracé est déjà en vue de dessus. Rien n'est à faire tant que l'écran
+  n'existe pas.
+
+**Chaîne A13.2 (chain55).** Les neuf étapes sortent à 0 au premier passage,
+sur une base remise à zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 634 |
+| `test:visual` | 14 |
+| `test:rls` | 94 |
+| `test:determinism` | 11 |
+| `test:e2e` | 179 |
+| `build` | sans erreur |
+
+## Circuit de validation du tableau des messages : émission pour revue et décisions (R12, H11)
+
+Périmètre choisi par Oss53pa : brancher l'émission pour revue, créer la table des
+décisions et ses commandes. Les boutons Approuver et Rejeter restent absents. Le
+studio n'a pas d'authentification, et le rôle de sa session, `designer`, n'a pas
+le droit d'approuver (R2 : « celui qui génère ne peut pas approuver »). Une
+décision sans approbateur réel n'aurait pas de sens.
+
+- **Migration 0074**, dans un commit à part. Elle crée `message_schedule_approval`,
+  telle que H11 la définit. Elle est additive : aucune ligne existante n'est
+  touchée.
+  - Insertion seule, avec les quatre verrous d'A12.3.
+  - Clés en `RESTRICT` : une décision ne disparaît ni avec le site ni avec le
+    tableau qu'elle juge.
+  - Le rejet exige un motif non blanc.
+  - L'approbateur et la date sont pris en base. La politique d'insertion refuse
+    un `user_id` qui ne serait pas celui de la session.
+  - Aller, retour, aller passent sur `azimut_ci`.
+- **Enregistrement de la table.** Elle est déclarée au schéma drizzle et
+  attribuée au module 02 (L3). Elle entre dans la liste des tables en insertion
+  seule du retrait des décors d'essai. L'essai A12.3 la couvre désormais : sa
+  liste d'attente est vide.
+- **Commandes de transition.** Émettre pour revue, rejeter et approuver passent
+  tous par la machine de R12 (`transitionSchedule`), dont les refus sont rendus
+  tels quels.
+  - Chaque transition est un seul geste.
+  - Le rejet et l'approbation écrivent leur décision dans
+    `message_schedule_approval`, jamais dans `approval`.
+  - L'approbation fait passer la version approuvée précédente à `superseded`.
+- **« Émettre pour revue » à l'écran.** Les conditions sont lues dans la session :
+  - les anomalies de R14 qui bloquent l'émission : niveau d'information,
+    continuité (H2.4), nommage (H2.2) dans chaque langue active ;
+  - le dernier passage de validation du site, réussi et portant l'empreinte du
+    graphe actuel (M02.W11) ;
+  - le rattachement d'un paquet de règles.
+
+  Un refus est affiché avec ses codes. La transition s'enregistre sans
+  annulation possible, puisque R12 ne ramène une version en revue au brouillon
+  que par un rejet motivé.
+- **Prérequis de M02.W11.** Le bandeau n'est plus affiché d'office : il se lit
+  dans les passages de validation enregistrés.
+- **Hors ligne (R16).** Générer, émettre et approuver sont retirés, et l'écran
+  le dit.
+- **Annuaire.** Les destinations et leurs noms entrent dans la session, en
+  lecture, comme les profils de parcours.
+
+**Décisions prises.**
+
+- Le plafond de destinations par face n'est pas recontrôlé à l'émission. R14 en
+  fait le déclencheur de l'écartement, appliqué à la génération et tracé ligne
+  par ligne (M02.W9).
+- La politique d'insertion exige que l'approbateur soit l'utilisateur de la
+  session. Elle n'exige pas son rôle : aucune table du schéma ne juge encore un
+  rôle en base, et le relecteur externe (O7) n'a pas de modèle.
+
+**Essais.**
+
+- Base : 5 essais.
+  - L'approbateur et la date sont pris en base.
+  - Un rejet sans motif est refusé.
+  - Une décision hors de H11, ou sans empreinte, est refusée.
+  - Un approbateur forgé est refusé sous le rôle applicatif.
+  - Une décision ne se modifie pas, et le tableau qu'elle juge ne se supprime
+    pas sous elle.
+
+  L'essai A12.3 couvre la table.
+- Commandes : 7 essais.
+- Conditions : 8 essais. Ils portent sur la validation (absente, réussie, pour
+  un autre graphe, échec postérieur), la collision de nommage, le niveau
+  d'information et l'assemblage des conditions.
+- Bout en bout : 2 essais.
+  - Le refus est dit avec ses codes, sans changement d'état.
+  - Les prérequis remplis, la version passe en revue, l'action disparaît, et
+    ni Approuver ni Rejeter n'apparaissent.
+
+  Le premier passage du second essai a été refusé pour continuité rompue :
+  l'essai annonçait des destinations que rien n'atteignait. Le refus était
+  juste, et c'est le décor de l'essai qui a été corrigé.
+
+### Reste ouvert après l'émission pour revue
+
+- Approuver et rejeter à l'écran : il faut un approbateur authentifié (A6). La
+  confirmation de M7 règle 9 et la saisie du motif de rejet viendront avec eux.
+- La session ne recharge depuis la base ni les tableaux, ni les passages de
+  validation, ni les décisions. Hors du stockage local, l'écran est dans l'état
+  vide de R16.
+- La validation du graphe (écran M5) ne lit toujours pas l'annuaire de la
+  session. Ses contrôles de destination ne lèvent donc rien, comme avant.
+- Un essai de bout en bout des commandes de décision contre la base est à
+  écrire. Une décision écrite ne se supprime pas, si bien qu'un tel essai
+  laisserait ses lignes : il demande un décor qui ne soit jamais retiré.
+
+**Chaîne A13.2, premier passage (chain56) : `test` refusé, deux contrôles.**
+
+- Le contrôle des citations a refusé « R2 » seul, en deux endroits. Le jeton
+  est ambigu ; il est désormais cité « R2 (partie R) ».
+- Le contrôle des branchements a refusé `submissionFindings` : la fonction
+  était exportée, mais seul son essai l'appelait. Elle n'est plus exportée, et
+  l'essai passe par `submissionConditions`.
+
+Aucun des deux contrôles n'a été assoupli. La chaîne a été arrêtée, puis
+relancée entière.
+
+**Chaîne A13.2 (chain57).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 649 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
+
+## Rechargement du circuit du tableau des messages depuis la base (R12, E5.4)
+
+Chantier choisi par Oss53pa. Avant lui, la session ne portait que ce que l'écran
+avait écrit lui-même. Hors du stockage local, l'écran du tableau était dans
+l'état vide de R16, et l'émission pour revue ne voyait aucun passage de
+validation enregistré. L'écran du tableau ne relisait d'ailleurs rien du dépôt.
+
+- **Lecture dans le dépôt.** Le dépôt gagne `loadScheduleRecords(siteId)`. Par
+  l'API REST, il lit les versions et les passages de validation du site, puis
+  les lignes et les décisions de ces versions. Le dépôt de référence rend des
+  listes vides, et refuse un site inconnu.
+- **Chargeur commun.** Un même chargeur, `loadSiteSession`, sert l'atelier et
+  l'écran du tableau. L'atelier seul y ajoute son esquisse : J3.3 la réserve à
+  l'atelier, et le garde-fou de J3.3 a refusé un premier chargeur qui la lisait
+  pour les deux. La liste de ce garde-fou n'a pas été touchée.
+- **Lecture des lignes.** Elle accepte les colonnes `jsonb` (`content`,
+  `exclusion_reason`) sous les deux formes : le texte que le chemin d'écriture
+  pose dans la session, et l'objet que la base rend.
+- **Dernier passage de validation.** Il se juge à l'instant, et non au texte de
+  l'horodatage : la base écrit `+00:00`, la session écrit `Z`.
+
+**Essais.**
+
+- Dépôt : 4 essais.
+  - Le dépôt de référence rend des listes vides.
+  - Un site inconnu est refusé.
+  - Les tables sont lues avec leurs filtres de site et de version.
+  - Sans version, ni lignes ni décisions ne sont demandées.
+- Session : 4 essais.
+  - Un tableau relu, aux colonnes en objets, se lit avec son écartement.
+  - Les décisions entrent dans la session.
+  - Un passage relu vaut pour le graphe actuel.
+  - Un passage plus récent l'emporte, malgré les deux écritures de l'instant.
+
+**Non vérifié.** La lecture contre un PostgREST réel n'a pas d'essai : le dépôt
+n'est éprouvé qu'avec un `fetch` simulé. Un tel essai laisserait en base des
+lignes en insertion seule (décisions, passages de validation) qu'aucun retrait
+ne peut ôter.
+
+**Constaté, non traité.**
+
+- `apps/studio/src/data/postgrest-repository.ts` dépassait déjà 400 lignes ; il
+  en gagne quatre.
+- Les annotations de révision (J4) ne se relisent toujours pas depuis la base.
+- La version approuvée ne montre pas encore son bandeau d'approbateur et de
+  date (R16).
+
+**Chaîne A13.2 (chain58).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 657 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
+
+## Annotations de révision relues depuis la base (J4, R12)
+
+Chantier choisi par Oss53pa. Avant lui, les annotations de révision se
+perdaient à la réouverture d'un site, alors qu'une annotation ouverte bloque
+l'approbation (`REVIEW.ANNOTATION_OPEN`).
+
+- Le circuit du tableau relu depuis la base porte désormais les annotations du
+  site et leur fil. Ni les annotations supprimées ni les réponses supprimées
+  ne sont relues : la suppression est logique.
+- Une annotation ouverte relue bloque l'approbation, comme une annotation posée
+  dans la session. Son tracé au stylet, que la base rend sous forme de tableau,
+  se relit tel quel.
+- Le fil se trie à l'instant, et non au texte de l'horodatage. Une réponse
+  écrite dans la session après une réponse relue vient bien après elle.
+- Deux fichiers nomment désormais les tables d'annotation : le chargeur REST
+  du circuit et la session relue du dépôt. Le contrôle J4 les inscrit, chacun
+  avec sa raison, comme le contrôle J3.3 le fait pour l'esquisse. Ses
+  assertions ne changent pas : `SiteData` ne porte aucune annotation, et aucun
+  moteur, compilateur ni export ne les nomme.
+
+**Essais.**
+
+- Dépôt : la lecture des annotations est filtrée par site et sans les
+  supprimées, la réponse supprimée est écartée, et sans annotation aucune
+  réponse n'est demandée.
+- Session : 2 essais.
+  - L'annotation relue garde son tracé et son fil, et bloque l'approbation.
+  - Le fil mêle correctement les deux écritures de l'instant.
+
+**Non vérifié.** Comme pour le reste du circuit, la lecture contre un PostgREST
+réel n'a pas d'essai.
+
+**Chaîne A13.2 (chain59).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 659 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 181 |
+| `build` | sans erreur |
+
+## Bandeau de version approuvée (R16)
+
+Chantier choisi par Oss53pa. R16 : « Version approuvée | Bandeau d'état
+indiquant l'approbateur et la date. Aucune action de génération sur cette
+version. »
+
+- La décision qui approuve la version affichée se lit dans les décisions
+  relues de la base : c'est la dernière décision `approved` de ce tableau,
+  jugée à l'instant.
+- Le bandeau dit la date, et l'approbateur par son identifiant : les huit
+  premiers caractères, puis la valeur complète à côté, comme pour l'empreinte
+  des entrées (R4).
+- Le modèle ne porte aucun nom d'utilisateur (A5.1). Une note à l'éditeur le
+  signale (`docs/note-editeur-nom-approbateur.md`) ; rien n'est ajouté au
+  modèle. Choix de l'utilisatrice, au titre de A2.2.
+- Si aucune décision n'est lue, le bandeau le dit au lieu d'inventer un
+  approbateur.
+- Aucune action de génération n'est offerte sur une version approuvée : la
+  machine de R12 n'en permet aucune depuis cet état.
+
+**Essais.**
+
+- Lecture de la décision : 3 essais.
+  - Sans décision, rien n'est inventé.
+  - Un rejet, ou la décision d'une autre version, ne compte pas.
+  - C'est la dernière approbation qui compte, jugée à l'instant.
+- Bout en bout : 2 essais.
+  - Le bandeau donne l'identifiant et la date, et n'offre aucune action de
+    génération, d'émission ni de décision.
+  - Sans décision lue, le bandeau le dit.
+
+**Chaîne A13.2 (chain60).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 662 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 183 |
+| `build` | sans erreur |
+
+## Aperçu du parcours : le calcul des points de décision n'est plus tu (L3.1)
+
+Chantier choisi par Oss53pa. L'aperçu du parcours, dans l'atelier du graphe,
+taisait deux choses :
+
+- un refus du calcul des points de décision, qu'il traitait comme un parcours
+  sans point de décision ;
+- les avertissements d'un tracé réussi, que l'écran effaçait.
+
+La borne, elle, rendait déjà le refus.
+
+- Un refus arrête le tracé et se dit avec ses codes.
+- Les avertissements accompagnent le tracé, chacun avec sa sévérité.
+
+Le moteur ne lève aujourd'hui ni refus ni avertissement sur ce calcul. Le
+défaut était donc latent ; l'essai simule les deux cas pour que l'aperçu les
+dise déjà le jour où le moteur en lèvera.
+
+**Essais.** 2 nouveaux essais : un refus arrête le tracé, un avertissement
+l'accompagne. L'essai par mutation le confirme : sur l'ancien code, les deux
+échouent.
+
+**Chaîne A13.2 (chain61).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 664 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 183 |
+| `build` | sans erreur |

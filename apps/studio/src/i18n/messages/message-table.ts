@@ -127,6 +127,8 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.banner.graph_not_validated.hint': 'Écran de validation du site.',
   'msgtable.banner.no_rules_pack': 'Aucun paquet de règles rattaché au site. Le plafond de destinations par face n’est pas appliqué.',
   'msgtable.banner.approved': 'Version approuvée par {approver} le {date}. Aucune génération sur cette version.',
+  'msgtable.banner.approved.approver': 'Identifiant complet de l’approbateur : {id}.',
+  'msgtable.banner.approved.unread': 'Version approuvée. La décision qui l’approuve n’a pas pu être lue : approbateur et date inconnus.',
   'msgtable.banner.unreadable': '{count} ligne(s) enregistrée(s) n’ont pas pu être lues et ne sont pas affichées.',
 
   // R16 — états de l'écran
@@ -137,6 +139,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.error.cause': 'La génération a échoué.',
   'msgtable.error.recovery': 'La version précédente est conservée. Relancez la génération.',
   'msgtable.offline': 'Consultation et annotation possibles. Générer, émettre et approuver sont indisponibles.',
+  'msgtable.refused': 'La transition demandée est refusée. Chaque motif ci-dessous se corrige à sa source.',
   'msgtable.denied': 'Ce rôle ne consulte pas le tableau des messages.',
 
   // R15 — raccourcis
@@ -294,6 +297,8 @@ export const MESSAGE_TABLE_EN: Readonly<Record<keyof typeof MESSAGE_TABLE_FR, st
   'msgtable.banner.graph_not_validated.hint': 'Site validation screen.',
   'msgtable.banner.no_rules_pack': 'No rules pack bound to the site. The cap on destinations per face is not applied.',
   'msgtable.banner.approved': 'Version approved by {approver} on {date}. No generation on this version.',
+  'msgtable.banner.approved.approver': 'Full approver identifier: {id}.',
+  'msgtable.banner.approved.unread': 'Version approved. The decision approving it could not be read: approver and date unknown.',
   'msgtable.banner.unreadable': '{count} stored line(s) could not be read and are not displayed.',
 
   'msgtable.empty.message': 'No schedule version for this site. Prerequisites: validated graph, established wayfinding plan, bound rules pack.',
@@ -303,6 +308,7 @@ export const MESSAGE_TABLE_EN: Readonly<Record<keyof typeof MESSAGE_TABLE_FR, st
   'msgtable.error.cause': 'Generation failed.',
   'msgtable.error.recovery': 'The previous version is kept. Run the generation again.',
   'msgtable.offline': 'Consultation and annotation remain possible. Generate, submit and approve are unavailable.',
+  'msgtable.refused': 'The requested transition is refused. Each reason below is fixed at its source.',
   'msgtable.denied': 'This role does not consult the message schedule.',
 
   'msgtable.shortcuts': 'Shortcuts',

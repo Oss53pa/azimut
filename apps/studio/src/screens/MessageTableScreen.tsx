@@ -5,6 +5,8 @@ import {
 import type { ScreenState } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { MessageSchedule, ScheduleTrigger } from '@azimut/engine-graph';
+import { getErrorMessage } from '@azimut/core-model';
+import type { ErrorCode, Finding } from '@azimut/core-model';
 import type { Option } from '../components/ui/index.js';
 import type {
   Grouping, RowGroup, ScheduleFilters, ScheduleRow,
@@ -92,6 +94,13 @@ export type MessageTableScreenProps = {
   readonly annotationPanel: JSX.Element | null;
   /** R12 — les annotations ouvertes sur ce tableau, qui bloquent l'approbation. */
   readonly openAnnotationCount: number;
+  /** R12 — les refus de la dernière transition demandée, chacun avec son code. */
+  readonly refusals: readonly Finding[];
+  /**
+   * R16 — la décision qui approuve la version affichée, quand elle est
+   * approuvée. `null` si la décision n'est pas lue : l'écran le dit.
+   */
+  readonly approval: { readonly approverId: string; readonly decidedAt: string } | null;
 };
 
 export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element {
@@ -203,9 +212,39 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
 
 /** R10 et R14 — les bandeaux, dans l'ordre où ils bloquent. */
 function Banners(props: MessageTableScreenProps): JSX.Element {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.xs }}>
+      {props.refusals.length > 0 && (
+        <p role="alert" style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-primary)' }}>
+          {t('msgtable.refused')}
+        </p>
+      )}
+      {props.refusals.map(f => (
+        <StateBanner
+          key={`${f.code}:${f.entity?.id ?? ''}`}
+          severity="blocking"
+          code={f.code}
+          message={getErrorMessage(f.code as ErrorCode, lang) ?? f.code}
+        />
+      ))}
+      {!props.online && (
+        <StateBanner severity="info" message={t('msgtable.offline')} />
+      )}
+      {props.schedule.state === 'approved' && (props.approval === null ? (
+        <StateBanner severity="info" message={t('msgtable.banner.approved.unread')} />
+      ) : (
+        <StateBanner
+          severity="info"
+          message={t('msgtable.banner.approved', {
+            // R4 (partie R), pour l'empreinte : huit premiers caractères, la
+            // valeur complète dite à côté. L'identifiant suit la même règle.
+            approver: props.approval.approverId.slice(0, 8),
+            date: props.approval.decidedAt,
+          })}
+          hint={t('msgtable.banner.approved.approver', { id: props.approval.approverId })}
+        />
+      ))}
       {!props.graphValidated && (
         <StateBanner
           severity="blocking"

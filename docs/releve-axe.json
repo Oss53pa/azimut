@@ -13,6 +13,76 @@
   "limite": "L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.",
   "incomplets": [
     {
+      "ecran": "M4 saisie du graphe",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "section > div > div > div[role=\"status\"] > div > div",
+        "span:nth-child(2) > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "M4 saisie du graphe",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "section > div > div > div[role=\"status\"] > div > div",
+        "span:nth-child(2) > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "M4 saisie du graphe",
+      "etat": "vide",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "section > div > div > div[role=\"status\"] > div > div",
+        "span:nth-child(2) > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "M4 saisie du graphe",
+      "etat": "vide",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "section > div > div > div[role=\"status\"] > div > div",
+        "span:nth-child(2) > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "M4 saisie du graphe",
+      "etat": "hors ligne",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "div[role=\"status\"] > div > div"
+      ]
+    },
+    {
+      "ecran": "M4 saisie du graphe",
+      "etat": "hors ligne",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "div:nth-child(2) > section > header > h2",
+        "div[role=\"status\"] > div > div"
+      ]
+    },
+    {
       "ecran": "M1 création d’un site",
       "etat": "formulaire ouvert",
       "langue": "fr",

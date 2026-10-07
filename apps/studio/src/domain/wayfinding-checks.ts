@@ -7,12 +7,22 @@
  * graphe (à quel point chacune est atteinte). Les noms d'orientation viennent
  * de l'annuaire, cloisonnés par bâtiment comme le veut H2.2.
  */
-import type { SiteData } from '@azimut/core-model';
+import type { Destination, DestinationName, SiteData } from '@azimut/core-model';
 import type { MessageSchedule, JalonnementSequence, JalonnementStep, NamedEntity } from '@azimut/engine-graph';
 import { codePointCompare } from '@azimut/core-model';
 
+/**
+ * Ce que les deux garde-fous lisent du site : le graphe, les niveaux,
+ * l'annuaire. L'écran du tableau des messages, qui ne tient pas le site
+ * entier, les lui donne depuis sa session.
+ */
+export type WayfindingCheckSite = Pick<SiteData, 'graph' | 'levels'> & {
+  readonly destinations: readonly Pick<Destination, 'id' | 'node_id' | 'occupant_name'>[];
+  readonly destination_names: readonly Pick<DestinationName, 'destination_id' | 'lang' | 'value'>[];
+};
+
 /** Bâtiment porteur d'un nœud, via son niveau. */
-function buildingOfNode(site: SiteData, nodeId: string): string {
+function buildingOfNode(site: WayfindingCheckSite, nodeId: string): string {
   const node = site.graph.nodes.find(n => n.id === nodeId);
   if (node === undefined) return '';
   const level = site.levels.find(l => l.id === node.level_id);
@@ -28,7 +38,7 @@ function buildingOfNode(site: SiteData, nodeId: string): string {
  * `reached` : les destinations dont le nœud EST ce point.
  */
 export function jalonnementFromSchedule(
-  site: SiteData,
+  site: WayfindingCheckSite,
   schedule: MessageSchedule,
 ): readonly JalonnementSequence[] {
   const announced = new Map<string, Set<string>>();
@@ -69,7 +79,7 @@ export function jalonnementFromSchedule(
  * sans nom dans la langue demandée retombe sur le nom d'occupant, qui est ce
  * que la face afficherait.
  */
-export function orientationNames(site: SiteData, lang: string): readonly NamedEntity[] {
+export function orientationNames(site: WayfindingCheckSite, lang: string): readonly NamedEntity[] {
   return [...site.destinations]
     .sort((a, b) => codePointCompare(a.id, b.id))
     .map((destination): NamedEntity => {

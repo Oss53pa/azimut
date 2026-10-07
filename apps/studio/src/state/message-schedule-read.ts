@@ -20,6 +20,8 @@ import { rowsOf } from './session-store.js';
 import type { Exclusion } from './message-schedule-commands.js';
 
 export type ReadSchedule = {
+  /** L'identifiant de stockage du tableau : les transitions de R12 l'écrivent. */
+  readonly scheduleId: string;
   readonly schedule: MessageSchedule;
   /** R9 — l'écartement de M02.W9, par identifiant stable de ligne. */
   readonly exclusions: ReadonlyMap<string, Exclusion>;
@@ -54,8 +56,13 @@ function boolean(values: Readonly<Record<string, unknown>>, key: string): boolea
   return value === 'true';
 }
 
-function parsed(raw: string | null): unknown {
-  if (raw === null) return null;
+/**
+ * Une colonne `jsonb`, sous l'une de ses deux formes : le texte que le chemin
+ * d'écriture pose dans la session, ou l'objet que la base rend à la relecture.
+ */
+function parsed(raw: unknown): unknown {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== 'string') return raw;
   try {
     return JSON.parse(raw);
   } catch {
@@ -112,7 +119,7 @@ function isBlockKind(value: unknown): value is ContentBlockKind {
   return typeof value === 'string' && BLOCK_KINDS.some(kind => kind === value);
 }
 
-function readContent(raw: string | null): LineContent | null {
+function readContent(raw: unknown): LineContent | null {
   const value = parsed(raw);
   if (!isRecord(value)) return null;
   const kind = value['block_kind'];
@@ -129,7 +136,7 @@ function readContent(raw: string | null): LineContent | null {
   return { block_kind: kind, entries };
 }
 
-function readExclusion(raw: string | null): Exclusion | null {
+function readExclusion(raw: unknown): Exclusion | null {
   const value = parsed(raw);
   if (!isRecord(value)) return null;
   const cap = value['cap'];
@@ -152,7 +159,7 @@ function readLine(row: StoredRow): MessageLine | null {
   const blockIndex = integer(v, 'block_index');
   const decisionPointId = text(v, 'decision_point_id');
   const level = integer(v, 'information_level');
-  const content = readContent(text(v, 'content'));
+  const content = readContent(v['content']);
 
   if (supportId === null || faceIndex === null || blockIndex === null) return null;
   // M02.W4 : une ligne sans point de décision ne peut pas exister. Une telle
@@ -226,7 +233,7 @@ export function readSchedule(
     lines.push(line);
     rowIds.set(line.id, row.id);
     if (boolean(row.values, 'excluded')) {
-      const exclusion = readExclusion(text(row.values, 'exclusion_reason'));
+      const exclusion = readExclusion(row.values['exclusion_reason']);
       // M02.W9 : l'écartement est tracé, jamais silencieux. Un écartement sans
       // motif lisible rend la ligne illisible plutôt qu'écartée sans raison.
       if (exclusion === null) {
@@ -240,6 +247,7 @@ export function readSchedule(
   }
 
   return {
+    scheduleId: head.id,
     schedule: {
       site_id: siteId,
       version: storedVersion,

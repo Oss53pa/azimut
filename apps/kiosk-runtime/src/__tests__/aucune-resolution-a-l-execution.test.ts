@@ -9,8 +9,11 @@ import { join } from 'node:path';
  * paquets de règles, et `loadKioskSite` rend un site où ce champ est absent,
  * et non vide : `KioskSite`. Une résolution faite ici ne trouverait donc jamais
  * le registre de sécurité, et omettrait la marque là où elle compte le plus :
- * l'écran d'évacuation. Tout ce qui se dessine sur une borne est composé à la
- * construction du paquet.
+ * l'écran d'évacuation. Tout ce qui porte un pictogramme est composé à la
+ * construction du paquet. Le tracé d'un itinéraire, lui, se compose à
+ * l'exécution, puisque le visiteur choisit sa destination : il vient du moteur
+ * de graphe, ne porte aucun pictogramme, et les moteurs de rendu restent hors
+ * de la borne.
  *
  * L'essai lit les imports du code d'exécution et refuse ceux qui résolvent une
  * fonction ou dessinent un plan. Un import par espace de noms est refusé aussi :

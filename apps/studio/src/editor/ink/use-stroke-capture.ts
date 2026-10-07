@@ -89,13 +89,34 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
     return out.accept ? kind : null;
   }
 
+  /**
+   * La matrice de l'écran vers le repère de la vue, quand la zone est un SVG.
+   *
+   * Elle tient compte du `viewBox` et du centrage (`preserveAspectRatio`) :
+   * une vue limitée par sa hauteur est centrée avec un décalage horizontal, que
+   * le seul rapport des largeurs ne voit pas — un trait tombait alors à côté
+   * des nœuds visés.
+   */
+  function screenMatrix(event: PointerEventLike): DOMMatrix | null {
+    const target = event.currentTarget;
+    if (typeof SVGSVGElement === 'undefined' || !(target instanceof SVGSVGElement)) return null;
+    return target.getScreenCTM()?.inverse() ?? null;
+  }
+
   /** Le rapport entre l'écran et le repère de la vue. */
   function ratio(event: PointerEventLike): number {
+    const matrix = screenMatrix(event);
+    if (matrix !== null && matrix.a > 0) return 1 / matrix.a;
     const width = event.currentTarget.getBoundingClientRect().width;
     return width > 0 ? width / options.viewWidth_px : 1;
   }
 
   function at(event: PointerEventLike): Point {
+    const matrix = screenMatrix(event);
+    if (matrix !== null) {
+      const p = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix);
+      return options.toMetres({ x_px: p.x, y_px: p.y });
+    }
     const box = event.currentTarget.getBoundingClientRect();
     const k = ratio(event);
     return options.toMetres({ x_px: (event.clientX - box.left) / k, y_px: (event.clientY - box.top) / k });
