@@ -53,11 +53,16 @@ const BASE_ROWS = [
 /**
  * L'annuaire qui rend le jalonnement continu : chaque destination annoncée au
  * point `n-hall` y est atteinte (H2.4). Sans lui, l'émission est refusée pour
- * continuité rompue, et c'est juste.
+ * continuité rompue, et c'est juste. Les lignes portent toutes les colonnes
+ * requises d'une destination, comme en base : une ligne incomplète serait
+ * illisible, donc écartée, et la continuité se romprait de même.
  */
 const DIRECTORY = [0, 1].map(index => ({
   table: 'destination', id: `dest-${String(index)}`,
-  values: { id: `dest-${String(index)}`, org_id: 'org-a', node_id: 'n-hall', occupant_name: `Destination ${String(index)}` },
+  values: {
+    id: `dest-${String(index)}`, org_id: 'org-a', node_id: 'n-hall', occupant_name: `Destination ${String(index)}`,
+    footprint_id: `fp-${String(index)}`, category_id: 'cat-commerce', occupancy_status: 'occupied', display_priority: 1,
+  },
 }));
 
 const PREREQUISITES = [

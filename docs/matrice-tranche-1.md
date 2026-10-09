@@ -3215,3 +3215,66 @@ zéro :
 | `test:determinism` | 11 |
 | `test:e2e` | 183 |
 | `build` | sans erreur |
+
+## La validation du graphe lit l'annuaire de la session (M5)
+
+Chantier choisi par Oss53pa. Jusqu'ici, la portée de la validation laissait
+l'annuaire vide (« l'annuaire entre avec le module 02 »). Ses contrôles de
+destination ne levaient donc rien, même sur un site qui en déclarait. La
+session porte désormais l'annuaire relu du dépôt, et ces contrôles
+s'appliquent :
+
+- destination reliée à un nœud absent (`GRAPH.DESTINATION_UNLINKED`) ;
+- destination inatteignable depuis une entrée ;
+- nom manquant dans une langue.
+
+Comportement de la lecture :
+
+- Une ligne d'annuaire illisible est écartée et comptée, jamais complétée.
+  Elle s'affiche comme toute ligne illisible de la session.
+- Une session sans annuaire n'en invente aucun.
+- L'émission pour revue lit la même portée au lieu d'une lecture à part.
+
+Le résultat de la validation peut donc changer : un site déclaré « sans
+anomalie » peut maintenant en montrer, si son annuaire en porte.
+
+**Essais.** 4 essais de portée.
+
+- L'annuaire du site est rendu tel quel.
+- La validation lève `GRAPH.DESTINATION_UNLINKED` sur une destination dont le
+  nœud manque.
+- Rien n'est inventé sans annuaire.
+- Une destination illisible est écartée et comptée.
+
+L'ancien essai, qui exigeait une portée sans destination, est remplacé par ces
+quatre.
+
+**Non traité.** Les profils de parcours, que la session porte aussi, n'entrent
+pas dans la portée. Le contrôle de couverture des entrées
+(`GRAPH.DESTINATION_ENTRANCE_COVERAGE`) n'est donc toujours pas exercé dans
+l'atelier.
+
+**Chaîne A13.2, premiers passages : deux refus.**
+
+- chain62, `test` : le contrôle des citations a refusé « M5 » seul, en trois
+  commentaires. Le jeton est désormais cité « M5 (partie M) ».
+- chain63, `test:e2e` : l'essai d'émission R12 était refusé pour continuité
+  rompue. Son décor ne donnait aux destinations que leur nœud et leur nom. La
+  nouvelle lecture les jugeait illisibles et les écartait : c'était la
+  conséquence attendue du chantier, révélée par un décor irréaliste. Le décor
+  porte maintenant les colonnes requises, comme en base.
+
+Aucun contrôle et aucune lecture n'ont été assouplis. La chaîne a été relancée
+entière après chaque correction.
+
+**Chaîne A13.2 (chain64).** Les neuf étapes sortent à 0, sur une base remise à
+zéro :
+
+| Étape | Résultat |
+| --- | --- |
+| `test` | 4 667 |
+| `test:visual` | 14 |
+| `test:rls` | 99 |
+| `test:determinism` | 11 |
+| `test:e2e` | 183 |
+| `build` | sans erreur |
