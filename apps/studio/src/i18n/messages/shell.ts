@@ -9,6 +9,7 @@
  */
 export const SHELL_FR = {
   'shell.brand.home': "Azimut, retour à l'accueil",
+  'shell.brand.logo': 'Azimut — une société Atlas Studio',
   'shell.nav.home': 'Accueil',
   'shell.nav.overview': "Vue d'ensemble",
   'shell.nav.screens': 'Écrans du module {module}',
@@ -65,6 +66,7 @@ export const SHELL_FR = {
 
 export const SHELL_EN: Readonly<Record<keyof typeof SHELL_FR, string>> = {
   'shell.brand.home': 'Azimut, back to home',
+  'shell.brand.logo': 'Azimut — an Atlas Studio company',
   'shell.nav.home': 'Home',
   'shell.nav.overview': 'Overview',
   'shell.nav.screens': 'Screens of module {module}',

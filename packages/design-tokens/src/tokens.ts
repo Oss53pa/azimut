@@ -80,6 +80,18 @@ export const sketchPalette = {
 
 export type SketchTokenKey = keyof typeof sketchPalette;
 
+/**
+ * Marque Atlas Studio. La couleur de la signature, fixée par le kit de logos
+ * de l'éditeur (noir Atlas). Elle ne sert qu'à la couleur que le navigateur
+ * donne à sa propre barre (`theme-color`) ; elle n'entre jamais dans
+ * l'interface, dont les couleurs restent celles du thème actif.
+ */
+export const brandTokens = {
+  'brand-ink': '#0E0E0E',
+} as const;
+
+export type BrandTokenKey = keyof typeof brandTokens;
+
 /** Backward-compatible alias — Papier state colors. */
 export const stateColors = stateColorsPapier;
 

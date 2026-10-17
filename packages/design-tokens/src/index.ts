@@ -8,6 +8,7 @@ export {
   isoTokens,
   kioskTokens,
   kioskTokensHighContrast,
+  brandTokens,
   radii,
   RADIUS_SCALE,
   isAllowedRadius,
@@ -27,6 +28,7 @@ export type {
   StateTokenKey,
   IsoTokenKey,
   KioskTokenKey,
+  BrandTokenKey,
   SpacingKey,
   TypeRole,
 } from './tokens.js';

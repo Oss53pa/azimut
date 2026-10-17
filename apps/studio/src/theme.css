@@ -105,3 +105,25 @@ a {
   max-width: 100%;
   height: auto;
 }
+
+/*
+ * Logo Atlas Studio (kit de marque). Les fichiers du kit ne se recolorent pas :
+ * le thème choisit la version, noire sur le thème clair, blanche sur le thème
+ * sombre. Une seule est montrée, l'autre sort aussi de l'arbre d'accessibilité.
+ */
+.az-brand-logo img {
+  display: block;
+  width: auto;
+}
+
+.az-brand-logo .az-brand-logo-blanc {
+  display: none;
+}
+
+:root[data-theme='instrument'] .az-brand-logo .az-brand-logo-noir {
+  display: none;
+}
+
+:root[data-theme='instrument'] .az-brand-logo .az-brand-logo-blanc {
+  display: block;
+}
