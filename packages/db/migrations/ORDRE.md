@@ -122,6 +122,7 @@ non plus — elle n'en retire que les clés étrangères.
 0076_a6_1_cloisonnement_complet
 0077_a6_2_fabricants_et_vendor
 0078_e5_1_liste_blanche_commandes
+0079_a2_4_identite_sous_le_proprietaire
 ```
 
 ## Règle pour la suite
@@ -204,6 +205,12 @@ que les lots du fabricant auquel il est rattaché (`vendor_member`), et ce qui
 en dépend. Une table nouvelle que ce rôle doit lire reçoit, dans sa
 politique `role_read`, la branche qui la relie à `lot_support` ; sinon le
 `vendor` ne la voit pas, ce qui est le défaut voulu.
+
+**L'identité sous le propriétaire (0079).** `current_user_id()` s'exécute
+sous le propriétaire des tables. Sur une plateforme dont le schéma `auth`
+appartient à un autre administrateur, les rôles propriétaires des fonctions
+n'ont pas besoin de l'usage de `auth` : les pas manuels décrits pour 0075 et
+0076 deviennent sans objet une fois 0079 appliquée.
 
 **La liste blanche des commandes (0078).** `azimut.command_table` dit quelles
 tables `apply_commands` peut viser. Une table attribuée à un module dans
