@@ -118,6 +118,7 @@ non plus — elle n'en retire que les clés étrangères.
 0072_j3_4_sketch_layer
 0073_j4_review_annotation
 0074_r12_message_schedule_approval
+0075_a6_2_membres_et_roles
 ```
 
 ## Règle pour la suite
@@ -159,6 +160,24 @@ en production, est membre de `azimut_compiler` et de `authenticated`, et de
 rien d'autre : elle prend un travail sous le premier, puis le traite sous
 l'identité de son demandeur.
 
+**Le rôle propriétaire des membres (0075).** `azimut_membership_admin` possède
+les fonctions qui créent une organisation et inscrivent, changent ou retirent
+un membre, ainsi que la lecture des organisations où l'utilisateur courant tient
+un rôle. Il ne sert à aucune connexion et personne ne l'endosse. Même règle que
+pour la file : la migration le crée s'il manque, sinon il est créé avant, et le
+propriétaire doit en être membre pour lui confier les fonctions. Sur une
+plateforme qui fournit `auth`, il doit aussi pouvoir lire `auth.uid()` : la
+migration accorde `USAGE` sur le schéma `auth`, et si le rôle qui migre ne le
+peut pas, elle l'annonce par un avertissement. Le pas se fait alors sous un
+rôle d'administration : `GRANT USAGE ON SCHEMA auth TO azimut_membership_admin;`.
+Tant qu'il manque, les fonctions de membres refusent tout : rien ne s'ouvre.
+
+**Les politiques par rôle (0075).** Toute table nouvelle portant `org_id`
+reçoit, dans sa migration, les politiques restrictives `role_read`,
+`role_insert`, `role_update` et `role_delete` (seulement les deux premières
+pour une table en insertion seule). `a6-2-roles.db.test.ts` lit la base et
+échoue si l'une manque.
+
 ```sh
 initdb -D "$PGDATA" -U postgres --auth=trust
 pg_ctl -D "$PGDATA" -o '-p 54332' -l "$PGDATA/server.log" start -w
@@ -170,6 +189,8 @@ GRANT authenticated TO azimut;
 CREATE ROLE azimut_compiler NOLOGIN;
 CREATE ROLE azimut_job_dispatch NOLOGIN;
 GRANT azimut_compiler, azimut_job_dispatch TO azimut;
+CREATE ROLE azimut_membership_admin NOLOGIN;
+GRANT azimut_membership_admin TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 
