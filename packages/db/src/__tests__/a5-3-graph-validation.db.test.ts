@@ -173,12 +173,23 @@ describe('A12.3 — graph_validation est en insertion seule', () => {
     expect(granted).toEqual(['INSERT', 'SELECT']);
   });
 
-  /** A6.1 : la politique existe, elle est forcée, et elle n'est pas FOR ALL. */
+  /**
+   * A6.1 : la politique existe, elle est forcée, et elle n'est pas FOR ALL.
+   * Les politiques restrictives par rôle d'A6.2 (0075) ne nomment, elles
+   * aussi, que la lecture et l'insertion.
+   */
   it('porte deux politiques distinctes, en lecture et en insertion', async () => {
     const rows = await db.execute(sql`
       select cmd from pg_policies
-      where schemaname = 'azimut' and tablename = 'graph_validation'`);
+      where schemaname = 'azimut' and tablename = 'graph_validation'
+        and permissive = 'PERMISSIVE'`);
     expect(rows.map(r => String(r['cmd'])).sort()).toEqual(['INSERT', 'SELECT']);
+
+    const restrictive = await db.execute(sql`
+      select cmd from pg_policies
+      where schemaname = 'azimut' and tablename = 'graph_validation'
+        and permissive = 'RESTRICTIVE'`);
+    expect(restrictive.map(r => String(r['cmd'])).sort()).toEqual(['INSERT', 'SELECT']);
 
     const forced = await db.execute(sql`
       select relforcerowsecurity from pg_class

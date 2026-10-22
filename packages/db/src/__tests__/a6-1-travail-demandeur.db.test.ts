@@ -6,6 +6,7 @@ import { buildCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { loadSiteDataAs } from '../load-site-data.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { provisionOrganization } from '../provision-organization.js';
 
 /**
  * A6.1 — le service de compilation lit sous l'identité du demandeur du travail
@@ -46,15 +47,16 @@ async function asUser<T>(userId: string, run: (tx: Tx) => Promise<T>): Promise<T
   });
 }
 
-async function seedOrg(userId: string, orgId: string, slug: string): Promise<void> {
-  await asUser(userId, async (tx) => {
-    await tx.execute(sql`insert into azimut.organization(id,name,slug) values (${orgId}, ${slug}, ${slug})`);
-  });
+/** L'organisation et son premier administrateur, provisionnés (0075). */
+async function seedOrg(adminId: string, orgId: string, slug: string): Promise<void> {
+  await client.begin(tx => provisionOrganization(
+    text => tx.unsafe(text), { id: orgId, name: slug, slug, adminId }));
 }
 
-async function join(userId: string, orgId: string): Promise<void> {
-  await asUser(userId, async (tx) => {
-    await tx.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${orgId}, ${userId}, 'admin')`);
+/** Un membre de plus, inscrit par l'administrateur de l'organisation. */
+async function join(adminId: string, userId: string, orgId: string): Promise<void> {
+  await asUser(adminId, async (tx) => {
+    await tx.execute(sql`select azimut.set_member(${orgId}, ${userId}, 'admin')`);
   });
 }
 
@@ -97,11 +99,9 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG_A, ORG_B]);
 
   await seedOrg(USER_A, ORG_A, 'a61-a');
-  await join(USER_A, ORG_A);
   await seedOrg(USER_B, ORG_B, 'a61-b');
-  await join(USER_B, ORG_B);
-  await join(USER_AB, ORG_A);
-  await join(USER_AB, ORG_B);
+  await join(USER_A, USER_AB, ORG_A);
+  await join(USER_B, USER_AB, ORG_B);
   await seedSite(USER_A, ORG_A, SITE_A);
   await seedSite(USER_B, ORG_B, SITE_B);
 });

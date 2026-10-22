@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, deleteOrgFixture } from '@azimut/db';
+import { createConnection, createDb, deleteOrgFixture, provisionOrganization } from '@azimut/db';
 import { DbWorkerQueue, REQUESTER_CANNOT_READ } from '../db-queue.js';
 import { processNextJob } from '../worker.js';
 import type { JobHandler } from '../worker.js';
@@ -96,10 +96,8 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG_A, ORG_B]);
 
   for (const [user, org, slug] of [[USER_A, ORG_A, 't011-a'], [USER_B, ORG_B, 't011-b']] as const) {
-    await asUser(user, run => run(
-      'insert into azimut.organization(id,name,slug) values ($1, $2, $2)', [org, slug]));
-    await asUser(user, run => run(
-      `insert into azimut.membership(org_id,user_id,role) values ($1, $2, 'admin')`, [org, user]));
+    await client.begin(tx => provisionOrganization(
+      text => tx.unsafe(text), { id: org, name: slug, slug, adminId: user }));
   }
 });
 
@@ -193,12 +191,13 @@ describe('T-0.11 — le service prend les travaux de toutes les organisations', 
   });
 
   it('un demandeur parti de l’organisation : le travail est abandonné, avec la raison', async () => {
-    await asUser(USER_LEFT, run => run(
-      `insert into azimut.membership(org_id,user_id,role) values ($1, $2, 'designer')`,
-      [ORG_A, USER_LEFT]));
+    // L'arrivée et le départ passent par l'administrateur de l'organisation
+    // (0075) : un utilisateur ne s'inscrit ni ne se retire lui-même.
+    await asUser(USER_A, run => run(
+      `select azimut.set_member($1, $2, 'designer')`, [ORG_A, USER_LEFT]));
     const jobId = await enqueue(USER_LEFT, ORG_A, { essai: 'départ' });
-    await asUser(USER_LEFT, run => run(
-      'delete from azimut.membership where org_id = $1 and user_id = $2', [ORG_A, USER_LEFT]));
+    await asUser(USER_A, run => run(
+      'select azimut.remove_member($1, $2)', [ORG_A, USER_LEFT]));
 
     expect(await queue().dequeue(at(300))).toBeNull();
     expect(await jobAs(USER_A, jobId))

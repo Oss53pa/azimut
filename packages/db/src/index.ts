@@ -14,4 +14,6 @@ export {
 export type { ClaimedJob, StalledJob, JobClosing, JobOutcome } from './job-dispatch.js';
 export type { WriteSession, AppliedCommand, Executor, TransactionalDb } from './write-path.js';
 export { deleteOrgFixture, dependencyOrder } from './fixture-cleanup.js';
+export { provisionOrganization, provisionStatements } from './provision-organization.js';
+export type { OrganizationProvision } from './provision-organization.js';
 export type { SqlRunner, SqlReader } from './fixture-cleanup.js';
