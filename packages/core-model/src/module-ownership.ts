@@ -354,4 +354,7 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   site_fact_forbidden_word: 'Les mots qu’un fait interdit. A5.11 porte `site_fact`, que Q2 range au module 01 ; elle ne décrit pas cette table fille, et aucune fiche de L3 ne la range.',
   source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
   discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
+  vendor: 'D-3, décision de l’utilisateur du 22/10/2026 : le fabricant que désigne `vendor_id` (partie H). Aucune fiche de L3 ne le range ; il s’écrit par `azimut.create_vendor`, réservée à l’admin, comme les membres.',
+  vendor_member: 'D-3 et A6.2 : rattachement d’un compte `vendor` à son fabricant. Ouvre un droit : même motif que `membership`.',
+  command_table: 'D-4, décision de l’utilisateur du 22/10/2026 : liste blanche de `apply_commands`, donnée de configuration sans org_id, écrite par les seules migrations.',
 };
