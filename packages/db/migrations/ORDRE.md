@@ -120,6 +120,8 @@ non plus — elle n'en retire que les clés étrangères.
 0074_r12_message_schedule_approval
 0075_a6_2_membres_et_roles
 0076_a6_1_cloisonnement_complet
+0077_a6_2_fabricants_et_vendor
+0078_e5_1_liste_blanche_commandes
 ```
 
 ## Règle pour la suite
@@ -196,6 +198,18 @@ d'une autre organisation. `a6-1-catalogue.db.test.ts` lit la base et échoue
 sur toute clé simple de ce genre, comme sur une table sans politique, une
 politique ouverte à tous ou une fonction SECURITY DEFINER sans chemin de
 recherche figé.
+
+**Le rattachement du `vendor` (0077).** Un compte au rôle `vendor` ne voit
+que les lots du fabricant auquel il est rattaché (`vendor_member`), et ce qui
+en dépend. Une table nouvelle que ce rôle doit lire reçoit, dans sa
+politique `role_read`, la branche qui la relie à `lot_support` ; sinon le
+`vendor` ne la voit pas, ce qui est le défaut voulu.
+
+**La liste blanche des commandes (0078).** `azimut.command_table` dit quelles
+tables `apply_commands` peut viser. Une table attribuée à un module dans
+`OWNED_TABLES` (`packages/core-model/src/module-ownership.ts`) y entre par
+la migration qui la crée, avec ses opérations ; `a6-1-liste-blanche.db.test.ts`
+échoue tant que la liste et le registre divergent.
 
 ```sh
 initdb -D "$PGDATA" -U postgres --auth=trust
