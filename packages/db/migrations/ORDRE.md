@@ -119,6 +119,7 @@ non plus — elle n'en retire que les clés étrangères.
 0073_j4_review_annotation
 0074_r12_message_schedule_approval
 0075_a6_2_membres_et_roles
+0076_a6_1_cloisonnement_complet
 ```
 
 ## Règle pour la suite
@@ -178,6 +179,24 @@ reçoit, dans sa migration, les politiques restrictives `role_read`,
 pour une table en insertion seule). `a6-2-roles.db.test.ts` lit la base et
 échoue si l'une manque.
 
+**Le rôle propriétaire de la validation (0076).** `azimut_proof_review`
+possède le déclencheur qui reporte une validation sur son épreuve. Même règle
+que les rôles précédents : créé avant les migrations si le propriétaire ne
+peut pas créer de rôle, et le propriétaire en est membre. Sur une plateforme
+qui fournit `auth`, il doit pouvoir lire `auth.uid()` :
+`GRANT USAGE ON SCHEMA auth TO azimut_proof_review;` si la migration l'annonce
+par un avertissement. Tant qu'il manque, une validation n'atteint pas son
+épreuve.
+
+**Les clés étrangères entre tables d'organisation (0076).** Une clé
+étrangère d'une table portant `org_id` vers une autre table portant `org_id`
+s'écrit `(org_id, x_id) REFERENCES t (org_id, id)`, et la table visée porte
+`UNIQUE (org_id, id)`. Une clé simple laisserait une ligne désigner une ligne
+d'une autre organisation. `a6-1-catalogue.db.test.ts` lit la base et échoue
+sur toute clé simple de ce genre, comme sur une table sans politique, une
+politique ouverte à tous ou une fonction SECURITY DEFINER sans chemin de
+recherche figé.
+
 ```sh
 initdb -D "$PGDATA" -U postgres --auth=trust
 pg_ctl -D "$PGDATA" -o '-p 54332' -l "$PGDATA/server.log" start -w
@@ -191,6 +210,8 @@ CREATE ROLE azimut_job_dispatch NOLOGIN;
 GRANT azimut_compiler, azimut_job_dispatch TO azimut;
 CREATE ROLE azimut_membership_admin NOLOGIN;
 GRANT azimut_membership_admin TO azimut;
+CREATE ROLE azimut_proof_review NOLOGIN;
+GRANT azimut_proof_review TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 
