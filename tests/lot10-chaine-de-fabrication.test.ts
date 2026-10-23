@@ -27,14 +27,14 @@ describe('lot 10 : la chaîne de fabrication est figée', () => {
     expect(calls.filter(c => !/@\d+\.\d+\.\d+$/.test(c))).toEqual([]);
   });
 
-  it('l’installation suit le verrou, et ce qui est livré est audité', () => {
+  it('l’installation suit le verrou, et toutes les dépendances sont auditées', () => {
     const ci = workflows.map(w => w.text).join('\n');
     const installs = [...ci.matchAll(/pnpm install([^\n]*)/g)].map(m => m[1] ?? '');
     expect(installs.length).toBeGreaterThan(0);
     expect(installs.filter(i => !i.includes('--frozen-lockfile'))).toEqual([]);
-    expect(ci).toContain('pnpm audit:prod');
+    expect(ci).toContain('pnpm audit:all');
     const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as { scripts: Record<string, string> };
-    expect(manifest.scripts['audit:prod']).toBe('pnpm audit --prod --audit-level=high');
+    expect(manifest.scripts['audit:all']).toBe('pnpm audit --audit-level=high');
   });
 
   it('une version forcée ne fait que corriger, dans la même version majeure', () => {

@@ -69,11 +69,11 @@ jobs:
       - name: Détection de secrets
         run: pnpm check:secrets
 
-      # Lot 10 de l'audit : aucune faille connue, haute ou critique, dans ce qui
-      # est livré. L'outillage de développement n'entre dans aucun livrable ;
-      # son état est suivi à part (rapport du lot 10).
-      - name: Audit des dépendances livrées
-        run: pnpm audit:prod
+      # Lot 10 de l'audit : aucune faille connue, haute ou critique, dans
+      # aucune dépendance, outillage d'essai et de construction compris. Ces
+      # outils ne sont pas livrés, mais ils s'exécutent ici et sur chaque poste.
+      - name: Audit des dépendances
+        run: pnpm audit:all
 
       - name: Typecheck
         run: pnpm typecheck
