@@ -226,6 +226,15 @@ jobs:
       - name: Aucun secret dans les livrables
         run: pnpm check:dist
 
+      # Lot 7 de l'audit (D-8) : le livrable porte ses en-têtes de sécurité,
+      # en fichier `_headers` et en balise meta de secours.
+      - name: Les en-têtes de sécurité sont livrés
+        run: |
+          set -euo pipefail
+          grep -q "^  Content-Security-Policy: default-src 'self'" apps/studio/dist/_headers
+          grep -q 'http-equiv="Content-Security-Policy"' apps/studio/dist/index.html
+          echo "En-têtes de sécurité présents dans le livrable du studio."
+
       - name: axe-core n'est livré nulle part
         run: |
           set -euo pipefail
@@ -340,6 +349,15 @@ jobs:
       # être de rôle `anon` ; ici, aucune n'est déclarée.
       - name: Aucun secret dans les livrables
         run: pnpm check:dist
+
+      # Lot 7 de l'audit (D-8) : le livrable porte ses en-têtes de sécurité,
+      # en fichier `_headers` et en balise meta de secours.
+      - name: Les en-têtes de sécurité sont livrés
+        run: |
+          set -euo pipefail
+          grep -q "^  Content-Security-Policy: default-src 'self'" apps/studio/dist/_headers
+          grep -q 'http-equiv="Content-Security-Policy"' apps/studio/dist/index.html
+          echo "En-têtes de sécurité présents dans le livrable du studio."
 
       - name: axe-core n'est livré nulle part
         run: |

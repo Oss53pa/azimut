@@ -63,3 +63,14 @@ requête ne part vers un service de polices : les fichiers sont servis par
 l'application elle-même, ce qui tient A3.4 en installation autonome. Ces
 polices ne concernent pas le rendu des panneaux, dont les polices relèvent des
 paquets de règles et de la charte.
+
+### Police de l'interface : IBM Plex Mono
+
+| | |
+| --- | --- |
+| **Version** | Fichiers WOFF2 figés dans le dépôt, graisses 400 et 500, sous-ensembles latin et latin étendu, `packages/design-tokens/src/fonts/` |
+| **Portée** | Interface du studio seulement, déclarée dans `studio-theme.css` |
+| **Licence** | SIL Open Font License 1.1, texte joint (`OFL-ibm-plex.txt`, mention de droits IBM Corp.) |
+| **Distribuée** | Oui, avec l'interface, aux mêmes conditions que Dosis et Grand Hotel |
+| **Autorisée le** | 23 octobre 2026, par la décision D-9 de l'audit de sécurité : héberger les polices dans le dépôt |
+| **Emploi** | Chiffres et codes de l'interface (`--font-mono`). Elle était chargée depuis un service de polices tiers, ce qu'une politique de sécurité du contenu stricte (`font-src 'self'`) refuse |
