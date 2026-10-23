@@ -45,3 +45,31 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
   posent dans la configuration du service d'authentification : facteur TOTP
   activé, mot de passe d'au moins 12 caractères, confirmation au changement
   de mot de passe.
+
+## Débit et quotas (lot 8)
+
+- **Ce qui est compté.** Les écritures, une par instruction et par
+  utilisateur ; les changements de membres et de fabricants, par utilisateur
+  et par organisation ; les créations d'organisation, par utilisateur ; les
+  dépôts de travaux, par utilisateur et par organisation. Seule une requête
+  identifiée est comptée. Le quota d'une organisation n'est consommé que par
+  ses membres : nul n'épuise celui d'une organisation dont il n'est pas
+  membre.
+- **Les seuils.** Ce sont des données de `azimut.security_setting`
+  (`rate.*.per_user`, `rate.*.per_org`, `rate.*.window_seconds`), qu'une
+  organisation peut resserrer. La file a deux quotas de plus :
+  `job.max_running_per_org` (travaux en cours simultanés) et
+  `job.payload.max_bytes` (taille du paramètre).
+- **La réponse.** Un dépassement rend `rate_limited`, que PostgREST traduit
+  en 429 avec `Retry-After`. Le message ne nomme ni l'organisation, ni
+  l'utilisateur, ni le compteur. Le dépassement est consigné au journal
+  technique de la base (`rate_limited action=… scope=…`) : une entrée dans
+  `audit_log` serait annulée avec la requête refusée.
+- **Le compilateur.** Ses écritures faites sous l'identité du demandeur
+  passent par les mêmes déclencheurs. Un refus y devient un échec de travail,
+  rejoué selon la temporisation de D9.2.
+- **La connexion.** Elle est limitée par le service d'authentification
+  (`[auth.rate_limit]` de `supabase/config.toml`) : 30 connexions ou
+  inscriptions par adresse et par tranche de 5 minutes, 150 rafraîchissements
+  de session, 30 vérifications de code. Sur un projet hébergé, les mêmes
+  limites se posent dans la configuration du service d'authentification.
