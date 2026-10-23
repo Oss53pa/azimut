@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
-import { enrolFixtureMembers } from '../fixture-membership.js';
+import { provisionStatements } from '../provision-organization.js';
 
 /**
  * R12 et H11 — `message_schedule_approval` sur une base réelle (0074).
@@ -21,6 +21,7 @@ const SITE = 'a1200000-0000-0000-0000-0000000000b1';
 const SCHEDULE = 'a1200000-0000-0000-0000-0000000000c1';
 const OWNER_REP = 'a1200000-0000-0000-0000-0000000000d1';
 const SOMEONE_ELSE = 'a1200000-0000-0000-0000-0000000000d2';
+const ADMIN = 'a1200000-0000-0000-0000-0000000000d3';
 
 let sql: postgres.Sql;
 
@@ -37,13 +38,19 @@ afterAll(async () => { await sql.end(); });
 async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void>): Promise<void> {
   const done = new Error('annulation voulue');
   await sql.begin(async tx => {
-    await tx`select set_config('azimut.current_user_id', ${OWNER_REP}, true)`;
-    await tx`insert into azimut.organization(id,name,slug) values (${ORG},'R12','r12-approbation')`;
-    await enrolFixtureMembers(text => tx.unsafe(text), [{ orgId: ORG, userId: OWNER_REP, role: 'owner_rep' }]);
+    // L'organisation et son administrateur sont provisionnés ; l'administrateur
+    // inscrit le représentant du maître d'ouvrage et monte le site et le
+    // tableau, que celui-ci ne peut pas écrire (A6.2, 0075).
+    for (const text of provisionStatements({ id: ORG, name: 'R12', slug: 'r12-approbation', adminId: ADMIN })) {
+      await tx.unsafe(text);
+    }
+    await tx`select set_config('azimut.current_user_id', ${ADMIN}, true)`;
+    await tx`select azimut.set_member(${ORG}, ${OWNER_REP}, 'owner_rep')`;
     await tx`insert into azimut.site(id,org_id,name,country_code,timezone)
              values (${SITE},${ORG},'Site de revue','FR','Europe/Paris')`;
     await tx`insert into azimut.message_schedule(id,org_id,site_id,version,state,generated_at,inputs_hash)
              values (${SCHEDULE},${ORG},${SITE},1,'in_review',now(),'sha256:entrees')`;
+    await tx`select set_config('azimut.current_user_id', ${OWNER_REP}, true)`;
     await check(tx);
     throw done;
   }).catch((e: unknown) => { if (e !== done) throw e; });
@@ -134,6 +141,9 @@ describe('R12 — une décision sur un tableau, en base', () => {
       const kept = await tx<{ decision: string; comment: string | null }[]>`
         select decision, comment from azimut.message_schedule_approval where schedule_id = ${SCHEDULE}`;
       expect(kept).toEqual([{ decision: 'approved', comment: null }]);
+      // La suppression est tentée par l'administrateur, qui a le droit de
+      // supprimer un tableau : c'est la clé et le verrou qui la refusent.
+      await tx`select set_config('azimut.current_user_id', ${ADMIN}, true)`;
       expect(await refusal(tx, () => tx`
         delete from azimut.message_schedule where id = ${SCHEDULE}`))
         .toMatch(/foreign key|insert-only/);

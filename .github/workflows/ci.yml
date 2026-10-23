@@ -105,6 +105,14 @@ jobs:
           CREATE ROLE azimut_compiler NOLOGIN;
           CREATE ROLE azimut_job_dispatch NOLOGIN;
           GRANT azimut_compiler, azimut_job_dispatch TO azimut;
+          -- Le rôle propriétaire des fonctions de membres (migration 0075),
+          -- même règle que les deux rôles de la file.
+          CREATE ROLE azimut_membership_admin NOLOGIN;
+          GRANT azimut_membership_admin TO azimut;
+          -- Le rôle propriétaire du déclencheur de validation (migration
+          -- 0076), même règle.
+          CREATE ROLE azimut_proof_review NOLOGIN;
+          GRANT azimut_proof_review TO azimut;
           -- Les deux rôles de PostgREST. `authenticator` n'a aucun droit
           -- propre : il se connecte, puis bascule vers `anon` ou
           -- `authenticated` selon le jeton. `NOINHERIT` est ce qui l'empêche

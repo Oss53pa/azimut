@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildCommand, inverseCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
-import { applyCommands, createConnection, createDb, deleteOrgFixture, enrolFixtureMembers } from '@azimut/db';
+import { applyCommands, createConnection, createDb, deleteOrgFixture, provisionOrganization } from '@azimut/db';
 import { annotateCommands, replyCommand, setStateCommand } from '../review-annotation.js';
 import type { ReviewAnnotation } from '../review-annotation.js';
 
@@ -62,8 +62,8 @@ beforeAll(async () => {
   db = createDb(URL);
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
   for (const [user, org, slug] of [[ALICE, ORG, 'j4-a'], [BOB, ORG_B, 'j4-b']] as const) {
-    await asUser(user, 'insert into azimut.organization(id,name,slug) values ($1, $2, $2)', [org, slug]);
-    await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: org, userId: user, role: 'admin' }]);
+    await client.begin(tx => provisionOrganization(
+      text => tx.unsafe(text), { id: org, name: slug, slug, adminId: user }));
   }
   await apply(ALICE, [
     command('site', SITE, { id: SITE, org_id: ORG, name: 'Site revue', country_code: 'FR', timezone: 'Europe/Paris' }),

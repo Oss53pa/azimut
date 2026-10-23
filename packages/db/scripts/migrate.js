@@ -37,6 +37,18 @@ try {
         applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `;
+    // Le registre n'est qu'au propriétaire (0076). Recréé dans un schéma qui
+    // existe déjà, il recevrait les droits par défaut de 0025, qui
+    // l'accordent à `authenticated`.
+    await sql`
+      DO $$
+      BEGIN
+        REVOKE ALL ON azimut._migrations FROM PUBLIC;
+        IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+          REVOKE ALL ON azimut._migrations FROM authenticated;
+        END IF;
+      END $$
+    `;
   }
 
   const applied = await sql`SELECT name FROM azimut._migrations ORDER BY id`;

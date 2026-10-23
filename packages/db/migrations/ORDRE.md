@@ -118,9 +118,11 @@ non plus — elle n'en retire que les clés étrangères.
 0072_j3_4_sketch_layer
 0073_j4_review_annotation
 0074_r12_message_schedule_approval
-0075_a6_1_membership_closed
-0076_a6_2_roles_in_policies
-0077_a6_2_delegated_decisions
+0075_a6_2_membres_et_roles
+0076_a6_1_cloisonnement_complet
+0077_a6_2_fabricants_et_vendor
+0078_e5_1_liste_blanche_commandes
+0079_a2_4_identite_sous_le_proprietaire
 ```
 
 ## Règle pour la suite
@@ -162,6 +164,60 @@ en production, est membre de `azimut_compiler` et de `authenticated`, et de
 rien d'autre : elle prend un travail sous le premier, puis le traite sous
 l'identité de son demandeur.
 
+**Le rôle propriétaire des membres (0075).** `azimut_membership_admin` possède
+les fonctions qui créent une organisation et inscrivent, changent ou retirent
+un membre, ainsi que la lecture des organisations où l'utilisateur courant tient
+un rôle. Il ne sert à aucune connexion et personne ne l'endosse. Même règle que
+pour la file : la migration le crée s'il manque, sinon il est créé avant, et le
+propriétaire doit en être membre pour lui confier les fonctions. Sur une
+plateforme qui fournit `auth`, il doit aussi pouvoir lire `auth.uid()` : la
+migration accorde `USAGE` sur le schéma `auth`, et si le rôle qui migre ne le
+peut pas, elle l'annonce par un avertissement. Le pas se fait alors sous un
+rôle d'administration : `GRANT USAGE ON SCHEMA auth TO azimut_membership_admin;`.
+Tant qu'il manque, les fonctions de membres refusent tout : rien ne s'ouvre.
+
+**Les politiques par rôle (0075).** Toute table nouvelle portant `org_id`
+reçoit, dans sa migration, les politiques restrictives `role_read`,
+`role_insert`, `role_update` et `role_delete` (seulement les deux premières
+pour une table en insertion seule). `a6-2-roles.db.test.ts` lit la base et
+échoue si l'une manque.
+
+**Le rôle propriétaire de la validation (0076).** `azimut_proof_review`
+possède le déclencheur qui reporte une validation sur son épreuve. Même règle
+que les rôles précédents : créé avant les migrations si le propriétaire ne
+peut pas créer de rôle, et le propriétaire en est membre. Sur une plateforme
+qui fournit `auth`, il doit pouvoir lire `auth.uid()` :
+`GRANT USAGE ON SCHEMA auth TO azimut_proof_review;` si la migration l'annonce
+par un avertissement. Tant qu'il manque, une validation n'atteint pas son
+épreuve.
+
+**Les clés étrangères entre tables d'organisation (0076).** Une clé
+étrangère d'une table portant `org_id` vers une autre table portant `org_id`
+s'écrit `(org_id, x_id) REFERENCES t (org_id, id)`, et la table visée porte
+`UNIQUE (org_id, id)`. Une clé simple laisserait une ligne désigner une ligne
+d'une autre organisation. `a6-1-catalogue.db.test.ts` lit la base et échoue
+sur toute clé simple de ce genre, comme sur une table sans politique, une
+politique ouverte à tous ou une fonction SECURITY DEFINER sans chemin de
+recherche figé.
+
+**Le rattachement du `vendor` (0077).** Un compte au rôle `vendor` ne voit
+que les lots du fabricant auquel il est rattaché (`vendor_member`), et ce qui
+en dépend. Une table nouvelle que ce rôle doit lire reçoit, dans sa
+politique `role_read`, la branche qui la relie à `lot_support` ; sinon le
+`vendor` ne la voit pas, ce qui est le défaut voulu.
+
+**L'identité sous le propriétaire (0079).** `current_user_id()` s'exécute
+sous le propriétaire des tables. Sur une plateforme dont le schéma `auth`
+appartient à un autre administrateur, les rôles propriétaires des fonctions
+n'ont pas besoin de l'usage de `auth` : les pas manuels décrits pour 0075 et
+0076 deviennent sans objet une fois 0079 appliquée.
+
+**La liste blanche des commandes (0078).** `azimut.command_table` dit quelles
+tables `apply_commands` peut viser. Une table attribuée à un module dans
+`OWNED_TABLES` (`packages/core-model/src/module-ownership.ts`) y entre par
+la migration qui la crée, avec ses opérations ; `a6-1-liste-blanche.db.test.ts`
+échoue tant que la liste et le registre divergent.
+
 ```sh
 initdb -D "$PGDATA" -U postgres --auth=trust
 pg_ctl -D "$PGDATA" -o '-p 54332' -l "$PGDATA/server.log" start -w
@@ -173,6 +229,10 @@ GRANT authenticated TO azimut;
 CREATE ROLE azimut_compiler NOLOGIN;
 CREATE ROLE azimut_job_dispatch NOLOGIN;
 GRANT azimut_compiler, azimut_job_dispatch TO azimut;
+CREATE ROLE azimut_membership_admin NOLOGIN;
+GRANT azimut_membership_admin TO azimut;
+CREATE ROLE azimut_proof_review NOLOGIN;
+GRANT azimut_proof_review TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 

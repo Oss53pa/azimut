@@ -14,12 +14,43 @@ import { support } from './signage.js';
  * il ne se stocke pas.
  */
 
+/**
+ * D-3 et A6.2 : le fabricant et les comptes `vendor` qui lui sont rattachés
+ * (migration 0077). Ils s'écrivent par `azimut.create_vendor` et
+ * `azimut.attach_vendor_member`, jamais par commande. La clé de
+ * `vendor_member` et celle de `fabrication_lot.vendor_id` sont composites,
+ * `(org_id, vendor_id)` vers `(org_id, id)`, en base seulement.
+ */
+export const vendor = azimut.table('vendor', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  name: text('name').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_vendor_org').on(t.org_id),
+  unique('vendor_org_id_id_key').on(t.org_id, t.id),
+]);
+
+export const vendorMember = azimut.table('vendor_member', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  vendor_id: uuid('vendor_id').notNull(),
+  user_id: uuid('user_id').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_vendor_member_user').on(t.user_id),
+  unique('vendor_member_unique').on(t.org_id, t.vendor_id, t.user_id),
+]);
+
 export const fabricationLot = azimut.table('fabrication_lot', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   site_id: uuid('site_id').notNull().references(() => site.id, { onDelete: 'restrict' }),
   code: text('code').notNull(),
   manufacturer_name: text('manufacturer_name').notNull(),
+  /** D-3 : le fabricant du lot, facultatif (migration 0077). */
+  vendor_id: uuid('vendor_id'),
   state: text('state').notNull().default('ordered'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),

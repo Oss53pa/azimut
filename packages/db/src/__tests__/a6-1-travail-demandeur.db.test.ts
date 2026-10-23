@@ -6,7 +6,7 @@ import { buildCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { loadSiteDataAs } from '../load-site-data.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
-import { enrolFixtureMembers } from '../fixture-membership.js';
+import { provisionOrganization } from '../provision-organization.js';
 
 /**
  * A6.1 — le service de compilation lit sous l'identité du demandeur du travail
@@ -20,9 +20,9 @@ import { enrolFixtureMembers } from '../fixture-membership.js';
  *   · le demandeur d'un travail est posé par la base, ne s'usurpe pas, et ne
  *     change plus après l'insertion.
  *
- * Le décor s'installe par le chemin identifié : chaque utilisateur crée son
- * organisation puis son site sous sa propre identité. Seul le rattachement
- * passe par l'exploitation, puisque personne ne se rattache seul (0075).
+ * Le décor s'installe par le chemin identifié, jamais en levant le
+ * cloisonnement : chaque utilisateur crée son organisation, s'y inscrit, puis
+ * crée son site sous sa propre identité.
  */
 const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
 
@@ -47,14 +47,17 @@ async function asUser<T>(userId: string, run: (tx: Tx) => Promise<T>): Promise<T
   });
 }
 
-async function seedOrg(userId: string, orgId: string, slug: string): Promise<void> {
-  await asUser(userId, async (tx) => {
-    await tx.execute(sql`insert into azimut.organization(id,name,slug) values (${orgId}, ${slug}, ${slug})`);
-  });
+/** L'organisation et son premier administrateur, provisionnés (0075). */
+async function seedOrg(adminId: string, orgId: string, slug: string): Promise<void> {
+  await client.begin(tx => provisionOrganization(
+    text => tx.unsafe(text), { id: orgId, name: slug, slug, adminId }));
 }
 
-async function join(userId: string, orgId: string): Promise<void> {
-  await enrolFixtureMembers(text => client.unsafe(text), [{ orgId, userId, role: 'admin' }]);
+/** Un membre de plus, inscrit par l'administrateur de l'organisation. */
+async function join(adminId: string, userId: string, orgId: string): Promise<void> {
+  await asUser(adminId, async (tx) => {
+    await tx.execute(sql`select azimut.set_member(${orgId}, ${userId}, 'admin')`);
+  });
 }
 
 async function seedSite(userId: string, orgId: string, siteId: string): Promise<void> {
@@ -96,11 +99,9 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG_A, ORG_B]);
 
   await seedOrg(USER_A, ORG_A, 'a61-a');
-  await join(USER_A, ORG_A);
   await seedOrg(USER_B, ORG_B, 'a61-b');
-  await join(USER_B, ORG_B);
-  await join(USER_AB, ORG_A);
-  await join(USER_AB, ORG_B);
+  await join(USER_A, USER_AB, ORG_A);
+  await join(USER_B, USER_AB, ORG_B);
   await seedSite(USER_A, ORG_A, SITE_A);
   await seedSite(USER_B, ORG_B, SITE_B);
 });

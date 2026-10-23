@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
-import { enrolFixtureMembers } from '../fixture-membership.js';
+import { provisionStatements } from '../provision-organization.js';
 
 /**
  * A12.3 — « `audit_log`, `approval`, `message_schedule_approval` et
@@ -99,8 +99,9 @@ describe('A12.3 — les tables en insertion seule, en base', () => {
  * ne survit pas, puisqu'aucune suppression ne pourrait l'effacer ensuite.
  *
  * La ligne entre par le chemin de l'application, jamais en levant le
- * cloisonnement (A2.4) : l'identité est posée, l'organisation créée, son
- * membre inscrit, et la politique d'insertion d'`audit_log` l'admet. Le
+ * cloisonnement (A2.4) : l'organisation et son administrateur sont
+ * provisionnés (0075), l'identité est posée, et la politique d'insertion
+ * d'`audit_log` l'admet. Le
  * propriétaire de l'installation autonome est membre du rôle applicatif ;
  * sous un super-utilisateur, les politiques ne jouent pas et le chemin passe
  * de même.
@@ -109,11 +110,12 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
   async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void>): Promise<void> {
     const done = new Error('annulation voulue');
     await sql.begin(async tx => {
+      for (const text of provisionStatements({ id: ORG, name: 'Audit', slug: 'audit-a123', adminId: USER })) {
+        await tx.unsafe(text);
+      }
       await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
-      await tx`insert into azimut.organization(id,name,slug) values (${ORG},'Audit','audit-a123')`;
-      await enrolFixtureMembers(text => tx.unsafe(text), [{ orgId: ORG, userId: USER, role: 'admin' }]);
-      await tx`insert into azimut.audit_log(org_id, actor_id, action, entity, occurred_at)
-               values (${ORG}, ${USER}, 'essai', 'organization', now())`;
+      await tx`insert into azimut.audit_log(org_id, action, entity, occurred_at)
+               values (${ORG}, 'essai', 'organization', now())`;
       await check(tx);
       throw done;
     }).catch((e: unknown) => { if (e !== done) throw e; });
