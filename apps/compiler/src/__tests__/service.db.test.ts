@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { buildCommand } from '@azimut/core-model';
-import { applyCommands, createConnection, createDb, deleteOrgFixture } from '@azimut/db';
+import { applyCommands, createConnection, createDb, deleteOrgFixture, enrolFixtureMembers } from '@azimut/db';
 import { createService, kioskPackagePath, readServiceConfig } from '../service.js';
 import type { Service } from '../service.js';
 import { processNextJob } from '../worker.js';
@@ -63,7 +63,7 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
 
   await asUser('insert into azimut.organization(id,name,slug) values ($1, $2, $2)', [ORG, 't011-service']);
-  await asUser(`insert into azimut.membership(org_id,user_id,role) values ($1, $2, 'admin')`, [ORG, USER]);
+  await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: ORG, userId: USER, role: 'admin' }]);
   const creations = [
     { table: 'site', id: SITE, after: {
       id: SITE, org_id: ORG, name: 'Site du service', country_code: 'FR', timezone: 'Europe/Paris' } },

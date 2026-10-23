@@ -15,3 +15,5 @@ export type { ClaimedJob, StalledJob, JobClosing, JobOutcome } from './job-dispa
 export type { WriteSession, AppliedCommand, Executor, TransactionalDb } from './write-path.js';
 export { deleteOrgFixture, dependencyOrder } from './fixture-cleanup.js';
 export type { SqlRunner, SqlReader } from './fixture-cleanup.js';
+export { enrolFixtureMembers, withdrawFixtureMembers } from './fixture-membership.js';
+export type { FixtureMember } from './fixture-membership.js';

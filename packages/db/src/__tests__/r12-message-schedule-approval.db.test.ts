@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
+import { enrolFixtureMembers } from '../fixture-membership.js';
 
 /**
  * R12 et H11 — `message_schedule_approval` sur une base réelle (0074).
@@ -38,7 +39,7 @@ async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void
   await sql.begin(async tx => {
     await tx`select set_config('azimut.current_user_id', ${OWNER_REP}, true)`;
     await tx`insert into azimut.organization(id,name,slug) values (${ORG},'R12','r12-approbation')`;
-    await tx`insert into azimut.membership(org_id,user_id,role) values (${ORG},${OWNER_REP},'owner_rep')`;
+    await enrolFixtureMembers(text => tx.unsafe(text), [{ orgId: ORG, userId: OWNER_REP, role: 'owner_rep' }]);
     await tx`insert into azimut.site(id,org_id,name,country_code,timezone)
              values (${SITE},${ORG},'Site de revue','FR','Europe/Paris')`;
     await tx`insert into azimut.message_schedule(id,org_id,site_id,version,state,generated_at,inputs_hash)
