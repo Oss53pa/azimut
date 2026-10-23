@@ -128,6 +128,7 @@ non plus — elle n'en retire que les clés étrangères.
 0082_a6_3_validation_des_entrees
 0083_a12_3_journal_des_evenements
 0084_d5_debit_et_quotas
+0085_a6_2_report_bat_et_travaux
 ```
 
 ## Règle pour la suite
@@ -225,6 +226,15 @@ espaces de stockage `azimut-*` et leurs politiques sont posés par
 existe. Si la plateforme le fournit plus tard, ou si la migration l'annonce
 par un avertissement de droits : `SELECT azimut.install_storage();` sous un
 rôle d'administration.
+
+**Le bon à tirer et le cycle de vie des travaux (0085).** Report des deux
+règles de la PR 26 que la chaîne appliquée n'avait pas. Le bon à tirer est
+décidé par l'`owner_rep` seul. `job` et `kiosk_package` ne s'écrivent que
+d'une session ouverte par le service, dont le rôle de connexion est membre
+d'`azimut_compiler` ; depuis l'API, un membre crée un travail en file et
+peut l'annuler tant qu'il est en file, rien d'autre. Le rôle de connexion du
+service doit donc être membre d'`azimut_compiler` :
+`GRANT azimut_compiler TO <rôle de connexion du service>;`
 
 **Le débit et les quotas (0084).** Les écritures, les changements de
 membres, les créations d'organisation et les dépôts de travaux sont comptés

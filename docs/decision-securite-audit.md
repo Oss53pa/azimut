@@ -19,6 +19,9 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
 | D-12 | – | L'ancien schéma `azimut`, partiel et vide, du projet hébergé partagé a été retiré, puis les migrations 0001 à 0079 appliquées en une transaction. | 22/10/2026 |
 | D-13 | 9 | Les échecs d'authentification sont journalisés par le service d'authentification lui-même, dans son journal des requêtes, et non dans `azimut.audit_log`. Aucune table nouvelle. | 23/10/2026 |
 | D-14 | 10 | Vite passe en 6.4 pour le studio, le compilateur et le cadre d'essai, et vitest en 4.1 : les failles hautes de vite ne sont corrigées qu'à partir de 6.4.4, et vitest 3 dépend encore d'une version vulnérable de tinypool. Déroge à A3.1 (« Vite 5 ») ; l'amendement du cahier revient à Oss53pa. | 23/10/2026 |
+| D-15 | 3 | Le bon à tirer est décidé par l'`owner_rep` seul : l'admin, qui produit, ne valide pas (même séparation que R2). Décidé le 23.10.2026 dans la PR 26, reporté par la migration 0085. | 23/10/2026 |
+| D-16 | 3 | `job` et `kiosk_package` ne s'écrivent que d'une session du service, dont le rôle de connexion est membre d'`azimut_compiler`. Depuis l'API, un membre crée un travail en file et l'annule tant qu'il l'est (D9.2). Décidé dans la PR 26, reporté par 0085. | 23/10/2026 |
+| D-17 | – | La base partagée fait foi : les migrations 0075 à 0077 de la PR 26, jamais appliquées, sont retirées du dépôt au profit de la chaîne appliquée ; ce qu'elles avaient en plus est reporté par 0085. | 23/10/2026 |
 
 ## Sessions (lot 2)
 
