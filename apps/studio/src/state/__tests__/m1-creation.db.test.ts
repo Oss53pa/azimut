@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, applyCommands, deleteOrgFixture } from '@azimut/db';
+import { createConnection, createDb, applyCommands } from '@azimut/db';
 import { createSiteCommands } from '../site-creation.js';
 import { commandPayload } from '../postgrest-sink.js';
 import type { CreationContext, SiteDraft } from '../site-creation.js';
+import { randomUUID } from 'node:crypto';
 
 /**
  * M1 (partie M) — le formulaire de création, contre une base réelle.
@@ -18,25 +19,32 @@ import type { CreationContext, SiteDraft } from '../site-creation.js';
  * `packages/db/migrations/ORDRE.md`. Sans base, la suite s'arrête avec le mode
  * d'emploi plutôt que de passer en silence.
  */
+/**
+ * Un décor propre à chaque exécution (préfixe `RUN`). Depuis 0083,
+ * le rattachement d’un paquet de règles laisse une entrée au journal d'audit, que rien ne
+ * supprime (A12.3) : l'organisation de l'essai ne se retire donc plus, et
+ * l'exécution suivante en prend une autre.
+ */
+const RUN = randomUUID().slice(0, 8);
 const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
 const ALICE = '11111111-1111-1111-1111-111111111111';
-const ORG = 'c1000000-0000-0000-0000-000000000001';
-const SITE = 'c1000000-0000-0000-0000-000000000101';
-const BUILDING = 'c1000000-0000-0000-0000-000000000102';
-const LEVEL = 'c1000000-0000-0000-0000-000000000103';
+const ORG = `${RUN}-0000-0000-0000-000000000001`;
+const SITE = `${RUN}-0000-0000-0000-000000000101`;
+const BUILDING = `${RUN}-0000-0000-0000-000000000102`;
+const LEVEL = `${RUN}-0000-0000-0000-000000000103`;
 // Le second jeu sert le chemin du poste, qui écrit son propre site : deux
 // chemins sur une même ligne se masqueraient l'un l'autre.
-const SITE_2 = 'c1000000-0000-0000-0000-000000000201';
-const BUILDING_2 = 'c1000000-0000-0000-0000-000000000202';
-const LEVEL_2 = 'c1000000-0000-0000-0000-000000000203';
+const SITE_2 = `${RUN}-0000-0000-0000-000000000201`;
+const BUILDING_2 = `${RUN}-0000-0000-0000-000000000202`;
+const LEVEL_2 = `${RUN}-0000-0000-0000-000000000203`;
 // Le troisième jeu porte un paquet choisi : A5.8, le rattachement en socle.
-const SITE_3 = 'c1000000-0000-0000-0000-000000000301';
-const BUILDING_3 = 'c1000000-0000-0000-0000-000000000302';
-const LEVEL_3 = 'c1000000-0000-0000-0000-000000000303';
-const BINDING_3 = 'c1000000-0000-0000-0000-000000000304';
+const SITE_3 = `${RUN}-0000-0000-0000-000000000301`;
+const BUILDING_3 = `${RUN}-0000-0000-0000-000000000302`;
+const LEVEL_3 = `${RUN}-0000-0000-0000-000000000303`;
+const BINDING_3 = `${RUN}-0000-0000-0000-000000000304`;
 // Un paquet d'essai, sans valeur normative : le référentiel des paquets est
 // global, il s'amorce et se retire hors organisation.
-const PACK = 'c1000000-0000-0000-0000-0000000000a1';
+const PACK = `${RUN}-0000-0000-0000-0000000000a1`;
 const T = '2026-09-23T10:00:00.000Z';
 
 /** La chaîne validée en `beforeAll`, pour les connexions ouvertes ensuite. */
@@ -69,13 +77,6 @@ const CONTEXT: CreationContext = {
   timestamp: T,
 };
 
-async function cleanup(): Promise<void> {
-  const fresh = createConnection(dsn);
-  await deleteOrgFixture(
-    text => fresh.unsafe(text), text => fresh.unsafe(text), [ORG]);
-  await fresh.end();
-}
-
 beforeAll(async () => {
   if (URL === undefined || URL === '') {
     throw new Error(
@@ -86,11 +87,9 @@ beforeAll(async () => {
   client = createConnection(dsn);
   db = createDb(dsn);
 
-  await cleanup();
-  await client`delete from azimut.rules_pack where id = ${PACK}`;
   await client`insert into azimut.rules_pack
     (id, key, version, jurisdiction, effective_from, source_ref, checksum)
-    values (${PACK}, 'essai-m1', '0.0.0', 'XX', '2026-01-01', 'essai', 'essai')`;
+    values (${PACK}, ${`essai-m1-${RUN}`}, '0.0.0', 'XX', '2026-01-01', 'essai', 'essai')`;
 
   // L'organisation et l'adhésion s'amorcent hors politique, comme le ferait un
   // import d'administration : sans adhésion, personne n'a d'identité à poser.
@@ -98,7 +97,7 @@ beforeAll(async () => {
     await client`alter table azimut.${client(table)} no force row level security`;
   }
   await client`insert into azimut.organization(id,name,slug)
-    values (${ORG},'Création','creation-m1')`;
+    values (${ORG},'Création',${`creation-m1-${RUN}`})`;
   await client`insert into azimut.membership(org_id,user_id,role)
     values (${ORG},${ALICE},'admin')`;
   for (const table of ['membership', 'organization']) {
@@ -110,8 +109,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await alice.release();
-  await cleanup();
-  await client`delete from azimut.rules_pack where id = ${PACK}`;
   await client.end();
   await db.$client.end();
 });

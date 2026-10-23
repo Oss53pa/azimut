@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { buildCommand } from '@azimut/core-model';
-import { applyCommands, createConnection, createDb, deleteOrgFixture, provisionOrganization } from '@azimut/db';
+import { applyCommands, createConnection, createDb, provisionOrganization } from '@azimut/db';
 import { createService, kioskPackagePath, readServiceConfig } from '../service.js';
 import type { Service } from '../service.js';
 import { processNextJob } from '../worker.js';
@@ -18,11 +19,17 @@ import { processNextJob } from '../worker.js';
  */
 const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
 
-const USER = 'a0120000-0000-0000-0000-0000000000a1';
-const ORG = 'a0120000-0000-0000-0000-00000000a0a0';
-const SITE = 'a0120000-0000-0000-0000-0000000005a1';
-const BUILDING = 'a0120000-0000-0000-0000-0000000006a1';
-const LEVEL = 'a0120000-0000-0000-0000-0000000007a1';
+/**
+ * Un décor propre à chaque exécution. La publication d'un paquet laisse une
+ * entrée au journal (A12.3, 0083), que rien ne supprime : l'organisation de
+ * l'essai ne se retire donc plus, et la suivante en prend une autre. La base
+ * d'essai est remontée à chaque chaîne d'intégration.
+ */
+const USER = randomUUID();
+const ORG = randomUUID();
+const SITE = randomUUID();
+const BUILDING = randomUUID();
+const LEVEL = randomUUID();
 
 let client: ReturnType<typeof createConnection>;
 let db: ReturnType<typeof createDb>;
@@ -60,10 +67,9 @@ beforeAll(async () => {
   }
   client = createConnection(URL);
   db = createDb(URL);
-  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
 
   await client.begin(tx => provisionOrganization(
-    text => tx.unsafe(text), { id: ORG, name: 't011-service', slug: 't011-service', adminId: USER }));
+    text => tx.unsafe(text), { id: ORG, name: 't011-service', slug: `t011-service-${ORG.slice(0, 8)}`, adminId: USER }));
   const creations = [
     { table: 'site', id: SITE, after: {
       id: SITE, org_id: ORG, name: 'Site du service', country_code: 'FR', timezone: 'Europe/Paris' } },
@@ -100,7 +106,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await service?.close();
-  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
   await client.end();
   await db.$client.end();
   await rm(dir, { recursive: true, force: true });

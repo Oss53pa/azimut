@@ -126,6 +126,7 @@ non plus — elle n'en retire que les clés étrangères.
 0080_a6_3_double_authentification
 0081_d5_d6_seuils_et_stockage
 0082_a6_3_validation_des_entrees
+0083_a12_3_journal_des_evenements
 ```
 
 ## Règle pour la suite
@@ -224,6 +225,28 @@ existe. Si la plateforme le fournit plus tard, ou si la migration l'annonce
 par un avertissement de droits : `SELECT azimut.install_storage();` sous un
 rôle d'administration.
 
+**Le journal des événements (0083).** `audit_log` n'est écrit que par la
+base : des déclencheurs, sous le rôle sans connexion `azimut_audit`,
+journalisent les cinq événements d'A12.3 avec l'identité de la requête.
+L'application n'y insère plus. Sur une plateforme où le rôle qui migre n'est
+pas super-utilisateur, il doit être membre d'`azimut_audit` avec héritage
+pour lui confier les fonctions, comme pour les autres rôles propriétaires :
+
+```sql
+CREATE ROLE azimut_audit NOLOGIN;
+GRANT azimut_audit TO <rôle qui migre> WITH INHERIT TRUE;
+```
+
+**Le propriétaire des tables (D-10).** Le rôle qui possède le schéma et ses
+tables est distinct des rôles de l'application, et aucun d'eux ne peut
+l'endosser : ni `authenticator`, ni `anon`, ni `authenticated`, ni les rôles du
+compilateur. C'est ce qui rend l'insertion seule d'A12.3 effective, puisque le
+propriétaire peut retirer les barrières d'une table. Le compilateur se
+connecte sous un rôle de connexion propre, membre de `azimut_compiler` et de
+`azimut_job_dispatch`, jamais sous le propriétaire.
+`d10-proprietaire.db.test.ts` échoue si un rôle de l'application devient
+membre du propriétaire.
+
 **La garde des entrées (0082).** Chaque table du schéma, `audit_log`
 exceptée, porte le déclencheur `guard_input`, qui refuse un texte à caractère
 de contrôle, à forçage de direction ou hors forme NFC, et une valeur au-delà
@@ -262,6 +285,8 @@ CREATE ROLE azimut_membership_admin NOLOGIN;
 GRANT azimut_membership_admin TO azimut;
 CREATE ROLE azimut_proof_review NOLOGIN;
 GRANT azimut_proof_review TO azimut;
+CREATE ROLE azimut_audit NOLOGIN;
+GRANT azimut_audit TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 

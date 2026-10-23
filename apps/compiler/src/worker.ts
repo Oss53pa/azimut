@@ -9,7 +9,22 @@ export type WorkerOptions = {
   queue: WorkerQueue;
   handlers: ReadonlyMap<string, JobHandler>;
   now: () => Date;
+  /**
+   * Lot 9 de l'audit : le journal technique, qui reçoit le détail d'un échec.
+   * Le travail, lui, ne garde qu'un code stable : le message d'une exception
+   * peut porter un chemin, une requête ou un secret, et `job.error` est lu par
+   * le demandeur. Par défaut, la sortie d'erreur du service.
+   */
+  report?: (jobId: string, failure: unknown) => void;
 };
+
+/** Le code stable qu'un travail garde quand son exécutant lève une exception. */
+export const HANDLER_FAILED = 'handler_failed';
+
+function reportToStderr(jobId: string, failure: unknown): void {
+  const detail = failure instanceof Error ? failure.stack ?? failure.message : String(failure);
+  console.error(`travail ${jobId} en échec : ${detail}`);
+}
 
 /**
  * D9.2 — reap jobs whose progress has stalled past the 30-minute timeout,
@@ -47,9 +62,8 @@ export async function processNextJob(
     const result = await handler(job);
     await queue.markSucceeded(job.id, result, now());
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : String(err);
-    await queue.markFailed(job.id, message, now());
+    (options.report ?? reportToStderr)(job.id, err);
+    await queue.markFailed(job.id, HANDLER_FAILED, now());
   }
 
   return true;
