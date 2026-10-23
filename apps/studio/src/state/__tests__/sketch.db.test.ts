@@ -1,8 +1,9 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
-import { applyCommands, createConnection, createDb, deleteOrgFixture, provisionOrganization } from '@azimut/db';
+import { applyCommands, createConnection, createDb, provisionOrganization } from '@azimut/db';
 import { eraseCommands, layerVisibilityCommand, sketchStrokeCommands } from '../sketch.js';
+import { randomUUID } from 'node:crypto';
 
 /**
  * J3 (partie J) — la couche d'esquisse contre la base réelle (migration 0072),
@@ -12,16 +13,23 @@ import { eraseCommands, layerVisibilityCommand, sketchStrokeCommands } from '../
  * sa pression reviennent tels quels ; la gomme supprime logiquement ; une
  * autre organisation n'en voit rien ; une couleur hors palette est refusée.
  */
+/**
+ * Un décor propre à chaque exécution (préfixe `RUN`). Depuis 0083,
+ * la suppression logique d’un trait laisse une entrée au journal d'audit, que rien ne
+ * supprime (A12.3) : l'organisation de l'essai ne se retire donc plus, et
+ * l'exécution suivante en prend une autre.
+ */
+const RUN = randomUUID().slice(0, 8);
 const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
-const ALICE = 'a3000000-0000-0000-0000-0000000000a1';
-const BOB = 'a3000000-0000-0000-0000-0000000000b1';
-const ORG = 'a3000000-0000-0000-0000-00000000a0a0';
-const ORG_B = 'a3000000-0000-0000-0000-00000000b0b0';
-const SITE = 'a3000000-0000-0000-0000-0000000005a1';
-const BUILDING = 'a3000000-0000-0000-0000-0000000006a1';
-const LEVEL = 'a3000000-0000-0000-0000-0000000007a1';
-const LAYER = 'a3000000-0000-0000-0000-0000000008a1';
-const STROKE = 'a3000000-0000-0000-0000-0000000009a1';
+const ALICE = `${RUN}-0000-0000-0000-0000000000a1`;
+const BOB = `${RUN}-0000-0000-0000-0000000000b1`;
+const ORG = `${RUN}-0000-0000-0000-00000000a0a0`;
+const ORG_B = `${RUN}-0000-0000-0000-00000000b0b0`;
+const SITE = `${RUN}-0000-0000-0000-0000000005a1`;
+const BUILDING = `${RUN}-0000-0000-0000-0000000006a1`;
+const LEVEL = `${RUN}-0000-0000-0000-0000000007a1`;
+const LAYER = `${RUN}-0000-0000-0000-0000000008a1`;
+const STROKE = `${RUN}-0000-0000-0000-0000000009a1`;
 const T = '2026-10-04T10:00:00.000Z';
 const POINTS = [{ x_m: 1.23456789, y_m: 2.5, p: 0.37 }, { x_m: 4.1, y_m: 3.33333, p: 0.91 }];
 
@@ -57,8 +65,7 @@ beforeAll(async () => {
   }
   client = createConnection(URL);
   db = createDb(URL);
-  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
-  for (const [user, org, slug] of [[ALICE, ORG, 'j3-a'], [BOB, ORG_B, 'j3-b']] as const) {
+  for (const [user, org, slug] of [[ALICE, ORG, `j3-a-${RUN}`], [BOB, ORG_B, `j3-b-${RUN}`]] as const) {
     await client.begin(tx => provisionOrganization(
       text => tx.unsafe(text), { id: org, name: slug, slug, adminId: user }));
   }
@@ -70,7 +77,6 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
   await client.end();
   await db.$client.end();
 });
@@ -120,10 +126,10 @@ describe('J3 — la couche d’esquisse en base', () => {
 
   it('une couleur hors de la palette d’esquisse est refusée par la base', async () => {
     const draft = {
-      operation: 'create', module: '12-atelier', table: 'sketch_stroke', id: 'a3000000-0000-0000-0000-0000000009b2',
+      operation: 'create', module: '12-atelier', table: 'sketch_stroke', id: `${RUN}-0000-0000-0000-0000000009b2`,
       org_id: ORG, timestamp: T,
       after: {
-        id: 'a3000000-0000-0000-0000-0000000009b2', org_id: ORG, layer_id: LAYER, tool: 'felt',
+        id: `${RUN}-0000-0000-0000-0000000009b2`, org_id: ORG, layer_id: LAYER, tool: 'felt',
         color: 'charter-primary', width_base_m: '0.08', points: '[]',
       },
     } as const;
