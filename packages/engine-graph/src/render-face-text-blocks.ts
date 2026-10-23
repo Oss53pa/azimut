@@ -1,6 +1,6 @@
 /**
  * Rendu des blocs de texte d'une face : en-tête, liste de destinations,
- * pictogramme, flèche, texte libre — et les tailles de police que le contrôle
+ * pictogramme, flèche, texte libre, et les tailles de police que le contrôle
  * d'encombrement relit (source unique). Sortis de `render-face.ts`.
  */
 import type { ResolvedContent } from './resolve-face.js';
@@ -45,7 +45,7 @@ function cardinalToAngle(direction: string): number {
 }
 
 /**
- * The rendered font size (em), in millimetres, of the destination-list block —
+ * The rendered font size (em), in millimetres, of the destination-list block:
  * the primary denomination text of a wayfinding face. Single source: the
  * renderer draws text at exactly this size and the legibility measurement reads
  * it back, so the two never drift (INV-4). The em size is not the cap height;
@@ -65,7 +65,7 @@ export function destinationListFontSizeMm(
 }
 
 /**
- * M04.G3 — l'inverse du calcul ci-dessus : la hauteur de bloc minimale pour que le
+ * M04.G3, l'inverse du calcul ci-dessus : la hauteur de bloc minimale pour que le
  * texte y soit dessiné à au moins `fontSizeMm`.
  *
  * Écrit ici, contre la fonction qu'elle inverse, pour que les deux ne dérivent
@@ -97,7 +97,7 @@ export function renderDestinationList(
   if (entries.length === 0) return '';
 
   // lineHeight keeps its original expression (byte-identical positioning); the
-  // font size comes from the shared helper — the same `lineHeight * 0.6` value,
+  // font size comes from the shared helper: the same `lineHeight * 0.6` value,
   // so no float round-trip drift and one source for the measured height.
   const lineHeight = Math.min(h / (entries.length + 0.5), h * 0.15);
   const fontSize = destinationListFontSizeMm(h, entries.length);
@@ -110,7 +110,7 @@ export function renderDestinationList(
     const ty = y + lineHeight * (i + 1);
     const dist =
       entry.distance_m !== null
-        ? ` — ${Math.round(entry.distance_m)} m`
+        ? `, ${Math.round(entry.distance_m)} m`
         : '';
 
     if (entry.direction) {
@@ -197,7 +197,7 @@ export function renderFreeText(
 ): string {
   const fontSize = Math.min(h * 0.4, 8);
   const ty = y + h / 2 + fontSize * 0.35;
-  // D8.3 — un texte saisi sur la face se lit dans la langue active, comme un
+  // D8.3 : un texte saisi sur la face se lit dans la langue active, comme un
   // nom de destination ; à défaut, le texte du gabarit.
   const text = content.texts !== undefined && Object.keys(content.texts).length > 0
     ? pickName(content.texts, lang)

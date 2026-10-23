@@ -14,12 +14,12 @@ import type { DeliveryRecorder } from './db-delivery-recorder.js';
 import type { Job } from './job.js';
 
 /**
- * D11 — `build_delivery_archive` job handler.
+ * D11: `build_delivery_archive` job handler.
  *
  * Renders the artworks for one delivery scope (site/building/level/version),
  * names each by the D11 scheme, assembles the delivery archive with its index,
- * and writes it to storage. The set of faces to render is payload-driven — each
- * item names a node, a face template and a travel profile — mirroring the
+ * and writes it to storage. The set of faces to render is payload-driven (each
+ * item names a node, a face template and a travel profile) mirroring the
  * compile_artworks contract.
  *
  * Payload:
@@ -158,7 +158,7 @@ export function createBuildDeliveryArchiveHandler(
         supportId: spec.reference,
         templateId: spec.template_id,
         profileKey: spec.profile_key,
-        title: `${spec.reference} — ${spec.type_code}`,
+        title: `${spec.reference} : ${spec.type_code}`,
         ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
         ...(context.measure_text !== undefined ? { measureText: context.measure_text } : {}),
         ...supportRenderParams(site.supports.find((s) => s.id === spec.reference)),

@@ -149,7 +149,7 @@ function getTemplate(id: string): FaceTemplate {
   return t;
 }
 
-describe('Visual regression — floor plans', () => {
+describe('Visual regression: floor plans', () => {
   it('RDC level snapshot', () => {
     const result = renderFloorPlan(refMultilevel, 'lvl-ml-rdc', floorOpts);
     expect(result.ok).toBe(true);
@@ -173,7 +173,7 @@ describe('Visual regression — floor plans', () => {
   });
 });
 
-describe('Visual regression — oriented plans', () => {
+describe('Visual regression: oriented plans', () => {
   it('0° orientation snapshot', () => {
     const result = renderOrientedPlan(refMultilevel, 'lvl-ml-rdc', orientedOpts);
     expect(result.ok).toBe(true);
@@ -198,7 +198,7 @@ describe('Visual regression — oriented plans', () => {
   });
 });
 
-describe('Visual regression — evacuation plans', () => {
+describe('Visual regression: evacuation plans', () => {
   it('RDC evacuation snapshot', () => {
     const result = renderEvacuationPlan(refMultilevel, 'lvl-ml-rdc', evacOpts);
     expect(result.ok).toBe(true);
@@ -215,7 +215,7 @@ describe('Visual regression — evacuation plans', () => {
   });
 });
 
-describe('Visual regression — isometric views', () => {
+describe('Visual regression: isometric views', () => {
   it('single level snapshot', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], isoOpts);
     expect(result.ok).toBe(true);
@@ -246,7 +246,7 @@ describe('Visual regression — isometric views', () => {
   });
 });
 
-describe('Visual regression — face renders', () => {
+describe('Visual regression: face renders', () => {
   it('directional face snapshot', () => {
     const template = getTemplate('ftpl-dir-front');
     const profile = getProfile('standard');
@@ -260,7 +260,7 @@ describe('Visual regression — face renders', () => {
   });
 });
 
-describe('Visual regression — face renders per active language (D12.2)', () => {
+describe('Visual regression: face renders per active language (D12.2)', () => {
   // A snapshot per active language of the site, not a single one in the
   // default language. The active-language list is site data (D12.1), derived
   // here from the destination denominations present.

@@ -26,8 +26,8 @@ export type CompileContext = {
   /**
    * Optional pack corpus. When no explicit `rules_pack` is given, the pack the
    * site is bound to (A5.8 `site_rules_binding`, socle and overlay) is
-   * resolved from this index. A site with no binding — or a binding absent from
-   * the corpus — surfaces `RULES.PACK_NOT_BOUND` and skips the check; it does
+   * resolved from this index. A site with no binding (or a binding absent from
+   * the corpus) surfaces `RULES.PACK_NOT_BOUND` and skips the check; it does
    * not abort artwork production. The index's source (database vs file corpus)
    * is the composition root's choice, not fixed here.
    */
@@ -71,7 +71,7 @@ export function createArtworkHandler(
       throw new Error(`Template not found: ${templateId}`);
     }
 
-    // A5.6 — the support instance carries the registry and reading context that
+    // A5.6: the support instance carries the registry and reading context that
     // scope the rules; unknown supports fall back to the render's own defaults.
     const support = site.supports.find((s) => s.id === supportId);
 
@@ -88,7 +88,7 @@ export function createArtworkHandler(
       supportId,
       templateId,
       profileKey,
-      title: `${supportId} — ${template.side}`,
+      title: `${supportId} : ${template.side}`,
       ...(effectivePack !== undefined ? { rulesPack: effectivePack } : {}),
       ...(measure_text !== undefined ? { measureText: measure_text } : {}),
       ...supportRenderParams(support),
