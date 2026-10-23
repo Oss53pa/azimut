@@ -124,6 +124,7 @@ non plus — elle n'en retire que les clés étrangères.
 0078_e5_1_liste_blanche_commandes
 0079_a2_4_identite_sous_le_proprietaire
 0080_a6_3_double_authentification
+0081_d5_d6_seuils_et_stockage
 ```
 
 ## Règle pour la suite
@@ -212,6 +213,15 @@ sous le propriétaire des tables. Sur une plateforme dont le schéma `auth`
 appartient à un autre administrateur, les rôles propriétaires des fonctions
 n'ont pas besoin de l'usage de `auth` : les pas manuels décrits pour 0075 et
 0076 deviennent sans objet une fois 0079 appliquée.
+
+**Les seuils et le stockage (0081).** Les seuils de taille, de nombre et de
+durée vivent dans `azimut.security_setting`, avec leur source ; une
+organisation ne peut que les resserrer (`org_security_setting`). Les quatre
+espaces de stockage `azimut-*` et leurs politiques sont posés par
+`azimut.install_storage()`, que la migration appelle si le schéma `storage`
+existe. Si la plateforme le fournit plus tard, ou si la migration l'annonce
+par un avertissement de droits : `SELECT azimut.install_storage();` sous un
+rôle d'administration.
 
 **La liste blanche des commandes (0078).** `azimut.command_table` dit quelles
 tables `apply_commands` peut viser. Une table attribuée à un module dans
