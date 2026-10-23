@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Hook PreToolUse de Claude Code — refuse d'écrire une variable d'environnement
+ * Hook PreToolUse de Claude Code : refuse d'écrire une variable d'environnement
  * exposée au navigateur dont le nom annonce un secret.
  *
  * Les préfixes VITE_, NEXT_PUBLIC_, REACT_APP_, EXPO_PUBLIC_ et PUBLIC_ sont

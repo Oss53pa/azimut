@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
 /**
- * A6.3 — le hook Claude Code `.claude/hooks/bloquer-secrets-client.js` refuse
+ * A6.3 : le hook Claude Code `.claude/hooks/bloquer-secrets-client.js` refuse
  * d'écrire une variable exposée au navigateur dont le nom annonce un secret.
  *
  * Le hook est lancé comme Claude Code le lance : un processus, l'appel d'outil

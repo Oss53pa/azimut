@@ -1,6 +1,6 @@
 ---
 name: audit-securite
-description: Audit puis durcissement sécurité d'une application existante, par lots validés un à un — secrets et clés, authentification, autorisation et cloisonnement, validation des entrées, fichiers téléversés, encodage en sortie, en-têtes HTTP, limitation de débit, journalisation, dépendances. À lancer à la demande (/audit-securite), jamais en tâche de fond.
+description: Audit puis durcissement sécurité d'une application existante, par lots validés un à un (secrets et clés, authentification, autorisation et cloisonnement, validation des entrées, fichiers téléversés, encodage en sortie, en-têtes HTTP, limitation de débit, journalisation, dépendances). À lancer à la demande (/audit-securite), jamais en tâche de fond.
 ---
 
 # Audit et durcissement sécurité
@@ -26,7 +26,7 @@ Cible de revue : OWASP ASVS niveau 2.
   compris en test.
 - Ne jamais committer de secret, même « de test ».
 
-## Étape 0 — audit, sans modifier de code
+## Étape 0 : audit, sans modifier de code
 
 Produis une note contenant :
 
@@ -43,18 +43,18 @@ cloisonnée ne protège rien.
 
 ## Lots
 
-### Lot 1 — secrets et clés
+### Lot 1 : secrets et clés
 - Côté client, seules les clés publiques par conception (anon, publiable).
   Toute autre clé reste serveur.
 - Recherche de secrets dans le bundle de production après construction.
 - `.env.example` sans valeur réelle ; détection de secrets en CI.
 
-### Lot 2 — authentification et sessions
+### Lot 2 : authentification et sessions
 - Double authentification pour les rôles privilégiés, vérifiée côté serveur ou
   base, pas seulement dans l'interface.
 - Durée de session, révocation, déconnexion globale, limitation des tentatives.
 
-### Lot 3 — autorisation et cloisonnement
+### Lot 3 : autorisation et cloisonnement
 - Autorisation en base (RLS ou équivalent) sur toute table portant un
   identifiant de locataire, avec un test qui échoue si une table en manque.
 - Aucune fuite inter-locataires par message d'erreur, compteur, clé étrangère
@@ -62,7 +62,7 @@ cloisonnée ne protège rien.
 - Fonctions privilégiées (`security definer` ou équivalent) : `search_path`
   figé, contrôle explicite du locataire et du rôle.
 
-### Lot 4 — validation et nettoyage des entrées
+### Lot 4 : validation et nettoyage des entrées
 - Schéma strict par entrée : type, longueur maximale, format, énumération,
   champs inconnus rejetés.
 - Validation à la frontière serveur ou en base (contraintes `CHECK`). La
@@ -72,33 +72,33 @@ cloisonnée ne protège rien.
 - Imports de fichiers ligne par ligne, même schéma, rapport d'erreurs.
 - Aucune requête construite par concaténation.
 
-### Lot 5 — fichiers téléversés
+### Lot 5 : fichiers téléversés
 - Type vérifié sur les octets, taille bornée, nom régénéré côté serveur.
 - Aucun bucket public ; URL signées à durée courte ; politiques alignées sur
   le locataire et le rôle.
 - SVG et PDF : refuser ou assainir scripts, références externes, entités XML.
 - Bornes de décompression, de pages et de durée sur les traitements lourds.
 
-### Lot 6 — encodage en sortie
+### Lot 6 : encodage en sortie
 - Tout texte utilisateur échappé à la sérialisation (HTML, SVG, PDF).
 - Aucune injection de HTML brut sur une donnée non maîtrisée.
 
-### Lot 7 — en-têtes HTTP
+### Lot 7 : en-têtes HTTP
 - CSP stricte, HSTS, `X-Content-Type-Options`, `Referrer-Policy`,
   `frame-ancestors`, CORS restreint.
 - Forme portable d'un hébergeur à l'autre.
 
-### Lot 8 — limitation de débit
+### Lot 8 : limitation de débit
 - Compteurs par utilisateur et par locataire sur les points sensibles ; quotas
   sur les files de travaux.
 - Réponse 429 avec `Retry-After`, sans fuite d'information.
 
-### Lot 9 — journalisation et erreurs
+### Lot 9 : journalisation et erreurs
 - Journal d'audit en insertion seule, garanti en base.
 - Ni secret, ni jeton, ni donnée personnelle dans les journaux.
 - Erreurs client génériques avec code stable.
 
-### Lot 10 — dépendances et chaîne de fabrication
+### Lot 10 : dépendances et chaîne de fabrication
 - Audit des dépendances en CI, lockfile figé.
 - Intégrité des artefacts publiés (empreinte ou signature) si le projet le
   prévoit ; sinon, signaler et demander.
