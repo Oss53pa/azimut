@@ -1,5 +1,11 @@
 import { z } from 'zod';
 
+// Validation sans compilation à la volée : zod n'essaie plus `new Function`,
+// que la politique de sécurité du contenu du studio refuse (audit, lot 7).
+// Le résultat d'une validation ne change pas, seule sa vitesse. Posé avant
+// toute déclaration de schéma : zod fixe ce choix à la construction.
+z.config({ jitless: true });
+
 const nonEmpty = z.string().min(1);
 
 export const ruleScopeSchema = z.object({

@@ -18,7 +18,11 @@ const LEVEL = 'niveau-essai';
 
 /** Applique le filtre de désaturation, comme le ferait un écran monochrome. */
 async function desaturate(page: import('@playwright/test').Page): Promise<void> {
-  await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
+  // Par le CSSOM, que la politique de sécurité du contenu laisse faire,
+  // et non par un <style> en ligne, qu'elle refuse.
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('filter', 'grayscale(1)', 'important');
+  });
 }
 
 test.describe('F16 — le produit se lit sans les couleurs', () => {

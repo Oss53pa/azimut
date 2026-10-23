@@ -212,7 +212,11 @@ test.describe('partie R — le tableau des messages en consultation', () => {
    */
   test('se lit entièrement sans les couleurs', async ({ page }) => {
     await openTable(page);
-    await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
+    // Par le CSSOM, que la politique de sécurité du contenu laisse faire,
+    // et non par un <style> en ligne, qu'elle refuse.
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('filter', 'grayscale(1)', 'important');
+    });
 
     const body = await page.locator('body').innerText();
     for (const word of ['Périmée', 'À jour', 'Brouillon', 'Orientation', 'À gauche']) {

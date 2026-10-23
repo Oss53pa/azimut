@@ -202,7 +202,11 @@ test.describe('M7.7 (partie M) — aucune information portée par la seule coule
   test('la gravité se lit au mot, pas à la teinte', async ({ page }) => {
     await page.goto(VALIDATION);
     await page.getByRole('button', { name: /Lancer la validation|Run validation/ }).first().click();
-    await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
+    // Par le CSSOM, que la politique de sécurité du contenu laisse faire,
+    // et non par un <style> en ligne, qu'elle refuse.
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty('filter', 'grayscale(1)', 'important');
+    });
     const body = await page.locator('body').innerText();
     expect(body).toMatch(/bloquantes|blocking/);
   });

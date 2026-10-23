@@ -1,0 +1,16 @@
+# En-têtes de sécurité du studio, appliqués par les hébergeurs qui lisent ce
+# fichier (Cloudflare, et la plupart des serveurs de fichiers statiques).
+#
+# La politique de sécurité du contenu est dans `index.html` (balise <meta>,
+# posée à la construction, voir `src/app/content-security-policy.ts`) : elle
+# voyage avec le paquet, quel que soit l'hébergeur (A3.4). Ce fichier ajoute ce
+# qu'une balise <meta> ne sait pas porter. Les deux politiques s'appliquent
+# ensemble ; celle-ci ne fait que restreindre l'encadrement.
+/*
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
