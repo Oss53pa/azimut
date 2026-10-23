@@ -175,4 +175,19 @@ describe('lot 6 de l’audit : identifiants et couleurs échappés dans le SVG',
     expect(svg).not.toContain('<script');
     expect(svg).toContain('data-node="n0&quot;&gt;&lt;script&gt;');
   });
+
+  it('un identifiant de niveau porteur de balisage ne sort pas de son attribut', () => {
+    const hostile = 'n0"><script>alert(3)</script><g x="';
+    const relevel = (id: string): string => (id === 'n0' ? hostile : id);
+    const evil = {
+      levels: scene.levels.map(l => ({ ...l, id: relevel(l.id) })),
+      footprints: scene.footprints.map(f => ({ ...f, level_id: relevel(f.level_id) })),
+      nodes: scene.nodes.map(n => ({ ...n, level_id: relevel(n.level_id) })),
+    };
+    const out = renderRouteAnimation(route, evil, ['carrefour'], options);
+    if (!out.ok) throw new Error('rendu attendu');
+    const svg = out.value.frames[0]?.svg ?? '';
+    expect(svg).not.toContain('<script');
+    expect(svg).toContain('data-level="n0&quot;&gt;&lt;script&gt;');
+  });
 });
