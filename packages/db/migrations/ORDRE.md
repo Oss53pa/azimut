@@ -120,6 +120,7 @@ non plus — elle n'en retire que les clés étrangères.
 0074_r12_message_schedule_approval
 0075_a6_1_membership_closed
 0076_a6_2_roles_in_policies
+0077_a6_2_delegated_decisions
 ```
 
 ## Règle pour la suite

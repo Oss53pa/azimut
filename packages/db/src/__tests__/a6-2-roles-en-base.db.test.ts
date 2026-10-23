@@ -110,7 +110,7 @@ describe('A6.2 — auditor : lecture seule intégrale, aucune écriture', () => 
   });
 });
 
-describe('A6.2 — bon à tirer : owner_rep ou admin, en son propre nom', () => {
+describe('A6.2 — bon à tirer : owner_rep seul, en son propre nom', () => {
   const decide = (tx: Tx, reviewer: string) => () => tx`
     insert into azimut.approval(org_id, proof_id, decision, reviewer_id)
     values (${ORG}, ${NO_PROOF}, 'approved', ${reviewer})`;
@@ -129,12 +129,17 @@ describe('A6.2 — bon à tirer : owner_rep ou admin, en son propre nom', () => 
     });
   });
 
-  it('owner_rep et admin : la politique laisse passer, seule l’épreuve absente arrête', async () => {
+  it('owner_rep : la politique laisse passer, seule l’épreuve absente arrête', async () => {
     await inRolledBack(async (tx, as) => {
-      for (const user of [OWNER_REP, ADMIN]) {
-        await as(user);
-        expect(await refusal(tx, decide(tx, user)), user).toMatch(/foreign key/);
-      }
+      await as(OWNER_REP);
+      expect(await refusal(tx, decide(tx, OWNER_REP))).toMatch(/foreign key/);
+    });
+  });
+
+  it('admin : refusé, celui qui produit ne valide pas (0077)', async () => {
+    await inRolledBack(async (tx, as) => {
+      await as(ADMIN);
+      expect(await refusal(tx, decide(tx, ADMIN))).toMatch(RLS);
     });
   });
 
