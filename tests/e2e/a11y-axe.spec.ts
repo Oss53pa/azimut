@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -141,7 +141,10 @@ type Incomplete = {
 const incompletes: Incomplete[] = [];
 
 async function runAxe(page: Page): Promise<AxeRun> {
-  await page.addScriptTag({ path: AXE });
+  // Évalué par le protocole de débogage, et non injecté en <script> en ligne :
+  // la politique de sécurité du contenu du studio refuse ce dernier, et
+  // l'essai tourne sous la vraie politique (lot 7 de l'audit).
+  await page.evaluate(readFileSync(AXE, 'utf8'));
   return page.evaluate(async (tags: readonly string[]) => {
     const axe = (window as unknown as {
       axe: { run: (ctx: unknown, opts: unknown) => Promise<unknown> };
