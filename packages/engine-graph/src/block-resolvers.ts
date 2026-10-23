@@ -4,6 +4,7 @@
  * directe et par la lecture du tableau des messages ; sortis de
  * `resolve-face.ts` pour tenir la limite de taille des fichiers.
  */
+import { validateSvg } from '@azimut/core-model';
 import type { Pictogram } from '@azimut/core-model';
 import type { LegendEntry, ResolvedContent } from './resolve-face.js';
 
@@ -16,6 +17,19 @@ function asStringOrNull(value: unknown): string | null {
 }
 
 /**
+ * Lot 5 de l'audit (E14.2) : un SVG intégré n'est rendu que s'il passe
+ * l'analyseur par liste blanche, et c'est sa forme reconstruite qui l'est. Un
+ * SVG refusé n'est pas rendu : le bloc retombe sur son libellé, comme sans
+ * SVG. C'était le chemin d'une faille XSS stockée.
+ */
+function asSafeSvgOrNull(value: unknown): string | null {
+  const raw = asStringOrNull(value);
+  if (raw === null) return null;
+  const checked = validateSvg(raw, 'asset');
+  return checked.ok ? checked.svg : null;
+}
+
+/**
  * A `map` block shows a pre-rendered plan. engine-graph does not render plans
  * (that is engine-layout's job, one layer up); the plan SVG is provided as a
  * sanitized `plan_svg` string in the block config, or null when none is
@@ -24,7 +38,7 @@ function asStringOrNull(value: unknown): string | null {
 export function resolveMapContent(config: Record<string, unknown>): ResolvedContent {
   return {
     type: 'map',
-    plan_svg: asStringOrNull(config['plan_svg']),
+    plan_svg: asSafeSvgOrNull(config['plan_svg']),
     caption: asString(config['caption'], ''),
   };
 }
@@ -61,7 +75,7 @@ export function resolveLogoContent(
 ): ResolvedContent {
   return {
     type: 'logo',
-    svg_markup: asStringOrNull(config['svg_markup']),
+    svg_markup: asSafeSvgOrNull(config['svg_markup']),
     label: asString(config['label'], defaultLabel),
   };
 }

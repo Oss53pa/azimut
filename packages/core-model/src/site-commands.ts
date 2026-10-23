@@ -18,7 +18,7 @@ import type { ModuleKey } from './module-ownership.js';
 import {
   OWNED_TABLES, SPLIT_OWNERSHIP_TABLE, ownsSupportColumn,
 } from './module-ownership.js';
-import { safetyRegistryFaults, factKeyFaults } from './command-checks.js';
+import { safetyRegistryFaults, factKeyFaults, embeddedSvgFaults } from './command-checks.js';
 import { touchedColumns } from './row-values.js';
 import type { RowValues } from './row-values.js';
 import type { Outcome, Finding } from './outcome.js';
@@ -142,6 +142,7 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
 
   findings.push(...safetyRegistryFaults(draft, before, after));
   findings.push(...factKeyFaults(draft, after));
+  findings.push(...embeddedSvgFaults(draft, after));
 
   if (findings.length > 0) return { ok: false, findings };
 

@@ -1,4 +1,4 @@
-import { roundSvg } from '@azimut/core-model';
+import { escapeXmlAttr, roundSvg } from '@azimut/core-model';
 import type { Point } from '@azimut/core-model';
 
 export type IsoPoint = { readonly x: number; readonly y: number };
@@ -49,12 +49,9 @@ export function pointsStr(pts: readonly IsoPoint[]): string {
   return pts.map((p) => `${p.x},${p.y}`).join(' ');
 }
 
+/** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
 export function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return escapeXmlAttr(s);
 }
 
 type WorldBounds = {

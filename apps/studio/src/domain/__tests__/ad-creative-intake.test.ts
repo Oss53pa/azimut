@@ -2,7 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { receiveCreative, receiveCreatives } from '../ad-creative-intake.js';
 import type { CreativePayload } from '../ad-creative-intake.js';
 import type { Creative, CreativeSpec } from '../ad-creative-control.js';
-import { DEFAULT_SANITIZE_CONFIG } from '../asset-sanitizer.js';
+import { sanitizeConfigFrom } from '../asset-sanitizer.js';
+import { REFERENCE_SECURITY_SETTINGS } from '../../data/reference-security-settings.js';
+
+/** Les bornes de référence (D-5), celles que la migration 0081 inscrit. */
+const LIMITS = sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, false);
 
 const SPEC: CreativeSpec = {
   format: 'svg',
@@ -46,20 +50,26 @@ const BINARY: CreativePayload = { kind: 'binary' };
  */
 describe('M05.R5 — assainissement du visuel reçu', () => {
   it('assainit un SVG et le rend affichable', () => {
-    const intake = receiveCreative({ creative: creative('cr-1'), payload: svg(CLEAN_SVG) }, SPEC);
+    const intake = receiveCreative({ creative: creative('cr-1'), payload: svg(CLEAN_SVG) }, SPEC, LIMITS);
     expect(intake.sanitation).toBe('clean');
     expect(intake.renderable).toBe(true);
     expect(intake.clean_svg).toBe(CLEAN_SVG);
   });
 
-  it('retire ce qui est dangereux plutôt que de refuser le fichier', () => {
-    const intake = receiveCreative({ creative: creative('cr-2'), payload: svg(DIRTY_SVG) }, SPEC);
-    expect(intake.sanitation).toBe('clean');
-    expect(intake.clean_svg).not.toContain('<script');
-    expect(intake.clean_svg).not.toContain('onclick');
-    expect(intake.clean_svg).not.toContain('<metadata');
-    // Ce qui est stocké n'est pas ce qui a été reçu.
-    expect(intake.clean_svg).not.toBe(DIRTY_SVG);
+  it('refuse un fichier qui porte un script ou un gestionnaire d’événement, sans le nettoyer (D-7)', () => {
+    // Lot 5 de l'audit : un nettoyage par expressions régulières se
+    // contourne. Le fichier est refusé entier, et n'est jamais rendu.
+    const intake = receiveCreative({ creative: creative('cr-2'), payload: svg(DIRTY_SVG) }, SPEC, LIMITS);
+    expect(intake.sanitation).toBe('failed');
+    expect(intake.renderable).toBe(false);
+    expect(intake.clean_svg).toBeUndefined();
+    expect(intake.findings[0]?.code).toBe('ASSET.SANITIZATION_FAILED');
+  });
+
+  it('sans seuils lus, n’assainit rien et ne rend rien (D-5)', () => {
+    const intake = receiveCreative({ creative: creative('cr-2b'), payload: svg(CLEAN_SVG) }, SPEC, null);
+    expect(intake.sanitation).toBe('deferred');
+    expect(intake.renderable).toBe(false);
   });
 
   it('refuse un fichier hors des bornes, et ne le rend jamais', () => {
@@ -68,7 +78,7 @@ describe('M05.R5 — assainissement du visuel reçu', () => {
     const intake = receiveCreative(
       { creative: creative('cr-3'), payload: svg(CLEAN_SVG) },
       SPEC,
-      { ...DEFAULT_SANITIZE_CONFIG, maxFileSize: 10 },
+      { ...LIMITS, maxFileSize: 10 },
     );
     expect(intake.sanitation).toBe('failed');
     expect(intake.renderable).toBe(false);
@@ -81,7 +91,7 @@ describe('M05.R5 — assainissement du visuel reçu', () => {
     const intake = receiveCreative(
       { creative: creative('cr-4'), payload: svg(CLEAN_SVG) },
       SPEC,
-      { ...DEFAULT_SANITIZE_CONFIG, maxFileSize: 10 },
+      { ...LIMITS, maxFileSize: 10 },
     );
     expect(intake.findings[0]?.entity).toEqual({ kind: 'creative', id: 'cr-4' });
   });
@@ -92,14 +102,14 @@ describe('M05.R5 — assainissement du visuel reçu', () => {
     const intake = receiveCreative(
       { creative: creative('cr-5', { format: 'png', resolution_dpi: 10 }), payload: svg(CLEAN_SVG) },
       SPEC,
-      { ...DEFAULT_SANITIZE_CONFIG, maxFileSize: 10 },
+      { ...LIMITS, maxFileSize: 10 },
     );
     expect(intake.findings).toHaveLength(1);
     expect(intake.findings.every(f => f.code === 'ASSET.SANITIZATION_FAILED')).toBe(true);
   });
 
   it('remet un format binaire au serveur, et ne le tient pas pour propre', () => {
-    const intake = receiveCreative({ creative: creative('cr-6'), payload: BINARY }, SPEC);
+    const intake = receiveCreative({ creative: creative('cr-6'), payload: BINARY }, SPEC, LIMITS);
     expect(intake.sanitation).toBe('deferred');
     // « Pas encore assaini » n'est pas « propre en attendant » (E14.2).
     expect(intake.renderable).toBe(false);
@@ -114,6 +124,7 @@ describe('M05.R6 — fiche technique, après l’assainissement', () => {
         payload: svg(CLEAN_SVG),
       },
       SPEC,
+      LIMITS,
     );
     expect(intake.sanitation).toBe('clean');
     // Non conforme, mais regardable : les deux axes ne se confondent pas.
@@ -126,13 +137,14 @@ describe('M05.R6 — fiche technique, après l’assainissement', () => {
     const intake = receiveCreative(
       { creative: creative('cr-8', { resolution_dpi: 72 }), payload: BINARY },
       SPEC,
+      LIMITS,
     );
     expect(intake.sanitation).toBe('deferred');
     expect(intake.findings.map(f => f.params['axis'])).toEqual(['resolution']);
   });
 
   it('ne signale rien sur un visuel propre et conforme', () => {
-    const intake = receiveCreative({ creative: creative('cr-9'), payload: svg(CLEAN_SVG) }, SPEC);
+    const intake = receiveCreative({ creative: creative('cr-9'), payload: svg(CLEAN_SVG) }, SPEC, LIMITS);
     expect(intake.findings).toEqual([]);
   });
 });
@@ -142,12 +154,12 @@ describe('receiveCreatives', () => {
     const intakes = receiveCreatives([
       { creative: creative('cr-b'), payload: BINARY },
       { creative: creative('cr-a'), payload: svg(CLEAN_SVG) },
-    ], SPEC);
+    ], SPEC, LIMITS);
     expect(intakes.map(i => i.creative_id)).toEqual(['cr-b', 'cr-a']);
   });
 
   it('rend le même constat deux fois de suite', () => {
     const receptions = [{ creative: creative('cr-a'), payload: svg(DIRTY_SVG) }];
-    expect(receiveCreatives(receptions, SPEC)).toEqual(receiveCreatives(receptions, SPEC));
+    expect(receiveCreatives(receptions, SPEC, LIMITS)).toEqual(receiveCreatives(receptions, SPEC, LIMITS));
   });
 });

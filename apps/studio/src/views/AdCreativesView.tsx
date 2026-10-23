@@ -1,7 +1,10 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import type { AdCreativeVerdict } from '@azimut/core-model';
 import { useI18n } from '../i18n/useI18n.js';
 import { receiveCreatives } from '../domain/ad-creative-intake.js';
+import { sanitizeConfigFrom } from '../domain/asset-sanitizer.js';
+import { useSecuritySettings } from '../data/use-security-settings.js';
 import { EMPTY_ADVERTISING_DATA, loadAdvertising, useRegistry } from '../data/index.js';
 import {
   DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, SPACE, TEXT,
@@ -46,6 +49,7 @@ type AdCreativesViewProps = {
  */
 export function AdCreativesView({ siteKey }: AdCreativesViewProps): JSX.Element {
   const { t, lang } = useI18n();
+  const settings = useSecuritySettings();
   const state = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -54,9 +58,10 @@ export function AdCreativesView({ siteKey }: AdCreativesViewProps): JSX.Element 
   const rows = useMemo<readonly CreativeRow[]>(() => {
     // Sans fiche technique, rien ne se reçoit : l'assainissement exige la
     // fiche pour son contrôle de conformité, et aucune n'est inventée.
-    const intakes = spec === null ? [] : receiveCreatives(reception, spec);
+    const limits = settings === null ? null : sanitizeConfigFrom(settings, false);
+    const intakes = spec === null ? [] : receiveCreatives(reception, spec, limits);
     return creativeRows(registry.creatives, reception, intakes, spec);
-  }, [registry, reception, spec]);
+  }, [registry, reception, spec, settings]);
 
   if (state.status !== 'ready') return <RegistryStatus state={state} />;
 
@@ -149,12 +154,13 @@ export function AdCreativesView({ siteKey }: AdCreativesViewProps): JSX.Element 
       >
         <section style={{ padding: '12px 16px' }}>
           {selected.renderable && selected.clean_svg !== undefined && (
-            <div
+            <SafeSvg
               className="az-svg-fit"
               role="img"
               aria-label={t('adcreatives.preview.aria', { creative: selected.creative.id })}
               style={{ border: '1px solid var(--border-hairline)', borderRadius: 4, marginBottom: SPACE.sm, color: 'var(--text-primary)' }}
-              dangerouslySetInnerHTML={{ __html: selected.clean_svg }}
+              profile="asset"
+              markup={selected.clean_svg}
             />
           )}
           <FindingList findings={selected.findings} empty={t('adcreatives.findings.none')} />

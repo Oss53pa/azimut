@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Footprint, GraphNode, Level } from '@azimut/core-model';
-import { orientationDegForAzimuth } from '@azimut/core-model';
+import { orientationDegForAzimuth, validateSvg } from '@azimut/core-model';
 import { renderRouteAnimation } from '../route-animation.js';
 import type { RouteAnimationOptions } from '../route-animation.js';
 
@@ -146,5 +146,48 @@ describe('D6.2 — le parcours sur un plan orienté', () => {
     const plain = renderRouteAnimation(route, scene, ['carrefour'], options);
     const north = renderRouteAnimation(route, scene, ['carrefour'], facing(0));
     expect(JSON.stringify(north)).toBe(JSON.stringify(plain));
+  });
+});
+
+describe('lot 6 de l’audit : l’animation passe la liste blanche de rendu', () => {
+  it('chaque image, animée ou fixe, est acceptée par le profil `render`', () => {
+    const out = renderRouteAnimation(route, scene, ['carrefour'], options);
+    if (!out.ok) throw new Error('rendu attendu');
+    for (const frame of out.value.frames) {
+      for (const svg of [frame.svg, frame.static_svg]) {
+        const checked = validateSvg(svg, 'render');
+        expect(checked.ok ? 'accepté' : `${checked.reason} ${checked.detail}`).toBe('accepté');
+      }
+    }
+  });
+});
+
+describe('lot 6 de l’audit : identifiants et couleurs échappés dans le SVG', () => {
+  it('un identifiant ou une couleur porteurs de balisage ne sortent pas de leur attribut', () => {
+    const hostile = 'n0"><script>alert(1)</script><g x="';
+    const evil = { ...scene, nodes: scene.nodes.map(n => (n.id === 'entree' ? { ...n, id: hostile } : n)) };
+    const out = renderRouteAnimation(
+      { path: [hostile, 'carrefour'] }, evil, [],
+      { ...options, theme: { ...options.theme, route: 'red"><script>alert(2)</script><g x="' } },
+    );
+    if (!out.ok) throw new Error('rendu attendu');
+    const svg = out.value.frames[0]?.svg ?? '';
+    expect(svg).not.toContain('<script');
+    expect(svg).toContain('data-node="n0&quot;&gt;&lt;script&gt;');
+  });
+
+  it('un identifiant de niveau porteur de balisage ne sort pas de son attribut', () => {
+    const hostile = 'n0"><script>alert(3)</script><g x="';
+    const relevel = (id: string): string => (id === 'n0' ? hostile : id);
+    const evil = {
+      levels: scene.levels.map(l => ({ ...l, id: relevel(l.id) })),
+      footprints: scene.footprints.map(f => ({ ...f, level_id: relevel(f.level_id) })),
+      nodes: scene.nodes.map(n => ({ ...n, level_id: relevel(n.level_id) })),
+    };
+    const out = renderRouteAnimation(route, evil, ['carrefour'], options);
+    if (!out.ok) throw new Error('rendu attendu');
+    const svg = out.value.frames[0]?.svg ?? '';
+    expect(svg).not.toContain('<script');
+    expect(svg).toContain('data-level="n0&quot;&gt;&lt;script&gt;');
   });
 });

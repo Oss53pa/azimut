@@ -4,6 +4,8 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { guardAdRulesPack } from '@azimut/engine-graph';
 import { receiveCreatives } from '../../../domain/ad-creative-intake.js';
+import { sanitizeConfigFrom } from '../../../domain/asset-sanitizer.js';
+import { REFERENCE_SECURITY_SETTINGS } from '../../../data/reference-security-settings.js';
 import { ATTACHED_AD_RULES_PACK as DEMO_AD_RULES_PACK } from '../../../domain/ad-rules-pack.js';
 import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
 
@@ -46,7 +48,8 @@ describe('M05.R7 — le paquet de règles publicitaires', () => {
 });
 
 describe('M05.R5 — l’assainissement passe sur les visuels reçus', () => {
-  const intakes = receiveCreatives(DEMO_CREATIVES, DEMO_CREATIVE_SPEC);
+  const intakes = receiveCreatives(DEMO_CREATIVES, DEMO_CREATIVE_SPEC,
+    sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, false));
 
   it('constate chaque visuel du jeu d’essai', () => {
     expect(intakes).toHaveLength(DEMO_CREATIVES.length);
@@ -58,14 +61,11 @@ describe('M05.R5 — l’assainissement passe sur les visuels reçus', () => {
     expect(states.has('deferred')).toBe(true);
   });
 
-  it('stocke un SVG débarrassé de ce qu’il portait', () => {
+  it('refuse le SVG piégé, et ne le rend jamais (D-7)', () => {
     const dirty = intakes.find(i => i.creative_id === 'cr-0261');
-    expect(dirty?.sanitation).toBe('clean');
-    expect(dirty?.clean_svg).toBeDefined();
-    expect(dirty?.clean_svg).not.toContain('<script');
-    expect(dirty?.clean_svg).not.toContain('onclick');
-    expect(dirty?.clean_svg).not.toContain('<metadata');
-    expect(dirty?.clean_svg).not.toContain('exemple.invalide');
+    expect(dirty?.sanitation).toBe('failed');
+    expect(dirty?.renderable).toBe(false);
+    expect(dirty?.clean_svg).toBeUndefined();
   });
 
   it('ne tient aucun visuel binaire pour rendable', () => {

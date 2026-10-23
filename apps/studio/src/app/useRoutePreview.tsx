@@ -1,3 +1,4 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import { codePointCompare, getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
@@ -122,10 +123,12 @@ export function useRoutePreview(session: TrancheSession): { readonly panel: JSX.
               {' · '}
               {t('route.decisions', { count: current.decision_node_ids.length })}
             </p>
-            <div key={`${String(replay)}:${String(frame)}:${String(still)}`} role="img" data-testid="route-frame"
+            <SafeSvg key={`${String(replay)}:${String(frame)}:${String(still)}`} role="img" data-testid="route-frame"
               data-level={current.level_id} data-still={still ? 'true' : 'false'}
               aria-label={t('route.frame_label', { level: levelName(current.level_id) })}
-              dangerouslySetInnerHTML={{ __html: still ? current.static_svg : current.svg }} />
+              profile="render"
+              markup={still ? current.static_svg : current.svg}
+            />
             <p style={{ margin: 0, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>{t('route.legend')}</p>
             {change !== null && (
               <StateBanner severity="info" message={t('route.change', {

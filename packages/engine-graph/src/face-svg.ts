@@ -3,6 +3,7 @@
  * et le choix d'une variante de langue. Sorties de `render-face.ts` pour tenir
  * la limite de taille des fichiers ; le rendu produit est inchangé (INV-4).
  */
+import { escapeXmlAttr } from '@azimut/core-model';
 
 export type FaceTheme = {
   readonly background: string;
@@ -26,10 +27,8 @@ export function pickName(
   return firstKey !== undefined ? (names[firstKey] as string) : '';
 }
 
+/** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
 export function esc(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return escapeXmlAttr(text);
 }
+

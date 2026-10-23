@@ -1,11 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import {
-  acceptPlanFile, judgeReplacement, MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS, unreadablePlanInspection,
+  acceptPlanFile as acceptWith, judgeReplacement, ACCEPTED_PLAN_FORMATS, unreadablePlanInspection,
 } from '../plan-import.js';
 import type { PlanFile } from '../plan-import.js';
-import { inspectPlanContent } from '../plan-content.js';
+import { inspectPlanContent as inspectWith } from '../plan-content.js';
 import type { PlanInspection } from '../plan-content.js';
-import { latin1, onePagePdf, plain } from './pdf-fixtures.js';
+import { latin1, onePagePdf, plain, PDF_LIMITS, PLAN_MAX_BYTES } from './pdf-fixtures.js';
+
+const MAX_PLAN_BYTES = PLAN_MAX_BYTES;
+const acceptPlanFile = (f: PlanFile, i: PlanInspection) => acceptWith(f, i, PLAN_MAX_BYTES);
+const inspectPlanContent = (bytes: Uint8Array) => inspectWith(bytes, PDF_LIMITS);
 
 function file(over: Partial<PlanFile> = {}): PlanFile {
   return { name: 'niveau-0.pdf', byteSize: 1024, page: null, ...over };

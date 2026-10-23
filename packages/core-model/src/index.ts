@@ -365,3 +365,7 @@ export {
   deriveLegend, compassRoseAngleDeg, mapRotationForAzimuthDeg,
 } from './plan-legend.js';
 export type { LegendEntry } from './plan-legend.js';
+export { escapeXmlText, escapeXmlAttr } from './xml-escape.js';
+export { validateSvg } from './svg/svg-validate.js';
+export type { SvgLimits, SvgRefusal, SvgValidation } from './svg/svg-validate.js';
+export type { SvgProfile } from './svg/svg-allowlist.js';

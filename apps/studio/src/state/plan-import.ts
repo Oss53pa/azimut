@@ -9,17 +9,15 @@
  * sur le type annoncé. Un fichier dont le contenu ne correspond à aucun des
  * formats acceptés est refusé. »
  *
- * Les deux valeurs que M2 (partie M) donne — quatre formats, 60 Mo — sont des contraintes
- * d'interface et non des valeurs d'origine normative : elles bornent ce que le
- * poste accepte de téléverser, elles ne décident d'aucune conformité. Elles
- * restent donc ici, nommées, et non dans un paquet de règles (INV-5).
+ * Les quatre formats de M2 (partie M) restent ici, nommés : ce sont des formats,
+ * non des seuils. Les 60 Mo de M2 sont un seuil, lu en configuration
+ * (`plan.max_bytes`, migration 0081, D-5) : « les seuils sont des données de
+ * configuration, jamais des constantes dans le code ».
  */
 import type { Finding, Outcome, PlanContentKind } from '@azimut/core-model';
 import { contentKindOf, planPrecisionWarnings, precisionOfPage } from './plan-content.js';
 import type { PlanInspection } from './plan-content.js';
 
-/** M2 (partie M) : « 60 Mo maximum ». */
-export const MAX_PLAN_BYTES = 60 * 1024 * 1024;
 
 /**
  * M2 (partie M) : « PDF vectoriel, DXF, PNG, JPG ». Chaque format porte le type
@@ -66,7 +64,7 @@ export type AcceptedPlan = {
  * quand son contenu n'a pas de tracé lisible. Version 29 : c'est la page
  * retenue qui en décide, et non le fichier entier.
  */
-export function acceptPlanFile(file: PlanFile, inspection: PlanInspection): Outcome<AcceptedPlan> {
+export function acceptPlanFile(file: PlanFile, inspection: PlanInspection, maxBytes: number): Outcome<AcceptedPlan> {
   const findings: Finding[] = [];
 
   if (inspection.format === null) {
@@ -75,11 +73,17 @@ export function acceptPlanFile(file: PlanFile, inspection: PlanInspection): Outc
     }));
   }
 
-  if (file.byteSize > MAX_PLAN_BYTES) {
+  if (file.byteSize > maxBytes) {
     findings.push(finding('IMPORT.FILE_TOO_LARGE', {
       bytes: file.byteSize,
-      maximum: MAX_PLAN_BYTES,
+      maximum: maxBytes,
     }));
+  }
+
+  // Lot 5 de l'audit : un PDF dont le contenu décompressé ou le nombre de
+  // pages dépasse sa borne est refusé, comme un fichier trop lourd.
+  if (inspection.limitExceeded !== undefined) {
+    findings.push(finding('IMPORT.FILE_TOO_LARGE', { limit: inspection.limitExceeded }));
   }
 
   findings.push(...pageFindings(file.page, inspection.pageCount));

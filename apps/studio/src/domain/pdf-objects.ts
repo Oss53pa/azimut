@@ -23,7 +23,8 @@ export type PdfDocument = {
   readonly root: number | null;
 };
 
-export async function readPdfDocument(bytes: Uint8Array): Promise<PdfDocument> {
+/** Lit les objets d'un PDF ; un flux d'objets ne se décompresse que jusqu'à la borne donnée. */
+export async function readPdfDocument(bytes: Uint8Array, maxInflatedBytes: number): Promise<PdfDocument> {
   const text = pdfText(bytes);
   const objects = new Map<number, PdfObject>();
   const streams = listPdfStreams(bytes, text);
@@ -33,7 +34,7 @@ export async function readPdfDocument(bytes: Uint8Array): Promise<PdfDocument> {
     const end = close < 0 ? text.length : close;
     const stream = streamWithin(streams, start, end);
     objects.set(Number(header[1]), { body: text.slice(start, end), stream });
-    if (stream !== null && /\/Type\s*\/ObjStm\b/.test(stream.dict)) await readObjectStream(stream, objects);
+    if (stream !== null && /\/Type\s*\/ObjStm\b/.test(stream.dict)) await readObjectStream(stream, objects, maxInflatedBytes);
   }
   const roots = [...text.matchAll(/\/Root\s+(\d+)\s+\d+\s+R/g)];
   const root = roots[roots.length - 1]?.[1];
@@ -53,11 +54,11 @@ function streamWithin(streams: readonly PdfStream[], start: number, end: number)
 }
 
 /** Un flux d'objets : un en-tête de paires `numéro décalage`, puis les objets. */
-async function readObjectStream(stream: PdfStream, objects: Map<number, PdfObject>): Promise<void> {
+async function readObjectStream(stream: PdfStream, objects: Map<number, PdfObject>, maxInflatedBytes: number): Promise<void> {
   const count = Number(/\/N\s+(\d+)/.exec(stream.dict)?.[1] ?? NaN);
   const first = Number(/\/First\s+(\d+)/.exec(stream.dict)?.[1] ?? NaN);
   if (!Number.isInteger(count) || !Number.isInteger(first)) return;
-  const decoded = await decodePdfStream(stream);
+  const decoded = await decodePdfStream(stream, maxInflatedBytes);
   if (decoded === null) return;
   const header = decoded.slice(0, first).trim().split(/\s+/).map(Number);
   for (let i = 0; i < count; i += 1) {

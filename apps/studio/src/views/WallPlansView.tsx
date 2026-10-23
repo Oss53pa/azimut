@@ -1,3 +1,4 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import { type Support, codePointCompare } from '@azimut/core-model';
 import { renderOrientedPlan, orientationDegForAzimuth } from '@azimut/engine-layout';
@@ -109,13 +110,14 @@ export function WallPlansView(): JSX.Element {
         <section style={{ padding: '12px 16px' }}>
           {preview?.ok === true
             ? (
-              <div
+              <SafeSvg
                 className="az-svg-fit"
                 role="img"
                 aria-label={t('wallplans.preview.aria', { support: selected.support.code ?? selected.support.id })}
                 style={{ border: '1px solid var(--border-hairline)', borderRadius: 4, overflow: 'hidden' }}
-                dangerouslySetInnerHTML={{ __html: preview.value }}
-              />
+              profile="render"
+              markup={preview.value}
+            />
             )
             : <FindingList findings={preview?.ok === false ? preview.findings : []} empty={t('wallplans.preview.none')} />}
           <p style={{ margin: `${String(SPACE.sm)}px 0 0`, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>

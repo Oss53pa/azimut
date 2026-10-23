@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { inspectPlanContent, precisionOfPage } from '../plan-content.js';
+import { inspectPlanContent as inspectWith, precisionOfPage } from '../plan-content.js';
 import type { PlanPrecision } from '../plan-content.js';
 import { scanContent } from '../../domain/pdf-painted-paths.js';
-import { flate, form, latin1, pdfFile, plain, scannedImage } from './pdf-fixtures.js';
+import { flate, form, latin1, pdfFile, plain, scannedImage, PDF_LIMITS } from './pdf-fixtures.js';
 import type { PdfObjectSpec } from './pdf-fixtures.js';
+
+const inspectPlanContent = (bytes: Uint8Array) => inspectWith(bytes, PDF_LIMITS);
 
 /**
  * M2 (partie M), version 29 — « Pour un document de plusieurs pages, la

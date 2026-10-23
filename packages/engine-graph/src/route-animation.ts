@@ -1,5 +1,5 @@
 import type { Footprint, GraphNode, Level, Outcome, Point } from '@azimut/core-model';
-import { codePointCompare, formatSvg, orientForDisplay } from '@azimut/core-model';
+import { codePointCompare, escapeXmlAttr, formatSvg, orientForDisplay } from '@azimut/core-model';
 
 /**
  * A7.3 et L3.1 — `renderRouteAnimation(route, scene)` : le parcours animé.
@@ -149,7 +149,8 @@ function marker(role: RouteMarkerRole, nodeId: string, at: { x: string; y: strin
   const side = formatSvg(options.marker_px);
   // Le point de décision est plein ; les autres marques sont évidées.
   const fill = role === 'decision' ? options.theme.marker : options.theme.marker_fill;
-  const common = `data-role="${role}" data-node="${nodeId}" fill="${fill}" stroke="${options.theme.marker}" stroke-width="${formatSvg(options.stroke_px / 2)}"`;
+  // Identifiants et couleurs viennent des données : échappés comme tout texte écrit dans le SVG.
+  const common = `data-role="${role}" data-node="${escapeXmlAttr(nodeId)}" fill="${escapeXmlAttr(fill)}" stroke="${escapeXmlAttr(options.theme.marker)}" stroke-width="${formatSvg(options.stroke_px / 2)}"`;
   // Les formes portent le rôle sans la couleur (E6.3) : départ rond, arrivée
   // carrée, décision ronde pleine, changement de niveau en losange.
   const half = options.marker_px / 2;
@@ -184,20 +185,20 @@ function frameSvg(
   }
   const theme = options.theme;
   const parts: string[] = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatSvg(options.width_px)} ${formatSvg(options.height_px)}" width="${formatSvg(options.width_px)}" height="${formatSvg(options.height_px)}" data-level="${run.level_id}">`,
-    `<rect width="100%" height="100%" fill="${theme.background}"/>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatSvg(options.width_px)} ${formatSvg(options.height_px)}" width="${formatSvg(options.width_px)}" height="${formatSvg(options.height_px)}" data-level="${escapeXmlAttr(run.level_id)}">`,
+    `<rect width="100%" height="100%" fill="${escapeXmlAttr(theme.background)}"/>`,
   ];
   for (const print of [...levelPrints].sort((a, b) => codePointCompare(a.id, b.id))) {
     const pts = print.geometry.vertices.map(v => { const p = project(v); return `${p.x},${p.y}`; }).join(' ');
-    parts.push(`<polygon points="${pts}" fill="${theme.footprint_fill}" stroke="${theme.footprint_stroke}" stroke-width="1"/>`);
+    parts.push(`<polygon points="${pts}" fill="${escapeXmlAttr(theme.footprint_fill)}" stroke="${escapeXmlAttr(theme.footprint_stroke)}" stroke-width="1"/>`);
   }
   const line = at.map(p => `${p.x},${p.y}`).join(' ');
   const len = formatSvg(lengthPx);
   if (dur_s === null || at.length < 2) {
-    parts.push(`<polyline data-role="route" points="${line}" fill="none" stroke="${theme.route}" stroke-width="${formatSvg(options.stroke_px)}" stroke-linecap="round" stroke-linejoin="round"/>`);
+    parts.push(`<polyline data-role="route" points="${line}" fill="none" stroke="${escapeXmlAttr(theme.route)}" stroke-width="${formatSvg(options.stroke_px)}" stroke-linecap="round" stroke-linejoin="round"/>`);
   } else {
     parts.push(
-      `<polyline data-role="route" points="${line}" fill="none" stroke="${theme.route}" stroke-width="${formatSvg(options.stroke_px)}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${len}" stroke-dashoffset="${len}">`
+      `<polyline data-role="route" points="${line}" fill="none" stroke="${escapeXmlAttr(theme.route)}" stroke-width="${formatSvg(options.stroke_px)}" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${len}" stroke-dashoffset="${len}">`
       + `<animate attributeName="stroke-dashoffset" from="${len}" to="0" dur="${formatSvg(dur_s)}s" fill="freeze"/></polyline>`,
     );
   }

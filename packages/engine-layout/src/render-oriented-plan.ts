@@ -1,3 +1,4 @@
+import { escapeXmlAttr } from '@azimut/core-model';
 import type {
   SiteData,
   Point,
@@ -54,12 +55,9 @@ export type OrientedPlanOptions = {
 /** D6.2 — défini dans core-model, partagé avec l'itinéraire de la borne. */
 export { orientationDegForAzimuth };
 
+/** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
 function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return escapeXmlAttr(s);
 }
 
 function degToRad(deg: number): number {

@@ -16,15 +16,14 @@ import type { AdvertisingData, ReceivedCreative } from './advertising-data.js';
  * en dur hors des jetons de thème, jeu d'essai compris, et ce qui est éprouvé
  * ici n'est pas le remplissage mais ce que l'assainisseur retire.
  *
- * Un SVG reçu d'un annonceur, porteur de ce que l'assainissement doit retirer :
- * un script, un gestionnaire d'événement, une image distante, des métadonnées
- * d'outil. Aucun de ces fragments n'est exécutable ici — c'est du texte dans
- * une chaîne, que `sanitizeSvg` retire avant tout stockage.
+ * Un SVG reçu d'un annonceur, porteur de ce que l'assainissement refuse : un
+ * script, un gestionnaire d'événement, une image distante, des métadonnées
+ * d'outil. Aucun de ces fragments n'est exécutable ici : c'est du texte dans
+ * une chaîne.
  *
- * Il est nettoyé, non refusé : `sanitizeSvg` ne refuse un fichier que sur sa
- * taille ou sa complexité, et un jeu d'essai ne va pas porter cinq mégaoctets
- * pour le démontrer. Ce refus-là est éprouvé par test, avec une configuration
- * serrée.
+ * Depuis le lot 5 de l'audit (D-7), il est refusé entier, non nettoyé : un
+ * nettoyage par expressions régulières se contourne. Le jeu d'essai montre
+ * donc un visuel propre, rendu, et un visuel piégé, jamais rendu.
  */
 const SVG_WITH_SCRIPT = [
   '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">',

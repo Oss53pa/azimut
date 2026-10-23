@@ -61,8 +61,8 @@ export function countPdfPagesOf(doc: PdfDocument): number | null {
   return pages > 0 ? pages : null;
 }
 
-export async function countPdfPages(bytes: Uint8Array): Promise<number | null> {
-  return countPdfPagesOf(await readPdfDocument(bytes));
+export async function countPdfPages(bytes: Uint8Array, maxInflatedBytes: number): Promise<number | null> {
+  return countPdfPagesOf(await readPdfDocument(bytes, maxInflatedBytes));
 }
 
 function declaredCount(doc: PdfDocument): number | null {

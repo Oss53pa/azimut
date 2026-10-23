@@ -1,11 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { deflateSync } from 'node:zlib';
-import { inspectPlanContent, planPrecisionWarnings, precisionOfPage, sniffPlanFormat } from '../plan-content.js';
+import { inspectPlanContent as inspectWith, planPrecisionWarnings, precisionOfPage, sniffPlanFormat } from '../plan-content.js';
 import type { PlanPrecision } from '../plan-content.js';
-import { countPdfPages } from '../../domain/pdf-pages.js';
+import { countPdfPages as countWith } from '../../domain/pdf-pages.js';
+
+const countPdfPages = (bytes: Uint8Array) => countWith(bytes, PDF_LIMITS.maxInflatedBytes);
 import { countPaintedPaths } from '../../domain/pdf-painted-paths.js';
-import { flate, latin1, onePagePdf, pdfFile, plain, scannedImage } from './pdf-fixtures.js';
+import { flate, latin1, onePagePdf, pdfFile, plain, scannedImage, PDF_LIMITS } from './pdf-fixtures.js';
 import type { PdfStreamSpec } from './pdf-fixtures.js';
+
+const inspectPlanContent = (bytes: Uint8Array) => inspectWith(bytes, PDF_LIMITS);
 
 /**
  * M2 (partie M), version 27 — `IMPORT.RASTER_PRECISION_LIMITED`, jugé sur le
