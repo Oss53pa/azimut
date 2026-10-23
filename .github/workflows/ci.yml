@@ -113,6 +113,9 @@ jobs:
           -- 0076), même règle.
           CREATE ROLE azimut_proof_review NOLOGIN;
           GRANT azimut_proof_review TO azimut;
+          -- Le rôle d'écriture du journal d'audit (migration 0083), même règle.
+          CREATE ROLE azimut_audit NOLOGIN;
+          GRANT azimut_audit TO azimut;
           -- Les deux rôles de PostgREST. `authenticator` n'a aucun droit
           -- propre : il se connecte, puis bascule vers `anon` ou
           -- `authenticated` selon le jeton. `NOINHERIT` est ce qui l'empêche
