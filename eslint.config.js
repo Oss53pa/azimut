@@ -23,6 +23,7 @@ export default tseslint.config(
     files: [
       '**/scripts/**/*.js',
       'packages/db/scripts/**/*.js',
+      '.claude/hooks/**/*.js',
       'apps/compiler/**/*.ts',
     ],
     languageOptions: {
