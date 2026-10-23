@@ -46,6 +46,7 @@ describe('lot 5 (D-7) : tout le reste est refusé, jamais nettoyé', () => {
     ['un gestionnaire d’événement entre apostrophes', wrap(`<rect onclick='alert(1)'/>`), 'attribute'],
     ['un lien javascript', wrap('<use href="javascript:alert(1)"/>'), 'value'],
     ['un lien javascript déguisé en entités', wrap('<use href="&#x6A;avascript:alert(1)"/>'), 'value'],
+    ['un lien javascript coupé par une tabulation', wrap('<use href=" java&#x09;script:alert(1)"/>'), 'value'],
     ['un lien vers l’extérieur', wrap('<use xlink:href="https://evil.example/x.svg#a"/>'), 'value'],
     ['une url() externe', wrap('<rect fill="url(https://evil.example/a)"/>'), 'value'],
     ['une url() javascript dans un style', wrap('<rect style="fill:url(javascript:alert(1))"/>'), 'value'],
