@@ -17,6 +17,7 @@ import { createPostgrestSink } from './postgrest-sink.js';
 import { DEFAULT_SCHEMA } from '../data/config.js';
 import type { DataSourceEnv } from '../data/config.js';
 import type { CommandSink } from './command-store.js';
+import { currentAccessToken } from '../auth/app-auth.js';
 
 function trimmed(value: string | undefined): string {
   return value === undefined ? '' : value.trim();
@@ -36,7 +37,7 @@ export function createSink(env: DataSourceEnv): CommandSink | null {
 
   const schema = trimmed(env.VITE_AZIMUT_DB_SCHEMA);
   return createPostgrestSink({
-    url, apiKey, schema: schema === '' ? DEFAULT_SCHEMA : schema,
+    url, apiKey, schema: schema === '' ? DEFAULT_SCHEMA : schema, accessToken: currentAccessToken,
   });
 }
 

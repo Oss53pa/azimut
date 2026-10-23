@@ -24,17 +24,23 @@ export type TextFieldProps = {
   readonly maxLength?: number | undefined;
   readonly disabled?: boolean | undefined;
   readonly autoFocus?: boolean | undefined;
+  /** Nature du champ : un mot de passe ne s'affiche pas, une adresse se saisit comme telle. */
+  readonly inputType?: 'text' | 'email' | 'password' | undefined;
+  /** Indication au gestionnaire de mots de passe du navigateur. */
+  readonly autoComplete?: string | undefined;
 };
 
 export function TextField({
   label, value, onChange, error, hint, maxLength, disabled = false, autoFocus = false,
+  inputType = 'text', autoComplete,
 }: TextFieldProps): JSX.Element {
   return (
     <FieldShell label={label} error={error} hint={hint}>
       {({ inputId, describedBy }) => (
         <input
           id={inputId}
-          type="text"
+          type={inputType}
+          autoComplete={autoComplete}
           value={value}
           disabled={disabled}
           maxLength={maxLength}

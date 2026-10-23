@@ -12,7 +12,7 @@ import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import { usePlanBackground } from './usePlanBackground.js';
 import { strikeFootprints } from '../state/footprint-strike.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { useSketchInk } from './useSketchInk.js';
 import { useStrictness } from '../editor/ink/use-strictness.js';
 import type { TrancheSession } from './useTrancheSession.js';
@@ -66,7 +66,7 @@ export function useFootprintInk(
     if (out.kind === 'strike') {
       setArbitration(null); setGhost(null);
       const struck = strikeFootprints(session.state.rows, out.footprintIds, {
-        orgId: ORG_OF_SESSION, timestamp: session.now(),
+        orgId: orgOfSession(), timestamp: session.now(),
       });
       if (struck.kind === 'referenced') {
         setMessage({

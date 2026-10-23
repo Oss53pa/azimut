@@ -1,7 +1,7 @@
 import { type JSX, useRef, useState } from 'react';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { acceptPlanFile, unreadablePlanInspection } from '../state/plan-import.js';
 import type { PlanFile } from '../state/plan-import.js';
 import { inspectPlanContent } from '../state/plan-content.js';
@@ -166,7 +166,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           const commands = calibrationCommands(draft.plan, measured.value, {
             site: {}, proposed: { x_m: 0, y_m: 0 },
           }, {
-            orgId: ORG_OF_SESSION,
+            orgId: orgOfSession(),
             siteId,
             levelId,
             planSourceId,
