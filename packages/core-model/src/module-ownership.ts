@@ -357,4 +357,6 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   vendor: 'D-3, décision de l’utilisateur du 22/10/2026 : le fabricant que désigne `vendor_id` (partie H). Aucune fiche de L3 ne le range ; il s’écrit par `azimut.create_vendor`, réservée à l’admin, comme les membres.',
   vendor_member: 'D-3 et A6.2 : rattachement d’un compte `vendor` à son fabricant. Ouvre un droit : même motif que `membership`.',
   command_table: 'D-4, décision de l’utilisateur du 22/10/2026 : liste blanche de `apply_commands`, donnée de configuration sans org_id, écrite par les seules migrations.',
+  security_setting: 'D-5, décision de l’utilisateur du 23/10/2026 : seuils communs de taille, de nombre et de durée, écrits par les seules migrations.',
+  org_security_setting: 'D-5 : surcharge des seuils par une organisation, qui ne peut que les resserrer ; écrite par l’admin, jamais par commande.',
 };
