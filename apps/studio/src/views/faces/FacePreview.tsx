@@ -1,3 +1,4 @@
+import { SafeSvg } from '../../components/SafeSvg.js';
 import { type JSX, useMemo } from 'react';
 import type { Support } from '@azimut/core-model';
 import { useSiteData } from '../../context/useSiteData.js';
@@ -30,13 +31,14 @@ export function FacePreview({ support, faceIndex }: FacePreviewProps): JSX.Eleme
       {preview === null
         ? <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('faceblocks.preview.none')}</p>
         : (
-          <div
+          <SafeSvg
             className="az-svg-fit"
             role="img"
             aria-label={t('faceblocks.preview.aria', { support: support.code ?? support.id, face: faceIndex })}
             style={{ border: '1px solid var(--border-hairline)', borderRadius: 4, overflow: 'hidden' }}
-            dangerouslySetInnerHTML={{ __html: preview.svg }}
-          />
+              profile="render"
+              markup={preview.svg}
+            />
         )}
     </section>
   );

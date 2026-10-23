@@ -1,3 +1,4 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -162,10 +163,11 @@ export function SignageView({ onNavigate }: SignageViewProps): JSX.Element {
             </p>
           ) : (
             <>
-              <div
+              <SafeSvg
                 style={{ border: '1px solid var(--border-hairline)', borderRadius: 4, overflow: 'hidden' }}
-                dangerouslySetInnerHTML={{ __html: preview.svg }}
-              />
+              profile="render"
+              markup={preview.svg}
+            />
               <p style={{ margin: `${String(SPACE.sm)}px 0 0`, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
                 {t('signage.preview.node', { label: preview.node.label, kind: preview.node.kind })}
               </p>

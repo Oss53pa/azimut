@@ -1,3 +1,4 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -106,10 +107,11 @@ export function FacesView(): JSX.Element {
               kind: preview.node.kind,
             })}
           </div>
-          <div
+          <SafeSvg
             style={{ padding: 16 }}
-            dangerouslySetInnerHTML={{ __html: preview.svg }}
-          />
+              profile="render"
+              markup={preview.svg}
+            />
         </div>
       ) : (
         <div style={{

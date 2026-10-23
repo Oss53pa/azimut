@@ -1,3 +1,4 @@
+import { SafeSvg } from '../components/SafeSvg.js';
 import { type JSX, useMemo, useState } from 'react';
 import { auditEvacuation } from '@azimut/engine-graph';
 import { renderEvacuationPlan, type EvacuationStats } from '@azimut/engine-layout';
@@ -169,13 +170,14 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
             <Panel title={t('evacuation.panel.preview', { level: labels.level(selected.levelId) })}>
               {selected.svg !== null
                 ? (
-                  <div
+                  <SafeSvg
                     className="az-svg-fit"
                     role="img"
                     aria-label={t('evacuation.preview.aria', { level: labels.level(selected.levelId) })}
                     style={{ border: '1px solid var(--border-hairline)', borderRadius: 4, overflow: 'hidden', maxWidth: PLAN_WIDTH }}
-                    dangerouslySetInnerHTML={{ __html: selected.svg }}
-                  />
+              profile="render"
+              markup={selected.svg}
+            />
                 )
                 : <FindingList findings={selected.findings} empty={t('evacuation.none')} />}
               <p style={{ margin: `${String(SPACE.sm)}px 0 0`, fontSize: TEXT.micro, color: 'var(--text-muted)' }}>
