@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
+import { enrolFixtureMembers } from '../fixture-membership.js';
 
 /**
  * A12.3 — « `audit_log`, `approval`, `message_schedule_approval` et
@@ -110,9 +111,9 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
     await sql.begin(async tx => {
       await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
       await tx`insert into azimut.organization(id,name,slug) values (${ORG},'Audit','audit-a123')`;
-      await tx`insert into azimut.membership(org_id,user_id,role) values (${ORG},${USER},'admin')`;
-      await tx`insert into azimut.audit_log(org_id, action, entity, occurred_at)
-               values (${ORG}, 'essai', 'organization', now())`;
+      await enrolFixtureMembers(text => tx.unsafe(text), [{ orgId: ORG, userId: USER, role: 'admin' }]);
+      await tx`insert into azimut.audit_log(org_id, actor_id, action, entity, occurred_at)
+               values (${ORG}, ${USER}, 'essai', 'organization', now())`;
       await check(tx);
       throw done;
     }).catch((e: unknown) => { if (e !== done) throw e; });

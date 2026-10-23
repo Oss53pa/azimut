@@ -6,6 +6,7 @@ import { buildCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { loadSiteDataAs } from '../load-site-data.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { enrolFixtureMembers } from '../fixture-membership.js';
 
 /**
  * A6.1 — le service de compilation lit sous l'identité du demandeur du travail
@@ -19,9 +20,9 @@ import { deleteOrgFixture } from '../fixture-cleanup.js';
  *   · le demandeur d'un travail est posé par la base, ne s'usurpe pas, et ne
  *     change plus après l'insertion.
  *
- * Le décor s'installe par le chemin identifié, jamais en levant le
- * cloisonnement : chaque utilisateur crée son organisation, s'y inscrit, puis
- * crée son site sous sa propre identité.
+ * Le décor s'installe par le chemin identifié : chaque utilisateur crée son
+ * organisation puis son site sous sa propre identité. Seul le rattachement
+ * passe par l'exploitation, puisque personne ne se rattache seul (0075).
  */
 const URL = process.env['AZIMUT_TEST_DATABASE_URL'];
 
@@ -53,9 +54,7 @@ async function seedOrg(userId: string, orgId: string, slug: string): Promise<voi
 }
 
 async function join(userId: string, orgId: string): Promise<void> {
-  await asUser(userId, async (tx) => {
-    await tx.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${orgId}, ${userId}, 'admin')`);
-  });
+  await enrolFixtureMembers(text => client.unsafe(text), [{ orgId, userId, role: 'admin' }]);
 }
 
 async function seedSite(userId: string, orgId: string, siteId: string): Promise<void> {

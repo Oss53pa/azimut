@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
-import { applyCommands, createConnection, createDb, deleteOrgFixture } from '@azimut/db';
+import { applyCommands, createConnection, createDb, deleteOrgFixture, enrolFixtureMembers } from '@azimut/db';
 import { eraseCommands, layerVisibilityCommand, sketchStrokeCommands } from '../sketch.js';
 
 /**
@@ -60,7 +60,7 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
   for (const [user, org, slug] of [[ALICE, ORG, 'j3-a'], [BOB, ORG_B, 'j3-b']] as const) {
     await asUser(user, 'insert into azimut.organization(id,name,slug) values ($1, $2, $2)', [org, slug]);
-    await asUser(user, `insert into azimut.membership(org_id,user_id,role) values ($1, $2, 'admin')`, [org, user]);
+    await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: org, userId: user, role: 'admin' }]);
   }
   await apply(ALICE, [
     command('site', SITE, { id: SITE, org_id: ORG, name: 'Site esquisse', country_code: 'FR', timezone: 'Europe/Paris' }),
