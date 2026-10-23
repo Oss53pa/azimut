@@ -26,6 +26,7 @@ const NOT_YET_CREATED = new Set<string>([]);
 
 const ORG = 'a1230000-0000-0000-0000-0000000000a1';
 const USER = 'a1230000-0000-0000-0000-0000000000b1';
+const MEMBER = 'a1230000-0000-0000-0000-0000000000b2';
 
 let sql: postgres.Sql;
 let existing: readonly string[] = [];
@@ -100,11 +101,9 @@ describe('A12.3 — les tables en insertion seule, en base', () => {
  *
  * La ligne entre par le chemin de l'application, jamais en levant le
  * cloisonnement (A2.4) : l'organisation et son administrateur sont
- * provisionnés (0075), l'identité est posée, et la politique d'insertion
- * d'`audit_log` l'admet. Le
- * propriétaire de l'installation autonome est membre du rôle applicatif ;
- * sous un super-utilisateur, les politiques ne jouent pas et le chemin passe
- * de même.
+ * provisionnés (0075), l'identité est posée, et l'administrateur change le
+ * rôle d'un membre. Depuis 0083, c'est la base qui écrit alors l'entrée :
+ * l'application n'insère plus dans le journal.
  */
 describe('A12.3 — audit_log refuse la modification, la suppression et le vidage', () => {
   async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void>): Promise<void> {
@@ -113,9 +112,11 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
       for (const text of provisionStatements({ id: ORG, name: 'Audit', slug: 'audit-a123', adminId: USER })) {
         await tx.unsafe(text);
       }
+      await tx`set local role authenticated`;
       await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
-      await tx`insert into azimut.audit_log(org_id, action, entity, occurred_at)
-               values (${ORG}, 'essai', 'organization', now())`;
+      await tx`select azimut.set_member(${ORG}, ${MEMBER}, 'designer')`;
+      await tx`select azimut.set_member(${ORG}, ${MEMBER}, 'operator')`;
+      await tx`reset role`;
       await check(tx);
       throw done;
     }).catch((e: unknown) => { if (e !== done) throw e; });
@@ -163,7 +164,7 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
         .toMatch(/insert-only/);
       const rows = await tx<{ action: string }[]>`
         select action from azimut.audit_log where org_id = ${ORG}`;
-      expect(rows.map(r => r.action)).toEqual(['essai']);
+      expect(rows.map(r => r.action)).toEqual(['membership.role_changed']);
     });
   });
 
