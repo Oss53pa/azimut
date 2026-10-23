@@ -125,6 +125,7 @@ non plus — elle n'en retire que les clés étrangères.
 0079_a2_4_identite_sous_le_proprietaire
 0080_a6_3_double_authentification
 0081_d5_d6_seuils_et_stockage
+0082_a6_3_validation_des_entrees
 ```
 
 ## Règle pour la suite
@@ -222,6 +223,23 @@ espaces de stockage `azimut-*` et leurs politiques sont posés par
 existe. Si la plateforme le fournit plus tard, ou si la migration l'annonce
 par un avertissement de droits : `SELECT azimut.install_storage();` sous un
 rôle d'administration.
+
+**La garde des entrées (0082).** Chaque table du schéma, `audit_log`
+exceptée, porte le déclencheur `guard_input`, qui refuse un texte à caractère
+de contrôle, à forçage de direction ou hors forme NFC, et une valeur au-delà
+des plafonds `input.text.max_chars` et `input.json.max_bytes`. Une table créée
+plus tard le reçoit dans sa propre migration :
+
+```sql
+CREATE TRIGGER guard_input BEFORE INSERT OR UPDATE ON azimut.<table>
+  FOR EACH ROW EXECUTE FUNCTION azimut.guard_input();
+```
+
+`input-catalogue.db.test.ts` échoue tant qu'une table en est dépourvue, et
+tant que le catalogue des colonnes du modèle (`core-model/src/input`) ne
+reproduit pas celui de la base. Après une migration qui touche des colonnes,
+`AZIMUT_WRITE_INPUT_CATALOGUE=1 pnpm test:rls input-catalogue` le réécrit ;
+la déclaration réécrite se relit avant d'être commise.
 
 **La liste blanche des commandes (0078).** `azimut.command_table` dit quelles
 tables `apply_commands` peut viser. Une table attribuée à un module dans
