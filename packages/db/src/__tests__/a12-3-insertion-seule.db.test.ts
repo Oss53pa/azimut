@@ -112,8 +112,8 @@ describe('A12.3 — audit_log refuse la modification, la suppression et le vidag
       await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
       await tx`insert into azimut.organization(id,name,slug) values (${ORG},'Audit','audit-a123')`;
       await enrolFixtureMembers(text => tx.unsafe(text), [{ orgId: ORG, userId: USER, role: 'admin' }]);
-      await tx`insert into azimut.audit_log(org_id, action, entity, occurred_at)
-               values (${ORG}, 'essai', 'organization', now())`;
+      await tx`insert into azimut.audit_log(org_id, actor_id, action, entity, occurred_at)
+               values (${ORG}, ${USER}, 'essai', 'organization', now())`;
       await check(tx);
       throw done;
     }).catch((e: unknown) => { if (e !== done) throw e; });
