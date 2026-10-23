@@ -87,13 +87,13 @@ describe('D-4 : la liste concorde avec le registre de propriété', () => {
       select table_name, modules,
              concat_ws(',', case when can_create then 'c' end, case when can_update then 'u' end,
                        case when can_delete then 'd' end) as ops
-      from azimut.command_table order by table_name`;
+      from azimut.command_table order by table_name collate "C"`;
     const expected = [
       ...MODULE_KEYS.flatMap(m => OWNED_TABLES[m].map(t => ({
         table_name: t, modules: [m], ops: INSERT_ONLY.includes(t) ? 'c' : 'c,u,d',
       }))),
       { table_name: 'support', modules: ['02-wayfinding', '04-signaletique'], ops: 'c,u,d' },
-    ].sort((a, b) => (a.table_name < b.table_name ? -1 : 1));
+    ].sort((a, b) => (a.table_name < b.table_name ? -1 : 1)); // ordre des octets, comme `collate "C"`
     expect(rows.map(r => ({ ...r }))).toEqual(expected);
   });
 
