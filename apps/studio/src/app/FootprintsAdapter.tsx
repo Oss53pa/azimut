@@ -1,7 +1,7 @@
 import { type JSX, useEffect, useState } from 'react';
 import type { Finding, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { acceptFootprint } from '../state/footprint-input.js';
 import type { FootprintKind } from '../state/footprint-input.js';
 import { acceptSeries } from '../state/footprint-series.js';
@@ -82,7 +82,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       const id = session.newId();
       const commands = createFootprintCommands(
         [{ id, footprint: accepted.value }],
-        { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+        { orgId: orgOfSession(), levelId, timestamp: session.now() },
         `footprint:${id}`,
       );
       if (!commands.ok) { setFindings(commands.findings); return; }
@@ -120,7 +120,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
       if (first === undefined) return;
       const commands = createFootprintCommands(
         rows,
-        { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+        { orgId: orgOfSession(), levelId, timestamp: session.now() },
         `series:${first.id}`,
       );
       if (!commands.ok) { setFindings(commands.findings); return; }

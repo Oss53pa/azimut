@@ -13,10 +13,8 @@
  * Le banc reproduit ce que la plateforme fournit en production, et rien de
  * plus :
  *
- *  · `auth.uid()`, que Supabase installe et que `azimut.current_user_id()`
- *    appelle en repli. Sa définition ici est celle de Supabase : la
- *    revendication `sub` du jeton. L'écrire autrement ferait passer les essais
- *    sur une identité que la production ne produit pas.
+ *  · un jeton signé comme la plateforme le signe, avec `sub`, `role` et `aal`
+ *    (le niveau d'assurance, `aal2` après un second facteur, A6.3) ;
  *  · `authenticator`, le rôle sans droits propres auquel PostgREST se connecte
  *    et depuis lequel il bascule vers `authenticated` ou `anon`.
  *
@@ -61,13 +59,18 @@ export type Harness = {
 };
 
 /** Un jeton d'accès, tel que la plateforme en délivre un. */
-export function signToken(userId: string, role = 'authenticated'): string {
+export function signToken(
+  userId: string,
+  role = 'authenticated',
+  aal: 'aal1' | 'aal2' = 'aal1',
+): string {
   const encode = (value: unknown): string =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
   const head = encode({ alg: 'HS256', typ: 'JWT' });
   const body = encode({
     sub: userId,
     role,
+    aal,
     exp: Math.floor(Date.now() / 1000) + 3600,
   });
   const signature = createHmac('sha256', testJwtSecret())
@@ -77,25 +80,15 @@ export function signToken(userId: string, role = 'authenticated'): string {
 }
 
 /**
- * Installe ce que la plateforme fournit, et que la base d'essai n'a pas.
+ * Vérifie ce que la plateforme fournit, et que la base d'essai doit porter.
  *
- * `auth.uid()` est défini en `SECURITY INVOKER` et lit la revendication que
- * PostgREST place dans la session. Le repli sur `NULL` quand rien n'est posé
- * est ce qui rend un appel anonyme sans organisation, donc sans ligne.
+ * L'identité ne passe plus par `auth.uid()` : depuis 0080,
+ * `azimut.current_user_id()` lit elle-même la revendication `sub` que
+ * PostgREST pose dans la session. Le banc n'installe donc plus rien dans un
+ * schéma `auth`, et il tourne aussi sur une base dont ce schéma appartient à
+ * la plateforme.
  */
 export async function installPlatformStubs(sql: Sql): Promise<void> {
-  await sql.unsafe(`
-    CREATE SCHEMA IF NOT EXISTS auth;
-    CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
-      LANGUAGE sql STABLE SET search_path TO ''
-      AS $fn$
-        SELECT nullif(
-          current_setting('request.jwt.claims', true)::json ->> 'sub', ''
-        )::uuid;
-      $fn$;
-    GRANT USAGE ON SCHEMA auth TO authenticated;
-  `);
-
   // Les deux rôles demandent un compte d'administration, que le propriétaire
   // de la base n'a pas. Ils sont donc posés une fois à la mise en route, et
   // vérifiés ici : les créer à la volée demanderait un compte d'administration
@@ -110,7 +103,6 @@ export async function installPlatformStubs(sql: Sql): Promise<void> {
       + '`packages/db/migrations/ORDRE.md`, section « étanchéité par PostgREST ».',
     );
   }
-  await sql.unsafe('GRANT USAGE ON SCHEMA auth TO anon');
 }
 
 /** Démarre PostgREST et attend qu'il réponde. */

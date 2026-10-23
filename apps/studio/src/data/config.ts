@@ -9,6 +9,8 @@
 import { createReferenceRepository } from './reference-repository.js';
 import { createPostgrestRepository } from './postgrest-repository.js';
 import type { SiteRepository } from './site-repository.js';
+import { currentAccessToken } from '../auth/app-auth.js';
+import type { PostgrestConfig } from './postgrest-http.js';
 
 export type DataSourceEnv = {
   readonly VITE_AZIMUT_API_URL?: string | undefined;
@@ -29,20 +31,31 @@ function trimmed(value: string | undefined): string {
  * sites de référence plutôt que d'échouer à chaque écran.
  */
 export function createRepository(env: DataSourceEnv): SiteRepository {
+  const config = postgrestConfigFor(env);
+  return config === null ? createReferenceRepository() : createPostgrestRepository(config);
+}
+
+/**
+ * La configuration de l'API REST, ou `null` sans URL ou sans clé. Les
+ * requêtes portent le jeton de la session ouverte, lu à chaque envoi.
+ */
+export function postgrestConfigFor(env: DataSourceEnv): PostgrestConfig | null {
   const url = trimmed(env.VITE_AZIMUT_API_URL).replace(/\/+$/, '');
   const apiKey = trimmed(env.VITE_AZIMUT_API_KEY);
-
-  if (url === '' || apiKey === '') {
-    return createReferenceRepository();
-  }
-
-  return createPostgrestRepository({
+  if (url === '' || apiKey === '') return null;
+  return {
     url,
     apiKey,
     schema: trimmed(env.VITE_AZIMUT_DB_SCHEMA) === ''
       ? DEFAULT_SCHEMA
       : trimmed(env.VITE_AZIMUT_DB_SCHEMA),
-  });
+    accessToken: currentAccessToken,
+  };
+}
+
+/** La configuration de l'API REST de l'application. */
+export function appPostgrestConfig(): PostgrestConfig | null {
+  return postgrestConfigFor(import.meta.env as DataSourceEnv);
 }
 
 /** Dépôt de l'application, construit une fois depuis l'environnement de build. */

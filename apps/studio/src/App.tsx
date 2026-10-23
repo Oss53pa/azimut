@@ -2,6 +2,7 @@ import { type JSX } from 'react';
 import { TrancheRouter } from './app/TrancheRouter.js';
 import { I18nProvider } from './i18n/index.js';
 import { langFromLocation } from './app/lang.js';
+import { AuthGate } from './auth/AuthGate.js';
 
 /**
  * F15 — `app/` porte la composition des écrans et le routage.
@@ -12,7 +13,9 @@ import { langFromLocation } from './app/lang.js';
 export function App(): JSX.Element {
   return (
     <I18nProvider defaultLang={langFromLocation(window.location.search)}>
-      <TrancheRouter />
+      <AuthGate>
+        <TrancheRouter />
+      </AuthGate>
     </I18nProvider>
   );
 }

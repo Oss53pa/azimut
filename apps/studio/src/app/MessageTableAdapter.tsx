@@ -2,7 +2,7 @@ import { type JSX, useCallback, useMemo, useState } from 'react';
 import { useTrancheSession } from './useTrancheSession.js';
 import { loadSiteSession } from './site-session-loader.js';
 import { appRepository } from '../data/index.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { appSink } from '../state/app-sink.js';
 import { rowsOf } from '../state/session-store.js';
 import { readSchedule, scheduleVersions } from '../state/message-schedule-read.js';
@@ -58,7 +58,7 @@ export function MessageTableAdapter({ siteId, actor }: {
   const repository = useMemo(() => appRepository(), []);
   const load = useCallback(() => loadSiteSession(repository, siteId), [repository, siteId]);
   const session = useTrancheSession(
-    { orgId: ORG_OF_SESSION, siteId, levelId: '' }, remote, load);
+    { orgId: orgOfSession(), siteId, levelId: '' }, remote, load);
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);
@@ -169,7 +169,7 @@ export function MessageTableAdapter({ siteId, actor }: {
   const targets = selection.selectedIds.length > 0
     ? [...selection.selectedIds].sort(codePointCompare)
     : focusedRow === null ? [] : [focusedRow.line.id];
-  const write = { orgId: ORG_OF_SESSION, siteId, timestamp: session.now() };
+  const write = { orgId: orgOfSession(), siteId, timestamp: session.now() };
   const annotationPanel = focusedRow === null ? null : (
     <AnnotationPanel
       annotations={annotationsOn(annotations, { kind: 'message_line', id: focusedRow.line.id })}
@@ -241,7 +241,7 @@ export function MessageTableAdapter({ siteId, actor }: {
           { id: read.scheduleId, schedule: read.schedule },
           submissionConditions(session.state, siteId, read.schedule, openAnnotationIds, LANGS),
           null,
-          { orgId: ORG_OF_SESSION, timestamp: session.now(), decisionId: session.newId() },
+          { orgId: orgOfSession(), timestamp: session.now(), decisionId: session.newId() },
         );
         if (!out.ok) { setRefusals(out.findings); return; }
         setRefusals([]);

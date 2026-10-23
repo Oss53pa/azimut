@@ -123,6 +123,7 @@ non plus — elle n'en retire que les clés étrangères.
 0077_a6_2_fabricants_et_vendor
 0078_e5_1_liste_blanche_commandes
 0079_a2_4_identite_sous_le_proprietaire
+0080_a6_3_double_authentification
 ```
 
 ## Règle pour la suite

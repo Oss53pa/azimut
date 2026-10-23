@@ -13,7 +13,7 @@ import type { CountrySummary, LegalEntitySummary } from '../data/index.js';
 import { useSiteCreation } from '../state/use-site-creation.js';
 import { appSink } from '../state/app-sink.js';
 import type { CommandSink } from '../state/command-store.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { ClientsSection } from './ClientsSection.js';
 
 /**
@@ -71,7 +71,7 @@ export function SitesAdapter(): JSX.Element {
   );
 
   const creation = useSiteCreation(sink, {
-    orgId: ORG_OF_SESSION,
+    orgId: orgOfSession(),
     newId: () => crypto.randomUUID(),
     now: () => new Date().toISOString(),
     existingNames: sites.map(site => site.name),
@@ -128,7 +128,7 @@ export function SitesAdapter(): JSX.Element {
       )}
 
       <ClientsSection
-        orgId={ORG_OF_SESSION}
+        orgId={orgOfSession()}
         entities={entityState}
         countries={countries}
         sink={sink}

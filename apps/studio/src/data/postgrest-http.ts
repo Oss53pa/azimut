@@ -13,6 +13,12 @@ export type PostgrestConfig = {
   readonly apiKey: string;
   /** Schéma interrogé. */
   readonly schema: string;
+  /**
+   * Le jeton de la session ouverte (A6.3). Lu à chaque requête, pour qu'un
+   * jeton rafraîchi serve aussitôt. Sans session, la clé publiable, qui ne
+   * voit rien.
+   */
+  readonly accessToken?: (() => string | undefined) | undefined;
 };
 
 /** Une requête en échec qu'aucun statut n'explique : réseau coupé, ou service injoignable. */
@@ -32,7 +38,7 @@ export async function query<Row>(
     response = await fetch(url, {
       headers: {
         apikey: config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
+        Authorization: `Bearer ${config.accessToken?.() ?? config.apiKey}`,
         'Accept-Profile': config.schema,
         Accept: 'application/json',
       },

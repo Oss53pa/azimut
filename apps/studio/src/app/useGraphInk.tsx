@@ -13,7 +13,7 @@ import { footprintsOfLevel } from '../state/session-scope.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
 import { useSketchInk } from './useSketchInk.js';
 import { useStrictness } from '../editor/ink/use-strictness.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -65,7 +65,7 @@ export function useGraphInk(inputs: GraphInkInputs): {
       tool, pointer, pxPerMeter, strictness: straightening.level,
       nodes: levelNodes.map(n => ({ id: n.id, at: n.position })),
     });
-    const scope = { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() };
+    const scope = { orgId: orgOfSession(), levelId, timestamp: session.now() };
     if (out.kind === 'not_graph_tool') { setNotice('ink.graph.not_tool'); return; }
     if (out.kind === 'unrecognized') {
       setNotice(tool === 'node' ? 'ink.graph.tap_expected' : 'ink.graph.edge_expected');

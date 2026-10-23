@@ -2,7 +2,7 @@ import { type JSX, useState } from 'react';
 import { computeGraphHash, validateGraph } from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { graphScopeFromSession } from '../state/session-scope.js';
 import { writeGraphValidation } from '../state/graph-validation-commands.js';
 import { NEVER_RUN } from '../state/validation-report.js';
@@ -78,7 +78,7 @@ export function ValidationScreenAdapter({ session, siteId }: {
 
         if (!graphHash.ok) return;
         const command = writeGraphValidation(findings, {
-          orgId: ORG_OF_SESSION,
+          orgId: orgOfSession(),
           siteId,
           id: session.newId(),
           timestamp: ranAt,

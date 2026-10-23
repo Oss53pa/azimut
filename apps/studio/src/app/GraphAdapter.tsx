@@ -1,7 +1,7 @@
 import { type JSX, useEffect, useState } from 'react';
 import type { Finding, NodeKind, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { orgOfSession } from './session-identity.js';
 import { acceptNode, acceptEdge } from '../state/graph-input.js';
 import type { EdgeRemedy } from '../state/graph-input.js';
 import { acceptAxis } from '../state/graph-axis.js';
@@ -130,7 +130,7 @@ export function GraphScreenAdapter({ session, levelId }: {
   function applyProperties(): void {
     void (async () => {
       if (chosen === null || selection === null) return;
-      const write = { orgId: ORG_OF_SESSION, timestamp: session.now() };
+      const write = { orgId: orgOfSession(), timestamp: session.now() };
 
       if (chosen.kind === 'node' && selection.kind === 'node') {
         const before = graph.nodes.find(n => n.id === chosen.id);
@@ -269,7 +269,7 @@ export function GraphScreenAdapter({ session, levelId }: {
           if (created.length > 0 || drawn.length > 0) {
             const commands = graphCommands(
               created, drawn, [],
-              { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+              { orgId: orgOfSession(), levelId, timestamp: session.now() },
               `axis:${created[0]?.id ?? drawn[0]?.id ?? 'vide'}`,
             );
             if (!commands.ok) { setFindings(commands.findings); return; }
@@ -293,7 +293,7 @@ export function GraphScreenAdapter({ session, levelId }: {
           const id = session.newId();
           const commands = graphCommands(
             [{ id, node }], [], [],
-            { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+            { orgId: orgOfSession(), levelId, timestamp: session.now() },
             `node:${id}`,
           );
           if (!commands.ok) { setFindings(commands.findings); return; }
@@ -361,7 +361,7 @@ export function GraphScreenAdapter({ session, levelId }: {
             [],
             drawn.flatMap(d => (d.edge.ok ? [{ id: d.id, edge: d.edge.value }] : [])),
             [],
-            { orgId: ORG_OF_SESSION, levelId, timestamp: session.now() },
+            { orgId: orgOfSession(), levelId, timestamp: session.now() },
             'edges',
           );
           if (!commands.ok) { setFindings(commands.findings); return; }

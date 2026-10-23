@@ -19,8 +19,8 @@ export type SinkConfig = {
   readonly url: string;
   readonly apiKey: string;
   readonly schema: string;
-  /** Jeton de session, quand il y en a un. */
-  readonly accessToken?: string | undefined;
+  /** Jeton de la session ouverte, lu à chaque envoi (A6.3). */
+  readonly accessToken?: (() => string | undefined) | undefined;
 };
 
 /**
@@ -41,7 +41,7 @@ export function createPostgrestSink(
         method: 'POST',
         headers: {
           apikey: config.apiKey,
-          Authorization: `Bearer ${config.accessToken ?? config.apiKey}`,
+          Authorization: `Bearer ${config.accessToken?.() ?? config.apiKey}`,
           'Content-Profile': config.schema,
           'Content-Type': 'application/json',
         },
