@@ -54,7 +54,7 @@ describe('M4 (partie M) — écriture du graphe', () => {
   /** Les nœuds avant les arêtes qui les citent : les clés étrangères l'exigent. */
   it('range les commandes dans l’ordre des dépendances', () => {
     const links: readonly VerticalLinkRow[] = [
-      { id: 'vl-1', edgeId: 'e-1', kind: 'stair', accessible: false, capacity: null },
+      { id: 'vl-1', edgeId: 'e-1', kind: 'stair', accessible: false, capacity: 1 },
     ];
     const r = graphCommands(nodeRows(2), edges, links, WRITE, 'axe');
     expect(r.ok).toBe(true);

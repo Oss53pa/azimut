@@ -162,7 +162,7 @@ describe('INV-3 — le registre de sécurité refuse chaque voie de contournemen
    */
   it('mais laisse passer le registre d’orientation, que J5.1 ouvre', () => {
     for (const draft of [
-      commande({ operation: 'create', after: { registry: 'wayfinding', code: 'W1' } }),
+      commande({ operation: 'create', after: { registry: 'wayfinding', svg_path: 'M0 0' } }),
       commande({
         before: { registry: 'wayfinding', svg_path: 'M0 0' },
         after: { registry: 'wayfinding', svg_path: 'M1 1' },

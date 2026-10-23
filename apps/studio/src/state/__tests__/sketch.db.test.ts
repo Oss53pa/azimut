@@ -119,16 +119,18 @@ describe('J3 — la couche d’esquisse en base', () => {
   });
 
   it('une couleur hors de la palette d’esquisse est refusée par la base', async () => {
-    const bad = buildCommand({
+    const draft = {
       operation: 'create', module: '12-atelier', table: 'sketch_stroke', id: 'a3000000-0000-0000-0000-0000000009b2',
       org_id: ORG, timestamp: T,
       after: {
         id: 'a3000000-0000-0000-0000-0000000009b2', org_id: ORG, layer_id: LAYER, tool: 'felt',
         color: 'charter-primary', width_base_m: '0.08', points: '[]',
       },
-    });
-    if (!bad.ok) throw new Error(JSON.stringify(bad.findings));
-    const applied = await applyCommands(db, { userId: ALICE }, [bad.value]);
+    } as const;
+    // Le modèle la refuse (lot 4) ; elle part tout de même, construite à la
+    // main, pour éprouver la base sans supposer que l'appelant l'a filtrée.
+    expect(buildCommand(draft).ok).toBe(false);
+    const applied = await applyCommands(db, { userId: ALICE }, [{ ...draft, before: null, groupKey: null }]);
     expect(applied.ok).toBe(false);
   });
 });

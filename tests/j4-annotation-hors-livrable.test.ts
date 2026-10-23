@@ -28,6 +28,8 @@ const ALLOWED: Readonly<Record<string, string>> = {
   'packages/db/src/schema/review.ts': 'Le schéma déclaré des deux tables.',
   'packages/db/src/schema/index.ts': 'L’export du schéma.',
   'packages/core-model/src/module-ownership.ts': 'La propriété du module 02 (partie L).',
+  'packages/core-model/src/input/input-columns-02.ts':
+    'Le catalogue des colonnes (lot 4, A6.3) : la forme des deux tables, sans aucun contenu.',
   'packages/engine-graph/src/message-schedule-state.ts':
     'R12 : le refus d’approbation nomme l’annotation ouverte par son identifiant, sans en lire le contenu.',
 };

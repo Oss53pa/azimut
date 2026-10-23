@@ -155,7 +155,9 @@ describe('S-37 — le motif d’une surface non numérisée', () => {
   });
 
   it('accepte un texte au passage obligé de l’écriture', () => {
-    expect(buildCommand(motif('Bord de page du plan source')).ok).toBe(true);
+    // Une colonne `jsonb` reçoit un texte JSON : la base refuse une chaîne brute.
+    expect(buildCommand(motif(JSON.stringify('Bord de page du plan source'))).ok).toBe(true);
+    expect(buildCommand(motif('Bord de page du plan source')).ok).toBe(false);
   });
 
   it('refuse un nombre ou un booléen là où un motif est attendu', () => {
