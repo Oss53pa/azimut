@@ -16,7 +16,8 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@azimut/testkit": "workspace:*"
+    "@azimut/testkit": "workspace:*",
+    "@types/node": "^26.4.1"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

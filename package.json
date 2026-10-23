@@ -36,12 +36,12 @@
     "globals": "^15.9.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vitest": "^2"
+    "vitest": "^4.1.12"
   },
   "pnpm": {
     "overrides": {
-      "brace-expansion@>=1.0.0 <1.1.20": "1.1.20",
-      "brace-expansion@>=5.0.0 <5.0.11": "5.0.11",
+      "brace-expansion@>=1.0.0 <1.1.21": "1.1.21",
+      "brace-expansion@>=5.0.0 <5.0.12": "5.0.12",
       "source-map-js@>=1.0.0 <1.2.2": "1.2.2"
     }
   }
