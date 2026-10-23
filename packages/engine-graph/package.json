@@ -14,7 +14,8 @@
     "@azimut/rules": "workspace:*"
   },
   "devDependencies": {
-    "@azimut/testkit": "workspace:*"
+    "@azimut/testkit": "workspace:*",
+    "@types/node": "^26.4.1"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

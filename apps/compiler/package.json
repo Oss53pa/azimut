@@ -21,7 +21,8 @@
   "devDependencies": {
     "@azimut/rules": "workspace:*",
     "@azimut/testkit": "workspace:*",
-    "vite": "^5.4.2"
+    "@types/node": "^26.4.1",
+    "vite": "^6.4.4"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

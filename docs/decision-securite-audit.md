@@ -17,6 +17,8 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
 | D-10 | 9 | Le propriétaire des tables est distinct du rôle de connexion de l'application, qui ne peut pas l'endosser. Documenté dans `packages/db/migrations/ORDRE.md`, et contrôlé en base. | 23/10/2026 |
 | D-11 | 10 | Le paquet de borne est protégé par son empreinte seule, conformément à A5.9 et A7.5 ; aucune signature. | 23/10/2026 |
 | D-12 | – | L'ancien schéma `azimut`, partiel et vide, du projet hébergé partagé a été retiré, puis les migrations 0001 à 0079 appliquées en une transaction. | 22/10/2026 |
+| D-13 | 9 | Les échecs d'authentification sont journalisés par le service d'authentification lui-même, dans son journal des requêtes, et non dans `azimut.audit_log`. Aucune table nouvelle. | 23/10/2026 |
+| D-14 | 10 | Vite passe en 6.4 pour le studio, le compilateur et le cadre d'essai, et vitest en 4.1 : les failles hautes de vite ne sont corrigées qu'à partir de 6.4.4, et vitest 3 dépend encore d'une version vulnérable de tinypool. Déroge à A3.1 (« Vite 5 ») ; l'amendement du cahier revient à Oss53pa. | 23/10/2026 |
 
 ## Sessions (lot 2)
 
@@ -45,6 +47,20 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
   posent dans la configuration du service d'authentification : facteur TOTP
   activé, mot de passe d'au moins 12 caractères, confirmation au changement
   de mot de passe.
+
+## Journal des événements (lot 9)
+
+- **Le journal de l'organisation.** `azimut.audit_log` n'admet que
+  l'insertion, par le seul rôle `azimut_audit`, au travers des déclencheurs
+  des événements de A12.3. Chaque ligne appartient à une organisation.
+- **Les échecs d'authentification (D-13).** Une tentative de connexion
+  échouée n'appartient à aucune organisation : elle n'entre pas dans
+  `azimut.audit_log`. Elle est consignée par le service d'authentification,
+  qui la reçoit et la refuse. En installation autonome, son journal des
+  requêtes est la sortie du service, à conserver avec les autres journaux
+  de l'instance ; sur un projet hébergé, c'est le journal du service
+  d'authentification de la plateforme. Le débit des tentatives est borné au
+  même endroit (lot 8, « La connexion »).
 
 ## Débit et quotas (lot 8)
 
@@ -83,9 +99,10 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
   avant toute lecture du site. Conformément à D-11, c'est l'empreinte seule :
   elle prouve que le paquet est celui que son manifeste décrit, pas qui l'a
   produit.
-- **Les dépendances livrées.** `pnpm audit:prod` refuse en intégration toute
-  faille connue, haute ou critique, dans les dépendances de production.
-  L'installation suit le verrou (`--frozen-lockfile`).
+- **Les dépendances.** `pnpm audit:all` refuse en intégration toute faille
+  connue, haute ou critique, dans toutes les dépendances, outillage d'essai
+  et de construction compris (D-14). L'installation suit le verrou
+  (`--frozen-lockfile`).
 - **Les versions forcées.** `pnpm.overrides` ne fait que corriger une faille
   dans la même version majeure ; un essai le vérifie.
 - **Les outils de la chaîne.** Chaque action est épinglée par son empreinte,
