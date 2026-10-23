@@ -82,3 +82,22 @@ describe('émetteur de commandes du poste', () => {
     if (!r.ok) expect(r.findings[0]?.params['cause']).toBe('transport');
   });
 });
+
+/** Lot 8 de l'audit : un dépassement de débit garde le délai indiqué par la base. */
+describe('émetteur de commandes : le dépassement de débit', () => {
+  const answer = (status: number, headers: Record<string, string>): typeof fetch =>
+    (async () => new Response('{"code":"rate_limited"}', { status, headers })) as typeof fetch;
+
+  it('rend le refus avec le délai de Retry-After', async () => {
+    const r = await createPostgrestSink(CONFIG, answer(429, { 'Retry-After': '37' }))([cmd('site-1')]);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.findings[0]?.params).toMatchObject({ cause: '429', retry_after_s: 37 });
+  });
+
+  it('ignore un délai mal formé, et ne lit pas l’en-tête hors 429', async () => {
+    const odd = await createPostgrestSink(CONFIG, answer(429, { 'Retry-After': 'demain' }))([cmd('site-1')]);
+    if (!odd.ok) expect(odd.findings[0]?.params).not.toHaveProperty('retry_after_s');
+    const other = await createPostgrestSink(CONFIG, answer(500, { 'Retry-After': '5' }))([cmd('site-1')]);
+    if (!other.ok) expect(other.findings[0]?.params).not.toHaveProperty('retry_after_s');
+  });
+});

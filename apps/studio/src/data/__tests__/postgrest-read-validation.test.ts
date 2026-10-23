@@ -80,3 +80,11 @@ describe('lot 4 : un identifiant n’entre dans une requête que s’il est un U
     expect(idEq('site_id', ID)).toBe(`site_id=eq.${ID}`);
   });
 });
+
+describe('lot 8 : un refus de débit à la lecture', () => {
+  it('devient la défaillance rate_limited, qui appelle l’état d’erreur', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('{"code":"rate_limited"}', { status: 429 })));
+    const error: unknown = await query(config, 'site', 'select=id').then(() => null, (e: unknown) => e);
+    expect(isRepositoryError(error) && error.failure === 'rate_limited' && error.screenState === 'error').toBe(true);
+  });
+});

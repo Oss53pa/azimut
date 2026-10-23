@@ -188,6 +188,8 @@ export const REPOSITORY_FAILURES = [
   'forbidden',
   'not_found',
   'offline',
+  // Lot 8 de l'audit : le dépôt a refusé pour dépassement de débit (429).
+  'rate_limited',
 ] as const;
 export type RepositoryFailure = (typeof REPOSITORY_FAILURES)[number];
 
@@ -215,6 +217,7 @@ export const FAILURE_SCREEN_STATE: Readonly<Record<RepositoryFailure, ScreenStat
   forbidden: 'permission_denied',
   'not_found': 'error',
   offline: 'offline',
+  'rate_limited': 'error',
 };
 
 /** Une défaillance d'accès à la donnée. */
@@ -241,6 +244,7 @@ export function failureForStatus(status: number): RepositoryFailure {
   if (status === 401) return 'unauthorized';
   if (status === 403) return 'forbidden';
   if (status === 404) return 'not_found';
+  if (status === 429) return 'rate_limited';
   return 'request_failed';
 }
 

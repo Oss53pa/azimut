@@ -55,7 +55,10 @@ export function createPostgrestSink(
       // Le message de la base ne remonte pas. A6.1 : aucune ligne d'une autre
       // organisation ne doit être détectable, « y compris par message
       // d'erreur ». Seul le statut, qui ne dit rien du contenu, est conservé.
-      return { ok: false, findings: [refusal(commands, String(response.status))] };
+      // Lot 8 de l'audit : un dépassement de débit garde le délai que la base
+      // indique, pour que l'écran dise quand réessayer.
+      const retry = response.status === 429 ? response.headers.get('Retry-After') : null;
+      return { ok: false, findings: [refusal(commands, String(response.status), retry)] };
     }
 
     return { ok: true, value: null, warnings: [] };
@@ -81,13 +84,14 @@ export function commandPayload(command: EntityCommand) {
   };
 }
 
-function refusal(commands: readonly EntityCommand[], cause: string): Finding {
+function refusal(commands: readonly EntityCommand[], cause: string, retryAfter: string | null = null): Finding {
   const first = commands[0];
+  const retry = retryAfter !== null && /^\d+$/.test(retryAfter) ? { retry_after_s: Number(retryAfter) } : {};
   return {
     code: 'EDIT.WRITE_REFUSED',
     severity: 'blocking',
     entity: first !== undefined ? { kind: 'command', id: first.id } : null,
-    params: { commands: commands.length, cause },
+    params: { commands: commands.length, cause, ...retry },
     ruleRef: 'A6.1',
   };
 }
