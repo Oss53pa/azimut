@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { Footprint, GraphNode, Level } from '@azimut/core-model';
-import { orientationDegForAzimuth } from '@azimut/core-model';
+import { orientationDegForAzimuth, validateSvg } from '@azimut/core-model';
 import { renderRouteAnimation } from '../route-animation.js';
 import type { RouteAnimationOptions } from '../route-animation.js';
 
@@ -146,5 +146,18 @@ describe('D6.2 — le parcours sur un plan orienté', () => {
     const plain = renderRouteAnimation(route, scene, ['carrefour'], options);
     const north = renderRouteAnimation(route, scene, ['carrefour'], facing(0));
     expect(JSON.stringify(north)).toBe(JSON.stringify(plain));
+  });
+});
+
+describe('lot 6 de l’audit : l’animation passe la liste blanche de rendu', () => {
+  it('chaque image, animée ou fixe, est acceptée par le profil `render`', () => {
+    const out = renderRouteAnimation(route, scene, ['carrefour'], options);
+    if (!out.ok) throw new Error('rendu attendu');
+    for (const frame of out.value.frames) {
+      for (const svg of [frame.svg, frame.static_svg]) {
+        const checked = validateSvg(svg, 'render');
+        expect(checked.ok ? 'accepté' : `${checked.reason} ${checked.detail}`).toBe('accepté');
+      }
+    }
   });
 });

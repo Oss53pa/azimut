@@ -7,8 +7,9 @@ import { esc, type FaceTheme } from './face-svg.js';
 
 /**
  * Embed a sanitized inline SVG asset (E14) into a block region as a nested
- * `<svg>` viewport. The markup is trusted as already sanitized by the import
- * layer and is embedded verbatim, which keeps the output deterministic.
+ * `<svg>` viewport. The markup reaching here has passed the allowlist parser
+ * and is its rebuilt form (`block-resolvers.ts`, lot 5 of the security
+ * audit); the rebuild is deterministic, so the output stays deterministic.
  */
 function embedSvg(markup: string, x: number, y: number, w: number, h: number): string {
   return (

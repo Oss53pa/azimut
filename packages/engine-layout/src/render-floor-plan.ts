@@ -1,3 +1,4 @@
+import { escapeXmlAttr } from '@azimut/core-model';
 import type {
   SiteData,
   GraphNode,
@@ -79,12 +80,9 @@ export type FloorPlanData = {
   readonly destinations: readonly Destination[];
 };
 
+/** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
 function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return escapeXmlAttr(s);
 }
 
 function computeBounds(

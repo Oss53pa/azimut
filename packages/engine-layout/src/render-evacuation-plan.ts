@@ -5,7 +5,7 @@ import type {
   Outcome,
   Finding,
 } from '@azimut/core-model';
-import { roundSvg, parkingSpacesOfLevel, pointInPolygon, codePointCompare } from '@azimut/core-model';
+import { escapeXmlAttr, roundSvg, parkingSpacesOfLevel, pointInPolygon, codePointCompare } from '@azimut/core-model';
 
 export type EvacuationTheme = {
   readonly background: string;
@@ -42,12 +42,9 @@ export type EvacuationStats = {
   readonly total_route_length_m: number;
 };
 
+/** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
 function esc(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return escapeXmlAttr(s);
 }
 
 type Transform = {
