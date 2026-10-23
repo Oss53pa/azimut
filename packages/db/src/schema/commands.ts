@@ -1,4 +1,4 @@
-import { text, boolean, numeric, uuid, timestamp, index, unique } from 'drizzle-orm/pg-core';
+import { text, boolean, numeric, uuid, timestamp, integer, index, unique, primaryKey } from 'drizzle-orm/pg-core';
 import { organization } from './org.js';
 import { azimut } from './azimut.js';
 
@@ -38,4 +38,15 @@ export const orgSecuritySetting = azimut.table('org_security_setting', {
 }, (t) => [
   index('idx_org_security_setting_org').on(t.org_id),
   unique('org_security_setting_unique').on(t.org_id, t.key),
+]);
+
+/** D-5, lot 8 : les compteurs de débit, par fenêtre, écrits par les seuls déclencheurs. */
+export const rateCounter = azimut.table('rate_counter', {
+  scope: text('scope').notNull(),
+  subject: uuid('subject').notNull(),
+  action: text('action').notNull(),
+  window_start: timestamp('window_start', { withTimezone: true }).notNull(),
+  hits: integer('hits').notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.scope, t.subject, t.action, t.window_start] }),
 ]);

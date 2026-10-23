@@ -43,6 +43,8 @@ export const DATA_SOURCE_FR = {
   'repo.failure.not_found.hint': 'Elle a pu être supprimée. Revenez à la liste des sites.',
   'repo.failure.offline': 'Poste hors ligne.',
   'repo.failure.offline.hint': 'Les sites déjà ouverts restent consultables. La création attend le retour du réseau.',
+  'repo.failure.rate_limited': 'Trop de demandes en peu de temps.',
+  'repo.failure.rate_limited.hint': 'Attendez une minute, puis rechargez.',
   // M1 (partie M) — formulaire de création d'un site. F10 : le libellé dit ce
   // que fait l'action, et le message d'erreur ce qu'il faut corriger.
   'sites.create.open': 'Nouveau site',
@@ -112,6 +114,8 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'repo.failure.not_found.hint': 'It may have been deleted. Go back to the site list.',
   'repo.failure.offline': 'Workstation offline.',
   'repo.failure.offline.hint': 'Sites already open stay readable. Creation waits for the network.',
+  'repo.failure.rate_limited': 'Too many requests in a short time.',
+  'repo.failure.rate_limited.hint': 'Wait a minute, then reload.',
   'sites.create.open': 'New site',
   'sites.create.title': 'New site',
   'sites.create.name': 'Site name',

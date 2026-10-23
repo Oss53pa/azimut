@@ -106,6 +106,10 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await service?.close();
+  // L'organisation reste (A12.3) ; ses travaux en attente, non. D9.2 :
+  // `queued` vers `cancelled`, l'annulation par l'utilisateur. Sans quoi ils
+  // seraient pris par la file commune des essais suivants.
+  await asUser(`update azimut.job set state = 'cancelled' where org_id = $1 and state = 'queued'`, [ORG]);
   await client.end();
   await db.$client.end();
   await rm(dir, { recursive: true, force: true });

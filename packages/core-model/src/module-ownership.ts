@@ -359,4 +359,5 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   command_table: 'D-4, décision de l’utilisateur du 22/10/2026 : liste blanche de `apply_commands`, donnée de configuration sans org_id, écrite par les seules migrations.',
   security_setting: 'D-5, décision de l’utilisateur du 23/10/2026 : seuils communs de taille, de nombre et de durée, écrits par les seules migrations.',
   org_security_setting: 'D-5 : surcharge des seuils par une organisation, qui ne peut que les resserrer ; écrite par l’admin, jamais par commande.',
+  rate_counter: 'D-5, lot 8 : compteurs de débit par fenêtre, écrits par les seuls déclencheurs de comptage, jamais par commande.',
 };
