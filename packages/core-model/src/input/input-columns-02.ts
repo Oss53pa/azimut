@@ -11,6 +11,7 @@ export const INPUT_COLUMNS_02: Readonly<Record<string, TableColumns>> = {
   plan_calibration_point: { id: 'uuid', org_id: 'uuid', calibration_id: 'uuid', ordinal: 'int', image_x_px: 'num', image_y_px: 'num', created_at: 'ts' },
   plan_source: { id: 'uuid', org_id: 'uuid', level_id: 'uuid', storage_path: 'text', media_type: 'text', uploaded_at: 'ts', content_kind: '=vector|raster|undetermined' },
   proof: { id: 'uuid', org_id: 'uuid', face_id: 'uuid', version: 'int', storage_path: 'text', status: '=pending|approved|rejected|superseded', submitted_at: 'ts', reviewed_at: '?ts', reviewer_id: '?uuid' },
+  rate_counter: { scope: '=user|org', subject: 'uuid', action: 'text', window_start: 'ts', hits: 'int' },
   review_annotation: { id: 'uuid', org_id: 'uuid', site_id: 'uuid', message_line_id: '?uuid', support_face_id: '?uuid', support_id: '?uuid', zone_id: '?uuid', state: '=open|resolved|rejected', body: 'text', ink: '?json', author_id: 'uuid', resolved_by: '?uuid', resolved_at: '?ts', created_at: 'ts', updated_at: 'ts', deleted_at: '?ts' },
   review_annotation_reply: { id: 'uuid', org_id: 'uuid', annotation_id: 'uuid', body: 'text', author_id: 'uuid', created_at: 'ts', updated_at: 'ts', deleted_at: '?ts' },
   route_cache: { id: 'uuid', org_id: 'uuid', site_id: 'uuid', profile_id: 'uuid', from_node_id: 'uuid', to_node_id: 'uuid', path: 'json', cost: 'num', computed_at: 'ts', inputs_hash: 'text' },
