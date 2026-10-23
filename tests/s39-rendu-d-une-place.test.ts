@@ -12,7 +12,7 @@ import { ACCESSIBLE_FUNCTION_KEY, boundPackId } from '@azimut/core-model';
 import type { Outcome, Pictogram, SiteData, Volume } from '@azimut/core-model';
 
 /**
- * S-39 — « Rendu d'une place de stationnement, dans toutes les vues :
+ * S-39, « Rendu d'une place de stationnement, dans toutes les vues :
  *
  * - Plan de niveau et plan orienté : contour léger, sans libellé. Une place ne
  *   porte ni occupant ni catégorie, et ne doit pas concurrencer visuellement
@@ -33,7 +33,7 @@ import type { Outcome, Pictogram, SiteData, Volume } from '@azimut/core-model';
  *
  * `refMultilevel` porte quatre places au RDC, dont une accessible, `fp-ml-a3`,
  * et désigne dans son paquet de règles le pictogramme de sécurité qui la
- * marque. Le contre-exemple — la même place sans désignation — est dérivé ici,
+ * marque. Le contre-exemple (la même place sans désignation) est dérivé ici,
  * au plus près du cas qu'il contredit.
  */
 
@@ -115,7 +115,7 @@ function polygonsWith(svg: string, jeton: string): string[] {
     .filter(tag => tag.includes(`fill="${jeton}"`));
 }
 
-describe('S-39 — plan de niveau : contour léger, sans libellé', () => {
+describe('S-39, plan de niveau : contour léger, sans libellé', () => {
   const svg = svgOf(renderFloorPlan(refMultilevel, RDC, floorOpts));
 
   it('dessine les quatre places avec le jeton des places, non celui du bâti', () => {
@@ -145,7 +145,7 @@ describe('S-39 — plan de niveau : contour léger, sans libellé', () => {
   });
 });
 
-describe('S-39 — plan orienté : le même traitement', () => {
+describe('S-39, plan orienté : le même traitement', () => {
   const svg = svgOf(renderOrientedPlan(refMultilevel, RDC, orientedOpts));
 
   it('dessine les places avec leur jeton et leur trait léger', () => {
@@ -159,7 +159,7 @@ describe('S-39 — plan orienté : le même traitement', () => {
   });
 });
 
-describe('S-39 — la marque d’une place accessible', () => {
+describe('S-39 : la marque d’une place accessible', () => {
   it('pose sur la seule place accessible le pictogramme que le site désigne', () => {
     // Le moteur ne connaît pas le code du pictogramme, et n'a pas à le
     // connaître : il nomme la fonction, A5.4, et la donnée nomme celui qui la
@@ -234,7 +234,7 @@ describe('S-39 — la marque d’une place accessible', () => {
   });
 });
 
-describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
+describe('S-39 et A5.4 : une organisation, deux sites, deux paquets', () => {
   // « Une organisation qui exploite deux sites rattachés à deux paquets
   // différents porte légitimement deux pictogrammes de même fonction, un par
   // paquet : l'unicité par organisation les déclarerait ambigus à tort. »
@@ -286,7 +286,7 @@ describe('S-39 et A5.4 — une organisation, deux sites, deux paquets', () => {
   });
 });
 
-describe('S-39 et A5.8 — un socle et une surcouche qui désignent la même fonction', () => {
+describe('S-39 et A5.8 : un socle et une surcouche qui désignent la même fonction', () => {
   // « Précédence, pour une même fonction de pictogramme comme pour une
   // règle : la surcouche l'emporte sur le socle. L'ambiguïté ne se juge qu'à
   // l'intérieur d'un même paquet ; deux paquets qui désignent la même fonction
@@ -322,7 +322,7 @@ describe('S-39 et A5.8 — un socle et une surcouche qui désignent la même fon
   });
 });
 
-describe('S-39 — vue isométrique : la place reste au sol, sans volume', () => {
+describe('S-39, vue isométrique : la place reste au sol, sans volume', () => {
   const isoTheme: IsoTheme = {
     background: 'tok-bg',
     floor_top: 'tok-top', floor_stroke: 'tok-stroke',
@@ -373,7 +373,7 @@ describe('S-39 — vue isométrique : la place reste au sol, sans volume', () =>
   });
 });
 
-describe('S-39 — plan d’évacuation : absente, sauf cheminement', () => {
+describe('S-39, plan d’évacuation : absente, sauf cheminement', () => {
   const evacTheme: EvacuationTheme = {
     background: 'tok-bg',
     footprint_fill: 'tok-fp-fill', footprint_stroke: 'tok-fp-stroke',

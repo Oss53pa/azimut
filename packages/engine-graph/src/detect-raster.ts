@@ -2,10 +2,10 @@ import type { Outcome, Finding } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * J5.2 — A pictogram is a monolinear vector drawing; raster content has no
+ * J5.2: A pictogram is a monolinear vector drawing; raster content has no
  * place in it. This guard scans a pictogram's SVG source for embedded raster
- * — an `<image>` element, a `data:image/…` URI, or an href pointing at a raster
- * file — and raises PICTO.RASTER_CONTENT for each offending pictogram.
+ * (an `<image>` element, a `data:image/…` URI, or an href pointing at a raster
+ * file) and raises PICTO.RASTER_CONTENT for each offending pictogram.
  */
 export type PictogramSvg = {
   readonly id: string;

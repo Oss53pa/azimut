@@ -1,9 +1,9 @@
 /**
- * N1.2 — horaires d'ouverture d'un bâtiment.
+ * N1.2 : horaires d'ouverture d'un bâtiment.
  *
  * « Par jour, plusieurs plages possibles, fuseau du site. » La structure suit
  * cette phrase : un jour de la semaine porte zéro, une ou plusieurs plages
- * horaires. Un jour absent est un jour fermé — l'absence est l'information,
+ * horaires. Un jour absent est un jour fermé : l'absence est l'information,
  * il n'y a pas de plage vide à écrire.
  *
  * Les heures sont des heures de pendule locales, `HH:MM`, sans fuseau et sans
@@ -80,7 +80,7 @@ export function isOpeningRange(value: unknown): value is OpeningRange {
  * jours sur sept ne se confondent pas.
  *
  * Aucun code d'anomalie ne couvre encore un horaire illisible ; l'écart est
- * donc silencieux, et conservateur — il retire une plage, il n'en invente pas.
+ * donc silencieux, et conservateur : il retire une plage, il n'en invente pas.
  */
 export function readOpeningHours(value: unknown): OpeningHours | undefined {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return undefined;

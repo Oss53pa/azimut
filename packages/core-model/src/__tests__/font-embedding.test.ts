@@ -15,7 +15,7 @@ function font(over: Partial<FontAsset> = {}): FontAsset {
   };
 }
 
-describe('G5.2 — guardFontEmbedding', () => {
+describe('G5.2: guardFontEmbedding', () => {
   it('allows any font for screen preview, including unknown licence', () => {
     const r = guardFontEmbedding(
       [font({ licence_kind: 'unknown', embeddable: false, licence_ref: null })],

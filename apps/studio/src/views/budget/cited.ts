@@ -1,5 +1,5 @@
 /**
- * H8 — ce que le garde des coûts de référence contrôle : les typologies que
+ * H8, ce que le garde des coûts de référence contrôle : les typologies que
  * les supports du site portent réellement (A5.6, `support.typology_id`).
  *
  * Un support sans typologie n'en cite aucune : il ne se chiffre pas, et rien

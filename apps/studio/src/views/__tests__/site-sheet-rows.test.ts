@@ -3,7 +3,7 @@ import { refMultilevel } from '@azimut/testkit';
 import { polygonArea, type SiteData } from '@azimut/core-model';
 import { levelRows } from '../register/site-sheet-rows.js';
 
-describe('Module 01 — lignes de la fiche de site', () => {
+describe('Module 01 : lignes de la fiche de site', () => {
   const site: SiteData = refMultilevel;
   const rows = levelRows(site, 'fr');
 

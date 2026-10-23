@@ -30,7 +30,7 @@ const EMPTY_HYPOTHESES: ExposureHypotheses = {
 };
 
 /**
- * M03.P6 — aucune donnée réelle n'est produite ici. Comptage, télémétrie et
+ * M03.P6 : aucune donnée réelle n'est produite ici. Comptage, télémétrie et
  * chiffre d'affaires déclaré viennent de tiers, et aucun chemin d'import
  * n'existe encore : l'échantillon est donc vide, et il le reste jusqu'à ce
  * qu'un import en verse un. Le remplir de nombres inventés ferait de cet
@@ -38,7 +38,7 @@ const EMPTY_HYPOTHESES: ExposureHypotheses = {
  */
 const IMPORTED_OBSERVATIONS: readonly PerformanceObservation[] = [];
 
-/** I5.3 — le calcul d'exposition n'est pas construit : aucun indice à apparier. */
+/** I5.3, le calcul d'exposition n'est pas construit : aucun indice à apparier. */
 const EXPOSURE_INDICES: readonly ExposureIndex[] = [];
 
 function findingsOf(outcome: { ok: boolean; warnings?: Finding[]; findings?: Finding[] }): readonly Finding[] {
@@ -46,7 +46,7 @@ function findingsOf(outcome: { ok: boolean; warnings?: Finding[]; findings?: Fin
 }
 
 /**
- * Module 03 — les parcours clients.
+ * Module 03 : les parcours clients.
  *
  * Un modèle de flux fondé sur le graphe est une simulation, pas une mesure :
  * aucun chiffre simulé n'est présenté ici comme une observation. Le calcul
@@ -69,13 +69,13 @@ export function CustomerFlowsView(): JSX.Element {
   const [declared, setDeclared] = useState(false);
 
   /**
-   * Hypothèses déclarées. Elles sont construites depuis le site — accès du
-   * graphe, destinations de l'annuaire, typologies — pour qu'aucune entité
+   * Hypothèses déclarées. Elles sont construites depuis le site (accès du
+   * graphe, destinations de l'annuaire, typologies) pour qu'aucune entité
    * inventée n'entre dans une pondération.
    */
   const hypotheses = useMemo<ExposureHypotheses>(() => {
     if (!declared) return EMPTY_HYPOTHESES;
-    // Des parts, donc une décomposition du tout — pour les deux familles.
+    // Des parts, donc une décomposition du tout : pour les deux familles.
     // Les poids d'attraction valaient 1 chacun : ils sommaient au nombre de
     // destinations, et l'écran présentait comme « hypothèses déclarées » un
     // jeu que le contrôle de normalisation refuse désormais.
@@ -95,7 +95,7 @@ export function CustomerFlowsView(): JSX.Element {
   }, [declared, entrances, site.destinations, typologies]);
 
   /**
-   * M03.P5 (partie N) — le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
+   * M03.P5 (partie N) : le seuil de corrélation, déclaré et non pré-rempli. Tant qu'il est
    * vide, aucune comparaison n'est possible et le garde-fou refuse le montant
    * faute de déclaration, non faute de corrélation.
    */

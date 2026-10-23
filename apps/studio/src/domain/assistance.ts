@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * I3 — Five assistances, each proposes and the user decides; nothing is applied
+ * I3: Five assistances, each proposes and the user decides; nothing is applied
  * silently, and a rejected proposal is not asked again. This is the application
  * layer, not an engine. Two anomaly codes surface from here:
  *  - ASSIST.PROPOSAL_REJECTED (info): a would-be proposal matches a prior
@@ -54,7 +54,7 @@ export type ExtractionRun = {
 
 /**
  * Flag contour-detection runs whose extraction rate falls below the supplied
- * threshold (never hardcoded here — it is a tuning value passed by the caller).
+ * threshold (never hardcoded here: it is a tuning value passed by the caller).
  * Returns one warning ASSIST.EXTRACTION_BELOW_THRESHOLD per low run, sorted by
  * id. Always ok: a low rate recommends manual calage, it does not block.
  */

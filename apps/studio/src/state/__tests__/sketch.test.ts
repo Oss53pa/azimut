@@ -8,7 +8,7 @@ import type { SketchStroke } from '../sketch.js';
 const write = { orgId: 'org', siteId: 'site', levelId: 'niv', timestamp: '2026-10-04T10:00:00.000Z' };
 const wobble = [{ x_m: 1.23456, y_m: 2.34567, p: 0.2 }, { x_m: 3.00001, y_m: 2.9, p: 0.9 }];
 
-describe('J3 — la couche d’esquisse', () => {
+describe('J3 : la couche d’esquisse', () => {
   it('le premier trait crée la couche du niveau, dans le même geste', () => {
     const out = sketchStrokeCommands(
       { newId: 'couche', name: 'Esquisse' },

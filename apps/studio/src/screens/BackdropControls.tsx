@@ -5,7 +5,7 @@ import { OPACITY_STEP } from '../viewport/backdrop-settings.js';
 import type { BackdropSettings } from '../viewport/backdrop-settings.js';
 
 /**
- * J1.4 (partie J) — les réglages du fond de décalque, au clavier comme au
+ * J1.4 (partie J), les réglages du fond de décalque, au clavier comme au
  * pointeur (E6.2) : un curseur d'opacité, une case pour les formes tracées.
  */
 export function BackdropControls(props: {

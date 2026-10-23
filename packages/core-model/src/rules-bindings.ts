@@ -1,7 +1,7 @@
 import type { RulesPackRole, SiteRulesBinding } from './site.js';
 
 /**
- * Le rattachement d'un site à ses paquets de règles — A5.8.
+ * Le rattachement d'un site à ses paquets de règles : A5.8.
  *
  * « Cette table fait foi pour le rattachement d'un site à ses paquets. Un site
  * porte au plus un socle et au plus une surcouche pays, section D3.6.
@@ -29,7 +29,7 @@ export function boundPackId(
  * Les paquets d'un site, du plus prioritaire au moins prioritaire.
  *
  * La surcouche d'abord, le socle ensuite, et seulement ceux qui existent. Une
- * demande — une fonction de pictogramme, une règle — se pose au premier ; elle
+ * demande (une fonction de pictogramme, une règle) se pose au premier ; elle
  * ne descend au suivant que si le premier ne répond pas.
  *
  * **Une surcouche sans socle.** A5.8 dit « au plus un socle », non « au moins
@@ -52,11 +52,11 @@ export function isBound(bindings: readonly SiteRulesBinding[]): boolean {
 export type RulesPackIdentity = { readonly key: string; readonly version: string };
 
 /**
- * Les paquets rattachés à un site, chacun à son rôle — D7.1 et annexe T, §3.1.
+ * Les paquets rattachés à un site, chacun à son rôle : D7.1 et annexe T, §3.1.
  *
  * « Les paquets de règles rattachés au site, socle et surcouche, chacun avec
- * sa clé et sa version. » La forme tient la règle d'A5.8 — au plus un socle,
- * au plus une surcouche — sans qu'aucun appelant ait à la vérifier.
+ * sa clé et sa version. » La forme tient la règle d'A5.8 (au plus un socle,
+ * au plus une surcouche) sans qu'aucun appelant ait à la vérifier.
  */
 export type BoundRulesPacks = {
   readonly base?: RulesPackIdentity;

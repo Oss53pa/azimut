@@ -1,5 +1,5 @@
 /**
- * D12.1 — reprise d'une session locale après incident (E5.4).
+ * D12.1 : reprise d'une session locale après incident (E5.4).
  *
  * Fragment à part : `data-source.ts` approche des 400 lignes que A2.4 fixe
  * pour un fichier, et la reprise n'est pas un sujet d'accès au dépôt.

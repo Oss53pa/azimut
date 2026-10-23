@@ -6,7 +6,7 @@ import { codePointCompare } from '@azimut/core-model';
 const profile = refMultilevel.travel_profiles[0];
 if (profile === undefined) throw new Error('fixture without a travel profile');
 
-describe('H2.5 — implantation d’essai', () => {
+describe('H2.5 : implantation d’essai', () => {
   it('place un support par point de décision, trié par nœud', () => {
     const result = trialPlacement(refMultilevel, profile, 'directional');
     expect(result.derived).toBe(true);
@@ -40,7 +40,7 @@ describe('H2.5 — implantation d’essai', () => {
   });
 });
 
-describe('A5.6 — typologie portée par le support', () => {
+describe('A5.6 : typologie portée par le support', () => {
   const [first, ...rest] = refMultilevel.supports;
   if (first === undefined) throw new Error('fixture without supports');
   const typed = {

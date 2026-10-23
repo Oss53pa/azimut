@@ -208,7 +208,7 @@ describe('loadSiteData (full path, stubbed db)', () => {
       [site, [{
         id: 'site-1', org_id: 'org-1', name: 'Site', country_code: 'FR',
       }]],
-      // A5.8 — les paquets viennent de la table de rattachement, qui fait foi.
+      // A5.8, les paquets viennent de la table de rattachement, qui fait foi.
       [siteRulesBinding, [
         { id: 'rb-1', org_id: 'org-1', site_id: 'site-1', rules_pack_id: 'rp-1', role: 'base', bound_at: new Date() },
         { id: 'rb-2', org_id: 'org-1', site_id: 'site-1', rules_pack_id: 'rp-2', role: 'overlay', bound_at: new Date() },

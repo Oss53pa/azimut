@@ -1,5 +1,5 @@
 /**
- * D8.3 — le texte libre saisi sur une face, tel que la résolution et la
+ * D8.3 : le texte libre saisi sur une face, tel que la résolution et la
  * lecture du tableau des messages le portent.
  */
 import type { ContentBlockInstance, FaceTemplate } from '@azimut/core-model';
@@ -22,7 +22,7 @@ export function freeTextContent(texts: Readonly<Record<string, string>>, fallbac
 }
 
 /**
- * D8.3 — le texte qu'un bloc libre de la face apporte à l'emplacement libre du
+ * D8.3 : le texte qu'un bloc libre de la face apporte à l'emplacement libre du
  * gabarit de même indice. Un bloc sans emplacement de même nature n'apporte
  * rien, et le bloc reste hors du rendu.
  */

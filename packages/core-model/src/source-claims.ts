@@ -1,5 +1,5 @@
 /**
- * Écarts entre sources — A5.11, règle M01.S11.
+ * Écarts entre sources : A5.11, règle M01.S11.
  *
  * « Un écart entre deux sources reste ouvert et visible tant qu'il n'est pas
  * tranché. »

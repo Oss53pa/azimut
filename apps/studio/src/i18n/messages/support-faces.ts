@@ -1,5 +1,5 @@
 /**
- * A5.6 — la saisie des faces de support : une ligne par face que la
+ * A5.6, la saisie des faces de support : une ligne par face que la
  * typologie prévoit, déclarée ou non, avec son gabarit et ses langues.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;

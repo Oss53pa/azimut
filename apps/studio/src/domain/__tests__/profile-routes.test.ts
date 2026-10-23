@@ -10,7 +10,7 @@ function withProfiles(extra: readonly TravelProfile[]): SiteData {
   return { ...refMultilevel, travel_profiles: [base, ...extra] };
 }
 
-describe('Module 03 — itinéraires par profil', () => {
+describe('Module 03 : itinéraires par profil', () => {
   it('résout chaque couple entrée → destination pour le profil de référence', () => {
     const [row] = profileRoutes(refMultilevel);
     expect(row?.pairs).toBeGreaterThan(0);

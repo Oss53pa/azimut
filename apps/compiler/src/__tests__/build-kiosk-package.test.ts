@@ -124,7 +124,7 @@ describe('createBuildKioskPackageHandler (D10)', () => {
   });
 });
 
-describe('kioskContextFromAssets (D10 — end to end)', () => {
+describe('kioskContextFromAssets (D10: end to end)', () => {
   const appAssets: KioskAppAssets = {
     indexHtml: enc.encode('<!doctype html><title>Borne</title><div id="app"></div>'),
     appJs: enc.encode('export const boot = () => {};'),
@@ -160,7 +160,7 @@ describe('kioskContextFromAssets (D10 — end to end)', () => {
   });
 });
 
-describe('kioskContextFromStore (D10 — bundle read from storage)', () => {
+describe('kioskContextFromStore (D10: bundle read from storage)', () => {
   const meta = { version: 7, langs: ['fr', 'en'], minRuntime: '1.0.0' };
 
   function bundleStore() {
@@ -220,7 +220,7 @@ describe('kioskContextFromStore (D10 — bundle read from storage)', () => {
   });
 });
 
-describe('createBuildKioskPackageHandler — persistence (D10)', () => {
+describe('createBuildKioskPackageHandler: persistence (D10)', () => {
   const appAssets: KioskAppAssets = {
     indexHtml: enc.encode('<!doctype html><title>Borne</title>'),
     appJs: enc.encode('export const boot = () => {};'),

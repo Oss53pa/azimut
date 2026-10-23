@@ -13,18 +13,18 @@ export const refMultilevel: SiteData = {
     name: 'Site multi-niveaux',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // M01.S1 — repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
+    // M01.S1, repère site posé au premier calage, celui du RDC (`cal-ml-rdc`).
     // Non nul : l'origine a été posée sur un repère du site, pas sur le coin
     // de l'image du premier fond.
     origin_x_m: -12.5,
     origin_y_m: -8,
-    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // N1.2, les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],
-    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    // D1.1, altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
-  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // A5.8, rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
   // rules-packs/test-fixture`. Sans paquet, le site n'aurait pas de registre de
   // sécurité, et sa place accessible ne pourrait porter aucune marque : A5.4
   // fait du paquet la portée de toute désignation de ce registre.
@@ -38,7 +38,7 @@ export const refMultilevel: SiteData = {
       site_id: 'site-multilevel-001',
       name: 'Bâtiment ML',
       independent_access: true,
-      // N1.2 — un jour absent est fermé ; le dimanche n'est pas déclaré.
+      // N1.2, un jour absent est fermé ; le dimanche n'est pas déclaré.
       opening_hours: {
         monday: [{ from: '08:00', to: '19:00' }],
         tuesday: [{ from: '08:00', to: '19:00' }],
@@ -68,7 +68,7 @@ export const refMultilevel: SiteData = {
       elevation_m: 3,
     },
   ],
-  /** A5.2 / N1.4 — les deux niveaux sont calés. */
+  /** A5.2 / N1.4, les deux niveaux sont calés. */
   plan_sources: [
     {
       id: 'ps-ml-rdc',
@@ -144,7 +144,7 @@ export const refMultilevel: SiteData = {
       kind: 'cell',
       unit_code: 'C-100',
     },
-    // S-35 — « Une place de stationnement est une empreinte de nature
+    // S-35, « Une place de stationnement est une empreinte de nature
     // `parking_space`. » Quatre places au sud du bâti, hors de son emprise :
     // elles se dessinent sur le même niveau et ne le recouvrent pas.
     {
@@ -246,7 +246,7 @@ export const refMultilevel: SiteData = {
       rules_pack_id: 'rp-test-0001',
     },
     {
-      // S-39 — la marque de la place accessible `fp-ml-a3`, désignée par la
+      // S-39, la marque de la place accessible `fp-ml-a3`, désignée par la
       // fonction d'accessibilité dans le paquet du site. Tracé de synthèse,
       // dans le carré de trente unités des tracés du dépôt : il n'imite aucun
       // pictogramme normalisé, et n'a pas à le faire pour éprouver la règle.
@@ -282,7 +282,7 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau RDC',
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -294,7 +294,7 @@ export const refMultilevel: SiteData = {
       occupant_name: 'Bureau R+1',
       occupancy_status: 'occupied',
       display_priority: 2,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
   ],
@@ -384,7 +384,7 @@ export const refMultilevel: SiteData = {
       ],
     },
   ],
-  // S8 — le stationnement, sur les objets du socle. Le seul site de référence
+  // S8, le stationnement, sur les objets du socle. Le seul site de référence
   // qui en porte, comme il est le seul à porter un vocabulaire : les autres
   // montrent le cas d'un site qui n'en déclare pas.
   //
@@ -403,7 +403,7 @@ export const refMultilevel: SiteData = {
       footprint_ids: ['fp-ml-a1', 'fp-ml-a2', 'fp-ml-a3', 'fp-ml-b1'],
     },
   ],
-  // A5.3 — l'extension d'une empreinte de place. Deux des quatre la portent :
+  // A5.3, l'extension d'une empreinte de place. Deux des quatre la portent :
   // une empreinte sans extension reste une place standard sans repère de
   // travée, comme une arête sans `vertical_link` reste une arête.
   parking_spaces: [

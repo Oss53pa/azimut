@@ -25,7 +25,7 @@ const centered: ViewState = {
   rotationDeg: 0,
 };
 
-describe('E3 — view-transform', () => {
+describe('E3: view-transform', () => {
   describe('meterToPixel / pixelToMeter round-trip', () => {
     it('origin maps to viewport center', () => {
       const px = meterToPixel({ x_m: 0, y_m: 0 }, centered, viewport);

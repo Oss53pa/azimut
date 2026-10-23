@@ -6,7 +6,7 @@ import {
 } from '../site-structure.js';
 
 /**
- * M1bis (partie M) — fiche de site, bâtiments et niveaux.
+ * M1bis (partie M) : fiche de site, bâtiments et niveaux.
  *
  * Les quatre premiers critères d'acceptation de l'écran se jugent ici ; le
  * cinquième, le parcours au clavier, dans `tests/e2e/m1bis-fiche-site.spec.ts`.

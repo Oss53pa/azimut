@@ -36,7 +36,7 @@ const STATE_SEVERITY: Readonly<Record<LineState, Severity>> = {
 };
 
 /**
- * Module 09 — le suivi budgétaire (H8), au gabarit « registre » : une ligne
+ * Module 09, le suivi budgétaire (H8), au gabarit « registre » : une ligne
  * par phase, de l'estimation au devis et au réalisé. L'écart et la
  * consommation se calculent en unité mineure, dans une seule devise ; ils ne
  * se saisissent pas. Lu en base (0043), ou dans le jeu de démonstration du
@@ -67,9 +67,9 @@ export function BudgetTrackingView({ siteKey }: BudgetTrackingViewProps): JSX.El
     return `${signed && v >= 0 ? '+' : ''}${formatNumber(v, lang, 1)} %`;
   };
   const phase = (l: BudgetLine): string => { const key = phaseKey(l.phase_key); return key === null ? l.phase_key : t(key); };
-  const lot = (l: BudgetLine): string => (l.lot_id === null ? '—' : lotCodes.get(l.lot_id) ?? l.lot_id);
+  const lot = (l: BudgetLine): string => (l.lot_id === null ? '–' : lotCodes.get(l.lot_id) ?? l.lot_id);
   const money = (l: BudgetLine, which: 'estimated' | 'quoted' | 'actual'): string =>
-    formatMoney(l[which], lang, which === 'estimated' ? t('budget.unpriced') : '—');
+    formatMoney(l[which], lang, which === 'estimated' ? t('budget.unpriced') : '–');
 
   const filters: readonly RegisterFilter[] = [
     { id: ALL, label: t('budgettrack.filter.all') },

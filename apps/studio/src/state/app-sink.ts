@@ -1,7 +1,7 @@
 /**
  * L'émetteur de commandes de l'application, construit depuis l'environnement.
  *
- * Le chemin d'écriture existe depuis le lot 1.2 — `createPostgrestSink`
+ * Le chemin d'écriture existe depuis le lot 1.2 : `createPostgrestSink`
  * appelle `azimut.apply_commands`, qui applique une suite en une transaction.
  * Aucun écran ne l'employait : tous recevaient un émetteur local, qui accepte
  * la commande sans l'envoyer. Un formulaire qui écrit dans une session locale
@@ -9,7 +9,7 @@
  *
  * La configuration est la même que celle du dépôt de lecture (A2.4 : aucune
  * clé, aucune URL dans le code). Sans elle, l'émetteur est absent et
- * l'appelant retombe sur le mode local — c'est le cas hors ligne que M8
+ * l'appelant retombe sur le mode local : c'est le cas hors ligne que M8
  * (partie M) critère 3 demande, et le refuser rendrait la tranche
  * invérifiable sur un poste nu.
  */

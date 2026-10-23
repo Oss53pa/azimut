@@ -16,7 +16,7 @@ const storedCreative: AdCreative = {
   received_at: '2026-09-01T00:00:00Z',
 };
 
-describe('H4.6 — visuels enregistrés et visuels en réception', () => {
+describe('H4.6 : visuels enregistrés et visuels en réception', () => {
   it('garde l’assainissement enregistré sans le recalculer, et ne rend pas un fichier non chargé', () => {
     const [row] = creativeRows([storedCreative], [], [], spec);
     expect(row?.origin).toBe('stored');

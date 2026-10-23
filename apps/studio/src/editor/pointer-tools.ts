@@ -1,9 +1,9 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * G3.1 / G3.5 — Three pointer types with assumed different capabilities. Mouse
+ * G3.1 / G3.5: Three pointer types with assumed different capabilities. Mouse
  * and stylus can do everything; a finger does navigation, selection and
- * property editing but not free drawing — the precision a cell footprint needs
+ * property editing but not free drawing: the precision a cell footprint needs
  * cannot be had from a finger, and offering an imprecise function is worse than
  * not offering it. When a coarse pointer is in use, free-drawing tools are
  * disabled with the reason shown (EDIT.TOUCH_TOOL_UNAVAILABLE, info). Adaptation

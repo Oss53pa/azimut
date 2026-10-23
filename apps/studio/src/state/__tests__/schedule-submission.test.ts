@@ -10,7 +10,7 @@ import {
 } from '../schedule-submission.js';
 
 /**
- * R12 (partie R) — les conditions de l'émission pour revue, lues dans la
+ * R12 (partie R) : les conditions de l'émission pour revue, lues dans la
  * session. Aucune n'est supposée remplie : le site de référence part sans
  * passage de validation, et l'émission y est refusée tant qu'il n'y en a pas.
  */
@@ -45,7 +45,7 @@ const schedule: MessageSchedule = {
   inputs_hash: 'sha256:entrees', lines: [],
 };
 
-describe('R12 — la validation de complétude, lue dans la session (M02.W11)', () => {
+describe('R12 : la validation de complétude, lue dans la session (M02.W11)', () => {
   it('sans passage enregistré, la validation n’est pas passée', () => {
     expect(graphValidatedForSite(base, SITE)).toBe(false);
   });
@@ -71,7 +71,7 @@ describe('R12 — la validation de complétude, lue dans la session (M02.W11)', 
   });
 });
 
-describe('R12 — les anomalies qui bloquent l’émission (R14)', () => {
+describe('R12 : les anomalies qui bloquent l’émission (R14)', () => {
   it('l’annuaire du site entre dans la session, pour les garde-fous de nommage et de continuité', () => {
     expect(base.rows.filter(r => r.table === 'destination').length).toBe(site.destinations.length);
     expect(base.rows.filter(r => r.table === 'destination_name').length).toBe(site.destination_names.length);

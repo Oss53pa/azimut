@@ -16,7 +16,7 @@ import { closureRows } from './closures/closure-rows.js';
 import { siteLabels } from './register/labels.js';
 
 /**
- * Module 01 — la saisie des fermetures temporaires (O11). Une fermeture porte
+ * Module 01 : la saisie des fermetures temporaires (O11). Une fermeture porte
  * une ou plusieurs arêtes, un début, une fin et un motif libre ; elle se
  * déclare ou se retire par une commande sur `temporary_closure`, envoyée à
  * `apply_commands`, et l'écran relit ensuite le site, qui reste la source de
@@ -39,7 +39,7 @@ export function ClosuresView(): JSX.Element {
   const [reason, setReason] = useState('');
   const edgeOptions: readonly Option[] = useMemo(
     () => site.graph.edges
-      .map(e => ({ value: e.id, label: `${labels.node(e.from_node_id)} — ${labels.node(e.to_node_id)}` }))
+      .map(e => ({ value: e.id, label: `${labels.node(e.from_node_id)} – ${labels.node(e.to_node_id)}` }))
       .sort((a, b) => a.label.localeCompare(b.label, lang) || codePointCompare(a.value, b.value)),
     [site, labels, lang],
   );

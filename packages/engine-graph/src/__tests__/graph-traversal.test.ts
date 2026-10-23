@@ -118,7 +118,7 @@ describe('bfs', () => {
   });
 });
 
-describe('buildAdjacency — additional edge cases', () => {
+describe('buildAdjacency: additional edge cases', () => {
   it('returns empty map for zero nodes and zero edges', () => {
     const adj = buildAdjacency([], []);
     expect(adj.size).toBe(0);
@@ -136,7 +136,7 @@ describe('buildAdjacency — additional edge cases', () => {
   });
 });
 
-describe('bfs — additional edge cases', () => {
+describe('bfs: additional edge cases', () => {
   it('node with explicit empty neighbor set terminates immediately', () => {
     const adj = new Map<string, Set<string>>();
     adj.set('solo', new Set());
@@ -146,7 +146,7 @@ describe('bfs — additional edge cases', () => {
   });
 });
 
-describe('buildAdjacency — both endpoints unknown', () => {
+describe('buildAdjacency: both endpoints unknown', () => {
   it('edge with both unknown from and to is silently ignored', () => {
     const adj = buildAdjacency(
       [node('a')],

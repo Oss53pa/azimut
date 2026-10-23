@@ -1,5 +1,5 @@
 /**
- * G3.1 et G3.2 (partie G) — trois types de pointeur, des capacités assumées.
+ * G3.1 et G3.2 (partie G) : trois types de pointeur, des capacités assumées.
  *
  * « Prétendre que tout est possible partout produit une interface mauvaise
  * partout. » Le stylet et la souris tracent ; le doigt navigue, sélectionne et
@@ -33,7 +33,7 @@ export type PointerTolerance = {
   readonly snap_px: number;
 };
 
-/** G3.2 — tolérances de sélection et de magnétisme par type de pointeur. */
+/** G3.2 : tolérances de sélection et de magnétisme par type de pointeur. */
 export const POINTER_TOLERANCES: Readonly<Record<PointerKind, PointerTolerance>> = {
   mouse: { select_px: 4, snap_px: 8 },
   pen: { select_px: 3, snap_px: 6 },
@@ -46,7 +46,7 @@ export function toleranceFor(kind: PointerKind): PointerTolerance {
 }
 
 /**
- * G3.1 — un pointeur peut-il tracer librement ?
+ * G3.1 : un pointeur peut-il tracer librement ?
  *
  * Le doigt ne le peut pas : l'outil de tracé reste inactif sous le doigt, avec
  * l'indication du motif (G3.5).
@@ -61,7 +61,7 @@ const PEN_BARREL_BUTTON = 2;
 const PEN_ERASER_BUTTON = 32;
 
 /**
- * J1.5 (partie J) — « Bouton latéral du stylet, s'il existe : gomme.
+ * J1.5 (partie J), « Bouton latéral du stylet, s'il existe : gomme.
  * Retournement du stylet, si le matériel le signale : gomme également. »
  *
  * Lu à la pose du stylet : le geste entier est alors un geste de gomme.

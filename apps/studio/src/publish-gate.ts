@@ -7,9 +7,9 @@ import type { VocabularyState } from './context/site-vocabulary.js';
 /**
  * Ce qui autorise, ou non, à publier.
  *
- * Extrait des écrans parce que deux d'entre eux posent la même question — le
+ * Extrait des écrans parce que deux d'entre eux posent la même question (le
  * bouton « Publier » de l'en-tête et la case « Publiable aujourd'hui » du
- * tableau de bord — et qu'une réponse écrite deux fois finit par diverger. Le
+ * tableau de bord) et qu'une réponse écrite deux fois finit par diverger. Le
  * dépôt tient déjà ce parti pour l'export de validation : la logique sort de la
  * vue, et devient vérifiable sans rien monter à l'écran.
  */
@@ -27,7 +27,7 @@ export type PublishGate = {
    *
    * Ils ne ferment pas la publication : décider qu'un paquet manquant
    * l'interdit relève de A2.2, et personne n'a tranché. Ils sont rendus pour
-   * que l'écran cesse de les taire — « aucune anomalie bloquante » et « tout a
+   * que l'écran cesse de les taire : « aucune anomalie bloquante » et « tout a
    * été contrôlé » ne sont pas la même phrase.
    */
   readonly unchecked: readonly string[];
@@ -54,7 +54,7 @@ function refusalOf(status: VocabularyState['status']): VocabularyRefusal {
  *
  * En mode atelier, une proposition est un état de travail légitime et la règle M01.S11 ne
  * s'exerce pas. Poser la question de la publication dans ce mode allumerait le
- * bouton sur un site dont chaque objet n'est encore qu'une suggestion — soit
+ * bouton sur un site dont chaque objet n'est encore qu'une suggestion : soit
  * exactement ce que `PARK.PROPOSAL_AS_EXISTING` existe pour refuser.
  *
  * Un vocabulaire non lu ne vaut pas un vocabulaire vide. Tant que la lecture

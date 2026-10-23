@@ -1,5 +1,5 @@
 /**
- * E5 — Document and history, bound together.
+ * E5: Document and history, bound together.
  *
  * The history reducer records commands; this hook is what makes them
  * take effect. Executing a command applies its `after` patch, undoing
@@ -7,7 +7,7 @@
  * redoing applies the `after` patch of the entry leaving the redo
  * stack. The two reducers therefore never drift apart.
  *
- * View state — pan, zoom, selection, active level — never reaches this
+ * View state (pan, zoom, selection, active level) never reaches this
  * hook, so it never enters the undo stack (E5.2).
  */
 

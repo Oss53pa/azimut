@@ -6,7 +6,7 @@ import { SKETCH_COLORS, SKETCH_TOOLS } from '../state/sketch.js';
 import type { SketchColor, SketchTool } from '../state/sketch.js';
 
 /**
- * J3.2 (partie J) — les outils de l'esquisse : crayon, feutre, marqueur
+ * J3.2 (partie J), les outils de l'esquisse : crayon, feutre, marqueur
  * translucide, gomme, et la palette propre à l'esquisse.
  *
  * L'outil et la couleur actifs se lisent au texte et à l'état ARIA, jamais à

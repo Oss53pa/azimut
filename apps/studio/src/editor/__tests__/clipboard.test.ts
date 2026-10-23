@@ -41,7 +41,7 @@ const crossOrgTarget: PasteContext = {
   targetLevelId: 'level-x',
 };
 
-describe('E7.3 — clipboard', () => {
+describe('E7.3: clipboard', () => {
   describe('empty clipboard', () => {
     it('starts empty', () => {
       expect(hasClipboard(EMPTY_CLIPBOARD)).toBe(false);

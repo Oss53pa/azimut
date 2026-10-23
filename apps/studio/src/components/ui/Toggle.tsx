@@ -2,7 +2,7 @@ import { type JSX, useId } from 'react';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F6, famille « Saisie » — interrupteur.
+ * F6, famille « Saisie »: interrupteur.
  *
  * Le libellé dit l'état en toutes lettres, jamais par la seule position du
  * curseur ni par une teinte (M7.7, partie M). Une case à cocher native porte

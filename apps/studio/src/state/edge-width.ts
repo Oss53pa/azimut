@@ -1,7 +1,7 @@
 /**
  * La largeur utile qu'une arête reçoit à sa création.
  *
- * M4 (partie M), propriétés d'une arête : « Largeur utile — défaut : hérité du
+ * M4 (partie M), propriétés d'une arête : « Largeur utile, défaut : hérité du
  * bâtiment, `building.default_edge_width_m`. » N1.2 la porte au modèle :
  * « Largeur héritée par les arêtes du bâtiment. »
  *
@@ -12,7 +12,7 @@
  *
  * Ce qu'il n'est pas : une largeur de calcul. `edge.width_m` reste la seule
  * largeur qu'un moteur lit. Changer la largeur d'un bâtiment ne retouche
- * aucune arête déjà tracée — l'héritage a lieu à la création, une fois.
+ * aucune arête déjà tracée : l'héritage a lieu à la création, une fois.
  */
 import type { SessionState } from './session-store.js';
 import { rowsOf } from './session-store.js';
@@ -21,14 +21,14 @@ import { numeric, text } from './row-values.js';
 /**
  * La largeur proposée quand le bâtiment n'en déclare aucune.
  *
- * `building.default_edge_width_m` est facultative — la colonne est nullable
- * (migration 0020) et le champ du modèle optionnel — parce qu'un bâtiment
+ * `building.default_edge_width_m` est facultative (la colonne est nullable
+ * (migration 0020) et le champ du modèle optionnel) parce qu'un bâtiment
  * relevé avant qu'on ait mesuré ses circulations existe. Il faut pourtant une
  * largeur pour tracer, l'arête n'en admettant pas d'absente.
  *
  * Ce n'est pas une valeur d'origine normative, et INV-5 ne la vise pas :
  * aucune norme ne fixe la largeur d'un cheminement dans le modèle. Les seuils
- * qui jugent une largeur — passage minimal, giration — vivent dans le paquet
+ * qui jugent une largeur (passage minimal, giration) vivent dans le paquet
  * de règles et sont lus par les contrôles, jamais ici. C'est une valeur
  * d'ouverture d'écran, que l'opérateur modifie au panneau et que la fiche de
  * site (M1bis) lui permet de fixer une fois pour tout le bâtiment.

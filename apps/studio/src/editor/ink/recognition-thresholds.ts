@@ -1,5 +1,5 @@
 /**
- * J1.3 (partie J) — les seuils de la reconnaissance de forme.
+ * J1.3 (partie J) : les seuils de la reconnaissance de forme.
  *
  * « Seuils de tolérance déclarés en constantes nommées, réglables. Ces seuils
  * sont des paramètres d'ergonomie, jamais des valeurs normatives. »

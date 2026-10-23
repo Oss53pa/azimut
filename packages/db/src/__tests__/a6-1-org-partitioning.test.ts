@@ -8,7 +8,7 @@ import {
 } from '../migration-corpus.js';
 
 /**
- * A6.1 — le test que le cahier des charges rend obligatoire, et qui manquait.
+ * A6.1 : le test que le cahier des charges rend obligatoire, et qui manquait.
  *
  * « Test obligatoire, exécuté à chaque migration : pour chaque table portant
  * `org_id`, une politique existe et est active. Une table nouvelle sans
@@ -20,7 +20,7 @@ import {
  * `approval`, `support_typology` et `support_version` portaient `org_id` sans
  * aucune politique. Constaté sur une base réelle, note du préalable K4 nº 7.
  */
-describe('A6.1 — cloisonnement par ligne, contrôle de catalogue', () => {
+describe('A6.1 : cloisonnement par ligne, contrôle de catalogue', () => {
   const tables = createdTables();
   const partitioned = [...tables]
     .filter(([, hasOrgId]) => hasOrgId)

@@ -12,11 +12,11 @@ import {
 import type { ValidationState, EntityGroup, Severity } from '../state/validation-report.js';
 
 /**
- * M5 (partie M) — écran de validation de complétude.
+ * M5 (partie M) : écran de validation de complétude.
  *
  * « Un écran vide qui ressemble à une réussite alors que rien n'a été calculé
  * est le pire des états possibles. » L'écran distingue donc trois vides :
- * jamais lancé, en cours, et sans anomalie — et n'en présente qu'un comme un
+ * jamais lancé, en cours, et sans anomalie, et n'en présente qu'un comme un
  * succès.
  */
 export type ValidationScreenProps = {

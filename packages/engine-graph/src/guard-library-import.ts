@@ -1,7 +1,7 @@
 import { codePointCompare, empreinteOutcome, type Finding, type Outcome } from '@azimut/core-model';
 
 /**
- * J6.3 — Library import provides duplicate detection: a symbol whose content is
+ * J6.3, Library import provides duplicate detection: a symbol whose content is
  * already present in the library is flagged rather than silently added a second
  * time. Identity is the D7.2 empreinte of the symbol, so two symbols
  * match when their content is identical regardless of id. This guard compares

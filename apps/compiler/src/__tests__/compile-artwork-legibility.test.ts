@@ -25,7 +25,7 @@ describe('T-2.12 createArtworkHandler', () => {
       profile_key: 'standard',
     });
 
-    // A taller face lifts the rendered text to ~40 mm — above the interior
+    // A taller face lifts the rendered text to ~40 mm: above the interior
     // requirement (35) but below the exterior one (47), so the reading context
     // alone decides the verdict.
     function tallFaceSite(ctx: 'interior' | 'exterior'): typeof refMultilevel {

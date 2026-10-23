@@ -1,5 +1,5 @@
 /**
- * J3 (partie J) — la couche d'esquisse d'un site, lue par l'API REST
+ * J3 (partie J) : la couche d'esquisse d'un site, lue par l'API REST
  * (migration 0072).
  *
  * À part du site : une esquisse ne participe à aucun calcul et n'entre dans

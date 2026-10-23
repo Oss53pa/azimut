@@ -12,7 +12,7 @@ import { formatDay } from './register/format.js';
 import { formatMoney } from './budget/money.js';
 
 const ALL = 'all';
-const EMPTY = '—';
+const EMPTY = '–';
 /** Longueur de la référence affichée : le début de l'identifiant, rien de calculé. */
 const REF_LENGTH = 8;
 
@@ -30,7 +30,7 @@ type OpsWorkOrdersViewProps = {
 };
 
 /**
- * Module 08 — les ordres de travaux (A5.7), au gabarit « registre », lus en
+ * Module 08 : les ordres de travaux (A5.7), au gabarit « registre », lus en
  * base. Un ordre naît d'une décision humaine (E3) : l'écran n'en crée ni n'en
  * fait avancer aucun. Le coût est en unité mineure avec sa devise (H8).
  */
@@ -93,7 +93,7 @@ export function OpsWorkOrdersView({ siteKey }: OpsWorkOrdersViewProps): JSX.Elem
             note: t('workorders.section.cost.note'),
             rows: [
               { id: 'cost', label: t('workorders.col.cost'), value: cost(selected) },
-              { id: 'currency', label: t('workorders.field.currency'), value: selected.estimated_cost?.currency ?? '—' },
+              { id: 'currency', label: t('workorders.field.currency'), value: selected.estimated_cost?.currency ?? '–' },
             ],
           },
         ]}

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { longestVariant, textExpansionFindings } from '../text-expansion.js';
 
-describe('D12.2 — longestVariant', () => {
+describe('D12.2: longestVariant', () => {
   it('returns the longest text among active languages', () => {
     const names = { fr: 'Accueil', en: 'Reception desk' };
     const result = longestVariant(names, ['fr', 'en']);
@@ -68,7 +68,7 @@ describe('D12.2 — longestVariant', () => {
   });
 });
 
-describe('D12.2 — textExpansionFindings', () => {
+describe('D12.2: textExpansionFindings', () => {
   it('emits LANG_VARIANT_LONGER when non-primary is longer', () => {
     const names = {
       fr: 'Accueil',
@@ -139,7 +139,7 @@ describe('D12.2 — textExpansionFindings', () => {
   it('all-empty names still returns the first alphabetically', () => {
     const names = { fr: '', en: '' };
     const result = longestVariant(names, ['fr', 'en']);
-    // Both length 0 — sorted order picks 'en' first
+    // Both length 0: sorted order picks 'en' first
     expect(result).not.toBeNull();
     expect(result?.lang).toBe('en');
     expect(result?.length).toBe(0);

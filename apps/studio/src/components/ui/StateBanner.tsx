@@ -12,7 +12,7 @@ type StateBannerProps = {
 };
 
 /**
- * D2 / F4.3 — a refusal or a warning, stated with its code.
+ * D2 / F4.3: a refusal or a warning, stated with its code.
  *
  * Severity is carried by a left rule and by the code itself, never by
  * colour alone: the banner still reads in greyscale.

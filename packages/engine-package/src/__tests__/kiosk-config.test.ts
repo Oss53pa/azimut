@@ -9,7 +9,7 @@ const valid = {
   buildingId: 'bldg-001',
 };
 
-describe('D10.3 — parseKioskConfig', () => {
+describe('D10.3: parseKioskConfig', () => {
   it('parses a valid config', () => {
     const r = parseKioskConfig(valid);
     expect(r.ok).toBe(true);

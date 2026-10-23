@@ -1,5 +1,5 @@
 /**
- * A5.7 — la couche de divergence telle que la base la porte : supports posés,
+ * A5.7, la couche de divergence telle que la base la porte : supports posés,
  * divergences enregistrées, ordres de travaux (migrations 0006 et 0041).
  *
  * La divergence désigne un support, ou le nœud d'un point de décision non

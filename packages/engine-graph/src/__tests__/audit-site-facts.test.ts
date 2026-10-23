@@ -30,7 +30,7 @@ function named(entries: readonly (readonly [string, DestinationName['lang'], str
   return { ...refMinimal, destination_names };
 }
 
-describe('auditSiteFacts — A5.11, un texte contre les faits du site', () => {
+describe('auditSiteFacts : A5.11, un texte contre les faits du site', () => {
   it('ne rend rien quand aucun texte ne contredit un fait', () => {
     const report = auditSiteFacts(named([['n-1', 'fr', 'Parking visiteurs']]), [PARKING_GRATUIT]);
     expect(report.findings).toEqual([]);
@@ -117,7 +117,7 @@ describe('auditSiteFacts — A5.11, un texte contre les faits du site', () => {
 });
 
 /**
- * A5.11 — « Tout fait du site porte sa source et son statut. Un fait de statut
+ * A5.11 : « Tout fait du site porte sa source et son statut. Un fait de statut
  * `proposal` ne s'affiche jamais comme un existant. »
  *
  * Les deux codes viennent du catalogue et changent de porteur : D2.2 les
@@ -125,7 +125,7 @@ describe('auditSiteFacts — A5.11, un texte contre les faits du site', () => {
  * levaient sur les objets de stationnement faute d'une colonne pour porter le
  * statut d'un fait. La migration 0053 l'a ajoutée.
  */
-describe('A5.11 — le statut et la source d’un fait', () => {
+describe('A5.11 : le statut et la source d’un fait', () => {
   const sansSource: SiteFact = {
     key: 'capacite_annoncee',
     value: 89,

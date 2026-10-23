@@ -1,9 +1,9 @@
 /**
- * D12.1 — modules 03 (parcours), 09 (budget), 10 (portefeuille),
+ * D12.1: modules 03 (parcours), 09 (budget), 10 (portefeuille),
  * 11 (transverses) et le tableau de bord H10.
  */
 export const DIRECTION_FR = {
-  // Module 03 — parcours clients
+  // Module 03, parcours clients
   'flows.eyebrow': 'Module 03 · H3 · I5.3',
   'flows.title': 'Parcours clients',
   'flows.subtitle': 'Customer flows',
@@ -18,7 +18,7 @@ export const DIRECTION_FR = {
   'flows.action.withdraw': 'Retirer les hypothèses',
   'flows.action.export': 'Exporter le rapport',
   'flows.blocked.message': "Un rapport de flux ne peut pas être exporté sans les hypothèses retenues.",
-  'flows.blocked.hint': "Les trois pondérations — part de fréquentation par accès, attractivité par destination, cône de visibilité par typologie — doivent être déclarées avant tout calcul.",
+  'flows.blocked.hint': "Les trois pondérations (part de fréquentation par accès, attractivité par destination, cône de visibilité par typologie) doivent être déclarées avant tout calcul.",
   'flows.simulation.message': "Un modèle de flux fondé sur le graphe est une simulation, pas une mesure. Aucun chiffre simulé n'est présenté ici comme une observation.",
   'flows.panel.entries': 'Part de fréquentation par accès',
   'flows.entries.empty': 'Aucune pondération déclarée.',
@@ -57,7 +57,7 @@ export const DIRECTION_FR = {
   'flows.monetary.note': "P5 : un montant n'est calculé que si la corrélation atteint le seuil déclaré. En dessous, et tant qu'elle n'est pas établie, seuls les écarts d'exposition sont produits. Une corrélation inconnue n'atteint pas le seuil.",
   'flows.note': "Ce qui est construit, ce sont les garde-fous : pas de rapport sans hypothèses affichées avec le résultat. L'énumération des parcours et la visibilité restent à écrire.",
 
-  // Module 09 — budget
+  // Module 09, budget
   'budget.eyebrow': 'Module 09 · H8',
   'budget.title': 'Budget et estimation',
   'budget.subtitle': 'Budget',
@@ -98,7 +98,7 @@ export const DIRECTION_FR = {
   'budget.missing.hint': 'Ces lignes restent non chiffrées plutôt que estimées.',
   'budget.note': "Les montants sont stockés en unité mineure avec leur devise, jamais convertis à l'affichage sans taux déclaré.",
 
-  // Module 10 — portefeuille
+  // Module 10, portefeuille
   'portfolio.eyebrow': 'Module 10 · H9',
   'portfolio.title': 'Portefeuille multi-sites',
   'portfolio.subtitle': 'Portfolio',
@@ -133,7 +133,7 @@ export const DIRECTION_FR = {
   'portfolio.tobuild.note': "Ces quatre briques n'ont aucun code. Elles sont énoncées ici pour ne pas être confondues avec ce qui fonctionne au-dessus.",
   'portfolio.note': "Le registre de sécurité reste cloisonné : aucune charte de groupe ne pourra l'altérer, quand les chartes existeront.",
 
-  // Module 11 — transverses
+  // Module 11, transverses
   'crosscutting.eyebrow': 'Module 11 · H10 · I5.2',
   'crosscutting.title': 'Fonctions transverses',
   'crosscutting.subtitle': 'Cross-cutting',
@@ -177,7 +177,7 @@ export const DIRECTION_FR = {
   'dashboard.publishable.yes': 'oui',
   'dashboard.publishable.no': 'non',
   'dashboard.publishable.note': '{count} anomalie(s) bloquante(s) ouverte(s)',
-  'dashboard.publishable.vocab': 'vocabulaire du site non disponible ({status}) — rien ne se conclut de son silence',
+  'dashboard.publishable.vocab': 'vocabulaire du site non disponible ({status}) : rien ne se conclut de son silence',
   'dashboard.metric.modules': 'Modules avec moteur',
   'dashboard.metric.modules.note': 'sur {total}',
   'dashboard.queue.foundation': 'Socle du site',
@@ -209,7 +209,7 @@ export const DIRECTION_EN: Readonly<Record<keyof typeof DIRECTION_FR, string>> =
   'flows.action.withdraw': 'Withdraw hypotheses',
   'flows.action.export': 'Export report',
   'flows.blocked.message': 'A flow report cannot be exported without the hypotheses it rests on.',
-  'flows.blocked.hint': 'The three weightings — footfall share per access, attraction per destination, visibility cone per typology — must be declared before any computation.',
+  'flows.blocked.hint': 'The three weightings (footfall share per access, attraction per destination, visibility cone per typology) must be declared before any computation.',
   'flows.simulation.message': 'A graph-based flow model is a simulation, not a measurement. No simulated figure is presented here as an observation.',
   'flows.panel.entries': 'Footfall share per access',
   'flows.entries.empty': 'No weighting declared.',
@@ -364,7 +364,7 @@ export const DIRECTION_EN: Readonly<Record<keyof typeof DIRECTION_FR, string>> =
   'dashboard.publishable.yes': 'yes',
   'dashboard.publishable.no': 'no',
   'dashboard.publishable.note': '{count} open blocking anomaly(ies)',
-  'dashboard.publishable.vocab': 'site vocabulary unavailable ({status}) — nothing follows from its silence',
+  'dashboard.publishable.vocab': 'site vocabulary unavailable ({status}): nothing follows from its silence',
   'dashboard.metric.modules': 'Modules with an engine',
   'dashboard.metric.modules.note': 'of {total}',
   'dashboard.queue.foundation': 'Site foundation',

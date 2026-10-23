@@ -4,7 +4,7 @@ import {
 } from '@azimut/core-model';
 
 /**
- * Ce qu'un document de stratégie peut lier — A5.11, règle M01.S11.
+ * Ce qu'un document de stratégie peut lier : A5.11, règle M01.S11.
  *
  * Le catalogue et les valeurs se construisent ensemble et volontairement : le
  * catalogue dit ce que le modèle sait offrir, les valeurs disent ce que ce
@@ -75,8 +75,8 @@ export function buildDocumentBindings(
       && fact.target?.kind === target.kind && fact.target.id === target.id);
 
     // Un champ que rien ne déclare reste vide, et non rempli d'un défaut. La
-    // règle M01.S11 — « un nombre affiché dans un livrable provient d'un fait
-    // ou d'un calcul » — refuse qu'un document annonce une capacité que
+    // règle M01.S11 (« un nombre affiché dans un livrable provient d'un fait
+    // ou d'un calcul ») refuse qu'un document annonce une capacité que
     // personne n'a déclarée, et « payant » est une annonce tout autant que
     // « gratuit ».
     values['parking'] = {
@@ -89,8 +89,8 @@ export function buildDocumentBindings(
 
   // Le statut d'un fait n'est pas jugé ici, et c'est délibéré : ce module rend
   // des valeurs, il ne décide pas ce qui a le droit de paraître. La règle
-  // M01.S11 — « un fait de statut `proposal` ne s'affiche jamais comme un
-  // existant » — est opposée par `auditSiteFacts` en mode livrable, qui lève
+  // M01.S11 (« un fait de statut `proposal` ne s'affiche jamais comme un
+  // existant ») est opposée par `auditSiteFacts` en mode livrable, qui lève
   // `PARK.PROPOSAL_AS_EXISTING`. Deux gardes pour une règle finiraient par se
   // contredire, et c'est l'anomalie qui nomme le fait à réviser.
   const factFields: string[] = [];

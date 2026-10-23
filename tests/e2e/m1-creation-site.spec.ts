@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * M1 (partie M) — le formulaire de création d'un site, à son chemin.
+ * M1 (partie M) : le formulaire de création d'un site, à son chemin.
  *
  * Il était spécifié au champ près et monté nulle part : `/sites` rendait la
  * liste sans bouton de création. Un écran inatteignable ne vaut pas mieux
  * qu'un écran absent, et aucun essai ne pouvait l'analyser.
  */
-test.describe('M1 (partie M) — création d’un site', () => {
+test.describe('M1 (partie M) : création d’un site', () => {
   test('le formulaire s’ouvre depuis la liste des sites', async ({ page }) => {
     await page.goto('/sites');
     await page.getByRole('button', { name: /^Nouveau site$/ }).click();
@@ -31,7 +31,7 @@ test.describe('M1 (partie M) — création d’un site', () => {
     await expect(page.getByText('RULES.PACK_NOT_BOUND')).toHaveCount(0);
   });
 
-  /** O4 — le fuseau est requis, et la création le refuse sans lui. */
+  /** O4 : le fuseau est requis, et la création le refuse sans lui. */
   test('le fuseau horaire est requis', async ({ page }) => {
     await page.goto('/sites');
     await page.getByRole('button', { name: /^Nouveau site$/ }).click();
@@ -59,7 +59,7 @@ test.describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * Q9, version 7 — « Aucune liste de pays ni correspondance vers les fuseaux
+   * Q9, version 7 : « Aucune liste de pays ni correspondance vers les fuseaux
    * dans le code. » Le sélecteur porte le référentiel, et non les seuls pays
    * des sites déjà créés, qui était le contenu précédent.
    */
@@ -77,7 +77,7 @@ test.describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * M1 (partie M) — « valeurs issues de `country.timezones`, pré-rempli quand
+   * M1 (partie M) : « valeurs issues de `country.timezones`, pré-rempli quand
    * le pays n'en compte qu'un ».
    */
   test('le fuseau se pré-remplit quand le pays n’en compte qu’un', async ({ page }) => {
@@ -105,7 +105,7 @@ test.describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * Q5, version 7 — « Le champ n'apparaît que si l'organisation en porte au
+   * Q5, version 7 : « Le champ n'apparaît que si l'organisation en porte au
    * moins une. À défaut, le formulaire indique où la créer, jamais un
    * sélecteur vide. »
    */

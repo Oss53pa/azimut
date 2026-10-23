@@ -1,5 +1,5 @@
 /**
- * Zones du socle lues depuis la base — A5.2, section S8.
+ * Zones du socle lues depuis la base : A5.2, section S8.
  *
  * Séparé des essais de `loadSiteData` sur le reste du socle : les deux réunis
  * franchissaient les quatre cents lignes (A2.4). Le `stubDb` qu'ils partagent
@@ -7,7 +7,7 @@
  *
  * Ce fichier éprouvait la lecture de quatre tables de stationnement que la
  * section S8 a retirées. Il éprouve désormais ce qui les remplace du côté de
- * la base : les zones, qui n'étaient pas chargées du tout — une zone ne portait
+ * la base : les zones, qui n'étaient pas chargées du tout, une zone ne portait
  * qu'un nom et une nature, et aucun moteur ne les lisait. `footprint_ids` et
  * S-35 changent cela, et un parking non chargé est un parking non contrôlé.
  */
@@ -89,7 +89,7 @@ describe('zones du socle', () => {
 });
 
 /**
- * A5.3 — l'extension des empreintes de place.
+ * A5.3 : l'extension des empreintes de place.
  *
  * Une ligne par empreinte, sur le modèle de `vertical_link` qui étend une
  * arête. Elle n'était pas chargée sous sa forme antérieure non plus : ce qui

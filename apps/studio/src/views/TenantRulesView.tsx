@@ -24,7 +24,7 @@ type ArticleRow = {
 };
 
 /**
- * Module 06 — le règlement d'enseigne du site (H5.2), article par article, au
+ * Module 06 : le règlement d'enseigne du site (H5.2), article par article, au
  * gabarit « registre ». Un article est un axe que le règlement borne ; ses
  * dossiers non conformes sont ceux où le garde `guardSignProject` relève un
  * écart sur cet axe. L'écran montre la version en vigueur aujourd'hui, et les

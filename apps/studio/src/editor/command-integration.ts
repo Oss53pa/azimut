@@ -1,5 +1,5 @@
 /**
- * E5 + E7 — Command integration.
+ * E5 + E7: Command integration.
  *
  * Converts completed tool gestures into undoable commands.
  * When a tool's phase transitions to 'done', the preview geometry
@@ -110,7 +110,7 @@ export function previewToCommand(
   return createCommand<ShapeCommandData>(
     commandType(toolId),
     targetId,
-    // 'before' is null-equivalent — this is a creation command.
+    // 'before' is null-equivalent: this is a creation command.
     // We use the same shape with zero/empty values as 'before'
     // so the Command<T> type stays uniform.
     emptyData(data.kind),

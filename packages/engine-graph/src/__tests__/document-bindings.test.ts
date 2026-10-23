@@ -17,7 +17,7 @@ const PARKING_GRATUIT: SiteFact = {
 };
 
 /**
- * Les faits du parking de `refMultilevel` — A5.11. Ils vivent dans le
+ * Les faits du parking de `refMultilevel` : A5.11. Ils vivent dans le
  * vocabulaire du site et non dans `SiteData`, et l'appelant les passe ; ces
  * essais les posent donc ici, une fois.
  */
@@ -56,7 +56,7 @@ describe('buildDocumentBindings (M15)', () => {
 
   it('laisse vide un champ qu’aucun fait ne déclare', () => {
     // M01.S11 : « un nombre affiché dans un livrable provient d'un fait ou
-    // d'un calcul ». Le nom vient de la zone, la capacité d'un fait — et sans
+    // d'un calcul ». Le nom vient de la zone, la capacité d'un fait : et sans
     // le fait, le document n'annonce rien plutôt qu'un défaut.
     const { values } = buildDocumentBindings(refMultilevel, []);
     expect(values['parking']?.['name']).toBe('Parking Ouest');

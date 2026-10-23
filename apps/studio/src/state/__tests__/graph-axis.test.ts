@@ -3,7 +3,7 @@ import { acceptAxis } from '../graph-axis.js';
 import type { AxisContext } from '../graph-axis.js';
 
 /**
- * M4 (partie M) critère 1 — « Un axe tracé en une passe produit les nœuds et
+ * M4 (partie M) critère 1 : « Un axe tracé en une passe produit les nœuds et
  * arêtes attendus, sans doublon. »
  *
  * « Sans doublon » est la moitié du critère, et la seule qui se casse en
@@ -29,7 +29,7 @@ const A = { x_m: 0, y_m: 0 };
 const B = { x_m: 10, y_m: 0 };
 const C = { x_m: 20, y_m: 0 };
 
-describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
+describe('M4 (partie M) critère 1 : l’axe de circulation', () => {
   it('produit un nœud par sommet et une arête par segment', () => {
     const outcome = acceptAxis([A, B, C], contextOf());
     expect(outcome.ok).toBe(true);
@@ -110,7 +110,7 @@ describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
   /**
    * Deux sommets coïncidents n'en font qu'un, et le segment entre eux n'existe
    * jamais : `unfoldAxis` les confond avant qu'aucune arête soit formée. Rien
-   * n'est donc « passé » — il n'y avait rien à passer, et lever
+   * n'est donc « passé » : il n'y avait rien à passer, et lever
    * `GRAPH.EDGE_SELF_LOOP` porterait sur un geste que l'opérateur n'a pas fait.
    */
   it('confond deux sommets coïncidents sans former de segment', () => {

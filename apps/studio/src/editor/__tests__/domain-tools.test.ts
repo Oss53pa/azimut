@@ -13,7 +13,7 @@ import {
 import type { Point } from '@azimut/core-model';
 import { polygonArea } from '../boolean-ops.js';
 
-describe('E7.2 — domain-specific tools', () => {
+describe('E7.2: domain-specific tools', () => {
   // -----------------------------------------------------------------------
   // Cell tracing
   // -----------------------------------------------------------------------
@@ -32,7 +32,7 @@ describe('E7.2 — domain-specific tools', () => {
         { x_m: 3, y_m: 4 },
       ];
       const result = traceCell(pts, false);
-      // Should have: (0,0) → (3,0) → (3,4) — corner inserted
+      // Should have: (0,0) → (3,0) → (3,4), corner inserted
       expect(result).toHaveLength(3);
       expect(result[1]).toStrictEqual({ x_m: 3, y_m: 0 });
     });
@@ -71,7 +71,7 @@ describe('E7.2 — domain-specific tools', () => {
         { x_m: 5, y_m: 3 },
         { x_m: 0, y_m: 3 },
       ];
-      // (0,3) to (0,0) is vertical — already aligned
+      // (0,3) to (0,0) is vertical: already aligned
       expect(closeCell(pts)).toHaveLength(4);
     });
 

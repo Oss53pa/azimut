@@ -1,10 +1,10 @@
-# Note — préalable K4 nº 7 : cloisonnement sur agrégats et jointures profondes
+# Note, préalable K4 nº 7 : cloisonnement sur agrégats et jointures profondes
 
 **Statut : préalable fermé. Les quatre défauts sont corrigés, migrations 0024
 et 0025, lot 1.1 de la tranche 1. Voir le chapitre 7.**
 
 Livrable du sujet « Cloisonnement sur agrégats et jointures profondes », registre
-partie K, section K3.3, niveau de blocage **P** — bloque avant la première ligne
+partie K, section K3.3, niveau de blocage **P** : bloque avant la première ligne
 de code. Conformément à K3.3, le livrable est cette note, pas du code.
 
 ---
@@ -24,7 +24,7 @@ volumes délibérément dissemblables pour qu'une fuite se voie dans un agrégat
 | Org B | 1 | 3 | 27 m |
 
 Douze formes de requête ont été exécutées, choisies pour couvrir exactement ce que
-le sujet nomme — les agrégats et les jointures profondes — et les voies par
+le sujet nomme (les agrégats et les jointures profondes) et les voies par
 lesquelles un cloisonnement par ligne se contourne d'ordinaire.
 
 ---
@@ -62,7 +62,7 @@ profondes ne franchissent pas la frontière d'organisation.
 Le résultat ci-dessus vaut *sous le rôle `authenticated`*. Quatre constats, chacun
 vérifié sur la même base, font qu'aujourd'hui le dépôt n'est pas dans cet état.
 
-### 3.1 Le propriétaire des tables voit tout — et c'est ainsi que l'application se connecte
+### 3.1 Le propriétaire des tables voit tout : et c'est ainsi que l'application se connecte
 
 52 des 55 tables ont la sécurité par ligne activée mais **non forcée**
 (`FORCE ROW LEVEL SECURITY` absent), et les 55 appartiennent au rôle `azimut`.
@@ -73,7 +73,7 @@ La même sonde, exécutée sans changer de rôle, donne :
 
 | Forme | Sous `authenticated` | Sous le propriétaire |
 | --- | --- | --- |
-| Sélection de sites | 1 — « Site A » | **2 — « Site A, Site B »** |
+| Sélection de sites | 1 : « Site A » | **2 : « Site A, Site B »** |
 | `SUM` des longueurs | 5 | **32** |
 | Jointure à 5 niveaux | 1 | **4** |
 | Agrégat par organisation | « Org A » | **« Org A, Org B »** |
@@ -126,14 +126,14 @@ autonome », et il est dans le socle, là où la tranche 1 doit écrire.
 ## 4. Constat annexe : critère 9 de T-2.14a, à moitié acquis
 
 La même base a permis d'éprouver le critère d'acceptation nº 9 de la tâche
-T-2.14a — « une tentative de modification et une tentative de suppression d'une
+T-2.14a : « une tentative de modification et une tentative de suppression d'une
 ligne d'approbation échouent au niveau de la base, avec le rôle d'administration ».
 
 | Tentative, avec le rôle propriétaire | Résultat |
 | --- | --- |
-| `UPDATE` d'une ligne d'approbation | **refusée** — « approval records are insert-only and cannot be modified or deleted » |
-| `DELETE` d'une ligne d'approbation | **refusée** — même message |
-| `TRUNCATE` de la table | **acceptée — la table est vidée** |
+| `UPDATE` d'une ligne d'approbation | **refusée**: « approval records are insert-only and cannot be modified or deleted » |
+| `DELETE` d'une ligne d'approbation | **refusée** : même message |
+| `TRUNCATE` de la table | **acceptée : la table est vidée** |
 
 Les deux déclencheurs posés par `0009` sont des déclencheurs par ligne. `TRUNCATE`
 ne les déclenche pas. L'insertion seule n'est donc pas garantie au niveau de la
@@ -149,7 +149,7 @@ la première ligne de code, et la réponse est non. La sécurité par ligne de
 PostgreSQL tient sur les agrégats et les jointures profondes. Le socle reste.
 
 Les quatre défauts sont des corrections, à porter au **lot 1.1 de la tranche 1**,
-avant toute écriture — puisque écrire sans cloisonnement effectif reviendrait à
+avant toute écriture : puisque écrire sans cloisonnement effectif reviendrait à
 construire le chemin d'écriture par-dessus une frontière ouverte.
 
 1. `FORCE ROW LEVEL SECURITY` sur les 55 tables, et un test qui échoue si une
@@ -157,7 +157,7 @@ construire le chemin d'écriture par-dessus une frontière ouverte.
 2. Les droits du rôle `authenticated`, portés par une migration.
 3. La sécurité par ligne et une politique sur `approval`, `support_typology` et
    `support_version` ; puis un test qui parcourt le catalogue et échoue dès
-   qu'une table portant `org_id` n'a pas de politique — pour que l'oubli de
+   qu'une table portant `org_id` n'a pas de politique : pour que l'oubli de
    `0009` et `0015` ne puisse pas se répéter.
 4. L'identité de l'utilisateur agissant propagée jusqu'à `auth.uid()`, et le rôle
    `authenticated` pris par la connexion applicative.
@@ -176,12 +176,12 @@ non-régression correspondant.
 L'essai s'est tenu sur PostgreSQL 16.13, sur une grappe locale jetable, avec deux
 organisations fictives. Aucune donnée client, aucun projet réel, aucune chaîne de
 connexion. L'échafaudage `auth.users` et `auth.uid()` a été fabriqué pour l'essai
-et n'est pas versé au dépôt — le fabriquer est précisément le constat du § 3.4.
+et n'est pas versé au dépôt : le fabriquer est précisément le constat du § 3.4.
 
 
 ---
 
-## 7. Suite donnée — lot 1.1 de la tranche 1
+## 7. Suite donnée : lot 1.1 de la tranche 1
 
 Les quatre défauts du § 3 et le constat du § 4 sont corrigés par deux
 migrations, chacune éprouvée sur une grappe jetable avant d'être testée.
@@ -221,9 +221,9 @@ Ce défaut ne se lit pas dans le SQL. Il ne se voit qu'en exécutant.
   `approval`. Hors du périmètre de ces deux migrations.
 - **La propagation de l'identité** jusqu'au réglage de session est le lot 1.2 :
   la base sait désormais la lire, `connection.ts` ne la pose pas encore.
-- **Le second test obligatoire de A6.1** — « un utilisateur de l'organisation A
+- **Le second test obligatoire de A6.1** (« un utilisateur de l'organisation A
   ne peut lire, écrire, ni détecter l'existence d'aucune ligne de
   l'organisation B, y compris par message d'erreur, par compteur, ou par
-  différence de temps de réponse » — n'est pas automatisé. Les douze formes de
+  différence de temps de réponse ») n'est pas automatisé. Les douze formes de
   cette note en constituent le canevas, mais elles demandent une base, et la
   suite d'essais n'en a aucune.

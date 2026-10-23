@@ -9,12 +9,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SCREENS = resolve(HERE, '..');
 
 /**
- * Partie R — l'écran du tableau des messages, moitié consultation.
+ * Partie R : l'écran du tableau des messages, moitié consultation.
  *
  * Aucune bibliothèque de rendu n'est installée et A3.3 n'en préautorise
  * aucune : le contrôle porte sur la structure des sources, comme pour les
  * écrans de la tranche M. Il attrape le défaut qui compte ici, et c'est le
- * plus grave que cet écran puisse avoir — une cellule modifiable.
+ * plus grave que cet écran puisse avoir : une cellule modifiable.
  */
 function source(...parts: readonly string[]): string {
   return readFileSync(resolve(SCREENS, ...parts), 'utf8');
@@ -34,7 +34,7 @@ const COMPARE = source('message-table', 'CompareView.tsx');
  * tableau est généré, jamais saisi. Une cellule éditable la romprait sans
  * qu'aucun autre essai ne s'en aperçoive.
  */
-describe('R18 (partie R) critère 2 — aucune cellule n’est modifiable', () => {
+describe('R18 (partie R) critère 2 : aucune cellule n’est modifiable', () => {
   it('le tableau ne porte aucun élément de saisie', () => {
     for (const forbidden of ['<input', '<textarea', '<select', 'contentEditable']) {
       expect(TABLE, forbidden).not.toContain(forbidden);
@@ -68,7 +68,7 @@ describe('R18 (partie R) critère 2 — aucune cellule n’est modifiable', () =
   });
 });
 
-describe('F7 et R16 (partie R) — les états de l’écran', () => {
+describe('F7 et R16 (partie R) : les états de l’écran', () => {
   it('les six états de F7 restent ceux du cahier', () => {
     expect([...F7_STATES]).toEqual([
       'empty', 'loading', 'partial', 'error', 'offline', 'permission_denied',
@@ -101,7 +101,7 @@ describe('F7 et R16 (partie R) — les états de l’écran', () => {
  * R10 et F14 : « Aucun état n'est porté par la seule couleur : chaque pastille
  * a son libellé. » Critère 13 de R18 : lisibilité intégrale en niveaux de gris.
  */
-describe('R10 et R17 (partie R) — aucun état porté par la seule couleur', () => {
+describe('R10 et R17 (partie R) : aucun état porté par la seule couleur', () => {
   it('chaque état de ligne a son libellé dans les deux langues', () => {
     for (const state of ['current', 'stale', 'blocking', 'excluded'] as const) {
       const key = `msgtable.linestate.${state}` as const;
@@ -145,7 +145,7 @@ describe('R10 et R17 (partie R) — aucun état porté par la seule couleur', ()
  * R11 (partie R) : « Les marques combinent symbole et libellé, jamais la
  * couleur seule. » Critère 13 de R18, lisibilité en niveaux de gris.
  */
-describe('R11 (partie R) — chaque marque porte un symbole et un libellé', () => {
+describe('R11 (partie R) : chaque marque porte un symbole et un libellé', () => {
   it('les quatre marques ont leur libellé dans les deux langues', () => {
     for (const change of ['added', 'removed', 'modified', 'unchanged'] as const) {
       const key = `msgtable.change.${change}` as const;
@@ -172,7 +172,7 @@ describe('R11 (partie R) — chaque marque porte un symbole et un libellé', () 
   });
 });
 
-describe('R4 (partie R) — une action non permise est absente, jamais grisée', () => {
+describe('R4 (partie R) : une action non permise est absente, jamais grisée', () => {
   it('la barre de version ne désactive aucune action', () => {
     expect(VERSION_BAR).not.toContain('disabled');
   });

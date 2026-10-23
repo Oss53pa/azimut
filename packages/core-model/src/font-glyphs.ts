@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * E12 / E14.2 — Charter fonts are validated on import: the Latin character sets
+ * E12 / E14.2, Charter fonts are validated on import: the Latin character sets
  * needed for French and English, accents included, must be present. A font that
  * lacks a required glyph raises a blocking ASSET.FONT_MISSING_GLYPHS, since a
  * missing accent would silently corrupt a panel.

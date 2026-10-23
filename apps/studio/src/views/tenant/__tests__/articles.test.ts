@@ -12,7 +12,7 @@ const [version] = registry.regulations;
 if (version === undefined) throw new Error('le jeu d’essai porte un règlement');
 const DEMO_SIGN_REGULATION: SignRegulation = version;
 
-describe('H5.2 — règlement d’enseigne article par article', () => {
+describe('H5.2 : règlement d’enseigne article par article', () => {
   it('rattache chaque dossier à une destination du site et à la version en vigueur à son dépôt', () => {
     expect(DEMO_SIGN_DOSSIERS.length).toBeGreaterThan(0);
     for (const d of DEMO_SIGN_DOSSIERS) {

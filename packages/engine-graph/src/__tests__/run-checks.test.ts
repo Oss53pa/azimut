@@ -157,7 +157,7 @@ describe('T-2.5 runChecks', () => {
     });
   });
 
-  describe('GRAPH.DESTINATION_NAME_DUPLICATE — whitespace normalization', () => {
+  describe('GRAPH.DESTINATION_NAME_DUPLICATE: whitespace normalization', () => {
     it('trims whitespace before comparing names', () => {
       const site: SiteData = {
         ...refMinimal,
@@ -182,7 +182,7 @@ describe('T-2.5 runChecks', () => {
     });
   });
 
-  describe('GRAPH.DESTINATION_LANG_INCOMPLETE — dest with zero names', () => {
+  describe('GRAPH.DESTINATION_LANG_INCOMPLETE: dest with zero names', () => {
     it('skips dest with no names at all when other dests have names', () => {
       // Destination with no names → not in langsByDest → continue path
       const site: SiteData = {
@@ -218,7 +218,7 @@ describe('T-2.5 runChecks', () => {
     });
   });
 
-  describe('GRAPH.CATEGORY_ALL_VACANT — mixed categories', () => {
+  describe('GRAPH.CATEGORY_ALL_VACANT: mixed categories', () => {
     it('flags only the all-vacant category, not the mixed one', () => {
       const d0 = refMinimal.destinations[0];
       const d1 = refMinimal.destinations[1];
@@ -267,7 +267,7 @@ describe('T-2.5 runChecks', () => {
     });
   });
 
-  describe('GRAPH.DESTINATION_NAME_DUPLICATE — same dest dedup', () => {
+  describe('GRAPH.DESTINATION_NAME_DUPLICATE: same dest dedup', () => {
     it('ignores duplicate name rows for the same destination', () => {
       const site: SiteData = {
         ...refMinimal,

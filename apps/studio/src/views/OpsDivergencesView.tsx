@@ -30,7 +30,7 @@ const EXPLAIN_KEYS: Readonly<Record<Issue, UiMessageKey>> = {
 };
 
 /**
- * Module 08 — les divergences entre le parc et la conception, au gabarit
+ * Module 08 : les divergences entre le parc et la conception, au gabarit
  * « registre ». Elles viennent du moteur de rapprochement (`reconcile`) sur
  * les données du site : un support posé hors de tout point de décision, un
  * point de décision sans support. Ce ne sont pas des données de démonstration.
@@ -65,7 +65,7 @@ export function OpsDivergencesView({ siteKey }: OpsDivergencesViewProps): JSX.El
     l.entity_kind === 'node' ? labels.node(l.entity_id) : (supports.get(l.entity_id)?.code ?? l.entity_id);
   const levelOf = (l: ReconciliationLine): string => {
     const level = labels.nodeLevel(nodeOf(l));
-    return level === null ? '—' : labels.level(level);
+    return level === null ? '–' : labels.level(level);
   };
 
   const rows = report.lines;

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M7 (partie M) — les onze règles que tout écran construit ensuite reprend.
+ * M7 (partie M) : les onze règles que tout écran construit ensuite reprend.
  *
  * « Ces onze règles sont extraites de la tranche. Tout écran construit ensuite
  * s'y conforme, sans qu'il soit nécessaire de le spécifier en entier. »
@@ -36,7 +36,7 @@ async function loadPlan(page: Page): Promise<void> {
   });
 }
 
-test.describe('M7.1 (partie M) — les six états sont traités', () => {
+test.describe('M7.1 (partie M) : les six états sont traités', () => {
   /**
    * « Un écran qui ne traite que le cas nominal est incomplet. » L'état vide
    * est celui qu'on voit en arrivant sur un site neuf : il doit inviter à
@@ -105,7 +105,7 @@ test.describe('M7.1 (partie M) — les six états sont traités', () => {
   });
 });
 
-test.describe('M7.2 (partie M) — tout se saisit au clavier, en numérique, dans le panneau', () => {
+test.describe('M7.2 (partie M) : tout se saisit au clavier, en numérique, dans le panneau', () => {
   /**
    * « Toute valeur saisissable au pointeur l'est aussi au clavier, en
    * numérique, dans le panneau et non dans un menu secondaire. »
@@ -132,7 +132,7 @@ test.describe('M7.2 (partie M) — tout se saisit au clavier, en numérique, dan
   });
 });
 
-test.describe('M7.3 (partie M) — une valeur calculée est en lecture seule et se dit telle', () => {
+test.describe('M7.3 (partie M) : une valeur calculée est en lecture seule et se dit telle', () => {
   test('la surface d’une empreinte ne se saisit pas', async ({ page }) => {
     await page.goto(FOOTPRINTS);
     const area = page.getByLabel(/Surface|Area/).first();
@@ -148,7 +148,7 @@ test.describe('M7.3 (partie M) — une valeur calculée est en lecture seule et 
   });
 });
 
-test.describe('M7.4 (partie M) — tout champ dimensionnel affiche son unité', () => {
+test.describe('M7.4 (partie M) : tout champ dimensionnel affiche son unité', () => {
   test('la distance réelle affiche ses mètres', async ({ page }) => {
     await page.goto(PLAN);
     const label = page.locator('label', { hasText: /Distance réelle|Real distance/ }).first();
@@ -162,7 +162,7 @@ test.describe('M7.4 (partie M) — tout champ dimensionnel affiche son unité', 
   });
 });
 
-test.describe('M7.5 (partie M) — un refus n’efface jamais le travail en cours', () => {
+test.describe('M7.5 (partie M) : un refus n’efface jamais le travail en cours', () => {
   /**
    * L'azimut hors domaine est refusé par `computeCalibration`. Ce que cet
    * essai vérifie, c'est que le refus laisse la saisie en place : effacer le
@@ -183,7 +183,7 @@ test.describe('M7.5 (partie M) — un refus n’efface jamais le travail en cour
   });
 });
 
-test.describe('M7.6 (partie M) — une anomalie porte son entité, son lien et sa référence', () => {
+test.describe('M7.6 (partie M) : une anomalie porte son entité, son lien et sa référence', () => {
   /**
    * « Une anomalie porte son entité, un lien vers elle, et sa référence
    * normative le cas échéant. » L'écran de validation est celui qui les
@@ -198,7 +198,7 @@ test.describe('M7.6 (partie M) — une anomalie porte son entité, son lien et s
   });
 });
 
-test.describe('M7.7 (partie M) — aucune information portée par la seule couleur', () => {
+test.describe('M7.7 (partie M) : aucune information portée par la seule couleur', () => {
   test('la gravité se lit au mot, pas à la teinte', async ({ page }) => {
     await page.goto(VALIDATION);
     await page.getByRole('button', { name: /Lancer la validation|Run validation/ }).first().click();
@@ -213,7 +213,7 @@ test.describe('M7.7 (partie M) — aucune information portée par la seule coule
   });
 });
 
-test.describe('M7.8 (partie M) — le focus est distinct de la sélection', () => {
+test.describe('M7.8 (partie M) : le focus est distinct de la sélection', () => {
   /**
    * « Confondre les deux rend l'application inutilisable au clavier. »
    *
@@ -255,7 +255,7 @@ test.describe('M7.8 (partie M) — le focus est distinct de la sélection', () =
   });
 });
 
-test.describe('M7.9 (partie M) — une action à conséquence demande une confirmation qui la nomme', () => {
+test.describe('M7.9 (partie M) : une action à conséquence demande une confirmation qui la nomme', () => {
   /**
    * M2 (partie M) : « Remplacer un fond sans recaler est le geste qui décale
    * silencieusement toute une modélisation. Il demande donc une confirmation
@@ -319,7 +319,7 @@ test.describe('M7.9 (partie M) — une action à conséquence demande une confir
   });
 });
 
-test.describe('M7.10 (partie M) — l’accent ne signale que ce que le logiciel a calculé', () => {
+test.describe('M7.10 (partie M) : l’accent ne signale que ce que le logiciel a calculé', () => {
   /**
    * La partie F le dit deux fois : « accent réservé aux valeurs produites par
    * un moteur », et « ce que l'utilisateur a saisi reste neutre ».
@@ -358,7 +358,7 @@ test.describe('M7.10 (partie M) — l’accent ne signale que ce que le logiciel
   });
 });
 
-test.describe('M7.11 (partie M) — aucun résultat vide présenté comme un succès', () => {
+test.describe('M7.11 (partie M) : aucun résultat vide présenté comme un succès', () => {
   /**
    * « Un écran vide qui ressemble à une réussite alors que rien n'a été
    * calculé est le pire des états possibles. »

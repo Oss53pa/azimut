@@ -1,5 +1,5 @@
 /**
- * R2 (partie R) — qui peut faire quoi sur le tableau des messages.
+ * R2 (partie R) : qui peut faire quoi sur le tableau des messages.
  *
  * La table est recopiée telle quelle, sans être déduite d'une hiérarchie de
  * rôles : R2 sépare volontairement celui qui génère de celui qui approuve, et

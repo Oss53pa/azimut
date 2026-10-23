@@ -1,5 +1,5 @@
 /**
- * Implantation d'essai — H2.5.
+ * Implantation d'essai: H2.5.
  *
  * Le tableau des messages se calcule à partir de supports implantés. Tant
  * qu'aucune implantation n'est enregistrée pour le site, l'écran en propose
@@ -7,7 +7,7 @@
  * par le moteur.
  *
  * Ce n'est pas une donnée inventée, c'est la première passe canonique d'un plan
- * de jalonnement — et elle est entièrement dérivée du graphe. L'écran le dit à
+ * de jalonnement : et elle est entièrement dérivée du graphe. L'écran le dit à
  * l'utilisateur ; rien n'est écrit dans le site.
  *
  * Déterminisme : l'identifiant d'un support d'essai vient du nœud, jamais d'un

@@ -14,7 +14,7 @@ import { divergenceReport } from './operations/divergence.js';
 import { natureKey } from './operations/labels.js';
 
 /**
- * Module 08 — l'exploitation. La couche de divergence naît du rapprochement
+ * Module 08 : l'exploitation. La couche de divergence naît du rapprochement
  * entre ce que le carnet prévoit et ce qu'une tournée relève. Une tournée non
  * synchronisée est visible mais pas intégrée : elle ne disparaît pas en
  * silence. Les tournées se lisent en base (0044), ou dans le jeu de
@@ -71,7 +71,7 @@ export function OperationsView({ siteKey }: OperationsViewProps): JSX.Element {
     { id: 'id', header: t('operations.col.round'), cell: r => r.id },
     { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone_label },
     { id: 'date', header: t('operations.col.surveyed'), cell: r => r.surveyed_on ?? t('operations.round.planned') },
-    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '—' },
+    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '–' },
     { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(counts.get(r.id) ?? 0) },
     {
       id: 'sync',

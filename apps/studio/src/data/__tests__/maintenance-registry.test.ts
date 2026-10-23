@@ -29,7 +29,7 @@ const BASE = {
   ],
 };
 
-describe('A5.7 — parc posé, sites de référence', () => {
+describe('A5.7 : parc posé, sites de référence', () => {
   const repository = createReferenceRepository();
 
   it('rend un registre vide : aucun site de référence n’a de parc posé', async () => {
@@ -42,7 +42,7 @@ describe('A5.7 — parc posé, sites de référence', () => {
   });
 });
 
-describe('A5.7 — parc posé, API REST', () => {
+describe('A5.7 : parc posé, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
     const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001')

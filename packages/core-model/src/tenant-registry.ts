@@ -1,5 +1,5 @@
 /**
- * H5 — les enseignes locataires telles que la base les porte (migration
+ * H5, les enseignes locataires telles que la base les porte (migration
  * 0046) : règlement d'enseigne du site, dossiers d'enseigne et leurs pièces.
  *
  * Le règlement est versionné par sa date d'effet : un dossier s'instruit
@@ -62,7 +62,7 @@ export function isTenantDossierState(value: string): value is TenantDossierState
 
 /**
  * La version du règlement en vigueur à une date : la plus récente dont la
- * date d'effet ne la dépasse pas. `null` quand aucune ne l'est encore — le
+ * date d'effet ne la dépasse pas. `null` quand aucune ne l'est encore : le
  * dossier ne s'instruit alors contre rien, et l'écran le dit.
  */
 export function regulationInForce(

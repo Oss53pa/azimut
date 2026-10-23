@@ -14,7 +14,7 @@ import { AXIS_KEYS, partKey } from './tenant/labels.js';
 import { formatDay, formatNumber } from './register/format.js';
 
 /**
- * Module 06 — l'instruction d'un dossier d'enseigne (H5.2), article par
+ * Module 06 : l'instruction d'un dossier d'enseigne (H5.2), article par
  * article. Chaque résultat vient du garde `guardSignProject` ; la lecture en
  * bas de page ne fait que résumer ses écarts et les pièces manquantes. La
  * décision reste humaine : aucun accord ni refus ne se prononce ici. Le
@@ -43,7 +43,7 @@ export function TenantInstructionView({ siteKey }: TenantInstructionViewProps): 
     return <div>{banner}<Note>{t('tenant.empty')}</Note></div>;
   }
   const tenant = dossier.tenant ?? t('tenant.destination.missing');
-  const cell = dossier.cell_code ?? '—';
+  const cell = dossier.cell_code ?? '–';
   if (instruction === null) {
     return (
       <div>

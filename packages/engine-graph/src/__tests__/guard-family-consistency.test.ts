@@ -21,7 +21,7 @@ const member = (over: Partial<FamilyMember> = {}): FamilyMember => ({
   ...over,
 });
 
-describe('J5.2 — guardFamilyConsistency', () => {
+describe('J5.2: guardFamilyConsistency', () => {
   it('accepts a member matching its family on every axis', () => {
     const r = guardFamilyConsistency([member()], [FAM]);
     expect(r.ok).toBe(true);
@@ -112,7 +112,7 @@ describe('J5.2 — guardFamilyConsistency', () => {
   });
 });
 
-describe('D7.2 — la grille se compare par l’empreinte canonique', () => {
+describe('D7.2 : la grille se compare par l’empreinte canonique', () => {
   it('une grille encodée dans un autre ordre de clés n’est pas une divergence', () => {
     const r = guardFamilyConsistency(
       [member({ grid: { rows: 3, cols: 4 } })],

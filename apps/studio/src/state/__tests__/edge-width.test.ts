@@ -3,7 +3,7 @@ import { inheritedEdgeWidthM, FALLBACK_EDGE_WIDTH_M } from '../edge-width.js';
 import type { SessionState, StoredRow } from '../session-store.js';
 
 /**
- * M4 (partie M), propriétés d'une arête : « Largeur utile — défaut : hérité du
+ * M4 (partie M), propriétés d'une arête : « Largeur utile, défaut : hérité du
  * bâtiment, `building.default_edge_width_m`. »
  *
  * L'écran posait une valeur unique, écrite dans son code, pour toutes les
@@ -33,7 +33,7 @@ function level(id: string, buildingId: string): StoredRow {
   };
 }
 
-describe('inheritedEdgeWidthM (M4, partie M — largeur héritée du bâtiment)', () => {
+describe('inheritedEdgeWidthM (M4, partie M : largeur héritée du bâtiment)', () => {
   it('rend la largeur déclarée par le bâtiment du niveau', () => {
     const session = state([
       building('b-1', { default_edge_width_m: 2.4 }),

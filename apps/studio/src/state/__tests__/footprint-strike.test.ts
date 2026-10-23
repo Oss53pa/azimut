@@ -9,7 +9,7 @@ const rows: readonly StoredRow[] = [
   { table: 'destination', id: 'd1', values: { footprint_id: 'occupee' } },
 ];
 
-describe('J1.2 — le trait barrant une empreinte', () => {
+describe('J1.2 : le trait barrant une empreinte', () => {
   it('supprime d’un geste, avec la ligne entière pour l’annulation', () => {
     const out = strikeFootprints(rows, ['libre'], write);
     expect(out.kind).toBe('deleted');

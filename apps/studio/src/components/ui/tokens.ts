@@ -1,5 +1,5 @@
 /**
- * F2 / F3 — style objects shared by the module screens.
+ * F2 / F3: style objects shared by the module screens.
  *
  * Every colour is a theme token: no literal colour is written here (A2.4).
  * The spacing scale has base 4 and the radii are 0 / 4 / 6 (partie F).
@@ -8,7 +8,7 @@ import type { CSSProperties } from 'react';
 
 export const SPACE = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 } as const;
 
-/** F3.2 — text sizes run 11 to 22, in two weights only. */
+/** F3.2: text sizes run 11 to 22, in two weights only. */
 export const TEXT = {
   micro: 11,
   small: 12,
@@ -69,7 +69,7 @@ export const PRIMARY_BUTTON_STYLE: CSSProperties = {
 
 export type Severity = 'blocking' | 'warning' | 'info' | 'valid';
 
-/** F4.3 — state colour is never decorative; each severity has one token. */
+/** F4.3: state colour is never decorative; each severity has one token. */
 export function severityColor(severity: Severity): string {
   switch (severity) {
     case 'blocking': return 'var(--state-blocking)';

@@ -19,10 +19,10 @@ function codes(over: Partial<FootprintDraft> = {}, context = EMPTY): string[] {
 }
 
 /**
- * M3 (partie M) — « Contrôles à la saisie ». « Un refus n'efface jamais le
+ * M3 (partie M) : « Contrôles à la saisie ». « Un refus n'efface jamais le
  * travail en cours. Il empêche la validation et dit pourquoi. »
  */
-describe('M3 (partie M) — contrôles du contour', () => {
+describe('M3 (partie M) : contrôles du contour', () => {
   it('accepte un rectangle', () => {
     expect(acceptFootprint(draft(), EMPTY).ok).toBe(true);
   });
@@ -32,7 +32,7 @@ describe('M3 (partie M) — contrôles du contour', () => {
       .toContain('GEOM.POLYGON_TOO_FEW_VERTICES');
   });
 
-  /** M3 (partie M), critère 1 — « Un polygone auto-intersectant est refusé avec son code. » */
+  /** M3 (partie M), critère 1 : « Un polygone auto-intersectant est refusé avec son code. » */
   it('refuse un contour auto-sécant', () => {
     const bowtie: readonly Point[] = [
       { x_m: 0, y_m: 0 }, { x_m: 4, y_m: 4 }, { x_m: 4, y_m: 0 }, { x_m: 0, y_m: 4 },
@@ -61,10 +61,10 @@ describe('M3 (partie M) — contrôles du contour', () => {
 });
 
 /**
- * M3 (partie M), critère 2 — « Les coordonnées stockées sont en mètres, quantifiées au
+ * M3 (partie M), critère 2 : « Les coordonnées stockées sont en mètres, quantifiées au
  * millimètre. » E4 : la quantification se fait à la validation du geste.
  */
-describe('M3 (partie M) — quantification au millimètre', () => {
+describe('M3 (partie M) : quantification au millimètre', () => {
   it('quantifie les sommets à la fermeture', () => {
     const r = acceptFootprint(draft({
       vertices: [
@@ -81,7 +81,7 @@ describe('M3 (partie M) — quantification au millimètre', () => {
   });
 
   /**
-   * M3 (partie M), critère 3 — « Une empreinte tracée à la souris et la même saisie au
+   * M3 (partie M), critère 3 : « Une empreinte tracée à la souris et la même saisie au
    * clavier produisent des données identiques. » Le pointeur rend des réels,
    * le clavier des valeurs rondes : quantifier les deux les rend égales.
    */
@@ -113,7 +113,7 @@ describe('M3 (partie M) — quantification au millimètre', () => {
 });
 
 /** M3 (partie M) : « Code de cellule | requis, unique par niveau, 1 à 20 caractères ». */
-describe('M3 (partie M) — code de cellule', () => {
+describe('M3 (partie M) : code de cellule', () => {
   it('refuse un code vide', () => {
     expect(codes({ unitCode: '  ' })).toContain('DATA.UNIT_CODE_REQUIRED');
   });
@@ -136,10 +136,10 @@ describe('M3 (partie M) — code de cellule', () => {
 
 /**
  * M3 (partie M) : « Empreintes superposées | avertissement, tracé accepté. » Un
- * recouvrement est parfois voulu — une mezzanine, un volume traversant — donc
+ * recouvrement est parfois voulu (une mezzanine, un volume traversant) donc
  * il se signale sans refuser.
  */
-describe('M3 (partie M) — recouvrement', () => {
+describe('M3 (partie M): recouvrement', () => {
   const voisin: readonly Point[] = [
     { x_m: 3, y_m: 2 }, { x_m: 8, y_m: 2 }, { x_m: 8, y_m: 6 }, { x_m: 3, y_m: 6 },
   ];
@@ -171,7 +171,7 @@ describe('M3 (partie M) — recouvrement', () => {
 });
 
 /** M3 (partie M) : « Surface | calculé | lecture seule, m2, 1 décimale ». */
-describe('M3 (partie M) — surface calculée', () => {
+describe('M3 (partie M) : surface calculée', () => {
   it('rend la surface à une décimale', () => {
     const r = acceptFootprint(draft(), EMPTY);
     expect(r.ok).toBe(true);

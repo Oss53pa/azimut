@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * J3.3 (partie J) — une esquisse « ne participe à aucun calcul » et
+ * J3.3 (partie J) : une esquisse « ne participe à aucun calcul » et
  * « n'apparaît dans aucun livrable de fabrication, dans aucun paquet de
  * borne, dans aucun export destiné à un tiers. Contrôle automatisé sur les
  * exports. »
@@ -21,7 +21,7 @@ const ROOT = resolve(HERE, '..');
  *   · ni les moteurs, ni le compilateur, ni le paquet de borne, ni la couche
  *     d'accès hors de son schéma ne nomment les tables d'esquisse ;
  *   · dans le studio, seuls les fichiers de l'atelier d'esquisse les nomment :
- *     tout autre fichier qui s'y mettrait — un export, un quantitatif — est
+ *     tout autre fichier qui s'y mettrait (un export, un quantitatif) est
  *     refusé ici avant d'exister.
  */
 
@@ -69,7 +69,7 @@ const ENGINES = readdirSync(resolve(ROOT, 'packages'))
   .filter(name => name.startsWith('engine-'))
   .map(name => resolve(ROOT, 'packages', name, 'src'));
 
-describe('J3.3 — l’esquisse n’atteint aucun calcul ni aucun livrable', () => {
+describe('J3.3 : l’esquisse n’atteint aucun calcul ni aucun livrable', () => {
   it('les surfaces sont bien toutes inspectées', () => {
     expect(ENGINES).toHaveLength(5);
     expect(ENGINES.flatMap(sourceFiles).length).toBeGreaterThan(40);

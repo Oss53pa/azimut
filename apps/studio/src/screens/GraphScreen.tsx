@@ -19,7 +19,7 @@ import { VerticalLinkFields } from './VerticalLinkFields.js';
 import type { VerticalLinkFieldsProps } from './VerticalLinkFields.js';
 
 /**
- * M4 (partie M) — écran de saisie du graphe.
+ * M4 (partie M) : écran de saisie du graphe.
  *
  * Deux panneaux de propriétés, un par nature d'objet, parce que M4 en donne
  * deux tableaux distincts. Le panneau visible suit la sélection.
@@ -80,7 +80,7 @@ export type GraphScreenProps = {
   readonly onNextNodeKind: (kind: NodeKind) => void;
   /**
    * Le geste se fait au pointeur dans la zone de travail, et au clavier par
-   * cette action — E6.2 : « Toute opération réalisable au pointeur l'est au
+   * cette action, E6.2 : « Toute opération réalisable au pointeur l'est au
    * clavier, y compris le dessin. »
    */
   readonly onPlaceNode: () => void;
@@ -102,7 +102,7 @@ export type GraphScreenProps = {
   /** Ce que la dernière passe a produit, ou `null` si aucune n'a eu lieu. */
   readonly axisReport: AxisReport | null;
   /**
-   * M4 (partie M) — « Propriétés d'un nœud », « Propriétés d'une arête ».
+   * M4 (partie M) : « Propriétés d'un nœud », « Propriétés d'une arête ».
    *
    * Les deux panneaux existaient et n'étaient jamais atteints : la sélection
    * restait nulle, et aucun geste ne la posait. Libellé, position, largeur,
@@ -110,7 +110,7 @@ export type GraphScreenProps = {
    *
    * L'application est explicite plutôt qu'à la frappe : une commande par
    * caractère saisi remplirait la pile d'annulation d'un geste par touche, ce
-   * que E5.2 écarte — « les commandes d'un même geste continu sont regroupées
+   * que E5.2 écarte, « les commandes d'un même geste continu sont regroupées
    * en une seule entrée annulable ».
    */
   readonly onApplyProperties: () => void;

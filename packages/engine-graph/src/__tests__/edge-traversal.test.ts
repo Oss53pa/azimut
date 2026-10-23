@@ -129,7 +129,7 @@ describe('buildExcludedKindsSet', () => {
   });
 });
 
-describe('isEdgeTraversableFrom — inline excluded set', () => {
+describe('isEdgeTraversableFrom: inline excluded set', () => {
   const nodeKinds = new Map([
     ['a', 'junction'],
     ['b', 'junction'],

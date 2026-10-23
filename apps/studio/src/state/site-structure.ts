@@ -1,5 +1,5 @@
 /**
- * M1bis (partie M) — la structure d'un site : bâtiments et niveaux.
+ * M1bis (partie M), la structure d'un site : bâtiments et niveaux.
  *
  * « Sans cet écran, un site reste au bâtiment et au niveau créés par le
  * formulaire de M1. La tâche T-1.5 et l'outil de liaison verticale sont alors
@@ -34,7 +34,7 @@ export type BuildingDraft = {
  *
  * Rang et altitude sont facultatifs *au brouillon* et requis à la création :
  * l'écran garde ce que l'opérateur a tapé, et `levelDraftComplete` dit si
- * l'action est possible. C'est la prévention plutôt que le refus — M1bis donne
+ * l'action est possible. C'est la prévention plutôt que le refus : M1bis donne
  * un code d'anomalie au nom et au rang en double, aucun à l'absence de rang ou
  * d'altitude, et en inventer un ajouterait au catalogue que le document vient
  * de compléter.

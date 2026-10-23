@@ -38,13 +38,13 @@ function calibration(id: string, sourceId: string, scale: number): PlanCalibrati
 }
 
 /**
- * N1.4 — « Niveau sans plan calé », bloquant.
+ * N1.4 : « Niveau sans plan calé », bloquant.
  *
  * Le critère N1.7-3 demande que le cas soit détecté sur un site de référence
  * dédié et ne le soit pas sur le site voisin : `ref-broken` porte les deux
  * situations, les trois autres sites sont calés.
  */
-describe('N1.4 — un niveau sans plan calé est bloquant', () => {
+describe('N1.4 : un niveau sans plan calé est bloquant', () => {
   it('signale les trois niveaux de ref-broken, ni plus ni moins', () => {
     const found = notCalibrated(refBroken);
     // `lvl-brk-b-rdc` est venu avec le second bâtiment que M01.S10 demande à
@@ -92,7 +92,7 @@ describe('N1.4 — un niveau sans plan calé est bloquant', () => {
   });
 });
 
-describe('N1.4 — ce qui vaut, ou non, pour un calage', () => {
+describe('N1.4 : ce qui vaut, ou non, pour un calage', () => {
   it('ne tient pas un niveau pour calé par le calage du fond d’un autre niveau', () => {
     // Le calage existe, mais il porte sur le fond de `lvl-brk-rdc`. Il ne peut
     // pas caler `lvl-brk-r1`, qui n'a aucun fond.

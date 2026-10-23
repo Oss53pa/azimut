@@ -5,26 +5,26 @@ import type { BoundRulesPacks } from './rules-bindings.js';
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * T-2.14a §3 et D7.2 — l'empreinte de contenu d'une face résolue, et la seule.
+ * T-2.14a §3 et D7.2 : l'empreinte de contenu d'une face résolue, et la seule.
  *
  * D7.2 : « Une seule implantation. L'empreinte est calculée par une seule
  * fonction, employée par tous les appelants. Deux implantations équivalentes
  * aujourd'hui divergeront demain, et l'invariant 4 repose sur elles. » Elle vit
- * ici, dans `core-model`, parce que deux moteurs l'emploient — la composition
- * et la péremption — et qu'aucun moteur ne dépend d'un autre (A4.1). L'annexe
+ * ici, dans `core-model`, parce que deux moteurs l'emploient (la composition
+ * et la péremption) et qu'aucun moteur ne dépend d'un autre (A4.1). L'annexe
  * T, §2, y range déjà la fonction d'empreinte.
  *
- * T-2.14a §3 — Content empreinte of a resolved face.
+ * T-2.14a §3: Content empreinte of a resolved face.
  *
  * Exactly seven elements go into the hash (§3.1): the resolved content block by
  * block in order, the template key and version, the charter id and version, the
- * rules packs bound to the site — base and overlay, each with its key and
- * version, in role order (§3.1.4, D7.1) —, the active languages (sorted), the computed
+ * rules packs bound to the site (base and overlay, each with its key and
+ * version, in role order (§3.1.4, D7.1)), the active languages (sorted), the computed
  * dimensions in whole millimetres, and the referenced pictogram ids (sorted).
  *
  * Everything else is excluded (§3.2): support and face ids, any timestamp,
  * author/reviewer ids, the version number, the artwork path, the version state,
- * and the placement inputs (render order, azimuth, reading distance) — these
+ * and the placement inputs (render order, azimuth, reading distance), these
  * only influence the computed dimensions, which are already in the hash.
  *
  * The input is self-contained on purpose: the caller maps its resolved face
@@ -34,12 +34,12 @@ import type { Finding, Outcome } from './outcome.js';
 export type FaceContentHashInput = {
   /** Resolved content of each block, in block order (§3.1.1). */
   readonly blocks: readonly unknown[];
-  /** Template key and version (§3.1.2) — both, or neither is representable. */
+  /** Template key and version (§3.1.2): both, or neither is representable. */
   readonly template: { readonly key: string; readonly version: string };
   /** Charter id and version (§3.1.3); the whole pair omitted from the hash when absent. */
   readonly charter?: { readonly id: string; readonly version: string };
   /**
-   * §3.1.4 and D7.1 — the packs bound to the site, base and overlay, each with
+   * §3.1.4 and D7.1: the packs bound to the site, base and overlay, each with
    * its key and version. Both bindings enter the hash, never the result of
    * their merge. No pack at all is a blocking anomaly (§8).
    */
@@ -58,7 +58,7 @@ function blocking(code: string, params: Record<string, string | number>): Findin
 }
 
 /**
- * D1.4 — round a computed dimension to whole millimetres through the single
+ * D1.4: round a computed dimension to whole millimetres through the single
  * rounding module, or `null` when it is absent, non-finite, zero or negative.
  * The dimension enters the hash rounded, not rejected for being non-integer:
  * §3.1.6 hashes "les dimensions calculées en millimètres entiers".
@@ -81,7 +81,7 @@ function dimParam(value: number | null): string | number {
  * Compute the content empreinte of a face, or a blocking finding when it cannot
  * be computed. Refuses (no hash) when the rules pack is absent (§8), when a
  * computed dimension is null, zero or negative after rounding (§8), or when the
- * resolved content cannot be canonically serialized (§4) — refusing is the
+ * resolved content cannot be canonically serialized (§4): refusing is the
  * correct behaviour, an empreinte on incomplete data would be worse than none.
  */
 export function computeFaceContentHash(

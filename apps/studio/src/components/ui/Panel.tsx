@@ -10,7 +10,7 @@ type PanelProps = {
 };
 
 /**
- * F1.3 — flat panel: a hairline border, no shadow, no hover elevation.
+ * F1.3, flat panel: a hairline border, no shadow, no hover elevation.
  * Border and fill say "separate object" and are spent once, here.
  */
 export function Panel({ title, note, padded = true, children }: PanelProps): JSX.Element {

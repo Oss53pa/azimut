@@ -39,7 +39,7 @@ type AdCreativesViewProps = {
 };
 
 /**
- * Module 05 — la réception des visuels (H4.6), au gabarit « registre ».
+ * Module 05 : la réception des visuels (H4.6), au gabarit « registre ».
  *
  * Un visuel en réception passe par l'assainissement (M05.R5, partie N) puis
  * par le garde de la fiche technique : format, résolution, zone de sécurité,

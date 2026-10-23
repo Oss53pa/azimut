@@ -8,7 +8,7 @@ import {
 } from '../shortcuts.js';
 import type { ShortcutDef } from '../shortcuts.js';
 
-describe('E16 — keyboard shortcuts', () => {
+describe('E16: keyboard shortcuts', () => {
   describe('default table', () => {
     it('has no internal conflicts', () => {
       const conflicts = detectConflicts(DEFAULT_SHORTCUTS);

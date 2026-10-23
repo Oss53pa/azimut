@@ -1,5 +1,5 @@
 /**
- * A5.7 — les lignes du parc posé : un support du site par ligne, ses poses
+ * A5.7, les lignes du parc posé : un support du site par ligne, ses poses
  * et les divergences enregistrées sur elles. Rien n'est déduit de plus que
  * ce que les tables portent.
  */

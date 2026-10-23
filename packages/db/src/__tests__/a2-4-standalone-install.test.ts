@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { upMigrations } from '../migration-corpus.js';
 
 /**
- * A2.4 — « Utiliser une fonctionnalité de la plateforme d'hébergement non
+ * A2.4 : « Utiliser une fonctionnalité de la plateforme d'hébergement non
  * disponible en installation autonome » est une interdiction permanente.
  *
  * Le socle en portait deux : trois clés étrangères vers `auth.users`, et
  * `auth.uid()` au cœur du cloisonnement. Sur une base autonome, neuf
- * migrations sur vingt-sept échouaient en cascade faute de cette table —
+ * migrations sur vingt-sept échouaient en cascade faute de cette table :
  * vérifié, note du préalable K4 nº 7.
  *
  * La migration 0024 retire les trois renvois et substitue à `auth.uid()` une
@@ -15,7 +15,7 @@ import { upMigrations } from '../migration-corpus.js';
  * schéma `auth` avait été entièrement supprimé : le cloisonnement continue de
  * rendre les valeurs de la seule organisation de l'utilisateur.
  */
-describe('A2.4 — le socle s’installe sans la plateforme', () => {
+describe('A2.4 : le socle s’installe sans la plateforme', () => {
   const migrations = upMigrations();
   const a24 = migrations.find(m => m.name.startsWith('0024_'));
   const sql = migrations.map(m => m.sql).join('\n');

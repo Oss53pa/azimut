@@ -1,5 +1,5 @@
 /**
- * Stationnement au plan de niveau — section S8.
+ * Stationnement au plan de niveau : section S8.
  *
  * Fichier distinct du reste des essais de `renderFloorPlan` : les deux réunis
  * dépassaient les quatre cents lignes qu'un fichier du dépôt ne franchit pas
@@ -9,8 +9,8 @@
  * Ce qu'ils éprouvaient a changé d'objets, pas de sens. Le plan ne dessine plus
  * l'emprise d'une table `parking` : il dessine les empreintes de place qu'une
  * zone de nature `parking` déclare, et distingue celles qu'un fait marque non
- * numérisées (S-37). Les deux cas que les anciens essais tenaient — l'ordre des
- * couches et le cadrage de ce qui déborde du bâti — sont tenus ici sur les
+ * numérisées (S-37). Les deux cas que les anciens essais tenaient (l'ordre des
+ * couches et le cadrage de ce qui déborde du bâti) sont tenus ici sur les
  * nouveaux objets.
  */
 import { describe, it, expect } from 'vitest';

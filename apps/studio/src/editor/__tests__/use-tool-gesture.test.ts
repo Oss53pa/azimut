@@ -5,7 +5,7 @@
  * pure-function integration path: the combination of pixelToMeter,
  * runSnapPipeline, and tool dispatch.
  *
- * The hook itself is thin wiring — the logic lives in the pure modules.
+ * The hook itself is thin wiring: the logic lives in the pure modules.
  */
 
 import { describe, it, expect } from 'vitest';

@@ -2,12 +2,12 @@ import type { SiteGraph } from '@azimut/core-model';
 import type { Route } from './compute-route.js';
 
 /**
- * Partie P, écran Itinéraire — les étapes écrites d'un itinéraire, sous forme neutre.
+ * Partie P, écran Itinéraire : les étapes écrites d'un itinéraire, sous forme neutre.
  *
  * « Étapes écrites, courtes, dans la langue active. Changement de niveau
  * signalé explicitement, avec le moyen. » Un moteur ne produit jamais de texte
  * destiné à l'affichage (A7) : chaque étape porte un code et ses paramètres,
- * et c'est l'interface — la borne, l'atelier — qui les dit dans sa langue.
+ * et c'est l'interface (la borne, l'atelier) qui les dit dans sa langue.
  *
  * La règle est celle que la borne appliquait seule : une étape par nœud du
  * chemin, puis les carrefours et paliers consécutifs d'un même niveau réunis

@@ -50,8 +50,8 @@ function parseLang(raw: unknown): CsvLang {
  * Create a job handler for `export_quantities`.
  *
  * Payload:
- *   - supports: PlacedSupport[] — list of placed supports
- *   - lang?: 'fr' | 'en' — CSV language (default 'fr')
+ *   - supports: PlacedSupport[], list of placed supports
+ *   - lang?: 'fr' | 'en', CSV language (default 'fr')
  *
  * Result:
  *   - total_supports, total_faces, cross_check_ok, csv_length, lang

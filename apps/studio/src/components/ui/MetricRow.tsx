@@ -15,7 +15,7 @@ type MetricRowProps = {
 };
 
 /**
- * F5 — the instrument row. Figures are the point of this strip, so they
+ * F5: the instrument row. Figures are the point of this strip, so they
  * take the large size; everywhere else a number sits inside a sentence.
  */
 export function MetricRow({ metrics }: MetricRowProps): JSX.Element {

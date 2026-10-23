@@ -12,7 +12,7 @@ const DOWN = readFileSync(resolve(DIR, '0021_s1_site_origin.down.sql'), 'utf8');
 /**
  * Corps SQL sans les commentaires : les assertions portent sur les
  * instructions, pas sur le texte qui explique pourquoi telle instruction est
- * absente — un commentaire qui cite `now()` pour dire qu'il n'est pas employé
+ * absente, un commentaire qui cite `now()` pour dire qu'il n'est pas employé
  * ne doit pas faire échouer le contrôle.
  */
 function statementsOf(sql: string): string {
@@ -23,7 +23,7 @@ function statementsOf(sql: string): string {
 }
 
 /**
- * M01.S1 — origine du repère site, recopiée du premier calage et jamais modifiée.
+ * M01.S1 : origine du repère site, recopiée du premier calage et jamais modifiée.
  */
 describe('migration 0021', () => {
   it('ajoute les deux colonnes de l’origine', () => {
@@ -58,7 +58,7 @@ const DOWN_0022 = readFileSync(
 );
 
 /**
- * M01.S1 — `calibrated_at` rend « le premier calage » identifiable.
+ * M01.S1 : `calibrated_at` rend « le premier calage » identifiable.
  */
 describe('migration 0022', () => {
   it('ajoute la date de calage sur plan_calibration', () => {
@@ -87,7 +87,7 @@ const DOWN_0023 = readFileSync(
 );
 
 /**
- * A5.2 — « chacun est calé au plus une fois ».
+ * A5.2 : « chacun est calé au plus une fois ».
  */
 describe('migration 0023', () => {
   it('crée l’index unique sur le fond de plan', () => {

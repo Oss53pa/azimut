@@ -51,7 +51,7 @@ type PlacementRow = {
 };
 
 /**
- * Module 05 — la régie publicitaire. Le planning d'occupation et le contrôle
+ * Module 05 : la régie publicitaire. Le planning d'occupation et le contrôle
  * automatique des visuels ; Azimut émet les états de vente, jamais le livre
  * comptable. Lu en base (0045), ou dans le jeu de démonstration du dépôt de
  * référence.
@@ -81,7 +81,7 @@ export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element 
   }, [options, today]);
 
   /**
-   * M05.R7 — les règles publicitaires viennent d'une extension du paquet de règles.
+   * M05.R7 : les règles publicitaires viennent d'une extension du paquet de règles.
    * En son absence, le module lève une anomalie et n'invente aucune règle : les
    * contrôles techniques de M05.R6 (partie N) continuent, les appréciations déclaratives, non,
    * puisqu'elles reposeraient sur un règlement que personne n'a versé.
@@ -92,7 +92,7 @@ export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element 
   }, []);
 
   /**
-   * M05.R5 (partie N) puis M05.R6 — chaque visuel reçu passe par l'assainissement avant tout, puis
+   * M05.R5 (partie N) puis M05.R6 : chaque visuel reçu passe par l'assainissement avant tout, puis
    * par sa fiche technique. L'écran ne contrôle rien lui-même : il affiche le
    * constat de réception.
    */

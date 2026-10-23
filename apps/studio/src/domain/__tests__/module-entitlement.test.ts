@@ -15,7 +15,7 @@ const ent = (
 
 const AT = '2026-06-01';
 
-describe('I5.2 — module entitlement (application layer)', () => {
+describe('I5.2: module entitlement (application layer)', () => {
   describe('isModuleNavigable', () => {
     it('is true for an active or trial subscription covering the date', () => {
       expect(isModuleNavigable([ent('active')], 'atelier', AT)).toBe(true);

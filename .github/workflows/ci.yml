@@ -92,7 +92,7 @@ jobs:
       #
       # `azimut` n'est pas superutilisateur. Un superutilisateur contourne
       # `FORCE ROW LEVEL SECURITY` et toutes les sondes de cloisonnement
-      # réussissent en ne prouvant rien — l'erreur commise au premier montage du
+      # réussissent en ne prouvant rien : l'erreur commise au premier montage du
       # banc du préalable K4 nº 7.
       #
       # `azimut` est membre de `authenticated`. Les politiques ne s'adressent
@@ -170,7 +170,7 @@ jobs:
       # suite qui l'éprouve passe par PostgREST, parce que c'est le chemin de
       # l'application : entre elle et PostgreSQL se trouvent l'exposition du
       # schéma, la conversion du jeton en rôle, les en-têtes de comptage et les
-      # messages d'erreur — c'est-à-dire les canaux indirects eux-mêmes.
+      # messages d'erreur, c'est-à-dire les canaux indirects eux-mêmes.
       #
       # Sans ce pas, la suite se sautait : `pnpm test:rls` rendait zéro avec
       # huit essais sautés, et la chaîne passait pour avoir éprouvé ce qu'elle
@@ -331,7 +331,7 @@ jobs:
           [ -n "$CLOUDFLARE_API_TOKEN" ] || manquants="$manquants CLOUDFLARE_API_TOKEN"
           [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || manquants="$manquants CLOUDFLARE_ACCOUNT_ID"
           if [ -n "$manquants" ]; then
-            echo "::error::Secrets manquants :$manquants — à déclarer dans Settings > Secrets and variables > Actions, volet « Secrets », section « Repository secrets ». Le pas précédent liste les variables du dépôt : un nom manquant qui y figure est au mauvais volet. Absent des deux, il n'a pas été enregistré ici — ou l'a été sous Dependabot, Codespaces, un environnement, ou au niveau de l'organisation sans accès accordé à ce dépôt. Le jeton se crée sur le tableau de bord Cloudflare avec le droit « Edit Cloudflare Workers »."
+            echo "::error::Secrets manquants :$manquants, à déclarer dans Settings > Secrets and variables > Actions, volet « Secrets », section « Repository secrets ». Le pas précédent liste les variables du dépôt : un nom manquant qui y figure est au mauvais volet. Absent des deux, il n'a pas été enregistré ici : ou l'a été sous Dependabot, Codespaces, un environnement, ou au niveau de l'organisation sans accès accordé à ce dépôt. Le jeton se crée sur le tableau de bord Cloudflare avec le droit « Edit Cloudflare Workers »."
             exit 1
           fi
           echo "Les deux secrets sont déclarés."

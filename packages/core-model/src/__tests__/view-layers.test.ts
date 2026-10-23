@@ -25,7 +25,7 @@ function layer(
   };
 }
 
-describe('S-10 — les dix calques thématiques', () => {
+describe('S-10 : les dix calques thématiques', () => {
   it('porte les dix clés de la section S9, dans l’ordre de la règle', () => {
     // Épinglé volontairement : un calque nouveau casse ce test, ce qui force à
     // le déclarer plutôt qu'à le laisser apparaître.
@@ -44,7 +44,7 @@ describe('S-10 — les dix calques thématiques', () => {
   });
 });
 
-describe('S-11 — deux visibilités distinctes, non l’une dérivée de l’autre', () => {
+describe('S-11 : deux visibilités distinctes, non l’une dérivée de l’autre', () => {
   it('lit l’écran et l’impression séparément', () => {
     const layers = [
       layer('sketch', 9, true, false),
@@ -81,7 +81,7 @@ describe('S-11 — deux visibilités distinctes, non l’une dérivée de l’au
   });
 });
 
-describe('S-11 — l’esquisse ne s’imprime jamais', () => {
+describe('S-11 : l’esquisse ne s’imprime jamais', () => {
   it('admet une esquisse visible à l’écran seule', () => {
     expect(auditViewLayers([layer(SKETCH_LAYER_KEY, 9, true, false)])).toEqual([]);
   });
@@ -117,11 +117,11 @@ describe('S-11 — l’esquisse ne s’imprime jamais', () => {
   });
 });
 
-describe('S-8 — la coloration de travail est propre à l’utilisateur', () => {
+describe('S-8 : la coloration de travail est propre à l’utilisateur', () => {
   /**
    * Aucune valeur de couleur n'est écrite ici, et c'est la seule façon
    * d'éprouver ce module sans enfreindre A2.4, « écrire en dur une couleur hors
-   * du fichier de jetons de thème » — l'interdiction ne fait pas d'exception
+   * du fichier de jetons de thème » : l'interdiction ne fait pas d'exception
    * pour les essais, et le garde de `no-hardcoded-colors` non plus.
    *
    * Ce qui se vérifie ici n'y perd rien : ce module transporte `hex` sans
@@ -187,14 +187,14 @@ describe('S-8 — la coloration de travail est propre à l’utilisateur', () =>
   });
 
   /**
-   * S9, version 17 — « même notation que les jetons de la partie F, six
+   * S9, version 17 : « même notation que les jetons de la partie F, six
    * chiffres hexadécimaux précédés d'un croisillon, en majuscules ».
    *
    * Les refus s'éprouvent ici, l'acceptation dans `tests/s9-notation-couleur-de-travail`.
    * Le partage n'est pas un caprice : A2.4 interdit d'écrire une couleur en dur
    * hors du fichier de jetons, et le garde de `no-hardcoded-colors` couvre
-   * `packages/` et `apps/`. Aucune des valeurs ci-dessous n'est une couleur —
-   * c'est précisément ce qui se vérifie — donc aucune n'enfreint
+   * `packages/` et `apps/`. Aucune des valeurs ci-dessous n'est une couleur (
+   * c'est précisément ce qui se vérifie) donc aucune n'enfreint
    * l'interdiction. Une valeur conforme, elle, en serait une : elle est donc
    * lue depuis un jeton de la partie F, qui est l'endroit où une couleur
    * s'écrit, et l'essai qui le fait vit là où les jetons se lisent.
@@ -220,7 +220,7 @@ describe('S-8 — la coloration de travail est propre à l’utilisateur', () =>
   });
 });
 
-describe('S-9 — l’interface sait combien de colorations sont actives', () => {
+describe('S-9 : l’interface sait combien de colorations sont actives', () => {
   it('compte celles de l’utilisateur, non celles du site', () => {
     const colours: readonly WorkColour[] = [
       { id: 'wc-1', org_id: 'o', site_id: 's', user_id: 'u-moi', target_kind: 'footprint', target_id: 'fp-1', hex: 'coloration-a' },

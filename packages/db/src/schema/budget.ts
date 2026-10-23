@@ -5,7 +5,7 @@ import { site } from './site.js';
 import { fabricationLot } from './worksite.js';
 
 /**
- * H8 — les tables du module 09, budget.
+ * H8 : les tables du module 09, budget.
  *
  * Migration `0043` (famille C de la proposition de schéma, 5.5). Montants en
  * unité mineure entière avec leur devise ; un coût absent reste NULL.

@@ -1,5 +1,5 @@
 /**
- * E9 — Scene objects: decoration layer and annotations.
+ * E9, Scene objects: decoration layer and annotations.
  *
  * Decoration objects are strictly separated from the business layer (E9.2).
  * They carry no business attributes. If they need one, they belong
@@ -26,7 +26,7 @@ export type DecorationStyle = {
 };
 
 /**
- * Style of a shape created by the editor. Roles only — a style never
+ * Style of a shape created by the editor. Roles only: a style never
  * names a colour directly, it names a role of the charte (E10).
  */
 export const DEFAULT_DECORATION_STYLE: DecorationStyle = {

@@ -1,5 +1,5 @@
 /**
- * M3 (partie M) — raccourcis du tracé des empreintes, et déplacement au
+ * M3 (partie M) : raccourcis du tracé des empreintes, et déplacement au
  * clavier.
  *
  * E16 veut la table en donnée. Comme pour M2 (partie M), elle est propre à

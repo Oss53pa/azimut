@@ -1,12 +1,12 @@
 /**
- * E3.4 — Interactive SVG viewport.
+ * E3.4: Interactive SVG viewport.
  *
  * Renders children inside a transformed `<g>` using the view transform
  * from core-model. Handles pan (middle-click drag, space+drag) and
- * zoom (wheel). All coordinate conversions go through view-transform —
+ * zoom (wheel). All coordinate conversions go through view-transform:
  * this component never computes its own.
  *
- * Pointer events on SVG elements are native — E3.4 requires SVG DOM
+ * Pointer events on SVG elements are native: E3.4 requires SVG DOM
  * rendering for free hit-testing and accessibility.
  */
 

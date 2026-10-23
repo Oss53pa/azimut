@@ -26,7 +26,7 @@ const offsetSquare: Polygon = [
   { x_m: 0.5, y_m: 1.5 },
 ];
 
-describe('E7.4 — boolean operations', () => {
+describe('E7.4: boolean operations', () => {
   describe('signedArea', () => {
     it('returns positive for CCW polygon', () => {
       expect(signedArea(square)).toBeGreaterThan(0);
@@ -185,7 +185,7 @@ describe('E7.4 — boolean operations', () => {
         // Remaining area should be large - intersection (100 - 4 = 96)
         expect(polygonArea(result.polygon)).toBeGreaterThan(0);
       }
-      // Either ok or validly rejected — both acceptable for subtraction
+      // Either ok or validly rejected: both acceptable for subtraction
     });
   });
 });

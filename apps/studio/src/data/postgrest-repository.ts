@@ -3,7 +3,7 @@
  *
  * Aucune bibliothèque cliente : `fetch` et rien d'autre (A3.3). L'API REST
  * expose les tables telles qu'elles sont ; le cloisonnement par organisation
- * reste celui de la base, appliqué ligne à ligne, jamais reproduit ici — un
+ * reste celui de la base, appliqué ligne à ligne, jamais reproduit ici : un
  * filtre côté écran ne serait pas un cloisonnement.
  *
  * Le schéma n'est pas `public` : chaque requête le nomme par l'en-tête
@@ -84,7 +84,7 @@ type SiteFactRow = {
   readonly declared_at: string;
   readonly declared_by: string | null;
   /**
-   * A5.11, version 17 — la cible du fait. Les deux colonnes sont nulles
+   * A5.11, version 17 : la cible du fait. Les deux colonnes sont nulles
    * ensemble ou renseignées ensemble, `site_fact_target_complete` le garantit
    * en base. Le mappage ne s'y fie pas pour autant : une base antérieure à la
    * migration 0056 rendrait `undefined`, et une moitié de cible se lit comme
@@ -127,13 +127,13 @@ function toSeverity(raw: string): LexiconSeverity {
 }
 
 /**
- * Une règle de charte, lue depuis `charter_rule` — A5.8.
+ * Une règle de charte, lue depuis `charter_rule` : A5.8.
  *
  * **Ce dépôt ne valide pas les paramètres, et c'est délibéré.** Une règle dont
  * les paramètres ne se lisent pas était écartée ici, ce qui faisait retomber
  * son contrôle parmi les non exercés : un site dont la charte est cassée se
  * lisait alors comme un site sans charte. D2.2 tranche autrement en inscrivant
- * `CHARTER.RULE_MALFORMED` — « une règle déclarée et cassée bloque, parce
+ * `CHARTER.RULE_MALFORMED` : « une règle déclarée et cassée bloque, parce
  * qu'elle a été voulue ». La règle traverse donc telle quelle, et ce sont les
  * résolveurs de `core-model` qui la refusent, avec une anomalie qui la nomme.
  *
@@ -170,7 +170,7 @@ function toFactStatus(raw: string): FactStatus {
 /**
  * Ce que `jsonb` rend, ramené aux trois scalaires du modèle.
  *
- * Une valeur structurée — tableau, objet — entre comme sa sérialisation
+ * Une valeur structurée (tableau, objet) entre comme sa sérialisation
  * canonique plutôt que d'être refusée : la refuser perdrait le fait entier, et
  * avec lui les mots qu'il interdit. `null` n'arrive pas, la base l'interdit
  * par contrainte, et s'il arrivait quand même il vaut la chaîne vide, que le
@@ -188,7 +188,7 @@ function toFactValue(raw: unknown): FactValue {
  * Une cible est entière ou absente, et la base le garantit. Ce mappage ne s'y
  * fie pas : il exige les deux valeurs, non nulles et non blanches, et rend
  * `{}` autrement. Une moitié de cible se lit alors comme un fait du site
- * entier, qui est le sens le plus prudent — l'autre lecture attribuerait un
+ * entier, qui est le sens le plus prudent : l'autre lecture attribuerait un
  * fait à un objet que rien ne nomme.
  *
  * Le champ est omis plutôt que rendu `undefined` : `exactOptionalPropertyTypes`
@@ -221,7 +221,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // La projection est plus étroite que `SiteRow` : la liste n'a besoin que
       // de quoi nommer un site. Le type dit exactement les colonnes demandées,
       // sinon il promettrait des champs que la réponse ne porte pas.
-      // A5.8 — les paquets viennent de la table de rattachement, qui fait foi,
+      // A5.8, les paquets viennent de la table de rattachement, qui fait foi,
       // en une seule requête : le cloisonnement de la base en borne la portée.
       const [rows, bindings] = await Promise.all([
         query<SiteListRow>(config, 'site', 'select=id,org_id,name,country_code&order=name.asc'),
@@ -295,7 +295,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<SupportVersionRow>(config, 'support_version', 'support_id', supportIds),
         ]);
 
-      // A5.2 — les zones du socle, qui pendent au niveau comme les empreintes
+      // A5.2 : les zones du socle, qui pendent au niveau comme les empreintes
       // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et
       // c'est par ici que les contrôles du domaine `PARK` le voient.
       const [contentBlocks, zones, parkingSpaces, temporaryClosures] = await Promise.all([
@@ -303,11 +303,11 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
         ),
         queryIn<ZoneRow>(config, 'zone', 'level_id', levelIds),
-        // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+        // A5.3 : l'extension des empreintes de place, qui pend à l'empreinte.
         queryIn<ParkingSpaceRow>(
           config, 'parking_space', 'footprint_id', footprints.map(f => f.id),
         ),
-        // O11 — les fermetures temporaires du site.
+        // O11 : les fermetures temporaires du site.
         query<TemporaryClosureRow>(config, 'temporary_closure', `${idEq('site_id', siteId)}`),
       ]);
 
@@ -342,8 +342,8 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
-      // Le site est vérifié d'abord. Sans cela, un identifiant inconnu — ou un
-      // site que le cloisonnement par ligne masque — rendrait quatre listes
+      // Le site est vérifié d'abord. Sans cela, un identifiant inconnu (ou un
+      // site que le cloisonnement par ligne masque) rendrait quatre listes
       // vides, et l'écran lirait « ce site ne déclare rien » au lieu de
       // « ce site ne vous est pas accessible ». L'adaptateur de référence
       // refuse déjà dans ce cas ; les deux doivent se comporter pareil.
@@ -476,7 +476,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     /**
-     * Q9 — lecture du référentiel global. Il n'est pas cloisonné : la table
+     * Q9 : lecture du référentiel global. Il n'est pas cloisonné : la table
      * n'a pas d'`org_id` et sa politique la rend lisible par tout compte
      * authentifié.
      */
@@ -494,7 +494,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     /**
-     * Q5 — les entités juridiques visibles. Le cloisonnement est celui de la
+     * Q5 : les entités juridiques visibles. Le cloisonnement est celui de la
      * base : la requête ne filtre pas par organisation, la politique le fait.
      */
     async listLegalEntities(): Promise<readonly LegalEntitySummary[]> {

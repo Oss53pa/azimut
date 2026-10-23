@@ -5,7 +5,7 @@ import { site } from './site.js';
 import { destination } from './directory.js';
 
 /**
- * H5 — les tables du module 06, enseignes locataires.
+ * H5 : les tables du module 06, enseignes locataires.
  *
  * Migration `0046` (famille C de la proposition de schéma, 5.2). Le règlement
  * se versionne par sa date d'effet ; le dossier se rattache à la cellule par

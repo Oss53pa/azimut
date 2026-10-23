@@ -1,11 +1,11 @@
-# Note de décision — Tâche T-0.9 : génération PDF/X et PDF/A
+# Note de décision, Tâche T-0.9 : génération PDF/X et PDF/A
 
 **Statut : proposition (A2.2). La décision est soumise, pas prise seule.**
 
 Cette note répond au premier des trois critères d'acceptation de T-0.9
-(« note comparative de deux ou trois options »). Les deux autres critères —
+(« note comparative de deux ou trois options »). Les deux autres critères (
 preuve de conformité PDF/X vérifiée par un outil tiers, et démonstration du
-déterminisme de sortie — sont traités en §4 et §7 : l'un est partiellement
+déterminisme de sortie) sont traités en §4 et §7 : l'un est partiellement
 acquis, l'autre reste à réaliser hors de cet environnement. La tâche relève
 explicitement de A2.2 : la bibliothèque n'est pas arrêtée ici, elle est
 proposée à ratification.
@@ -19,7 +19,7 @@ un fichier d'exécution destiné à la fabrication : PDF/X-4 pour l'impression
 en quadrichromie, PDF/A pour l'archivage. Trois contraintes du cahier des
 charges bornent le choix, avant toute considération de confort :
 
-- **INV-4 — déterminisme.** Deux compilations d'un même état produisent des
+- **INV-4 : déterminisme.** Deux compilations d'un même état produisent des
   fichiers strictement identiques, octet pour octet. Toute source
   d'horodatage, d'identifiant aléatoire ou d'ordre non défini est à
   neutraliser explicitement.

@@ -3,7 +3,7 @@ import postgres from 'postgres';
 import { provisionStatements } from '../provision-organization.js';
 
 /**
- * R12 et H11 — `message_schedule_approval` sur une base réelle (0074).
+ * R12 et H11 : `message_schedule_approval` sur une base réelle (0074).
  *
  * Ce qui s'éprouve : l'approbateur et la date sont pris en base ; un rejet
  * sans motif est refusé ; un approbateur autre que l'utilisateur de la session
@@ -79,7 +79,7 @@ async function reached(
   }
 }
 
-describe('R12 — une décision sur un tableau, en base', () => {
+describe('R12 : une décision sur un tableau, en base', () => {
   it('l’approbation prend l’approbateur et la date en base', async () => {
     await inRolledBack(async tx => {
       await tx`insert into azimut.message_schedule_approval(org_id,schedule_id,decision,inputs_hash)

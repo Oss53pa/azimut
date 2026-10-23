@@ -1,5 +1,5 @@
 /**
- * R11 (partie R) — comparaison de deux versions du tableau des messages.
+ * R11 (partie R) : comparaison de deux versions du tableau des messages.
  *
  * « Choix de deux versions. Affichage en un seul tableau, chaque ligne
  * marquée : Ajoutée, Supprimée, Modifiée, Inchangée. »
@@ -7,8 +7,8 @@
  * Le rapprochement se fait par l'identifiant stable de ligne, et c'est ce qui
  * décide du résultat : « Sans lui, une ligne regénérée paraîtrait supprimée
  * puis ajoutée, et la comparaison serait inutilisable. » `messageLineId` le
- * dérive du support, de la face et du bloc — trois valeurs qu'une régénération
- * ne change pas —, et non d'un identifiant de ligne tiré à l'écriture, qui
+ * dérive du support, de la face et du bloc (trois valeurs qu'une régénération
+ * ne change pas), et non d'un identifiant de ligne tiré à l'écriture, qui
  * serait neuf à chaque version.
  *
  * Module pur et déterministe (INV-4) : deux appels sur les mêmes versions
@@ -19,7 +19,7 @@ import { lineFingerprint } from './message-schedule.js';
 import type { MessageEntry, MessageLine, MessageSchedule } from './message-schedule.js';
 import { codePointCompare } from '@azimut/core-model';
 
-/** R11 — les quatre marques, et elles seules. */
+/** R11 : les quatre marques, et elles seules. */
 export const LINE_CHANGES = ['added', 'removed', 'modified', 'unchanged'] as const;
 
 export type LineChange = (typeof LINE_CHANGES)[number];
@@ -132,7 +132,7 @@ function changesBetween(
  *
  * La modification se juge sur l'empreinte de contenu, la même que celle dont
  * dépend la péremption de M02.W8. Deux lignes de même empreinte sont
- * inchangées, et aucun écart de champ n'est alors calculé — il n'y en a pas.
+ * inchangées, et aucun écart de champ n'est alors calculé : il n'y en a pas.
  */
 export function diffSchedules(
   reference: MessageSchedule,

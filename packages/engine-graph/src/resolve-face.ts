@@ -35,7 +35,7 @@ export type ResolvedDestinationEntry = {
   readonly distance_m: number | null;
 };
 
-/** K-Tier-A / E9.4 — one row of a legend block: a symbol and its meaning. */
+/** K-Tier-A / E9.4, one row of a legend block: a symbol and its meaning. */
 export type LegendEntry = {
   /** Pictogram path (`d`) drawn at 30-unit grid, or null for a plain swatch. */
   readonly symbol_path: string | null;
@@ -64,7 +64,7 @@ export type ResolvedContent =
       /** Le texte du gabarit, ou la première variante saisie sur la face. */
       readonly text: string;
       /**
-       * D8.3 — les variantes saisies sur la face, par langue. Présentes, le
+       * D8.3 : les variantes saisies sur la face, par langue. Présentes, le
        * rendu y choisit la langue active comme pour un nom de destination.
        */
       readonly texts?: Readonly<Record<string, string>>;

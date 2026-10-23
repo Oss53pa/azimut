@@ -1,5 +1,5 @@
 /**
- * L1 de la partie L — propriété unique, déclarée.
+ * L1 de la partie L : propriété unique, déclarée.
  *
  * « INT-1. Propriété unique. Chaque entité appartient à exactement un module. Lui
  * seul l'écrit. Une entité sans propriétaire déclaré ne peut pas être créée. »
@@ -7,7 +7,7 @@
  * Ce fichier est ce registre. Il ne contient que ce que les fiches de modules
  * de L3 nomment, mot pour mot. Une table que les quatorze documents
  * n'attribuent pas figure dans `TABLES_WITHOUT_DECLARED_OWNER`, avec son
- * motif — jamais attribuée d'office, ce qui serait inventer.
+ * motif : jamais attribuée d'office, ce qui serait inventer.
  */
 
 // ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ export const MODULE_KEYS = [
 export type ModuleKey = (typeof MODULE_KEYS)[number];
 
 /**
- * L2 — « Une couche lit les couches inférieures, jamais les supérieures. »
+ * L2 : « Une couche lit les couches inférieures, jamais les supérieures. »
  *
  * L'atelier n'est pas une couche : c'est la surface d'édition commune, qui
  * sert les couches 0 à 2 et ne possède aucune donnée métier. Son rang est donc
@@ -63,20 +63,20 @@ export const NON_OPTIONAL_MODULES: readonly ModuleKey[] = [
 ];
 
 // ---------------------------------------------------------------------------
-// INT-1 — qui possède quoi
+// INT-1 : qui possède quoi
 // ---------------------------------------------------------------------------
 
 /**
  * Les tables que chaque module possède, telles que L3 les nomme.
  *
  * Seules figurent ici celles qui existent au schéma. Les entités que L3 nomme
- * et que le schéma n'a pas encore — `message_line`, `orientation_zone`,
- * `ad_placement`, `sketch_layer`… — ne sont pas inventées : elles entreront
+ * et que le schéma n'a pas encore (`message_line`, `orientation_zone`,
+ * `ad_placement`, `sketch_layer`…) ne sont pas inventées : elles entreront
  * avec la tranche qui les construit.
  */
 export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   // Q2 et Q5 : l'entité juridique émettrice, rangée à la plateforme. Les
-  // autres tables que Q2 lui donne — `country`, `organization`, `membership` —
+  // autres tables que Q2 lui donne (`country`, `organization`, `membership`)
   // restent dans TABLES_WITHOUT_DECLARED_OWNER tant qu'aucune saisie ne les
   // écrit.
   '00-plateforme': ['legal_entity'],
@@ -109,12 +109,12 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     'site_rules_binding',
   ],
   // N2.2, migration 0027. Le module possède aussi les attributs
-  // d'implantation de `support` — dont `code` — par la scission L0, déclarée
+  // d'implantation de `support` (dont `code`) par la scission L0, déclarée
   // dans SUPPORT_COLUMN_OWNER.
   '02-wayfinding': [
     'orientation_zone', 'naming_rule', 'information_level',
     'wayfinding_sequence', 'message_schedule', 'message_line',
-    // J4 — l'annotation en révision, dans le circuit du tableau des messages
+    // J4, l'annotation en révision, dans le circuit du tableau des messages
     // (R7.4) ; décision de l'utilisateur, la partie L ne la nommant pas.
     'review_annotation', 'review_annotation_reply',
     // R12 et H11, migration 0074 ; L3 en donne la propriété au module 02.
@@ -140,7 +140,7 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
 };
 
 // ---------------------------------------------------------------------------
-// L0 — la scission de `support`, prioritaire sur A5.6
+// L0 : la scission de `support`, prioritaire sur A5.6
 // ---------------------------------------------------------------------------
 
 /**
@@ -207,7 +207,7 @@ export const COLUMNS_SPECIFIED_NOT_YET_IN_SCHEMA: Readonly<Record<string, string
  * donc justifiée par D3.5, non par A5.6, et cette note tient lieu de mandat.
  */
 export const SUPPORT_CONTEXT_MANDATE =
-  'D3.5 — portée de règle, entre `supportRegistry` et `sectorKey` dans l’ordre de spécificité.';
+  'D3.5 : portée de règle, entre `supportRegistry` et `sectorKey` dans l’ordre de spécificité.';
 
 /**
  * Colonnes d'identité et de rattachement de `support`, que le socle écrit à la
@@ -231,7 +231,7 @@ export const SPLIT_OWNERSHIP_TABLE = 'support';
  *
  * Une colonne sans propriétaire déclaré n'appartient à personne : elle n'est
  * écrite par aucune commande. C'est le cas aujourd'hui de `kind`, et des
- * colonnes d'identité, que L0 réserve à la création — laquelle n'a pas encore
+ * colonnes d'identité, que L0 réserve à la création : laquelle n'a pas encore
  * de module émetteur. Le silence se lit donc comme un refus, jamais comme une
  * permission.
  */
@@ -245,7 +245,7 @@ export function ownsSupportColumn(module: ModuleKey, column: string): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// INT-3 — dépendance descendante : ce que chaque module lit
+// INT-3, dépendance descendante : ce que chaque module lit
 // ---------------------------------------------------------------------------
 
 /**
@@ -296,7 +296,7 @@ export const DECLARED_UPWARD_READS: readonly {
 ];
 
 // ---------------------------------------------------------------------------
-// INT-4 — dégradation déclarée
+// INT-4 : dégradation déclarée
 // ---------------------------------------------------------------------------
 
 /**
@@ -352,7 +352,7 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   audit_log: 'A5.10 et A12.3, journal d’audit en insertion seule. X4 le distingue du journal d’activité du module 11, sans l’y ranger.',
   support: 'Scindée entre les modules 02 et 04, colonne par colonne (L0). Voir `SUPPORT_COLUMN_OWNER` : elle a deux propriétaires, pas aucun.',
   site_fact_forbidden_word: 'Les mots qu’un fait interdit. A5.11 porte `site_fact`, que Q2 range au module 01 ; elle ne décrit pas cette table fille, et aucune fiche de L3 ne la range.',
-  source_claim: 'Affirmations de source. A5.11 pose la règle — « un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché » — sans déclarer la table. Hors du cahier des charges.',
+  source_claim: 'Affirmations de source. A5.11 pose la règle (« un écart entre deux sources reste ouvert et visible tant qu’il n’est pas tranché ») sans déclarer la table. Hors du cahier des charges.',
   discrepancy_decision: 'Décision tranchant un écart, même motif que `source_claim`.',
   vendor: 'D-3, décision de l’utilisateur du 22/10/2026 : le fabricant que désigne `vendor_id` (partie H). Aucune fiche de L3 ne le range ; il s’écrit par `azimut.create_vendor`, réservée à l’admin, comme les membres.',
   vendor_member: 'D-3 et A6.2 : rattachement d’un compte `vendor` à son fabricant. Ouvre un droit : même motif que `membership`.',

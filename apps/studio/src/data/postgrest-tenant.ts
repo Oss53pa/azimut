@@ -1,5 +1,5 @@
 /**
- * H5 — lecture des enseignes locataires par l'API REST : versions du
+ * H5, lecture des enseignes locataires par l'API REST : versions du
  * règlement d'enseigne, dossiers du site et leurs pièces (migration 0046).
  *
  * Une valeur hors liste, ou une liste JSON qui n'est pas une liste de

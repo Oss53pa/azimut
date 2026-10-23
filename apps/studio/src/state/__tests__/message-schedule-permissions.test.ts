@@ -5,7 +5,7 @@ import {
 import { SCHEDULE_TRIGGERS, triggersFrom } from '@azimut/engine-graph';
 
 /**
- * R2 (partie R) — la table des droits, recopiée et éprouvée ligne à ligne.
+ * R2 (partie R) : la table des droits, recopiée et éprouvée ligne à ligne.
  *
  * Critère 8 de R18 : « Un utilisateur qui a généré une version ne peut pas
  * l'approuver. » Il ne tient pas à une vérification au moment d'approuver : il
@@ -13,7 +13,7 @@ import { SCHEDULE_TRIGGERS, triggersFrom } from '@azimut/engine-graph';
  * le dernier essai de ce fichier vérifie, et il tient même si l'écran change.
  */
 
-describe('R2 (partie R) — la table des droits', () => {
+describe('R2 (partie R) : la table des droits', () => {
   it('admin et designer produisent, sans décider', () => {
     for (const actor of ['admin', 'designer'] as const) {
       expect(can(actor, 'consult'), actor).toBe(true);
@@ -71,7 +71,7 @@ describe('R2 (partie R) — la table des droits', () => {
   });
 });
 
-describe('R2 et R12 (partie R) — droit et état se croisent, sans se remplacer', () => {
+describe('R2 et R12 (partie R) : droit et état se croisent, sans se remplacer', () => {
   it('chaque déclencheur de R12 a son droit, sauf le remplacement', () => {
     for (const trigger of SCHEDULE_TRIGGERS) {
       const permission = permissionOfTrigger(trigger);

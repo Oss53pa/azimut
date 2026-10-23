@@ -6,13 +6,13 @@ import {
 
 const fullCoverage = new Set(REQUIRED_LATIN_COVERAGE);
 
-describe('E12 — guardFontGlyphCoverage (ASSET.FONT_MISSING_GLYPHS)', () => {
+describe('E12: guardFontGlyphCoverage (ASSET.FONT_MISSING_GLYPHS)', () => {
   it('passes a font covering the full required set', () => {
     expect(guardFontGlyphCoverage('f-1', fullCoverage).ok).toBe(true);
   });
 
   it('requires the French accents, not only ASCII letters', () => {
-    // ASCII letters only — missing every accent.
+    // ASCII letters only: missing every accent.
     const ascii = new Set(REQUIRED_LATIN_COVERAGE.filter((c) => /[A-Za-z]/.test(c)));
     const r = guardFontGlyphCoverage('f-1', ascii);
     expect(r.ok).toBe(false);

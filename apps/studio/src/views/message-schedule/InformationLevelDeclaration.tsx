@@ -19,12 +19,12 @@ function toggle(
 }
 
 /**
- * H2.3 — le rattachement d'une typologie à un ou plusieurs niveaux
+ * H2.3 : le rattachement d'une typologie à un ou plusieurs niveaux
  * d'information est déclaré, jamais déduit d'un nom de typologie.
  *
  * Aucune colonne du modèle A5 ne le porte aujourd'hui : la déclaration vit donc
  * dans l'écran, et une typologie sans déclaration n'obtient pas un niveau par
- * défaut — elle produit WAYFIND.NO_INFORMATION_LEVEL, ce qui est le
+ * défaut, elle produit WAYFIND.NO_INFORMATION_LEVEL, ce qui est le
  * comportement attendu.
  */
 export function InformationLevelDeclaration(

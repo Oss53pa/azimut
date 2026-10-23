@@ -19,7 +19,7 @@ function template(
   };
 }
 
-describe('E10 — guardTemplateBlockOverflow (EDIT.TEMPLATE_BLOCK_OVERFLOW)', () => {
+describe('E10: guardTemplateBlockOverflow (EDIT.TEMPLATE_BLOCK_OVERFLOW)', () => {
   it('accepts a template whose blocks fit the grid', () => {
     const r = guardTemplateBlockOverflow(
       template([

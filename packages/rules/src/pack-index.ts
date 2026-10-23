@@ -1,5 +1,5 @@
 /**
- * Construction de l'index des paquets de règles — lit le disque.
+ * Construction de l'index des paquets de règles : lit le disque.
  *
  * Séparé de `resolve-site-pack.ts`, qui résout un paquet depuis un index
  * déjà construit et reste donc pur. Ce fichier-ci charge les paquets et
@@ -17,7 +17,7 @@ import type { RulesPackIndex, RulesPackSource } from './resolve-site-pack.js';
  * Build a pack index from the file corpus. Each source binds an id to a
  * directory, loaded via {@link loadRulesPack} (checksum, source-ref and
  * TEST-environment guards all applied). The first source that fails to load
- * aborts the build with its findings — a corpus with one broken pack is never
+ * aborts the build with its findings: a corpus with one broken pack is never
  * returned as a silently partial index.
  *
  * This is the file-backed way to populate the index; a database-backed builder

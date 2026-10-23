@@ -2,16 +2,16 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * J4 — Revision annotations carry a reviewer's remark on a face, a support or a
+ * J4: Revision annotations carry a reviewer's remark on a face, a support or a
  * plan zone, inside the proof (bon à tirer) and message-schedule validation
  * circuit. Their state is one of: open, handled, rejected. An open annotation
- * blocks the closure of a review — this guard is that control. It never touches
+ * blocks the closure of a review: this guard is that control. It never touches
  * dressing annotations (which are printed) or the sketch layer.
  */
 export const REVIEW_ANNOTATION_STATES = ['open', 'handled', 'rejected'] as const;
 export type ReviewAnnotationState = (typeof REVIEW_ANNOTATION_STATES)[number];
 
-/** Entity a revision annotation is anchored on — never floating (J4). */
+/** Entity a revision annotation is anchored on: never floating (J4). */
 export type ReviewAnchor = {
   readonly kind: string;
   readonly id: string;

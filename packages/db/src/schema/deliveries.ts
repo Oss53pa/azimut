@@ -6,7 +6,7 @@ import { organization } from './org.js';
 import { site } from './site.js';
 
 /**
- * D11 — a produced delivery archive (site/building/level/version), its storage
+ * D11: a produced delivery archive (site/building/level/version), its storage
  * location, integrity checksum and the quantitative it carries. One row per
  * assembled archive.
  */

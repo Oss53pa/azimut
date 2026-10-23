@@ -13,7 +13,7 @@ function csv(lines: string[]): string {
 
 const header = 'unit_code;building;level;occupancy_status;occupant_name;category_key;name_fr;name_en;effective_from';
 
-describe('D4.2 — importOccupancy', () => {
+describe('D4.2: importOccupancy', () => {
   it('imports a valid row matching a known node', () => {
     const content = csv([
       header,
@@ -176,7 +176,7 @@ describe('D4.2 — importOccupancy', () => {
     const result = importOccupancy(refMultilevel, content);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // Not rejected — empty date is valid
+    // Not rejected: empty date is valid
     expect(result.value.rejected).toBe(0);
   });
 

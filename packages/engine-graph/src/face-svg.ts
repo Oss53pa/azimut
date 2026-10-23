@@ -14,7 +14,7 @@ export type FaceTheme = {
 };
 
 /**
- * D12 — pick the destination name for the active language, falling back
+ * D12: pick the destination name for the active language, falling back
  * deterministically to the first available variant when the language is
  * absent (a missing variant is reported separately as LAYOUT.LANG_VARIANT_MISSING).
  */

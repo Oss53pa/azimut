@@ -7,7 +7,7 @@ import type { ExposureHypotheses } from '../exposure.js';
 
 /**
  * Jeu complet : deux accès qui se partagent la fréquentation. La somme vaut
- * l'unité, comme N3.3 l'exige — un jeu qui ne la vaudrait pas ne serait pas
+ * l'unité, comme N3.3 l'exige : un jeu qui ne la vaudrait pas ne serait pas
  * « complet », il serait refusé.
  */
 const complete: ExposureHypotheses = {
@@ -19,7 +19,7 @@ const complete: ExposureHypotheses = {
   visibility_cones: [{ typology: 'mall', angle_deg: 60, distance_m: 15 }],
 };
 
-describe('I5.3 — guardExposureHypotheses', () => {
+describe('I5.3: guardExposureHypotheses', () => {
   it('passes when the three weightings are declared', () => {
     expect(guardExposureHypotheses(complete).ok).toBe(true);
   });
@@ -57,7 +57,7 @@ describe('I5.3 — guardExposureHypotheses', () => {
   });
 });
 
-describe('H12 — guardFlowResultExport', () => {
+describe('H12: guardFlowResultExport', () => {
   it('exports a flow result carrying complete hypotheses', () => {
     expect(guardFlowResultExport(complete).ok).toBe(true);
   });
@@ -81,7 +81,7 @@ describe('H12 — guardFlowResultExport', () => {
   });
 });
 
-describe('N3.3 — normalisation des parts de fréquentation', () => {
+describe('N3.3 : normalisation des parts de fréquentation', () => {
   it('accepte des parts qui somment à l\u2019unité', () => {
     expect(entryWeightSum(complete.entry_weights)).toBeCloseTo(ENTRY_WEIGHT_TOTAL, 12);
     expect(guardExposureHypotheses(complete).ok).toBe(true);
@@ -180,7 +180,7 @@ describe('N3.3 — normalisation des parts de fréquentation', () => {
   });
 });
 
-describe('I5.3 — une pondération négative n’est pas une pondération', () => {
+describe('I5.3 : une pondération négative n’est pas une pondération', () => {
   it('refuse une part de fréquentation négative, et nomme l’accès', () => {
     // Deux parts de -0,5 et 1,5 somment à l'unité : la normalisation les
     // laisse passer, et c'est pourquoi ce refus lui est antérieur.

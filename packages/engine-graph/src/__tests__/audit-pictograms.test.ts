@@ -10,7 +10,7 @@ const p = (
   comprehension_state: PictogramComprehension['comprehension_state'],
 ): PictogramComprehension => ({ id, registry, comprehension_state });
 
-describe('J5.3 — auditPictogramComprehension', () => {
+describe('J5.3: auditPictogramComprehension', () => {
   it('is always ok, reporting untested orientation pictograms as info warnings', () => {
     const r = auditPictogramComprehension([p('w-1', 'wayfinding', 'untested')]);
     expect(r.ok).toBe(true);

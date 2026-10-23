@@ -197,7 +197,7 @@ describe('computeRoute', () => {
         ],
       },
     };
-    // Route should still work — self-loop is silently discarded
+    // Route should still work: self-loop is silently discarded
     const result = computeRoute(
       selfLoopSite,
       stdProfile,

@@ -15,17 +15,17 @@ export const refAdversarial: SiteData = {
     name: 'Site adversarial',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // M01.S1, repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
     origin_y_m: 0,
-    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // N1.2, les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],
-    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    // D1.1, altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
-  // A5.8 — aucun paquet rattaché.
+  // A5.8, aucun paquet rattaché.
   rules_bindings: [],
   buildings: [
     {
@@ -34,7 +34,7 @@ export const refAdversarial: SiteData = {
       site_id: 'site-adversarial-001',
       name: 'Bâtiment',
       independent_access: true,
-      // N1.2 — deux plages dans la même journée : fermeture de midi.
+      // N1.2, deux plages dans la même journée : fermeture de midi.
       opening_hours: {
         monday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
         tuesday: [{ from: '09:30', to: '12:30' }, { from: '14:00', to: '19:30' }],
@@ -55,7 +55,7 @@ export const refAdversarial: SiteData = {
       elevation_m: 0,
     },
   ],
-  /** A5.2 / N1.4 — le niveau est calé : ce site éprouve le texte, pas le calage. */
+  /** A5.2 / N1.4, le niveau est calé : ce site éprouve le texte, pas le calage. */
   plan_sources: [
     {
       id: 'ps-adv-001',
@@ -229,7 +229,7 @@ export const refAdversarial: SiteData = {
       occupant_name: LONG_NAME_FR,
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / M01.S5 — période close et période ouverte se déclarent pareil.
+      // N1.2 / M01.S5, période close et période ouverte se déclarent pareil.
       valid_from: '2025-09-01',
       valid_to: '2027-08-31',
     },

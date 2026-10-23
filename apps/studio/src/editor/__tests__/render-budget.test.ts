@@ -26,7 +26,7 @@ function run(
   return { state: s, switches };
 }
 
-describe('G2.2 — renderBudgetStep', () => {
+describe('G2.2: renderBudgetStep', () => {
   it('stays full while frames are within budget', () => {
     const { state, switches } = run(initialRenderBudgetState(), 10, 0, 3000, 16);
     expect(state.mode).toBe('full');

@@ -5,7 +5,7 @@ import { refBroken, refMinimal, refRetail } from '@azimut/testkit';
 import type { SiteData } from '@azimut/core-model';
 
 /**
- * M01.S10 — « Toute arête dont les deux extrémités appartiennent à des
+ * M01.S10 : « Toute arête dont les deux extrémités appartiennent à des
  * bâtiments différents porte une ligne `building_link`. »
  *
  * N1.7 critère 3 veut, pour chaque cas, un site qui le déclenche et un site

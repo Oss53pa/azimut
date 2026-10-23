@@ -18,7 +18,7 @@ function oval(cx: number, cy: number, rx: number, ry: number, tilt_deg: number, 
 
 const context = { pxPerMeter: 40, strictness: 'normal' as const };
 
-describe('J1.2 — cercle et ovale dans l’éditeur d’habillage', () => {
+describe('J1.2 : cercle et ovale dans l’éditeur d’habillage', () => {
   it('un ovale à peu près droit devient une ellipse posée sur les axes', () => {
     const out = strokeToEditorEllipse(oval(5, 5, 4, 2, 3), context);
     expect(out.kind).toBe('ellipse');
@@ -66,7 +66,7 @@ function sketchRect(w: number, h: number, tilt_deg: number): readonly Point[] {
   return out;
 }
 
-describe('J1.2 — le rectangle dans l’éditeur d’habillage', () => {
+describe('J1.2 : le rectangle dans l’éditeur d’habillage', () => {
   it('un rectangle approximatif devient un rectangle posé sur les axes', () => {
     const out = strokeToEditorRect(sketchRect(6, 3, 2), context);
     expect(out.kind).toBe('rect');

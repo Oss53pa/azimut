@@ -1,5 +1,5 @@
 /**
- * La coquille de l'application — en-tête, barre latérale, recherche, accueil —
+ * La coquille de l'application (en-tête, barre latérale, recherche, accueil)
  * dessinée sur la maquette « logiciel autonome v2 », et les écrans des
  * modules 13 et 14.
  *

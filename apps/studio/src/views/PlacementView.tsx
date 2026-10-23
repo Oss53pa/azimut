@@ -11,7 +11,7 @@ import { siteLabels } from './register/labels.js';
 import { formatNumber } from './register/format.js';
 
 const ALL = 'all';
-const EMPTY = '—';
+const EMPTY = '–';
 
 type PlacementRow = {
   readonly support: Support;
@@ -22,7 +22,7 @@ type PlacementRow = {
 };
 
 /**
- * Module 02 — l'implantation des supports, au gabarit « registre » : un
+ * Module 02, l'implantation des supports, au gabarit « registre » : un
  * support par ligne, son nœud, son orientation, sa distance de lecture, et
  * s'il est posé sur un point de décision du premier profil.
  */

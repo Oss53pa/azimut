@@ -12,7 +12,7 @@ export type CharterRegistryState = {
 };
 
 /**
- * A5.8 — charge les chartes d'un site, à la demande de l'écran qui les
+ * A5.8 : charge les chartes d'un site, à la demande de l'écran qui les
  * montre. Un échec se déclare `failed` et rend un registre vide que l'écran
  * ne prend pas pour un fait.
  */

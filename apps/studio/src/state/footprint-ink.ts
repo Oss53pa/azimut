@@ -37,7 +37,7 @@ export type InkOutcome =
   | { readonly kind: 'applied'; readonly arbitration: FootprintArbitration }
   | { readonly kind: 'unrecognized'; readonly ghost: readonly Point[] }
   | { readonly kind: 'not_tracing_tool' }
-  /** J1.2 — « trait barrant une forme » : les empreintes à supprimer. */
+  /** J1.2, « trait barrant une forme » : les empreintes à supprimer. */
   | { readonly kind: 'strike'; readonly footprintIds: readonly string[] };
 
 const ORDER: Readonly<Record<FootprintTool, readonly FootprintShape['kind'][]>> = {
@@ -60,8 +60,8 @@ function asShape(candidate: InkCandidate): FootprintShape | null {
 }
 
 /**
- * Les lectures d'un trait pour l'outil actif. Deux lectures identiques — un
- * rectangle est aussi un polygone — n'en font qu'une.
+ * Les lectures d'un trait pour l'outil actif. Deux lectures identiques (un
+ * rectangle est aussi un polygone) n'en font qu'une.
  */
 export function footprintReadings(
   candidates: readonly InkCandidate[], tool: FootprintTool,

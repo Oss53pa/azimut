@@ -38,7 +38,7 @@ type DirectoryRow = {
 
 const ALL = 'all';
 const MISSING = 'missing';
-const EMPTY = '—';
+const EMPTY = '–';
 
 const STATUS_KEYS: Readonly<Record<OccupancyStatus, UiMessageKey>> = {
   occupied: 'status.occupied',
@@ -52,12 +52,12 @@ function findingsOf(result: { ok: boolean; warnings?: Finding[]; findings?: Find
 }
 
 /**
- * Module 01 — l'annuaire des occupants, au gabarit « registre » de la maquette.
+ * Module 01 : l'annuaire des occupants, au gabarit « registre » de la maquette.
  *
  * Une destination porte un nom par langue active ; une face n'affiche jamais
  * autre chose que ce nom. Les deux contrôles qui comptent ici sont donc la
  * couverture linguistique et l'unicité des noms d'orientation entre bâtiments
- * (H2.2) — un lecteur de panneau ne distingue pas deux « Porte A ».
+ * (H2.2) : un lecteur de panneau ne distingue pas deux « Porte A ».
  */
 export function DestinationsView({ onNavigate }: DestinationsViewProps): JSX.Element {
   const site = useSiteData();

@@ -2,14 +2,14 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H2.2 — A site is oriented first by how it is named. Naming rules are declared
+ * H2.2: A site is oriented first by how it is named. Naming rules are declared
  * and checked; uniqueness among them. On multi-building sites two doors "A"
  * frequently coexist, which is a naming collision. This guard detects two
  * entities carrying the same orientation name within the same scope and raises
  * a blocking WAYFIND.NAMING_COLLISION.
  *
- * Names are compared case-insensitively on trimmed, whitespace-collapsed text —
- * "Porte A" and "porte  a" collide — because a panel reader does not tell them
+ * Names are compared case-insensitively on trimmed, whitespace-collapsed text (
+ * "Porte A" and "porte  a" collide) because a panel reader does not tell them
  * apart. The scope key (e.g. a building id, or "" for a site-wide namespace) is
  * declared by the caller so uniqueness is checked within the intended namespace.
  */

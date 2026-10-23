@@ -25,8 +25,8 @@ function edge(over: Partial<EdgeDraft> = {}): EdgeDraft {
   };
 }
 
-/** A5.3 — les listes fermées que M4 (partie M) reprend. */
-describe('M4 (partie M) — listes fermées de A5.3', () => {
+/** A5.3 : les listes fermées que M4 (partie M) reprend. */
+describe('M4 (partie M) : listes fermées de A5.3', () => {
   it('les onze types de nœud', () => {
     expect(NODE_KINDS.length).toBe(11);
     expect(NODE_KINDS).toContain('destination_access');
@@ -45,7 +45,7 @@ describe('M4 (partie M) — listes fermées de A5.3', () => {
 /**
  * M4 (partie M) : « Le type se choisit avant le geste, jamais après. »
  */
-describe('M4 (partie M) — nœud', () => {
+describe('M4 (partie M) : nœud', () => {
   it('quantifie la position au millimètre (E4)', () => {
     expect(acceptNode({ kind: 'junction', label: '', position: { x_m: 1.00049, y_m: -0.00009 } }).position)
       .toEqual({ x_m: 1, y_m: 0 });
@@ -58,8 +58,8 @@ describe('M4 (partie M) — nœud', () => {
   });
 });
 
-/** M4 (partie M) — les trois contrôles à la saisie, et eux seuls. */
-describe('M4 (partie M) — arête', () => {
+/** M4 (partie M) : les trois contrôles à la saisie, et eux seuls. */
+describe('M4 (partie M) : arête', () => {
   it('accepte une arête entre deux nœuds distincts du même niveau', () => {
     expect(acceptEdge(edge()).ok).toBe(true);
   });
@@ -123,11 +123,11 @@ describe('M4 (partie M) — arête', () => {
 });
 
 /**
- * M4 (partie M), critère 2 — « La longueur n'est jamais saisissable et se
+ * M4 (partie M), critère 2 : « La longueur n'est jamais saisissable et se
  * recalcule à chaque déplacement. » A5.3 : « `edge.length_m` est calculé,
  * jamais saisi. »
  */
-describe('M4 (partie M) — la longueur est calculée, jamais saisie', () => {
+describe('M4 (partie M) : la longueur est calculée, jamais saisie', () => {
   it('ne figure pas dans ce qui est saisissable', () => {
     expect('lengthM' in edge()).toBe(false);
   });
@@ -163,7 +163,7 @@ describe('M4 (partie M) — la longueur est calculée, jamais saisie', () => {
  * propriétés, là où M1 et M3 en ont une : la largeur et la pente sont tenues
  * par le contrôle de saisie, qui refuse la valeur, et non par une anomalie.
  */
-describe('M4 (partie M) — bornes de saisie, sans code d’anomalie', () => {
+describe('M4 (partie M) : bornes de saisie, sans code d’anomalie', () => {
   it('les bornes de pente sont celles de M4 (partie M)', () => {
     expect([SLOPE_MIN_PCT, SLOPE_MAX_PCT]).toEqual([-20, 20]);
   });
@@ -189,10 +189,10 @@ describe('M4 (partie M) — bornes de saisie, sans code d’anomalie', () => {
 });
 
 /**
- * M4 (partie M), critère 1 — « Un axe tracé en une passe produit les nœuds et
+ * M4 (partie M), critère 1 : « Un axe tracé en une passe produit les nœuds et
  * arêtes attendus, sans doublon. »
  */
-describe('M4 (partie M) — axe de circulation', () => {
+describe('M4 (partie M) : axe de circulation', () => {
   function point(x: number, y: number, existing: string | null = null): AxisPoint {
     return { position: { x_m: x, y_m: y }, existingNodeId: existing };
   }

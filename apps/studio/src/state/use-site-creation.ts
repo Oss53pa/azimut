@@ -1,5 +1,5 @@
 /**
- * F15, `state/` — le magasin de l'écran M1 (partie M).
+ * F15, `state/` : le magasin de l'écran M1 (partie M).
  *
  * Il tient l'état du formulaire, appelle la logique de création, confie les
  * commandes à l'émetteur, et rend les anomalies à l'écran. M12.A2 :
@@ -37,7 +37,7 @@ export type CreationEnvironment = {
   /** Rend l'instant courant. Injecté : E5.1 interdit de lire l'horloge ici. */
   readonly now: () => string;
   readonly existingNames: readonly string[];
-  /** Q9 — les pays du référentiel, contre lesquels pays et fuseau se jugent. */
+  /** Q9 : les pays du référentiel, contre lesquels pays et fuseau se jugent. */
   readonly countries: readonly CountryChoice[];
   readonly defaultBuildingName: string;
   readonly defaultLevelName: string;

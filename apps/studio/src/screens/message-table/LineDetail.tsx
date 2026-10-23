@@ -7,7 +7,7 @@ import type { ErrorCode } from '@azimut/core-model';
 import type { ScheduleRow } from '../../state/message-schedule-rows.js';
 
 /**
- * R7 (partie R) — le panneau de détail.
+ * R7 (partie R) : le panneau de détail.
  *
  * « Il répond à la seule question que la maîtrise d'ouvrage se pose devant une
  * ligne : pourquoi cette ligne existe-t-elle ? »
@@ -21,16 +21,16 @@ import type { ScheduleRow } from '../../state/message-schedule-rows.js';
  */
 export type LineDetailProps = {
   readonly row: ScheduleRow | null;
-  /** R7.1 — les profils de parcours qui passent par le point de décision. */
+  /** R7.1 : les profils de parcours qui passent par le point de décision. */
   readonly profilesAtDecisionPoint: readonly string[];
-  /** R7.3 — chaque source mène à l'écran où elle se corrige. */
+  /** R7.3 : chaque source mène à l'écran où elle se corrige. */
   readonly onOpenSource: (source: SourceKey) => void;
   readonly lang: string;
-  /** R7.4 — le panneau des annotations de la ligne. */
+  /** R7.4 : le panneau des annotations de la ligne. */
   readonly annotations?: JSX.Element | null | undefined;
 };
 
-/** R7.3 — les cinq sources dont une ligne dérive, et leur écran de correction. */
+/** R7.3 : les cinq sources dont une ligne dérive, et leur écran de correction. */
 export const SOURCE_KEYS = [
   'directory', 'zoning', 'placement', 'wayfinding', 'pictogram',
 ] as const;

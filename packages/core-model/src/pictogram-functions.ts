@@ -4,7 +4,7 @@ import type { Finding } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * Le vocabulaire des fonctions de pictogramme — A5.4.
+ * Le vocabulaire des fonctions de pictogramme : A5.4.
  *
  * « `function_key` : à quoi sert ce pictogramme, et non d'où il vient. C'est
  * par elle qu'un moteur demande "le pictogramme d'accessibilité" sans
@@ -29,8 +29,8 @@ import { codePointCompare } from './empreinte.js';
  * **Ce module ne ferme pas l'ensemble des fonctions.** Comme la table des clés
  * de fait d'A5.11, il porte celles que le dépôt emploie. Le registre
  * d'orientation les prend libres, en toutes lettres ; fermer l'ensemble
- * refuserait ce qu'A5.4 autorise. La discipline — une fonction entre dans
- * cette table au même commit que son premier usage — porte sur l'auteur du
+ * refuserait ce qu'A5.4 autorise. La discipline (une fonction entre dans
+ * cette table au même commit que son premier usage) porte sur l'auteur du
  * commit, non sur l'exécution.
  */
 
@@ -111,7 +111,7 @@ export type PictogramScope =
  * La portée d'un registre pour un site donné.
  *
  * Les paquets de sécurité d'un site sont ceux qui lui sont rattachés, la
- * surcouche avant le socle — `packsByPrecedence`. Un site sans paquet n'a pas
+ * surcouche avant le socle : `packsByPrecedence`. Un site sans paquet n'a pas
  * de registre de sécurité : aucune désignation n'y vient de nulle part, et
  * toute demande y rendra `not_designated`.
  */
@@ -129,7 +129,7 @@ export function siteScope(
  *
  * Trois cas, et trois seulement : un pictogramme la porte, aucun ne la porte,
  * plusieurs la portent. Les deux derniers ont chacun leur code au catalogue de
- * D2.2, et ce sont deux anomalies différentes — l'une est une désignation qui
+ * D2.2, et ce sont deux anomalies différentes : l'une est une désignation qui
  * manque, l'autre une désignation qui se contredit. Une ambiguïté nomme le
  * paquet où elle se trouve, `null` pour le registre d'orientation.
  */
@@ -170,7 +170,7 @@ function within(
  * Le pictogramme qui porte une fonction dans une portée, s'il est unique.
  *
  * **Registre de sécurité : un paquet après l'autre.** La surcouche d'abord ;
- * si elle désigne la fonction, elle répond, et le socle n'est pas consulté —
+ * si elle désigne la fonction, elle répond, et le socle n'est pas consulté :
  * « la surcouche l'emporte ». Si elle ne la désigne pas, le socle répond. Deux
  * paquets qui désignent la même fonction ne sont donc jamais ambigus, comme
  * A5.8 le veut ; deux pictogrammes du même paquet le sont.

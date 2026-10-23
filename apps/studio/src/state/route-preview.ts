@@ -9,7 +9,7 @@ import { graphScopeFromSession } from './session-scope.js';
 import { boolean, structured, text } from './row-values.js';
 
 /**
- * L3.1 (partie L) et A7.3 — le parcours d'un visiteur, vu dans l'atelier du
+ * L3.1 (partie L) et A7.3, le parcours d'un visiteur, vu dans l'atelier du
  * graphe : d'un nœud à un autre, pour un profil de parcours du site.
  *
  * Le chemin vient de `computeRoute` (A7.1), les points de décision de
@@ -57,7 +57,7 @@ export type PlannedRoute = {
   /** Le type de chaque nœud du chemin : il dit le moyen d'un changement de niveau. */
   readonly nodeKinds: ReadonlyMap<string, string>;
   readonly cost: number;
-  /** Partie P, écran Itinéraire — les étapes écrites, sous forme neutre : l'interface les dit. */
+  /** Partie P, écran Itinéraire, les étapes écrites, sous forme neutre : l'interface les dit. */
   readonly steps: readonly RouteStep[];
   readonly totalDistance_m: number;
 };

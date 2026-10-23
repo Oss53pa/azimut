@@ -16,14 +16,14 @@ function kinds(candidates: readonly InkCandidate[]): readonly string[] {
   return candidates.map(c => c.kind);
 }
 
-describe('J1.2 — point appuyé', () => {
+describe('J1.2 : point appuyé', () => {
   it('devient un nœud, au millimètre', () => {
     const tap = [{ x_m: 3.00012, y_m: 4.99987 }, { x_m: 3.0004, y_m: 5.0001 }];
     expect(recognize(tap, context())).toEqual([{ kind: 'node', at: { x_m: 3, y_m: 5 } }]);
   });
 });
 
-describe('J1.2 — traits presque droits', () => {
+describe('J1.2: traits presque droits', () => {
   it('presque horizontal : segment contraint sur l’axe', () => {
     const out = first(recognize(stroke({ x_m: 1, y_m: 2 }, { x_m: 11, y_m: 2.6 }, 40, 0.05), context()));
     expect(out.kind).toBe('segment');
@@ -52,7 +52,7 @@ describe('J1.2 — traits presque droits', () => {
   });
 });
 
-describe('J1.2 et J1.3 — contours fermés, redressés d’un bloc', () => {
+describe('J1.2 et J1.3 : contours fermés, redressés d’un bloc', () => {
   const rect = [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 10, y_m: 6 }, { x_m: 0, y_m: 6 }];
 
   it('un rectangle à main levée devient un rectangle aux angles droits, sur les axes', () => {
@@ -101,7 +101,7 @@ describe('J1.2 et J1.3 — contours fermés, redressés d’un bloc', () => {
   });
 });
 
-describe('J1.2 — gestes sur ce qui est déjà posé', () => {
+describe('J1.2 : gestes sur ce qui est déjà posé', () => {
   const nodes = [{ id: 'n-b', at: { x_m: 10, y_m: 0 } }, { id: 'n-a', at: { x_m: 0, y_m: 0 } }];
 
   it('un trait qui rejoint deux nœuds propose d’abord l’arête', () => {
@@ -128,7 +128,7 @@ describe('J1.2 — gestes sur ce qui est déjà posé', () => {
   });
 });
 
-describe('J0 et J1.3 — déterminisme et quantification', () => {
+describe('J0 et J1.3 : déterminisme et quantification', () => {
   it('un même trait rend toujours les mêmes candidates, à tout niveau d’intensité', () => {
     const drawn = rotate(loop([{ x_m: 0, y_m: 0 }, { x_m: 7, y_m: 0 }, { x_m: 7, y_m: 4 }, { x_m: 0, y_m: 4 }], 20, 0.06), 2);
     for (const strictness of STRICTNESS_LEVELS) {

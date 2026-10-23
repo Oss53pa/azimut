@@ -47,7 +47,7 @@ function accepting(): { sink: CommandSink; seen: number[] } {
   return { sink, seen };
 }
 
-describe('M3 (partie M) — écriture des empreintes', () => {
+describe('M3 (partie M) : écriture des empreintes', () => {
   it('n’écrit que la table du module 01', () => {
     const r = createFootprintCommands(rows(1), WRITE, 'geste');
     expect(r.ok).toBe(true);
@@ -65,10 +65,10 @@ describe('M3 (partie M) — écriture des empreintes', () => {
 });
 
 /**
- * M3 (partie M), critère d'acceptation 4 — « La duplication en série de
+ * M3 (partie M), critère d'acceptation 4 : « La duplication en série de
  * 20 cellules se fait en une commande annulable d'un seul geste. »
  */
-describe('M3 (partie M) — duplication en série de vingt cellules', () => {
+describe('M3 (partie M) : duplication en série de vingt cellules', () => {
   it('produit vingt empreintes', () => {
     const r = createFootprintCommands(rows(20), WRITE, 'serie');
     expect(r.ok).toBe(true);

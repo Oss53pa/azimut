@@ -18,7 +18,7 @@ type ValidationRun = {
   readonly checksRun: readonly string[];
   readonly checksSkipped: readonly string[];
   readonly checksUndeclared: readonly string[];
-  /** Horodatage du calcul, fourni par l'écran — jamais lu dans un moteur. */
+  /** Horodatage du calcul, fourni par l'écran : jamais lu dans un moteur. */
   readonly ranAt: string;
 };
 
@@ -44,7 +44,7 @@ function validate(site: SiteData, vocabulary: SiteVocabulary, ranAt: string): Va
 }
 
 /**
- * Tranche M · écran M5 — la validation.
+ * Tranche M · écran M5 : la validation.
  *
  * Elle ne se lance pas toute seule : un écran vide qui ressemble à une réussite
  * alors que rien n'a été calculé serait le pire des états. Tant que la

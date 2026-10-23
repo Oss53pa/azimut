@@ -2,7 +2,7 @@ import { SCALE_MAX_PX_PER_M, SCALE_MIN_PX_PER_M } from './view-transform.js';
 import type { ViewState } from './view-transform.js';
 
 /**
- * E3.3 — « La position de vue est mémorisée par niveau et par utilisateur,
+ * E3.3 : « La position de vue est mémorisée par niveau et par utilisateur,
  * hors du modèle métier. »
  *
  * Elle vit dans le stockage du navigateur, sous une clé par zone et par

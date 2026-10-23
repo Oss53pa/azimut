@@ -5,7 +5,7 @@ import { processNextJob, HANDLER_FAILED } from '../worker.js';
 import type { JobHandler } from '../worker.js';
 
 /**
- * T-0.11 et D9.2 — la file des travaux en base (migration 0071), contre la
+ * T-0.11 et D9.2 : la file des travaux en base (migration 0071), contre la
  * base réelle et sous `FORCE ROW LEVEL SECURITY`.
  *
  * Acceptation de T-0.11 : un travail factice s'exécute, échoue, est rejoué
@@ -107,7 +107,7 @@ afterAll(async () => {
   await db.$client.end();
 });
 
-describe('T-0.11 — le service prend les travaux de toutes les organisations', () => {
+describe('T-0.11 : le service prend les travaux de toutes les organisations', () => {
   it('chaque travail est lu et clos sous son demandeur', async () => {
     const jobA = await enqueue(USER_A, ORG_A, { marque: 'a' });
     const jobB = await enqueue(USER_B, ORG_B, { marque: 'b' });
@@ -207,7 +207,7 @@ describe('T-0.11 — le service prend les travaux de toutes les organisations', 
   });
 });
 
-describe('T-0.11 — nul autre accès à la file', () => {
+describe('T-0.11 : nul autre accès à la file', () => {
   it('un utilisateur n’exécute aucune fonction de prise', async () => {
     for (const call of [
       `select * from azimut.job_claim(now(), '{5}'::integer[])`,

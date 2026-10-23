@@ -52,7 +52,7 @@ describe('resolveSiteRulesPack', () => {
     }
   });
 
-  it('does not read disk — an empty index simply misses', () => {
+  it('does not read disk: an empty index simply misses', () => {
     const result = resolveSiteRulesPack(socle(PACK_ID), new Map());
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -61,7 +61,7 @@ describe('resolveSiteRulesPack', () => {
   });
 });
 
-describe('resolveSiteRulesPack — socle et surcouche, A5.8 et D3.6', () => {
+describe('resolveSiteRulesPack : socle et surcouche, A5.8 et D3.6', () => {
   const OVERLAY_ID = 'rp-test-overlay';
   const index = (): RulesPackIndex => {
     const pack = fixtureIndex().get(PACK_ID);

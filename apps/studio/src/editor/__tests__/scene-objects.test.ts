@@ -47,7 +47,7 @@ function shape(id: string, layerId: string): DecorationShape {
   };
 }
 
-describe('E9 — scene objects', () => {
+describe('E9: scene objects', () => {
   describe('sortLayers', () => {
     it('sorts by z-order ascending', () => {
       const layers = [layer('c', { zOrder: 3 }), layer('a', { zOrder: 1 }), layer('b', { zOrder: 2 })];

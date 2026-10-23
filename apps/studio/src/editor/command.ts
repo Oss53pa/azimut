@@ -1,7 +1,7 @@
 /**
- * E5 — Command pattern for editing operations.
+ * E5: Command pattern for editing operations.
  *
- * Every data mutation passes through a Command — a serializable object
+ * Every data mutation passes through a Command: a serializable object
  * with type, target, before, after, and a caller-provided timestamp.
  *
  * Commands are reversible. A non-reversible command is rejected.
@@ -9,7 +9,7 @@
  */
 
 // ---------------------------------------------------------------------------
-// E5.2 — Undo stack depth
+// E5.2: Undo stack depth
 // ---------------------------------------------------------------------------
 
 /** Maximum undo entries, named constant. */
@@ -45,9 +45,9 @@ export type Command<T = unknown> = {
 // ---------------------------------------------------------------------------
 
 export type HistoryState = {
-  /** Undo stack — most recent at the end. */
+  /** Undo stack: most recent at the end. */
   readonly undoStack: readonly Command[];
-  /** Redo stack — most recent at the end. */
+  /** Redo stack: most recent at the end. */
   readonly redoStack: readonly Command[];
 };
 
@@ -79,7 +79,7 @@ export function historyReducer(
       const cmd = action.command;
       const prev = state.undoStack;
 
-      // E5.2 — Coalesce commands with the same groupKey
+      // E5.2: Coalesce commands with the same groupKey
       const lastEntry = prev[prev.length - 1];
       if (
         cmd.groupKey !== null &&
@@ -126,7 +126,7 @@ export function historyReducer(
     }
 
     case 'clear': {
-      // E5.3 — Stack cleared on sync
+      // E5.3, Stack cleared on sync
       return EMPTY_HISTORY;
     }
   }
@@ -165,7 +165,7 @@ export function createCommand<T>(
 
 /**
  * Check if a command can be undone (has a previous value).
- * Always true by construction — commands store before/after.
+ * Always true by construction: commands store before/after.
  */
 export function canUndo(state: HistoryState): boolean {
   return state.undoStack.length > 0;

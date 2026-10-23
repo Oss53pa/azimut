@@ -12,7 +12,7 @@ import type { PdfStreamSpec } from './pdf-fixtures.js';
 const inspectPlanContent = (bytes: Uint8Array) => inspectWith(bytes, PDF_LIMITS);
 
 /**
- * M2 (partie M), version 27 — `IMPORT.RASTER_PRECISION_LIMITED`, jugé sur le
+ * M2 (partie M), version 27 : `IMPORT.RASTER_PRECISION_LIMITED`, jugé sur le
  * contenu, jamais sur l'extension. Version 29 : un PDF se juge sur sa page ;
  * le suivi page par page est éprouvé dans `pdf-page-nature.test.ts`.
  */
@@ -39,7 +39,7 @@ async function warningsOf(bytes: Uint8Array, name: string) {
   return planPrecisionWarnings(await judgePlanPrecision(bytes), name);
 }
 
-describe('M2 — la nature du fichier se lit dans ses octets', () => {
+describe('M2 : la nature du fichier se lit dans ses octets', () => {
   it('reconnaît PDF, PNG, JPEG et DXF, texte comme binaire', () => {
     expect(sniffPlanFormat(onePagePdf([plain('')]))).toBe('pdf');
     expect(sniffPlanFormat(PNG_HEAD)).toBe('png');
@@ -50,7 +50,7 @@ describe('M2 — la nature du fichier se lit dans ses octets', () => {
   });
 });
 
-describe('M2 — un PDF est vectoriel s’il porte au moins un tracé peint', () => {
+describe('M2 : un PDF est vectoriel s’il porte au moins un tracé peint', () => {
   it('un tracé sans filtre', async () => {
     expect(await judgePlanPrecision(onePagePdf([plain('0 0 m 100 0 l S')]))).toBe('vector');
   });
@@ -94,7 +94,7 @@ describe('M2 — un PDF est vectoriel s’il porte au moins un tracé peint', ()
   });
 });
 
-describe('M2 — le lecteur de contenu ne prend pas pour un tracé ce qui n’en est pas', () => {
+describe('M2 : le lecteur de contenu ne prend pas pour un tracé ce qui n’en est pas', () => {
   it('ni le texte d’une chaîne, ni une image en ligne, ni un commentaire', () => {
     expect(countPaintedPaths('BT /F1 12 Tf (0 0 m 10 0 l S) Tj ET')).toBe(0);
     expect(countPaintedPaths('BI /W 2 /H 2 /BPC 8 /CS /G ID 0 0 m S f EI')).toBe(0);
@@ -107,7 +107,7 @@ describe('M2 — le lecteur de contenu ne prend pas pour un tracé ce qui n’en
   });
 });
 
-describe('M2 — un DXF est vectoriel s’il porte une entité géométrique', () => {
+describe('M2 : un DXF est vectoriel s’il porte une entité géométrique', () => {
   it('une ligne dans les entités', async () => {
     expect(await judgePlanPrecision(dxf([['ENTITIES', ['LINE']]]))).toBe('vector');
   });
@@ -127,7 +127,7 @@ describe('M2 — un DXF est vectoriel s’il porte une entité géométrique', (
   });
 });
 
-describe('M2 — IMPORT.RASTER_PRECISION_LIMITED, un avertissement jugé sur le contenu', () => {
+describe('M2 : IMPORT.RASTER_PRECISION_LIMITED, un avertissement jugé sur le contenu', () => {
   it('une image en mode point lève l’avertissement', async () => {
     const warnings = await warningsOf(PNG_HEAD, 'niveau-0.png');
     expect(warnings).toEqual([{
@@ -163,7 +163,7 @@ const pageTree = (count: number): string[] => [
   ...Array.from({ length: count }, () => '<< /Type /Page /Parent 2 0 R >>'),
 ];
 
-describe('M2 — le nombre de pages d’un PDF se lit dans son arbre des pages', () => {
+describe('M2 : le nombre de pages d’un PDF se lit dans son arbre des pages', () => {
   it('lit le compte du nœud des pages que désigne le catalogue', async () => {
     expect(await countPdfPages(pdfFile(pageTree(3), 'trailer\n<< /Root 1 0 R >>\n'))).toBe(3);
     expect(await countPdfPages(pdfFile(pageTree(1), 'trailer\n<< /Root 1 0 R >>\n'))).toBe(1);

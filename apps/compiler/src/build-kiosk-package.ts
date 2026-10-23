@@ -8,7 +8,7 @@ import type { PackageRecorder } from './db-package-recorder.js';
 import type { Job } from './job.js';
 
 /**
- * D10 — `build_kiosk_package` job handler.
+ * D10: `build_kiosk_package` job handler.
  *
  * Produces the kiosk deployment tree (index.html, assets, data, maps) and its
  * D10.2 manifest via assembleKioskPackage. The runtime app assets and the
@@ -22,7 +22,7 @@ export type BuildKioskPackageContext = {
    * Resolve the kiosk tree files, keyed by relative path. In production this
    * reads compiled artifacts from storage; in tests it returns fixture bytes.
    *
-   * D10.0 — an Outcome, not a bare map: the renders the tree embarks carry
+   * D10.0, an Outcome, not a bare map: the renders the tree embarks carry
    * anomalies, and a success alone would swallow them.
    */
   readonly resolveKioskFiles: () => Promise<Outcome<ReadonlyMap<string, Uint8Array>>>;
@@ -59,7 +59,7 @@ export type BuildKioskPackageResult = {
   readonly built_at: string;
   readonly network_clean: boolean;
   /**
-   * D10.0 — the anomalies of the renders and of the assembly, never dropped.
+   * D10.0: the anomalies of the renders and of the assembly, never dropped.
    * Empty when the package carries none.
    */
   readonly findings: readonly Finding[];
@@ -169,7 +169,7 @@ export function createBuildKioskPackageHandler(
       storagePath = record.storage_path;
       checksum = record.checksum;
       if (recordPackage) {
-        // A6.1 — the row is written as the requester; none, none written.
+        // A6.1: the row is written as the requester; none, none written.
         if (job.requested_by === null || job.requested_by === '') {
           throw new Error('build_kiosk_package job has no requester (requested_by)');
         }

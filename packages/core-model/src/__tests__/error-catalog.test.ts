@@ -67,7 +67,7 @@ describe('ERROR_CATALOG', () => {
     // sans porter un seul code, il annonçait un cloisonnement que rien
     // n'appliquait. La version 15 le rétablit avec son premier code,
     // `CHARTER.RULE_MALFORMED`, et un domaine qui porte un code n'est plus
-    // vide. `NET` en était sorti avant lui, pour un autre motif — voir
+    // vide. `NET` en était sorti avant lui, pour un autre motif : voir
     // `RETIRED_CODES`.
     expect([...ANOMALY_DOMAINS].sort()).toEqual(
       [

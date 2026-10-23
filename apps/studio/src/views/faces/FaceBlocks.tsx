@@ -44,7 +44,7 @@ function TextFields({ langs, texts, onChange, disabled }: {
 }
 
 /**
- * D8.3 et E1.4 — les blocs d'une face déclarée : ajouter un bloc libre,
+ * D8.3 et E1.4, les blocs d'une face déclarée : ajouter un bloc libre,
  * réécrire son texte, le retirer. Les blocs venus du gabarit ou
  * des plans muraux se lisent ici sans se saisir.
  */
@@ -63,7 +63,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   const kindLabel = (k: string): string => (KNOWN_KINDS.has(k) ? t(`faceblocks.kind.${k}` as UiMessageKey) : k);
   const now = (): string => new Date().toISOString();
 
-  // D8.3 — les emplacements du gabarit que ce type de bloc peut remplir, libres.
+  // D8.3 : les emplacements du gabarit que ce type de bloc peut remplir, libres.
   const support = site.supports.find(s => s.id === face.support_id);
   const template = support === undefined ? null : faceTemplate(site, support, face.face_index);
   const taken = new Set(blocks.map(b => b.block_index));

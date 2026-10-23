@@ -2,11 +2,11 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * G7.2 — Reprise of a client's existing vector files. The only honest path is
+ * G7.2: Reprise of a client's existing vector files. The only honest path is
  * import as a background reference: the file is converted to a calibrated image
  * the designer redraws over; it is archived and consultable but feeds no
  * calculation. There is never automatic conversion of a drawing into a
- * structured model (G7.1/G7.3) — a drawing carries no graph, categories, or
+ * structured model (G7.1/G7.3): a drawing carries no graph, categories, or
  * occupancy. Importing a vector file records an info
  * IMPORT.VECTOR_AS_REFERENCE_ONLY, making the reference-only nature explicit.
  */
@@ -17,7 +17,7 @@ export type VectorImport = {
 
 /**
  * Record vector-file imports as background references only. Returns one info
- * IMPORT.VECTOR_AS_REFERENCE_ONLY per imported file, sorted by import id — the
+ * IMPORT.VECTOR_AS_REFERENCE_ONLY per imported file, sorted by import id: the
  * file is usable as a calibrated backdrop, never as model data. Always ok.
  */
 export function auditVectorImports(

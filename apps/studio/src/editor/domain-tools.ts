@@ -1,5 +1,5 @@
 /**
- * E7.2 — Domain-specific tools: cell geometry.
+ * E7.2, Domain-specific tools: cell geometry.
  *
  * Cell tracing, parallel offset, cell division, and cell fusion.
  * These tools operate on footprint geometry, producing polygons.

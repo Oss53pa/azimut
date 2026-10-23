@@ -36,7 +36,7 @@ const options: RouteAnimationOptions = {
 
 const route = { path: ['entree', 'carrefour', 'ascenseur-0', 'ascenseur-1', 'boutique'] };
 
-describe('A7.3 et L3.1 — le parcours animé', () => {
+describe('A7.3 et L3.1 : le parcours animé', () => {
   it('un tronçon par niveau traversé, et le changement de niveau rendu à part', () => {
     const out = renderRouteAnimation(route, scene, ['carrefour'], options);
     expect(out.ok).toBe(true);
@@ -114,7 +114,7 @@ function markAt(svg: string, nodeId: string): { readonly x: number; readonly y: 
   return { x: Number(circle[1]), y: Number(circle[2]) };
 }
 
-describe('D6.2 — le parcours sur un plan orienté', () => {
+describe('D6.2 : le parcours sur un plan orienté', () => {
   // Entrée en (0, 10), carrefour en (20, 10) : le carrefour, point de
   // décision, est à l'est de l'usager.
   const ground = { path: ['entree', 'carrefour', 'ascenseur-0'] };
@@ -123,7 +123,7 @@ describe('D6.2 — le parcours sur un plan orienté', () => {
     orientation: { center: { x_m: 0, y_m: 10 }, orientation_deg: orientationDegForAzimuth(azimuth) },
   });
 
-  it('D6.4 — ce qui est devant l’usager est en haut, quel que soit son azimut', () => {
+  it('D6.4 : ce qui est devant l’usager est en haut, quel que soit son azimut', () => {
     for (const [azimuth, ahead] of [[90, true], [270, false]] as const) {
       const out = renderRouteAnimation(ground, scene, ['carrefour'], facing(azimuth));
       if (!out.ok) throw new Error('rendu attendu');

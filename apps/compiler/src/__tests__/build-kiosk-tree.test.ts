@@ -24,7 +24,7 @@ const appAssets: KioskAppAssets = {
   appCss: enc.encode('body{margin:0;font-family:system-ui}'),
 };
 
-describe('D10.1 — buildKioskDataFiles', () => {
+describe('D10.1: buildKioskDataFiles', () => {
   it('produces canonical JSON for graph, directory and scene', () => {
     const data = buildKioskDataFiles(refMultilevel);
     expect([...data.keys()].sort()).toEqual([
@@ -48,7 +48,7 @@ describe('D10.1 — buildKioskDataFiles', () => {
   });
 });
 
-describe('D10.1 — buildKioskMapFiles', () => {
+describe('D10.1: buildKioskMapFiles', () => {
   it('renders one map per level, named by ordinal', () => {
     const maps = valueOf(buildKioskMapFiles(refMultilevel));
     expect([...maps.keys()].sort()).toEqual([
@@ -66,7 +66,7 @@ describe('D10.1 — buildKioskMapFiles', () => {
   });
 });
 
-describe('D10.1 — buildKioskTree feeds assembleKioskPackage', () => {
+describe('D10.1: buildKioskTree feeds assembleKioskPackage', () => {
   it('produces a complete, assemblable, autonomous tree', () => {
     const tree = valueOf(buildKioskTree(refMultilevel, appAssets));
 

@@ -7,7 +7,7 @@ type KioskAppViewProps = {
 };
 
 /**
- * Module 13 — bornes et appli. Le paquet de borne et son exécutable existent
+ * Module 13 : bornes et appli. Le paquet de borne et son exécutable existent
  * hors du studio ; les quatre écrans de la maquette (borne portrait, borne
  * paysage, téléphone, gestion) n'en ont aucun ici.
  */

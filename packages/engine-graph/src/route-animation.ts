@@ -2,7 +2,7 @@ import type { Footprint, GraphNode, Level, Outcome, Point } from '@azimut/core-m
 import { codePointCompare, formatSvg, orientForDisplay } from '@azimut/core-model';
 
 /**
- * A7.3 et L3.1 — `renderRouteAnimation(route, scene)` : le parcours animé.
+ * A7.3 et L3.1, `renderRouteAnimation(route, scene)` : le parcours animé.
  *
  * « Tracé progressif, mise en évidence des points de décision, transition
  * explicite au changement de niveau, équivalent statique pour l'impression et
@@ -47,7 +47,7 @@ export type RouteAnimationTheme = {
   readonly marker_fill: string;
 };
 
-/** D6.2 — la rotation d'affichage et son centre, la position de l'usager. */
+/** D6.2 : la rotation d'affichage et son centre, la position de l'usager. */
 export type RouteOrientation = {
   readonly center: Point;
   /** La valeur rendue par `orientationDegForAzimuth`, jamais l'azimut brut. */

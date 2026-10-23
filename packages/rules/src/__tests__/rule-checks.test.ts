@@ -25,8 +25,8 @@ function pack(): LoadedRulesPack {
   return outcome.value;
 }
 
-describe('controle qualite — consomme les regles chargees', () => {
-  describe('lisibilite — LAYOUT.CHAR_HEIGHT_BELOW_MIN', () => {
+describe('controle qualite : consomme les regles chargees', () => {
+  describe('lisibilite: LAYOUT.CHAR_HEIGHT_BELOW_MIN', () => {
     it('passe quand la hauteur atteint la formule (interior, facteur 7)', () => {
       // 5 m * 7 = 35 mm requis (au-dessus du plancher 33)
       const r = checkCharHeight(pack(), {
@@ -92,7 +92,7 @@ describe('controle qualite — consomme les regles chargees', () => {
     });
   });
 
-  describe('contraste — LAYOUT.CONTRAST_BELOW_MIN', () => {
+  describe('contraste: LAYOUT.CONTRAST_BELOW_MIN', () => {
     it('passe au-dessus du minimum (wayfinding 4.7)', () => {
       const r = checkContrast(pack(), {
         supportRegistry: 'wayfinding',
@@ -135,7 +135,7 @@ describe('controle qualite — consomme les regles chargees', () => {
     });
   });
 
-  describe('double borne — LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS', () => {
+  describe('double borne: LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS', () => {
     // fixture: MIN_STROKE_TO_HEIGHT min 0.13, max 0.23
     it('passe dans les bornes', () => {
       const r = checkStrokeToHeight(pack(), {
@@ -164,7 +164,7 @@ describe('controle qualite — consomme les regles chargees', () => {
     });
   });
 
-  describe('plage — LAYOUT.MOUNTING_OUT_OF_RANGE', () => {
+  describe('plage: LAYOUT.MOUNTING_OUT_OF_RANGE', () => {
     // fixture: MOUNTING.HEIGHT_RANGE interior min_mm 1130, max_mm 1670
     it('passe dans la plage', () => {
       const r = checkMountingHeight(pack(), {

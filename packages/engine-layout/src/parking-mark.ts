@@ -5,7 +5,7 @@ import { roundSvg, footprintCentre, PICTOGRAM_GRID_UNITS } from '@azimut/core-mo
 export type ScreenPoint = { readonly x: number; readonly y: number };
 
 /**
- * La marque d'une place accessible, posée sur le plan — S-39.
+ * La marque d'une place accessible, posée sur le plan : S-39.
  *
  * « Place accessible : elle porte le pictogramme du registre de sécurité
  * désigné par la fonction d'accessibilité, section A5.4, jamais un symbole
@@ -18,7 +18,7 @@ export type ScreenPoint = { readonly x: number; readonly y: number };
  * Ce module ne choisit pas le pictogramme : `accessibleSpaceMark` le résout
  * depuis la fonction désignée, A5.4, et le lui passe. Il le dessine, centré
  * sur l'empreinte et mis à l'échelle de la place. Sans pictogramme il n'est
- * pas appelé, et rien n'est dessiné — la règle interdit le symbole de
+ * pas appelé, et rien n'est dessiné : la règle interdit le symbole de
  * remplacement, et s'abstenir est le seul repli qu'elle laisse.
  */
 

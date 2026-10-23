@@ -1,5 +1,5 @@
 /**
- * D8.3 — la saisie des blocs d'une face : blocs libres (texte par langue) et
+ * D8.3, la saisie des blocs d'une face : blocs libres (texte par langue) et
  * légendes. Les autres types se lisent ici sans se saisir.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;

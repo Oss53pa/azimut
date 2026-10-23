@@ -1,5 +1,5 @@
 /**
- * E3.2 — Initial view state for a level.
+ * E3.2: Initial view state for a level.
  *
  * Computes the view that frames the content of a level: business
  * footprints and nodes, plus the habillage shapes of E9. Pure, so the

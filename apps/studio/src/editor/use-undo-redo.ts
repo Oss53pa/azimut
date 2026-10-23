@@ -1,8 +1,8 @@
 /**
- * E5 — Undo/redo actions.
+ * E5: Undo/redo actions.
  *
  * Provides undo/redo callbacks and state queries.
- * Keyboard shortcuts are handled by useShortcuts (E16) — this hook
+ * Keyboard shortcuts are handled by useShortcuts (E16): this hook
  * only exposes the action functions.
  *
  * Separated from EditorCanvas to keep file sizes under 400 lines (A2.4).

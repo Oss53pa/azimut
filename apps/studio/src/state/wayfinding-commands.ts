@@ -7,7 +7,7 @@
  * plutôt que documentaire.
  *
  * Le tableau des messages a son propre module, `message-schedule-commands`,
- * parce qu'il s'écrit en un seul geste — un tableau et ses lignes — là où les
+ * parce qu'il s'écrit en un seul geste (un tableau et ses lignes) là où les
  * quatre entités d'ici s'écrivent une par une.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
@@ -22,11 +22,11 @@ export type WayfindingWrite = {
   readonly timestamp: string;
 };
 
-/** N2.2 — les cinq natures de zone d'orientation. */
+/** N2.2 : les cinq natures de zone d'orientation. */
 export const ZONE_KINDS = ['mall', 'entrance', 'core', 'service', 'outdoor'] as const;
 export type ZoneKind = (typeof ZONE_KINDS)[number];
 
-/** N2.2 — les cibles d'une règle de nommage, et ses portées d'unicité. */
+/** N2.2 : les cibles d'une règle de nommage, et ses portées d'unicité. */
 export const NAMING_TARGETS = ['level', 'zone', 'door', 'core', 'parking'] as const;
 export type NamingTarget = (typeof NAMING_TARGETS)[number];
 
@@ -174,7 +174,7 @@ export function createNamingRule(
 }
 
 /**
- * M02.W3 — « Tout support porte au moins un niveau d'information. »
+ * M02.W3 : « Tout support porte au moins un niveau d'information. »
  *
  * Le rattachement se fait typologie par typologie. L'absence de rattachement
  * n'est pas refusée ici, puisqu'il n'y a rien à écrire : c'est l'audit du
@@ -199,7 +199,7 @@ export function createInformationLevel(
 }
 
 /**
- * H2.4 — une étape du plan de jalonnement.
+ * H2.4 : une étape du plan de jalonnement.
  *
  * `ordinal` est l'ordre de rencontre le long du parcours. Deux étapes de même
  * rang pour un même profil sont refusées en base ; ici on refuse seulement ce
@@ -253,14 +253,14 @@ function single(input: {
 }
 
 /**
- * A5.6 et N2.2 — le code lisible d'un support, par exemple `D-042`.
+ * A5.6 et N2.2 : le code lisible d'un support, par exemple `D-042`.
  *
  * `code` est une colonne de `support`, et `support` est la seule table que L0
  * scinde : son implantation revient au module 02, sa fabrication au module 04.
  * La commande ne touche donc qu'une colonne, et `buildCommand` refuse toute
  * autre part de la ligne.
  *
- * L'unicité par site est tenue par la base — index unique posé par la
+ * L'unicité par site est tenue par la base : index unique posé par la
  * migration 0027. Elle ne peut pas l'être ici : ce fichier est pur, il ne lit
  * rien, et un contrôle en mémoire laisserait passer le cas qui compte, deux
  * postes attribuant le même code au même instant.

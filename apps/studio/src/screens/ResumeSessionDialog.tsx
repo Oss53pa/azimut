@@ -3,7 +3,7 @@ import { Button, Dialog, SPACE, TEXT } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 /**
- * E5.4 — « Reprise proposée à la réouverture après incident, avec choix
+ * E5.4 : « Reprise proposée à la réouverture après incident, avec choix
  * explicite de l'utilisateur entre l'état local et l'état serveur. Aucune
  * fusion silencieuse. »
  *

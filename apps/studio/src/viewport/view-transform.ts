@@ -1,5 +1,5 @@
 /**
- * E3.1 — la transformation entre repère métier et repère de vue.
+ * E3.1 : la transformation entre repère métier et repère de vue.
  *
  * « Une transformation unique, exportée par un module dédié, convertit dans
  * les deux sens. Aucun composant d'interface ne calcule sa propre conversion.
@@ -14,7 +14,7 @@
 import type { Point } from '@azimut/core-model';
 import { ZOOM_STEP_FACTOR } from '@azimut/core-model';
 
-/** E3.2 — l'état de vue. */
+/** E3.2 : l'état de vue. */
 export type ViewState = {
   readonly centerX_m: number;
   readonly centerY_m: number;
@@ -32,7 +32,7 @@ export type ViewPoint = { readonly x_px: number; readonly y_px: number };
 /** La fenêtre d'affichage, en pixels. */
 export type Viewport = { readonly width_px: number; readonly height_px: number };
 
-/** E3.3 — l'échelle est bornée. Hors bornes, l'outil refuse au lieu de dégénérer. */
+/** E3.3 : l'échelle est bornée. Hors bornes, l'outil refuse au lieu de dégénérer. */
 export const SCALE_MIN_PX_PER_M = 0.05;
 export const SCALE_MAX_PX_PER_M = 500;
 
@@ -106,7 +106,7 @@ export function fitToContent(
 }
 
 /**
- * E3.3 — un cran de zoom autour d'un point de la vue, qui reste sous le
+ * E3.3 : un cran de zoom autour d'un point de la vue, qui reste sous le
  * pointeur. Le facteur par cran est la constante nommée du modèle
  * (`ZOOM_STEP_FACTOR`) ; l'échelle reste dans ses bornes, et un zoom qui les
  * dépasserait laisse la vue telle quelle au lieu de la déformer.
@@ -124,7 +124,7 @@ export function zoomAround(view: ViewState, viewport: Viewport, pivot: ViewPoint
   };
 }
 
-/** E3.3 — un déplacement de vue, en pixels. Il ne touche aucune donnée. */
+/** E3.3 : un déplacement de vue, en pixels. Il ne touche aucune donnée. */
 export function panBy(view: ViewState, dx_px: number, dy_px: number): ViewState {
   return {
     ...view,

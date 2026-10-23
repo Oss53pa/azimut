@@ -1,5 +1,5 @@
 /**
- * A5.6 — les emplacements de face du site : pour chaque support, autant de
+ * A5.6, les emplacements de face du site : pour chaque support, autant de
  * faces que sa typologie en prévoit (la face 0 seule sans typologie), chacune
  * déclarée en base ou non. Une face déclarée au-delà du nombre prévu reste
  * listée, marquée hors typologie, pour ne pas disparaître en silence.

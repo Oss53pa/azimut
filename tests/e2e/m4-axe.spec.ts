@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M4 (partie M) critère 1 — « Un axe tracé en une passe produit les nœuds et
+ * M4 (partie M) critère 1 : « Un axe tracé en une passe produit les nœuds et
  * arêtes attendus, sans doublon. »
  *
  * Le jugement de l'axe tient dans `state/__tests__/graph-axis.test.ts`. Ce
- * qui se prouve ici et nulle part ailleurs : la passe est un geste — un seul
- * appui, une seule annulation — et l'écran dit ce qu'il a repris. Sans ce
+ * qui se prouve ici et nulle part ailleurs : la passe est un geste (un seul
+ * appui, une seule annulation) et l'écran dit ce qu'il a repris. Sans ce
  * compte rendu, « sans doublon » serait invérifiable à l'usage : un graphe a
  * la même allure qu'il ait doublé un nœud ou non.
  */
@@ -23,7 +23,7 @@ async function setPoint(page: Page, n: number, x: string, y: string): Promise<vo
   await page.getByLabel(new RegExp(`Point ${String(n)} · Y`)).fill(y);
 }
 
-test.describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
+test.describe('M4 (partie M) critère 1 : l’axe de circulation', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(GRAPH);
     // M4 (partie M) donne une touche à chaque outil, et les champs de l'axe
@@ -102,8 +102,8 @@ test.describe('M4 (partie M) critère 1 — l’axe de circulation', () => {
   });
 
   /**
-   * Un axe sans segment ne trace rien. Plutôt qu'un code d'anomalie — le
-   * cahier des charges n'en donne aucun pour ce cas — l'écran empêche d'y
+   * Un axe sans segment ne trace rien. Plutôt qu'un code d'anomalie (le
+   * cahier des charges n'en donne aucun pour ce cas) l'écran empêche d'y
    * descendre : le retrait est refusé à deux points, et le tracé ne peut donc
    * jamais être pressé sur un axe vide.
    */

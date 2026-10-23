@@ -5,9 +5,9 @@ import { DEFAULT_SHORTCUTS } from '../../editor/shortcuts.js';
 const NONE = { ctrl: false, shift: false, alt: false, meta: false };
 
 /**
- * M2 (partie M), raccourcis — et E16, qui veut que la table soit une donnée.
+ * M2 (partie M), raccourcis : et E16, qui veut que la table soit une donnée.
  */
-describe('M2 (partie M) — raccourcis du calage', () => {
+describe('M2 (partie M) : raccourcis du calage', () => {
   it('porte les trois raccourcis discrets que M2 (partie M) nomme', () => {
     expect(CALIBRATION_SHORTCUTS.map(s => s.key)).toEqual(['0', 'Enter', 'Escape']);
   });

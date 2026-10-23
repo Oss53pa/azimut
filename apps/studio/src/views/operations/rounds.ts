@@ -1,5 +1,5 @@
 /**
- * I5.6 — ce que les écrans des tournées calculent : le garde de
+ * I5.6, ce que les écrans des tournées calculent : le garde de
  * synchronisation, et le nombre de constats d'une tournée, qui se compte au
  * lieu de se stocker.
  */

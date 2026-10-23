@@ -7,7 +7,7 @@ import { createSiteCommands } from '../site-creation.js';
 const ENV = {
   orgId: 'aaaaaaaa-0000-0000-0000-000000000001',
   existingNames: ['Déjà pris'],
-  // Q9 — l'extrait du référentiel contre lequel pays et fuseau se jugent.
+  // Q9, l'extrait du référentiel contre lequel pays et fuseau se jugent.
   countries: [{ code: 'FR', timezones: ['Europe/Paris'] }],
   defaultBuildingName: 'Bâtiment 1',
   defaultLevelName: 'Niveau 0',
@@ -48,7 +48,7 @@ function sinkThat(ok: boolean): { sink: CommandSink; seen: EntityCommand[][] } {
  * La chaîne complète de M1 (partie M), sans interface : saisie, contrôle,
  * commandes, écriture. C'est ce que le magasin enchaîne.
  */
-describe('M1 (partie M) — de la saisie à l’écriture', () => {
+describe('M1 (partie M) : de la saisie à l’écriture', () => {
   function build(draft = DRAFT, timestamp = '2026-09-21T10:00:00.000Z') {
     return createSiteCommands(draft, {
       ...ENV,
@@ -72,7 +72,7 @@ describe('M1 (partie M) — de la saisie à l’écriture', () => {
   });
 
   /**
-   * M7.5 (partie M) — « Un refus de saisie n'efface jamais le travail en
+   * M7.5 (partie M) : « Un refus de saisie n'efface jamais le travail en
    * cours. » Une écriture refusée ne laisse rien dans la pile : sans cela on
    * pourrait annuler un geste qui n'a pas eu lieu.
    */

@@ -1,7 +1,7 @@
 import type { Finding } from '@azimut/core-model';
 
 /**
- * G2.2 — Adaptive render budget. The fixed 3 000-object threshold is removed
+ * G2.2: Adaptive render budget. The fixed 3 000-object threshold is removed
  * and replaced by a budget measured at runtime: the view targets a per-frame
  * time budget; frame time is averaged over a sliding window; if the average
  * stays over budget long enough the view switches to lightweight rendering, and

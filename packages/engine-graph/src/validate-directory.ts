@@ -17,7 +17,7 @@ export type DirectoryValidationResult = {
  *
  * Exportée parce que A7.1 range « destinations non reliées » parmi ce que
  * `validateGraph` détecte. Le contrôle vivait ici, et seul `validateDirectory`
- * l'appelait — or aucun code de production n'appelle `validateDirectory`. La
+ * l'appelait : or aucun code de production n'appelle `validateDirectory`. La
  * détection existait donc sans jamais s'exécuter.
  */
 export function destinationNodeMissingFindings(site: GraphScope): Finding[] {

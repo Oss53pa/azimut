@@ -1,5 +1,5 @@
 /**
- * D12.1 — accès au dépôt de données : écran d'attente, états de chargement,
+ * D12.1, accès au dépôt de données : écran d'attente, états de chargement,
  * origine de la donnée.
  */
 export const DATA_SOURCE_FR = {
@@ -30,7 +30,7 @@ export const DATA_SOURCE_FR = {
   'sites.state.loading': 'Chargement de la liste…',
   'sites.state.failed': 'La liste des sites n’a pas pu être chargée.',
   'sites.action.reload': 'Recharger',
-  // F7 — une défaillance d'accès n'est pas une anomalie : elle appelle un état
+  // F7, une défaillance d'accès n'est pas une anomalie : elle appelle un état
   // d'écran. F10 veut qu'un message dise ce qui s'est passé et comment le
   // corriger, sans excuse ni formule vague.
   'repo.failure.request_failed': 'Le dépôt n’a pas répondu.',
@@ -45,7 +45,7 @@ export const DATA_SOURCE_FR = {
   'repo.failure.offline.hint': 'Les sites déjà ouverts restent consultables. La création attend le retour du réseau.',
   'repo.failure.rate_limited': 'Trop de demandes en peu de temps.',
   'repo.failure.rate_limited.hint': 'Attendez une minute, puis rechargez.',
-  // M1 (partie M) — formulaire de création d'un site. F10 : le libellé dit ce
+  // M1 (partie M), formulaire de création d'un site. F10 : le libellé dit ce
   // que fait l'action, et le message d'erreur ce qu'il faut corriger.
   'sites.create.open': 'Nouveau site',
   'sites.create.title': 'Nouveau site',

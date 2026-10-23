@@ -1,5 +1,5 @@
 /**
- * N1.2 / D12.1 — langues actives d'un site.
+ * N1.2 / D12.1: langues actives d'un site.
  *
  * Deux valeurs en V1, et pas une de plus : la partie N le dit explicitement,
  * et l'énuméré est fermé pour que le jour où une troisième arrive, elle passe
@@ -14,7 +14,7 @@ export const ACTIVE_LANGS = ['fr', 'en'] as const;
 export type ActiveLang = (typeof ACTIVE_LANGS)[number];
 
 /**
- * Restreint une chaîne venue de l'extérieur — base, import, fichier — à une
+ * Restreint une chaîne venue de l'extérieur (base, import, fichier) à une
  * langue admise. À employer à toute frontière qui reçoit du texte libre.
  */
 export function isActiveLang(value: string): value is ActiveLang {
@@ -26,7 +26,7 @@ export function isActiveLang(value: string): value is ActiveLang {
  *
  * Les valeurs inconnues sont écartées et l'ordre déclaré est conservé : une
  * langue citée deux fois ne l'est qu'une. Une liste vide en sort quand rien
- * n'est déclaré — ce n'est pas « le français par défaut », c'est l'absence de
+ * n'est déclaré : ce n'est pas « le français par défaut », c'est l'absence de
  * déclaration, et elle doit rester visible.
  */
 export function readActiveLangs(value: unknown): readonly ActiveLang[] {

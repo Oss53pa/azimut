@@ -1,5 +1,5 @@
 /**
- * D12.1 — modules 07 (chantier et pose) et 08 (exploitation).
+ * D12.1 : modules 07 (chantier et pose) et 08 (exploitation).
  */
 export const PRODUCTION_FR = {
   'worksite.eyebrow': 'Module 07 · H6',
@@ -46,7 +46,7 @@ export const PRODUCTION_FR = {
   'worksite.panel.findings': 'Contrôle des réserves',
   'worksite.findings.empty': 'Aucune réserve ouverte.',
   'worksite.findings.note': "Une réserve ouverte avertit ; c'est l'appelant qui refuse la bascule en « posé ».",
-  'worksite.note': "Un support ne bascule en « posé » qu'une fois ses réserves levées — ce qui donne à la couche de divergence une origine connue.",
+  'worksite.note': "Un support ne bascule en « posé » qu'une fois ses réserves levées : ce qui donne à la couche de divergence une origine connue.",
 
   'operations.eyebrow': 'Module 08 · H7',
   'operations.title': 'Maintenance',
@@ -136,7 +136,7 @@ export const PRODUCTION_EN: Readonly<Record<keyof typeof PRODUCTION_FR, string>>
   'worksite.panel.findings': 'Reserve control',
   'worksite.findings.empty': 'No open reserve.',
   'worksite.findings.note': 'An open reserve warns; the caller is what refuses the flip to "installed".',
-  'worksite.note': 'A support only flips to "installed" once its reserves are lifted — which gives the divergence layer a known origin.',
+  'worksite.note': 'A support only flips to "installed" once its reserves are lifted: which gives the divergence layer a known origin.',
 
   'operations.eyebrow': 'Module 08 · H7',
   'operations.title': 'Maintenance',
@@ -177,6 +177,6 @@ export const PRODUCTION_EN: Readonly<Record<keyof typeof PRODUCTION_FR, string>>
   'operations.divergence.uncovered': 'Uncovered points',
   'operations.divergence.orientation': 'Orientations out of range',
   'operations.divergence.undersized': 'Undersized supports',
-  'operations.divergence.explain': 'No orientation range or minimum size is declared by the model: the last two rows therefore stay at zero — they are not "compliant".',
+  'operations.divergence.explain': 'No orientation range or minimum size is declared by the model: the last two rows therefore stay at zero, they are not "compliant".',
   'operations.note': 'Divergence reads between what the schedule expects and what a round surveys. An unsynced round stays visible: it does not vanish silently.',
 };

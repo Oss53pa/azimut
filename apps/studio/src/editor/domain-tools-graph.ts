@@ -1,5 +1,5 @@
 /**
- * E7.2 — Domain-specific tools: graph operations.
+ * E7.2, Domain-specific tools: graph operations.
  *
  * Circulation axis tracing, typed node placement, series
  * duplication, and level report. These tools produce graph
@@ -42,7 +42,7 @@ export type CirculationAxisResult = {
 /**
  * Generate graph nodes and edges from a circulation axis polyline.
  *
- * This is NOT a simple line — it produces proper graph elements:
+ * This is NOT a simple line, it produces proper graph elements:
  * a node at each vertex, and an edge between consecutive nodes.
  *
  * @param points - Polyline vertices.

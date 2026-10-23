@@ -6,7 +6,7 @@ import { annotateCommands, replyCommand, setStateCommand } from '../review-annot
 import type { ReviewAnnotation } from '../review-annotation.js';
 
 /**
- * J4 (partie J) — l'annotation en révision contre la base réelle (0073), par
+ * J4 (partie J) : l'annotation en révision contre la base réelle (0073), par
  * le chemin d'écriture ordinaire et sous cloisonnement forcé.
  *
  * Ce qui s'éprouve : l'auteur et la signature de clôture sont posés par la
@@ -86,7 +86,7 @@ function open(): ReviewAnnotation {
   return { id: NOTE, anchor: { kind: 'zone', id: ZONE }, state: 'open', body: '', ink: null, created_at: '', replies: [] };
 }
 
-describe('J4 — l’annotation en révision, en base', () => {
+describe('J4 : l’annotation en révision, en base', () => {
   it('s’écrit sur sa zone ; l’auteur est posé par la base, le tracé revient tel quel', async () => {
     const out = annotateCommands([{ id: NOTE, anchor: { kind: 'zone', id: ZONE } }], { body: 'Flèche à inverser', ink: INK }, W);
     if (out.kind !== 'written') throw new Error(out.kind);

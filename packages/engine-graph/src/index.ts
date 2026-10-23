@@ -111,7 +111,7 @@ export type { LoadedRulesPack, RulesPackIndex, RulesPackSource } from '@azimut/r
 // buildRulesPackIndex lit le disque : il reste sur @azimut/rules/loader,
 // sinon le studio l'embarquerait et son build casserait.
 export { resolveSiteRulesPack, boundRulesPackIdentities } from '@azimut/rules';
-// I5.4 / N5.2-R7 — le paquet de règles publicitaires. Même raison que ci-dessus :
+// I5.4 / N5.2-R7 : le paquet de règles publicitaires. Même raison que ci-dessus :
 // le studio l'atteint par ici, sans dépendre du chargeur qui lit le disque.
 export { guardAdRulesPack } from '@azimut/rules';
 export type { AdRulesPack } from '@azimut/rules';
@@ -146,7 +146,7 @@ export type {
   OccupancyImportReport,
 } from './import-occupancy.js';
 
-// H2.5 — Tableau des messages
+// H2.5 : Tableau des messages
 export {
   INFORMATION_LEVELS,
   NO_WAYFINDING_RULES,
@@ -174,7 +174,7 @@ export { checkMessageSchedule, refreshStaleFlags } from './message-schedule-chec
 export type { StaleDiff } from './message-schedule-checks.js';
 export { messageScheduleToCsv, messageScheduleToMarkdown } from './message-schedule-export.js';
 export type { ScheduleLang } from './message-schedule-export.js';
-// R12 (partie R) — circuit de validation du tableau des messages
+// R12 (partie R) : circuit de validation du tableau des messages
 export { diffSchedules, visibleDiffLines, LINE_CHANGES } from './message-schedule-diff.js';
 export type {
   DiffCounts, FieldChange, LineChange, LineDiff, ScheduleDiff,

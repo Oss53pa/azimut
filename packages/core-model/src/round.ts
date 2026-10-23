@@ -1,5 +1,5 @@
 /**
- * D1.4 — Single rounding module. Never reimplement these elsewhere.
+ * D1.4: Single rounding module. Never reimplement these elsewhere.
  */
 
 const SVG_DECIMALS = 3;
@@ -11,7 +11,7 @@ function eliminateNegativeZero(v: number): number {
 
 /**
  * The single rounding primitive (D1.4): nearest, ties resolved away from zero.
- * Every other rounding here delegates to it — none reimplements the tie rule.
+ * Every other rounding here delegates to it: none reimplements the tie rule.
  */
 export function roundHalfAwayFromZero(value: number): number {
   if (value >= 0) return eliminateNegativeZero(Math.round(value));

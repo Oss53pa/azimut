@@ -19,7 +19,7 @@ type UncoveredRow = { readonly nodeId: string; readonly levelId: string | null; 
 type LevelRow = { readonly levelId: string; readonly points: number; readonly covered: number };
 
 /**
- * Module 02 — l'audit de couverture du jalonnement (N2.6, N2.4).
+ * Module 02 : l'audit de couverture du jalonnement (N2.6, N2.4).
  *
  * Tout vient du moteur `auditCoverage` : un point de décision est couvert
  * quand un support y est posé. Tant que le graphe ne passe pas sa validation
@@ -92,7 +92,7 @@ export function CoverageAuditView({ onNavigate }: CoverageAuditViewProps): JSX.E
     })
     .filter(row => row.points > 0);
   const pct = (covered: number, total: number): string =>
-    (total === 0 ? '—' : `${formatNumber((covered / total) * 100, lang, 1)} %`);
+    (total === 0 ? '–' : `${formatNumber((covered / total) * 100, lang, 1)} %`);
 
   const metrics: readonly Metric[] = [
     { id: 'points', label: t('coverage.metric.points'), value: String(report.total_decision_points) },
@@ -110,7 +110,7 @@ export function CoverageAuditView({ onNavigate }: CoverageAuditViewProps): JSX.E
 
   const uncoveredColumns: readonly Column<UncoveredRow>[] = [
     { id: 'point', header: t('coverage.col.point'), cell: r => labels.node(r.nodeId) },
-    { id: 'level', header: t('placement.col.level'), cell: r => (r.levelId === null ? '—' : labels.level(r.levelId)) },
+    { id: 'level', header: t('placement.col.level'), cell: r => (r.levelId === null ? '–' : labels.level(r.levelId)) },
     { id: 'branches', header: t('coverage.col.branches'), numeric: true, cell: r => String(r.branches) },
     { id: 'severity', header: t('coverage.col.severity'), cell: () => <Tag label={t('coverage.severity.blocking')} severity="blocking" /> },
   ];

@@ -6,7 +6,7 @@ import type { AssetWriter } from './asset-store.js';
 import type { Job } from './job.js';
 
 /**
- * D6.1 — a wall plan is not a file but a family of files, one per implantation.
+ * D6.1: a wall plan is not a file but a family of files, one per implantation.
  *
  * For each plan-support placement (its node position and compass azimuth), the
  * plan is oriented so what the viewer faces is up (D6.2, via
@@ -14,7 +14,7 @@ import type { Job } from './job.js';
  * family, keyed by file name. The handler writes it to storage.
  *
  * Placements are payload-driven (node, azimuth, reference, type), like the
- * other compiler handlers — no stored "plan support" model is assumed here.
+ * other compiler handlers: no stored "plan support" model is assumed here.
  */
 export type WallPlanPlacement = {
   readonly node_id: string;

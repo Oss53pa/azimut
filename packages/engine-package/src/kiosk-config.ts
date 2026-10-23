@@ -1,7 +1,7 @@
 import type { Outcome, Finding } from '@azimut/core-model';
 
 /**
- * D10.3 — Kiosk local configuration.
+ * D10.3: Kiosk local configuration.
  *
  * A file separate from the package, never recompiled with it. A single package
  * serves every kiosk of a site; each kiosk carries its own position node,

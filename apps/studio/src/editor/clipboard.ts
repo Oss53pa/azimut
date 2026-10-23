@@ -1,5 +1,5 @@
 /**
- * E7.3 — Clipboard: copy, cut, paste within editing context 1.
+ * E7.3, Clipboard: copy, cut, paste within editing context 1.
  *
  * Copy-paste between levels and between sites of the SAME organization
  * is allowed. Copy-paste between organizations is forbidden and
@@ -63,7 +63,7 @@ export function copyToClipboard(
 }
 
 // ---------------------------------------------------------------------------
-// Cut (copy + delete source — deletion handled externally)
+// Cut (copy + delete source: deletion handled externally)
 // ---------------------------------------------------------------------------
 
 export function cutToClipboard(

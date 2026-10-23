@@ -1,8 +1,8 @@
 /**
  * Les requêtes de l'adaptateur REST : `fetch` et rien d'autre (A3.3).
  *
- * Séparées de l'adaptateur pour que chaque registre lu à part — vocabulaire,
- * wayfinding — les emploie sans que le fichier de l'adaptateur grossisse.
+ * Séparées de l'adaptateur pour que chaque registre lu à part (vocabulaire,
+ * wayfinding) les emploie sans que le fichier de l'adaptateur grossisse.
  */
 import type { z } from 'zod';
 import { readRowSchema, tableColumns } from '@azimut/core-model';

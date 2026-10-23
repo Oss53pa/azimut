@@ -1,5 +1,5 @@
 /**
- * E7.1 — Toolbar component.
+ * E7.1: Toolbar component.
  *
  * Renders the tool palette grouped by function. Each button
  * dispatches set_tool to the tool reducer. The active tool is

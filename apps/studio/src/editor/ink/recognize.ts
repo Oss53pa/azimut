@@ -9,7 +9,7 @@ import {
 } from './stroke-geometry.js';
 
 /**
- * J1 (partie J) — reconnaissance de forme : « l'encre est une méthode de
+ * J1 (partie J), reconnaissance de forme : « l'encre est une méthode de
  * saisie, pas une donnée ».
  *
  * À la levée du stylet, le trait est analysé et rend ses candidates, de la
@@ -19,7 +19,7 @@ import {
  * à la souris donnent des données strictement identiques.
  *
  * Ce que la reconnaissance ne fait pas (J2) : elle ne devine pas la nature
- * métier d'une forme — c'est l'outil actif qui en décide —, ne reconstruit pas
+ * métier d'une forme (c'est l'outil actif qui en décide), ne reconstruit pas
  * un plan, ne lit pas l'écriture.
  *
  * Aucune candidate ne supprime par défaut : un trait qui barre une forme

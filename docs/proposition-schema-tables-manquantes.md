@@ -1,4 +1,4 @@
-# Proposition — schéma des tables manquantes
+# Proposition : schéma des tables manquantes
 
 **Statut : proposition, non appliquée.** Aucune migration n'est écrite dans
 `packages/db/migrations/`, aucun type n'est ajouté à `core-model`. Ce document
@@ -24,7 +24,7 @@ Deux besoins que l'on croyait de famille C n'en sont pas : les fermetures et les
 emplacements de plans muraux se portent sur des colonnes que A5 prévoit déjà
 (section 4).
 
-## 2. Famille A — présentes en base, non chargées
+## 2. Famille A : présentes en base, non chargées
 
 Ces tables existent depuis la migration indiquée. Aucun écran ne peut s'en
 servir, parce que `postgrest-repository.ts` ne les lit pas et que `SiteData` ne
@@ -45,7 +45,7 @@ les porte pas.
 lecture dans le dépôt, puis l'écran. Ce n'est pas un choix de modèle, c'est la
 mise en service de tables déjà décidées.
 
-## 3. Famille B — écarts entre la base et A5.7
+## 3. Famille B : écarts entre la base et A5.7
 
 ### 3.1 `installed_support`
 
@@ -54,7 +54,7 @@ mise en service de tables déjà décidées.
 | `installed_version int` | absent | La version posée est ce qui fonde `outdated_content` |
 | `condition` in (`good`,`worn`,`damaged`,`missing`) | absent | Sans elle, `damaged` et `missing` ne se relèvent pas |
 | `surveyed_by`, `surveyed_at` | absent | La tournée ne laisse pas de trace sur le support |
-| — | `installer_notes` | Présent en base, absent de A5.7 |
+| – | `installer_notes` | Présent en base, absent de A5.7 |
 
 Proposé : ajout des quatre colonnes, `condition` sous `CHECK`. Additif, sans
 transformation. `installer_notes` est conservé.
@@ -173,7 +173,7 @@ héritées `support_face.side` et `support_content_block.ordinal`, absentes de
 A5.6, deviennent facultatives (décision du même jour), un bloc devant garder
 `block_index` ou `ordinal`.
 
-## 5. Famille C — tables nouvelles, modules 05 à 09
+## 5. Famille C : tables nouvelles, modules 05 à 09
 
 Ni A5 ni la partie B ne définissent ces entités. Le studio les simule avec
 `domain/demo/*` (retiré depuis : les jeux de démonstration sont servis par le dépôt
@@ -188,7 +188,7 @@ Conventions appliquées partout, celles de A5 et des migrations 0007 et 0039 :
 l'utilisateur retire ; énumérés sous `CHECK` ; montants en `bigint` d'unité
 mineure avec `currency char(3)`.
 
-### 5.1 Module 05 — régie
+### 5.1 Module 05 : régie
 
 ```sql
 ad_placement   (id, org_id, site_id, code, level_id, node_id null,
@@ -213,7 +213,7 @@ base empêcherait de l'enregistrer pour le montrer. À trancher.
 **Hors proposition** : contrats, grille tarifaire, annonceurs (aucun lecteur),
 fiche technique (générée, H4.2, donc non stockée).
 
-### 5.2 Module 06 — enseignes
+### 5.2 Module 06: enseignes
 
 ```sql
 tenant_sign_regulation (id, org_id, site_id, max_height_mm int null,
@@ -233,7 +233,7 @@ article s'applique aux dossiers déposés après lui. Lecteur : `guardSignProjec
 **Hors proposition** : constat photographié et historique par cellule (M06.T4,
 M06.T5, aucun moteur).
 
-### 5.3 Module 07 — chantier
+### 5.3 Module 07: chantier
 
 ```sql
 fabrication_lot (id, org_id, site_id, code, manufacturer_name, state,
@@ -252,7 +252,7 @@ install_reserve (id, org_id, support_id, lot_id, observation_key,
 lot devient calculé. Lecteur : `auditInstallReserves`. Une réserve se lève par
 `lifted_at`, jamais par suppression.
 
-### 5.4 Module 08 — tournées
+### 5.4 Module 08 : tournées
 
 ```sql
 inspection_round   (id, org_id, site_id, zone_label, surveyor_id null,
@@ -266,7 +266,7 @@ inspection_finding (id, org_id, round_id, support_id, nature_key, severity,
 S'ajoutent à `installed_support`, `divergence`, `work_order` (famille B), qui
 restent la couche de divergence de A5.7. Lecteur : `auditSurveySync`.
 
-### 5.5 Module 09 — budget
+### 5.5 Module 09: budget
 
 ```sql
 cost_reference (id, org_id, typology_key, substrate_key,

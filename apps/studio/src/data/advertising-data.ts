@@ -1,5 +1,5 @@
 /**
- * H4 — ce que les écrans de la régie lisent : le registre de la base, et ce
+ * H4, ce que les écrans de la régie lisent : le registre de la base, et ce
  * qui n'y est pas encore.
  *
  * Deux choses n'ont pas de table, et ce n'est pas un oubli :

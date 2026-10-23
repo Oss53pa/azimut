@@ -1,5 +1,5 @@
 /**
- * H2.5 + H2.6 — Péremption et contrôles du tableau des messages.
+ * H2.5 + H2.6 : Péremption et contrôles du tableau des messages.
  *
  * Deux responsabilités distinctes :
  *
@@ -106,7 +106,7 @@ export function checkMessageSchedule(
 ): readonly Finding[] {
   const findings: Finding[] = [];
 
-  // H2.6 — nombre maximal de destinations par face
+  // H2.6 : nombre maximal de destinations par face
   const max = rules.max_destinations_per_face;
   if (max !== null) {
     const counts = countDestinationsPerFace(schedule.lines);
@@ -124,7 +124,7 @@ export function checkMessageSchedule(
     }
   }
 
-  // H2.3 — un support sans niveau d'information existe sans raison.
+  // H2.3 : un support sans niveau d'information existe sans raison.
   // Signalé une fois par support, pas une fois par ligne.
   const supportsWithoutLevel = new Set<string>();
   for (const line of schedule.lines) {
@@ -140,7 +140,7 @@ export function checkMessageSchedule(
     });
   }
 
-  // H2.5 — péremption, une anomalie par ligne concernée
+  // H2.5 : péremption, une anomalie par ligne concernée
   for (const line of schedule.lines) {
     if (!line.stale) continue;
     findings.push({

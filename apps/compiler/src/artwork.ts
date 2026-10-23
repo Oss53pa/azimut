@@ -25,7 +25,7 @@ export type ArtworkRenderParams = {
   readonly pdfTarget: PdfTarget;
   readonly creationDate: Date;
   readonly nodeId: string;
-  /** Support composed on that node — identifies its lines in the schedule. */
+  /** Support composed on that node: identifies its lines in the schedule. */
   readonly supportId: string;
   readonly templateId: string;
   readonly profileKey: string;
@@ -41,21 +41,21 @@ export type ArtworkRenderParams = {
   /** Orientation registry of the support; defaults to 'wayfinding'. */
   readonly supportRegistry?: string;
   /**
-   * Reading context of the support (interior/exterior) — scopes the legibility
+   * Reading context of the support (interior/exterior): scopes the legibility
    * rule (D3.5). Legibility is checked only when this, `readingDistanceM`, a
    * bound pack, and a measured text size are all present.
    */
   readonly supportContext?: string;
-  /** Reading distance of the support (m) — feeds the legibility formula. */
+  /** Reading distance of the support (m): feeds the legibility formula. */
   readonly readingDistanceM?: number;
   /**
-   * A5.6 — dimensions carried by the support instance (mm). When set they
+   * A5.6: dimensions carried by the support instance (mm). When set they
    * override the typology's default face size.
    */
   readonly overrideWidthMm?: number;
   readonly overrideHeightMm?: number;
   /**
-   * A5.6 — origin of the dimensions. When 'overridden' and the resulting format
+   * A5.6: origin of the dimensions. When 'overridden' and the resulting format
    * is non-conform, LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM is raised.
    */
   readonly dimensionsSource?: string;
@@ -91,7 +91,7 @@ export type ArtworkRender = {
    */
   readonly legibilityFindings: readonly Finding[];
   /**
-   * A5.6 — raised (LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM) when the support's
+   * A5.6: raised (LAYOUT.DIMENSIONS_OVERRIDDEN_NONCONFORM) when the support's
    * dimensions were hand-set ('overridden') and the resulting format fails the
    * format-conformance (legibility) check. Empty otherwise.
    */
@@ -102,7 +102,7 @@ export type ArtworkRender = {
    */
   readonly contentOverflowFindings: readonly Finding[];
   /**
-   * M04.G3 — le format que le contenu, la distance de lecture et la variante
+   * M04.G3 : le format que le contenu, la distance de lecture et la variante
    * linguistique la plus longue imposent, indépendamment de celui qui a été
    * employé. `null` quand il n'est pas calculable : pas de paquet rattaché, pas
    * de distance relevée, ou pas de liste de destinations sur la face. Sa
@@ -130,7 +130,7 @@ export async function renderArtwork(
     (st) => st.key === template.support_type_key,
   );
   const face = supportType?.faces.find((f) => f.side === template.side);
-  // A5.6 — the support instance's dimensions win when set (dimensions_source
+  // A5.6: the support instance's dimensions win when set (dimensions_source
   // 'overridden'); otherwise the typology's default face size, then a fallback.
   const widthMm = params.overrideWidthMm ?? face?.default_width_mm ?? 600;
   const heightMm = params.overrideHeightMm ?? face?.default_height_mm ?? 400;
@@ -158,7 +158,7 @@ export async function renderArtwork(
   const { svg, min_text_font_size_mm } = renderFaceWithMeasures(resolved.value, renderOptions);
 
   // Content fit (LAYOUT.CONTENT_OVERFLOW). Runs only when a text measure is
-  // supplied — no font-metrics table ships yet (G5.1), so it is dormant.
+  // supplied: no font-metrics table ships yet (G5.1), so it is dormant.
   let contentOverflowFindings: readonly Finding[] = [];
   if (params.measureText !== undefined) {
     contentOverflowFindings = checkFaceContentFit(
@@ -181,8 +181,8 @@ export async function renderArtwork(
   // Legibility (LEGIBILITY.MIN_CHAR_HEIGHT). Scoped by the support's reading
   // context (D3.5); needs a bound pack, a context, a positive reading distance,
   // and a measured text height. A support with no surveyed distance (0) is not
-  // checked — the floor would flag it on data it does not have. The height is
-  // the rendered em size — cap-height conversion (partie G) is deferred, so the
+  // checked: the floor would flag it on data it does not have. The height is
+  // the rendered em size: cap-height conversion (partie G) is deferred, so the
   // verdict is provisional.
   let legibilityFindings: readonly Finding[] = [];
   if (
@@ -202,15 +202,15 @@ export async function renderArtwork(
     if (!legibility.ok) legibilityFindings = legibility.findings;
   }
 
-  // M04.G3 — le format que le contenu, la distance de lecture et la variante
+  // M04.G3 : le format que le contenu, la distance de lecture et la variante
   // linguistique la plus longue imposent. Calculé quand un paquet est rattaché
   // et qu'une distance est relevée ; la largeur reste indéterminée tant
   // qu'aucune mesure de texte n'est fournie (G5.1).
   const computedFormat = requiredFaceFormat(params, resolved.value);
 
-  // A5.6 / M04.G3 — a hand-set format that comes out non-conform is a blocking
+  // A5.6 / M04.G3, a hand-set format that comes out non-conform is a blocking
   // anomaly distinct from the underlying failure: it tells the operator to fix
-  // the dimensions, not the content. Triggered by any format check — the text
+  // the dimensions, not the content. Triggered by any format check: the text
   // too small for the reading distance (legibility) or text wider than its
   // block (content overflow).
   //
@@ -263,7 +263,7 @@ export async function renderArtwork(
 }
 
 /**
- * M04.G3 — le format que le contenu, la distance de lecture et la variante
+ * M04.G3 : le format que le contenu, la distance de lecture et la variante
  * linguistique la plus longue imposent.
  *
  * Rend `null` dès qu'une des trois entrées manque : sans paquet rattaché, la

@@ -308,7 +308,7 @@ describe('detectColumns', () => {
   });
 });
 
-describe('parseCsvLine — complex quoting', () => {
+describe('parseCsvLine: complex quoting', () => {
   it('handles separator inside quoted field with escaped quotes', () => {
     // Field: a;"b";c  (with escaped quotes inside)
     const result = parseCsvLine('"a;""b"";c";d', ';');

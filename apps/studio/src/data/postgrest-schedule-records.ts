@@ -1,5 +1,5 @@
 /**
- * R12 (partie R) — le circuit du tableau des messages d'un site, lu par l'API
+ * R12 (partie R), le circuit du tableau des messages d'un site, lu par l'API
  * REST : versions (0027), lignes, décisions (0074), passages de la
  * validation de complétude (0035), et annotations de révision avec leur fil
  * (0073, J4). Les annotations et réponses supprimées ne sont pas relues : la

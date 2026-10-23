@@ -21,7 +21,7 @@ type BudgetViewProps = {
 };
 
 /**
- * Module 09 — budget et estimation. Une typologie sans coût de référence
+ * Module 09 : budget et estimation. Une typologie sans coût de référence
  * n'est pas chiffrée au hasard : la ligne reste non chiffrée et le dit. Lu en
  * base (0043), ou dans le jeu de démonstration du dépôt de référence.
  */
@@ -83,7 +83,7 @@ export function BudgetView({ siteKey }: BudgetViewProps): JSX.Element {
 
   const lineColumns: readonly Column<BudgetLine>[] = [
     { id: 'phase', header: t('budget.col.phase'), cell: l => { const key = phaseKey(l.phase_key); return key === null ? l.phase_key : t(key); } },
-    { id: 'lot', header: t('budget.col.lot'), cell: l => (l.lot_id === null ? '—' : lotCodes.get(l.lot_id) ?? l.lot_id) },
+    { id: 'lot', header: t('budget.col.lot'), cell: l => (l.lot_id === null ? '–' : lotCodes.get(l.lot_id) ?? l.lot_id) },
     {
       id: 'estimated',
       header: t('budget.col.estimated'),
@@ -94,13 +94,13 @@ export function BudgetView({ siteKey }: BudgetViewProps): JSX.Element {
       id: 'quoted',
       header: t('budget.col.quoted'),
       numeric: true,
-      cell: l => formatMoney(l.quoted, '—'),
+      cell: l => formatMoney(l.quoted, '–'),
     },
     {
       id: 'actual',
       header: t('budget.col.actual'),
       numeric: true,
-      cell: l => formatMoney(l.actual, '—'),
+      cell: l => formatMoney(l.actual, '–'),
     },
     {
       id: 'variance',
@@ -122,7 +122,7 @@ export function BudgetView({ siteKey }: BudgetViewProps): JSX.Element {
   const referenceColumns: readonly Column<CostReference>[] = [
     { id: 'typology', header: t('budget.col.typology'), cell: r => r.typology_key },
     { id: 'substrate', header: t('budget.col.substrate'), cell: r => r.substrate_key },
-    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer_name ?? '—' },
+    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer_name ?? '–' },
     {
       id: 'cost',
       header: t('budget.col.unitcost'),
@@ -131,7 +131,7 @@ export function BudgetView({ siteKey }: BudgetViewProps): JSX.Element {
         ? <Tag label={t('budget.reference.absent')} severity="warning" />
         : formatMoney(r.unit_cost, t('budget.unpriced')),
     },
-    { id: 'since', header: t('budget.col.since'), cell: r => r.since ?? '—' },
+    { id: 'since', header: t('budget.col.since'), cell: r => r.since ?? '–' },
   ];
 
   return (

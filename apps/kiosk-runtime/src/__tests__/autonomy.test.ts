@@ -4,11 +4,11 @@ import { computeWayfinding } from '../wayfinding-session.js';
 import { refMultilevel } from '@azimut/testkit';
 
 /**
- * D10.5 — Autonomy check.
+ * D10.5: Autonomy check.
  *
  * The kiosk runtime must run the full user journey without a single outbound
  * request (INV-1). Here we trap every network global; if the journey touches
- * any of them the test fails — that attempt is exactly what would raise
+ * any of them the test fails: that attempt is exactly what would raise
  * PACKAGE.NETWORK_DEPENDENCY in a served package.
  */
 
@@ -21,7 +21,7 @@ const NETWORK_GLOBALS = [
   'EventSource',
 ] as const;
 
-describe('D10.5 — kiosk journey makes no outbound request', () => {
+describe('D10.5: kiosk journey makes no outbound request', () => {
   const attempts: string[] = [];
   const saved: NetGlobals = {};
   const g = globalThis as unknown as NetGlobals;

@@ -1,5 +1,5 @@
 /**
- * H2.5 — état calculé de l'écran « Tableau des messages ».
+ * H2.5 : état calculé de l'écran « Tableau des messages ».
  *
  * Toute la résolution de contenu revient au moteur : cet module ne fait que
  * lui fournir ses entrées et rassembler ses sorties. Aucun texte de face n'est
@@ -60,7 +60,7 @@ export type ScheduleInputsChoice = {
  * Calcule le tableau et ses contrôles.
  *
  * Quand le site ne porte aucun support implanté, l'implantation d'essai prend
- * le relais — et l'écran le signale : `source` vaut alors `trial`.
+ * le relais, et l'écran le signale : `source` vaut alors `trial`.
  */
 export function buildScheduleModel(
   site: SiteData,

@@ -1,5 +1,5 @@
 /**
- * E5 + E7.3 — Document commands.
+ * E5 + E7.3: Document commands.
  *
  * Every editing operation becomes a Command carrying the document state
  * before and after it (E5.1). Applying `before` undoes the operation,
@@ -137,7 +137,7 @@ export function deleteShapesCommand(
 }
 
 // ---------------------------------------------------------------------------
-// Movement — alignment, distribution, nudge
+// Movement: alignment, distribution, nudge
 // ---------------------------------------------------------------------------
 
 /**

@@ -3,7 +3,7 @@ import { guardCreativeAgainstSpec, type Creative, type CreativeSpec } from './ad
 import { sanitizeSvg, type SanitizeConfig } from './asset-sanitizer.js';
 
 /**
- * N5.2 — réception d'un visuel d'annonceur, règles M05.R5 et M05.R6.
+ * N5.2 : réception d'un visuel d'annonceur, règles M05.R5 et M05.R6.
  *
  * M05.R5 : « Tout visuel reçu est assaini avant stockage, selon les règles d'import
  * d'actifs déjà posées. Un visuel non assaini n'est jamais rendu. »
@@ -11,7 +11,7 @@ import { sanitizeSvg, type SanitizeConfig } from './asset-sanitizer.js';
  *
  * Les deux sont ici dans cet ordre, et l'ordre porte du sens : on assainit
  * avant de stocker, donc avant tout le reste. Un visuel dont l'assainissement
- * échoue ne reçoit pas de contrôle technique — le contrôler reviendrait à
+ * échoue ne reçoit pas de contrôle technique : le contrôler reviendrait à
  * traiter comme un document un fichier qu'on vient de déclarer dangereux.
  *
  * Deux axes, jamais confondus. L'assainissement dit si le visuel peut être
@@ -24,7 +24,7 @@ export type CreativePayload =
   /** Un SVG, dont la source est assainissable ici. */
   | { readonly kind: 'svg'; readonly source: string }
   /**
-   * Un format binaire — PDF, PNG. L'assainissement fait autorité côté serveur,
+   * Un format binaire, PDF, PNG. L'assainissement fait autorité côté serveur,
    * en environnement isolé (E14.1) ; le navigateur ne peut pas le prononcer.
    */
   | { readonly kind: 'binary' };
@@ -44,7 +44,7 @@ export type CreativeIntake = {
   readonly creative_id: string;
   readonly sanitation: SanitationState;
   /**
-   * M05.R5 (partie N) — un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
+   * M05.R5 (partie N) : un visuel non assaini n'est jamais rendu. Vrai du seul état `clean` :
    * `deferred` n'est pas « propre en attendant », c'est « pas encore assaini ».
    */
   readonly renderable: boolean;

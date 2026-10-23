@@ -14,7 +14,7 @@ type RecordedDivergencesPanelProps = {
 };
 
 /**
- * A5.7 — les divergences enregistrées en base, relevées sur le terrain, sur
+ * A5.7 : les divergences enregistrées en base, relevées sur le terrain, sur
  * un support ou sur le nœud d'un point non couvert (0041). À
  * distinguer du rapprochement, qui les calcule : les deux listes ne se
  * fusionnent pas, elles ne disent pas la même chose.

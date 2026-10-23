@@ -39,7 +39,7 @@ const rows: StoredRow[] = [
 
 const state: SessionState = { rows, queued: [], online: true };
 
-describe('L3.1 — le parcours d’un visiteur dans l’atelier', () => {
+describe('L3.1 : le parcours d’un visiteur dans l’atelier', () => {
   it('les profils se lisent dans la session ; aucun n’est inventé', () => {
     expect(profilesOfSession(state).map(p => p.key)).toEqual(['general']);
     expect(profilesOfSession({ ...state, rows: rows.filter(r => r.table !== 'travel_profile') })).toEqual([]);

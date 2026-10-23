@@ -52,7 +52,7 @@ const A = shape('dec-1', 'layer-0', 0);
 const B = shape('dec-2', 'layer-0', 2);
 const C = shape('dec-3', 'layer-1', 4);
 
-describe('E5+E9 — editor document', () => {
+describe('E5+E9: editor document', () => {
   describe('queries', () => {
     it('starts empty', () => {
       const doc = emptyDocument('site-1');

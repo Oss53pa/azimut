@@ -7,7 +7,7 @@ import {
 
 const css = readFileSync(fileURLToPath(new URL('../studio-theme.css', import.meta.url)), 'utf8');
 
-describe('J3.2 — la palette de l’esquisse', () => {
+describe('J3.2 : la palette de l’esquisse', () => {
   it('porte les quatre couleurs que sketch_stroke.color accepte (migration 0072)', () => {
     expect(Object.keys(sketchPalette).map(k => k.replace('sketch-', '')))
       .toEqual(['graphite', 'brick', 'ultramarine', 'fir']);

@@ -1,8 +1,8 @@
 /**
- * G6.2 / E13 — Luminance-contrast, an accessibility measure computed from
+ * G6.2 / E13: Luminance-contrast, an accessibility measure computed from
  * display (sRGB) values with the WCAG relative-luminance formula, never a
  * colorimetric measure. Pure and deterministic; the threshold it is compared
- * against is never here — it comes from a loaded rules pack (INV-5).
+ * against is never here: it comes from a loaded rules pack (INV-5).
  */
 function parseHex(hex: string): { r: number; g: number; b: number } | null {
   const m = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(hex.trim());

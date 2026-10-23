@@ -1,5 +1,5 @@
 /**
- * D9 — State machines. Unlisted transitions are forbidden.
+ * D9: State machines. Unlisted transitions are forbidden.
  */
 import { admittedEvents } from './support-version-state.js';
 import { SUPPORT_VERSION_STATES } from './site.js';
@@ -33,13 +33,13 @@ function assertTransition(
 }
 
 /**
- * D9 / M04.G7 — la machine des versions de support et d'épreuve.
+ * D9 / M04.G7 : la machine des versions de support et d'épreuve.
  *
  * Une seule table, celle de `support-version-state.ts`, qui porte les
  * événements et les effets en plus des états. Elle était recopiée ici en
  * états seuls ; deux tables décrivant la même machine finissent par diverger,
- * et c'est celle qui porte M04.G7 — rien n'est admis depuis `approved` sauf le
- * remplacement — qui doit faire foi (invariant 1).
+ * et c'est celle qui porte M04.G7 (rien n'est admis depuis `approved` sauf le
+ * remplacement) qui doit faire foi (invariant 1).
  */
 const PROOF_TRANSITIONS = buildMap(
   SUPPORT_VERSION_STATES.flatMap(from =>

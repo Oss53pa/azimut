@@ -23,12 +23,12 @@ function parseMode(raw: unknown): CheckMode {
 export type AuditSiteContext = {
   readonly site: SiteData;
   /**
-   * Ce que le site oppose à ses propres textes — A5.8 et A5.11.
+   * Ce que le site oppose à ses propres textes : A5.8 et A5.11.
    *
    * Facultatif, et l'absence n'est pas neutre : les contrôles qui dépendent
    * d'une déclaration ne s'exécutent alors pas, et le résultat les nomme dans
-   * `checks_undeclared`. C'est ce qu'exige A5.8 — « le contrôle ne s'exécute
-   * pas et le signale » — et c'est ce qui distingue un site sans charte d'un
+   * `checks_undeclared`. C'est ce qu'exige A5.8 (« le contrôle ne s'exécute
+   * pas et le signale ») et c'est ce qui distingue un site sans charte d'un
    * site dont la charte n'interdit rien.
    */
   readonly vocabulary?: SiteVocabulary;

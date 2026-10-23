@@ -60,7 +60,7 @@ export const buildingLink = azimut.table('building_link', {
 ]);
 
 /**
- * O11 — fermeture temporaire d'une ou plusieurs arêtes (migration 0069).
+ * O11 : fermeture temporaire d'une ou plusieurs arêtes (migration 0069).
  * Bornes en heure locale du site (O4), sans fuseau ; fin incluse.
  */
 export const temporaryClosure = azimut.table('temporary_closure', {

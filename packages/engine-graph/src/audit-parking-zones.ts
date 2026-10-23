@@ -2,7 +2,7 @@ import type { Finding, SiteData, SiteZone } from '@azimut/core-model';
 import { isParkingSpaceFootprint, isParkingZone, codePointCompare } from '@azimut/core-model';
 
 /**
- * Places de stationnement et zones qui les portent — section S8.
+ * Places de stationnement et zones qui les portent : section S8.
  *
  * « Une place de stationnement est une empreinte de nature `parking_space`. Un
  * parking est une zone de nature `parking`. Aucune table nouvelle : ce sont les

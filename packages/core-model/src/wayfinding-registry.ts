@@ -1,10 +1,10 @@
 /**
- * N2.2 — le registre du wayfinding : zones d'orientation, règles de nommage,
+ * N2.2, le registre du wayfinding : zones d'orientation, règles de nommage,
  * niveaux d'information par typologie. Tables de la migration 0027.
  *
  * Comme le vocabulaire, ce registre ne rejoint pas `SiteData` : un site se
  * charge et se dessine sans lui, et il se lit à part. Un registre vide dit que
- * le site ne déclare rien — il ne fait réussir aucun contrôle.
+ * le site ne déclare rien : il ne fait réussir aucun contrôle.
  *
  * Les énumérés recopient les CHECK de 0027 ; un test structurel vérifie que
  * les deux listes coïncident.
@@ -19,7 +19,7 @@ export type NamingTarget = (typeof NAMING_TARGETS)[number];
 export const NAMING_SCOPES = ['site', 'building', 'level'] as const;
 export type NamingScope = (typeof NAMING_SCOPES)[number];
 
-/** H2.3 — quatre niveaux d'information, du plus général au plus local. */
+/** H2.3 : quatre niveaux d'information, du plus général au plus local. */
 export const INFORMATION_LEVELS = [1, 2, 3, 4] as const;
 export type InformationLevelRank = (typeof INFORMATION_LEVELS)[number];
 

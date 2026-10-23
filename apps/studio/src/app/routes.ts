@@ -1,11 +1,11 @@
 /**
- * F15 — `app/`, « composition des écrans, routage ».
+ * F15 : `app/`, « composition des écrans, routage ».
  *
  * Les cinq chemins sont ceux que la partie M donne, mot pour mot. Aucun
  * routeur tiers : A3.3 n'en préautorise aucun, et cinq chemins n'en demandent
  * pas.
  *
- * Le module est pur — il ne lit ni `location` ni `history` — pour que
+ * Le module est pur (il ne lit ni `location` ni `history`) pour que
  * l'analyse d'un chemin s'éprouve sans navigateur.
  */
 

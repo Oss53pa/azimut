@@ -15,7 +15,7 @@ import type { EdgeEndpoint } from '../graph-input.js';
 import { writeGraphValidation } from '../graph-validation-commands.js';
 
 /**
- * M2, M3 et M4 (partie M) — les écrans de l'atelier écrivent réellement.
+ * M2, M3 et M4 (partie M) : les écrans de l'atelier écrivent réellement.
  *
  * Les essais unitaires de ces trois écrans prouvent la forme des commandes
  * contre un émetteur de doublure, qui accepte tout. Ils ne prouvent pas que la
@@ -141,7 +141,7 @@ afterAll(async () => {
 });
 
 // ---------------------------------------------------------------------------
-// M2 (partie M) — import et calage
+// M2 (partie M) : import et calage
 // ---------------------------------------------------------------------------
 
 const PLAN: AcceptedPlan = {
@@ -171,7 +171,7 @@ function calibration() {
   return computed.value;
 }
 
-describe('M2 (partie M) — le calage s’écrit', () => {
+describe('M2 (partie M) : le calage s’écrit', () => {
   it('écrit le fond, son calage et ses points', async () => {
     await apply(calibrationCommands(PLAN, calibration(), ORIGIN, CALIBRATION_WRITE));
 
@@ -189,7 +189,7 @@ describe('M2 (partie M) — le calage s’écrit', () => {
     expect(points.map(r => r['ordinal'])).toEqual([0, 1]);
   });
 
-  /** M01.S1 — le repère est fixé par le premier calage et ne bouge plus. */
+  /** M01.S1 : le repère est fixé par le premier calage et ne bouge plus. */
   it('fixe l’origine du repère site', async () => {
     const rows = await alice`
       select origin_x_m, origin_y_m from azimut.site where id = ${SITE}`;
@@ -199,7 +199,7 @@ describe('M2 (partie M) — le calage s’écrit', () => {
 });
 
 // ---------------------------------------------------------------------------
-// M3 (partie M) — tracé des empreintes
+// M3 (partie M) : tracé des empreintes
 // ---------------------------------------------------------------------------
 
 const SQUARE: readonly Point[] = [
@@ -217,7 +217,7 @@ function accepted(code: string, vertices: readonly Point[] = SQUARE) {
 
 const FOOTPRINT_WRITE: FootprintWrite = { orgId: ORG, levelId: LEVEL, timestamp: T };
 
-describe('M3 (partie M) — les empreintes s’écrivent', () => {
+describe('M3 (partie M) : les empreintes s’écrivent', () => {
   it('écrit deux cellules en un seul geste', async () => {
     const rows: readonly FootprintRow[] = [
       { id: FOOTPRINT_1, footprint: accepted('B01') },
@@ -235,7 +235,7 @@ describe('M3 (partie M) — les empreintes s’écrivent', () => {
     expect(written.map(r => r['kind'])).toEqual(['cell', 'cell']);
   });
 
-  /** M01.S2 — la géométrie est en mètres, et se relit telle quelle. */
+  /** M01.S2 : la géométrie est en mètres, et se relit telle quelle. */
   it('rend la géométrie au millimètre', async () => {
     const rows = await alice`
       select geometry from azimut.footprint where id = ${FOOTPRINT_1}`;
@@ -244,7 +244,7 @@ describe('M3 (partie M) — les empreintes s’écrivent', () => {
 });
 
 // ---------------------------------------------------------------------------
-// M4 (partie M) — saisie du graphe
+// M4 (partie M) : saisie du graphe
 // ---------------------------------------------------------------------------
 
 function endpoint(id: string, x: number): EdgeEndpoint {
@@ -253,7 +253,7 @@ function endpoint(id: string, x: number): EdgeEndpoint {
 
 const GRAPH_WRITE: GraphWrite = { orgId: ORG, levelId: LEVEL, timestamp: T };
 
-describe('M4 (partie M) — le graphe s’écrit', () => {
+describe('M4 (partie M) : le graphe s’écrit', () => {
   it('écrit deux nœuds et l’arête qui les relie', async () => {
     const nodes: readonly NodeRow[] = [
       { id: NODE_A, node: acceptNode({ kind: 'entrance', label: 'Entrée', position: { x_m: 0, y_m: 0 } }) },
@@ -274,7 +274,7 @@ describe('M4 (partie M) — le graphe s’écrit', () => {
     expect(written.map(r => r['kind'])).toEqual(['entrance', 'junction']);
   });
 
-  /** M01.S6 — la longueur est calculée, jamais saisie. */
+  /** M01.S6 : la longueur est calculée, jamais saisie. */
   it('écrit une arête dont la longueur est celle du calcul', async () => {
     const rows = await alice`
       select length_m, width_m, accessible, direction from azimut.edge where id = ${EDGE}`;
@@ -286,11 +286,11 @@ describe('M4 (partie M) — le graphe s’écrit', () => {
 });
 
 // ---------------------------------------------------------------------------
-// M5 (partie M) — validation de complétude
+// M5 (partie M) : validation de complétude
 // ---------------------------------------------------------------------------
 
 /**
- * M5 (partie M) — « Relancer | Recalcule, affiche la durée réelle, enregistre
+ * M5 (partie M) : « Relancer | Recalcule, affiche la durée réelle, enregistre
  * le passage dans `graph_validation` ».
  *
  * Décor à part, et qui ne se retire pas. A12.3 interdit toute suppression d'un
@@ -303,7 +303,7 @@ describe('M4 (partie M) — le graphe s’écrit', () => {
 const ORG_V = 'c3000000-0000-0000-0000-000000000001';
 const SITE_V = 'c3000000-0000-0000-0000-000000000101';
 
-describe('M5 (partie M) — le passage de validation s’enregistre', () => {
+describe('M5 (partie M) : le passage de validation s’enregistre', () => {
   it('écrit un passage, avec l’empreinte du graphe validé', async () => {
     await client`alter table azimut.membership no force row level security`;
     await client`alter table azimut.organization no force row level security`;

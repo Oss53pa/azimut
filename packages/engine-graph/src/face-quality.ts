@@ -3,10 +3,10 @@ import { checkContrast, type LoadedRulesPack } from '@azimut/rules';
 import type { FaceTheme } from './render-face.js';
 
 /**
- * G6.2 / E13 — Face-level contrast control, wired to the render pipeline's own
+ * G6.2 / E13: Face-level contrast control, wired to the render pipeline's own
  * colours. The face theme's text and accent (pictogram) colours are each
  * checked against the background using thresholds resolved from a loaded rules
- * pack — never a value in code (INV-5). An absent rule propagates
+ * pack: never a value in code (INV-5). An absent rule propagates
  * RULES.RULE_NOT_FOUND: the product refuses rather than inventing a threshold.
  */
 export type FaceContrastInput = {

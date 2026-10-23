@@ -4,7 +4,7 @@ import type { RouteAnimationOptions } from '@azimut/engine-graph';
 import type { SessionState, StoredRow } from '../session-store.js';
 
 /**
- * L3.1 — un refus ou un avertissement du calcul des points de décision n'est
+ * L3.1 : un refus ou un avertissement du calcul des points de décision n'est
  * jamais tu par l'aperçu. Le moteur n'en lève aucun aujourd'hui : l'essai le
  * simule, pour que le jour où il en lèvera, l'aperçu le dise déjà.
  */
@@ -46,7 +46,7 @@ const finding = (severity: Finding['severity']): Finding => ({
   code: 'GRAPH.NOT_VALIDATED', severity, entity: null, params: {}, ruleRef: null,
 });
 
-describe('L3.1 — l’aperçu du parcours ne tait rien du calcul des points de décision', () => {
+describe('L3.1 : l’aperçu du parcours ne tait rien du calcul des points de décision', () => {
   beforeEach(() => { verdict.value = { ok: true, value: [], warnings: [] }; });
 
   it('un refus arrête le tracé et se rend tel quel', () => {

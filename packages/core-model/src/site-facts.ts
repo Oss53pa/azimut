@@ -1,5 +1,5 @@
 /**
- * Faits du site et mots qu'ils interdisent — A5.11, règle M01.S11.
+ * Faits du site et mots qu'ils interdisent : A5.11, règle M01.S11.
  *
  * « Un fait du site est une donnée déclarée qui n'appartient à aucune autre
  * table : capacité annoncée d'un parking, surface commercialisable, nombre de
@@ -30,7 +30,7 @@ export type ForbiddenWord = {
 };
 
 /**
- * Statut d'un fait déclaré — les trois valeurs d'A5.11, et elles seules.
+ * Statut d'un fait déclaré : les trois valeurs d'A5.11, et elles seules.
  *
  * `proposal` est ce qu'une source propose sans que personne l'ait arrêté.
  * `to_verify` est ce qu'on a relevé sans pouvoir le confirmer. La distinction
@@ -38,7 +38,7 @@ export type ForbiddenWord = {
  *
  * Aucune valeur de retrait : A5.11 n'en donne pas. Le statut d'un fait dit
  * ce que la déclaration vaut, non ce qu'un objet devient quand il disparaît du
- * plan — c'est le statut des objets de stationnement qui porte ce dernier cas.
+ * plan : c'est le statut des objets de stationnement qui porte ce dernier cas.
  */
 export type FactStatus = 'existing' | 'proposal' | 'to_verify';
 
@@ -57,8 +57,8 @@ export const PUBLISHABLE_FACT_STATUSES: readonly FactStatus[] = ['existing'];
 /**
  * Valeur d'un fait.
  *
- * A5.11 la stocke en `jsonb`, et les trois exemples qu'elle nomme — capacité
- * annoncée, surface commercialisable, nombre de places de livraison — sont des
+ * A5.11 la stocke en `jsonb`, et les trois exemples qu'elle nomme (capacité
+ * annoncée, surface commercialisable, nombre de places de livraison) sont des
  * scalaires. Le modèle retient donc les trois scalaires de JSON. Une valeur
  * structurée, tableau ou objet, entre comme sa sérialisation canonique : rien
  * n'en produit aujourd'hui, et la rendre en texte ne perd pas la donnée,
@@ -70,7 +70,7 @@ export type SiteFact = {
   /** Clé stable du fait : `parking_gratuit`, `niveaux_parking`. */
   readonly key: string;
   readonly value: FactValue;
-  /** A5.11 — ce que la déclaration vaut. Requis : il n'y a pas de statut par défaut. */
+  /** A5.11 : ce que la déclaration vaut. Requis : il n'y a pas de statut par défaut. */
   readonly status: FactStatus;
   /** D'où vient l'affirmation : plan, relevé, décision de la Direction. */
   readonly source_ref: string;
@@ -85,7 +85,7 @@ export type SiteFact = {
    */
   readonly declared_by?: string;
   /**
-   * A5.11 — l'objet sur lequel le fait porte, quand il en désigne un.
+   * A5.11 : l'objet sur lequel le fait porte, quand il en désigne un.
    *
    * « Renseignés, le fait porte sur cet objet, par exemple la capacité annoncée
    * d'un parking donné ; vides, il porte sur le site entier. L'unicité porte
@@ -96,7 +96,7 @@ export type SiteFact = {
    * désigne aucun objet, un identifiant sans nature ne dit pas où le chercher,
    * et les deux moitiés se liraient comme un fait de site. Le type l'exprime
    * par un seul champ facultatif portant les deux valeurs, ce qu'une paire de
-   * champs facultatifs ne permettrait pas — la base le tient par
+   * champs facultatifs ne permettrait pas : la base le tient par
    * `site_fact_target_complete`.
    */
   readonly target?: FactTarget;
@@ -110,7 +110,7 @@ export type SiteFact = {
  * document a déjà deux références polymorphes de cette forme,
  * `audit_log.entity` et `attachment.entity_kind`, ni l'une ni l'autre
  * contrainte en valeur. Les contrôles qui lisent une nature la nomment
- * eux-mêmes, depuis la section qui la leur donne — voir
+ * eux-mêmes, depuis la section qui la leur donne : voir
  * `PARKING_FACT_TARGET_KIND`.
  */
 export type FactTarget = {
@@ -119,7 +119,7 @@ export type FactTarget = {
 };
 
 /**
- * S-35 — la nature de cible qu'un fait de capacité de parking désigne.
+ * S-35 : la nature de cible qu'un fait de capacité de parking désigne.
  *
  * « Un parking est une zone de nature `parking`. » La capacité annoncée porte
  * donc sur une zone, et c'est la section S8 qui le dit, non ce module.

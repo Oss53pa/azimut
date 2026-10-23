@@ -1,5 +1,5 @@
 /**
- * D12.1 / partie H — la carte du produit : familles, modules, états.
+ * D12.1 / partie H, la carte du produit : familles, modules, états.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;
  * la table anglaise est typée contre elle, une traduction manquante
@@ -13,13 +13,13 @@ export const MODULES_FR = {
   'family.deliverables': 'Livrables',
   'family.steering': 'Pilotage',
 
-  // Navigation — entrées ajoutées par la carte du produit
+  // Navigation, entrées ajoutées par la carte du produit
   'nav.item.productmap': 'Carte du produit',
   'nav.item.sites': 'Sites',
   'nav.item.calibration': 'Calage du plan',
   'nav.item.footprints': 'Empreintes',
 
-  // Modules — noms
+  // Modules, noms
   'module.01.name': 'Socle du site',
   'module.02.name': 'Wayfinding',
   'module.03.name': 'Parcours',
@@ -35,7 +35,7 @@ export const MODULES_FR = {
   'module.13.name': 'Bornes et appli',
   'module.14.name': 'Restitutions',
 
-  // Modules — résumés
+  // Modules, résumés
   'module.01.summary': 'Graphe, destinations, supports, plans de niveaux, contrôles de complétude.',
   'module.02.summary': 'Tableau des messages : génération, péremption ligne à ligne, exports tableur et document.',
   'module.03.summary': "Garde-fous sur les hypothèses de flux et l'export. Calcul d'exposition non construit.",
@@ -51,7 +51,7 @@ export const MODULES_FR = {
   'module.13.summary': 'Paquet de borne compilé et vérifié, exécutable de borne. Application mobile et gestion du parc non construites.',
   'module.14.summary': 'Dossiers client et fabricant, rapport client. Aucun moteur ne les compose encore.',
 
-  // Modules — état du moteur
+  // Modules, état du moteur
   'module.engine.complete': 'Moteur complet',
   'module.engine.partial': 'Moteur partiel',
   'module.engine.absent': 'Moteur absent',

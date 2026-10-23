@@ -5,7 +5,7 @@ import { LINE_CHANGES, diffSchedules, visibleDiffLines } from '../message-schedu
 import type { LineDiff } from '../message-schedule-diff.js';
 
 /**
- * R11 (partie R) — la comparaison de deux versions.
+ * R11 (partie R) : la comparaison de deux versions.
  *
  * Critère 7 de R18 : « La comparaison de deux versions distingue ajoutées,
  * supprimées et modifiées, **sans fausse suppression d'une ligne
@@ -65,7 +65,7 @@ function byId(lines: readonly LineDiff[], id: string): LineDiff {
 // Les quatre marques
 // ---------------------------------------------------------------------------
 
-describe('R11 (partie R) — les quatre marques', () => {
+describe('R11 (partie R) : les quatre marques', () => {
   const reference = schedule(6, [
     line(),
     line({ block_index: 1 }),
@@ -117,10 +117,10 @@ describe('R11 (partie R) — les quatre marques', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Critère 7 de R18 — pas de fausse suppression
+// Critère 7 de R18 : pas de fausse suppression
 // ---------------------------------------------------------------------------
 
-describe('R18 (partie R) critère 7 — aucune fausse suppression', () => {
+describe('R18 (partie R) critère 7 : aucune fausse suppression', () => {
   /**
    * La comparaison repose sur l'identifiant stable, dérivé du support, de la
    * face et du bloc. Une régénération produit des lignes neuves, mais le même
@@ -165,7 +165,7 @@ describe('R18 (partie R) critère 7 — aucune fausse suppression', () => {
 // Les écarts, champ par champ
 // ---------------------------------------------------------------------------
 
-describe('R11 (partie R) — la valeur ancienne et la nouvelle, côte à côte', () => {
+describe('R11 (partie R) : la valeur ancienne et la nouvelle, côte à côte', () => {
   function changesFor(over: Partial<MessageLine>): readonly { field: string; before: string; after: string }[] {
     const diff = diffSchedules(
       schedule(6, [line()]),
@@ -253,7 +253,7 @@ describe('R11 (partie R) — la valeur ancienne et la nouvelle, côte à côte',
 // Présentation et déterminisme
 // ---------------------------------------------------------------------------
 
-describe('R11 (partie R) — inchangées masquées, ordre stable', () => {
+describe('R11 (partie R) : inchangées masquées, ordre stable', () => {
   const diff = diffSchedules(
     schedule(6, [line(), line({ block_index: 1 })]),
     schedule(7, [line(), line({ block_index: 1, direction: 'right' })]),
@@ -268,7 +268,7 @@ describe('R11 (partie R) — inchangées masquées, ordre stable', () => {
     expect(visibleDiffLines(diff, true)).toHaveLength(2);
   });
 
-  /** INV-4 — deux comparaisons du même couple rendent le même résultat. */
+  /** INV-4 : deux comparaisons du même couple rendent le même résultat. */
   it('deux comparaisons identiques rendent le même résultat', () => {
     const again = diffSchedules(
       schedule(6, [line(), line({ block_index: 1 })]),

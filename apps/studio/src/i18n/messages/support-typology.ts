@@ -1,5 +1,5 @@
 /**
- * A5.6 — le lien d'un support à sa typologie, et ce qu'un écran suppose quand
+ * A5.6 : le lien d'un support à sa typologie, et ce qu'un écran suppose quand
  * il manque.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;

@@ -3,7 +3,7 @@ import postgres from 'postgres';
 import { provisionStatements } from '../provision-organization.js';
 
 /**
- * A12.3 — « `audit_log`, `approval`, `message_schedule_approval` et
+ * A12.3 : « `audit_log`, `approval`, `message_schedule_approval` et
  * `graph_validation` sont en insertion seule, garanti en base et non par
  * convention applicative. Aucune modification et aucune suppression ne sont
  * possibles, pour aucun rôle, administration comprise. »
@@ -44,7 +44,7 @@ beforeAll(async () => {
 
 afterAll(async () => { await sql.end(); });
 
-describe('A12.3 — les tables en insertion seule, en base', () => {
+describe('A12.3 : les tables en insertion seule, en base', () => {
   it('chaque table nommée existe, sauf celles qui attendent encore leur création', () => {
     const missing = INSERT_ONLY.filter(t => !existing.includes(t));
     expect(missing.filter(t => !NOT_YET_CREATED.has(t))).toEqual([]);
@@ -105,7 +105,7 @@ describe('A12.3 — les tables en insertion seule, en base', () => {
  * rôle d'un membre. Depuis 0083, c'est la base qui écrit alors l'entrée :
  * l'application n'insère plus dans le journal.
  */
-describe('A12.3 — audit_log refuse la modification, la suppression et le vidage', () => {
+describe('A12.3 : audit_log refuse la modification, la suppression et le vidage', () => {
   async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void>): Promise<void> {
     const done = new Error('annulation voulue');
     await sql.begin(async tx => {

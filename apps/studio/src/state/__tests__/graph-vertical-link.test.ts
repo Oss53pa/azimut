@@ -4,7 +4,7 @@ import type { VerticalLinkDraft } from '../graph-vertical-link.js';
 import { graphCommands } from '../graph-commands.js';
 
 /**
- * T-1.5 — « Une arête entre deux niveaux sans liaison verticale associée est
+ * T-1.5 : « Une arête entre deux niveaux sans liaison verticale associée est
  * refusée. » Le refus tient déjà dans `graph-input.test.ts` ; ce qui se prouve
  * ici est l'autre moitié : qu'il existe un geste qui produit l'arête *avec* sa
  * liaison, et qu'il refuse ce qui n'en est pas une.
@@ -60,7 +60,7 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
    * à l'aplomb l'un de l'autre sont à distance nulle *dans le plan*. La
    * longueur est tridimensionnelle, et c'est l'altitude du niveau qui la
    * porte. Posés tous deux à l'altitude zéro, ils seraient refusés pour
-   * longueur nulle — alors que c'est l'alignement même que QC-12 attend.
+   * longueur nulle : alors que c'est l'alignement même que QC-12 attend.
    */
   it('tire la longueur de la dénivelée, et non du plan', () => {
     const outcome = acceptVerticalLink(draft());
@@ -114,7 +114,7 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
   });
 
   /**
-   * M01.S10 — une passerelle entre deux bâtiments est à la fois une liaison
+   * M01.S10 : une passerelle entre deux bâtiments est à la fois une liaison
    * verticale et une liaison inter-bâtiments. C'est le seul geste de l'atelier
    * qui puisse produire une arête franchissant une limite de bâtiment, et la
    * règle exige alors la ligne.
@@ -181,7 +181,7 @@ describe('acceptVerticalLink (T-1.5, outil « Liaison verticale » de M4, partie
 
   /**
    * Les deux écritures vont ensemble. Les séparer laisserait, entre les deux
-   * commandes, un état que la validation refuse — et qu'une annulation
+   * commandes, un état que la validation refuse : et qu'une annulation
    * partielle pourrait figer.
    */
   it('s’écrit en un seul groupe, l’arête avant la liaison', () => {

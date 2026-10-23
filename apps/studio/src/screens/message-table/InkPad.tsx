@@ -3,7 +3,7 @@ import { useStrokeCapture } from '../../editor/ink/use-stroke-capture.js';
 import type { InkNote, InkPoint } from '../../state/review-annotation.js';
 
 /**
- * J4 (partie J) — le cadre où l'on écrit une annotation au stylet.
+ * J4 (partie J) : le cadre où l'on écrit une annotation au stylet.
  *
  * Le tracé est gardé tel quel, rapporté au cadre (0 à 1) avec sa pression : une
  * note manuscrite, que rien ne reconnaît ni ne redresse (décision de

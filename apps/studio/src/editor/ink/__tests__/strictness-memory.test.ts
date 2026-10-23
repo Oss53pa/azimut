@@ -6,7 +6,7 @@ function memoryStore(): Pick<Storage, 'getItem' | 'setItem'> {
   return { getItem: key => data.get(key) ?? null, setItem: (key, value) => { data.set(key, value); } };
 }
 
-describe('J1.3 — le niveau de redressement mémorisé', () => {
+describe('J1.3 : le niveau de redressement mémorisé', () => {
   it('se retrouve d’une session à l’autre', () => {
     const store = memoryStore();
     expect(recallStrictness(store)).toBe(DEFAULT_STRICTNESS);

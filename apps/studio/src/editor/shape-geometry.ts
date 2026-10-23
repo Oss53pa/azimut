@@ -1,5 +1,5 @@
 /**
- * E9 + E4 — Geometry of decoration shapes.
+ * E9 + E4: Geometry of decoration shapes.
  *
  * Pure functions converting between tool command data (E5) and the
  * decoration geometry of the habillage layer (E9.3), plus the bounds

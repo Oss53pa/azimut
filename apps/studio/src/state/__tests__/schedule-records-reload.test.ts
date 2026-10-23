@@ -10,7 +10,7 @@ import { openAnnotationIdsOn, readAnnotations } from '../review-annotation.js';
 import type { SessionState } from '../session-store.js';
 
 /**
- * R12 — un tableau relu de la base se lit comme un tableau écrit dans la
+ * R12 : un tableau relu de la base se lit comme un tableau écrit dans la
  * session. La base rend ses colonnes `jsonb` en objets et ses instants avec
  * `+00:00` ; le chemin d'écriture les avait posés en texte et avec `Z`.
  */
@@ -59,7 +59,7 @@ const records: ScheduleRecords = {
   }],
 };
 
-describe('R12 — le circuit du tableau, relu de la base', () => {
+describe('R12 : le circuit du tableau, relu de la base', () => {
   const session = sessionFromSite(site, undefined, records);
 
   it('le tableau relu se lit, avec ses lignes et leur écartement', () => {

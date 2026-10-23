@@ -15,7 +15,7 @@ import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
 import { ConsequenceDialog } from './ConsequenceDialog.js';
 
 /**
- * M2 (partie M) — écran d'import et de calage de plan.
+ * M2 (partie M) : écran d'import et de calage de plan.
  *
  * « C'est l'écran d'entrée réel du produit, et le plus important de la
  * tranche. Tout le reste en dépend. »
@@ -137,7 +137,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
           <StateBanner severity="info" message={t(blockedKey(blocked))} />
         )}
 
-        {/* Étape 1 — le fond. */}
+        {/* Étape 1 : le fond. */}
         <Panel title={t('calib.step.plan')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, padding: SPACE.md }}>
             <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
@@ -196,7 +196,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
           </div>
         </Panel>
 
-        {/* Étape 2 — l'échelle. */}
+        {/* Étape 2 : l'échelle. */}
         <Panel title={t('calib.step.scale')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md }}>
             <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
@@ -208,7 +208,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
               menu secondaire. » M2 pose les deux points au clic dans la zone
               de travail ; leur équivalent au clavier manquait, et l'écran
               n'avait aucun moyen de les recevoir. L'adaptateur y suppléait en
-              posant deux points d'office à la validation — c'est-à-dire en
+              posant deux points d'office à la validation : c'est-à-dire en
               écrivant en base des points de calage que personne n'avait posés.
             */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: SPACE.sm }}>
@@ -260,7 +260,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
           </div>
         </Panel>
 
-        {/* Étape 3 — l'orientation. */}
+        {/* Étape 3: l'orientation. */}
         <Panel title={t('calib.step.orientation')}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md }}>
             <AngleField

@@ -1,7 +1,7 @@
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * A9 — les sites dans l'ordre où un lecteur les cherche : par nom, dans la
+ * A9, les sites dans l'ordre où un lecteur les cherche : par nom, dans la
  * langue active, déclarée par l'appelant.
  *
  * Le dépôt rend ses sites dans un ordre de donnée, par points de code : il ne

@@ -2,13 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { listValue } from '../site-commands.js';
 
 /**
- * E5.1 — l'encodage d'une liste dans une commande.
+ * E5.1 : l'encodage d'une liste dans une commande.
  *
  * La base a refusé chaque création de site tant que `active_langs`, colonne de
  * tableau, recevait du JSON. Ces essais fixent l'encodage ; l'essai de base de
  * la création de site vérifie qu'il passe réellement.
  */
-describe('E5.1 — une liste voyage dans l’encodage de sa colonne', () => {
+describe('E5.1 : une liste voyage dans l’encodage de sa colonne', () => {
   it('rend une liste simple sans citation inutile', () => {
     expect(listValue(['en', 'fr'])).toBe('{en,fr}');
   });

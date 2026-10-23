@@ -6,7 +6,7 @@ const types: readonly SupportType[] = [
   { id: 'typ-b', org_id: 'org-1', key: 'b', name: 'B', face_count: 2, faces: [] },
 ];
 
-describe('A5.6 — supportTypologyOf', () => {
+describe('A5.6: supportTypologyOf', () => {
   it('résout la typologie par son identifiant', () => {
     expect(supportTypologyOf(types, { typology_id: 'typ-b' })?.key).toBe('b');
   });

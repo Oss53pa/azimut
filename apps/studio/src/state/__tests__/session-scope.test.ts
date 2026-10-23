@@ -7,19 +7,19 @@ import { EMPTY_SESSION } from '../session-store.js';
 import type { SessionState, StoredRow } from '../session-store.js';
 
 /**
- * M5 (partie M) — l'écran de validation fait tourner le moteur.
+ * M5 (partie M) : l'écran de validation fait tourner le moteur.
  *
  * L'enjeu de ces essais est l'aller-retour : un site de référence, versé dans
  * une session puis relu, doit rendre le verdict que le moteur rend sur le site
  * lui-même. Sans cela, l'écran validerait une image dégradée de la saisie, et
- * un opérateur verrait des anomalies qui n'existent pas — ou, plus grave,
+ * un opérateur verrait des anomalies qui n'existent pas : ou, plus grave,
  * n'en verrait pas.
  */
 function sessionOf(rows: readonly StoredRow[]): SessionState {
   return { ...EMPTY_SESSION, rows };
 }
 
-describe('M5 (partie M) — ce que la session donne à valider', () => {
+describe('M5 (partie M) : ce que la session donne à valider', () => {
   it('rend le verdict du site sur ce que la session porte du site', () => {
     const scope = graphScopeFromSession(sessionFromSite(refMinimal));
     expect(scope.unreadable).toEqual([]);

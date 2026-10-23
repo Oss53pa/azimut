@@ -17,7 +17,7 @@ import type {
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * M1bis (partie M) — l'adaptateur de la fiche de site.
+ * M1bis (partie M) : l'adaptateur de la fiche de site.
  *
  * Il lit la structure dans le magasin de session, par le chemin inverse de
  * celui qui l'écrit, et délègue tout jugement à `state/site-structure.ts`.

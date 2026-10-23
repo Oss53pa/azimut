@@ -148,7 +148,7 @@ export function multiLevelWithoutAccessibleVlFindings(
 }
 
 /**
- * M01.S10 — une arête entre deux bâtiments sans sa ligne `building_link`.
+ * M01.S10 : une arête entre deux bâtiments sans sa ligne `building_link`.
  *
  * « Toute arête dont les deux extrémités appartiennent à des bâtiments
  * différents porte une ligne `building_link`, qui déclare si le passage est
@@ -199,14 +199,14 @@ export function crossBuildingWithoutLinkFindings(site: GraphScope): Finding[] {
  *
  * « Relié » se lit sur le graphe : une arête dont les deux extrémités
  * retombent, par leur niveau, sur deux bâtiments différents. Aucune ligne de
- * `building_link` n'est requise pour cela — la table existe, rien ne l'écrit
+ * `building_link` n'est requise pour cela : la table existe, rien ne l'écrit
  * encore, et fonder le constat sur elle ferait passer tout site pour isolé.
  *
  * Deux codes selon ce que le bâtiment a par ailleurs :
  *
- *  · `GRAPH.BUILDING_ISOLATED` — ni liaison, ni accès indépendant. Le
+ *  · `GRAPH.BUILDING_ISOLATED`, ni liaison, ni accès indépendant. Le
  *    bâtiment est inatteignable.
- *  · `GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY` — pas de liaison, mais un
+ *  · `GRAPH.BUILDING_ACCESS_INDEPENDENT_ONLY` : pas de liaison, mais un
  *    accès propre. T-1.5 : « signalé, pas refusé ». C'est un relevé possible,
  *    pas une faute.
  *
@@ -323,14 +323,14 @@ export function missingDestinationNameFindings(
 }
 
 /**
- * `GRAPH.VERTICAL_LINK_MISALIGNED` — une liaison verticale qui ne tombe pas au
+ * `GRAPH.VERTICAL_LINK_MISALIGNED` : une liaison verticale qui ne tombe pas au
  * même endroit d'un niveau à l'autre.
  *
  * D2.2 : « Liaison verticale non alignée entre deux niveaux, ascenseurs et
  * escaliers droits seulement, tolérance de la section D1.5. » Un visiteur qui monte par
  * l'ascenseur ressort au même endroit du plan ; si les deux nœuds ne
  * coïncident pas, le plan du niveau supérieur place la sortie ailleurs que là
- * où elle est, et aucun contrôle existant ne le voyait — `VERTICAL_LINK_MISSING`
+ * où elle est, et aucun contrôle existant ne le voyait : `VERTICAL_LINK_MISSING`
  * ne juge que la présence de la liaison, pas sa position.
  *
  * **Le seuil n'est pas inventé et n'est pas normatif.** D2.2 renvoie à D1.5,
@@ -342,13 +342,13 @@ export function missingDestinationNameFindings(
  * **L'escalier mécanique et la rampe sont hors du contrôle**, pour une seule et
  * même raison : l'un comme l'autre gagne sa hauteur en avançant, et leurs deux
  * extrémités ne peuvent donc pas coïncider en plan. Les retenir produirait une
- * anomalie bloquante sur une géométrie correcte — et sur toute rampe réelle,
+ * anomalie bloquante sur une géométrie correcte : et sur toute rampe réelle,
  * la coïncidence exigée n'étant tenable que par ce qui occupe une gaine
  * verticale. Restent donc l'ascenseur et l'escalier, les deux natures qui en
  * occupent une, et pour lesquelles la coïncidence est le fait à vérifier.
  *
  * Deux natures retenues sur quatre, et c'est D2.2 qui le dit désormais. Sans
- * cette lecture, aucun passage entre deux bâtiments ne serait représentable —
+ * cette lecture, aucun passage entre deux bâtiments ne serait représentable :
  * il franchit toujours une limite de niveau (M01.S10), donc porte une liaison,
  * et ses deux têtes sont par construction distantes.
  */
@@ -402,7 +402,7 @@ export function verticalLinkMisalignedFindings(
 }
 
 /**
- * `GRAPH.DESTINATION_ENTRANCE_COVERAGE` — une destination que toutes les
+ * `GRAPH.DESTINATION_ENTRANCE_COVERAGE` : une destination que toutes les
  * entrées empruntées n'atteignent pas.
  *
  * Le contrôle existant, `GRAPH.DESTINATION_UNREACHABLE`, réunit ce que toutes
@@ -413,15 +413,15 @@ export function verticalLinkMisalignedFindings(
  * dessert est un défaut de jalonnement que rien ne voyait.
  *
  * Il lit de plus le sens de circulation, que les contrôles de structure
- * ignorent — voir `buildDirectedAdjacency`. Un sens unique qui coupe une aile
+ * ignorent : voir `buildDirectedAdjacency`. Un sens unique qui coupe une aile
  * la laisse reliée au sens du modèle, donc muette pour eux.
  *
  * **« Nœud public » est lu comme « nœud portant une destination ».** Le modèle
  * ne classe pas les nœuds en publics et privés ; en inventer la notion serait
  * un choix de modèle de données (A2.2). Les destinations sont ce que le site
  * publie, et le rapprochement est le plus étroit que le modèle permette. Les
- * commodités qui ne portent pas de destination — sanitaires, point
- * d'information — restent donc hors du contrôle.
+ * commodités qui ne portent pas de destination (sanitaires, point
+ * d'information) restent donc hors du contrôle.
  *
  * Une anomalie par destination, et non par couple entrée-destination : une aile
  * coupée est un défaut, pas cinq. Les entrées en défaut sont nommées dans les
@@ -434,8 +434,8 @@ export function verticalLinkMisalignedFindings(
  * pas une donnée impossible.
  *
  * Elle ne compte que les **entrées empruntées par au moins un profil de
- * visiteur** : une entrée qu'aucun profil ne peut franchir — service,
- * livraison, issue à sens unique qu'aucun profil n'emprunte — n'a pas à
+ * visiteur** : une entrée qu'aucun profil ne peut franchir (service,
+ * livraison, issue à sens unique qu'aucun profil n'emprunte) n'a pas à
  * desservir l'annuaire, et l'exiger d'elle produisait une anomalie sur un
  * relevé exact. « Empruntée » se lit sur le graphe : le profil peut franchir
  * au moins une arête depuis cette entrée, au sens de `isEdgeTraversableFrom`.
@@ -503,8 +503,8 @@ export function destinationNotReachedFromEveryEntranceFindings(
  *
  * « Emprunter » se lit sur le graphe et non sur une déclaration : le profil
  * franchit au moins une arête depuis cette entrée. `isEdgeTraversableFrom`
- * porte déjà cette lecture — sens de circulation, accessibilité requise,
- * natures exclues — et la réécrire ici donnerait deux définitions de la même
+ * porte déjà cette lecture (sens de circulation, accessibilité requise,
+ * natures exclues) et la réécrire ici donnerait deux définitions de la même
  * règle.
  *
  * Aucun profil, aucune entrée retenue : voir la note de

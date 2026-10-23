@@ -10,7 +10,7 @@ import type { Service } from '../service.js';
 import { processNextJob } from '../worker.js';
 
 /**
- * T-0.11 — le service assemblé comme en production, contre la base réelle.
+ * T-0.11 : le service assemblé comme en production, contre la base réelle.
  *
  * Un utilisateur dépose un travail `build_kiosk_package` ; le service le prend
  * par la file en base, lit le site sous l'identité du demandeur, écrit le
@@ -120,7 +120,7 @@ function loop(): Service['loop'] {
   return service.loop;
 }
 
-describe('T-0.11 — le service assemblé sur la base', () => {
+describe('T-0.11 : le service assemblé sur la base', () => {
   it('fabrique un paquet de borne sous l’identité du demandeur', async () => {
     const id = await enqueue('build_kiosk_package', {
       site_id: SITE, version: 1, built_at: '2026-10-04T09:00:00.000Z',

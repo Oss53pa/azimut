@@ -1,5 +1,5 @@
 {
-  "mesure": "M8 (partie M) critère 5 — absence de violation détectable automatiquement",
+  "mesure": "M8 (partie M) critère 5 : absence de violation détectable automatiquement",
   "outil": "axe-core, dépendance de développement, jamais livrée",
   "regles": [
     "wcag2a",

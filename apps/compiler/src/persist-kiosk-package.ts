@@ -3,13 +3,13 @@ import type { KioskManifest } from '@azimut/engine-package';
 import type { AssetWriter } from './asset-store.js';
 
 /**
- * D10 — Persist an assembled kiosk package to storage and produce the
+ * D10: Persist an assembled kiosk package to storage and produce the
  * `kiosk_package` record for the caller to insert.
  *
  * Writes every tree file (manifest.json included) under `<storagePath>/…` and
  * returns the record: `content_hash` is the manifest's deterministic identity
  * (builtAt excluded, D10.2); `checksum` is the byte integrity of exactly what
- * was stored — the SHA-256 of the manifest.json bytes, which cover every file's
+ * was stored: the SHA-256 of the manifest.json bytes, which cover every file's
  * hash plus builtAt. The record mirrors the `kiosk_package` table; persisting
  * the DB row is the caller's responsibility (the compiler holds no DB handle).
  */
@@ -39,7 +39,7 @@ export async function persistKioskPackage(
     throw new Error('Assembled kiosk tree is missing manifest.json');
   }
 
-  // Deterministic write order (sorted paths) — a sink may key on order.
+  // Deterministic write order (sorted paths): a sink may key on order.
   const paths = [...tree.keys()].sort();
   for (const path of paths) {
     await sink.write(joinStorage(storagePath, path), tree.get(path) as Uint8Array);

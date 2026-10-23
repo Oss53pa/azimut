@@ -38,7 +38,7 @@ function installed(version: number, marker: string): InstalledVersion {
   return { manifest: r.value.manifest, files: r.value.files };
 }
 
-describe('D10.4 — shouldUpdate', () => {
+describe('D10.4: shouldUpdate', () => {
   it('updates when no local version', () => {
     expect(shouldUpdate(null, 5)).toBe(true);
   });
@@ -50,7 +50,7 @@ describe('D10.4 — shouldUpdate', () => {
   });
 });
 
-describe('D10.4 — verifyAgainstManifest', () => {
+describe('D10.4: verifyAgainstManifest', () => {
   it('accepts a consistent tree', () => {
     const v = installed(1, 'v1');
     const result = verifyAgainstManifest(v.manifest, v.files);
@@ -89,7 +89,7 @@ describe('D10.4 — verifyAgainstManifest', () => {
   });
 });
 
-describe('D10.4 — commitUpdate (atomic) and rollback', () => {
+describe('D10.4: commitUpdate (atomic) and rollback', () => {
   it('commits a valid candidate and keeps the previous version', () => {
     const install: KioskInstallation = { current: installed(1, 'v1'), previous: null };
     const candidate = installed(2, 'v2');

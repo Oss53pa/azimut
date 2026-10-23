@@ -11,7 +11,7 @@ function cat(
   return { categoryId: id, label, color, pictogramId: null, destinationCount: count };
 }
 
-describe('E9.4 — legend generation', () => {
+describe('E9.4: legend generation', () => {
   describe('generateLegend', () => {
     it('includes only categories with destinations', () => {
       const categories = [

@@ -10,7 +10,7 @@ export type ScreenAction = {
 };
 
 type ScreenHeaderProps = {
-  /** Short eyebrow — module number and state, already translated. */
+  /** Short eyebrow: module number and state, already translated. */
   readonly eyebrow?: string | undefined;
   readonly title: string;
   /** Second-language title, shown small beside the first (D12). */
@@ -20,7 +20,7 @@ type ScreenHeaderProps = {
 };
 
 /**
- * F3 — the single title block every module screen opens with. The eyebrow
+ * F3: the single title block every module screen opens with. The eyebrow
  * carries the module's place in the map (partie H), never decoration.
  */
 export function ScreenHeader(

@@ -13,7 +13,7 @@ function cmd(id: string, before: number, after: number, group?: string): Command
   return createCommand('move', id, before, after, '2024-01-01T00:00:00Z', group);
 }
 
-describe('E5 — command pattern', () => {
+describe('E5: command pattern', () => {
   describe('execute', () => {
     it('adds command to undo stack', () => {
       const s = historyReducer(EMPTY_HISTORY, {

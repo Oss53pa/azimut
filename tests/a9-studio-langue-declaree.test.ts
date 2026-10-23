@@ -4,7 +4,7 @@ import { relative } from 'node:path';
 import { LOCALIZED, ROOT, studioFiles } from './a9-perimetre.js';
 
 /**
- * A9, version 30 — « Dans l'interface, un tri selon la langue de l'utilisateur
+ * A9, version 30 : « Dans l'interface, un tri selon la langue de l'utilisateur
  * est légitime, à condition que la langue soit déclarée explicitement et non
  * déduite de la machine. Un contrôle automatique refuse [...], dans
  * l'interface, tout appel qui ne déclare aucune langue. »
@@ -91,7 +91,7 @@ function currentCounts(): Map<string, number> {
   return counts;
 }
 
-describe('A9 — ce qui déclare une langue dans l’interface', () => {
+describe('A9 : ce qui déclare une langue dans l’interface', () => {
   it('un appel déclare sa langue par l’argument prévu, écrit et défini', () => {
     expect(countUndeclared('a.localeCompare(b, lang)')).toBe(0);
     expect(countUndeclared("a.localeCompare(b, 'fr', { sensitivity: 'base' })")).toBe(0);
@@ -112,7 +112,7 @@ describe('A9 — ce qui déclare une langue dans l’interface', () => {
   });
 });
 
-describe('A9 — aucun appel sans langue dans l’interface', () => {
+describe('A9 : aucun appel sans langue dans l’interface', () => {
   it('aucun fichier de l’interface n’en compte un seul', () => {
     const found = [...currentCounts()].map(([file, count]) => `${file} : ${count}`);
     expect(found, 'Déclarer la langue active, ou comparer par points de code (codePointCompare)').toEqual([]);

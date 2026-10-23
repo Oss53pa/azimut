@@ -6,7 +6,7 @@ import type { Strictness } from './recognition-thresholds.js';
 import { toleranceFor } from './pointer-kind.js';
 
 /**
- * J1.2 (partie J) — les formes de l'éditeur d'habillage (E7) tracées au
+ * J1.2 (partie J), les formes de l'éditeur d'habillage (E7) tracées au
  * stylet : « cercle ou ovale approximatif : ellipse, cercle si proche », et
  * « rectangle approximatif : rectangle, angles droits ».
  *
@@ -57,7 +57,7 @@ export function strokeToEditorEllipse(
 }
 
 /**
- * J1.2 — « Rectangle approximatif : rectangle, angles droits », avec l'outil
+ * J1.2, « Rectangle approximatif : rectangle, angles droits », avec l'outil
  * Rectangle de l'éditeur d'habillage. Le rectangle de l'éditeur est posé sur
  * les axes, comme l'ellipse : un rectangle tracé de biais n'est pas redressé
  * d'office.

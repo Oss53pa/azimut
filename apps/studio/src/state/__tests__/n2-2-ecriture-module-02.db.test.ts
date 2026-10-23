@@ -10,12 +10,12 @@ import {
 import { writeScheduleCommands } from '../message-schedule-commands.js';
 
 /**
- * N2.2 — le chemin d'écriture du module 02, contre une base réelle.
+ * N2.2 : le chemin d'écriture du module 02, contre une base réelle.
  *
  * Les essais unitaires prouvent que les commandes ont la forme voulue. Ils ne
  * prouvent pas qu'elles s'écrivent : les contraintes qui portent les règles du
- * module — `decision_point_id` non nul pour M02.W4, le motif obligatoire pour M02.W9,
- * les politiques de cloisonnement — sont en base et nulle part ailleurs. Le
+ * module (`decision_point_id` non nul pour M02.W4, le motif obligatoire pour M02.W9,
+ * les politiques de cloisonnement) sont en base et nulle part ailleurs. Le
  * préalable K4 nº 7 a montré que ces trois points se décident à l'exécution.
  *
  * Il demande donc `pnpm test:db`. Mise en place dans
@@ -113,7 +113,7 @@ beforeAll(async () => {
   bob = await reserveAs(BOB);
 
   // Le décor : il appartient aux modules 01, 03 et 04, et s'écrit par leurs
-  // commandes. `support` fait exception — L0 le scinde colonne par colonne, et
+  // commandes. `support` fait exception : L0 le scinde colonne par colonne, et
   // aucun module ne possède aujourd'hui sa création. Les deux supports sont
   // donc posés en SQL, sous l'identité et sous les politiques. C'est un manque
   // constaté du modèle de commande, pas un contournement du cloisonnement.
@@ -310,7 +310,7 @@ describe('le tableau des messages et ses lignes', () => {
  * Ce que la base refuse quand le constructeur est contourné.
  *
  * Les commandes du module produisent des lignes conformes ; ces essais posent
- * la question inverse — si quelque chose d'autre écrivait, la règle tiendrait-
+ * la question inverse : si quelque chose d'autre écrivait, la règle tiendrait-
  * elle ? M02.W4 et M02.W9 ne sont des règles opposables que si la réponse est oui.
  */
 describe('M02.W4 et M02.W9 tenues par la base, et non par l’appelant', () => {
@@ -373,7 +373,7 @@ describe('M02.W4 et M02.W9 tenues par la base, et non par l’appelant', () => {
 });
 
 /**
- * `support.code` — la colonne que le module 02 possède dans une table qu'il ne
+ * `support.code` : la colonne que le module 02 possède dans une table qu'il ne
  * possède pas (L0), et que l'annexe Z rend requise.
  */
 describe('le code d’un support', () => {

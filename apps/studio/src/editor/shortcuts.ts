@@ -1,5 +1,5 @@
 /**
- * E16 — Keyboard shortcuts.
+ * E16: Keyboard shortcuts.
  *
  * Single declaration table. Never scattered across components.
  * Automated conflict detection, including browser/OS reserved keys.
@@ -168,7 +168,7 @@ export function detectDestructiveWithoutModifier(
   return shortcuts.filter((def) => {
     if (!def.destructive) return false;
     const { ctrl, shift, alt, meta } = def.modifiers;
-    // Delete key is exempted — it's universally expected
+    // Delete key is exempted: it's universally expected
     if (def.key.toLowerCase() === 'delete') return false;
     return !ctrl && !shift && !alt && !meta;
   });

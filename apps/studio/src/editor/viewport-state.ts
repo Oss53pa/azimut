@@ -1,7 +1,7 @@
 /**
- * E3.2 — Viewport state management.
+ * E3.2: Viewport state management.
  *
- * View state is UI-only — it never enters the undo stack (E5.2),
+ * View state is UI-only: it never enters the undo stack (E5.2),
  * never persists in the business model, and is memorized per level
  * and per user session.
  */
@@ -14,7 +14,7 @@ import {
 } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
-// Actions — all view manipulations expressed as plain data
+// Actions: all view manipulations expressed as plain data
 // ---------------------------------------------------------------------------
 
 export type ViewAction =
@@ -28,7 +28,7 @@ export type ViewAction =
   | { readonly type: 'fit'; readonly bounds: { readonly minX: number; readonly minY: number; readonly maxX: number; readonly maxY: number }; readonly viewport: ViewportSize; readonly padding_px: number };
 
 // ---------------------------------------------------------------------------
-// Reducer — pure, deterministic, no side effects
+// Reducer: pure, deterministic, no side effects
 // ---------------------------------------------------------------------------
 
 export function viewReducer(state: ViewState, action: ViewAction): ViewState {
@@ -110,7 +110,7 @@ export function viewReducer(state: ViewState, action: ViewAction): ViewState {
 }
 
 // ---------------------------------------------------------------------------
-// Default view — used when no saved view exists for a level
+// Default view: used when no saved view exists for a level
 // ---------------------------------------------------------------------------
 
 export const DEFAULT_VIEW: ViewState = {

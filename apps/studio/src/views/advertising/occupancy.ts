@@ -1,5 +1,5 @@
 /**
- * H4.3 — lecture du planning d'occupation.
+ * H4.3 : lecture du planning d'occupation.
  *
  * Les états proviennent des contrats ; cette fonction ne fait que les projeter
  * sur une grille de mois. Un emplacement sans contrat sur un mois est libre,

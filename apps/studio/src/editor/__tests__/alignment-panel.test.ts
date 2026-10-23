@@ -1,7 +1,7 @@
 /**
  * Tests for alignment, distribution, and z-order pure functions.
  *
- * The AlignmentPanel component is thin UI — these tests cover
+ * The AlignmentPanel component is thin UI: these tests cover
  * the underlying pure computations from alignment.ts.
  */
 
@@ -19,7 +19,7 @@ const ITEMS: readonly AlignableBounds[] = [
   { id: 'c', minX_m: 6, minY_m: 1, maxX_m: 8, maxY_m: 3 },
 ];
 
-describe('E7.3 — alignment and distribution', () => {
+describe('E7.3: alignment and distribution', () => {
   describe('computeAlignment', () => {
     it('returns empty for < 2 items', () => {
       const single = ITEMS[0];

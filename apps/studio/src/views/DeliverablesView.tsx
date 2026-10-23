@@ -7,7 +7,7 @@ type DeliverablesViewProps = {
 };
 
 /**
- * Module 14 — restitutions. Les pièces s'exportent déjà module par module ;
+ * Module 14 : restitutions. Les pièces s'exportent déjà module par module ;
  * aucun moteur ne les assemble en dossier client, dossier fabricant ou
  * rapport. L'écran mène aux exports qui existent et nomme le reste.
  */

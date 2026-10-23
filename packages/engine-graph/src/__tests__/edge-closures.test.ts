@@ -12,14 +12,14 @@ if (entrance === undefined || farthest === undefined) throw new Error('jeu incom
 const base = computeRoute(refMultilevel, profile, entrance.id, farthest.id);
 if (!base.ok) throw new Error('itinéraire de référence introuvable');
 
-/** O11 — une fermeture de toutes les arêtes de l'itinéraire de référence. */
+/** O11 : une fermeture de toutes les arêtes de l'itinéraire de référence. */
 const WORKS: TemporaryClosure = {
   id: 'tc-1', org_id: refMultilevel.site.org_id, site_id: refMultilevel.site.id,
   edge_ids: base.value.edges, from_at: '2026-10-12T00:00:00', to_at: '2026-10-16T23:59:59', reason: 'Travaux',
 };
 const closedSite: SiteData = { ...refMultilevel, temporary_closures: [WORKS] };
 
-describe('O11 — fermetures temporaires et itinéraire', () => {
+describe('O11 : fermetures temporaires et itinéraire', () => {
   it('ignore les fermetures sans instant : un rendu durable ne les voit pas', () => {
     const route = computeRoute(closedSite, profile, entrance.id, farthest.id);
     expect(route.ok && route.value.edges).toEqual(base.value.edges);

@@ -13,7 +13,7 @@ function memoryStore(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> & { 
 
 const view = { centerX_m: 12.5, centerY_m: -3, scale_px_per_m: 40, rotationDeg: 0 };
 
-describe('E3.3 — la position de vue, mémorisée par niveau, hors du modèle', () => {
+describe('E3.3 : la position de vue, mémorisée par niveau, hors du modèle', () => {
   it('se retrouve telle qu’elle a été laissée, pour le même niveau seulement', () => {
     const store = memoryStore();
     rememberView('empreintes:niv-1', view, store);

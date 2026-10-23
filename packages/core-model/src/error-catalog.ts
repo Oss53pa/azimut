@@ -1,5 +1,5 @@
 /**
- * D2.2 — Error code catalog.
+ * D2.2: Error code catalog.
  *
  * Every finding code produced by any engine is listed here.
  * Adding a code requires an entry in this catalog in the same commit.
@@ -188,7 +188,7 @@ export const ERROR_CATALOG = {
   'DATA.FACE_DIMENSIONS_INVALID':           { severity: 'blocking', description: 'Dimensions de face nulles ou négatives' },
   'DATA.SUPPORT_VERSION_TRANSITION_FORBIDDEN': { severity: 'blocking', description: 'Transition d’état non prévue par la section D9.1' },
   'DATA.SUPPORT_VERSION_REJECT_MOTIF_REQUIRED': { severity: 'blocking', description: 'Rejet d’une version sans motif, section D9.1' },
-  // N4.3 — règle M04.G7 : une version approuvée est immuable, une correction crée
+  // N4.3, règle M04.G7 : une version approuvée est immuable, une correction crée
   // une nouvelle version.
   'DATA.APPROVED_VERSION_NOT_IMMUTABLE': { severity: 'blocking', description: 'Tentative de modification d’une version approuvée, règle M04.G7' },
   'DATA.FACE_CONTENT_UNSERIALIZABLE':       { severity: 'blocking', description: 'Contenu de face non sérialisable en forme canonique, section D7.2' },
@@ -249,9 +249,9 @@ export const ERROR_CATALOG = {
   'CALIB.RESIDUAL_NOT_MEASURED':            { severity: 'warning',  description: 'Résidu non mesurable, trop peu de points homologues' },
   'CALIB.RESIDUAL_MEAN_EXCEEDED':           { severity: 'blocking', description: 'Résidu moyen de calage au-dessus du seuil' },
   'CALIB.RESIDUAL_POINT_EXCEEDED':          { severity: 'blocking', description: 'Résidu d’un point de calage au-dessus du seuil' },
-  // A5.8 — « une règle déclarée et cassée bloque, parce qu'elle a été voulue ».
+  // A5.8, « une règle déclarée et cassée bloque, parce qu'elle a été voulue ».
   'CHARTER.RULE_MALFORMED':                 { severity: 'blocking', description: 'Règle de charte déclarée dont les paramètres sont illisibles ou ne correspondent pas à sa nature. À distinguer d’une règle absente, qui ne s’exécute pas et le signale, section A5.8 : une règle déclarée et cassée bloque, parce qu’elle a été voulue' },
-  // N1.3 — règle M01.S1 : le repère site est fixé au premier calage.
+  // N1.3, règle M01.S1 : le repère site est fixé au premier calage.
   'CALIB.ORIGIN_LOCKED':                    { severity: 'blocking', description: 'Tentative de modification de l’origine du repère site, règle M01.S1' },
   'CALIB.ORIGIN_MISMATCH':                  { severity: 'blocking', description: 'Origine du repère incohérente entre deux niveaux d’un même site' },
 
@@ -329,7 +329,7 @@ export const ERROR_CATALOG = {
 export type ErrorCode = keyof typeof ERROR_CATALOG;
 
 /**
- * D2.1 — les domaines d'anomalie autorisés, « et eux seuls ».
+ * D2.1 : les domaines d'anomalie autorisés, « et eux seuls ».
  *
  * Cette liste est un sous-ensemble de celle de D2.1, restreint aux domaines que
  * le dépôt emploie réellement. La distinction tient à ce qu'un domaine déclaré
@@ -365,7 +365,7 @@ export const ANOMALY_DOMAINS = [
 export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
 
 /**
- * D2.1 — « Un code est stable à vie. Il n'est jamais renommé, jamais traduit,
+ * D2.1 : « Un code est stable à vie. Il n'est jamais renommé, jamais traduit,
  * jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et
  * sa valeur reste réservée. »
  *
@@ -375,7 +375,7 @@ export type AnomalyDomain = (typeof ANOMALY_DOMAINS)[number];
  */
 export const RETIRED_CODES: Readonly<Record<string, string>> = {
   'NET.REQUEST_FAILED':
-    'Le domaine `NET` n’était autorisé par aucun des quatorze documents, et D2.2 réserve le catalogue aux anomalies produites par un moteur — or un moteur n’a pas de réseau (A4.1). Remplacé par un genre de défaillance de dépôt, qui appelle un état d’écran de F7.',
+    'Le domaine `NET` n’était autorisé par aucun des quatorze documents, et D2.2 réserve le catalogue aux anomalies produites par un moteur : or un moteur n’a pas de réseau (A4.1). Remplacé par un genre de défaillance de dépôt, qui appelle un état d’écran de F7.',
   'NET.UNAUTHORIZED': 'Même motif que `NET.REQUEST_FAILED`.',
   'NET.FORBIDDEN': 'Même motif que `NET.REQUEST_FAILED`.',
   'NET.NOT_FOUND': 'Même motif que `NET.REQUEST_FAILED`.',

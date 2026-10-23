@@ -22,7 +22,7 @@ export const membership = azimut.table('membership', {
 ]);
 
 /**
- * Q9 — le référentiel des pays.
+ * Q9 : le référentiel des pays.
  *
  * Table globale, sans `org_id` : elle ne se cloisonne pas, elle se lit. Q2 la
  * range à la plateforme, et M00.PL2 la veut en lecture seule pour

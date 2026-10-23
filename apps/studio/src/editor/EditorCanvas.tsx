@@ -1,5 +1,5 @@
 /**
- * E3 + E7 + E8 — Editor canvas.
+ * E3 + E7 + E8: Editor canvas.
  *
  * Assembles the full editor workspace:
  *   - Toolbar (left panel, tool selection)
@@ -44,7 +44,7 @@ import { useEditorInk } from './use-editor-ink.js';
 import type { EditorInkNotice } from './use-editor-ink.js';
 
 // ---------------------------------------------------------------------------
-// Public API — exposed via onReady callback
+// Public API: exposed via onReady callback
 // ---------------------------------------------------------------------------
 
 export type EditorCanvasApi = {
@@ -81,12 +81,12 @@ type EditorCanvasProps = {
   readonly onPointerSnap?: ((snap: SnapResult) => void) | undefined;
   /** Accessibility label for the SVG viewport. */
   readonly ariaLabel?: string | undefined;
-  /** J1 — what a stylus stroke produced, to be announced (E6.3). */
+  /** J1: what a stylus stroke produced, to be announced (E6.3). */
   readonly onInkNotice?: ((notice: EditorInkNotice) => void) | undefined;
 };
 
 // ---------------------------------------------------------------------------
-// Layout styles (inline, no hardcoded colors — A2.4)
+// Layout styles (inline, no hardcoded colors: A2.4)
 // ---------------------------------------------------------------------------
 
 const EDITOR_STYLE: React.CSSProperties = {

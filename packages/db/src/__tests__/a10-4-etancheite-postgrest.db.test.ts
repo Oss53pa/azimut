@@ -17,7 +17,7 @@ function only<T>(rows: readonly T[]): T {
 }
 
 /**
- * A10.4 nº 2 — « Étanchéité entre deux organisations, y compris par canal
+ * A10.4 nº 2 : « Étanchéité entre deux organisations, y compris par canal
  * indirect. »
  *
  * A6.1 dit ce que « canal indirect » recouvre : « un utilisateur de
@@ -114,7 +114,7 @@ async function observed<T>(query: string): Promise<readonly T[]> {
   }
 }
 
-describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’application', () => {
+describe.runIf(runnable)('A10.4 : étanchéité par le chemin de l’application', () => {
   beforeAll(async () => {
     client = postgres(dsn ?? '');
     await installPlatformStubs(client);
@@ -275,7 +275,7 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
  * Le garde de la chaîne. Il ne prouve rien du cloisonnement : il prouve que ce
  * qui le prouve a bien été exécuté.
  */
-describe.runIf(required)('A10.4 — la chaîne exécute bien cette suite', () => {
+describe.runIf(required)('A10.4 : la chaîne exécute bien cette suite', () => {
   it('PostgREST est disponible là où la chaîne le déclare requis', () => {
     expect(
       runnable,

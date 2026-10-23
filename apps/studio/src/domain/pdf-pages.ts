@@ -3,7 +3,7 @@ import type { PdfDocument } from './pdf-objects.js';
 import { referenceOf, referencesOf } from './pdf-syntax.js';
 
 /**
- * M2 (partie M) — « Page | sélecteur | si PDF multipage, requis |
+ * M2 (partie M) : « Page | sélecteur | si PDF multipage, requis |
  * `IMPORT.PAGE_REQUIRED` ». Version 28 : le nombre de pages d'un PDF n'était
  * jamais lu, et le code de page requise ne se levait donc jamais.
  *

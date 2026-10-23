@@ -10,7 +10,7 @@ import { travelProfile, pictogram } from './directory.js';
 import { supportTypology, support } from './signage.js';
 
 /**
- * N2.2 — les tables du module 02, wayfinding.
+ * N2.2 : les tables du module 02, wayfinding.
  *
  * Migration `0027`. Le module possède aussi les attributs d'implantation de
  * `support` (scission L0), qui restent définis avec la table elle-même dans
@@ -117,7 +117,7 @@ export const messageLine = azimut.table('message_line', {
 ]);
 
 /**
- * R12 et H11 — les décisions sur un tableau (migration 0074). Insertion seule
+ * R12 et H11 : les décisions sur un tableau (migration 0074). Insertion seule
  * (A12.3) ; l'approbateur et la date sont pris en base, et un rejet porte
  * toujours son motif dans `comment`.
  */

@@ -27,7 +27,7 @@ function gesture(event: GestureEvent): ToolAction {
   return { type: 'gesture', event };
 }
 
-describe('E7.1 — tool state machine', () => {
+describe('E7.1: tool state machine', () => {
   describe('default state', () => {
     it('starts with select tool in idle phase', () => {
       expect(DEFAULT_TOOL_STATE.currentTool).toBe('select');

@@ -6,7 +6,7 @@ import { relativeLuminance } from '../contrast.js';
 // the no-hardcoded-colors scanner).
 const BASE = '#8A6C48';
 
-describe('D5.3 — iso face shading', () => {
+describe('D5.3: iso face shading', () => {
   it('declares three fixed darkening factors, top brightest', () => {
     expect(isoFaceShading['iso-shade-top']).toBe(1);
     expect(isoFaceShading['iso-shade-left']).toBeLessThan(isoFaceShading['iso-shade-top']);

@@ -93,7 +93,7 @@ export function acceptVerticalLink(
 
   // M4 (partie M) : « Relie deux nœuds de niveaux différents. » Deux nœuds
   // d'un même niveau font une arête ordinaire ; lui adjoindre une liaison
-  // verticale écrirait une liaison qu'aucun contrôle ne rattraperait —
+  // verticale écrirait une liaison qu'aucun contrôle ne rattraperait :
   // `verticalLinkMisalignedFindings` écarte justement les liaisons dont les
   // deux nœuds partagent un niveau.
   if (draft.from.levelId === draft.to.levelId) {

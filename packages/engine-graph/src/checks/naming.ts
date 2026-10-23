@@ -2,7 +2,7 @@ import type { SiteData, Finding } from '@azimut/core-model';
 import { guardNamingCollisions, type NamedEntity } from '../guard-naming.js';
 
 /**
- * H2.2 — Orientation nomenclature uniqueness. Building names must be unique
+ * H2.2: Orientation nomenclature uniqueness. Building names must be unique
  * within the site, and level names unique within their building (two levels
  * named alike in one building is a naming collision). Node/zone labels are left
  * out here to avoid flagging legitimately blank technical labels.

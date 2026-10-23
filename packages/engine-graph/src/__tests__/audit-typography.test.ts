@@ -5,7 +5,7 @@ import { refMultilevel } from '@azimut/testkit';
 import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
 
 /**
- * La charte d'un site d'essai — A5.8, `charter_rule`.
+ * La charte d'un site d'essai : A5.8, `charter_rule`.
  *
  * Les six caractères sont ceux que le dépôt portait en dur jusqu'ici, et leurs
  * noms sont ceux que l'anomalie rapporte. Ils sont ici, dans une charte
@@ -40,7 +40,7 @@ function siteAvecDenomination(value: string): SiteData {
   };
 }
 
-describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la charte', () => {
+describe('LAYOUT.FORBIDDEN_CHARACTER : A5.8, caractères interdits par la charte', () => {
   it('ne signale rien sur les sites de référence', () => {
     // Le contrôle naît sans rien à dire : les jeux de référence sont propres.
     // Un essai qui ne le vérifierait pas laisserait croire au contrôle une
@@ -55,7 +55,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
       ['Niveau · Un', 'point médian'],
       ['3 × 4 places', 'signe de multiplication'],
       ['Nord – Sud', 'tiret demi-cadratin'],
-      ['Nord — Sud', 'tiret cadratin'],
+      ['Nord \u2014 Sud', 'tiret cadratin'],
       ['Ouverture prochaine…', 'points de suspension'],
       ['Sortie → Parking', 'flèche'],
     ];
@@ -72,7 +72,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
   it('rend une anomalie par occurrence, et sa position', () => {
     // Deux fautes dans une dénomination sont deux corrections à faire. Un
     // compte agrégé obligerait à relire le texte pour savoir lesquelles.
-    const report = auditTypography(siteAvecDenomination('A — B — C'), CHARTE);
+    const report = auditTypography(siteAvecDenomination('A \u2014 B \u2014 C'), CHARTE);
     expect(report.findings).toHaveLength(2);
     expect(report.findings.map(f => f.params['position'])).toEqual([2, 6]);
   });
@@ -148,12 +148,12 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
   });
 
   /**
-   * A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
+   * A5.8 : « Quand la charte ne porte pas une règle, le contrôle correspondant
    * ne s'exécute pas et le signale. Il n'applique aucune valeur par défaut :
    * une règle absente n'est pas une règle permissive. »
    */
   it('ne s’exécute pas quand la charte ne porte pas la règle', () => {
-    const report = auditTypography(siteAvecDenomination('A — B'), []);
+    const report = auditTypography(siteAvecDenomination('A \u2014 B'), []);
     expect(report.declared).toBe(false);
     expect(report.applied).toBe(false);
     expect(report.findings).toEqual([]);
@@ -164,11 +164,11 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
   /**
    * Le seul essai qui tienne contre un repli silencieux : si le contrôle
    * gardait une liste par défaut, l'essai ci-dessus passerait pour une autre
-   * raison — un site propre. Celui-ci porte un caractère que l'ancienne liste
+   * raison, un site propre. Celui-ci porte un caractère que l'ancienne liste
    * interdisait, et exige qu'il passe faute de charte pour le refuser.
    */
   it('n’applique aucune liste par défaut : le tiret cadratin passe sans charte', () => {
-    const r = runChecks(siteAvecDenomination('A — B'), {});
+    const r = runChecks(siteAvecDenomination('A \u2014 B'), {});
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.value.findings.map(f => f.code)).not.toContain('LAYOUT.FORBIDDEN_CHARACTER');
@@ -180,7 +180,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
     // `null` et le tableau vide ne disent pas la même chose : l'un veut dire
     // « pas de règle », l'autre « une règle qui n'interdit rien ».
     const vide: CharterRule = { id: 'cr-vide', kind: 'forbidden_character', params: { characters: [] } };
-    const report = auditTypography(siteAvecDenomination('A — B'), [vide]);
+    const report = auditTypography(siteAvecDenomination('A \u2014 B'), [vide]);
     expect(report.applied).toBe(true);
     expect(report.findings).toEqual([]);
   });
@@ -199,7 +199,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
       kind: 'forbidden_character',
       params: { characters: [{ from: 0x2190, to: 0x21ff, name: 'flèche' }] },
     };
-    const report = auditTypography(siteAvecDenomination('A — B → C'), [tirets, fleches]);
+    const report = auditTypography(siteAvecDenomination('A \u2014 B → C'), [tirets, fleches]);
     expect(report.findings.map(f => f.params['name'])).toEqual(['tiret cadratin', 'flèche']);
   });
 
@@ -207,7 +207,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
     // La destination du rendu ne change rien : un caractère que la charte
     // interdit l'est à l'atelier comme à l'impression.
     for (const mode of ['atelier', 'livrable'] as const) {
-      const r = runChecks(siteAvecDenomination('A — B'), VOCABULAIRE, { mode });
+      const r = runChecks(siteAvecDenomination('A \u2014 B'), VOCABULAIRE, { mode });
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       expect(r.value.checks_run).toContain('forbidden_characters');
@@ -216,16 +216,16 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
   });
 
   /**
-   * D2.2, `CHARTER.RULE_MALFORMED` — « une règle déclarée et cassée bloque,
+   * D2.2, `CHARTER.RULE_MALFORMED` : « une règle déclarée et cassée bloque,
    * parce qu'elle a été voulue ». Trois états, et non deux : absente, lisible,
    * déclarée et cassée. C'est le troisième que la version 15 nomme.
    */
-  describe('CHARTER.RULE_MALFORMED — une règle déclarée qui ne se lit pas', () => {
+  describe('CHARTER.RULE_MALFORMED : une règle déclarée qui ne se lit pas', () => {
     const cassee = (id: string, params: Record<string, unknown>): CharterRule =>
       ({ id, kind: 'forbidden_character', params });
 
     it('refuse une règle dont les caractères ne sont pas une liste', () => {
-      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-x', {})]);
+      const report = auditTypography(siteAvecDenomination('A \u2014 B'), [cassee('cr-x', {})]);
       expect(report.declared).toBe(true);
       expect(report.applied).toBe(false);
       const [finding] = report.findings;
@@ -245,7 +245,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
         ['entrée non objet', ['tiret']],
       ];
       for (const [libelle, characters] of cas) {
-        const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-y', { characters })]);
+        const report = auditTypography(siteAvecDenomination('A \u2014 B'), [cassee('cr-y', { characters })]);
         expect(report.findings.map(f => f.code), libelle).toEqual(['CHARTER.RULE_MALFORMED']);
         expect(report.findings[0]?.params['reason'], libelle).toBe('character_range_invalid');
       }
@@ -254,7 +254,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
     it('n’applique aucune liste par défaut quand la règle est cassée', () => {
       // Le cas décisif, comme pour la règle absente : le tiret cadratin passe,
       // parce qu'aucune charte lisible ne l'interdit.
-      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-x', {})]);
+      const report = auditTypography(siteAvecDenomination('A \u2014 B'), [cassee('cr-x', {})]);
       expect(report.findings.map(f => f.code)).not.toContain('LAYOUT.FORBIDDEN_CHARACTER');
     });
 
@@ -264,7 +264,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
         kind: 'forbidden_character',
         params: { characters: [{ from: 0x2014, to: 0x2014, name: 'tiret cadratin' }] },
       };
-      const report = auditTypography(siteAvecDenomination('A — B'), [cassee('cr-a', {}), lisible]);
+      const report = auditTypography(siteAvecDenomination('A \u2014 B'), [cassee('cr-a', {}), lisible]);
       expect(report.applied).toBe(true);
       const codes = report.findings.map(f => f.code);
       expect(codes).toContain('CHARTER.RULE_MALFORMED');
@@ -280,7 +280,7 @@ describe('LAYOUT.FORBIDDEN_CHARACTER — A5.8, caractères interdits par la char
     });
 
     it('remonte à runChecks en contrôle exercé, non en contrôle non exercé', () => {
-      const r = runChecks(siteAvecDenomination('A — B'), { charter_rules: [cassee('cr-x', {})] });
+      const r = runChecks(siteAvecDenomination('A \u2014 B'), { charter_rules: [cassee('cr-x', {})] });
       expect(r.ok).toBe(true);
       if (!r.ok) return;
       expect(r.value.checks_run).toContain('forbidden_characters');

@@ -1,5 +1,5 @@
 /**
- * D1.5 — Technical tolerances. Not normative values.
+ * D1.5: Technical tolerances. Not normative values.
  */
 
 export const POINT_COINCIDENCE_M = 0.001;
@@ -13,7 +13,7 @@ export const POLYGON_MIN_AREA_M2 = 0.0001;
 /**
  * Écart admis sur la somme d'un jeu de parts qui doit valoir l'unité.
  *
- * Purement flottant : additionner n fois 1/n ne rend pas exactement 1 — trois
+ * Purement flottant : additionner n fois 1/n ne rend pas exactement 1, trois
  * tiers donnent 0.9999999999999999. Ce n'est pas une marge de tolérance
  * métier : 33,3 + 33,3 + 33,3 doit être refusé, et il l'est, l'écart valant
  * 1e-3. Le seuil reste six ordres de grandeur sous la plus petite part qu'on

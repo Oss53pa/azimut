@@ -7,12 +7,12 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * J4 (partie J) — une annotation de révision « n'apparaît jamais dans un
+ * J4 (partie J) : une annotation de révision « n'apparaît jamais dans un
  * livrable ». R13 : « Un export ne porte aucune annotation de révision. »
  *
  * Même structure que le contrôle de l'esquisse (J3.3) : `SiteData` ne la
  * porte pas, et seuls les fichiers nommés ici peuvent nommer ses tables ou sa
- * lecture. Tout autre fichier — un export, un compilateur, un moteur — qui s'y
+ * lecture. Tout autre fichier (un export, un compilateur, un moteur) qui s'y
  * mettrait est refusé ici avant d'exister.
  */
 const MARKERS = /\breview_annotation(?:_reply)?s?\b|\breadAnnotations\b|\breviewAnnotation(?:Reply)?\b/;
@@ -52,7 +52,7 @@ const SURFACES = [
   ...readdirSync(resolve(ROOT, 'apps')).map(name => resolve(ROOT, 'apps', name, 'src')),
 ].filter(dir => { try { return statSync(dir).isDirectory(); } catch { return false; } });
 
-describe('J4 — l’annotation de révision n’atteint aucun livrable', () => {
+describe('J4 : l’annotation de révision n’atteint aucun livrable', () => {
   it('les surfaces sont bien toutes inspectées', () => {
     expect(SURFACES.length).toBeGreaterThan(8);
     expect(SURFACES.flatMap(sourceFiles).length).toBeGreaterThan(500);

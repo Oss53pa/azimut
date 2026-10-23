@@ -20,7 +20,7 @@ import type { VerticalLinkKind } from '../state/graph-input.js';
  * inventer un placerait une cage d'ascenseur là où personne ne l'a vue.
  *
  * Quand le site n'a qu'un niveau, l'outil ne se présente pas actif et muet :
- * il dit pourquoi il ne peut rien faire. M7 (partie M), règle 11 — « Aucun résultat vide
+ * il dit pourquoi il ne peut rien faire. M7 (partie M), règle 11 : « Aucun résultat vide
  * n'est présenté comme un succès si le calcul n'a pas eu lieu. »
  */
 
@@ -54,7 +54,7 @@ export type VerticalLinkFieldsProps = {
   readonly capacity: number;
   readonly onCapacity: (value: number | null) => void;
   /**
-   * M01.S10 — les deux extrémités franchissent une limite de bâtiment, et la
+   * M01.S10 : les deux extrémités franchissent une limite de bâtiment, et la
    * liaison inter-bâtiments part avec l'arête. Le champ n'apparaît que dans ce
    * cas : une passerelle déclare si elle est couverte, un escalier interne n'a
    * rien à déclarer.

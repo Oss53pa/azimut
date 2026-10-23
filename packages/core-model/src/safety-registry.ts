@@ -3,7 +3,7 @@ import type { Finding, Outcome } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * INV-3 — le registre de sécurité est cloisonné.
+ * INV-3 : le registre de sécurité est cloisonné.
  *
  * « Aucune charte client ne peut modifier une couleur, une géométrie, un
  * pictogramme ou une proportion relevant du registre de sécurité. Le moteur
@@ -14,7 +14,7 @@ import { codePointCompare } from './empreinte.js';
  * `engine-graph`, et rien ne les appelait : le registre n'était donc protégé
  * que sur le chemin de la charte, par `guardCharterOnSafety`, et pas du tout
  * sur celui de la bibliothèque. Le point de passage de toute écriture est
- * `buildCommand`, en `site-commands.ts` — M12.A2, « l'atelier n'écrit jamais
+ * `buildCommand`, en `site-commands.ts` : M12.A2, « l'atelier n'écrit jamais
  * directement en base, il appelle les commandes du module propriétaire ». Or
  * A4.1 interdit à `core-model` de lire un moteur. Les gardes descendent donc
  * là où l'écriture passe, et `engine-graph` les réexporte : les appelants

@@ -24,7 +24,7 @@ const codes = (draft: LegalEntityDraft, env = ENV): readonly string[] => {
   return [...checked.findings.map(f => f.code), ...checked.notices.map(n => n.key)];
 };
 
-describe('Q5 — déclarer une entité juridique', () => {
+describe('Q5 : déclarer une entité juridique', () => {
   it('rend une commande de création du module 00 sur legal_entity', () => {
     const out = declareLegalEntityCommand(DRAFT, ENV);
     if (!out.ok) throw new Error(out.findings.map(f => f.code).join(', '));

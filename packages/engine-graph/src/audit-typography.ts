@@ -3,13 +3,13 @@ import { resolveForbiddenCharacters, codePointCompare } from '@azimut/core-model
 import { checkableTexts } from './site-texts.js';
 
 /**
- * Caractères interdits dans un texte de livrable — A5.8.
+ * Caractères interdits dans un texte de livrable : A5.8.
  *
  * `charter_rule` porte la nature `forbidden_character`, et D2.2 nomme
  * l'anomalie « Caractère interdit **par la charte** dans un texte de
  * livrable ». La règle appartient donc à la charte d'un client, et non au
  * produit : c'est l'arbitrage de l'éditeur, et il renverse celui que ce module
- * portait — il tenait la liste pour une règle de rédaction valant pour tout
+ * portait, il tenait la liste pour une règle de rédaction valant pour tout
  * livrable Azimut.
  *
  * **La liste vient désormais de la charte du site**, qui entre dans la
@@ -17,7 +17,7 @@ import { checkableTexts } from './site-texts.js';
  *
  * Trois issues, et le rapport les distingue. La charte ne porte pas la règle :
  * le contrôle ne s'exécute pas, `declared` est faux, l'appelant le range parmi
- * les non exercés, et aucune valeur par défaut n'est appliquée — « une règle
+ * les non exercés, et aucune valeur par défaut n'est appliquée, « une règle
  * absente n'est pas une règle permissive ». La charte la porte et elle se lit :
  * le contrôle juge. La charte la porte et elle ne se lit pas : le contrôle
  * lève `CHARTER.RULE_MALFORMED`, bloquant, et **n'est pas rangé parmi les non

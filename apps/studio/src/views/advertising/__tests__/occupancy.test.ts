@@ -4,7 +4,7 @@ import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
 
 const { bookings: DEMO_BOOKINGS, placements: DEMO_PLACEMENTS } = REFERENCE_ADVERTISING.registry;
 
-describe('H4.3 — planning d’occupation', () => {
+describe('H4.3 : planning d’occupation', () => {
   it('énumère les mois consécutifs en franchissant l’année', () => {
     expect(monthsFrom('2026-11-01', 4)).toEqual(['2026-11', '2026-12', '2027-01', '2027-02']);
   });

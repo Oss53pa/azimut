@@ -1,5 +1,5 @@
 /**
- * E3 + E5 + E7 + E8 + E16 — Editor view, context 1.
+ * E3 + E5 + E7 + E8 + E16: Editor view, context 1.
  *
  * Assembles the editor over a real document: tool gestures, clipboard,
  * alignment, draw order and deletion all produce reversible commands
@@ -214,7 +214,7 @@ export function EditorView(): JSX.Element {
     dispatchSelection({ type: 'clear' });
   }, [selection.selectedIds, operations]);
 
-  // ---- Shortcut dispatcher (E16) — sole keyboard handler ----
+  // ---- Shortcut dispatcher (E16), sole keyboard handler ----
   useShortcuts({
     onUndo: undo,
     onRedo: redo,

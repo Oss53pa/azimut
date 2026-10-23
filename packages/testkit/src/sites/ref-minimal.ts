@@ -12,17 +12,17 @@ export const refMinimal: SiteData = {
     name: 'Site minimal',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // M01.S1 — repère site posé au premier calage : les deux nombres sont ceux de
+    // M01.S1, repère site posé au premier calage : les deux nombres sont ceux de
     // `cal-*`, recopiés, et plus jamais modifiés.
     origin_x_m: 0,
     origin_y_m: 0,
-    // N1.2 — les quatre sites de référence sont bilingues : la déclaration
+    // N1.2, les quatre sites de référence sont bilingues : la déclaration
     // dit ce qu'ils portent, elle ne le décide pas.
     active_langs: ['fr', 'en'],
-    // D1.1 — altitude du niveau de référence. Valeur de synthèse.
+    // D1.1, altitude du niveau de référence. Valeur de synthèse.
     reference_elevation_m: 42.5,
   },
-  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // A5.8, rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
   // rules-packs/test-fixture`. Le pictogramme de sécurité du site vient de ce
   // paquet (A5.4) : sans rattachement, aucun site ne le verrait, et le site de
   // référence ne porterait pas le cas qu'il éprouve.
@@ -36,7 +36,7 @@ export const refMinimal: SiteData = {
       site_id: 'site-minimal-001',
       name: 'Bâtiment principal',
       independent_access: true,
-      // N1.2 — un jour absent est fermé ; le dimanche n'est pas déclaré.
+      // N1.2, un jour absent est fermé ; le dimanche n'est pas déclaré.
       opening_hours: {
         monday: [{ from: '08:00', to: '19:00' }],
         tuesday: [{ from: '08:00', to: '19:00' }],
@@ -59,7 +59,7 @@ export const refMinimal: SiteData = {
     },
   ],
   /**
-   * A5.2 / N1.4 — un fond de plan calé par niveau. Sans lui, le niveau serait
+   * A5.2 / N1.4, un fond de plan calé par niveau. Sans lui, le niveau serait
    * signalé `CALIB.LEVEL_NOT_CALIBRATED` : le site de référence doit être
    * propre, c'est `refBroken` qui porte les cas en faute.
    */
@@ -280,7 +280,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau A',
       occupancy_status: 'occupied',
       display_priority: 1,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -292,7 +292,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau B',
       occupancy_status: 'occupied',
       display_priority: 2,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -304,7 +304,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau C',
       occupancy_status: 'vacant',
       display_priority: 3,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
     {
@@ -316,7 +316,7 @@ export const refMinimal: SiteData = {
       occupant_name: 'Bureau D',
       occupancy_status: 'occupied',
       display_priority: 4,
-      // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+      // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
       valid_from: '2026-01-01',
     },
   ],

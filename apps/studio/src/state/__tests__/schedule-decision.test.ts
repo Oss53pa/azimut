@@ -3,7 +3,7 @@ import { EMPTY_SESSION } from '../session-store.js';
 import type { SessionState, StoredRow } from '../session-store.js';
 import { approvalOf } from '../schedule-decision.js';
 
-/** R16 — la décision qui approuve une version, lue dans la session. */
+/** R16 : la décision qui approuve une version, lue dans la session. */
 function decision(id: string, scheduleId: string, kind: string, userId: string, at: string): StoredRow {
   return {
     table: 'message_schedule_approval', id,
@@ -15,7 +15,7 @@ function session(rows: readonly StoredRow[]): SessionState {
   return { ...EMPTY_SESSION, rows };
 }
 
-describe('R16 — l’approbateur et la date d’une version approuvée', () => {
+describe('R16 : l’approbateur et la date d’une version approuvée', () => {
   it('sans décision, rien n’est inventé', () => {
     expect(approvalOf(session([]), 'm1')).toBeNull();
   });

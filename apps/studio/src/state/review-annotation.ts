@@ -2,7 +2,7 @@ import type { EntityCommand } from '@azimut/core-model';
 import { buildCommand, codePointCompare } from '@azimut/core-model';
 
 /**
- * J4 (partie J) — l'annotation en révision : une remarque de relecture
+ * J4 (partie J), l'annotation en révision : une remarque de relecture
  * ancrée sur une ligne du tableau des messages, une face, un support ou une
  * zone (migration 0073, module 02).
  *
@@ -160,7 +160,7 @@ export type AnnotateOutcome =
 /**
  * Une remarque, posée sur une ou plusieurs entités : « annoter la sélection
  * d'une même remarque crée une annotation par ligne » (R8). Un seul geste,
- * une seule annulation. Une remarque vide — ni texte, ni tracé — n'est pas
+ * une seule annulation. Une remarque vide (ni texte, ni tracé) n'est pas
  * écrite.
  */
 export function annotateCommands(
@@ -205,7 +205,7 @@ export function replyCommand(
 }
 
 /**
- * Traiter ou refuser une annotation, ou la rouvrir. La signature — qui, quand —
+ * Traiter ou refuser une annotation, ou la rouvrir. La signature (qui, quand)
  * est posée par la base au changement d'état (0073) : l'appelant ne la
  * fournit pas, il ne pourrait que la falsifier.
  */

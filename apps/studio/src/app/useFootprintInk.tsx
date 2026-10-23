@@ -18,7 +18,7 @@ import { useStrictness } from '../editor/ink/use-strictness.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
- * J1 (partie J) — le tracé au stylet dans l'atelier des empreintes (M3, partie M).
+ * J1 (partie J) : le tracé au stylet dans l'atelier des empreintes (M3, partie M).
  *
  * Un trait achevé est lu ; la lecture retenue remplace le contour en cours,
  * que le panneau montre sommet par sommet et que `Entrée` ferme comme une
@@ -55,7 +55,7 @@ export function useFootprintInk(
   } | null>(null);
   const setNotice = (key: UiMessageKey | null): void => { setMessage(key === null ? null : { key }); };
   const { background, notice: backgroundNotice } = usePlanBackground(session, levelId);
-  // J1.3 — le niveau de redressement retenu par l'utilisateur.
+  // J1.3 : le niveau de redressement retenu par l'utilisateur.
   const straightening = useStrictness(`redressement-empreintes-${levelId}`);
 
   /** Un tracé lu comme une saisie d'empreinte : un trait, ou une esquisse promue. */
@@ -71,7 +71,7 @@ export function useFootprintInk(
       if (struck.kind === 'referenced') {
         setMessage({
           key: 'ink.strike.referenced',
-          params: { code: struck.unitCode === '' ? '—' : struck.unitCode, count: struck.dependents },
+          params: { code: struck.unitCode === '' ? '–' : struck.unitCode, count: struck.dependents },
         });
         return;
       }
@@ -95,7 +95,7 @@ export function useFootprintInk(
     if (shape !== null) onVertices(shape.vertices);
   }
 
-  // J3 — en mode esquisse, le trait va à la couche d'esquisse, sans lecture ;
+  // J3 : en mode esquisse, le trait va à la couche d'esquisse, sans lecture ;
   // une esquisse promue (J3.3) revient ici et se lit comme un trait.
   const sketch = useSketchInk(session, levelId, setNotice, read);
 
@@ -134,7 +134,7 @@ export function useFootprintInk(
       onTouchRefused={() => { setNotice('ink.touch_refused'); }}
       onStroke={(points, pointer, pxPerMeter, detail) => {
         if (sketch.active) { sketch.onStroke(points, detail, pxPerMeter, pointer); return; }
-        // J1.5 — la gomme du stylet n'efface que l'esquisse : une empreinte se
+        // J1.5, la gomme du stylet n'efface que l'esquisse : une empreinte se
         // retire par une commande, jamais d'un frottement.
         if (detail.eraser) { setNotice('ink.eraser_sketch_only'); return; }
         read(points, pointer, pxPerMeter);

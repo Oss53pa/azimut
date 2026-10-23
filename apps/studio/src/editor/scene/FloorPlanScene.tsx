@@ -1,10 +1,10 @@
 /**
- * E3.4 — SVG DOM rendering of a floor plan level.
+ * E3.4: SVG DOM rendering of a floor plan level.
  *
  * Each footprint, node, and edge is a real SVG element with native
  * hit-testing and accessibility attributes. No dangerouslySetInnerHTML.
  *
- * Coordinates are in meter-space — the parent Viewport's <g transform>
+ * Coordinates are in meter-space: the parent Viewport's <g transform>
  * handles the view transform. This component never computes its own
  * coordinate conversion (E3.1).
  */

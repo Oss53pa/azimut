@@ -20,8 +20,8 @@ const DEPOSIT = 'docs/cahier-des-charges.sha256';
  *
  * **Il ne s'édite jamais depuis le code.** Rien dans le dépôt ne l'écrit, et
  * ce contrôle est ce qui rend la règle vérifiable plutôt que déclarative :
- * une écriture, d'où qu'elle vienne — une main, un script, un agent qui croit
- * corriger une coquille — déplace l'empreinte et fait rougir la chaîne au pas
+ * une écriture, d'où qu'elle vienne (une main, un script, un agent qui croit
+ * corriger une coquille) déplace l'empreinte et fait rougir la chaîne au pas
  * suivant. Corriger le document est un geste de l'éditeur, qui redonne alors
  * l'empreinte de la version nouvelle ; ce n'est pas un geste du dépôt.
  *
@@ -35,7 +35,7 @@ const DEPOSIT = 'docs/cahier-des-charges.sha256';
  * la compilation. Les deux lisent la même valeur déposée : il n'y a qu'une
  * définition de l'empreinte attendue.
  */
-describe('Cahier des charges consolidé — empreinte déposée', () => {
+describe('Cahier des charges consolidé : empreinte déposée', () => {
   const deposited = readFileSync(resolve(ROOT, DEPOSIT), 'utf-8');
 
   it('le dépôt ne porte qu’une ligne, et elle nomme le document', () => {

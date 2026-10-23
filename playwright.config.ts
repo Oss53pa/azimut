@@ -6,11 +6,11 @@ import { existsSync } from 'node:fs';
  * | Playwright ». Aucune dérogation à demander (A3.3).
  *
  * Ce que cette suite porte, et que l'analyse statique ne peut pas atteindre :
- *  · F16 — « Parcours complet au clavier sur chaque écran » ;
- *  · F16 — « Rendu en niveaux de gris : aucune information perdue » ;
- *  · M8 (partie M) critères 1 à 3 — le parcours de bout en bout, au clavier
+ *  · F16, « Parcours complet au clavier sur chaque écran » ;
+ *  · F16, « Rendu en niveaux de gris : aucune information perdue » ;
+ *  · M8 (partie M) critères 1 à 3 : le parcours de bout en bout, au clavier
  *    seul, puis hors ligne ;
- *  · M8 (partie M) critère 4 — le chronométrage de ce parcours.
+ *  · M8 (partie M) critère 4 : le chronométrage de ce parcours.
  *
  * F12 fixe la largeur minimale de poste à 1366 pixels : c'est la fenêtre
  * d'essai, et non une taille choisie au hasard.
@@ -20,7 +20,7 @@ import { existsSync } from 'node:fs';
  *
  * En intégration continue, l'action installe le Chromium qu'attend cette
  * version de Playwright, et il n'y a rien à désigner. Sur un poste qui en
- * porte déjà un — c'est le cas de l'environnement de développement — le
+ * porte déjà un (c'est le cas de l'environnement de développement) le
  * télécharger à chaque exécution demanderait le réseau pour rien.
  *
  * `CHROMIUM_PATH` désigne ce binaire. Une chaîne vide vaut « aucun » : c'est
@@ -59,7 +59,7 @@ export default defineConfig({
      * La construction précède le service.
      *
      * `preview` sert `dist/`, qu'il ne construit pas. Sans cette construction,
-     * la suite s'exécutait contre le dernier paquet construit — c'est-à-dire
+     * la suite s'exécutait contre le dernier paquet construit : c'est-à-dire
      * potentiellement contre du code qui n'est plus celui du dépôt, en
      * annonçant vert. Une vérification qui peut porter sur autre chose que ce
      * qu'on vérifie ne vérifie rien (A2.3).

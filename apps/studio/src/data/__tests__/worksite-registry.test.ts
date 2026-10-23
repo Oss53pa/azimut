@@ -17,7 +17,7 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
   return calls;
 }
 
-describe('H6 — chantier, sites de référence', () => {
+describe('H6 : chantier, sites de référence', () => {
   const repository = createReferenceRepository();
 
   it('sert le jeu de démonstration, que les écrans signalent', async () => {
@@ -30,7 +30,7 @@ describe('H6 — chantier, sites de référence', () => {
   });
 });
 
-describe('H6 — chantier, API REST', () => {
+describe('H6: chantier, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
     const error: unknown = await createPostgrestRepository(config).loadWorksiteRegistry('aaaa0009-0000-4000-8000-000000000001')

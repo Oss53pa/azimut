@@ -340,7 +340,7 @@ describe('T-2.16 runBatch', () => {
     expect(job?.org_id).toBe('org-001');
   });
 
-  it('A6.1 — chaque travail créé porte le demandeur du lot', async () => {
+  it('A6.1 : chaque travail créé porte le demandeur du lot', async () => {
     const queue = new MemoryQueue();
     const handler: JobHandler = async () => ({ ok: true });
     await runBatch([{ item_id: 'demandeur', payload: {} }], makeOptions(queue, handler));

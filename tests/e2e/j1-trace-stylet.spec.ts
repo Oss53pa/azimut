@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J1 et G3 (parties J et G) — tracer une empreinte dans la zone de travail.
+ * J1 et G3 (parties J et G) : tracer une empreinte dans la zone de travail.
  *
  * La reconnaissance est essayée sur ses formes dans
  * `editor/ink/__tests__/recognize.test.ts`. Ce qui ne se prouve qu'à l'écran :
@@ -75,7 +75,7 @@ async function pointer(page: Page, type: string, pointerType: 'pen' | 'touch', b
   });
 }
 
-test.describe('J1 (partie J) — le tracé dans la zone de travail', () => {
+test.describe('J1 (partie J) : le tracé dans la zone de travail', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
@@ -139,7 +139,7 @@ async function navigate(page: Page, path: string): Promise<void> {
   }, path);
 }
 
-test.describe('J1.4 (partie J) — le plan calé sert de fond de décalque', () => {
+test.describe('J1.4 (partie J) : le plan calé sert de fond de décalque', () => {
   test('l’image calée est posée dans la zone, et la zone ne s’en excuse plus', async ({ page }) => {
     await page.goto(`/sites/${SITE}/levels/${LEVEL}/plan`);
     await page.getByLabel(/Fichier du fond de plan|Base plan file/)
@@ -168,7 +168,7 @@ test.describe('J1.4 (partie J) — le plan calé sert de fond de décalque', () 
   });
 });
 
-test.describe('J1.2 (partie J) — le réseau de circulation tracé dans l’atelier du graphe', () => {
+test.describe('J1.2 (partie J) : le réseau de circulation tracé dans l’atelier du graphe', () => {
   const GRAPH = `/sites/${SITE}/levels/${LEVEL}/graph`;
   const VIEW = /Graphe du niveau|Level graph/;
 
@@ -226,7 +226,7 @@ test.describe('J1.2 (partie J) — le réseau de circulation tracé dans l’ate
   });
 });
 
-test.describe('E3.3 (partie E) — zoom et déplacement dans la zone de travail', () => {
+test.describe('E3.3 (partie E) : zoom et déplacement dans la zone de travail', () => {
   async function draftBox(page: Page): Promise<{ x: number; y: number; width: number; height: number }> {
     const box = await page.getByTestId('ink-draft').boundingBox();
     if (box === null) throw new Error('contour introuvable');

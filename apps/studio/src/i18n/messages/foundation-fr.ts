@@ -1,6 +1,6 @@
-/** Écrans du socle — libellés français. Table seule ; l'assemblage est dans `foundation.ts`. */
+/** Écrans du socle : libellés français. Table seule ; l'assemblage est dans `foundation.ts`. */
 export const FOUNDATION_FR = {
-  // M1 (partie M) — liste des sites
+  // M1 (partie M), liste des sites
   'sites.eyebrow': 'Module 01 · écran M1',
   'sites.title': 'Sites',
   'sites.subtitle': 'Sites',
@@ -22,7 +22,7 @@ export const FOUNDATION_FR = {
   'sites.empty': 'Aucun site ne correspond au filtre.',
   'sites.note': "Les sites listés sont les sites de référence du dépôt : ils servent à exercer les moteurs sur des cas connus. L'application n'a pas encore de dépôt persistant ; ouvrir un site le charge en mémoire.",
 
-  // Module 01 — socle
+  // Module 01, socle
   'foundation.eyebrow': 'Module 01 · écran + moteur',
   'foundation.title': 'Socle du site',
   'foundation.subtitle': 'Site foundation',
@@ -72,7 +72,7 @@ export const FOUNDATION_FR = {
   'foundation.trace.unbound': 'Paquet non lié',
   'foundation.note': "Tout ce qui est affiché ici est dérivé du site. Aucun de ces compteurs n'est enregistré : deux ouvertures du même état de données donnent les mêmes chiffres.",
 
-  // M2 (partie M) — calage
+  // M2 (partie M), calage
   'calibration.eyebrow': 'Module 01 · écran M2',
   'calibration.title': 'Calage du plan',
   'calibration.subtitle': 'Plan calibration',
@@ -119,7 +119,7 @@ export const FOUNDATION_FR = {
   'calibration.frame.unposed': 'non posée',
   'calibration.frame.message.unposed': "Le repère n'est pas encore posé. Le premier calage le fixera.",
   'calibration.frame.message.locked': 'Repère fixé par le premier calage. Il ne se déplace plus.',
-  'calibration.frame.note': "M01.S1 : l'origine du repère site est celle du premier calage, recopiée sur le site, et jamais modifiée. Le premier calage est celui que sa date désigne ; si un calage du site n'est pas daté, il reste indéterminé et le contrôle se tait plutôt que de deviner. La déplacer laisserait chaque empreinte, chaque nœud et chaque support à ses coordonnées en désignant un autre endroit — aucune reprise ne rattraperait cela. Une origine non posée n'est pas l'origine (0, 0).",
+  'calibration.frame.note': "M01.S1 : l'origine du repère site est celle du premier calage, recopiée sur le site, et jamais modifiée. Le premier calage est celui que sa date désigne ; si un calage du site n'est pas daté, il reste indéterminé et le contrôle se tait plutôt que de deviner. La déplacer laisserait chaque empreinte, chaque nœud et chaque support à ses coordonnées en désignant un autre endroit : aucune reprise ne rattraperait cela. Une origine non posée n'est pas l'origine (0, 0).",
   'calibration.panel.levels': 'État des niveaux',
   'calibration.levels.col.level': 'Niveau',
   'calibration.levels.col.sources': 'Fonds importés',
@@ -133,7 +133,7 @@ export const FOUNDATION_FR = {
   'calibration.levels.note': "Le calage lu ici est celui qui est enregistré, pas celui de la mesure en cours : la mesure ci-dessus n'est encore écrite nulle part. Un niveau sans plan calé est une anomalie bloquante (N1.4).",
   'calibration.note': "Le tracé des empreintes reste refusé tant que l'orientation n'est pas saisie : une empreinte tracée sur un fond non orienté est fausse sans que rien ne le signale.",
 
-  // M2 bis — calage à n points (section M2, partie M)
+  // M2 bis, calage à n points (section M2, partie M)
   'measured.section': 'Calage mesuré',
   'measured.panel.surface': 'Surface des amers',
   'measured.panel.surface.note': '{placed} posé(s) sur {total}',
@@ -171,7 +171,7 @@ export const FOUNDATION_FR = {
   'measured.tolerance.unjudged': 'Sans tolérance déclarée, les résidus sont calculés et affichés, et aucun verdict n’est rendu.',
   'measured.findings.empty': 'Aucune anomalie de calage mesuré.',
 
-  // M3 (partie M) — empreintes
+  // M3 (partie M), empreintes
   'footprints.eyebrow': 'Module 01 · écran M3',
   'footprints.title': 'Empreintes',
   'footprints.subtitle': 'Footprints',
@@ -187,7 +187,7 @@ export const FOUNDATION_FR = {
   'footprints.panel.note': 'surface calculée au tracé',
   'footprints.col.unitcode': 'Code d’unité',
   'footprints.unitcode.missing': 'absent',
-  'footprints.unitcode.none': '—',
+  'footprints.unitcode.none': '–',
   'footprints.col.code': 'Identifiant',
   'footprints.col.kind': 'Nature',
   'footprints.col.level': 'Niveau',

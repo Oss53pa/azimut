@@ -26,7 +26,7 @@ const CHARTERS = [
   { id: 'aaaa0004-0000-4000-8000-000000000005', name: 'Charte B', version: '2', created_at: '2026-03-01T00:00:00Z' },
 ];
 
-describe('A5.8 — charte, sites de référence', () => {
+describe('A5.8 : charte, sites de référence', () => {
   const repository = createReferenceRepository();
 
   it('rend un registre vide : le dépôt ne contient aucune charte', async () => {
@@ -39,7 +39,7 @@ describe('A5.8 — charte, sites de référence', () => {
   });
 });
 
-describe('A5.8 — charte, API REST', () => {
+describe('A5.8: charte, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
     const error: unknown = await createPostgrestRepository(config).loadCharterRegistry('aaaa0004-0000-4000-8000-000000000001')

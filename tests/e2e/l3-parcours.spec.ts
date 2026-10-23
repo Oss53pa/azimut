@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * L3.1 (partie L) — le parcours d'un visiteur, montré dans l'atelier du graphe.
+ * L3.1 (partie L) : le parcours d'un visiteur, montré dans l'atelier du graphe.
  *
  * Le rendu est essayé dans `engine-iso/src/__tests__/route-animation.test.ts`,
  * le calcul dans `state/__tests__/route-preview.test.ts`. Ce qui ne se prouve
@@ -56,17 +56,17 @@ async function openWorkshop(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Tracer le parcours' }).click();
 }
 
-test.describe('L3.1 (partie L) — le parcours d’un visiteur', () => {
+test.describe('L3.1 (partie L) : le parcours d’un visiteur', () => {
   test('le tracé avance niveau par niveau, et le changement de niveau est dit', async ({ page }) => {
     await openWorkshop(page);
     const frame = page.getByTestId('route-frame');
     await expect(frame).toHaveAttribute('data-level', 'n0');
     await expect(frame.locator('animate')).toHaveCount(1);
     await expect(frame.locator('[data-role="decision"]')).toHaveCount(1);
-    await expect(page.getByText(/Niveau Rez-de-chaussée — tronçon 1 sur 2/)).toBeVisible();
+    await expect(page.getByText(/Niveau Rez-de-chaussée : tronçon 1 sur 2/)).toBeVisible();
     await expect(page.getByText(/Changement de niveau : ascenseur, vers Étage 1/)).toBeVisible();
 
-    // Partie P, écran Itinéraire — les étapes écrites, dans la langue active, venues du moteur.
+    // Partie P, écran Itinéraire : les étapes écrites, dans la langue active, venues du moteur.
     const steps = page.getByRole('list', { name: /Étapes, 32 m au total/ });
     await expect(steps.getByRole('listitem')).toHaveText([
       'Depuis Entrée nord',

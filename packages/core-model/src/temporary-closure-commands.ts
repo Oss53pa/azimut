@@ -1,5 +1,5 @@
 /**
- * O11 — déclarer ou retirer une fermeture temporaire.
+ * O11 : déclarer ou retirer une fermeture temporaire.
  *
  * Une fermeture est une ligne de `temporary_closure` : une ou plusieurs
  * arêtes, un début, une fin, un motif. Commandes du module 01, propriétaire

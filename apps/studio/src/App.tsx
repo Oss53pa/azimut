@@ -5,7 +5,7 @@ import { langFromLocation } from './app/lang.js';
 import { AuthGate } from './auth/AuthGate.js';
 
 /**
- * F15 — `app/` porte la composition des écrans et le routage.
+ * F15 : `app/` porte la composition des écrans et le routage.
  *
  * Les cinq écrans de la tranche M (partie M) vivent à leurs chemins ; tout
  * autre chemin retombe sur l'atelier existant.

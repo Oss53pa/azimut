@@ -1,5 +1,5 @@
 /**
- * Module 01 — les lignes de la fiche de site : un niveau par ligne, et ce que
+ * Module 01, les lignes de la fiche de site : un niveau par ligne, et ce que
  * le site en sait. Tout est dérivé des données du site (INV-1) ; rien ne
  * s'enregistre ici.
  */

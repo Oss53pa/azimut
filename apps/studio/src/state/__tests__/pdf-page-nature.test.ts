@@ -8,7 +8,7 @@ import type { PdfObjectSpec } from './pdf-fixtures.js';
 const inspectPlanContent = (bytes: Uint8Array) => inspectWith(bytes, PDF_LIMITS);
 
 /**
- * M2 (partie M), version 29 — « Pour un document de plusieurs pages, la
+ * M2 (partie M), version 29 : « Pour un document de plusieurs pages, la
  * nature se juge sur la page retenue, en suivant les objets qu'elle
  * référence, et non sur le fichier entier [...]. Quand le suivi ne permet pas
  * de conclure, la nature est indéterminée, jamais vectorielle. »
@@ -22,7 +22,7 @@ async function natures(objects: readonly PdfObjectSpec[], tail?: string): Promis
   return Array.from({ length: inspection.pageCount ?? 0 }, (_, i) => precisionOfPage(inspection, i + 1));
 }
 
-describe('M2 — chaque page se juge sur ses propres objets', () => {
+describe('M2 : chaque page se juge sur ses propres objets', () => {
   it('les tracés d’une page ne masquent pas leur absence sur une autre', async () => {
     expect(await natures([
       CATALOG,
@@ -74,7 +74,7 @@ describe('M2 — chaque page se juge sur ses propres objets', () => {
   });
 });
 
-describe('M2 — la page se suit dans les objets qu’elle invoque', () => {
+describe('M2 : la page se suit dans les objets qu’elle invoque', () => {
   const page = (resources: string): string => `<< /Type /Page /Parent 2 0 R /Contents 4 0 R ${resources} >>`;
   const pages = '<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
 
@@ -106,7 +106,7 @@ describe('M2 — la page se suit dans les objets qu’elle invoque', () => {
   });
 });
 
-describe('M2 — un suivi qui ne conclut pas rend la page indéterminée, jamais vectorielle', () => {
+describe('M2 : un suivi qui ne conclut pas rend la page indéterminée, jamais vectorielle', () => {
   const pages = '<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
 
   it('un flux de tracés que nul arbre de pages ne désigne', async () => {
@@ -141,7 +141,7 @@ describe('M2 — un suivi qui ne conclut pas rend la page indéterminée, jamais
   });
 });
 
-describe('M2 — le lecteur de contenu relève les objets invoqués', () => {
+describe('M2 : le lecteur de contenu relève les objets invoqués', () => {
   it('un nom suivi de Do, une fois chacun, et rien d’autre', () => {
     expect(scanContent('q /Im0 Do Q /Fm1 Do /Im0 Do /GS0 gs (/Faux Do) Tj').invoked).toEqual(['Im0', 'Fm1']);
   });

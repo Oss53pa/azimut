@@ -1,5 +1,5 @@
 /**
- * Calage à n points, côté atelier — section M2 (partie M).
+ * Calage à n points, côté atelier : section M2 (partie M).
  *
  * Le moteur d'ajustement vit dans `core-model` et ne connaît que des paires de
  * coordonnées. Ce module fait le pont avec ce que l'opérateur manipule à

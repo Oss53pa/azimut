@@ -6,7 +6,7 @@ import { canTraceFreely, isPenEraser, pointerKindOf } from './pointer-kind.js';
 import type { PointerKind } from './pointer-kind.js';
 
 /**
- * J1.1 et G3 (parties J et G) — la capture d'un trait dans une zone de travail.
+ * J1.1 et G3 (parties J et G) : la capture d'un trait dans une zone de travail.
  *
  * Un trait commence quand un pointeur qui trace se pose, suit ses
  * déplacements, et s'achève à sa levée : il est alors remis à l'appelant, en
@@ -94,7 +94,7 @@ export function useStrokeCapture(options: StrokeCaptureOptions): StrokeCapture {
    *
    * Elle tient compte du `viewBox` et du centrage (`preserveAspectRatio`) :
    * une vue limitée par sa hauteur est centrée avec un décalage horizontal, que
-   * le seul rapport des largeurs ne voit pas — un trait tombait alors à côté
+   * le seul rapport des largeurs ne voit pas, un trait tombait alors à côté
    * des nœuds visés.
    */
   function screenMatrix(event: PointerEventLike): DOMMatrix | null {

@@ -32,7 +32,7 @@ function overlaps(a: FaceTemplate['blocks'][number], b: FaceTemplate['blocks'][n
 }
 
 /**
- * Module 04 — les gabarits.
+ * Module 04 : les gabarits.
  *
  * Un gabarit déclare des régions en pour-cent de la face et le type de contenu
  * qui s'y résout ; il ne porte aucun texte. Ce que l'écran mesure sur chacun,

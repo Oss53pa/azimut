@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * E5.3 — Reconciling the local undo stack with offline object-level merge. The
+ * E5.3: Reconciling the local undo stack with offline object-level merge. The
  * undo stack is cleared at synchronisation: what is synced is no longer undoable
  * locally. Reverting a synced modification is done by a new, traced inverse
  * command, not by an undo. This guard refuses an undo whose target has already
@@ -16,7 +16,7 @@ export type UndoEntry = {
 
 /**
  * Guard an undo request. ok when the target is still local (unsynced); a
- * warning EDIT.UNDO_AFTER_SYNC (ok:false) when it has been synchronised — the
+ * warning EDIT.UNDO_AFTER_SYNC (ok:false) when it has been synchronised, the
  * caller must issue an inverse command instead.
  */
 export function guardUndoTarget(entry: UndoEntry): Outcome<null> {

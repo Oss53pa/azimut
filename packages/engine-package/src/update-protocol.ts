@@ -4,12 +4,12 @@ import type { KioskManifest, KioskManifestFile } from './assemble-kiosk-package.
 import { kioskManifestContentHash } from './assemble-kiosk-package.js';
 
 /**
- * D10.4 — Kiosk update protocol (pure decision logic).
+ * D10.4: Kiosk update protocol (pure decision logic).
  *
  * The runtime side (real HTTP, filesystem, atomic rename) is environment
- * specific; the decisive logic — decide whether to update, verify a downloaded
+ * specific; the decisive logic (decide whether to update, verify a downloaded
  * tree against the manifest file by file, commit atomically while keeping the
- * previous version, and roll back a failed boot — is pure and lives here so it
+ * previous version, and roll back a failed boot) is pure and lives here so it
  * can be tested deterministically, including the decisive "interrupted download
  * must not produce a mixed state" scenario.
  */
@@ -93,7 +93,7 @@ export function verifyAgainstManifest(
 /**
  * Step 5 of D10.4: atomic commit. The candidate is verified against its own
  * manifest first; only a fully-consistent candidate replaces `current`, and the
- * outgoing version is kept as `previous`. On any discrepancy nothing changes —
+ * outgoing version is kept as `previous`. On any discrepancy nothing changes:
  * an interrupted or corrupt download leaves the running version intact (no
  * mixed state).
  */

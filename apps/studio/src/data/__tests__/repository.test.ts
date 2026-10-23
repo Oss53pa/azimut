@@ -75,7 +75,7 @@ describe('Dépôt lu par l’API REST', () => {
 
     await createPostgrestRepository(config).listSites();
 
-    // A5.8 — la liste lit les sites, puis leurs paquets dans la table de
+    // A5.8 : la liste lit les sites, puis leurs paquets dans la table de
     // rattachement qui fait foi.
     const calls = fetchMock.mock.calls as [string, RequestInit][];
     expect(calls.map(([url]) => url.split('?')[0])).toEqual([

@@ -10,7 +10,7 @@ import { GROUPINGS } from '../../state/message-schedule-rows.js';
 import type { Grouping, ScheduleFilters } from '../../state/message-schedule-rows.js';
 
 /**
- * R6 (partie R) — regroupement, filtres, recherche.
+ * R6 (partie R): regroupement, filtres, recherche.
  *
  * « Les filtres actifs sont visibles en permanence sous forme de pastilles
  * retirables. Un filtre actif qui masque des lignes affiche leur nombre. Un
@@ -32,7 +32,7 @@ export type FilterBarProps = {
   readonly directionOptions: readonly Option[];
   readonly decisionPointOptions: readonly Option[];
   readonly levelOptions: readonly Option[];
-  /** R6.2 (partie R) — nombre de lignes que les filtres retirent de la vue. */
+  /** R6.2 (partie R) : nombre de lignes que les filtres retirent de la vue. */
   readonly hidden: number;
   readonly searchId: string;
 };

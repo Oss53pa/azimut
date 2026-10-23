@@ -17,7 +17,7 @@ function codes(out: { ok: boolean; findings?: readonly { code: string }[]; notic
   return [...(out.findings?.map(f => f.code) ?? []), ...out.notices.map(n => n.key)];
 }
 
-describe('D8.3 — blocs saisis sur une face', () => {
+describe('D8.3 : blocs saisis sur une face', () => {
   it('ajoute un bloc libre après les blocs de la face, une entrée par langue', () => {
     const out = declareBlockCommand(SITE, FACE, 'free', { en: ' Exit ', fr: 'Sortie' }, ENV);
     expect(out.ok && out.value.after).toEqual({
@@ -37,7 +37,7 @@ describe('D8.3 — blocs saisis sur une face', () => {
     expect(out.ok && out.notices[0]?.params['lang']).toBe('en');
   });
 
-  it('E1.4 — refuse une légende ou un type résolu par EDIT.CONTEXT_VIOLATION', () => {
+  it('E1.4 : refuse une légende ou un type résolu par EDIT.CONTEXT_VIOLATION', () => {
     expect(codes(declareBlockCommand(SITE, FACE, 'legend', {}, ENV))).toEqual(['EDIT.CONTEXT_VIOLATION']);
     expect(codes(declareBlockCommand(SITE, FACE, 'resolved', {}, ENV))).toEqual(['EDIT.CONTEXT_VIOLATION']);
   });

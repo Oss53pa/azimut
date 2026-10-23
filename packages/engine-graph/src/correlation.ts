@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * N3.2 / N3.3 — M03.P5 : un montant n'est calculé que si la corrélation entre
+ * N3.2 / N3.3, M03.P5 : un montant n'est calculé que si la corrélation entre
  * exposition et performance réelle atteint le seuil déclaré. En dessous, seuls
  * les écarts d'exposition sont produits, et l'interface le dit.
  *
@@ -17,14 +17,14 @@ import { codePointCompare } from '@azimut/core-model';
  * destination. Azimut produit le premier et jamais le second.
  */
 
-/** M03.P6 (partie N) — nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
+/** M03.P6 (partie N) : nature d'une donnée réelle importée. Aucune n'est produite par Azimut. */
 export type PerformanceSourceKind =
   | 'footfall_count'
   | 'telemetry'
   | 'declared_revenue';
 
 /**
- * M03.P6 (partie N) — observation réelle importée pour une cellule.
+ * M03.P6 (partie N) : observation réelle importée pour une cellule.
  *
  * `source_label` et `observed_at` ne sont pas facultatifs : M03.P6 exige que
  * l'origine et la date soient conservées, et une observation qui ne les porte
@@ -41,14 +41,14 @@ export type PerformanceObservation = {
   readonly observed_at: string;
 };
 
-/** M03.P2 (partie N) / M03.P3 — indice d'exposition calculé par Azimut pour une cellule. */
+/** M03.P2 (partie N) / M03.P3 : indice d'exposition calculé par Azimut pour une cellule. */
 export type ExposureIndex = {
   readonly destination_id: string;
   readonly index: number;
 };
 
 /**
- * M03.P5 (partie N) — hypothèse propre au chiffrage : le seuil de corrélation.
+ * M03.P5 (partie N), hypothèse propre au chiffrage : le seuil de corrélation.
  *
  * Il est déclaré par celui qui commande l'audit, jamais porté par le code et
  * jamais doté d'une valeur par défaut. Un seuil implicite serait un seuil que
@@ -104,7 +104,7 @@ export function isDeclaredThreshold(value: number): boolean {
   return Number.isFinite(value) && value >= 0 && value <= 1;
 }
 
-/** M03.P6 (partie N) — une observation sans origine ni date n'entre dans aucun calcul. */
+/** M03.P6 (partie N) : une observation sans origine ni date n'entre dans aucun calcul. */
 export function isSourcedObservation(observation: PerformanceObservation): boolean {
   return observation.source_label.trim().length > 0
     && observation.observed_at.trim().length > 0;
@@ -122,7 +122,7 @@ type Pair = {
  * Trié par identifiant de destination : l'ordre d'accumulation des sommes est
  * donc fixé, et deux appels sur les mêmes données rendent le même coefficient
  * au bit près (invariant 4). Une destination présente d'un seul côté n'entre
- * pas dans l'échantillon — il n'y a rien à corréler.
+ * pas dans l'échantillon : il n'y a rien à corréler.
  */
 function pairSample(
   indices: readonly ExposureIndex[],
@@ -212,7 +212,7 @@ function pearson(xs: readonly number[], ys: readonly number[]): number | null {
  * Établit la corrélation entre exposition et performance réelle.
  *
  * Mesure seulement : aucun verdict, aucun refus. C'est ce que l'interface
- * affiche pour dire où en est l'échantillon, y compris — et surtout — quand le
+ * affiche pour dire où en est l'échantillon, y compris (et surtout) quand le
  * coefficient n'est pas établissable.
  */
 export function assessCorrelation(
@@ -258,14 +258,14 @@ export function assessCorrelation(
 }
 
 /**
- * M03.P5 (partie N) — garde-fou du montant.
+ * M03.P5 (partie N) : garde-fou du montant.
  *
  * Refuse par `FLOW.CORRELATION_TOO_LOW` dans les trois cas où M03.P5 ne permet pas
  * de produire un montant : le coefficient est établi mais sous le seuil,
  * l'échantillon est trop petit, ou le coefficient n'est pas défini. Les deux
  * derniers ne sont pas « une corrélation basse » mais une corrélation non
  * établie ; `status` le dit dans le rapport, et un montant y est refusé de la
- * même façon — M03.P5 exige que la corrélation *atteigne* le seuil, et une
+ * même façon : M03.P5 exige que la corrélation *atteigne* le seuil, et une
  * corrélation inconnue ne l'atteint pas.
  *
  * Un seuil qui n'est pas déclaré est refusé avant tout calcul, par

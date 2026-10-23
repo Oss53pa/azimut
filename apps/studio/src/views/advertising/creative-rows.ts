@@ -1,5 +1,5 @@
 /**
- * H4.6 — les lignes des visuels : ceux que la base a enregistrés, et ceux qui
+ * H4.6, les lignes des visuels : ceux que la base a enregistrés, et ceux qui
  * attendent en réception.
  *
  * Un visuel enregistré a été assaini à sa réception (M05.R5, partie N) : son état se

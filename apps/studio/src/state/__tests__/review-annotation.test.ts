@@ -7,7 +7,7 @@ import {
 const write = { orgId: 'org', siteId: 'site', timestamp: '2026-10-06T08:00:00.000Z' };
 const ink = [[{ x: 0.1, y: 0.1, p: 0.5 }, { x: 0.4, y: 0.2, p: 0.7 }]];
 
-describe('J4 — l’annotation en révision', () => {
+describe('J4 : l’annotation en révision', () => {
   it('une même remarque sur trois lignes : trois annotations, un seul geste (R8)', () => {
     const out = annotateCommands(
       ['l1', 'l2', 'l3'].map((line, i) => ({ id: `a${String(i)}`, anchor: { kind: 'message_line' as const, id: line } })),

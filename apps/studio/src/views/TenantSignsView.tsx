@@ -22,7 +22,7 @@ const DOSSIER_STATE_KEYS = {
 } as const;
 
 /**
- * Module 06 — les enseignes locataires. Une enseigne appartient au locataire :
+ * Module 06 : les enseignes locataires. Une enseigne appartient au locataire :
  * elle est instruite et suivie, jamais conçue ici. Les axes mesurables du
  * règlement sont contrôlés automatiquement ; le reste reste un avis humain.
  * Chaque dossier s'instruit contre la version du règlement en vigueur à son
@@ -83,7 +83,7 @@ export function TenantSignsView({ siteKey }: TenantSignsViewProps): JSX.Element 
 
   const columns: readonly Column<SignDossier>[] = [
     { id: 'id', header: t('tenant.col.dossier'), cell: d => d.id },
-    { id: 'cell', header: t('tenant.col.cell'), cell: d => d.cell_code ?? '—' },
+    { id: 'cell', header: t('tenant.col.cell'), cell: d => d.cell_code ?? '–' },
     { id: 'tenant', header: t('tenant.col.tenant'), cell: d => d.tenant ?? t('tenant.destination.missing') },
     { id: 'submitted', header: t('tenant.col.submitted'), cell: d => d.submitted_on },
     {

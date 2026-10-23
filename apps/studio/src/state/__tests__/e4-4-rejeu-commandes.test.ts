@@ -11,7 +11,7 @@ import { acceptNode, acceptEdge } from '../graph-input.js';
 import { graphCommands } from '../graph-commands.js';
 
 /**
- * E4.4 — essai obligatoire, sur le chemin qui écrit réellement.
+ * E4.4 : essai obligatoire, sur le chemin qui écrit réellement.
  *
  * « Rejouer une séquence enregistrée d'opérations d'édition sur un site de
  * référence, deux fois, et vérifier l'égalité stricte de l'état final et des
@@ -20,7 +20,7 @@ import { graphCommands } from '../graph-commands.js';
  * L'éditeur de documents a le sien depuis longtemps. Il porte sur ses propres
  * correctifs de document, et non sur les `EntityCommand` qui mènent à la base :
  * la preuve existait donc sur une couche que personne n'écrit. Celui-ci porte
- * sur l'autre, celle des empreintes et du graphe — T-1.2b, préalable à T-1.4.
+ * sur l'autre, celle des empreintes et du graphe : T-1.2b, préalable à T-1.4.
  *
  * La séquence comporte une annulation et un rétablissement, parce que c'est là
  * que le rejeu se casse d'ordinaire : une pile qui garderait un horodatage, un
@@ -144,7 +144,7 @@ async function play(): Promise<Replay> {
   return { session, store };
 }
 
-describe('E4.4 — le rejeu d’une séquence donne deux fois le même état', () => {
+describe('E4.4 : le rejeu d’une séquence donne deux fois le même état', () => {
   it('rend deux fois les mêmes lignes locales', async () => {
     const first = await play();
     const second = await play();
@@ -187,7 +187,7 @@ describe('E4.4 — le rejeu d’une séquence donne deux fois le même état', (
  * E5.2 et E5.3, sur le même chemin : la promesse d'annulation ne vaut que si
  * l'état revient exactement, et qu'elle cesse à la synchronisation.
  */
-describe('E5.2 — annuler puis rétablir rend un état identique', () => {
+describe('E5.2 : annuler puis rétablir rend un état identique', () => {
   it('l’annulation retire exactement ce que le geste avait écrit', async () => {
     let session: SessionState = EMPTY_SESSION;
     let store: StoreState = EMPTY_STORE;

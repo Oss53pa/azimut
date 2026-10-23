@@ -1,12 +1,12 @@
 /**
- * D12.1 — modules 05 (régie publicitaire) et 06 (enseignes locataires),
+ * D12.1 : modules 05 (régie publicitaire) et 06 (enseignes locataires),
  * plus la mention commune du jeu de démonstration.
  */
 export const COMMERCE_FR = {
   // Mention commune aux écrans servis par un jeu de démonstration
   'demo.dataset.message': 'Jeu de démonstration.',
 
-  // Module 05 — régie
+  // Module 05, régie
   'ads.eyebrow': 'Module 05 · H4',
   'ads.title': 'Régie publicitaire',
   'ads.subtitle': 'Advertising',
@@ -50,14 +50,14 @@ export const COMMERCE_FR = {
   'ads.panel.intake': 'Réception des visuels',
   'ads.rulespack.attached': 'Paquet de règles publicitaires rattaché.',
   'ads.rulespack.missing': "Aucun paquet de règles publicitaires n'est rattaché.",
-  'ads.rulespack.hint': "Les contrôles techniques continuent. Les appréciations déclaratives — règlement du site, contenu interdit, mentions légales — reposeraient sur un règlement que personne n'a versé, et aucun livrable publicitaire ne peut être produit.",
+  'ads.rulespack.hint': "Les contrôles techniques continuent. Les appréciations déclaratives (règlement du site, contenu interdit, mentions légales) reposeraient sur un règlement que personne n'a versé, et aucun livrable publicitaire ne peut être produit.",
   'ads.rulespack.note': "R7 : les règles publicitaires viennent d'une extension du paquet de règles, enfichable, versionnée, refusée sans référence documentaire. En son absence, le module lève une anomalie et n'invente aucune règle. Le corpus par pays reste à établir (N5.7) : le mécanisme est prêt, le contenu absent.",
   'ads.creative.col.intake': 'Assainissement',
   'ads.sanitation.clean': 'assaini',
   'ads.sanitation.failed': 'refusé',
   'ads.sanitation.deferred': 'serveur',
   'ads.intake.empty': 'Rien à signaler à la réception.',
-  'ads.intake.note': "R5 : tout visuel reçu est assaini avant stockage, et un visuel non assaini n'est jamais rendu. Un SVG est assaini ici — script, gestionnaire d'événement, référence externe et métadonnées retirés. Un format binaire est remis au serveur, seul à faire autorité (E14.1) : il n'est pas « propre en attendant », il n'est pas encore assaini.",
+  'ads.intake.note': "R5 : tout visuel reçu est assaini avant stockage, et un visuel non assaini n'est jamais rendu. Un SVG est assaini ici : script, gestionnaire d'événement, référence externe et métadonnées retirés. Un format binaire est remis au serveur, seul à faire autorité (E14.1) : il n'est pas « propre en attendant », il n'est pas encore assaini.",
   'ads.panel.spec': 'Fiche technique',
   'ads.spec.format': 'Format de fichier',
   'ads.spec.resolution': 'Résolution minimale',
@@ -67,7 +67,7 @@ export const COMMERCE_FR = {
   'ads.spec.note': "La fiche technique est générée depuis l'emplacement, jamais rédigée à la main.",
   'ads.note': "Azimut émet les états de vente et les éléments de facturation. Azimut n'est jamais le livre comptable.",
 
-  // Module 06 — enseignes locataires
+  // Module 06, enseignes locataires
   'tenant.eyebrow': 'Module 06 · H5',
   'tenant.title': 'Enseignes locataires',
   'tenant.subtitle': 'Tenant signs',
@@ -155,14 +155,14 @@ export const COMMERCE_EN: Readonly<Record<keyof typeof COMMERCE_FR, string>> = {
   'ads.panel.intake': 'Creative intake',
   'ads.rulespack.attached': 'An advertising rules pack is attached.',
   'ads.rulespack.missing': 'No advertising rules pack is attached.',
-  'ads.rulespack.hint': 'Technical checks carry on. Declarative judgements — site rules, forbidden content, legal notices — would rest on rules nobody has supplied, and no advertising deliverable can be produced.',
-  'ads.rulespack.note': 'R7: advertising rules come from a rules-pack extension — pluggable, versioned, refused without a documentary reference. In its absence the module raises an anomaly and invents no rule. The per-country corpus is still to be established (N5.7): the mechanism is ready, the content absent.',
+  'ads.rulespack.hint': 'Technical checks carry on. Declarative judgements (site rules, forbidden content, legal notices) would rest on rules nobody has supplied, and no advertising deliverable can be produced.',
+  'ads.rulespack.note': 'R7: advertising rules come from a rules-pack extension, pluggable, versioned, refused without a documentary reference. In its absence the module raises an anomaly and invents no rule. The per-country corpus is still to be established (N5.7): the mechanism is ready, the content absent.',
   'ads.creative.col.intake': 'Sanitization',
   'ads.sanitation.clean': 'sanitized',
   'ads.sanitation.failed': 'refused',
   'ads.sanitation.deferred': 'server',
   'ads.intake.empty': 'Nothing to report on intake.',
-  'ads.intake.note': 'R5: every creative received is sanitized before storage, and an unsanitized creative is never rendered. An SVG is sanitized here — script, event handler, external reference and metadata removed. A binary format is deferred to the server, the only authority (E14.1): it is not "clean meanwhile", it is not yet sanitized.',
+  'ads.intake.note': 'R5: every creative received is sanitized before storage, and an unsanitized creative is never rendered. An SVG is sanitized here: script, event handler, external reference and metadata removed. A binary format is deferred to the server, the only authority (E14.1): it is not "clean meanwhile", it is not yet sanitized.',
   'ads.panel.spec': 'Technical sheet',
   'ads.spec.format': 'File format',
   'ads.spec.resolution': 'Minimum resolution',

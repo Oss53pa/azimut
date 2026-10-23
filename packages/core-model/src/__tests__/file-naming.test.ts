@@ -6,7 +6,7 @@ import {
   buildArchiveName,
 } from '../file-naming.js';
 
-describe('D11 — transliterate', () => {
+describe('D11: transliterate', () => {
   it('replaces accented characters', () => {
     expect(transliterate('Réception')).toBe('Reception');
     expect(transliterate('Étage')).toBe('Etage');
@@ -32,7 +32,7 @@ describe('D11 — transliterate', () => {
   });
 });
 
-describe('D11 — sanitizeSegment', () => {
+describe('D11: sanitizeSegment', () => {
   it('uppercases and removes spaces', () => {
     expect(sanitizeSegment('Bureau A')).toBe('BUREAUA');
   });
@@ -58,7 +58,7 @@ describe('D11 — sanitizeSegment', () => {
   });
 });
 
-describe('D11 — buildFileName', () => {
+describe('D11: buildFileName', () => {
   it('produces the example from the spec', () => {
     const result = buildFileName({
       site_code: 'CPL',
@@ -174,7 +174,7 @@ describe('D11 — buildFileName', () => {
   });
 });
 
-describe('D11 — buildArchiveName', () => {
+describe('D11: buildArchiveName', () => {
   it('omits support-specific segments', () => {
     const result = buildArchiveName({
       site_code: 'CPL',
@@ -221,7 +221,7 @@ describe('D11 — buildArchiveName', () => {
   });
 });
 
-describe('D11 — buildFileName truncation symmetry', () => {
+describe('D11: buildFileName truncation symmetry', () => {
   it('head is at least as long as tail after truncation', () => {
     const result = buildFileName({
       site_code: 'A'.repeat(30),
@@ -243,7 +243,7 @@ describe('D11 — buildFileName truncation symmetry', () => {
   });
 });
 
-describe('D11 — edge cases', () => {
+describe('D11: edge cases', () => {
   it('does not truncate a filename exactly at max length (120)', () => {
     // A_B_C_D_{R*103}_V1_F.PDF  →  17 + 103 = 120
     const result = buildFileName({

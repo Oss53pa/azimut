@@ -1287,7 +1287,7 @@ dans le jeton ne dit laquelle. Les jetons `P8` à `P13` n'appartiennent qu'à ce
 complément, mais une règle ajoutée à N3.2 les rendrait ambigus à leur tour.
 
 La levée est la même que pour `M` et `R` : citer le document. Le dépôt
-l'applique et le vérifie — `tests/rule-citation-ambiguity.test.ts` refuse un
+l'applique et le vérifie : `tests/rule-citation-ambiguity.test.ts` refuse un
 jeton `M1`–`M17`, `R1`–`R6` ou `P1`–`P7` écrit seul dans un commentaire.
 
 ### C8. Registre de sécurité
@@ -1326,7 +1326,7 @@ réponse à la question posée ci-dessous.
 
 Conséquence immédiate : le vocabulaire et l'architecture des parties A à N
 restent ceux du produit. Les sections 19 et 19 bis, qui redéfinissent un schéma
-et déplacent le calcul lourd, ne s'appliquent pas telles quelles — voir C1 et
+et déplacent le calcul lourd, ne s'appliquent pas telles quelles : voir C1 et
 C5, qui restent ouverts. Ce que le complément apporte réellement au produit, ce
 sont des capacités absentes du socle, pas un socle de rechange.
 
@@ -1342,12 +1342,12 @@ qu'elles ne sont pas prises ; aucune n'est contournée en silence.
    parties L et N, ou les dix-sept M1 à M17 ? Sans réponse, les codes se citent
    avec leur document d'origine, comme la note de collision de CLAUDE.md
    l'impose.
-2. Les seuils du complément — résidu de calage, contraste, vitesse de marche,
-   distance de rappel — sont-ils d'origine normative, et donc à porter par un
+2. Les seuils du complément (résidu de calage, contraste, vitesse de marche,
+   distance de rappel) sont-ils d'origine normative, et donc à porter par un
    paquet de règles (INV-5), ou des paramètres de produit ? Aucun n'est inscrit
    dans le code tant que la question tient.
-3. P1 — « tout objet porte une source et un statut, une proposition ne s'affiche
-   jamais comme un existant » — n'a aucun appui dans le socle : aucune entité de
+3. P1 (« tout objet porte une source et un statut, une proposition ne s'affiche
+   jamais comme un existant ») n'a aucun appui dans le socle : aucune entité de
    A5 ne porte ni statut ni source. Les objets du stationnement le portent,
    ceux du socle non. Généraliser touche A5 en entier.
 4. La grille d'accessibilité (M12) attend les critères WCAG 2.2 et ISO 21542
@@ -1374,18 +1374,18 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 10. Les grands formats imprimés A0 et A1. L'obstacle a changé de nature
     depuis que `docs/decision-t-0-9-generation-pdf.md` existe : la note
     comparative propose `pdf-lib` et attend ratification, et surtout le dépôt
-    n'a aucune notion de format de page — ni A4, ni A3, ni échelle de tirage.
+    n'a aucune notion de format de page, ni A4, ni A3, ni échelle de tirage.
     Ce qui manque n'est donc plus le générateur mais le modèle : ce qu'un
     livrable A0 est dans ce produit, et si les dimensions de l'ISO 216 sont une
     donnée versionnée ou une constante. Cela relève de A2.2.
-11. La seconde moitié de P7 — « présent de l'indicatif, pas de conditionnel » —
+11. La seconde moitié de P7 (« présent de l'indicatif, pas de conditionnel »)
     et son contrôle QC-07. Reconnaître un conditionnel demande une analyse de
     la langue que ce moteur ne fait pas.
 12. Onze codes du catalogue D2 restent muets, chacun avec sa raison inscrite
     dans `tests/error-code-reachability.test.ts`. Trois familles : la capacité
-    n'est pas construite — import vectoriel, encre, éditeur de pictogrammes,
+    n'est pas construite, import vectoriel, encre, éditeur de pictogrammes,
     calcul d'exposition, variante de langue à la composition ; la donnée manque
-    au modèle — code d'unité sur l'empreinte, largeur minimale de logo, calage
+    au modèle : code d'unité sur l'empreinte, largeur minimale de logo, calage
     par niveau ; ou le paquet de règles fait défaut, pour l'adjacence
     chromatique.
 13. Neuf garde-fous du studio ne sont appelés par aucun écran : ils ont été
@@ -1394,8 +1394,8 @@ du temps, et chacun est nommé pour ne pas rester un silence.
 14. ~~Une part de fréquentation négative qui laisserait la somme à un
     passerait le contrôle de normalisation.~~ **Fait.** `FLOW.WEIGHT_INVALID`
     refuse une pondération négative ou non finie, dans les deux familles, avant
-    la normalisation. La justification que je donnais pour ne pas le faire —
-    « une décision qui dépasse le fait de lever un code déjà déclaré » — ne
+    la normalisation. La justification que je donnais pour ne pas le faire (
+    « une décision qui dépasse le fait de lever un code déjà déclaré ») ne
     tenait pas : une part d'un tout ne se soustrait pas, ce n'est pas une
     décision mais de l'arithmétique.
 15. Les portails véhicules ne se dessinent pas : un point orienté sur un plan
@@ -1424,10 +1424,10 @@ qu'aucun moteur n'exerçait, ont été levés depuis :
 
 | Contrôle | Où |
 | --- | --- |
-| QC-06 — caractère interdit dans un texte de livrable (P7) | `engine-graph/audit-typography.ts` |
-| QC-10 — desserte de toutes les entrées, sens de circulation compris | `engine-graph/checks-structure.ts`, dans `validateGraph` |
-| QC-12 — liaison verticale au même point d'un niveau à l'autre (P5) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
-| QC-20 — rédaction trop longue dans un texte libre | `engine-graph/audit-sentence-length.ts` |
+| QC-06 : caractère interdit dans un texte de livrable (P7) | `engine-graph/audit-typography.ts` |
+| QC-10 : desserte de toutes les entrées, sens de circulation compris | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+| QC-12 : liaison verticale au même point d'un niveau à l'autre (P5) | `engine-graph/checks-structure.ts`, dans `validateGraph` |
+| QC-20 : rédaction trop longue dans un texte libre | `engine-graph/audit-sentence-length.ts` |
 
 Deux contrôles du socle ont été écrits au passage, parce que leurs codes
 figuraient au catalogue D2 sans qu'aucun moteur ne les lève : le lexique de
@@ -1445,7 +1445,7 @@ de destination restent donc hors du contrôle. Le contrôle a par ailleurs sorti
 un point que le socle ignorait : le champ `direction` d'une arête, présent au
 modèle depuis A5, n'était lu que par le calcul d'itinéraire. Aucun contrôle de
 complétude ne le lisait, si bien qu'un sens unique coupant une aile du site ne
-se voyait nulle part — l'aile restant reliée au sens du modèle. QC-10 lit ce
+se voyait nulle part : l'aile restant reliée au sens du modèle. QC-10 lit ce
 champ ; les contrôles de structure continuent de l'ignorer, et disent
 désormais pourquoi.
 
@@ -1456,7 +1456,7 @@ extrémités ne peuvent pas coïncider, et le retenir produirait une anomalie
 bloquante sur une géométrie correcte. Le titre de QC-12, « liaison verticale
 non alignée », se lirait plus largement : l'écart entre l'énumération de P5 et
 ce titre n'est pas tranché, et relève de A2.2. Le seuil, lui, n'est pas posé
-par le contrôle — P5 dit « le même point », et D1.5 définit déjà à partir de
+par le contrôle : P5 dit « le même point », et D1.5 définit déjà à partir de
 quelle distance deux points n'en sont plus qu'un.
 
 De QC-06, la traduction des noms typographiques du document en points de code
@@ -1468,17 +1468,17 @@ De QC-20, deux choses sont écrites dans le moteur plutôt que supposées. Le
 corpus se limite au texte libre d'un gabarit de face : le modèle ne porte ni
 cartouche ni note, et c'est ce qui s'en approche le plus, le seul endroit où
 l'on écrit des phrases. Et le découpage en phrases coupe à tort sur une
-abréviation — « M. Dupont » compte pour deux —, ce qui raccourcit les phrases
+abréviation : « M. Dupont » compte pour deux, ce qui raccourcit les phrases
 et fait donc sous-estimer le contrôle plutôt que sur-signaler, ce qu'on veut
 d'un signalant qu'on ne veut pas voir ignoré à force de crier.
 
 **Rectification.** Une version antérieure de ce registre rangeait QC-20 parmi
 les contrôles demandant une analyse de la langue. C'était faux : compter les
 mots d'une phrase n'en demande pas. Seul QC-07, le verbe au conditionnel, est
-dans ce cas, et la seconde moitié de P7 avec lui — « présent de l'indicatif,
-pas de conditionnel » — qui n'est pas faite.
+dans ce cas, et la seconde moitié de P7 avec lui (« présent de l'indicatif,
+pas de conditionnel ») qui n'est pas faite.
 
-De M15, seul le mécanisme des champs liés est fait — celui sans lequel le reste
+De M15, seul le mécanisme des champs liés est fait : celui sans lequel le reste
 ne vaudrait rien, puisqu'il est ce qui empêche le document de dupliquer une
 donnée. La structure du document, les objets de cartographie, l'ingestion de la
 plateforme de marque et la publication restent à faire.

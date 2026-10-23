@@ -15,8 +15,8 @@ type CalibrationSurfaceProps = {
 };
 
 /**
- * Surface de calage. À défaut d'un fond de plan téléversé — l'application n'a
- * pas encore de dépôt de fichier — elle rend les empreintes du niveau comme
+ * Surface de calage. À défaut d'un fond de plan téléversé (l'application n'a
+ * pas encore de dépôt de fichier) elle rend les empreintes du niveau comme
  * fond : les clics portent donc sur une géométrie réelle du site, et la mesure
  * qui en sort est celle de cette géométrie.
  */

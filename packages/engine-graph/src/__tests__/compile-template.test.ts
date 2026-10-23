@@ -23,7 +23,7 @@ function profile(): TravelProfile {
   return p;
 }
 
-describe('D8 — compileTemplate', () => {
+describe('D8: compileTemplate', () => {
   it('maps grid areas to percentage regions', () => {
     // 2 columns, no margin/gutter → each column is 50% wide.
     const tpl = templateSchema.parse({
@@ -146,9 +146,9 @@ describe('D8 — compileTemplate', () => {
   });
 });
 
-describe('D8.4 — a template added purely by file renders (no code change)', () => {
+describe('D8.4: a template added purely by file renders (no code change)', () => {
   it('authors a Template as data, compiles and renders a valid face', () => {
-    // This object is the only thing an author supplies — no engine code is
+    // This object is the only thing an author supplies: no engine code is
     // touched. It flows: schema.parse → compileTemplate → resolveFaceContent
     // → renderFace, and must produce a valid SVG.
     const authored = {
@@ -203,7 +203,7 @@ describe('D8.4 — a template added purely by file renders (no code change)', ()
     // Header resolved from site.name, destinations resolved from the graph.
     expect(svg).toContain('Site multi-niveaux');
     expect(svg).toContain('Bureau RDC');
-    // K-Tier-A: a legend block with no configured entries renders nothing —
+    // K-Tier-A: a legend block with no configured entries renders nothing,
     // no more placeholder token.
     expect(svg).not.toContain('[Légende]');
   });

@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * T-1.5 — « Liaisons verticales et inter-bâtiments ».
+ * T-1.5 : « Liaisons verticales et inter-bâtiments ».
  *
  * Acceptation : « Une arête entre deux niveaux sans liaison verticale associée
  * est refusée. » Le refus était tenu, et rien ne le levait : l'atelier ne
  * connaissait qu'un niveau, celui du chemin, et aucun geste ne pouvait
- * produire une arête inter-niveaux — ni donc la liaison qui l'accompagne.
+ * produire une arête inter-niveaux, ni donc la liaison qui l'accompagne.
  * L'outil `L` de M4 (partie M) existait à la barre et ne faisait rien.
  *
  * Ce qui se prouve ici, et nulle part ailleurs : la session porte les deux
@@ -28,7 +28,7 @@ async function ready(page: Page): Promise<void> {
   await page.locator('[role="toolbar"] button').first().waitFor({ state: 'attached' });
 }
 
-test.describe('T-1.5 — la liaison verticale', () => {
+test.describe('T-1.5 : la liaison verticale', () => {
   test('la session porte les deux niveaux, et l’on passe de l’un à l’autre', async ({ page }) => {
     await page.goto(GRAPH);
     await ready(page);
@@ -82,7 +82,7 @@ test.describe('T-1.5 — la liaison verticale', () => {
     await expect(page.getByText(/Liaisons\s*3|Links\s*3/)).toBeVisible();
 
     // E5.2 : un geste, une entrée d'annulation. L'arête et la liaison partent
-    // ensemble — les séparer laisserait une arête inter-niveaux sans liaison,
+    // ensemble : les séparer laisserait une arête inter-niveaux sans liaison,
     // c'est-à-dire l'état que T-1.5 refuse.
     await page.keyboard.press('Control+z');
     await expect(page.getByText(/Liaisons\s*2|Links\s*2/)).toBeVisible();

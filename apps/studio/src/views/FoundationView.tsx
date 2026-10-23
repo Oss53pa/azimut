@@ -41,7 +41,7 @@ function ratio(part: number, whole: number): string {
 }
 
 /**
- * Module 01 — le socle du site. Graphe, destinations, supports, plans de
+ * Module 01 : le socle du site. Graphe, destinations, supports, plans de
  * niveaux, contrôles de complétude. Tous les compteurs sont calculés depuis
  * les données du site ; aucun n'est stocké (invariant 1).
  */
@@ -59,13 +59,13 @@ export function FoundationView({ onNavigate }: FoundationViewProps): JSX.Element
     findings.push(...findingsOf(validateDirectory(site)));
 
     const coverage = profile === undefined ? null : auditCoverage(site, profile, site.supports);
-    // N2.4 — les anomalies de couverture sont nommées par leur code comme les
+    // N2.4, les anomalies de couverture sont nommées par leur code comme les
     // autres : elles rejoignent la liste au lieu de rester dans un compteur.
     if (coverage !== null && coverage.ok) findings.push(...coverage.value.findings);
     const access = profile === undefined ? null : auditAccessibility(site, profile);
     const evac = auditEvacuation(site);
     const quantities = computeQuantities(site, placedSupports(site, site.support_types[0]?.key ?? ''));
-    // D2.2 — une empreinte refusée est une anomalie comme une autre.
+    // D2.2 : une empreinte refusée est une anomalie comme une autre.
     const inputs = profile === undefined ? null : computeInputsHash(site, profile);
     if (inputs !== null && !inputs.ok) findings.push(...inputs.findings);
 

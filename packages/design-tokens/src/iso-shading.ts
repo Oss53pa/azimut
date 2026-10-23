@@ -1,5 +1,5 @@
 /**
- * D5.3 — Isometric face shading.
+ * D5.3: Isometric face shading.
  *
  * The three visible faces of an iso volume (top, left, right) derive from a
  * single base colour by fixed darkening factors. Per the spec these factors are

@@ -1,9 +1,9 @@
 /**
- * A5 — forme des lignes telles que la base les rend.
+ * A5 : forme des lignes telles que la base les rend.
  *
  * Ces types décrivent les colonnes, pas le modèle métier : ils sont le contrat
  * entre la base et `assembleSiteData`. Les deux chemins de lecture les
- * satisfont — l'ORM côté service, l'API REST côté navigateur — ce qui permet
+ * satisfont (l'ORM côté service, l'API REST côté navigateur) ce qui permet
  * une seule implémentation du passage ligne → modèle (invariant 1).
  *
  * Deux conventions de PostgreSQL s'y lisent :
@@ -27,20 +27,20 @@ export type SiteRow = {
   readonly org_id: string;
   readonly name: string;
   readonly country_code: string;
-  /** O4 — fuseau du site, requis depuis la migration 0031. */
+  /** O4 : fuseau du site, requis depuis la migration 0031. */
   readonly timezone: string;
-  /** Q5 — entité juridique émettrice, NULL tant que rien n'est facturé. */
+  /** Q5 : entité juridique émettrice, NULL tant que rien n'est facturé. */
   readonly legal_entity_id: string | null;
-  /** M01.S1 — origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
+  /** M01.S1 : origine du repère site, NULL tant qu'aucun calage n'a eu lieu. */
   readonly origin_x_m: string | null;
   readonly origin_y_m: string | null;
-  /** N1.2 — `text[]`, NULL quand rien n'est déclaré. */
+  /** N1.2 : `text[]`, NULL quand rien n'est déclaré. */
   readonly active_langs: readonly string[] | null;
   readonly reference_elevation_m: string | null;
 };
 
 /**
- * A5.8 — le rattachement d'un site à un paquet de règles, socle ou surcouche.
+ * A5.8 : le rattachement d'un site à un paquet de règles, socle ou surcouche.
  * Cette table fait foi : le site ne porte plus de colonne de paquet.
  */
 export type SiteRulesBindingRow = {
@@ -59,7 +59,7 @@ export type BuildingRow = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
-  /** N1.2 — `jsonb`, forme libre du point de vue de la base. */
+  /** N1.2 : `jsonb`, forme libre du point de vue de la base. */
   readonly opening_hours: unknown;
   readonly default_edge_width_m: string | null;
 };
@@ -88,13 +88,13 @@ export type PlanCalibrationRow = {
   readonly org_id: string;
   readonly plan_source_id: string;
   readonly scale_m_per_px: string;
-  /** A5.2 — position, dans l'image, de l'origine du repère site. */
+  /** A5.2 : position, dans l'image, de l'origine du repère site. */
   readonly origin_x_px: string | null;
   readonly origin_y_px: string | null;
-  /** A5.2 — distance réelle dont l'échelle est tirée. */
+  /** A5.2 : distance réelle dont l'échelle est tirée. */
   readonly reference_distance_m: string | null;
   readonly rotation_deg: string;
-  /** M01.S1 — NULL sur une ligne antérieure à la migration 0022. */
+  /** M01.S1 : NULL sur une ligne antérieure à la migration 0022. */
   readonly calibrated_at: TimestampValue | null;
 };
 
@@ -139,7 +139,7 @@ export type EdgeRow = {
   readonly length_m: string;
 };
 
-/** O11 — `temporary_closure` (migration 0069). Bornes `timestamp` sans fuseau. */
+/** O11: `temporary_closure` (migration 0069). Bornes `timestamp` sans fuseau. */
 export type TemporaryClosureRow = {
   readonly id: string;
   readonly org_id: string;
@@ -160,7 +160,7 @@ export type VerticalLinkRow = {
   readonly accessible: boolean;
 };
 
-/** M01.S10 — le passage entre deux bâtiments, et s'il est couvert. */
+/** M01.S10 : le passage entre deux bâtiments, et s'il est couvert. */
 export type BuildingLinkRow = {
   readonly id: string;
   readonly org_id: string;
@@ -199,7 +199,7 @@ export type DestinationRow = {
   readonly occupant_name: string;
   readonly occupancy_status: string;
   readonly display_priority: number;
-  /** N1.2 / M01.S5 — `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
+  /** N1.2 / M01.S5 : `date`, rendue en chaîne `AAAA-MM-JJ` par les deux chemins. */
   readonly valid_from: string | null;
   readonly valid_to: string | null;
 };
@@ -227,7 +227,7 @@ export type SupportRow = {
   readonly id: string;
   readonly org_id: string;
   readonly site_id: string;
-  /** A5.6 et N2.2 — code lisible, unique par site. Nullable, voir 0027. */
+  /** A5.6 et N2.2 : code lisible, unique par site. Nullable, voir 0027. */
   readonly code: string | null;
   readonly node_id: string;
   readonly registry: string | null;
@@ -237,7 +237,7 @@ export type SupportRow = {
   readonly width_mm: number | null;
   readonly height_mm: number | null;
   readonly dimensions_source: string | null;
-  /** A5.6 — typologie du support (0015). Nullable : ON DELETE SET NULL. */
+  /** A5.6: typologie du support (0015). Nullable : ON DELETE SET NULL. */
   readonly typology_id: string | null;
 };
 
@@ -284,7 +284,7 @@ export type SupportVersionRow = {
 
 /** Toutes les lignes d'un site, telles qu'un chemin de lecture les rassemble. */
 
-/** A5.3 — l'extension d'une empreinte de place : une ligne par empreinte. */
+/** A5.3, l'extension d'une empreinte de place : une ligne par empreinte. */
 export type ParkingSpaceRow = {
   readonly id: string;
   readonly org_id: string;
@@ -293,7 +293,7 @@ export type ParkingSpaceRow = {
   readonly row_label: string;
 };
 
-/** A5.2 — une zone du socle, avec les empreintes qu'elle déclare couvrir. */
+/** A5.2 : une zone du socle, avec les empreintes qu'elle déclare couvrir. */
 export type ZoneRow = {
   readonly id: string;
   readonly org_id: string;
@@ -330,6 +330,6 @@ export type SiteRowSet = {
   readonly support_versions: readonly SupportVersionRow[];
   readonly zones: readonly ZoneRow[];
   readonly parking_spaces: readonly ParkingSpaceRow[];
-  /** O11 — facultatif : un chargeur qui ne lit pas la table n'en rend aucune. */
+  /** O11, facultatif : un chargeur qui ne lit pas la table n'en rend aucune. */
   readonly temporary_closures?: readonly TemporaryClosureRow[];
 };

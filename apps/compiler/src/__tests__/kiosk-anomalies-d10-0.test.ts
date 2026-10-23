@@ -6,7 +6,7 @@ import { createBuildKioskPackageHandler, kioskContextFromAssets } from '../build
 import type { Job } from '../job.js';
 
 /**
- * D10.0 — « L'assemblage d'un paquet agrège les anomalies de chaque rendu
+ * D10.0 : « L'assemblage d'un paquet agrège les anomalies de chaque rendu
  * qu'il embarque, et ne lit jamais le seul succès. Une marque de sécurité
  * omise, faute de fonction désignée, bloque la construction du paquet. »
  */
@@ -40,7 +40,7 @@ function job(): Job {
   };
 }
 
-describe('D10.0 — une marque de sécurité omise bloque le paquet', () => {
+describe('D10.0 : une marque de sécurité omise bloque le paquet', () => {
   it('refuse les plans d’un site dont la marque d’accessibilité n’est pas désignée', () => {
     const built = buildKioskMapFiles(unbound);
     expect(built.ok).toBe(false);
@@ -67,7 +67,7 @@ describe('D10.0 — une marque de sécurité omise bloque le paquet', () => {
   });
 });
 
-describe('D10.0 — les avertissements des rendus ne se perdent pas', () => {
+describe('D10.0 : les avertissements des rendus ne se perdent pas', () => {
   it('rassemble l’avertissement de chaque niveau, avec le niveau qui le porte', () => {
     const built = buildKioskMapFiles(withEmptyLevel);
     expect(built.ok).toBe(true);

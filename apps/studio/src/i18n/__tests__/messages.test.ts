@@ -7,7 +7,7 @@ import {
   type UiMessageKey,
 } from '../index.js';
 
-describe('D12.1 — UI message catalogue', () => {
+describe('D12.1: UI message catalogue', () => {
   const keys = Object.keys(MESSAGES_FR) as UiMessageKey[];
 
   it('has at least one key', () => {
@@ -35,7 +35,7 @@ describe('D12.1 — UI message catalogue', () => {
   });
 });
 
-describe('D12.1 — translator', () => {
+describe('D12.1: translator', () => {
   it('translates by language', () => {
     expect(makeTranslate('fr')('nav.item.checks')).toBe('Contrôles');
     expect(makeTranslate('en')('nav.item.checks')).toBe('Checks');

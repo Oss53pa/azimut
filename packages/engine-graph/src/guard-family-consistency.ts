@@ -1,7 +1,7 @@
 import { codePointCompare, empreinteOutcome, type Finding, type Outcome } from '@azimut/core-model';
 
 /**
- * J5.2 / J5.4 — Pictograms of one family must be optically coherent: a single
+ * J5.2 / J5.4, Pictograms of one family must be optically coherent: a single
  * stroke width per family (or a flat fill, never the two mixed) and a shared
  * construction grid. The family (pictogram_family) declares grid, stroke_width
  * and style; each member must match them. This guard compares every member
@@ -15,7 +15,7 @@ export type PictogramFamily = {
   readonly style: FamilyStyle;
   /** Declared line thickness; null for a flat-fill family. */
   readonly stroke_width: number | null;
-  /** Construction grid (jsonb) — compared by canonical content. */
+  /** Construction grid (jsonb): compared by canonical content. */
   readonly grid: unknown;
 };
 

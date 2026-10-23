@@ -1,5 +1,5 @@
 /**
- * F15, `state/` — l'avancement du calage de M2 (partie M).
+ * F15, `state/` : l'avancement du calage de M2 (partie M).
  *
  * M2 se parcourt en trois étapes : le fond, l'échelle, l'orientation. Ce module
  * dit où en est la saisie et ce qui lui manque, et rien d'autre.
@@ -7,7 +7,7 @@
  * Il tenait aussi un crochet React qui pilotait l'écran avec sa propre pile
  * d'annulation. Ce crochet est parti : `useTrancheSession` tient désormais une
  * session partagée par les quatre écrans de l'atelier, et une pile privée à un
- * écran aurait perdu l'annulation au changement d'écran — ce que E5.2 refuse,
+ * écran aurait perdu l'annulation au changement d'écran, ce que E5.2 refuse,
  * la portée de la pile étant « le site en cours d'édition ». Rien ne
  * l'appelait, et aucun essai ne le couvrait.
  */

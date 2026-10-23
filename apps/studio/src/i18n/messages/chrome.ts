@@ -1,5 +1,5 @@
 /**
- * D12.1 — Chrome de l'application : navigation, barre d'en-tête, libellés de sévérité.
+ * D12.1, Chrome de l'application : navigation, barre d'en-tête, libellés de sévérité.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;
  * la table anglaise est typée contre elle, une traduction manquante

@@ -1,5 +1,5 @@
 /**
- * D12.1 — Studio UI message catalogue.
+ * D12.1: Studio UI message catalogue.
  *
  * No interface text is written inside a component: components reference keys
  * only. Key convention: `domain.screen.element`, lowercase segments separated

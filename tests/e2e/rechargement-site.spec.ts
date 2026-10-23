@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E5.4 et N1.7 critère 1 — l'atelier repart de l'état enregistré.
+ * E5.4 et N1.7 critère 1 : l'atelier repart de l'état enregistré.
  *
  * Le chemin d'écriture était prouvé, le retour ne l'était pas : l'atelier
  * s'ouvrait vide dès que le stockage local ne portait rien, et un site
  * modélisé la veille se présentait comme un site neuf.
  *
- * Le dépôt servi ici est celui des sites de référence du dépôt de code —
+ * Le dépôt servi ici est celui des sites de référence du dépôt de code :
  * aucune donnée client, conformément à A13.1.
  */
 const SITE = 'ref-minimal';
 const LEVEL = 'lvl-001';
 
-test.describe('E5.4 — l’atelier repart de l’état enregistré', () => {
+test.describe('E5.4 : l’atelier repart de l’état enregistré', () => {
   test('ouvre le graphe du site tel que le dépôt le porte', async ({ page }) => {
     await page.goto(`/sites/${SITE}/levels/${LEVEL}/graph`);
 
@@ -40,7 +40,7 @@ test.describe('E5.4 — l’atelier repart de l’état enregistré', () => {
   });
 
   /**
-   * E5.4 — « choix explicite de l'utilisateur entre l'état local et l'état
+   * E5.4 : « choix explicite de l'utilisateur entre l'état local et l'état
    * serveur. Aucune fusion silencieuse. » Un travail local laissé sur le poste
    * ne se fait pas écraser par le dépôt : la reprise est proposée.
    */

@@ -1,7 +1,7 @@
 /**
- * M4 (partie M) — l'axe de circulation, de la saisie aux commandes.
+ * M4 (partie M) : l'axe de circulation, de la saisie aux commandes.
  *
- * Le déroulement de l'axe lui-même — quels sommets, quels segments — vit dans
+ * Le déroulement de l'axe lui-même (quels sommets, quels segments) vit dans
  * `unfoldAxis`, qui le fait depuis le début et porte ses propres essais. Ce
  * module ne le refait pas : il l'entoure. Deux implémentations d'un même
  * contrôle finissent par diverger, et c'est alors le dernier écrit qui décide.
@@ -11,8 +11,8 @@
  *  · `unfoldAxis` reçoit l'identifiant du nœud existant sous chaque point, parce
  *    qu'au pointeur c'est la zone de travail qui le connaît. Saisi au clavier,
  *    personne ne le connaît : il faut le chercher dans le graphe, et c'est fait
- *    ici, à la même maille que `unfoldAxis` emploie pour confondre deux points
- *    — la position quantifiée au millimètre (E4.2). Une seconde notion de
+ *    ici, à la même maille que `unfoldAxis` emploie pour confondre deux points,
+ *    la position quantifiée au millimètre (E4.2). Une seconde notion de
  *    « même point » ferait reprendre un nœud d'un côté et pas de l'autre.
  *
  *  · le second doublon, celui des arêtes. Un segment qui redouble une arête

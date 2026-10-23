@@ -15,7 +15,7 @@ import { formatDay } from './register/format.js';
 const ALL = 'all';
 
 /**
- * Module 08 — les tournées d'inspection (H7), au gabarit « registre ». Une
+ * Module 08 : les tournées d'inspection (H7), au gabarit « registre ». Une
  * tournée relevée hors ligne reste visible tant qu'elle n'est pas
  * réconciliée : le garde `auditSurveySync` la signale. Lu en base (0044), ou
  * dans le jeu de démonstration du dépôt de référence.
@@ -56,7 +56,7 @@ export function OpsRoundsView({ siteKey }: OpsRoundsViewProps): JSX.Element {
   const columns: readonly Column<InspectionRound>[] = [
     { id: 'id', header: t('operations.col.round'), cell: r => r.id },
     { id: 'zone', header: t('operations.col.zone'), cell: r => r.zone_label },
-    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '—' },
+    { id: 'surveyor', header: t('operations.col.surveyor'), cell: r => r.surveyor_id ?? '–' },
     { id: 'count', header: t('operations.col.observations'), numeric: true, cell: r => String(counts.get(r.id) ?? 0) },
     { id: 'sync', header: t('operations.col.sync'), cell: syncTag },
     { id: 'date', header: t('operations.col.surveyed'), cell: r => formatDay(r.surveyed_on ?? undefined, lang) ?? t('operations.round.planned') },
@@ -77,7 +77,7 @@ export function OpsRoundsView({ siteKey }: OpsRoundsViewProps): JSX.Element {
             id: 'round',
             title: t('opsrounds.section.round'),
             rows: [
-              { id: 'surveyor', label: t('operations.col.surveyor'), value: selected.surveyor_id ?? '—' },
+              { id: 'surveyor', label: t('operations.col.surveyor'), value: selected.surveyor_id ?? '–' },
               { id: 'date', label: t('operations.col.surveyed'), value: formatDay(selected.surveyed_on ?? undefined, lang) ?? t('operations.round.planned') },
               { id: 'count', label: t('operations.col.observations'), value: String(counts.get(selected.id) ?? 0) },
             ],

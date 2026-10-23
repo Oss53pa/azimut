@@ -40,7 +40,7 @@ function baseWithout(omit: 'charter' | 'rules_packs'): FaceContentHashInput {
   };
 }
 
-describe('computeFaceContentHash — determinism & order (§6.1, §6.2)', () => {
+describe('computeFaceContentHash: determinism & order (§6.1, §6.2)', () => {
   it('is deterministic byte-for-byte', () => {
     expect(hash()).toBe(hash());
     expect(hash()).toMatch(/^sha256:[0-9a-f]{64}$/);
@@ -55,7 +55,7 @@ describe('computeFaceContentHash — determinism & order (§6.1, §6.2)', () => 
   });
 });
 
-describe('computeFaceContentHash — sensitivity (§6.4)', () => {
+describe('computeFaceContentHash: sensitivity (§6.4)', () => {
   const b = hash();
   it('block content', () => {
     expect(hash({ blocks: [{ type: 'header', site_name: 'Autre' }] })).not.toBe(b);
@@ -68,7 +68,7 @@ describe('computeFaceContentHash — sensitivity (§6.4)', () => {
   it('a referenced pictogram', () => expect(hash({ pictogram_ids: ['p1', 'p3'] })).not.toBe(b));
 });
 
-describe('computeFaceContentHash — absence vs null & NFC (§6.5, §6.6)', () => {
+describe('computeFaceContentHash: absence vs null & NFC (§6.5, §6.6)', () => {
   it('hashes a face with no charter consistently, and a charter changes it', () => {
     const a = computeFaceContentHash(baseWithout('charter'));
     const b = computeFaceContentHash(baseWithout('charter'));
@@ -93,7 +93,7 @@ describe('computeFaceContentHash — absence vs null & NFC (§6.5, §6.6)', () =
   });
 });
 
-describe('computeFaceContentHash — edge cases (§8)', () => {
+describe('computeFaceContentHash: edge cases (§8)', () => {
   it('hashes a face with no blocks', () => {
     expect(computeFaceContentHash(base({ blocks: [] })).ok).toBe(true);
   });
@@ -107,7 +107,7 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
   });
 
   it('handles a long accented label with apostrophes and non-breaking spaces', () => {
-    const label = 'Service d’oto-rhino-laryngologie et chirurgie cervico-faciale — aile C';
+    const label = 'Service d’oto-rhino-laryngologie et chirurgie cervico-faciale : aile C';
     expect(computeFaceContentHash(base({ blocks: [{ type: 'header', site_name: label }] })).ok).toBe(true);
   });
 
@@ -170,16 +170,16 @@ describe('computeFaceContentHash — edge cases (§8)', () => {
 
   it('everything identical hashes the same (support id is not an input, so excluded §3.2)', () => {
     // The input carries no support id, face id, timestamp, author, version or
-    // state — they cannot affect the empreinte. Two identical inputs match.
+    // state: they cannot affect the empreinte. Two identical inputs match.
     expect(hash()).toBe(hash());
   });
 });
 
 /**
- * D7.1 et annexe T, §3.1.4 — le socle et la surcouche, chacun avec sa clé et
+ * D7.1 et annexe T, §3.1.4 : le socle et la surcouche, chacun avec sa clé et
  * sa version, dans l'ordre de leur rôle ; jamais le seul résultat de leur fusion.
  */
-describe('computeFaceContentHash — socle et surcouche (D7.1)', () => {
+describe('computeFaceContentHash : socle et surcouche (D7.1)', () => {
   const SOCLE = { key: 'intl', version: '2026.1' };
   it('distinguishes two sites sharing a base with different overlays', () => {
     expect(hash({ rules_packs: { base: SOCLE, overlay: { key: 'ci', version: '1' } } }))

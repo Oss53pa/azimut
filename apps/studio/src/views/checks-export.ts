@@ -6,7 +6,7 @@ import { escapeCsvCell } from '@azimut/core-model';
  *
  * Il porte deux natures de ligne, et c'est le point : jusqu'ici il ne portait
  * que les anomalies, si bien qu'une validation dont aucun contrôle n'a tourné
- * s'exportait en fichier vide — le même fichier qu'une validation parfaitement
+ * s'exportait en fichier vide, le même fichier qu'une validation parfaitement
  * propre. Un destinataire qui ne voit que l'export lisait une réussite là où
  * rien n'avait été regardé.
  *
@@ -15,7 +15,7 @@ import { escapeCsvCell } from '@azimut/core-model';
  * `record` suffit à trier.
  *
  * `state` porte la sévérité pour une anomalie, l'état pour un contrôle. Les
- * deux répondent à la même question — ce que vaut cette ligne — et les séparer
+ * deux répondent à la même question (ce que vaut cette ligne) et les séparer
  * en deux colonnes dont l'une serait toujours vide n'aiderait personne.
  */
 export type CheckRoster = {

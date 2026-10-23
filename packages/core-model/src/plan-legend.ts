@@ -1,5 +1,5 @@
 /**
- * M01.S8 (partie N) — « La légende et la rose des vents ne sont pas dessinées.
+ * M01.S8 (partie N) : « La légende et la rose des vents ne sont pas dessinées.
  * Elles sont générées depuis les catégories présentes et depuis l'orientation.
  * Seule leur position est composée. »
  *
@@ -78,7 +78,7 @@ export function deriveLegend(
  * L'angle de la rose des vents, en convention compas (D1.3).
  *
  * D6.3 place la rose parmi les éléments que la rotation du plan n'emporte
- * pas — elle reste lisible horizontalement — mais qui « tournent sur
+ * pas (elle reste lisible horizontalement) mais qui « tournent sur
  * eux-mêmes pour indiquer le nord réel ». Sa rotation propre est donc celle du
  * plan : c'est ainsi que son nord tombe là où le nord du plan est tombé.
  *

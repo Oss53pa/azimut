@@ -14,7 +14,7 @@ import { formatDay, formatNumber } from './register/format.js';
 const ALL = 'all';
 
 /**
- * Module 04 — la charte du site (A5.8), au gabarit « registre » : couleurs,
+ * Module 04, la charte du site (A5.8), au gabarit « registre » : couleurs,
  * caractères, règles et lexique en une seule liste. L'écran lit la charte en
  * base et n'en modifie rien. Ses valeurs sont citées en texte, jamais
  * appliquées à l'interface (F1.3) ; le contraste se calcule, le seuil

@@ -34,8 +34,8 @@ const PLAN_WIDTH = 720;
 const PLAN_HEIGHT = 440;
 
 /**
- * Module 04 — les plans d'évacuation (N4.3). Ils ne se dessinent pas : le
- * moteur les tire du graphe, niveau par niveau — sorties, cheminements
+ * Module 04 : les plans d'évacuation (N4.3). Ils ne se dessinent pas : le
+ * moteur les tire du graphe, niveau par niveau, sorties, cheminements
  * marqués d'évacuation, repères. L'écran rassemble ce que le moteur rend et
  * ce que l'audit d'évacuation relève.
  */
@@ -50,7 +50,7 @@ export function EvacuationView({ onNavigate }: EvacuationViewProps): JSX.Element
     return audit.ok ? audit.value.uncovered_nodes : [];
   }, [site]);
 
-  // O11 — le plan, imprimé et durable, ne voit pas les fermetures
+  // O11 : le plan, imprimé et durable, ne voit pas les fermetures
   // temporaires ; l'écran les montre, pour qu'une décision humaine soit prise
   // sur la période. Ce n'est pas une anomalie de moteur : aucun code.
   const evacuationClosures = useMemo(() => closuresOnEvacuation(site), [site]);

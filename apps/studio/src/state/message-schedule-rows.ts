@@ -1,5 +1,5 @@
 /**
- * R5, R6, R9 et R10 (partie R) — les lignes du tableau des messages telles que
+ * R5, R6, R9 et R10 (partie R) : les lignes du tableau des messages telles que
  * l'écran les présente.
  *
  * Module pur : il ne dessine rien et ne lit aucune horloge. Il prend un
@@ -16,7 +16,7 @@ import type { Exclusion } from './message-schedule-commands.js';
 import { codePointCompare } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
-// Identifiant stable — partie R, sections R5 et R11
+// Identifiant stable : partie R, sections R5 et R11
 // ---------------------------------------------------------------------------
 
 /**
@@ -46,7 +46,7 @@ export function stableLineId(
 // État d'une ligne (R10)
 // ---------------------------------------------------------------------------
 
-/** R10 — les quatre présentations d'une ligne, et elles seules. */
+/** R10 : les quatre présentations d'une ligne, et elles seules. */
 export const LINE_STATES = ['current', 'stale', 'blocking', 'excluded'] as const;
 export type LineState = (typeof LINE_STATES)[number];
 
@@ -58,7 +58,7 @@ export type ScheduleRow = {
   readonly state: LineState;
   /** Les anomalies portées par cette ligne, pour la pastille et le détail. */
   readonly findings: readonly Finding[];
-  /** R9 — le motif de l'écartement, quand la ligne est écartée. */
+  /** R9 : le motif de l'écartement, quand la ligne est écartée. */
   readonly exclusion: Exclusion | null;
 };
 
@@ -103,7 +103,7 @@ export function buildRows(inputs: RowInputs): readonly ScheduleRow[] {
 }
 
 /**
- * R10 — l'ordre de priorité des états.
+ * R10 : l'ordre de priorité des états.
  *
  * Une ligne écartée n'est jamais composée : c'est ce qu'il faut dire d'elle
  * avant tout le reste. Vient ensuite l'anomalie bloquante, puis la péremption.
@@ -129,7 +129,7 @@ function compareRows(a: ScheduleRow, b: ScheduleRow): number {
 // Filtres et recherche (R6.2 (partie R), R6.3)
 // ---------------------------------------------------------------------------
 
-/** R6.2 (partie R) — les neuf filtres, et eux seuls. */
+/** R6.2 (partie R) : les neuf filtres, et eux seuls. */
 export type ScheduleFilters = {
   readonly supportIds: readonly string[];
   readonly directions: readonly string[];
@@ -139,7 +139,7 @@ export type ScheduleFilters = {
   readonly anomaliesOnly: boolean;
   /** R9 : les lignes écartées sont masquées par défaut. */
   readonly showExcluded: boolean;
-  /** R6.3 (partie R) — recherche, tolérante aux accents et à la casse. */
+  /** R6.3 (partie R) : recherche, tolérante aux accents et à la casse. */
   readonly search: string;
 };
 
@@ -156,9 +156,9 @@ export const NO_FILTERS: ScheduleFilters = {
 
 export type FilteredRows = {
   readonly rows: readonly ScheduleRow[];
-  /** R6.2 (partie R) — le nombre de lignes que les filtres retirent de la vue. */
+  /** R6.2 (partie R) : le nombre de lignes que les filtres retirent de la vue. */
   readonly hidden: number;
-  /** R9 — comptées à part, elles figurent dans la barre d'état. */
+  /** R9 : comptées à part, elles figurent dans la barre d'état. */
   readonly excluded: number;
 };
 
@@ -253,7 +253,7 @@ export function activeFilterCount(filters: ScheduleFilters): number {
 // Regroupement (R6.1 (partie R))
 // ---------------------------------------------------------------------------
 
-/** R6.1 (partie R) — les quatre regroupements disponibles. */
+/** R6.1 (partie R) : les quatre regroupements disponibles. */
 export const GROUPINGS = ['support', 'zone', 'level', 'decision_point'] as const;
 export type Grouping = (typeof GROUPINGS)[number];
 

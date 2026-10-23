@@ -5,10 +5,10 @@ import {
 import { NODE_KINDS } from '../graph-input.js';
 
 /**
- * M4 (partie M), « Affichage » — et M7.7 (partie M), « aucune information
+ * M4 (partie M), « Affichage » : et M7.7 (partie M), « aucune information
  * n'est portée par la seule couleur ».
  */
-describe('M4 (partie M) — le graphe se lit sans les couleurs', () => {
+describe('M4 (partie M) : le graphe se lit sans les couleurs', () => {
   it('les onze types de nœud ont une forme', () => {
     for (const kind of NODE_KINDS) {
       expect(NODE_SHAPE[kind], kind).toBeDefined();
@@ -23,7 +23,7 @@ describe('M4 (partie M) — le graphe se lit sans les couleurs', () => {
   });
 
   /**
-   * Trois types partagent le chevron — les liaisons verticales — et se
+   * Trois types partagent le chevron (les liaisons verticales) et se
    * distinguent par leur libellé. C'est voulu, et c'est déclaré : la
    * distinction reste hors couleur.
    */

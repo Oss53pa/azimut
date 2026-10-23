@@ -6,7 +6,7 @@ import type { CreationContext, SiteDraft } from '../site-creation.js';
 import { randomUUID } from 'node:crypto';
 
 /**
- * M1 (partie M) — le formulaire de création, contre une base réelle.
+ * M1 (partie M) : le formulaire de création, contre une base réelle.
  *
  * Les essais unitaires prouvent que les commandes de création ont la forme
  * voulue. Ils ne prouvaient pas qu'elles s'écrivent, et elles ne s'écrivaient
@@ -70,7 +70,7 @@ const CONTEXT: CreationContext = {
   // Aucun paquet n'est choisi : l'identifiant du rattachement ne sert pas.
   bindingId: '00000000-0000-0000-0000-00000000b1d0',
   existingNames: [],
-  // Q9 — l'extrait du référentiel contre lequel pays et fuseau se jugent.
+  // Q9, l'extrait du référentiel contre lequel pays et fuseau se jugent.
   countries: [{ code: 'FR', timezones: ['Europe/Paris'] }],
   defaultBuildingName: 'Bâtiment 1',
   defaultLevelName: 'Niveau 0',
@@ -127,7 +127,7 @@ async function reserveAs(userId: string) {
   return held;
 }
 
-describe('M1 (partie M) — la création s’écrit réellement', () => {
+describe('M1 (partie M) : la création s’écrit réellement', () => {
   it('applique les trois commandes du formulaire en une transaction', async () => {
     const built = createSiteCommands(DRAFT, CONTEXT);
     expect(built.ok, built.ok ? '' : built.findings.map(f => f.code).join(', ')).toBe(true);
@@ -187,7 +187,7 @@ describe('M1 (partie M) — la création s’écrit réellement', () => {
   });
 
   /**
-   * A6.1 — la ligne écrite appartient bien à l'organisation de la session, et
+   * A6.1 : la ligne écrite appartient bien à l'organisation de la session, et
    * la base la rend sous son identité. Une écriture qui aurait échappé au
    * cloisonnement ne se verrait pas autrement.
    */
@@ -200,14 +200,14 @@ describe('M1 (partie M) — la création s’écrit réellement', () => {
 
 /**
  * Le poste n'emprunte pas ce chemin. Il parle à PostgREST, qui appelle
- * `azimut.apply_commands` — une seconde implantation du même contrat, avec ses
+ * `azimut.apply_commands`, une seconde implantation du même contrat, avec ses
  * propres conversions : elle aplatit chaque valeur en texte par
  * `jsonb_each_text`, là où le service passe des paramètres typés.
  *
  * C'est précisément sur cette conversion que l'encodage d'une liste se joue.
  * Éprouver un seul des deux chemins laisserait l'autre faux.
  */
-describe('M1 (partie M) — la même création par le chemin du poste', () => {
+describe('M1 (partie M) : la même création par le chemin du poste', () => {
   it('applique les commandes telles que l’émetteur les envoie', async () => {
     const built = createSiteCommands(DRAFT, {
       ...CONTEXT, siteId: SITE_2, buildingId: BUILDING_2, levelId: LEVEL_2,
@@ -226,7 +226,7 @@ describe('M1 (partie M) — la même création par le chemin du poste', () => {
     if (!built.ok) return;
 
     // `client.json` marque le paramètre comme `jsonb`. Une chaîne castée
-    // arriverait comme une chaîne JSON, et la fonction la refuserait — ce que
+    // arriverait comme une chaîne JSON, et la fonction la refuserait : ce que
     // PostgREST ne fait pas, puisqu'il transmet le corps déjà analysé.
     const payload = client.json(built.value.map(commandPayload));
     const applied = await alice`select azimut.apply_commands(${payload}) as n`;
@@ -245,10 +245,10 @@ describe('M1 (partie M) — la même création par le chemin du poste', () => {
 });
 
 /**
- * A5.8 — « La table de rattachement fait foi. » Un paquet choisi à la création
+ * A5.8 : « La table de rattachement fait foi. » Un paquet choisi à la création
  * s'écrit en socle, dans la même transaction que le site qu'il rattache.
  */
-describe('M1 (partie M) et A5.8 — le paquet choisi s’écrit en socle', () => {
+describe('M1 (partie M) et A5.8 : le paquet choisi s’écrit en socle', () => {
   it('écrit le rattachement avec le site, le paquet et le rôle', async () => {
     const built = createSiteCommands(
       { ...DRAFT, name: 'Gare de Lille Sud', rulesPackId: PACK },

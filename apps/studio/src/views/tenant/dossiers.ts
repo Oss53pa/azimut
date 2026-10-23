@@ -1,5 +1,5 @@
 /**
- * H5.2 — le dossier d'enseigne tel que les écrans le lisent : ce que la base
+ * H5.2, le dossier d'enseigne tel que les écrans le lisent : ce que la base
  * porte, complété par l'annuaire du site et par la version du règlement en
  * vigueur au dépôt.
  *

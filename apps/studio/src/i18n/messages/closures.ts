@@ -1,5 +1,5 @@
 /**
- * O11 — fermetures temporaires : saisie d'un instant simulé, liste des
+ * O11, fermetures temporaires : saisie d'un instant simulé, liste des
  * fermetures déclarées, et ce que les créneaux de pose en voient. Et D6 :
  * ce que dit l'écran des plans muraux quand aucun support n'est implanté.
  *

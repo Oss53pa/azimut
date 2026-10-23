@@ -48,7 +48,7 @@ export function allUpSql(): string {
  * Le corpus se rejoue migration par migration, et non d'un seul bloc : une
  * table supprimée sort de la carte, et une table recréée plus tard y revient
  * avec sa nouvelle définition. Lire la seule concaténation ferait dire au
- * corpus qu'une table supprimée existe encore — c'est-à-dire décrire un
+ * corpus qu'une table supprimée existe encore : c'est-à-dire décrire un
  * schéma que la base n'a plus, et réclamer pour elle une politique, un
  * propriétaire ou une infraction déclarée.
  *

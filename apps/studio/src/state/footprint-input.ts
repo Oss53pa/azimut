@@ -1,5 +1,5 @@
 /**
- * M3 (partie M) — contrôles à la saisie du tracé des empreintes.
+ * M3 (partie M) : contrôles à la saisie du tracé des empreintes.
  *
  * « Un refus n'efface jamais le travail en cours. Il empêche la validation et
  * dit pourquoi. » C'est la différence entre ces contrôles et ceux de la
@@ -7,7 +7,7 @@
  * dire s'il peut être fermé, et le refus laisse la main.
  *
  * Les prédicats viennent de `core-model` : la validation du site les emploie
- * aussi, et deux implémentations du même test finiraient par diverger — l'écran
+ * aussi, et deux implémentations du même test finiraient par diverger, l'écran
  * accepterait un contour que la validation refuse, ou pire, l'opérateur
  * corrigerait un tracé que rien ne reproche.
  */
@@ -72,7 +72,7 @@ export function acceptFootprint(
 ): Outcome<AcceptedFootprint> {
   // E4 : la quantification se fait à la validation du geste, jamais pendant,
   // jamais au rendu. Les contrôles portent donc sur les valeurs quantifiées,
-  // celles qui seront écrites — juger l'une et écrire l'autre laisserait
+  // celles qui seront écrites : juger l'une et écrire l'autre laisserait
   // passer un contour dégénéré d'un micron.
   const vertices = draft.vertices.map(quantizePoint);
   const findings: Finding[] = [
@@ -128,8 +128,8 @@ function checkUnitCode(code: string, existing: readonly string[]): readonly Find
 
 /**
  * M3 (partie M) : « Empreintes superposées | `GEOM.FOOTPRINTS_OVERLAP` | Avertissement,
- * tracé accepté. » Un recouvrement est parfois voulu — une mezzanine, un
- * volume traversant — donc il se signale sans refuser.
+ * tracé accepté. » Un recouvrement est parfois voulu (une mezzanine, un
+ * volume traversant) donc il se signale sans refuser.
  */
 function overlapWarnings(
   vertices: readonly Point[],
@@ -149,7 +149,7 @@ function overlapWarnings(
 
 /**
  * Recouvrement : deux arêtes se croisent, ou l'un des contours contient un
- * sommet de l'autre — le second cas attrape l'empreinte entièrement incluse,
+ * sommet de l'autre, le second cas attrape l'empreinte entièrement incluse,
  * dont aucune arête ne croise celles de l'autre.
  */
 function polygonsOverlap(a: readonly Point[], b: readonly Point[]): boolean {

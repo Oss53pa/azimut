@@ -28,7 +28,7 @@ function decale(dx: number, kind?: VerticalLinkKind): SiteData {
   };
 }
 
-describe('GRAPH.VERTICAL_LINK_MISALIGNED — liaison verticale décalée', () => {
+describe('GRAPH.VERTICAL_LINK_MISALIGNED : liaison verticale décalée', () => {
   it('ne signale rien sur le site de référence, dont les liaisons coïncident', () => {
     // Sans cette vérification, un contrôle en panne aurait l'air vertueux.
     expect(verticalLinkMisalignedFindings(refMultilevel)).toHaveLength(0);
@@ -58,7 +58,7 @@ describe('GRAPH.VERTICAL_LINK_MISALIGNED — liaison verticale décalée', () =>
   it('laisse tranquilles l’escalier mécanique et la rampe, même décalés', () => {
     // L'un comme l'autre gagne sa hauteur en avançant : ses extrémités ne
     // peuvent pas coïncider, et les retenir produirait une anomalie bloquante
-    // sur une géométrie correcte — sur toute rampe réelle, d'ailleurs, la
+    // sur une géométrie correcte, sur toute rampe réelle, d'ailleurs, la
     // coïncidence n'étant tenable que par ce qui occupe une gaine verticale.
     expect(verticalLinkMisalignedFindings(decale(8, 'escalator'))).toHaveLength(0);
     expect(verticalLinkMisalignedFindings(decale(8, 'ramp'))).toHaveLength(0);

@@ -125,7 +125,7 @@ describe('createAuditSiteHandler', () => {
     expect(r1).toStrictEqual(r2);
   });
 
-  it('ignores job payload — audit needs only site context', async () => {
+  it('ignores job payload: audit needs only site context', async () => {
     const context: AuditSiteContext = { site: refMinimal };
     const handler = createAuditSiteHandler(context);
 
@@ -146,7 +146,7 @@ describe('createAuditSiteHandler', () => {
     // Confirm no crash: null entities are handled by the ?? '' fallback
     for (const f of findings) {
       if (f.entity === null) {
-        // null entity is valid — sorting should not throw
+        // null entity is valid: sorting should not throw
         expect(f.code).toBeTruthy();
       }
     }
@@ -219,8 +219,8 @@ describe('createAuditSiteHandler', () => {
   });
 });
 
-describe('mode d’audit — A5.11, règle M01.S11', () => {
-  // A5.11 — le statut porte sur le fait, non sur l'objet : ni `zone` ni
+describe('mode d’audit : A5.11, règle M01.S11', () => {
+  // A5.11, le statut porte sur le fait, non sur l'objet : ni `zone` ni
   // `footprint` n'en déclarent. Une capacité annoncée mais non arrêtée est une
   // proposition, et c'est elle qu'un livrable ne peut pas montrer.
   const avecProposition = refMultilevel;
@@ -268,7 +268,7 @@ describe('mode d’audit — A5.11, règle M01.S11', () => {
 });
 
 /**
- * A5.8 — la charte entre dans la signature des contrôles de rédaction, et donc
+ * A5.8 : la charte entre dans la signature des contrôles de rédaction, et donc
  * dans celle de leurs appelants. Le service de compilation en est un.
  *
  * Sans charte rattachée, les deux contrôles ne s'exécutent pas et le rapport
@@ -276,7 +276,7 @@ describe('mode d’audit — A5.11, règle M01.S11', () => {
  * audit qui n'avait rien à opposer, et elle doit se lire dans le résultat du
  * travail, pas seulement dans le code.
  */
-describe('A5.8 — la charte entre dans la signature de l’appelant', () => {
+describe('A5.8 : la charte entre dans la signature de l’appelant', () => {
   const CHARTE: readonly CharterRule[] = [
     {
       id: 'cr-compilateur-caracteres',
@@ -293,7 +293,7 @@ describe('A5.8 — la charte entre dans la signature de l’appelant', () => {
   }
 
   it('nomme les contrôles non exercés quand aucune charte n’est rattachée', async () => {
-    const handler = createAuditSiteHandler({ site: avecDenomination('Nord — Sud') });
+    const handler = createAuditSiteHandler({ site: avecDenomination('Nord \u2014 Sud') });
     const result = await handler(makeJob());
     const undeclared = result['checks_undeclared'] as string[];
     expect(undeclared).toContain('forbidden_characters');
@@ -304,7 +304,7 @@ describe('A5.8 — la charte entre dans la signature de l’appelant', () => {
 
   it('les exerce dès que la charte porte les règles', async () => {
     const vocabulary: SiteVocabulary = { charter_rules: CHARTE };
-    const handler = createAuditSiteHandler({ site: avecDenomination('Nord — Sud'), vocabulary });
+    const handler = createAuditSiteHandler({ site: avecDenomination('Nord \u2014 Sud'), vocabulary });
     const result = await handler(makeJob());
     const undeclared = result['checks_undeclared'] as string[];
     expect(undeclared).not.toContain('forbidden_characters');

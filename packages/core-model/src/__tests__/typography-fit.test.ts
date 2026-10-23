@@ -10,7 +10,7 @@ const box = (over: Partial<TextFitBox> = {}): TextFitBox => ({
   ...over,
 });
 
-describe('E12 — guardTextFit (TYPO.TEXT_OVERFLOW)', () => {
+describe('E12: guardTextFit (TYPO.TEXT_OVERFLOW)', () => {
   it('passes when the text fits both axes', () => {
     expect(guardTextFit(box()).ok).toBe(true);
   });

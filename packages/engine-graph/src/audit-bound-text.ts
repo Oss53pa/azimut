@@ -4,7 +4,7 @@ import type {
 import { literalNumbers, resolveBoundParagraph, codePointCompare } from '@azimut/core-model';
 
 /**
- * Contrôle du texte lié d'un document — A5.11, règle M01.S11.
+ * Contrôle du texte lié d'un document : A5.11, règle M01.S11.
  *
  * « Un nombre affiché dans un livrable provient d'un fait ou d'un calcul,
  * jamais d'un littéral écrit dans un gabarit. »

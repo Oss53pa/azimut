@@ -3,7 +3,7 @@ import {
   parseRoute, buildPath, tranchePath, M_ROUTES, TRANCHE_ORDER,
 } from '../routes.js';
 
-/** F15 — les chemins de la partie M, mot pour mot. */
+/** F15 : les chemins de la partie M, mot pour mot. */
 describe('routes de la tranche M (partie M)', () => {
   it('les motifs sont ceux de la partie M', () => {
     expect(M_ROUTES.map(r => r.pattern)).toEqual([

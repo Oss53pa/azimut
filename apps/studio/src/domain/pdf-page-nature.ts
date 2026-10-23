@@ -1,5 +1,5 @@
 /**
- * M2 (partie M), version 29 — « Pour un document de plusieurs pages, la
+ * M2 (partie M), version 29, « Pour un document de plusieurs pages, la
  * nature se juge sur la page retenue, en suivant les objets qu'elle
  * référence, et non sur le fichier entier : les tracés d'une autre page
  * masqueraient l'absence de tracés sur celle qui est importée. Quand le suivi
@@ -19,9 +19,9 @@
  *   être le contenu ; les ignorer ne peut que faire manquer un tracé, jamais
  *   en prêter un.
  *
- * Chaque objet qui ne se lit pas — flux introuvable ou non décodable, nom
+ * Chaque objet qui ne se lit pas (flux introuvable ou non décodable, nom
  * invoqué absent des ressources, objet externe d'un type inconnu,
- * formulaire qui s'invoque lui-même — est compté. Un tracé lu suffit à
+ * formulaire qui s'invoque lui-même) est compté. Un tracé lu suffit à
  * conclure ; sans tracé, un seul objet non lu rend la page indéterminée.
  */
 import { decodePdfStream, PdfLimitExceeded } from './pdf-streams.js';

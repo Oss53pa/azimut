@@ -1,5 +1,5 @@
 /**
- * R15 (partie R) — les raccourcis du tableau des messages.
+ * R15 (partie R) : les raccourcis du tableau des messages.
  *
  * Table déclarée en donnée, comme E16 l'exige : « Table de raccourcis unique,
  * déclarée en donnée, jamais dispersée dans les composants. »
@@ -40,7 +40,7 @@ export const MESSAGE_TABLE_SHORTCUTS: readonly ShortcutBinding[] = [
 /**
  * L'action d'un appui, ou `null`.
  *
- * Les touches de modification du système — `Ctrl`, `Alt`, `Meta` — laissent
+ * Les touches de modification du système (`Ctrl`, `Alt`, `Meta`) laissent
  * passer : E16 demande que les raccourcis du navigateur et du système ne
  * soient pas capturés.
  */

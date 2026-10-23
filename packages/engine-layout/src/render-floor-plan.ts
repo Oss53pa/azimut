@@ -16,7 +16,7 @@ import {
 import { accessibleMarkSvg } from './parking-mark.js';
 
 /**
- * L'épaisseur de trait d'une place — S-39, « contour léger ».
+ * L'épaisseur de trait d'une place : S-39, « contour léger ».
  *
  * Plus fin que celui d'une empreinte de bâti, qui vaut 1. Une place est un
  * marquage au sol, elle ne doit pas concurrencer visuellement une cellule
@@ -63,14 +63,14 @@ export type FloorPlanData = {
    */
   readonly parkings: readonly Footprint[];
   /**
-   * Celles de ces places qu'un fait marque non numérisées — S-37. Ce ne sont
+   * Celles de ces places qu'un fait marque non numérisées : S-37. Ce ne sont
    * pas des emplacements mais des surfaces, et le plan doit les montrer comme
    * telles, faute de quoi un parking à demi relevé se lit comme un parking à
    * demi vide.
    */
   readonly undigitized: readonly Footprint[];
   /**
-   * Celles de ces places que l'extension d'A5.3 dit accessibles — S-39. Elles
+   * Celles de ces places que l'extension d'A5.3 dit accessibles : S-39. Elles
    * sont déjà dans l'une des deux listes ci-dessus ; celle-ci dit seulement
    * lesquelles portent la marque normalisée.
    */
@@ -223,7 +223,7 @@ export function renderFloorPlan(
   /**
    * Ce que le plan lit en plus de la scène : les faits d'A5.11 et le
    * pictogramme normalisé d'une place accessible. Facultatif et vide par
-   * défaut — un appelant qui ne passe rien obtient un plan où toute place est
+   * défaut : un appelant qui ne passe rien obtient un plan où toute place est
    * une place ordinaire et sans marque, ce qui est le rendu d'un site qui ne
    * déclare ni l'un ni l'autre.
    */
@@ -268,7 +268,7 @@ export function renderFloorPlan(
       ` text-anchor="middle" dominant-baseline="central"`,
       ` font-family="${esc(options.font_family)}" font-size="14"`,
       ` fill="${esc(options.theme.text_secondary)}">`,
-      `${esc(level.name)} — aucun élément</text>`,
+      `${esc(level.name)} : aucun élément</text>`,
       `</svg>`,
     ].join('');
     return { ok: true, value: svg, warnings };
@@ -320,8 +320,8 @@ export function renderFloorPlan(
   //
   // Elles ont toujours un tracé, désormais : ce sont des empreintes, et A5.2
   // exige d'une empreinte un polygone fermé d'au moins trois sommets. La limite
-  // de l'ancien modèle — une surface déclarée hors des empreintes pouvait
-  // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait — tombe avec
+  // de l'ancien modèle (une surface déclarée hors des empreintes pouvait
+  // n'avoir aucune géométrie, et le plan restait muet là où le contrôle savait) tombe avec
   // lui.
   const sortedUndigitized = [...data.undigitized].sort(
     (a, b) => codePointCompare(a.id, b.id),
@@ -344,13 +344,13 @@ export function renderFloorPlan(
     );
   }
 
-  // S-39 — la marque d'une place accessible, après les places et les surfaces,
+  // S-39 : la marque d'une place accessible, après les places et les surfaces,
   // avant le bâti. Elle est dessinée par-dessus la place qu'elle qualifie.
   //
   // La fonction n'est demandée que s'il y a une place à marquer : un niveau
   // sans place accessible ne réclame rien, et n'a donc rien à signaler.
   // Demandée et non désignée, la marque est omise et l'avertissement porté au
-  // rendu ; demandée et ambiguë, le plan refuse — choisir entre deux
+  // rendu ; demandée et ambiguë, le plan refuse : choisir entre deux
   // pictogrammes serait décider à la place de celui qui a désigné.
   if (data.accessible.length > 0) {
     const mark = accessibleSpaceMark(site);

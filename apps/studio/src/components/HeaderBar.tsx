@@ -34,7 +34,7 @@ const HEADER_STYLE: React.CSSProperties = {
  *
  * « Publier » n'est pas un bouton décoratif : il est refusé tant qu'une
  * anomalie bloquante est ouverte, et il dit laquelle. Il n'y a pas de bouton
- * « Enregistrer » — l'application n'a pas de dépôt persistant, et un bouton
+ * « Enregistrer » : l'application n'a pas de dépôt persistant, et un bouton
  * qui n'enregistre rien est pire que son absence. Pour la même raison, la
  * cloche de notifications et le menu du compte de la maquette n'y sont pas :
  * aucune donnée ne les porte encore.

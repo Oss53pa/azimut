@@ -1,5 +1,5 @@
 /**
- * A5 — passage des lignes de la base au modèle en mémoire.
+ * A5 : passage des lignes de la base au modèle en mémoire.
  *
  * Une seule implémentation, partagée par les deux chemins de lecture : le
  * service, qui interroge la base par l'ORM, et le navigateur, qui l'interroge
@@ -43,7 +43,7 @@ export {
  * Une valeur que le modèle ne connaît pas ne doit pas se faire passer pour un
  * parking : la nature commande les contrôles du domaine `PARK`, et retomber
  * sur `parking` inventerait un parking là où la base dit autre chose.
- * `technical` est le choix inverse — une zone que rien ne réclame.
+ * `technical` est le choix inverse : une zone que rien ne réclame.
  */
 function toZoneKind(raw: string): SiteZoneKind {
   return isSiteZoneKind(raw) ? raw : 'technical';
@@ -92,12 +92,12 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     ...(rows.site.legal_entity_id !== null
       ? { legal_entity_id: rows.site.legal_entity_id }
       : {}),
-    // M01.S1 — les deux colonnes vont ensemble ; le CHECK de la migration 0021
+    // M01.S1, les deux colonnes vont ensemble ; le CHECK de la migration 0021
     // l'impose en base, et une origine à moitié lue n'entre pas au modèle.
     ...(rows.site.origin_x_m !== null && rows.site.origin_y_m !== null
       ? { origin_x_m: num(rows.site.origin_x_m), origin_y_m: num(rows.site.origin_y_m) }
       : {}),
-    // N1.2 — les valeurs inconnues sont écartées à la frontière ; le CHECK de
+    // N1.2, les valeurs inconnues sont écartées à la frontière ; le CHECK de
     // la migration 0020 les interdit déjà en base, cette lecture tient pour
     // les données arrivées avant lui.
     active_langs: readActiveLangs(rows.site.active_langs),
@@ -107,7 +107,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
   };
 
   const buildings: Building[] = rows.buildings.map(b => {
-    // N1.2 — la colonne est du `jsonb` : la base n'en garantit pas la forme,
+    // N1.2, la colonne est du `jsonb` : la base n'en garantit pas la forme,
     // et `readOpeningHours` écarte ce qui n'est pas lisible.
     const hours = readOpeningHours(b.opening_hours);
     return {
@@ -147,7 +147,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: c.org_id,
     plan_source_id: c.plan_source_id,
     scale_m_per_px: num(c.scale_m_per_px),
-    // A5.2 — les deux coordonnées vont ensemble ; le CHECK de la migration
+    // A5.2, les deux coordonnées vont ensemble ; le CHECK de la migration
     // 0032 l'impose, et une origine à moitié lue n'entre pas au modèle.
     ...(c.origin_x_px !== null && c.origin_y_px !== null
       ? { origin_x_px: num(c.origin_x_px), origin_y_px: num(c.origin_y_px) }
@@ -195,7 +195,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
   }));
 
   /**
-   * M01.S6 — la longueur d'une arête est calculée, jamais saisie. La colonne
+   * M01.S6 : la longueur d'une arête est calculée, jamais saisie. La colonne
    * `length_m` n'est donc pas lue : elle est un cache que l'application ne
    * croit pas. Deux nœuds déplacés d'un centimètre rendent toute valeur
    * stockée fausse, et un itinéraire faux ne se voit pas.
@@ -289,11 +289,11 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     honor_hours: p.honor_hours,
   }));
 
-  // A5.2, version 18 — les zones du socle. Elles n'étaient pas assemblées : une
+  // A5.2, version 18 : les zones du socle. Elles n'étaient pas assemblées : une
   // zone ne portait qu'un nom et une nature, et aucun moteur ne les lisait.
-  // `footprint_ids` et la section S8 changent cela — un parking **est** une
+  // `footprint_ids` et la section S8 changent cela : un parking **est** une
   // zone, et les contrôles du domaine `PARK` n'ont plus d'autre source.
-  // A5.3 — ce que les empreintes de place portent en plus. Une ligne par
+  // A5.3 : ce que les empreintes de place portent en plus. Une ligne par
   // empreinte ; une empreinte sans ligne reste une place standard sans repère
   // de travée, comme une arête sans `vertical_link` reste une arête.
   const parkingSpaces: ParkingSpace[] = rows.parking_spaces.map(s => ({
@@ -313,7 +313,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     footprint_ids: asStringArray(z.footprint_ids) ?? [],
   }));
 
-  // A5.8 — les paquets du site, depuis la table qui fait foi.
+  // A5.8 : les paquets du site, depuis la table qui fait foi.
   const rulesBindings: SiteRulesBinding[] = mapRulesBindingRows(rows.rules_bindings);
 
   return {

@@ -20,10 +20,10 @@ function ran(findings: readonly Finding[]): ValidationState {
 }
 
 /**
- * M5 (partie M) — « Un écran vide qui ressemble à une réussite alors que rien
+ * M5 (partie M) : « Un écran vide qui ressemble à une réussite alors que rien
  * n'a été calculé est le pire des états possibles. » C'est M7.11 (partie M).
  */
-describe('M5 (partie M) — jamais lancé n’est pas un succès', () => {
+describe('M5 (partie M) : jamais lancé n’est pas un succès', () => {
   it('une validation jamais lancée invite à la lancer', () => {
     expect(present(NEVER_RUN)).toEqual({ kind: 'invite' });
   });
@@ -51,7 +51,7 @@ describe('M5 (partie M) — jamais lancé n’est pas un succès', () => {
  * M5 (partie M) : « Anomalies groupées par entité, ordonnées par gravité
  * décroissante. »
  */
-describe('M5 (partie M) — groupement et ordre', () => {
+describe('M5 (partie M) : groupement et ordre', () => {
   const node12 = { kind: 'node', id: 'N-12' };
   const node3 = { kind: 'node', id: 'N-3' };
 
@@ -119,7 +119,7 @@ describe('M5 (partie M) — groupement et ordre', () => {
  * correspondant indique que le calcul est conditionné, il n'affiche jamais
  * zéro ni un tiret. »
  */
-describe('M5 (partie M) — le taux de couverture est conditionné', () => {
+describe('M5 (partie M) : le taux de couverture est conditionné', () => {
   it('n’affiche rien tant que la validation n’a pas tourné', () => {
     expect(coverageDisplay(NEVER_RUN, 87)).toEqual({ kind: 'conditioned', on: 'never_run' });
   });
@@ -149,7 +149,7 @@ describe('M5 (partie M) — le taux de couverture est conditionné', () => {
  * M5 (partie M) : « Exporter | Document ou tableur, avec l'horodatage et la
  * version du paquet de règles. »
  */
-describe('M5 (partie M) — export', () => {
+describe('M5 (partie M): export', () => {
   const pack = { key: 'fr-erp', version: '2026.1' };
 
   it('porte l’horodatage, la durée et la version des règles', () => {
@@ -188,7 +188,7 @@ describe('M5 (partie M) — export', () => {
  * documentaire. Une anomalie normative sans référence visible est un défaut,
  * pas un détail de présentation. »
  */
-describe('M5 (partie M) — référence normative et ligne d’anomalie', () => {
+describe('M5 (partie M) : référence normative et ligne d’anomalie', () => {
   it('montre la référence quand l’anomalie en porte une', () => {
     const line = toLine(finding('LAYOUT.CHAR_HEIGHT_BELOW_MIN', 'blocking', null, 'fr-erp/char-height'));
     expect(line.ruleRef).toBe('fr-erp/char-height');

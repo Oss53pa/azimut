@@ -1,5 +1,5 @@
 /**
- * F15, `state/` — l'écriture d'un geste de saisie, partagée par les écrans
+ * F15, `state/` : l'écriture d'un geste de saisie, partagée par les écrans
  * qui écrivent par commande (fermetures, faces, blocs libres).
  *
  * Une commande refusée avant envoi rend ses anomalies, et ses refus de saisie

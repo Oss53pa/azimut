@@ -21,14 +21,14 @@ export type CoverageReport = {
   readonly uncovered_points: readonly string[];
   readonly unused_supports: readonly string[];
   /**
-   * N2.4 — les deux anomalies de l'audit, nommées par leur code : une
+   * N2.4, les deux anomalies de l'audit, nommées par leur code : une
    * `GRAPH.DECISION_POINT_UNCOVERED` par point de décision qu'aucun support ne
    * couvre, une `GRAPH.SUPPORT_UNUSED` par support ne servant aucun parcours.
    *
    * Elles vivent dans le rapport et non dans les avertissements de l'`Outcome`,
    * comme le fait déjà `CheckReport` : la première est bloquante, et un
    * `Outcome` en succès ne porte que des avertissements. Un point non couvert
-   * n'empêche pas de rendre le rapport — c'est précisément ce que l'audit sert
+   * n'empêche pas de rendre le rapport : c'est précisément ce que l'audit sert
    * à montrer.
    */
   readonly findings: readonly Finding[];
@@ -49,7 +49,7 @@ export type EvacuationReport = {
 /**
  * Audit de couverture (N2.6).
  *
- * M02.W10 — aucun taux de couverture n'est publié tant que la validation de
+ * M02.W10, aucun taux de couverture n'est publié tant que la validation de
  * complétude du graphe échoue : le refus ci-dessous est cette règle. Il ne rend
  * aucun rapport, pas même partiel, parce qu'un taux calculé sur un graphe faux
  * serait lu comme un taux.

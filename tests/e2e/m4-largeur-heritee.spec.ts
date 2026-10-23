@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M4 (partie M), propriétés d'une arête : « Largeur utile — défaut : hérité du
+ * M4 (partie M), propriétés d'une arête : « Largeur utile, défaut : hérité du
  * bâtiment, `building.default_edge_width_m`. »
  *
  * Le jugement tient dans `state/__tests__/edge-width.test.ts`. Ce qui se
@@ -12,7 +12,7 @@ import type { Page } from '@playwright/test';
  *
  * Le site est `ref-retail`, site de référence du dépôt de code (C1) : deux
  * bâtiments, l'un déclarant 2,4 m et l'autre 1,1 m. C'est cette différence qui
- * rend la preuve possible — deux bâtiments à la même largeur ne diraient pas
+ * rend la preuve possible : deux bâtiments à la même largeur ne diraient pas
  * lequel a été lu. Aucune donnée client (A13.1).
  */
 const GALERIE = '/sites/ref-retail/levels/lvl-rt-g-rdc/graph';
@@ -46,7 +46,7 @@ async function drawAndSelect(
   }).first().click();
 }
 
-test.describe('M4 (partie M) — la largeur héritée du bâtiment', () => {
+test.describe('M4 (partie M) : la largeur héritée du bâtiment', () => {
   test('une arête tracée dans la galerie hérite des 2,4 m du bâtiment', async ({ page }) => {
     await page.goto(GALERIE);
     await ready(page);

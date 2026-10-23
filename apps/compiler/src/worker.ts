@@ -27,7 +27,7 @@ function reportToStderr(jobId: string, failure: unknown): void {
 }
 
 /**
- * D9.2 — reap jobs whose progress has stalled past the 30-minute timeout,
+ * D9.2: reap jobs whose progress has stalled past the 30-minute timeout,
  * failing them (and re-queuing with backoff while attempts remain). Returns the
  * ids reaped. A worker loop calls this before dequeuing.
  */
@@ -88,12 +88,12 @@ export type WorkerLoopSummary = {
 };
 
 /**
- * D9.2 — run the worker until {@link WorkerLoopOptions.shouldStop} is true.
+ * D9.2: run the worker until {@link WorkerLoopOptions.shouldStop} is true.
  *
  * Each iteration reaps stalled jobs on the configured cadence, then processes
  * one ready job. When a job runs, the loop continues immediately (draining a
  * backlog without idling); when the queue is empty it sleeps `sleepMs` before
- * polling again. The loop owns no timers of its own — `now`, `sleep` and
+ * polling again. The loop owns no timers of its own: `now`, `sleep` and
  * `shouldStop` are injected, so it is fully deterministic in tests and free of
  * hidden non-determinism (INV-4).
  */

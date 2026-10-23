@@ -30,7 +30,7 @@ async function edgeCount(page: Page): Promise<number> {
   return Number(/\d+/.exec(text)?.[0] ?? -1);
 }
 
-test.describe('M4 (partie M) — l’outil « Arête » est tenu à son niveau', () => {
+test.describe('M4 (partie M) : l’outil « Arête » est tenu à son niveau', () => {
   test('tracer au rez-de-chaussée ne pose aucune arête à l’étage', async ({ page }) => {
     await page.goto(RDC);
     await ready(page);

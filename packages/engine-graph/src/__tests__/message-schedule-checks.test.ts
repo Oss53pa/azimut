@@ -42,7 +42,7 @@ function build(site: SiteData = SITE, levels = LEVELS): MessageSchedule {
 // Péremption
 // ---------------------------------------------------------------------------
 
-describe('H2.5 — péremption des lignes', () => {
+describe('H2.5 : péremption des lignes', () => {
   it('ne périme rien quand les données n’ont pas changé', () => {
     const stored = build();
     const diff = refreshStaleFlags(stored, build());
@@ -108,7 +108,7 @@ describe('H2.5 — péremption des lignes', () => {
 // Contrôles
 // ---------------------------------------------------------------------------
 
-describe('H2.6 — contrôles du tableau', () => {
+describe('H2.6 : contrôles du tableau', () => {
   it('ne contrôle pas le nombre de destinations quand le principe est absent', () => {
     const codes = checkMessageSchedule(build(), NO_WAYFINDING_RULES).map(f => f.code);
     expect(codes).not.toContain('WAYFIND.TOO_MANY_DESTINATIONS');

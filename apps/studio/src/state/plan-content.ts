@@ -7,7 +7,7 @@ import { countDxfGeometry, looksLikeTextDxf } from '../domain/dxf-geometry.js';
 import type { PlanFormatKey } from './plan-import.js';
 
 /**
- * M2 (partie M), version 27 — la précision d'un fond de plan, jugée sur son
+ * M2 (partie M), version 27 : la précision d'un fond de plan, jugée sur son
  * contenu.
  *
  * « Un fichier sans contenu vectoriel exploitable est accepté en dernier

@@ -2,7 +2,7 @@
  * Ce que la validation du graphe lit, tel que la session le porte.
  *
  * M5 (partie M) fait tourner `validateGraph` sur le travail en cours. Le
- * moteur lit sept champs — `GraphScope` les nomme — et ce module les assemble
+ * moteur lit sept champs (`GraphScope` les nomme) et ce module les assemble
  * depuis le magasin de session, par le chemin inverse de celui qui les a
  * écrits.
  *
@@ -10,7 +10,7 @@
  * et comptée : valider un site complété d'office reviendrait à valider ce que
  * personne n'a saisi, et l'écran rendrait un verdict sur une saisie
  * imaginaire. Ce que la session ne porte pas reste vide, et les contrôles qui
- * s'y rattachent ne lèvent rien — ce qui est exact : un site sans destination
+ * s'y rattachent ne lèvent rien, ce qui est exact : un site sans destination
  * n'a pas de destination non reliée.
  */
 import type {
@@ -61,7 +61,7 @@ function readFootprint(row: StoredRow): Footprint | null {
  * Les niveaux que la session porte, ordonnés.
  *
  * T-1.5 : une liaison verticale relie deux niveaux, et l'atelier n'en
- * connaissait qu'un — celui du chemin. Le magasin en porte pourtant autant
+ * connaissait qu'un, celui du chemin. Le magasin en porte pourtant autant
  * que le site en compte, la session chargeant le site entier. Ce lecteur les
  * rend, pour que l'écran désigne l'autre extrémité au lieu de la supposer.
  *
@@ -182,7 +182,7 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
       destination_names: collect(session, 'destination_name', readDestinationName, unreadable),
       // Les profils de parcours viennent avec T-1.9. Sans eux,
       // `GRAPH.DESTINATION_ENTRANCE_COVERAGE` ne retient aucune entrée et ne
-      // lève rien — l'éditeur a limité sa portée aux entrées qu'au moins un
+      // lève rien : l'éditeur a limité sa portée aux entrées qu'au moins un
       // profil emprunte, et « empruntée » n'est pas décidable sans profil.
       travel_profiles: [],
       footprints: collect(session, 'footprint', readFootprint, unreadable),
@@ -192,7 +192,7 @@ export function graphScopeFromSession(session: SessionState): SessionScope {
 }
 
 /**
- * J1 — les empreintes d'un niveau, telles que la zone de travail les montre et
+ * J1 : les empreintes d'un niveau, telles que la zone de travail les montre et
  * que la reconnaissance les connaît (un trait qui barre ou entoure une forme).
  * Une ligne illisible n'est pas montrée : `graphScopeFromSession` la signale.
  */

@@ -14,7 +14,7 @@ import { formatNumber } from './register/format.js';
 
 const ALL = 'all';
 const ACCESSIBLE = 'accessible';
-const EMPTY = '—';
+const EMPTY = '–';
 
 type ProfileRow = { readonly profile: TravelProfile; readonly routes: ProfileRoutes | undefined };
 
@@ -24,7 +24,7 @@ const NODE_KINDS: ReadonlySet<string> = new Set<NodeKind>([
 ]);
 
 /**
- * Module 03 — les profils de déplacement, au gabarit « registre ». Un profil
+ * Module 03 : les profils de déplacement, au gabarit « registre ». Un profil
  * se lit par ses contraintes (types de passage exclus, accessibilité exigée,
  * horaires respectés) et par ce qu'elles font aux itinéraires du site :
  * combien aboutissent, combien restent sans solution, de combien ils
@@ -35,7 +35,7 @@ export function ProfilesView(): JSX.Element {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState(ALL);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  // A5.3 — instant simulé, heure locale du site : lu ici, jamais dans le moteur.
+  // A5.3, instant simulé, heure locale du site : lu ici, jamais dans le moteur.
   const [instant, setInstant] = useState('');
   const at = isLocalInstant(instant) ? instant : undefined;
 

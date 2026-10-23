@@ -1,7 +1,7 @@
 import type { Point } from '@azimut/core-model';
 
 /**
- * J1 (partie J) — la géométrie d'un trait, sans rien en décider.
+ * J1 (partie J) : la géométrie d'un trait, sans rien en décider.
  *
  * Fonctions pures sur des points en mètres. Aucune ne lit l'horloge, le DOM ou
  * l'aléatoire : un même trait donne toujours les mêmes mesures.

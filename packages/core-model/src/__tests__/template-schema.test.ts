@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { templateSchema } from '../template-schema.js';
 import { validTemplate } from './template-fixtures.js';
 
-describe('D8.2 — templateSchema', () => {
+describe('D8.2: templateSchema', () => {
   it('parses the spec example', () => {
     const tpl = validTemplate();
     expect(tpl.key).toBe('directional-suspended-2lines');
@@ -65,7 +65,7 @@ describe('D8.2 — templateSchema', () => {
   });
 });
 
-describe('D8.2 — templateSchema boundaries', () => {
+describe('D8.2: templateSchema boundaries', () => {
   it.each([
     ['faceCount: 0', { key: 'test', faceCount: 0, grid: { columns: 6, margin_mm: 0, gutter_mm: 0 }, blocks: [] }],
     ['columns: 0', { key: 'test', faceCount: 1, grid: { columns: 0, margin_mm: 0, gutter_mm: 0 }, blocks: [] }],

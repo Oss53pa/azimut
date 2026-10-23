@@ -11,7 +11,7 @@ import { allUpSql, createdTables } from '../migration-corpus.js';
  * N1.7, critère 2, dit comment le vérifier : « Aucune coordonnée en pixels en
  * base, **vérifié par analyse du schéma**. » Un essai qui n'inspecterait que
  * les commandes d'écriture laisserait passer une colonne créée par migration
- * et jamais écrite par elles — c'est-à-dire le cas qui s'installe en silence.
+ * et jamais écrite par elles : c'est-à-dire le cas qui s'installe en silence.
  *
  * Le motif recherché est la coordonnée, `x_px` et `y_px`, et non le pixel en
  * général : une échelle s'exprime légitimement en pixels par mètre, et une
@@ -73,7 +73,7 @@ function migratedColumns(): ReadonlyMap<string, readonly string[]> {
     }
     // Un renommage change le nom sans créer de colonne. L'ignorer laisserait
     // le garde juger le schéma d'après le nom d'origine, donc d'après un état
-    // que la base n'a plus — et une colonne renommée en pixels passerait.
+    // que la base n'a plus : et une colonne renommée en pixels passerait.
     for (const renamed of (altered[2] ?? '').matchAll(
       /RENAME COLUMN ([a-z_][a-z0-9_]*) TO ([a-z_][a-z0-9_]*)/g,
     )) {
@@ -98,7 +98,7 @@ const RESERVED = new Set([
   'PRIMARY', 'FOREIGN', 'UNIQUE', 'CHECK', 'CONSTRAINT', 'EXCLUDE', 'LIKE',
 ]);
 
-describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
+describe('M01.S2 (partie N) : aucune coordonnée en pixels en base', () => {
   it('le schéma se lit, sans quoi l’essai ne prouverait rien', () => {
     const tables = migratedColumns();
     expect(tables.size).toBeGreaterThan(40);
@@ -157,7 +157,7 @@ describe('M01.S2 (partie N) — aucune coordonnée en pixels en base', () => {
  * deviendrait un commentaire sans objet, et le garde cesserait de dire quoi
  * que ce soit sur elles.
  */
-describe('A5.2 — les quatre colonnes autorisées existent', () => {
+describe('A5.2 : les quatre colonnes autorisées existent', () => {
   it('chacune est bien créée par une migration', () => {
     const tables = migratedColumns();
     for (const qualified of AUTHORISED_BY_A5_2) {

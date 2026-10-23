@@ -7,7 +7,7 @@ import {
 const viewport = { width_px: 800, height_px: 600 };
 const view = { centerX_m: 10, centerY_m: 5, scale_px_per_m: 20, rotationDeg: 0 };
 
-describe('E3.3 — zoom et déplacement de vue', () => {
+describe('E3.3 : zoom et déplacement de vue', () => {
   it('un cran de zoom applique le facteur nommé, et garde sous le pointeur le point qui y était', () => {
     const pivot = { x_px: 610, y_px: 140 };
     const before = toMetres(pivot, view, viewport);

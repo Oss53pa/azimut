@@ -9,13 +9,13 @@ function draft(over: Partial<CalibrationDraft> = {}): CalibrationDraft {
 }
 
 /**
- * M2 (partie M) — trois étapes : le fond, l'échelle, l'orientation.
+ * M2 (partie M), trois étapes : le fond, l'échelle, l'orientation.
  *
  * L'étape se déduit de ce qui est saisi. Deux sources pour le même fait
  * finissent toujours par diverger, et l'utilisateur qui revient en arrière
  * verrait l'écran dire le contraire de ce qu'il voit.
  */
-describe('M2 (partie M) — avancement du calage', () => {
+describe('M2 (partie M) : avancement du calage', () => {
   it('les trois étapes sont celles de M2 (partie M)', () => {
     expect([...CALIBRATION_STEPS]).toEqual(['plan', 'scale', 'orientation']);
   });
@@ -46,10 +46,10 @@ describe('M2 (partie M) — avancement du calage', () => {
 });
 
 /**
- * M2 (partie M), état « Partiel » — « Fond chargé, calage incomplet : le tracé reste
+ * M2 (partie M), état « Partiel », « Fond chargé, calage incomplet : le tracé reste
  * inaccessible et l'écran dit pourquoi. »
  */
-describe('M2 (partie M) — ce qui bloque le tracé, et pourquoi', () => {
+describe('M2 (partie M) : ce qui bloque le tracé, et pourquoi', () => {
   const complete = draft({
     plan: PLAN, a: { x_px: 0, y_px: 0 }, b: { x_px: 90, y_px: 0 },
     realDistanceM: 9, northAzimuthDeg: 0,

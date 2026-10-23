@@ -31,7 +31,7 @@ export type CheckReport = {
    * Contrôles qu'aucune déclaration du site ne permet d'exercer.
    *
    * Distinct de `checks_skipped`, qui dit « il manque un paquet de règles ».
-   * Ici le site ne déclare rien à opposer — pas de lexique de charte, pas de
+   * Ici le site ne déclare rien à opposer : pas de lexique de charte, pas de
    * fait, pas d'écart entre sources. Les confondre ferait passer un site
    * muet pour un site contrôlé.
    */
@@ -44,7 +44,7 @@ export type CheckReport = {
  *
  * `atelier` est le travail en cours : une proposition y est un état légitime.
  * `livrable` est ce qui part à l'impression ou à la publication, et la règle
- * M01.S11 y devient opposable — « un fait de statut `proposal` ne s'affiche
+ * M01.S11 y devient opposable : « un fait de statut `proposal` ne s'affiche
  * jamais comme un existant », et une proposition affichée s'y lirait comme un
  * fait.
  *
@@ -102,14 +102,14 @@ export function runChecks(
   const run: string[] = [...BASE_CHECKS];
   const undeclared: string[] = [];
 
-  // A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
+  // A5.8 : « Quand la charte ne porte pas une règle, le contrôle correspondant
   // ne s'exécute pas et le signale, comme pour un paquet de règles absent. »
   // Les deux contrôles de rédaction lisent la charte du site, et aucune limite
   // n'est appliquée par défaut.
   //
   // Le rangement suit `declared`, et non `applied` : une règle déclarée dont
   // les paramètres ne se lisent pas lève `CHARTER.RULE_MALFORMED` en bloquant
-  // et reste parmi les contrôles exercés. Le contrôle a bien tourné — il a lu
+  // et reste parmi les contrôles exercés. Le contrôle a bien tourné : il a lu
   // la charte et l'a refusée. Le ranger parmi les non exercés cacherait qu'un
   // site a une charte et qu'elle ne produit rien.
   const charterRules = vocabulary.charter_rules ?? [];
@@ -140,7 +140,7 @@ export function runChecks(
 
   // Le stationnement est de la géométrie du site : zones et empreintes viennent
   // de `SiteData`, les capacités annoncées des faits d'A5.11. Un site sans zone
-  // de parking n'a rien à contrôler — ce n'est pas un contrôle non exercé,
+  // de parking n'a rien à contrôler : ce n'est pas un contrôle non exercé,
   // c'est un site sans parking.
   const parkingZonesDeclared = (site.zones ?? []).filter(z => isParkingZone(z.kind));
   if (parkingZonesDeclared.length > 0) {
@@ -156,7 +156,7 @@ export function runChecks(
     if (forDeliverable) run.push('parking_publication');
   }
 
-  // S8 — le rattachement d'une place à un parking, sur les objets du socle.
+  // S8 : le rattachement d'une place à un parking, sur les objets du socle.
   // Distinct du contrôle ci-dessus, qui juge les objets d'un module que la
   // section S8 rend redondant : celui-ci lit les empreintes de nature
   // `parking_space` et les zones de nature `parking`, c'est-à-dire ce

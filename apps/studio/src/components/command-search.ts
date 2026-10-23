@@ -2,7 +2,7 @@
  * La recherche « aller à » de la coquille : ce qu'elle indexe et comment elle
  * compare.
  *
- * Elle n'indexe que la carte du produit — modules et écrans — parce que c'est
+ * Elle n'indexe que la carte du produit (modules et écrans) parce que c'est
  * la seule chose que l'application sait nommer partout. Chercher dans les
  * données du site relève du module 11, qui n'a pas de moteur de recherche
  * (`crosscutting.missing.search`) ; la palette ne le simule pas.

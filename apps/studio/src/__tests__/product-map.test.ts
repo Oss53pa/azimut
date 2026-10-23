@@ -19,7 +19,7 @@ function declaredViewIds(): readonly string[] {
 /** Écrans hors module : le chrome de l'application. */
 const CHROME_VIEWS = new Set(['dashboard', 'product-map']);
 
-describe('Partie H — la carte du produit', () => {
+describe('Partie H : la carte du produit', () => {
   it('déclare les quatorze modules, numérotés sans trou', () => {
     expect(PRODUCT_MODULES).toHaveLength(14);
     expect(PRODUCT_MODULES.map(m => m.number)).toEqual([

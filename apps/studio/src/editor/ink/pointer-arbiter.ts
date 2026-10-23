@@ -1,7 +1,7 @@
 import type { PointerKind } from './pointer-kind.js';
 
 /**
- * G3.4 et J1.5 — rejet de la paume.
+ * G3.4 et J1.5 : rejet de la paume.
  *
  * « Rejet de la paume obligatoire dès qu'un stylet est détecté : tout contact
  * tactile est ignoré tant que le stylet est actif. »

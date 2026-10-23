@@ -42,7 +42,7 @@ async function apply(state: StoreState, sink: CommandSink, cs: EntityCommand[]) 
 }
 
 /**
- * F15 — `state/`, « magasin et commandes, écrit dans le dépôt », et M12.A2 : l'atelier n'écrit jamais directement, il passe par les commandes
+ * F15, `state/`, « magasin et commandes, écrit dans le dépôt », et M12.A2 : l'atelier n'écrit jamais directement, il passe par les commandes
  * du module propriétaire.
  */
 describe('magasin de commandes', () => {
@@ -55,7 +55,7 @@ describe('magasin de commandes', () => {
   });
 
   /**
-   * M7.5 (partie M) — « Un refus de saisie n'efface jamais le travail en
+   * M7.5 (partie M) : « Un refus de saisie n'efface jamais le travail en
    * cours. » Une
    * commande refusée ne doit pas non plus entrer dans la pile : elle y serait
    * annulable, et son inverse s'écrirait sur une ligne qui n'a pas bougé.
@@ -86,7 +86,7 @@ describe('magasin de commandes', () => {
 });
 
 /**
- * E5.1 — « Une commande est réversible. » L'annulation n'est pas un retrait :
+ * E5.1 : « Une commande est réversible. » L'annulation n'est pas un retrait :
  * c'est une écriture inverse, qui passe par le même chemin et le même
  * cloisonnement.
  */
@@ -169,7 +169,7 @@ describe('annulation et rétablissement', () => {
 });
 
 /**
- * E5.3 — « La pile d'annulation est vidée à la synchronisation. Ce qui est
+ * E5.3 : « La pile d'annulation est vidée à la synchronisation. Ce qui est
  * synchronisé n'est plus annulable localement. » C'est la règle qui rend
  * tenable la rencontre d'un historique local et d'une fusion par objet.
  *
@@ -177,7 +177,7 @@ describe('annulation et rétablissement', () => {
  * synchronisation. Revenir sur une modification synchronisée se fait par une
  * commande inverse tracée. »
  */
-describe('E5.3 — la synchronisation vide la pile', () => {
+describe('E5.3 : la synchronisation vide la pile', () => {
   it('vide l’annulation, le rétablissement et les commandes en attente', async () => {
     const { sink } = accepting();
     let state = (await apply(EMPTY_STORE, sink, [cmd('s1')])).state;

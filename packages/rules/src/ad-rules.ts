@@ -1,12 +1,12 @@
 import type { Outcome, Finding } from '@azimut/core-model';
 
 /**
- * I5.4 — Advertising legal rules.
+ * I5.4: Advertising legal rules.
  *
  * The rules applicable to advertising (mandatory notices, price-display
  * constraints, forbidden product categories) are carried by an EXTENSION of the
  * rules pack, with the same properties: pluggable, versioned, dated, and
- * refused if the documentary reference is missing — with no fallback value.
+ * refused if the documentary reference is missing, with no fallback value.
  *
  * This guard enforces the attachment and the documentary reference: an
  * advertising deliverable cannot be produced without an ad rules pack whose

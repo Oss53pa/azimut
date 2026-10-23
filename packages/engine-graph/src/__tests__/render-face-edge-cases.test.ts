@@ -103,7 +103,7 @@ describe('T-2.15 renderFace', () => {
       ],
     };
     const svg = renderFace(face, opts);
-    // Only the background rect and SVG shell — no destination text
+    // Only the background rect and SVG shell: no destination text
     const textMatches = svg.match(/<text /g);
     expect(textMatches).toBeNull();
   });

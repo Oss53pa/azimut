@@ -7,7 +7,7 @@ import { MAX_ATTEMPTS } from './queue.js';
 import type { JobHandler, WorkerLoopOptions } from './worker.js';
 
 /**
- * T-0.11 — l'assemblage du service de compilation sur la base.
+ * T-0.11 : l'assemblage du service de compilation sur la base.
  *
  * Un seul gestionnaire aujourd'hui, `build_kiosk_package` : c'est le seul qui
  * charge son site travail par travail, sous l'identité du demandeur. Les

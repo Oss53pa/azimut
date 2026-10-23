@@ -10,7 +10,7 @@ function version(id: string, effective_from: string): TenantSignRegulation {
 
 const versions = [version('v2', '2026-06-01'), version('v1', '2026-01-01')];
 
-describe('H5 — la version du règlement en vigueur au dépôt', () => {
+describe('H5 : la version du règlement en vigueur au dépôt', () => {
   it('retient la plus récente dont la date d’effet ne dépasse pas le dépôt', () => {
     expect(regulationInForce(versions, '2026-05-31')?.id).toBe('v1');
     expect(regulationInForce(versions, '2026-06-01')?.id).toBe('v2');

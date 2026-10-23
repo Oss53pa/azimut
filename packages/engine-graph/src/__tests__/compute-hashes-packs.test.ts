@@ -5,7 +5,7 @@ import { resolvedFaceContentHash } from '../compute-staleness.js';
 import { resolveFaceContent } from '../resolve-face.js';
 
 /**
- * D7.1 — l'empreinte de contenu porte le socle et la surcouche.
+ * D7.1 : l'empreinte de contenu porte le socle et la surcouche.
  *
  * « Les deux rattachements entrent dans l'empreinte, et non le seul résultat
  * de leur fusion. Sans cela, deux sites partageant un même socle avec des
@@ -35,7 +35,7 @@ const SOCLE = { key: 'international', version: '2026.1' };
 const PAYS_CI = { key: 'ci', version: '2026.1' };
 const PAYS_SN = { key: 'sn', version: '2026.1' };
 
-describe('D7.1 — le socle et la surcouche entrent dans l’empreinte', () => {
+describe('D7.1 : le socle et la surcouche entrent dans l’empreinte', () => {
   it('distingue deux sites de même socle et de surcouches différentes', () => {
     expect(hashWith({ base: SOCLE, overlay: PAYS_CI }))
       .not.toBe(hashWith({ base: SOCLE, overlay: PAYS_SN }));

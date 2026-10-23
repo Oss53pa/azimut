@@ -1,5 +1,5 @@
 /**
- * E8 — Snap (magnétisme) and constraints.
+ * E8 : Snap (magnétisme) and constraints.
  *
  * Snap targets are expressed in pixel-space (tolerance is constant
  * on screen, not in meters). Priority is deterministic (E8.2):
@@ -26,7 +26,7 @@ export const DEFAULT_SNAP_TOLERANCE_PX = 8;
 
 export type SnapKind = 'vertex' | 'intersection' | 'midpoint' | 'guide' | 'grid';
 
-/** Priority order — lower is higher priority (E8.2). */
+/** Priority order: lower is higher priority (E8.2). */
 const SNAP_PRIORITY: Record<SnapKind, number> = {
   vertex: 0,
   intersection: 1,

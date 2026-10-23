@@ -27,7 +27,7 @@ function shapeWith(geometry: DecorationGeometry): DecorationShape {
   };
 }
 
-describe('E9 — geometry of decoration shapes', () => {
+describe('E9: geometry of decoration shapes', () => {
   describe('geometryBounds', () => {
     it('bounds a polygon from its points', () => {
       const b = geometryBounds({

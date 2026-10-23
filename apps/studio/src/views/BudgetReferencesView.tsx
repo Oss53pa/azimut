@@ -17,7 +17,7 @@ const PRICED = 'priced';
 const UNPRICED = 'unpriced';
 
 /**
- * Module 09 — les coûts de référence (H8), au gabarit « registre ». Un coût
+ * Module 09 : les coûts de référence (H8), au gabarit « registre ». Un coût
  * absent n'est pas estimé : la typologie reste non chiffrée, et le garde
  * `auditCostReferences` la signale si un support du site la porte. Lu en base
  * (0043), ou dans le jeu de démonstration du dépôt de référence.
@@ -59,10 +59,10 @@ export function BudgetReferencesView({ siteKey }: BudgetReferencesViewProps): JS
   const columns: readonly Column<CostReference>[] = [
     { id: 'typology', header: t('budget.col.typology'), cell: r => r.typology_key },
     { id: 'substrate', header: t('budget.col.substrate'), cell: r => r.substrate_key },
-    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer_name ?? '—' },
+    { id: 'manufacturer', header: t('budget.col.manufacturer'), cell: r => r.manufacturer_name ?? '–' },
     { id: 'state', header: t('budgetrefs.col.state'), cell: stateTag },
     { id: 'cost', header: t('budget.col.unitcost'), numeric: true, cell: r => formatMoney(r.unit_cost, lang, t('budget.unpriced')) },
-    { id: 'since', header: t('budget.col.since'), cell: r => r.since ?? '—' },
+    { id: 'since', header: t('budget.col.since'), cell: r => r.since ?? '–' },
   ];
 
   const inspector = selected === null
@@ -79,9 +79,9 @@ export function BudgetReferencesView({ siteKey }: BudgetReferencesViewProps): JS
             id: 'reference',
             title: t('budgetrefs.section.reference'),
             rows: [
-              { id: 'manufacturer', label: t('budget.col.manufacturer'), value: selected.manufacturer_name ?? '—' },
-              { id: 'since', label: t('budget.col.since'), value: selected.since ?? '—' },
-              { id: 'currency', label: t('budgetrefs.field.currency'), value: selected.unit_cost?.currency ?? '—' },
+              { id: 'manufacturer', label: t('budget.col.manufacturer'), value: selected.manufacturer_name ?? '–' },
+              { id: 'since', label: t('budget.col.since'), value: selected.since ?? '–' },
+              { id: 'currency', label: t('budgetrefs.field.currency'), value: selected.unit_cost?.currency ?? '–' },
             ],
           },
           {

@@ -1,5 +1,5 @@
 /**
- * D12.1 — la zone de tracé au stylet de l'atelier des empreintes (J1, G3).
+ * D12.1 : la zone de tracé au stylet de l'atelier des empreintes (J1, G3).
  *
  * Fragment à part : `workshop-screens.ts` approche des 400 lignes que A2.4
  * fixe pour un fichier.

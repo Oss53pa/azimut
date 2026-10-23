@@ -14,7 +14,7 @@ type ProviderProps = {
   readonly site: SiteData;
   /**
    * Facultatif : le vocabulaire se charge à part et peut ne pas être arrivé.
-   * Son absence vaut registre vide *lu*, et non registre illisible — une carte
+   * Son absence vaut registre vide *lu*, et non registre illisible : une carte
    * s'affiche sans lexique.
    */
   readonly vocabulary?: VocabularyState | undefined;

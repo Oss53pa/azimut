@@ -1,5 +1,5 @@
 /**
- * A5.6 — passage ligne → modèle pour la famille signalétique : typologie,
+ * A5.6, passage ligne → modèle pour la famille signalétique : typologie,
  * support, face, bloc de contenu, version.
  *
  * Sorti de `assemble-site-data.ts`, qui franchissait les quatre cents lignes
@@ -17,7 +17,7 @@ import type {
 import { num, isoString, asRecord, asStringArray, versionState } from './row-scalars.js';
 
 /**
- * A5.6 — la base ne stocke aucune dimension par défaut au niveau de la
+ * A5.6, la base ne stocke aucune dimension par défaut au niveau de la
  * typologie : elles vivent sur l'instance. `faces` reste donc vide, et
  * l'appelant retombe sur les dimensions de l'instance puis sur une taille
  * de face par défaut.
@@ -34,7 +34,7 @@ export function mapSupportTypologyRow(row: SupportTypologyRow): SupportType {
   };
 }
 
-/** A5.6 — `face_index` vaut 0 quand la colonne additive est nulle. */
+/** A5.6 : `face_index` vaut 0 quand la colonne additive est nulle. */
 export function mapSupportFaceRow(row: SupportFaceRow): SupportFace {
   const langs = asStringArray(row.langs);
   return {
@@ -48,7 +48,7 @@ export function mapSupportFaceRow(row: SupportFaceRow): SupportFace {
 }
 
 /**
- * A5.6 — `block_index` retombe sur l'`ordinal` antérieur. La contrainte
+ * A5.6 : `block_index` retombe sur l'`ordinal` antérieur. La contrainte
  * `support_content_block_position_present` (0049) garantit l'un des deux ; une
  * ligne qui n'en porte aucun ne peut venir que d'un schéma qui a dérivé, et la
  * lecture échoue plutôt que de placer le bloc au hasard.
@@ -71,7 +71,7 @@ export function mapContentBlockRow(row: SupportContentBlockRow): ContentBlockIns
   };
 }
 
-/** A5.6 — l'état est garanti par la contrainte CHECK de la base. */
+/** A5.6 : l'état est garanti par la contrainte CHECK de la base. */
 export function mapSupportVersionRow(row: SupportVersionRow): SupportVersion {
   return {
     id: row.id,
@@ -87,9 +87,9 @@ export function mapSupportVersionRow(row: SupportVersionRow): SupportVersion {
 }
 
 /**
- * A5.6 — registre, contexte et distance de lecture sont des colonnes additives
+ * A5.6 (registre, contexte et distance de lecture sont des colonnes additives
  * et nullables : une ligne antérieure retombe sur les valeurs les plus
- * permissives — registre de wayfinding, contexte intérieur, distance nulle —
+ * permissives) registre de wayfinding, contexte intérieur, distance nulle,
  * pour qu'un support non relevé n'emprunte jamais en silence une règle plus
  * stricte que sa donnée ne le permet. Les vraies valeurs viennent du relevé.
  */

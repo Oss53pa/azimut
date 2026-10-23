@@ -2,16 +2,16 @@ import type { Point } from './geometry.js';
 import { roundMetres } from './round.js';
 
 /**
- * M01.S6 — « La longueur d'une arête est calculée, jamais saisie, et recalculée à
+ * M01.S6 : « La longueur d'une arête est calculée, jamais saisie, et recalculée à
  * toute modification de position. »
  *
  * Une arête n'a pas de géométrie propre : elle relie deux nœuds et rien
  * d'autre. Sa longueur est donc entièrement déterminée par ses extrémités, et
- * une valeur stockée qui en diffère est fausse — elle fausse silencieusement
+ * une valeur stockée qui en diffère est fausse : elle fausse silencieusement
  * tout itinéraire, puisque le calcul de parcours somme des longueurs.
  *
  * Trois dimensions, pas deux. Deux nœuds superposés sur des niveaux différents
- * — le cas d'un ascenseur ou d'un escalier — sont à la distance qui sépare les
+ * (le cas d'un ascenseur ou d'un escalier) sont à la distance qui sépare les
  * deux niveaux, pas à distance nulle. Mesurer dans le plan seul en ferait une
  * arête de longueur zéro, c'est à dire une anomalie inventée par la mesure.
  *
@@ -68,7 +68,7 @@ export type EdgeLengthInput = {
  * Une arête dont une extrémité est inconnue n'entre pas dans le résultat : sa
  * longueur n'est pas calculable, et en inventer une masquerait le nœud
  * manquant que `validateGraph` signale. Un niveau inconnu vaut une altitude
- * nulle — le nœud existe, sa position dans le plan reste vraie, et c'est le
+ * nulle : le nœud existe, sa position dans le plan reste vraie, et c'est le
  * niveau orphelin qui est l'anomalie, pas l'arête.
  */
 export function computeEdgeLengths(

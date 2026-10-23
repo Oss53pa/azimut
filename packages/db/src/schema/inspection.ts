@@ -5,7 +5,7 @@ import { site } from './site.js';
 import { support } from './signage.js';
 
 /**
- * I5.6 — les tournées d'inspection du module 08.
+ * I5.6 : les tournées d'inspection du module 08.
  *
  * Migration `0044` (famille C de la proposition de schéma, 5.4). Le nombre de
  * constats d'une tournée se compte, il ne se stocke pas.

@@ -21,7 +21,7 @@ const sql = postgres(url);
 try {
   // A4 : le registre est dans le schéma de l'application, en nom pleinement
   // qualifié. Ce script interrogeait `_migrations` sans qualification, donc
-  // par le chemin de recherche, donc le schéma par défaut — où la migration
+  // par le chemin de recherche, donc le schéma par défaut : où la migration
   // 0051 ne l'a justement plus laissé. Il annonçait alors « aucune table de
   // migrations » et rendait zéro : un retour en arrière qui ne fait rien et
   // se déclare réussi. Le code de sortie fait foi, et il disait le contraire

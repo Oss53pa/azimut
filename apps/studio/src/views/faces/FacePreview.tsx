@@ -12,7 +12,7 @@ type FacePreviewProps = {
 };
 
 /**
- * A5.6 / D8.3 — la face telle que le moteur la rend : gabarit de la
+ * A5.6 / D8.3, la face telle que le moteur la rend : gabarit de la
  * typologie, contenu du tableau des messages, textes saisis sur la face, dans
  * la langue de l'interface. Rien n'est dessiné par l'écran (INV-2).
  */

@@ -135,7 +135,7 @@ describe('T-2.7 renderIsoView', () => {
   });
 });
 
-describe('D5.4 — hit zones', () => {
+describe('D5.4: hit zones', () => {
   it('returns hit zones in reverse painter order', () => {
     const result = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(result.ok).toBe(true);
@@ -147,7 +147,7 @@ describe('D5.4 — hit zones', () => {
     }
   });
 
-  it('hit zones are never stored — recalculated each render', () => {
+  it('hit zones are never stored: recalculated each render', () => {
     const r1 = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     const r2 = renderIsoView(refMultilevel, ['lvl-ml-rdc'], defaultOptions);
     expect(r1.ok).toBe(true);
@@ -157,7 +157,7 @@ describe('D5.4 — hit zones', () => {
   });
 });
 
-describe('D5.5 — multi-level modes', () => {
+describe('D5.5: multi-level modes', () => {
   it('active_level mode estompes non-active levels', () => {
     const opts: IsoOptions = {
       ...defaultOptions,
@@ -236,7 +236,7 @@ describe('D5.5 — multi-level modes', () => {
   });
 });
 
-describe('renderIsoView — edge-case geometry', () => {
+describe('renderIsoView: edge-case geometry', () => {
   it('skips walls for zero-height volume', () => {
     const site = {
       ...refMultilevel,
@@ -352,7 +352,7 @@ describe('renderIsoView — edge-case geometry', () => {
       ],
       graph: { ...refMultilevel.graph, nodes: [], edges: [] },
     };
-    // Provide level IDs in both orders — result must be identical
+    // Provide level IDs in both orders: result must be identical
     const r1 = renderIsoView(sameOrdinalSite, ['lvl-b', 'lvl-a'], defaultOptions);
     const r2 = renderIsoView(sameOrdinalSite, ['lvl-a', 'lvl-b'], defaultOptions);
     expect(r1).toStrictEqual(r2);

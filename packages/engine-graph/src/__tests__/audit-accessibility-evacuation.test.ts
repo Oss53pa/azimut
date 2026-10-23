@@ -106,7 +106,7 @@ describe('auditAccessibility', () => {
   });
 });
 
-describe('auditAccessibility — self-loop edge', () => {
+describe('auditAccessibility: self-loop edge', () => {
   it('self-loop edge is skipped in adjacency graph', () => {
     const site: SiteData = {
       ...refMinimal,
@@ -222,7 +222,7 @@ describe('auditEvacuation', () => {
   });
 });
 
-describe('auditAccessibility — multi-level fixture', () => {
+describe('auditAccessibility: multi-level fixture', () => {
   it('multi-level accessible destinations reachable from entrance', () => {
     const accProfile = refMultilevel.travel_profiles.find(
       (p) => p.key === 'accessible',

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * R16 (partie R) — « Version approuvée | Bandeau d'état indiquant
+ * R16 (partie R) : « Version approuvée | Bandeau d'état indiquant
  * l'approbateur et la date. Aucune action de génération sur cette version. »
  *
  * L'approbateur n'est connu que par son identifiant : le modèle ne porte
@@ -35,7 +35,7 @@ async function open(page: Page, rows: readonly unknown[]): Promise<void> {
   await expect(page.getByText('Approuvé', { exact: true })).toBeVisible();
 }
 
-test.describe('R16 (partie R) — la version approuvée', () => {
+test.describe('R16 (partie R) : la version approuvée', () => {
   test('le bandeau dit l’approbateur et la date, et aucune génération n’est offerte', async ({ page }) => {
     await open(page, [...BASE_ROWS, DECISION]);
     await expect(page.getByText('Version approuvée par a1b2c3d4 le 2026-10-03T14:00:00+00:00. Aucune génération sur cette version.'))

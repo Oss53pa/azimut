@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SCRIPT = resolve(HERE, '..', '..', 'scripts', 'reset.js');
 
 /**
- * `pnpm db:reset` — les deux refus, et ce que le script touche.
+ * `pnpm db:reset`, les deux refus, et ce que le script touche.
  *
  * Deux défauts réparés, tous deux constatés en exécutant le script :
  *
@@ -35,7 +35,7 @@ function run(env: Readonly<Record<string, string>>): { code: number; stderr: str
   }
 }
 
-describe('db:reset — refuse hors de l’environnement local', () => {
+describe('db:reset, refuse hors de l’environnement local', () => {
   it('refuse sans déclaration d’environnement', () => {
     const { code, stderr } = run({
       DATABASE_URL: 'postgres://u@127.0.0.1:5432/p',
@@ -81,7 +81,7 @@ describe('db:reset — refuse hors de l’environnement local', () => {
   });
 });
 
-describe('db:reset — ne touche que les schémas de l’application', () => {
+describe('db:reset, ne touche que les schémas de l’application', () => {
   const source = readFileSync(SCRIPT, 'utf8');
 
   it('supprime le schéma de l’application', () => {

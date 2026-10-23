@@ -7,7 +7,7 @@ import { site } from './site.js';
 import { support } from './signage.js';
 
 /**
- * H6 — les tables du module 07, chantier et pose.
+ * H6 : les tables du module 07, chantier et pose.
  *
  * Migration `0042` (famille C de la proposition de schéma, 5.3). Le nombre de
  * supports d'un lot ou d'un créneau se calcule depuis les tables de liaison,

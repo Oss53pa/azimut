@@ -25,10 +25,10 @@ type WallPlanRow = {
 };
 
 /**
- * Module 04 — les plans muraux orientés (D6), au gabarit « registre ».
+ * Module 04 : les plans muraux orientés (D6), au gabarit « registre ».
  *
  * Un plan mural se tourne comme le regard du lecteur : ce qui est devant lui
- * est en haut. D6 et T-2.9 : « un rendu par implantation » — chaque support
+ * est en haut. D6 et T-2.9 : « un rendu par implantation », chaque support
  * implanté est une implantation, sans déclaration à part ; la rotation vient
  * de son azimut par `orientationDegForAzimuth`, et l'aperçu est le rendu du
  * moteur, jamais un dessin.
@@ -77,7 +77,7 @@ export function WallPlansView(): JSX.Element {
 
   const columns: readonly Column<WallPlanRow>[] = [
     { id: 'support', header: t('placement.col.code'), cell: r => r.support.code ?? r.support.id },
-    { id: 'level', header: t('placement.col.level'), cell: r => (r.levelId === null ? '—' : labels.level(r.levelId)) },
+    { id: 'level', header: t('placement.col.level'), cell: r => (r.levelId === null ? '–' : labels.level(r.levelId)) },
     { id: 'node', header: t('placement.col.node'), cell: r => labels.node(r.support.node_id) },
     { id: 'azimuth', header: t('placement.col.azimuth'), numeric: true, cell: r => formatNumber(r.support.azimuth_deg, lang, 0) },
     { id: 'rotation', header: t('wallplans.col.rotation'), numeric: true, cell: r => formatNumber(r.rotationDeg, lang, 2) },

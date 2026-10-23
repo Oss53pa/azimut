@@ -1,5 +1,5 @@
 /**
- * H2.5 — La composition consomme le tableau des messages.
+ * H2.5 : La composition consomme le tableau des messages.
  *
  * « Le moteur de composition consomme le tableau des messages. Il ne
  * résout pas le contenu directement depuis le graphe. »
@@ -18,7 +18,7 @@
  * validé avant d'être composé. `composeFace` accepte un tableau déjà
  * généré et validé, et en génère un à la volée quand l'appelant n'en a
  * pas. Le jour où les tableaux seront versionnés en base, seule la
- * provenance du tableau change — le moteur, lui, consomme déjà des
+ * provenance du tableau change : le moteur, lui, consomme déjà des
  * lignes de message et pas le graphe.
  */
 
@@ -330,7 +330,7 @@ export function composeFace(options: ComposeFaceOptions): Outcome<ResolvedFace> 
     rules: options.rules ?? NO_WAYFINDING_RULES,
     version: options.version ?? 1,
     generated_at,
-    // A5.6 — la typologie synthétique n'a qu'une face ; les blocs saisis sont
+    // A5.6 : la typologie synthétique n'a qu'une face ; les blocs saisis sont
     // ceux de la face réelle portant ce côté sur la typologie déclarée.
     instanceBlocks: id => {
       const real = declaredType === undefined ? null : faceIndexForSide(declaredType, template.side);

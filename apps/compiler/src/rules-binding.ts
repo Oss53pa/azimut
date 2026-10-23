@@ -6,7 +6,7 @@ import { resolveSiteRulesPack } from '@azimut/engine-graph';
  * The rules pack in effect for a site, resolved once per render batch. An
  * explicit pack wins; otherwise the site's bindings (A5.8 `site_rules_binding`,
  * socle and overlay) are resolved through the supplied corpus index. Resolution findings
- * (RULES.PACK_NOT_BOUND) are returned, never thrown — a missing pack skips the
+ * (RULES.PACK_NOT_BOUND) are returned, never thrown: a missing pack skips the
  * quality checks, it does not stop artwork production. Shared by the single-face
  * and delivery-archive handlers so both bind a pack the same way.
  */

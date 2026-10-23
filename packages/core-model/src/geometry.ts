@@ -49,7 +49,7 @@ function onSegment(p: Point, q: Point, r: Point): boolean {
 }
 
 /**
- * Vrai quand les segments [p1,p2] et [p3,p4] se croisent réellement — et non
+ * Vrai quand les segments [p1,p2] et [p3,p4] se croisent réellement : et non
  * quand ils se touchent seulement par une extrémité.
  */
 export function segmentsProperlyIntersect(
@@ -80,7 +80,7 @@ export function segmentsProperlyIntersect(
  * Une seule implémentation, deux appelants : la validation de complétude du
  * site (`engine-graph`) et le contrôle à la saisie de l'écran M3 (partie M).
  * Deux implémentations du même prédicat finiraient par diverger, et l'écran
- * accepterait alors un contour que la validation refuse — ou l'inverse, ce
+ * accepterait alors un contour que la validation refuse, ou l'inverse, ce
  * qui est pire : l'opérateur corrigerait un tracé que rien ne reproche.
  *
  * Un triangle ne peut pas se recouper : en deçà de quatre sommets, la réponse
@@ -110,7 +110,7 @@ export function isSelfIntersecting(vertices: readonly Point[]): boolean {
  * Un point est-il dans un polygone.
  *
  * Algorithme du lancer de rayon, le plus simple qui soit exact pour un
- * polygone simple — et A5.2 n'en admet pas d'autre. Un point exactement sur un
+ * polygone simple : et A5.2 n'en admet pas d'autre. Un point exactement sur un
  * bord n'a pas de réponse stable par cette méthode, et la question ne se pose
  * pas pour les usages qui l'appellent : ils cherchent ce qu'une surface
  * contient, non ce qu'elle borde.

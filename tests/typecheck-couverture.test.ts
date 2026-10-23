@@ -4,7 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 /**
- * Versions 27 et 28 — aucun fichier TypeScript du dépôt n'échappe au contrôle
+ * Versions 27 et 28, aucun fichier TypeScript du dépôt n'échappe au contrôle
  * de types : « un essai que le contrôle de types ignore peut casser sans que
  * rien ne le dise », et un fichier de configuration aussi.
  *
@@ -65,7 +65,7 @@ function projectFiles(tsconfig: string): string[] {
   return Array.isArray(files) ? files.map(file => resolve(dirname(tsconfig), String(file))) : [];
 }
 
-describe('Versions 27 et 28 — tout fichier TypeScript du dépôt est vérifié', () => {
+describe('Versions 27 et 28 : tout fichier TypeScript du dépôt est vérifié', () => {
   it('chaque fichier TypeScript relève d’un projet que `pnpm typecheck` vérifie', () => {
     const checked = new Set(packageDirs().flatMap(typecheckProjects).flatMap(projectFiles));
     const missing = typescriptSources(ROOT)

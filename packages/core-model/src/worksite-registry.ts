@@ -1,5 +1,5 @@
 /**
- * H6 — le chantier tel que la base le porte (migration 0042) : lots de
+ * H6, le chantier tel que la base le porte (migration 0042) : lots de
  * fabrication, créneaux de pose, réserves de pose.
  *
  * Comme le vocabulaire, ce registre ne rejoint pas `SiteData` : il se lit à

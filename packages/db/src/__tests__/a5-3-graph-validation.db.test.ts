@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import { sql } from 'drizzle-orm';
 
 /**
- * A5.3 et A12.3 — `graph_validation`, insertion seule, sur une base réelle.
+ * A5.3 et A12.3 : `graph_validation`, insertion seule, sur une base réelle.
  *
  * « Toute tentative de modification ou de suppression échoue au niveau de la
  * base. » Un essai sur le texte des migrations dirait que les barrages sont
@@ -92,7 +92,7 @@ async function refusalOf(run: () => Promise<unknown>): Promise<string> {
   throw new Error('la requête a réussi alors qu’elle devait être refusée');
 }
 
-describe('A5.3 — un passage de validation s’enregistre', () => {
+describe('A5.3 : un passage de validation s’enregistre', () => {
   it('accepte un passage réussi', async () => {
     await asOwner(async () => {
       await insertRun(`sha256:aaa-${RUN}`, true, 0);
@@ -131,11 +131,11 @@ describe('A5.3 — un passage de validation s’enregistre', () => {
 });
 
 /**
- * A12.3 — l'insertion seule, éprouvée sous le rôle propriétaire du schéma.
+ * A12.3 : l'insertion seule, éprouvée sous le rôle propriétaire du schéma.
  * C'est le rôle qui contourne les politiques ; si les barrages tiennent sous
  * lui, ils tiennent sous les autres.
  */
-describe('A12.3 — graph_validation est en insertion seule', () => {
+describe('A12.3 : graph_validation est en insertion seule', () => {
   it('refuse la modification', async () => {
     const motif = await asOwner(() => refusalOf(() => db.execute(sql`
       update azimut.graph_validation set passed = false where site_id = ${SITE}`)));
@@ -150,7 +150,7 @@ describe('A12.3 — graph_validation est en insertion seule', () => {
 
   /**
    * TRUNCATE ne déclenche aucun déclencheur par ligne. Sans déclencheur
-   * d'instruction, la table se viderait — c'est ce qui s'était produit sur
+   * d'instruction, la table se viderait : c'est ce qui s'était produit sur
    * `approval` avant que le barrage ne soit posé.
    */
   it('refuse le vidage', async () => {
@@ -198,13 +198,13 @@ describe('A12.3 — graph_validation est en insertion seule', () => {
   });
 
   /**
-   * A5.11, version 7 — la clé étrangère refuse la suppression du parent.
+   * A5.11, version 7 : la clé étrangère refuse la suppression du parent.
    *
    * La table a d'abord porté `ON DELETE CASCADE` vers `site` et vers
    * `organization`, ce qui opposait A5.3 à l'insertion seule d'A12.3 : la
    * cascade est une suppression, le déclencheur la refusait, et le refus
    * paraissait venir de la table fille pour une raison que la clé ne disait
-   * pas. A5.11 tranche — aucune cascade vers `organization` ni vers `site`,
+   * pas. A5.11 tranche : aucune cascade vers `organization` ni vers `site`,
    * et les tables en insertion seule refusent la suppression de leur parent.
    *
    * L'essai vérifie donc d'où vient le refus, et pas seulement qu'il a lieu :

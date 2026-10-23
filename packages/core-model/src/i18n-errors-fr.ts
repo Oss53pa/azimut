@@ -1,4 +1,4 @@
-/** Catalogue D2 — libellés français. Table seule : la mécanique est dans `i18n-errors`. */
+/** Catalogue D2 : libellés français. Table seule : la mécanique est dans `i18n-errors`. */
 import type { ErrorMessages } from './i18n-errors.js';
 
 export const ERROR_MESSAGES_FR: ErrorMessages = {

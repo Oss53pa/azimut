@@ -22,7 +22,7 @@ const req = (over: Partial<EditRequest> = {}): EditRequest => ({
   ...over,
 });
 
-describe('G4.2 — guardObjectEdit', () => {
+describe('G4.2: guardObjectEdit', () => {
   it('allows an edit when there is no lock', () => {
     expect(guardObjectEdit(req(), [], NOW).ok).toBe(true);
   });

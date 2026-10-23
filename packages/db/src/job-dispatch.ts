@@ -3,7 +3,7 @@ import { setSessionIdentity } from './write-path.js';
 import type { Executor, TransactionalDb } from './write-path.js';
 
 /**
- * T-0.11 et D9.2 — les requêtes de la file des travaux (migration 0071).
+ * T-0.11 et D9.2 : les requêtes de la file des travaux (migration 0071).
  *
  * Deux identités seulement. Sous `azimut_compiler`, le service n'exécute que
  * les trois fonctions de prise et n'apprend d'un travail que son identifiant,
@@ -117,7 +117,7 @@ export async function claimJob(
   };
 }
 
-/** D9.2 — les travaux en cours depuis plus que le délai. */
+/** D9.2 : les travaux en cours depuis plus que le délai. */
 export async function stalledJobs(
   db: TransactionalDb, now: Date, timeoutMs: number,
 ): Promise<readonly StalledJob[]> {
@@ -160,7 +160,7 @@ export async function readJobPayloadAs(
  * Clôt un travail sous l'identité de son demandeur. Un succès le termine ; un
  * échec le remet en file tant que des tentatives restent (D9.2), l'heure de
  * fin restant posée pour la temporisation. Un travail qui n'est plus en cours
- * à la tentative donnée — relevé comme stagnant, puis repris ailleurs — n'est
+ * à la tentative donnée (relevé comme stagnant, puis repris ailleurs) n'est
  * pas touché : une clôture tardive écraserait l'essai suivant.
  */
 export async function closeJobAs(

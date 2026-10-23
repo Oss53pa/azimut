@@ -9,14 +9,14 @@ import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
 
 /**
- * M1bis (partie M) — fiche de site, bâtiments et niveaux.
+ * M1bis (partie M) : fiche de site, bâtiments et niveaux.
  *
  * Famille registre. C'est l'écran qui manquait : sans lui, un site reste au
  * bâtiment et au niveau que le formulaire de M1 crée, et la tâche T-1.5 est
  * impossible faute d'un second niveau.
  *
  * Deux refus par prévention plutôt que par anomalie. L'action de création
- * reste inactive tant que les champs requis ne sont pas saisis — M1bis donne
+ * reste inactive tant que les champs requis ne sont pas saisis : M1bis donne
  * un code au nom en double et au rang en double, aucun à l'absence de rang ou
  * d'altitude. Et la suppression d'un niveau demande une confirmation qui nomme
  * la conséquence (M7, règle 9).

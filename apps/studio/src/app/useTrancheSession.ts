@@ -1,5 +1,5 @@
 /**
- * F15, `app/` — la session du parcours de M8 (partie M).
+ * F15, `app/` : la session du parcours de M8 (partie M).
  *
  * « Un opérateur part d'un site vide, importe un plan, le cale, trace trois
  * cellules, pose quatre nœuds, trace les arêtes, lance la validation, et
@@ -48,7 +48,7 @@ export type TrancheSession = {
   readonly record: (commands: readonly EntityCommand[]) => Promise<boolean>;
   readonly count: (table: string) => number;
   /**
-   * T-1.2b et E5.2 — la pile d'annulation du parcours.
+   * T-1.2b et E5.2 : la pile d'annulation du parcours.
    *
    * Elle est ici et non dans chaque écran : la portée est « le site en cours
    * d'édition, par utilisateur », et un écran qui tiendrait la sienne perdrait
@@ -82,7 +82,7 @@ export type TrancheSession = {
   readonly newId: () => string;
   readonly now: () => string;
   /**
-   * J1.4 — les images des plans calés, par source de plan, le temps de la
+   * J1.4 : les images des plans calés, par source de plan, le temps de la
    * session. Le fichier n'est encore téléversé nulle part : sans cette
    * mémoire, le fond du décalque disparaîtrait dès la sortie de l'écran de
    * calage. Elle ne survit pas au rechargement, et l'atelier le dit.
@@ -100,7 +100,7 @@ export type PlanImage = {
 /**
  * L'émetteur par défaut : il accepte tout sans rien envoyer.
  *
- * Le chemin d'écriture réel est celui du lot 1.2 — `createPostgrestSink`. Tant
+ * Le chemin d'écriture réel est celui du lot 1.2 : `createPostgrestSink`. Tant
  * qu'aucun dépôt n'est configuré, le parcours doit rester praticable : c'est
  * exactement le cas « hors ligne » que M8 (partie M) critère 3 demande, et le refuser
  * rendrait la tranche invérifiable sur un poste nu.
@@ -145,7 +145,7 @@ export function useTrancheSession(
   /** L'état du dépôt, tenu à part : c'est le second terme du choix d'E5.4. */
   const stored = useRef<SessionState>(EMPTY_SESSION);
   const [loadFailed, setLoadFailed] = useState(false);
-  // E5.2 — la pile d'annulation du site en cours. Le `ref` porte l'état
+  // E5.2 : la pile d'annulation du site en cours. Le `ref` porte l'état
   // courant, pour qu'un second geste parte du premier et non du dernier rendu.
   const [storeState, setStore] = useState<StoreState>(EMPTY_STORE);
   const [planImages, setPlanImages] = useState<ReadonlyMap<string, PlanImage>>(new Map());
@@ -165,7 +165,7 @@ export function useTrancheSession(
     setState(next);
   }, []);
 
-  // E5.4 — à l'ouverture d'un écran, l'état local est relu. Ce qu'on en fait
+  // E5.4 : à l'ouverture d'un écran, l'état local est relu. Ce qu'on en fait
   // dépend de qui l'a laissé là : cet onglet, ou une session interrompue.
   //
   // Le dépôt est lu en parallèle. Il ne remplace jamais un travail local : il
@@ -204,7 +204,7 @@ export function useTrancheSession(
 
   const discardResume = useCallback((): void => {
     // Aucune fusion (E5.4) : ce qui est écarté est effacé, et le parcours
-    // repart de l'état du dépôt — vide tant que le dépôt ne porte rien.
+    // repart de l'état du dépôt, vide tant que le dépôt ne porte rien.
     clearSession(context.siteId, storage);
     adopt(stored.current);
     setPendingResume(null);
@@ -218,7 +218,7 @@ export function useTrancheSession(
         const { state: flushedState } = await flushQueue(current.current, send);
         current.current = flushedState;
         setState(flushedState);
-        // E5.3 — « La pile d'annulation est vidée à la synchronisation. Ce qui
+        // E5.3 : « La pile d'annulation est vidée à la synchronisation. Ce qui
         // est synchronisé n'est plus annulable localement. » Revenir dessus
         // demande une commande inverse tracée, jamais une annulation.
         store.current = afterSync(store.current);

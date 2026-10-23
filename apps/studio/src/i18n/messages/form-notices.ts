@@ -1,5 +1,5 @@
 /**
- * D2.2 — les refus de saisie sans code au catalogue (`FormNotice`).
+ * D2.2 : les refus de saisie sans code au catalogue (`FormNotice`).
  *
  * Typées contre `FormNoticeKey` : une clé déclarée par le modèle sans
  * traduction ici ne compile pas.

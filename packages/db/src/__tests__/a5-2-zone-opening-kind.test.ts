@@ -12,12 +12,12 @@ const MIGRATION = resolve(
 );
 
 /**
- * A5.2 — `zone.kind` et `opening.kind` ont désormais leurs valeurs au schéma.
+ * A5.2 : `zone.kind` et `opening.kind` ont désormais leurs valeurs au schéma.
  *
  * Les deux colonnes sont restées en texte libre depuis la migration 0003 :
  * le document ne les énumérait pas, et en inventer aurait été une faute. Il
- * les déclare, et ce contrôle tient les deux listes ensemble — celle de la
- * base et celle du modèle — comme le fait déjà `footprint.kind`. Si elles
+ * les déclare, et ce contrôle tient les deux listes ensemble (celle de la
+ * base et celle du modèle) comme le fait déjà `footprint.kind`. Si elles
  * divergeaient, une des deux mentirait, et c'est celle qu'un développeur lit
  * qui le tromperait.
  */
@@ -33,7 +33,7 @@ function kindsIn(table: string): readonly string[] {
     .filter(part => part.length > 0);
 }
 
-describe('A5.2 — natures de zone et d’ouverture', () => {
+describe('A5.2 : natures de zone et d’ouverture', () => {
   it('la base et le modèle déclarent les mêmes natures de zone', () => {
     expect([...kindsIn('zone')].sort()).toEqual([...ZONE_KINDS].sort());
   });

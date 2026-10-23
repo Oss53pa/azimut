@@ -13,7 +13,7 @@ const color = (
   ...over,
 });
 
-describe('G6.2 — colorDelta (COLOR.DELTA_NOT_COMPUTABLE)', () => {
+describe('G6.2: colorDelta (COLOR.DELTA_NOT_COMPUTABLE)', () => {
   it('computes a CIE76 delta when both colours have measured values', () => {
     const a = color('c-1', { lab: { l: 50, a: 0, b: 0 } });
     const b = color('c-2', { lab: { l: 53, a: 4, b: 0 } });
@@ -48,7 +48,7 @@ describe('G6.2 — colorDelta (COLOR.DELTA_NOT_COMPUTABLE)', () => {
   });
 });
 
-describe('G6.3 — auditColorReferences (COLOR.REFERENCE_UNVERIFIABLE)', () => {
+describe('G6.3: auditColorReferences (COLOR.REFERENCE_UNVERIFIABLE)', () => {
   it('reports nothing for a colour whose measured values are provided', () => {
     const r = auditColorReferences([
       color('c-1', {

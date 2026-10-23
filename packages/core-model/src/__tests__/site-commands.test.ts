@@ -30,11 +30,11 @@ function built(over: Partial<CommandDraft> = {}) {
 }
 
 /**
- * E5.1 — « Toute modification de donnée passe par une commande, objet
+ * E5.1, « Toute modification de donnée passe par une commande, objet
  * sérialisable comportant : un type, une cible, les valeurs avant et après, et
  * un horodatage fourni par l'appelant, jamais lu par la commande elle-même. »
  */
-describe('E5.1 — commande d’écriture', () => {
+describe('E5.1 : commande d’écriture', () => {
   it('construit une commande de création', () => {
     const c = built();
     expect(c.operation).toBe('create');
@@ -57,7 +57,7 @@ describe('E5.1 — commande d’écriture', () => {
     if (!out.ok) expect(out.findings.map(f => f.code)).toContain('EDIT.TIMESTAMP_REQUIRED');
   });
 
-  describe('R1 et R2 (partie L) — un module n’écrit que ce qu’il possède', () => {
+  describe('R1 et R2 (partie L) : un module n’écrit que ce qu’il possède', () => {
     it('accepte une table que le module possède', () => {
       expect(ownsTable('01-socle', 'site')).toBe(true);
       expect(built({ table: 'node', after: { id: 'node-1', org_id: ORG, label: 'Accueil' } }).table).toBe('node');
@@ -108,11 +108,11 @@ describe('E5.1 — commande d’écriture', () => {
 });
 
 /**
- * E5.1 — « Une commande est réversible. Une commande non réversible est
+ * E5.1 : « Une commande est réversible. Une commande non réversible est
  * refusée en revue. » L'inverse se calcule sans relire la base, la commande
  * portant ses deux états.
  */
-describe('E5.1 — réversibilité', () => {
+describe('E5.1 : réversibilité', () => {
   const T2 = '2026-09-21T10:00:01.000Z';
 
   it('l’inverse d’une création est une suppression', () => {
@@ -146,11 +146,11 @@ describe('E5.1 — réversibilité', () => {
 });
 
 /**
- * M02.W8 (partie N) — « Toute modification du graphe ou de l'annuaire marque
+ * M02.W8 (partie N) : « Toute modification du graphe ou de l'annuaire marque
  * périmées les seules lignes concernées. Ni plus, ni moins. » La précision de
  * la péremption commence ici : savoir exactement ce qui a changé.
  */
-describe('M02.W8 (partie N) — les colonnes réellement changées', () => {
+describe('M02.W8 (partie N) : les colonnes réellement changées', () => {
   it('ne retient que les colonnes dont la valeur diffère', () => {
     const c = built({
       operation: 'update',
@@ -182,13 +182,13 @@ describe('M02.W8 (partie N) — les colonnes réellement changées', () => {
 });
 
 /**
- * L0 — « L'implantation d'un support est une décision de wayfinding, pas de
+ * L0 : « L'implantation d'un support est une décision de wayfinding, pas de
  * signalétique. » `support` est la seule table à deux propriétaires, et la
  * garantie ne vaut que si `buildCommand` la tient colonne par colonne :
  * déclarée dans `SUPPORT_COLUMN_OWNER` sans être appliquée, la scission
  * n'était qu'un commentaire.
  */
-describe('la table scindée — `support`, colonne par colonne', () => {
+describe('la table scindée : `support`, colonne par colonne', () => {
   const BASE = {
     operation: 'update' as const,
     table: 'support',

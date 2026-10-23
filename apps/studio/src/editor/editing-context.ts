@@ -1,16 +1,16 @@
 /**
- * E1 — Editing context enforcement.
+ * E1: Editing context enforcement.
  *
  * Three editing contexts coexist with opposite rules.
  * Confusing them is the most costly mistake (E0.2).
  *
- * Context 1: Site geometry & decoration — full vector editing.
- * Context 2: Templates — visual editing that produces data, never drawings.
- * Context 3: Support faces — NO editing. View, control, validate.
+ * Context 1: Site geometry & decoration, full vector editing.
+ * Context 2: Templates, visual editing that produces data, never drawings.
+ * Context 3: Support faces, NO editing. View, control, validate.
  *
  * This module enforces the permission matrix from E1.4.
  * Every editing operation must pass through `checkPermission` before
- * executing. The check never throws — it returns a Finding.
+ * executing. The check never throws: it returns a Finding.
  */
 
 import type { Finding } from '@azimut/core-model';

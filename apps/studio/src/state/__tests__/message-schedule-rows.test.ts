@@ -7,7 +7,7 @@ import {
 import type { Exclusion } from '../message-schedule-commands.js';
 
 /**
- * R5, R6, R9 et R10 (partie R) — les lignes telles que l'écran les présente.
+ * R5, R6, R9 et R10 (partie R) : les lignes telles que l'écran les présente.
  *
  * Deux critères d'acceptation de R18 sont éprouvés ici : le quatrième,
  * « un filtre actif affiche le nombre de lignes qu'il masque », et la règle de
@@ -65,10 +65,10 @@ function blocking(lineId: string): Finding {
 }
 
 // ---------------------------------------------------------------------------
-// R5 (partie R) — l'identifiant stable
+// R5 (partie R): l'identifiant stable
 // ---------------------------------------------------------------------------
 
-describe('R5 (partie R) — l’identifiant stable d’une ligne', () => {
+describe('R5 (partie R) : l’identifiant stable d’une ligne', () => {
   it('se forme du code de support, de la face et du bloc', () => {
     expect(stableLineId('D-042', 1, 3)).toBe('D-042/F1/B3');
   });
@@ -98,10 +98,10 @@ describe('R5 (partie R) — l’identifiant stable d’une ligne', () => {
 });
 
 // ---------------------------------------------------------------------------
-// R10 — l'état d'une ligne
+// R10 : l'état d'une ligne
 // ---------------------------------------------------------------------------
 
-describe('R10 (partie R) — l’état d’une ligne', () => {
+describe('R10 (partie R) : l’état d’une ligne', () => {
   function stateOf(over: Partial<MessageLine>, extras: {
     findings?: readonly Finding[];
     exclusions?: ReadonlyMap<string, Exclusion>;
@@ -140,10 +140,10 @@ describe('R10 (partie R) — l’état d’une ligne', () => {
 });
 
 // ---------------------------------------------------------------------------
-// R6 (partie R) — filtres, recherche, lignes masquées
+// R6 (partie R) : filtres, recherche, lignes masquées
 // ---------------------------------------------------------------------------
 
-describe('R6 (partie R) — filtres et recherche', () => {
+describe('R6 (partie R) : filtres et recherche', () => {
   const rows = buildRows({
     schedule: schedule([
       line({ id: 'sup-1#0#0' }),
@@ -169,7 +169,7 @@ describe('R6 (partie R) — filtres et recherche', () => {
 
   /**
    * R3 (partie R) : la barre d'état compte « 3 écartées » que le filtre les montre ou
-   * non. Le compte dit ce que le tableau porte, pas ce que la vue affiche —
+   * non. Le compte dit ce que le tableau porte, pas ce que la vue affiche :
    * sans quoi masquer les écartées les ferait disparaître du compte aussi,
    * et l'écran cesserait de dire ce qui n'a pas trouvé de place.
    */
@@ -221,10 +221,10 @@ describe('R6 (partie R) — filtres et recherche', () => {
 });
 
 // ---------------------------------------------------------------------------
-// R6.1 (partie R) — regroupement
+// R6.1 (partie R): regroupement
 // ---------------------------------------------------------------------------
 
-describe('R6.1 (partie R) — regroupement', () => {
+describe('R6.1 (partie R): regroupement', () => {
   const rows = buildRows({
     schedule: schedule([
       line({ id: 'sup-1#0#0' }),

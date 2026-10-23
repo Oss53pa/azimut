@@ -12,7 +12,7 @@ const run = (id: string, extraction_rate: number): ExtractionRun => ({
   extraction_rate,
 });
 
-describe('I3 — filterAssistProposals (ASSIST.PROPOSAL_REJECTED)', () => {
+describe('I3: filterAssistProposals (ASSIST.PROPOSAL_REJECTED)', () => {
   it('keeps proposals the user has not rejected', () => {
     const r = filterAssistProposals(
       [prop('p-1', 'sig-a'), prop('p-2', 'sig-b')],
@@ -51,7 +51,7 @@ describe('I3 — filterAssistProposals (ASSIST.PROPOSAL_REJECTED)', () => {
   });
 });
 
-describe('I3 — auditExtractionRate (ASSIST.EXTRACTION_BELOW_THRESHOLD)', () => {
+describe('I3: auditExtractionRate (ASSIST.EXTRACTION_BELOW_THRESHOLD)', () => {
   it('passes runs at or above the threshold', () => {
     const r = auditExtractionRate([run('r-1', 0.9), run('r-2', 0.8)], 0.8);
     expect(r.ok).toBe(true);

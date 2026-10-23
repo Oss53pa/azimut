@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { guardToolAction, availableTools } from '../context-guard.js';
 import type { ToolAction } from '../tool-state.js';
 
-describe('E1.4 — editing context guard', () => {
+describe('E1.4: editing context guard', () => {
   // -----------------------------------------------------------------------
-  // Context 1 (site) — full editing
+  // Context 1 (site), full editing
   // -----------------------------------------------------------------------
   describe('context 1 (site)', () => {
     it('allows all drawing tools', () => {
@@ -30,7 +30,7 @@ describe('E1.4 — editing context guard', () => {
   });
 
   // -----------------------------------------------------------------------
-  // Context 2 (template) — visual editing, produces data
+  // Context 2 (template), visual editing, produces data
   // -----------------------------------------------------------------------
   describe('context 2 (template)', () => {
     it('blocks drawing tools (templates produce data, not shapes)', () => {
@@ -63,7 +63,7 @@ describe('E1.4 — editing context guard', () => {
   });
 
   // -----------------------------------------------------------------------
-  // Context 3 (face) — NO editing, view/control only
+  // Context 3 (face), NO editing, view/control only
   // -----------------------------------------------------------------------
   describe('context 3 (face)', () => {
     it('blocks drawing tools', () => {

@@ -1,5 +1,5 @@
 /**
- * E3.1 — Two coordinate systems, one transformation.
+ * E3.1: Two coordinate systems, one transformation.
  *
  * Business coordinate system (meter-space):
  *   origin: arbitrary, X east, Y north (D1.1).
@@ -16,7 +16,7 @@ import { normalizeAzimuth } from './angle.js';
 import { roundSvg, roundHalfAwayFromZero } from './round.js';
 
 // ---------------------------------------------------------------------------
-// E3.2 — View state
+// E3.2: View state
 // ---------------------------------------------------------------------------
 
 /** Immutable view state. Never stored in business data. */
@@ -31,7 +31,7 @@ export type ViewState = {
 };
 
 // ---------------------------------------------------------------------------
-// E3.3 — Scale bounds
+// E3.3: Scale bounds
 // ---------------------------------------------------------------------------
 
 /** Minimum scale (fully zoomed out). */
@@ -42,7 +42,7 @@ export const MAX_SCALE_PX_PER_M = 500;
 export const ZOOM_STEP_FACTOR = 1.15;
 
 // ---------------------------------------------------------------------------
-// E4.2 — Quantization step for editing operations
+// E4.2: Quantization step for editing operations
 // ---------------------------------------------------------------------------
 
 /**
@@ -80,7 +80,7 @@ export type ViewportSize = {
  * The Y-axis is flipped: north (positive Y in meters) is up on screen.
  *
  * When rotationDeg ≠ 0, meter-space is rotated around the viewport center
- * before scaling — used for oriented plan preview (E3.2).
+ * before scaling: used for oriented plan preview (E3.2).
  */
 export function meterToPixel(
   point: Point,
@@ -148,7 +148,7 @@ export function pixelToMeter(
 
 /**
  * Clamp a scale value to the allowed range (E3.3).
- * Returns the clamped value — never throws.
+ * Returns the clamped value: never throws.
  */
 export function clampScale(scale: number): number {
   if (scale < MIN_SCALE_PX_PER_M) return MIN_SCALE_PX_PER_M;
@@ -180,7 +180,7 @@ export function applyZoomStep(
  * supérieur, donc `-0.5` vers `-0` là où « au plus loin de zéro » donne `-1` :
  * deux règles d'arrondi dans le même produit, ce que D1.4 interdit
  * nommément. Et il rend `-0` pour toute valeur négative proche de zéro, que
- * D1.4 interdit en sortie — un sommet posé au pointeur à un micron sous
+ * D1.4 interdit en sortie : un sommet posé au pointeur à un micron sous
  * l'origine et le même saisi au clavier donnaient alors deux valeurs
  * différentes, contre le critère 3 de M3 (partie M).
  */

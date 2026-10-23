@@ -1,5 +1,5 @@
 /**
- * E7.4 — Geometry primitives for polygon operations.
+ * E7.4: Geometry primitives for polygon operations.
  *
  * Pure functions operating in meter-space. No external geometry
  * library (A3.3). Extracted from boolean-ops.ts to keep files

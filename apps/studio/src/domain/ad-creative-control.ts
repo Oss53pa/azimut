@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * H4.6 — On reception, an advertiser's creative is checked automatically
+ * H4.6, On reception, an advertiser's creative is checked automatically
  * against the technical sheet (H4.2, generated not hand-written): file format,
  * resolution, safe zone, colour profile, and weight. Any divergence raises a
  * blocking AD.CREATIVE_SPEC_MISMATCH. The declarative controls (site rules,

@@ -1,5 +1,5 @@
 /**
- * H5.2 — le règlement d'enseigne lu article par article, et l'instruction
+ * H5.2 : le règlement d'enseigne lu article par article, et l'instruction
  * d'un dossier contre lui.
  *
  * Un article est un axe du règlement du site (hauteur, débord, matériau,

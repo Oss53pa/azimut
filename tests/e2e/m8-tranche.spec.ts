@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { cpus, platform, release, totalmem } from 'node:os';
 
 /**
- * M8 (partie M) — critères d'acceptation de la tranche entière.
+ * M8 (partie M) : critères d'acceptation de la tranche entière.
  *
  * « Ce qui compte n'est pas que chaque écran existe, mais que la chaîne
  * fonctionne. »
@@ -121,7 +121,7 @@ async function runChain(page: Page): Promise<void> {
   await expect(page.getByText(/Aucune anomalie|No anomaly/)).toBeVisible();
 }
 
-test.describe('M8 (partie M) critère 1 — la chaîne fonctionne', () => {
+test.describe('M8 (partie M) critère 1 : la chaîne fonctionne', () => {
   test('un site vide devient un graphe validé', async ({ page }) => {
     await runChain(page);
   });
@@ -153,10 +153,10 @@ test.describe('M8 (partie M) critère 1 — la chaîne fonctionne', () => {
   });
 });
 
-test.describe('M8 (partie M) critère 2 — le même parcours au clavier seul', () => {
+test.describe('M8 (partie M) critère 2 : le même parcours au clavier seul', () => {
   /**
    * Aucun clic. Le dépôt du fichier est le seul geste qu'un navigateur
-   * n'autorise pas à simuler au clavier — il passe par `setInputFiles`, qui
+   * n'autorise pas à simuler au clavier : il passe par `setInputFiles`, qui
    * est ce qu'une frappe sur le champ de fichier déclenche.
    */
   test('la chaîne se parcourt sans la souris', async ({ page }) => {
@@ -173,13 +173,13 @@ test.describe('M8 (partie M) critère 2 — le même parcours au clavier seul', 
     await page.keyboard.type('0');
 
     // Tabuler jusqu'au bouton de validation, puis le presser à la barre
-    // d'espace — sans jamais cliquer.
+    // d'espace: sans jamais cliquer.
     await pressByKeyboard(page, /^Valider le calage$|^Validate calibration$/);
     await expect(page.getByText(/Plan calé|Plan calibrated/)).toBeVisible();
 
     await page.goto(GRAPH);
     // M4 (partie M) critère 4 : « Le graphe complet est saisissable au clavier
-    // seul. » Le type du nœud en fait partie — un sélecteur qu'on ne pourrait
+    // seul. » Le type du nœud en fait partie : un sélecteur qu'on ne pourrait
     // atteindre qu'à la souris rendrait le parcours au clavier incomplet sans
     // qu'aucun essai le dise.
     for (const kind of CHAIN_NODE_KINDS) {
@@ -233,7 +233,7 @@ async function pressByKeyboard(page: Page, name: RegExp): Promise<void> {
   throw new Error(`bouton non atteint au clavier : ${String(name)}`);
 }
 
-test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () => {
+test.describe('M8 (partie M) critère 3 : le même parcours hors ligne', () => {
   /**
    * « Le même parcours est réalisable hors ligne, avec synchronisation au
    * retour du réseau. » Le travail avance sans réseau ; ce qui est écrit
@@ -300,7 +300,7 @@ test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () =>
    * L'autre branche du choix : écarter n'est jamais une fusion.
    *
    * E5.4 veut le choix « entre l'état local et l'état serveur ». Le dépôt ne
-   * connaît pas ce site — il n'existe que sur ce poste —, l'état du dépôt est
+   * connaît pas ce site (il n'existe que sur ce poste), l'état du dépôt est
    * donc vide et écarter ramène à zéro. Le libellé, lui, dit ce que le bouton
    * fait : repartir de l'état enregistré.
    */
@@ -324,7 +324,7 @@ test.describe('M8 (partie M) critère 3 — le même parcours hors ligne', () =>
 });
 
 /**
- * M8 (partie M) critère 4 — « Le temps du parcours est mesuré et consigné.
+ * M8 (partie M) critère 4 : « Le temps du parcours est mesuré et consigné.
  * C'est le premier relevé de l'indicateur économique central du produit, et il
  * sert de base à toutes les révisions ultérieures. »
  *
@@ -386,7 +386,7 @@ function machineOfRecord(): Record<string, string> {
  * D13, version 29 : « Taille de fenêtre déclarée avec le relevé, pour toute
  * mesure qui dépend d'un rendu. » Relevée sur la page mesurée, comme la
  * machine : c'est la fenêtre où le parcours a tourné, et non celle que la
- * configuration est censée imposer — la version 28 a montré que les deux
+ * configuration est censée imposer, la version 28 a montré que les deux
  * pouvaient différer. Une page sans fenêtre fixe ne produit pas de relevé.
  */
 function windowOfRecord(page: Page): { largeur_px: number; hauteur_px: number } {
@@ -395,7 +395,7 @@ function windowOfRecord(page: Page): { largeur_px: number; hauteur_px: number } 
   return { largeur_px: size.width, hauteur_px: size.height };
 }
 
-test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et consigné', () => {
+test.describe('M8 (partie M) critère 4 : le temps du parcours est mesuré et consigné', () => {
   test('le parcours est chronométré selon le protocole D13', async ({ page }) => {
     const runs: Run[] = [];
 
@@ -450,7 +450,7 @@ test.describe('M8 (partie M) critère 4 — le temps du parcours est mesuré et 
     // qui déplaît.
     const retained = runs.slice(1);
     const record = {
-      mesure: 'M8 (partie M) critère 4 — temps du parcours complet de la tranche',
+      mesure: 'M8 (partie M) critère 4 : temps du parcours complet de la tranche',
       protocole: 'D13',
       releve_le: new Date().toISOString(),
       machine: machineOfRecord(),

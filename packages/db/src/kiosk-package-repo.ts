@@ -5,7 +5,7 @@ import { setSessionIdentity } from './write-path.js';
 type PackageWriter<TSchema extends Record<string, unknown>> = Pick<PostgresJsDatabase<TSchema>, 'insert'>;
 
 /**
- * D10 — Insert input for a built kiosk package, mirroring the `kiosk_package`
+ * D10: Insert input for a built kiosk package, mirroring the `kiosk_package`
  * table. `built_at` is an ISO-8601 string (the manifest's builtAt); omit it to
  * let the column default to now(). `content_hash` is the deterministic package
  * identity; `checksum` is the byte integrity of the stored artifact.
@@ -50,7 +50,7 @@ export async function insertKioskPackage<TSchema extends Record<string, unknown>
 }
 
 /**
- * A6.1 — enregistre le paquet sous l'identité du demandeur du travail.
+ * A6.1 : enregistre le paquet sous l'identité du demandeur du travail.
  *
  * Sous `FORCE ROW LEVEL SECURITY`, une insertion sans identité est refusée :
  * le service de compilation écrit ce que son demandeur aurait pu écrire, dans

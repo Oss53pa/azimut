@@ -1,5 +1,5 @@
 /**
- * M2 (partie M), étape 1 — le fond de plan.
+ * M2 (partie M), étape 1 : le fond de plan.
  *
  * « Fichier | dépôt ou sélection | PDF vectoriel, DXF, PNG, JPG. 60 Mo maximum |
  * `IMPORT.FILE_TOO_LARGE`, `IMPORT.FORMAT_UNSUPPORTED` »
@@ -137,7 +137,7 @@ function finding(code: string, params: Record<string, string | number>): Finding
 }
 
 // ---------------------------------------------------------------------------
-// M2 (partie M) — remplacer le fond
+// M2 (partie M) : remplacer le fond
 // ---------------------------------------------------------------------------
 
 /**
@@ -165,7 +165,7 @@ export type ReplacementVerdict =
  *
  * La fonction ne décide pas d'agir : elle dit ce qui arrivera, pour que la
  * confirmation puisse le nommer. Un remplacement n'est jamais silencieux, même
- * quand les dimensions concordent — l'utilisateur doit savoir que le calage
+ * quand les dimensions concordent : l'utilisateur doit savoir que le calage
  * d'un fond a été reporté sur un autre.
  */
 export function judgeReplacement(

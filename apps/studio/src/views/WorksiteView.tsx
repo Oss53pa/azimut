@@ -19,7 +19,7 @@ type WorksiteViewProps = {
 };
 
 /**
- * Module 07 — chantier et pose. Un support ne bascule en « posé » qu'une fois
+ * Module 07 : chantier et pose. Un support ne bascule en « posé » qu'une fois
  * ses réserves levées : c'est ce qui donne à la couche de divergence du module
  * 08 une origine connue. Lu en base (0042), ou dans le jeu de démonstration du
  * dépôt de référence.

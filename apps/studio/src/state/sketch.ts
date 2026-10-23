@@ -2,7 +2,7 @@ import type { EntityCommand, Outcome, Point } from '@azimut/core-model';
 import { buildCommand, codePointCompare } from '@azimut/core-model';
 
 /**
- * J3 (partie J) — la couche d'esquisse : « réfléchir sur le plan avant de
+ * J3 (partie J), la couche d'esquisse : « réfléchir sur le plan avant de
  * modéliser ».
  *
  * C'est la seule couche où le trait est conservé tel quel : jamais quantifié,
@@ -53,8 +53,8 @@ const MARKER_OPACITY = 0.35;
 
 /**
  * Le rendu d'un segment selon l'outil et la pression : la pression module
- * l'épaisseur et l'opacité (J3.2). Une pression nulle — souris, ou pointeur
- * qui ne la signale pas — vaut la pression moyenne.
+ * l'épaisseur et l'opacité (J3.2). Une pression nulle (souris, ou pointeur
+ * qui ne la signale pas) vaut la pression moyenne.
  */
 export function strokeStyle(tool: SketchTool, pressure: number): { readonly widthFactor: number; readonly opacity: number } {
   const p = pressure > 0 ? Math.min(pressure, 1) : 0.5;

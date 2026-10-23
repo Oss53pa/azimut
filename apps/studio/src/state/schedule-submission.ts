@@ -1,5 +1,5 @@
 /**
- * R12 (partie R) — ce que l'émission pour revue exige, lu dans la session.
+ * R12 (partie R) : ce que l'émission pour revue exige, lu dans la session.
  *
  * « Aucune anomalie bloquante, et validation de complétude du graphe passée,
  * règle M02.W11. » R14 y ajoute le paquet de règles rattaché. Chaque condition
@@ -36,7 +36,7 @@ function findingsOf(outcome: Outcome<null>): readonly Finding[] {
   return outcome.ok ? outcome.warnings : outcome.findings;
 }
 
-/** M02.W11 — le dernier passage du site est-il réussi, et pour ce graphe-ci ? */
+/** M02.W11 : le dernier passage du site est-il réussi, et pour ce graphe-ci ? */
 function graphValidatedIn(session: SessionState, siteId: string, graphHash: string | null): boolean {
   if (graphHash === null) return false;
   // L'instant, et non le texte : un passage relu de la base porte `+00:00`

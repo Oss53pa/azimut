@@ -5,7 +5,7 @@ import {
 } from '../opening-hours.js';
 
 /**
- * N1.2 — « Par jour, plusieurs plages possibles, fuseau du site. »
+ * N1.2 : « Par jour, plusieurs plages possibles, fuseau du site. »
  */
 describe('WEEKDAYS', () => {
   it('porte les sept jours, lundi d’abord', () => {

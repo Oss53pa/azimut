@@ -52,7 +52,7 @@ function offScaleInLine(line: string): number[] {
   return found;
 }
 
-describe('F4.1 — spacing scale', () => {
+describe('F4.1: spacing scale', () => {
   it('the scale holds exactly the ten allowed base-4 values', () => {
     expect([...SPACING_SCALE]).toEqual([2, 4, 6, 8, 12, 16, 20, 24, 32, 48]);
     expect(Object.values(spacing)).toEqual([...SPACING_SCALE]);
@@ -65,7 +65,7 @@ describe('F4.1 — spacing scale', () => {
   });
 });
 
-describe('F16 — no off-scale spacing in the studio app', () => {
+describe('F16: no off-scale spacing in the studio app', () => {
   it('every padding/margin/gap value lies on the F4.1 scale', () => {
     const violations: string[] = [];
     for (const file of walk(STUDIO_DIR)) {

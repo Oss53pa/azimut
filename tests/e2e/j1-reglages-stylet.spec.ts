@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J1.4 et J1.5 (partie J) — les réglages du fond de décalque et la gomme du
+ * J1.4 et J1.5 (partie J) : les réglages du fond de décalque et la gomme du
  * stylet.
  *
  * Les réglages sont essayés en mémoire dans `viewport/__tests__/backdrop-settings.test.ts`,
@@ -58,7 +58,7 @@ async function penStroke(page: Page, buttons: number): Promise<void> {
   await zone.dispatchEvent('pointerup', { ...pen, clientX: box.x + box.width * 0.8, clientY: y, buttons: 0 });
 }
 
-test.describe('J1.4 (partie J) — les réglages du fond de décalque', () => {
+test.describe('J1.4 (partie J) : les réglages du fond de décalque', () => {
   test('l’opacité du plan calé se règle', async ({ page }) => {
     await page.goto(`/sites/${SITE}/levels/${LEVEL}/plan`);
     await page.getByLabel(/Fichier du fond de plan|Base plan file/)
@@ -97,7 +97,7 @@ test.describe('J1.4 (partie J) — les réglages du fond de décalque', () => {
   });
 });
 
-test.describe('J1.5 (partie J) — la gomme du stylet', () => {
+test.describe('J1.5 (partie J) : la gomme du stylet', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();
@@ -127,7 +127,7 @@ test.describe('J1.5 (partie J) — la gomme du stylet', () => {
   });
 });
 
-test.describe('J1.2 (partie J) — le trait barrant une empreinte', () => {
+test.describe('J1.2 (partie J) : le trait barrant une empreinte', () => {
   test('un trait qui barre une empreinte la supprime ; Ctrl+Z la rétablit', async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await drawRectangle(page);
@@ -161,7 +161,7 @@ test.describe('J1.2 (partie J) — le trait barrant une empreinte', () => {
   });
 });
 
-test.describe('J1.3 (partie J) — le niveau de redressement', () => {
+test.describe('J1.3 (partie J) : le niveau de redressement', () => {
   test('se règle, se retrouve au rechargement, et vaut dans l’atelier du graphe', async ({ page }) => {
     await page.goto(FOOTPRINTS);
     const select = page.getByLabel(/^(Redressement|Straightening)$/);

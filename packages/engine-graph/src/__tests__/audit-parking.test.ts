@@ -6,7 +6,7 @@ import {
 import { auditParking } from '../audit-parking.js';
 
 /**
- * Section S8, règles S-35 à S-37 — le stationnement sur les objets du socle.
+ * Section S8, règles S-35 à S-37 : le stationnement sur les objets du socle.
  *
  * Ces essais portaient sur trois tables d'un module de stationnement que la
  * section S8 a retirées. Ils portent désormais sur ce qui les remplace : une
@@ -62,11 +62,11 @@ const capacite = (id: string, n: number): SiteFact =>
 const nonNumerisee = (footprintId: string, n: number): SiteFact =>
   fait(PARKING_UNDIGITIZED_SPACES_KEY, n, 'footprint', footprintId);
 
-/** S-37 — le motif qui accompagne la marque ; sans lui, un avertissement. */
+/** S-37 : le motif qui accompagne la marque ; sans lui, un avertissement. */
 const motif = (footprintId: string): SiteFact =>
   fait(PARKING_UNDIGITIZED_REASON_KEY, 'Calque absent du plan fourni', 'footprint', footprintId);
 
-describe('auditParking — capacité annoncée et places tracées (S-36)', () => {
+describe('auditParking : capacité annoncée et places tracées (S-36)', () => {
   it('ne signale rien quand les places tracées couvrent la capacité', () => {
     const fps = places('ouest', 40);
     const report = auditParking({
@@ -181,7 +181,7 @@ describe('auditParking — capacité annoncée et places tracées (S-36)', () =>
   });
 });
 
-describe('S-37 — la surface non numérisée explique l’écart, à concurrence', () => {
+describe('S-37 : la surface non numérisée explique l’écart, à concurrence', () => {
   it('admet l’écart quand la surface déclare exactement ce qui manque', () => {
     // 40 places tracées, une surface de plus déclarant 49 places : le compte
     // est de 89, et la capacité annoncée est couverte.
@@ -275,7 +275,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
 });
 
 /**
- * S-38 — « Le comptage des places obéit à une règle unique : une empreinte de
+ * S-38, « Le comptage des places obéit à une règle unique : une empreinte de
  * place vaut une place, sauf si elle est marquée non numérisée, auquel cas
  * elle vaut le nombre déclaré par son fait et ne compte jamais en plus pour
  * elle-même. Sans cette règle, chaque surface non numérisée fausserait le
@@ -286,7 +286,7 @@ describe('S-37 — la surface non numérisée explique l’écart, à concurrenc
  * à travers un écart de capacité : c'est le compte qui est en cause, pas sa
  * comparaison.
  */
-describe('S-38 — la règle de comptage, éprouvée pour elle-même', () => {
+describe('S-38 : la règle de comptage, éprouvée pour elle-même', () => {
   function compte(marques: readonly (number | null)[]): number {
     const fps = places('ouest', marques.length);
     return auditParking({
@@ -338,7 +338,7 @@ describe('S-38 — la règle de comptage, éprouvée pour elle-même', () => {
   });
 });
 
-describe('A5.11 — un fait non publiable au livrable', () => {
+describe('A5.11 : un fait non publiable au livrable', () => {
   const fps = places('ouest', 2);
   const proposition = (): SiteFact =>
     ({ ...capacite('ouest', 2), status: 'proposal' });

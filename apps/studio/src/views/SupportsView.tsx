@@ -25,11 +25,11 @@ type TypeRow = {
 };
 
 /**
- * Module 01 — les typologies de support.
+ * Module 01 : les typologies de support.
  *
  * Une typologie déclare ses faces et leurs dimensions par défaut ; un gabarit
- * s'y rattache par côté. Les écarts entre les deux — face_count qui ne
- * correspond pas, gabarit rattaché à une typologie inconnue, côté absent —
+ * s'y rattache par côté. Les écarts entre les deux (face_count qui ne
+ * correspond pas, gabarit rattaché à une typologie inconnue, côté absent)
  * sont ceux que `validateSupports` relève.
  */
 export function SupportsView({ onNavigate }: SupportsViewProps): JSX.Element {

@@ -6,7 +6,7 @@ import {
 } from './render-budget.js';
 
 /**
- * G2.2 — React glue driving the adaptive render-budget controller from the
+ * G2.2: React glue driving the adaptive render-budget controller from the
  * animation frame clock. Each frame the inter-frame interval is fed to the pure
  * reducer (renderBudgetStep) as a proxy for render cost; the reducer decides the
  * mode with its sliding window and hysteresis. The reducer holds all the logic

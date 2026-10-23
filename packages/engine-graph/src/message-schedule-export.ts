@@ -1,5 +1,5 @@
 /**
- * H2.5 — Exports du tableau des messages.
+ * H2.5 : Exports du tableau des messages.
  *
  * « Exportable en tableur et en document, avec un identifiant stable
  * par ligne. »
@@ -7,7 +7,7 @@
  * L'export en tableur développe une ligne par mention : un bloc de
  * destinations produit autant de lignes que de destinations annoncées,
  * parce que c'est ainsi qu'un tableau des messages se relit. Le modèle,
- * lui, reste une ligne par bloc — l'export est un rendu, pas la donnée.
+ * lui, reste une ligne par bloc : l'export est un rendu, pas la donnée.
  */
 
 import type { MessageLine, MessageSchedule } from './message-schedule.js';

@@ -1,5 +1,5 @@
 /**
- * J4 et R7.4 — l'annotation en révision, dans le panneau de détail du
+ * J4 et R7.4 : l'annotation en révision, dans le panneau de détail du
  * tableau des messages.
  *
  * Fragment à part : `message-table.ts` approche des 400 lignes que A2.4 fixe.

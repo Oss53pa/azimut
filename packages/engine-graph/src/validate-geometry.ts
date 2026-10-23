@@ -32,7 +32,7 @@ function distance(a: Point, b: Point): number {
  *
  * Il y eut un temps où le modèle en comptait deux familles : les empreintes, et
  * l'emprise d'un parking, que la table `parking` portait. La section S8 a retiré
- * cette table — « un parking est une zone de nature `parking` », et une zone
+ * cette table, « un parking est une zone de nature `parking` », et une zone
  * n'a pas de géométrie propre : elle déclare les empreintes qu'elle couvre
  * (A5.2). Toute la géométrie polygonale du site est donc revenue aux
  * empreintes, places de stationnement comprises, et ces contrôles les voient
@@ -260,7 +260,7 @@ function footprintsOverlapFindings(
               code: 'GEOM.FOOTPRINTS_OVERLAP',
               severity: 'warning',
               entity: { kind: 'footprint', id: fpA.id },
-              // K2.1 — propose manual painter order (volume.render_order).
+              // K2.1, propose manual painter order (volume.render_order).
               params: { other_footprint_id: fpB.id, remedy: 'render_order' },
               ruleRef: null,
             });

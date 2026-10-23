@@ -13,13 +13,13 @@ function codes(site: SiteData, code: string): readonly Finding[] {
 }
 
 /**
- * N1.4 — règle M01.S3 et unicité du code d'unité.
+ * N1.4 : règle M01.S3 et unicité du code d'unité.
  *
  * Le critère N1.7-3 demande que chaque cas soit détecté sur un site de
  * référence dédié, et ne le soit pas sur le site voisin. `ref-broken` porte
  * les violations, les trois autres sites sont propres.
  */
-describe('M01.S3 — une cellule porte obligatoirement un code d’unité', () => {
+describe('M01.S3 : une cellule porte obligatoirement un code d’unité', () => {
   it('signale la cellule sans code, et elle seule', () => {
     const found = codes(refBroken, 'DATA.UNIT_CODE_REQUIRED');
     expect(found).toHaveLength(1);
@@ -59,7 +59,7 @@ describe('M01.S3 — une cellule porte obligatoirement un code d’unité', () =
   });
 });
 
-describe('N1.4 — unicité du code d’unité par niveau', () => {
+describe('N1.4 : unicité du code d’unité par niveau', () => {
   it('signale les deux cellules qui partagent un code sur un niveau', () => {
     const found = codes(refBroken, 'DATA.CODE_DUPLICATE');
     expect(found.map(f => f.entity?.id)).toEqual(['fp-brk-dup-a', 'fp-brk-dup-b']);
@@ -106,7 +106,7 @@ describe('N1.4 — unicité du code d’unité par niveau', () => {
   });
 });
 
-describe('N1.4 — les deux contrôles sont déclarés exécutés', () => {
+describe('N1.4 : les deux contrôles sont déclarés exécutés', () => {
   it('figurent dans la liste des contrôles exécutés', () => {
     const result = runChecks(refMinimal);
     expect(result.ok).toBe(true);

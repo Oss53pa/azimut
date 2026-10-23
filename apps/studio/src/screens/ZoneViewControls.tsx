@@ -3,7 +3,7 @@ import { Button, SPACE } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 /**
- * E6.2 et E3.3 — la vue se règle aussi au clavier : « Toute opération
+ * E6.2 et E3.3, la vue se règle aussi au clavier : « Toute opération
  * réalisable au pointeur l'est au clavier ». La molette et le déplacement au
  * pointeur ont donc leurs boutons, atteignables à la tabulation.
  */

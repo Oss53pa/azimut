@@ -10,7 +10,7 @@ import type { SiteDraft } from '../state/site-creation.js';
 import { SITE_NAME_MAX } from '../state/site-creation.js';
 
 /**
- * Q9 — un pays du référentiel, avec ses fuseaux.
+ * Q9 : un pays du référentiel, avec ses fuseaux.
  *
  * Les fuseaux voyagent avec le pays parce que M1 (partie M) les lie : le champ
  * de fuseau n'offre que ceux du pays choisi, et se pré-remplit quand le pays
@@ -24,7 +24,7 @@ export type NewSiteDialogProps = {
   readonly countries: readonly CountryOption[];
   readonly rulesPacks: readonly Option[];
   /**
-   * Q5 — les entités juridiques de l'organisation. Vide, le champ n'apparaît
+   * Q5 : les entités juridiques de l'organisation. Vide, le champ n'apparaît
    * pas : « à défaut, le formulaire indique où la créer, jamais un sélecteur
    * vide ».
    */
@@ -37,11 +37,11 @@ export type NewSiteDialogProps = {
 };
 
 /**
- * M1 (partie M) — le formulaire de création d'un site.
+ * M1 (partie M) : le formulaire de création d'un site.
  *
- * Six champs : le nom, le pays, le fuseau, le paquet de règles — facultatif à
- * la création —, l'entité juridique — affichée seulement si l'organisation en
- * porte une — et les langues actives.
+ * Six champs : le nom, le pays, le fuseau, le paquet de règles (facultatif à
+ * la création), l'entité juridique (affichée seulement si l'organisation en
+ * porte une) et les langues actives.
  *
  * Les anomalies arrivent ensemble et se rangent sous leur champ. M7.5 (partie
  * M) : « Un refus de saisie n'efface jamais le travail en cours. » La saisie

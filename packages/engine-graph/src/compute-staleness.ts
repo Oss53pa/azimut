@@ -6,16 +6,16 @@ import { resolveFaceContent } from './resolve-face.js';
 import type { ResolvedFace } from './resolve-face.js';
 
 /**
- * D7.3 — Staleness engine.
+ * D7.3: Staleness engine.
  *
  * Given the content hashes recorded when a set of faces were last compiled, and
  * the current site, decide exactly which faces are stale. A face is stale when
- * its recomputed content_hash differs from the recorded one — or when its
+ * its recomputed content_hash differs from the recorded one: or when its
  * content can no longer be resolved (it changed to unresolvable). This is the
  * mechanism behind the operating promise: a destination change marks exactly
  * the faces that mention it, never more, never fewer.
  *
- * D7.2 — the hash is the single one, `computeFaceContentHash` from core-model.
+ * D7.2: the hash is the single one, `computeFaceContentHash` from core-model.
  * This module only maps a resolved face into its input.
  */
 
@@ -24,7 +24,7 @@ export type FaceHashContext = {
   /** The template's version; its key is the template id. */
   readonly template_version: string;
   readonly charter?: { readonly id: string; readonly version: string };
-  /** D7.1 — base and overlay, each with its key and version. */
+  /** D7.1: base and overlay, each with its key and version. */
   readonly rules_packs: BoundRulesPacks;
   readonly active_langs: readonly string[];
   readonly dimensions: { readonly width_mm: number; readonly height_mm: number };

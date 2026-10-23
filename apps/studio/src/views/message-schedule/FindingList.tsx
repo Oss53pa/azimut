@@ -13,7 +13,7 @@ type FindingListProps = {
 };
 
 /**
- * D2 — une anomalie s'affiche avec son code et son message catalogué. Le code
+ * D2 : une anomalie s'affiche avec son code et son message catalogué. Le code
  * est une donnée, il n'est pas traduit ; le message l'est.
  */
 export function FindingList({ findings, empty, limit }: FindingListProps): JSX.Element {

@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { destinationListBlockHeightMm, type TextMeasure } from './render-face.js';
 
 /**
- * N4.3 — règle M04.G3. « Le format est calculé depuis le contenu, la distance de
+ * N4.3 : règle M04.G3. « Le format est calculé depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue. »
  *
  * Les trois entrées sont là, et chacune joue son rôle :
@@ -10,7 +10,7 @@ import { destinationListBlockHeightMm, type TextMeasure } from './render-face.js
  *  - le **contenu** donne le nombre de lignes, donc la hauteur qu'il faut pour
  *    les dessiner ;
  *  - la **distance de lecture** donne, par le paquet de règles, la hauteur de
- *    caractère exigée — jamais une constante de ce fichier (M04.G4) ;
+ *    caractère exigée : jamais une constante de ce fichier (M04.G4) ;
  *  - la **variante linguistique la plus longue** donne la largeur : une face
  *    dimensionnée sur le français déborderait en anglais, et l'inverse.
  *
@@ -31,8 +31,8 @@ export type FaceFormatInput = {
    * Part de la face qu'occupe le bloc des destinations, en pour-cent de sa
    * hauteur et de sa largeur.
    *
-   * Lue dans le gabarit compilé, là où le rendu la lit : la grille — marges,
-   * gouttières, rangées — a déjà été résolue en région, et la recalculer ici
+   * Lue dans le gabarit compilé, là où le rendu la lit : la grille (marges,
+   * gouttières, rangées) a déjà été résolue en région, et la recalculer ici
    * la recopierait (invariant 1).
    */
   readonly block_height_pct: number;
@@ -107,7 +107,7 @@ export function computeFaceFormat(
  * Largeur que le bloc doit avoir, ou `null` faute de mesure.
  *
  * Le texte est mesuré à la taille exacte à laquelle il sera dessiné, celle que
- * la règle exige — la même que `checkFaceContentFit` emploie pour constater le
+ * la règle exige : la même que `checkFaceContentFit` emploie pour constater le
  * débordement. L'un dit qu'il déborde, l'autre dit de combien il faut élargir.
  */
 function measuredWidth(input: FaceFormatInput): number | null {

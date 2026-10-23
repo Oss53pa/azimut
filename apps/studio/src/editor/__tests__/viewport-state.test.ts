@@ -9,7 +9,7 @@ import {
 
 const vp: ViewportSize = { width_px: 800, height_px: 600 };
 
-describe('E3 — viewport-state reducer', () => {
+describe('E3: viewport-state reducer', () => {
   describe('pan', () => {
     it('panning right moves center left in meters', () => {
       const next = viewReducer(DEFAULT_VIEW, {
@@ -32,7 +32,7 @@ describe('E3 — viewport-state reducer', () => {
       expect(next).toStrictEqual(DEFAULT_VIEW);
     });
 
-    it('pan never enters undo stack — scale and rotation unchanged', () => {
+    it('pan never enters undo stack: scale and rotation unchanged', () => {
       const next = viewReducer(DEFAULT_VIEW, {
         type: 'pan', dx_px: 50, dy_px: -30,
       });
@@ -70,7 +70,7 @@ describe('E3 — viewport-state reducer', () => {
       const next = viewReducer(atMax, {
         type: 'zoom', steps: 1, pivot: { x: 400, y: 300 }, viewport: vp,
       });
-      expect(next).toBe(atMax); // reference equality — no change
+      expect(next).toBe(atMax); // reference equality: no change
     });
 
     it('zoom at min scale returns same state', () => {

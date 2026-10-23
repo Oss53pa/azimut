@@ -12,7 +12,7 @@ import {
 } from '../projection.js';
 import type { LevelGeom } from '../projection.js';
 
-describe('D5.1 — isometric projection constants', () => {
+describe('D5.1: isometric projection constants', () => {
   it('COS_30 matches specification', () => {
     expect(COS_30).toBe(0.8660254037844386);
   });
@@ -22,7 +22,7 @@ describe('D5.1 — isometric projection constants', () => {
   });
 });
 
-describe('D5.1 — toIso', () => {
+describe('D5.1: toIso', () => {
   it('projects origin to origin', () => {
     const p = toIso(0, 0, 0, 1);
     expect(p.x).toBe(0);
@@ -45,7 +45,7 @@ describe('D5.1 — toIso', () => {
   });
 });
 
-describe('D5.1 — isoTx', () => {
+describe('D5.1: isoTx', () => {
   it('applies offset after projection', () => {
     const t = { scale: 1, offsetX: 100, offsetY: 200 };
     const p = isoTx(0, 0, 0, t);
@@ -134,7 +134,7 @@ describe('pointsStr', () => {
   });
 });
 
-describe('esc — XML escaping', () => {
+describe('esc: XML escaping', () => {
   it('escapes ampersand, angle brackets, and double quotes', () => {
     expect(esc('A & B <C> "D"')).toBe('A &amp; B &lt;C&gt; &quot;D&quot;');
   });
@@ -152,7 +152,7 @@ describe('esc — XML escaping', () => {
   });
 });
 
-describe('computeWorldBounds — multi-level merging', () => {
+describe('computeWorldBounds: multi-level merging', () => {
   it('merges XY bounds across two levels', () => {
     const levels: LevelGeom[] = [
       { vertices: [{ x_m: 0, y_m: 0 }], elevation_m: 0, maxZ: 3 },
@@ -185,9 +185,9 @@ describe('computeWorldBounds — multi-level merging', () => {
   });
 });
 
-describe('computeIsoTransform — edge cases', () => {
+describe('computeIsoTransform: edge cases', () => {
   it('handles vertical-only extent (isoW = 0, isoH > 0)', () => {
-    // Single XY point but different Z — projects to same iso X but different iso Y
+    // Single XY point but different Z, projects to same iso X but different iso Y
     const wb = { minX: 5, maxX: 5, minY: 5, maxY: 5, minZ: 0, maxZ: 10 };
     const t = computeIsoTransform(wb, 800, 600, 20);
     expect(t.scale).toBeGreaterThan(0);
@@ -203,7 +203,7 @@ describe('computeIsoTransform — edge cases', () => {
   });
 });
 
-describe('projectTopFace — edge cases', () => {
+describe('projectTopFace: edge cases', () => {
   it('returns empty array for empty vertices', () => {
     const t = { scale: 10, offsetX: 0, offsetY: 0 };
     expect(projectTopFace([], 5, t)).toEqual([]);
@@ -218,7 +218,7 @@ describe('projectTopFace — edge cases', () => {
   });
 });
 
-describe('computeWorldBounds — non-finite elevation', () => {
+describe('computeWorldBounds: non-finite elevation', () => {
   it('clamps Infinity elevation_m to zero', () => {
     const levels: LevelGeom[] = [{
       vertices: [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 10 }],

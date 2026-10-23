@@ -112,11 +112,11 @@
   --duration-float: 200ms;
   --duration-panel: 240ms;
 
-  /* Shadow — tooltip and dialog only (F6) */
+  /* Shadow, tooltip and dialog only (F6) */
   --shadow-float: 0 1px 3px rgba(28, 31, 36, 0.10);
   --shadow-dialog: 0 2px 6px rgba(28, 31, 36, 0.12);
 
-  /* Overlay scrim behind modal dialogs (F2.5 — no hardcoded colour) */
+  /* Overlay scrim behind modal dialogs (F2.5, no hardcoded colour) */
   --overlay-scrim: rgba(28, 31, 36, 0.40);
 
   /* Typography (F2.1) */
@@ -125,19 +125,19 @@
   --font-brand: "Grand Hotel", cursive;
   --font-mono: "IBM Plex Mono", monospace;
 
-  /* Editor-specific — derived from design tokens */
+  /* Editor-specific, derived from design tokens */
   --az-snap-indicator: var(--accent);
   --az-tool-preview: var(--accent);
   --az-selection-handle: var(--text-primary);
 
-  /* Sketch layer palette (J3.2) — one value for both themes: the work area
+  /* Sketch layer palette (J3.2), one value for both themes: the work area
      keeps a light ground in both (F5) */
   --sketch-graphite: #3B4048;
   --sketch-brick: #A34A2D;
   --sketch-ultramarine: #3341A6;
   --sketch-fir: #2D5A44;
 
-  /* Habillage layer roles (E9) — roles, never direct colours */
+  /* Habillage layer roles (E9), roles, never direct colours */
   --az-decoration-fill: var(--surface-sunken);
   --az-decoration-stroke: var(--border-strong);
   --az-decoration-selected: var(--accent);

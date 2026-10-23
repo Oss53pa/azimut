@@ -26,21 +26,21 @@ export const support = azimut.table('support', {
   // n'ont pas de code : le rendre requis transformerait des données (A2.2-7).
   code: text('code'),
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
-  // A5.6 : typologie de l'instance. Additif, nullable — cf. migration 0015.
+  // A5.6 : typologie de l'instance. Additif, nullable : cf. migration 0015.
   typology_id: uuid('typology_id').references(() => supportTypology.id, { onDelete: 'set null' }),
   kind: text('kind').notNull(),
   azimuth_deg: numeric('azimuth_deg').notNull().default('0'),
   height_m: numeric('height_m'),
   width_m: numeric('width_m'),
   // A5.6 : distance de lecture (formule de lisibilité) et registre (portée des
-  // règles, durcissement safety). Additifs, nullables — cf. migration 0012.
+  // règles, durcissement safety). Additifs, nullables : cf. migration 0012.
   reading_distance_m: numeric('reading_distance_m'),
   registry: text('registry'),
   // A5.6 / D3.5 : contexte de lecture (interieur/exterieur), portée de la
-  // lisibilité. Additif, nullable — cf. migration 0013.
+  // lisibilité. Additif, nullable : cf. migration 0013.
   context: text('context'),
   // A5.6 : dimensions portées par l'instance (mm) et leur origine. Priment sur
-  // le défaut de la typologie quand renseignées. Additifs — cf. migration 0014.
+  // le défaut de la typologie quand renseignées. Additifs : cf. migration 0014.
   width_mm: integer('width_mm'),
   height_mm: integer('height_mm'),
   dimensions_source: text('dimensions_source'),
@@ -59,7 +59,7 @@ export const supportFace = azimut.table('support_face', {
   side: text('side'),
   width_mm: numeric('width_mm'),
   height_mm: numeric('height_mm'),
-  // A5.6 : identité de face par index, gabarit et langues. Additifs — cf.
+  // A5.6 : identité de face par index, gabarit et langues. Additifs : cf.
   // migration 0016. `side` préexistant est laissé en place.
   face_index: integer('face_index'),
   template_key: text('template_key'),
@@ -78,7 +78,7 @@ export const supportContentBlock = azimut.table('support_content_block', {
   // Hérité, facultatif depuis 0049 : A5.6 place le bloc par `block_index`.
   ordinal: integer('ordinal'),
   config: jsonb('config').notNull().default({}),
-  // A5.6 : index de bloc, liaison (contenu résolu) et texte libre. Additifs —
+  // A5.6 : index de bloc, liaison (contenu résolu) et texte libre. Additifs :
   // cf. migration 0016. `ordinal`/`config` préexistants sont laissés en place.
   block_index: integer('block_index'),
   binding: jsonb('binding'),
@@ -138,7 +138,7 @@ export const installedSupport = azimut.table('installed_support', {
   installed_at: timestamp('installed_at', { withTimezone: true }).notNull().defaultNow(),
   photo_path: text('photo_path'),
   installer_notes: text('installer_notes'),
-  // 0047 : colonnes de A5.7, nullables — une pose antérieure n'a pas été relevée.
+  // 0047 : colonnes de A5.7, nullables, une pose antérieure n'a pas été relevée.
   installed_version: integer('installed_version'),
   condition: text('condition'),
   surveyed_by: uuid('surveyed_by'),

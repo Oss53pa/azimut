@@ -1,8 +1,8 @@
 /**
  * Les contrôles que `buildCommand` applique à une commande, table par table.
  *
- * Séparés de `site-commands.ts` pour la raison qu'A2.4 donne — un fichier ne
- * passe pas quatre cents lignes sans découpage — et parce que la coupure est
+ * Séparés de `site-commands.ts` pour la raison qu'A2.4 donne (un fichier ne
+ * passe pas quatre cents lignes sans découpage) et parce que la coupure est
  * naturelle : ce module dit ce qui est refusé, `site-commands.ts` dit ce
  * qu'est une commande et comment on l'inverse.
  *
@@ -70,7 +70,7 @@ const REGISTRY_COLUMN = 'registry';
  *
  * Et un cinquième, qui n'est pas une voie mais une absence : une commande sur
  * cette table dont les lignes ne déclarent pas le registre. On ne peut alors
- * pas savoir ce qu'elle touche, et A7 tranche — « un moteur qui reçoit une
+ * pas savoir ce qu'elle touche, et A7 tranche : « un moteur qui reçoit une
  * entrée qu'il ne peut pas traiter refuse ». Laisser passer ferait du champ
  * omis la voie de contournement la plus simple de toutes.
  */
@@ -110,13 +110,13 @@ export function safetyRegistryFaults(
 }
 
 /**
- * A5.11 — « Une valeur qui ne correspond pas au type déclaré est refusée. »
+ * A5.11 : « Une valeur qui ne correspond pas au type déclaré est refusée. »
  *
  * La table des clés donne à chacune le type attendu de sa valeur. Une écriture
  * de fait qui porte « oui » là où la table déclare un booléen est une commande
  * mal formée, au même titre qu'une création sans état postérieur : elle ne
  * peut pas être appliquée telle quelle. Elle est donc refusée par
- * `EDIT.COMMAND_SHAPE_INVALID`, et non par un code neuf — le catalogue de D2.2
+ * `EDIT.COMMAND_SHAPE_INVALID`, et non par un code neuf : le catalogue de D2.2
  * est clos, et cette anomalie a déjà son code.
  *
  * Une clé que la table ne porte pas ne produit aucun défaut : voir

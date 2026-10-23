@@ -1,5 +1,5 @@
 /**
- * I5.6 — lecture des tournées d'inspection par l'API REST : tournées du site
+ * I5.6, lecture des tournées d'inspection par l'API REST : tournées du site
  * et constats faits pendant elles (migration 0044).
  *
  * Une valeur hors liste ne peut venir que d'un schéma qui a dérivé ; la

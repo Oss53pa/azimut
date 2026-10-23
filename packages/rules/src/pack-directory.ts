@@ -61,7 +61,7 @@ export function loadPackDirectoryParsed(
   manifest: Manifest,
   ruleFileContents: Readonly<Record<string, string>>,
 ): Outcome<LoadedRulesPack> {
-  // D3.4 — un fichier annoncé et introuvable se nomme d'abord : l'empreinte
+  // D3.4, un fichier annoncé et introuvable se nomme d'abord : l'empreinte
   // d'un paquet incomplet ne dirait rien de plus qu'un écart.
   const missingFiles: Finding[] = [];
   for (const fileName of manifest.files) {
@@ -79,7 +79,7 @@ export function loadPackDirectoryParsed(
     return { ok: false, findings: missingFiles };
   }
 
-  // D3.4 et D7.2 — l'intégrité, dans la forme canonique commune.
+  // D3.4 et D7.2 : l'intégrité, dans la forme canonique commune.
   const checksum = computeRulesPackChecksum(manifest.key, manifest.files, ruleFileContents);
   if (!checksum.ok) return checksum;
   const computed = checksum.value;

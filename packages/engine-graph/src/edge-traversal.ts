@@ -17,7 +17,7 @@ export function buildExcludedKindsSet(
  * Pass a pre-built `excludedKinds` set (via `buildExcludedKindsSet`)
  * to avoid allocating a Set on every call in hot loops.
  *
- * O11 — `closedEdges`, the edges temporarily closed at the instant the caller
+ * O11: `closedEdges`, the edges temporarily closed at the instant the caller
  * chose, are not traversable. Without it, closures are ignored: the engine
  * never reads the clock (INV-4), and durable renders do not see them.
  */

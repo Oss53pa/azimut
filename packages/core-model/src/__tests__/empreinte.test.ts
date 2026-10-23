@@ -70,7 +70,7 @@ describe('empreinte (T-2.14a §4.9)', () => {
   });
 });
 
-describe('D2.2 — empreinteOutcome refuse une valeur non hachable', () => {
+describe('D2.2 : empreinteOutcome refuse une valeur non hachable', () => {
   it('rend l’empreinte d’une valeur ordinaire', () => {
     const r = empreinteOutcome({ a: 1, b: 'é' });
     expect(r.ok && r.value).toBe(empreinte({ a: 1, b: 'é' }));

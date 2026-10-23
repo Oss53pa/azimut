@@ -13,7 +13,7 @@ const items: SelectableItem[] = [
   { id: 'd', drawOrder: 3 },
 ];
 
-describe('E6 — selection model', () => {
+describe('E6: selection model', () => {
   describe('select (single click)', () => {
     it('selects one item and sets it active', () => {
       const s = selectionReducer(EMPTY_SELECTION, { type: 'select', id: 'b' });
@@ -107,7 +107,7 @@ describe('E6 — selection model', () => {
     });
   });
 
-  describe('navigate (E6.2 — keyboard tab)', () => {
+  describe('navigate (E6.2: keyboard tab)', () => {
     it('next from no selection selects first item', () => {
       const s = selectionReducer(EMPTY_SELECTION, {
         type: 'navigate', direction: 'next', items,

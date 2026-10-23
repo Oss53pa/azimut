@@ -3,13 +3,13 @@ import type { PostgresJsDatabase } from '@azimut/db';
 import type { KioskPackageRecord } from './persist-kiosk-package.js';
 
 /**
- * D10 — Adapter that records a persisted kiosk package as a `kiosk_package`
+ * D10: Adapter that records a persisted kiosk package as a `kiosk_package`
  * row. Bridges the storage-side {@link KioskPackageRecord} (produced by
  * persistKioskPackage) to the DB insert in @azimut/db, supplying the org from
  * the job. Injected into the build_kiosk_package handler as its `recordPackage`
  * port, so the compiler stays free of any live database handle at its core.
  *
- * A6.1 — the row is written as the job's requester: under FORCE ROW LEVEL
+ * A6.1, the row is written as the job's requester: under FORCE ROW LEVEL
  * SECURITY, an insert without identity is refused.
  */
 export type PackageRecorder = (

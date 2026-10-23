@@ -1,5 +1,5 @@
 /**
- * A5.3 — l'enregistrement d'un passage de la validation de complétude.
+ * A5.3 : l'enregistrement d'un passage de la validation de complétude.
  *
  * M5 (partie M) : « Relancer | Recalcule, affiche la durée réelle, enregistre
  * le passage dans `graph_validation`. » Jusqu'ici le résultat mourait avec la
@@ -20,7 +20,7 @@ export type ValidationWrite = {
   readonly id: string;
   /** ISO-8601, fourni par l'appelant (E5.1). C'est aussi `ran_at`. */
   readonly timestamp: string;
-  /** D7.2 — l'empreinte du graphe validé, sans profil. */
+  /** D7.2 : l'empreinte du graphe validé, sans profil. */
   readonly graphHash: string;
 };
 
@@ -29,8 +29,8 @@ export type ValidationWrite = {
  *
  * Aucune mise à jour, aucune suppression : la table est en insertion seule
  * (A12.3), et la base le refuserait de toute façon. La commande ne porte donc
- * qu'une création, et son inverse — que le motif de commande exige calculable
- * — est vide de sens ici. C'est assumé : un passage de validation est un fait
+ * qu'une création, et son inverse (que le motif de commande exige calculable)
+ * est vide de sens ici. C'est assumé : un passage de validation est un fait
  * daté, pas un état qu'on modifie.
  */
 export function writeGraphValidation(
@@ -78,7 +78,7 @@ export function writeGraphValidation(
 }
 
 /**
- * M02.W11 — la validation de complétude est-elle passée pour ce graphe ?
+ * M02.W11 : la validation de complétude est-elle passée pour ce graphe ?
  *
  * « Le dernier enregistrement de `graph_validation` du site est passé et porte
  * l'empreinte du graphe actuel. Une validation obtenue avant une modification

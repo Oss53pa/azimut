@@ -1,5 +1,5 @@
 /**
- * A5.8 — la charte du site, telle que la base la porte : couleurs, caractères,
+ * A5.8, la charte du site, telle que la base la porte : couleurs, caractères,
  * règles et lexique, rattachés à une charte versionnée (migration 0006).
  *
  * Comme le vocabulaire, ce registre ne rejoint pas `SiteData` : il se lit à

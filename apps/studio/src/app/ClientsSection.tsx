@@ -28,7 +28,7 @@ type DialogState = {
 const CLOSED: DialogState = { open: false, busy: false, findings: [], notices: [] };
 
 /**
- * Q5 — les clients de l'organisation, sous la liste des sites : leurs
+ * Q5, les clients de l'organisation, sous la liste des sites : leurs
  * entités juridiques, et le formulaire qui en crée une. Le formulaire du site
  * les propose ensuite dans son champ « Entité juridique ».
  */

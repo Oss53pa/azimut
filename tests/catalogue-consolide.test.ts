@@ -8,7 +8,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DOCUMENT = readFileSync(resolve(ROOT, 'docs/cahier-des-charges.md'), 'utf-8');
 
 /**
- * D2.2 — le catalogue du dépôt et celui du consolidé, dans les deux sens.
+ * D2.2 : le catalogue du dépôt et celui du consolidé, dans les deux sens.
  *
  * « Toute anomalie produite par un moteur figure dans ce catalogue. Ajouter un
  * code demande une entrée ici dans le même commit. » Et, en fin de D2.2 :
@@ -17,8 +17,8 @@ const DOCUMENT = readFileSync(resolve(ROOT, 'docs/cahier-des-charges.md'), 'utf-
  * document est donc l'union de ses tables, et c'est elle qui est lue ici.
  *
  * Ce contrôle lit le document lui-même, et non une liste recopiée. Deux listes
- * recopiées à la main ont vieilli sans que personne s'en aperçoive — celle des
- * domaines autorisés et celle des codes — et c'est ce qui a laissé 96 codes
+ * recopiées à la main ont vieilli sans que personne s'en aperçoive (celle des
+ * domaines autorisés et celle des codes) et c'est ce qui a laissé 96 codes
  * vivre hors du catalogue pendant plusieurs versions. Le document est dans le
  * dépôt avec son empreinte déposée : le lire coûte moins que de le recopier.
  */
@@ -57,7 +57,7 @@ function words(value: string): string {
  * Codes que le consolidé catalogue et que le dépôt ne porte pas encore.
  *
  * Aucun n'est un oubli : chacun appartient à un module non construit. La liste
- * est déclarée pour que l'écart reste visible et nommé — un code qui
+ * est déclarée pour que l'écart reste visible et nommé : un code qui
  * disparaîtrait de cette liste sans apparaître au catalogue ferait échouer le
  * contrôle.
  */
@@ -92,7 +92,7 @@ const NON_CONSTRUITS: Readonly<Record<string, string>> = {
   'VISITOR.PII_ON_KIOSK': 'Partie P, module 13, application visiteur.',
 };
 
-describe('D2.2 — le catalogue du dépôt et celui du consolidé', () => {
+describe('D2.2 : le catalogue du dépôt et celui du consolidé', () => {
   const doc = documentCatalogue();
   const repo = Object.keys(ERROR_CATALOG) as (keyof typeof ERROR_CATALOG)[];
 
@@ -161,7 +161,7 @@ describe('D2.2 — le catalogue du dépôt et celui du consolidé', () => {
   });
 });
 
-describe('D2.1 — les domaines du dépôt et ceux du consolidé', () => {
+describe('D2.1 : les domaines du dépôt et ceux du consolidé', () => {
   /** La phrase de D2.1 qui énumère les domaines, et elle seule. */
   function documentDomains(): ReadonlySet<string> {
     const line = /Domaines autorisés, et eux seuls\s*:([^\n]+)/.exec(DOCUMENT);

@@ -6,7 +6,7 @@ import {
 
 const sym = (id: string, content: unknown): LibrarySymbol => ({ id, content });
 
-describe('J6.3 — guardLibraryImport', () => {
+describe('J6.3: guardLibraryImport', () => {
   it('accepts symbols with no content match in the library', () => {
     const r = guardLibraryImport(
       [sym('in-1', { svg: '<path d="M0 0"/>' })],
@@ -71,7 +71,7 @@ describe('J6.3 — guardLibraryImport', () => {
   });
 });
 
-describe('D2.2 — un symbole non hachable est refusé', () => {
+describe('D2.2 : un symbole non hachable est refusé', () => {
   it('refuse par DATA.HASH_INPUT_INVALID au lieu de laisser passer un doublon inconnu', () => {
     const r = guardLibraryImport(
       [{ id: 'in-1', content: { d: Number.POSITIVE_INFINITY } }],

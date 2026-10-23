@@ -2,13 +2,13 @@ import { buildFileName, buildArchiveName, canonicalSerialize, codePointCompare }
 import type { FileNameParts, Outcome, Finding } from '@azimut/core-model';
 
 /**
- * D11 — Delivery archive assembler.
+ * D11: Delivery archive assembler.
  *
  * A delivery groups the files produced for one site/building/level/version.
  * Each produced file is named by the deterministic D11 scheme
  * (`buildFileName`); the archive itself is named by the same scheme without the
  * per-support segments (`buildArchiveName`) and carries an index file that
- * echoes the quantitative — the inventory a manufacturer reads without the
+ * echoes the quantitative: the inventory a manufacturer reads without the
  * software.
  *
  * The output is deterministic: entries are sorted by file name and the index is
@@ -17,7 +17,7 @@ import type { FileNameParts, Outcome, Finding } from '@azimut/core-model';
  * PACKAGE.DUPLICATE_PATH and fails the assembly.
  *
  * The index's quantitative comes from the single quantity engine
- * (`computeQuantities`), supplied by the caller as {@link DeliveryQuantities} —
+ * (`computeQuantities`), supplied by the caller as {@link DeliveryQuantities},
  * it is never recomputed here (INV-1: no data duplicated for a rendering).
  */
 
@@ -50,7 +50,7 @@ export type DeliveryLevelQuantity = {
 
 /**
  * The authoritative quantitative for a delivery, produced by the quantity
- * engine and passed in verbatim — structurally the serializable form of the
+ * engine and passed in verbatim: structurally the serializable form of the
  * engine's QuantityReport.
  */
 export type DeliveryQuantities = {
@@ -74,7 +74,7 @@ export type DeliveryArchiveInput = {
   readonly quantities: DeliveryQuantities;
 };
 
-/** One line of the delivery index — a produced file and its identity. */
+/** One line of the delivery index: a produced file and its identity. */
 export type DeliveryIndexEntry = {
   readonly file_name: string;
   readonly type_code: string;
@@ -87,7 +87,7 @@ export type DeliveryIndexEntry = {
 /**
  * The index a manufacturer reads: the archive's own file manifest (entries,
  * file_count, total_bytes) plus the authoritative quantitative from the quantity
- * engine (`quantities`) — echoed, not recomputed.
+ * engine (`quantities`), echoed, not recomputed.
  */
 export type DeliveryIndex = {
   readonly archive: string;

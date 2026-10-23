@@ -1,5 +1,5 @@
 /**
- * Theme Papier (F2) — light theme tokens.
+ * Theme Papier (F2): light theme tokens.
  * Warm neutral palette, default for design application.
  */
 export const themePapier = {
@@ -19,7 +19,7 @@ export const themePapier = {
 } as const;
 
 /**
- * Theme Instrument (F2) — dark theme tokens.
+ * Theme Instrument (F2): dark theme tokens.
  * Same semantic keys, values adjusted for dark ground.
  */
 export const themeInstrument = {
@@ -39,7 +39,7 @@ export const themeInstrument = {
 } as const;
 
 /**
- * Semantic state colors — Papier theme (F2.3).
+ * Semantic state colors: Papier theme (F2.3).
  * Reserved for state meaning only, never decorative.
  */
 export const stateColorsPapier = {
@@ -50,7 +50,7 @@ export const stateColorsPapier = {
 } as const;
 
 /**
- * Semantic state colors — Instrument theme (F2.3).
+ * Semantic state colors: Instrument theme (F2.3).
  * Adjusted for legibility on dark backgrounds.
  */
 export const stateColorsInstrument = {
@@ -61,7 +61,7 @@ export const stateColorsInstrument = {
 } as const;
 
 /**
- * J3.2 — la palette de la couche d'esquisse : quatre couleurs de feutre.
+ * J3.2, la palette de la couche d'esquisse : quatre couleurs de feutre.
  *
  * « Palette de couleurs propre à l'esquisse, sans aucun rapport avec les
  * jetons d'interface ni avec les chartes clients, précisément pour qu'une
@@ -80,7 +80,7 @@ export const sketchPalette = {
 
 export type SketchTokenKey = keyof typeof sketchPalette;
 
-/** Backward-compatible alias — Papier state colors. */
+/** Backward-compatible alias: Papier state colors. */
 export const stateColors = stateColorsPapier;
 
 export const isoTokens = {
@@ -100,7 +100,7 @@ export type StateTokenKey = keyof typeof stateColorsPapier;
 export type TokenKey = keyof typeof allTokens;
 
 /**
- * Kiosk tokens (F13) — minimal set for public-facing kiosk.
+ * Kiosk tokens (F13): minimal set for public-facing kiosk.
  */
 export const kioskTokens = {
   'k-bg': '#FFFFFF',
@@ -184,7 +184,7 @@ export function isAllowedRadius(value: number): boolean {
 
 /**
  * Motion durations in ms (F11).
- * Three durations only — no fourth without stop-and-ask.
+ * Three durations only: no fourth without stop-and-ask.
  */
 export const durations = {
   state: 120,

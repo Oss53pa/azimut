@@ -3,7 +3,7 @@ import type { FontAsset } from './font-embedding.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * G5.1 / G5.2 — Font registry checks beyond embedding.
+ * G5.1 / G5.2: Font registry checks beyond embedding.
  *
  * G5.1: text is measured exclusively from a versioned metrics table carrying a
  * hash, never from the browser's measurement functions (which would break
@@ -13,7 +13,7 @@ import { codePointCompare } from './empreinte.js';
  *
  * G5.2: a font whose licence is undeclared (licence_kind = 'unknown') is
  * flagged at the registry level with a warning FONT.LICENCE_UNKNOWN, so the
- * undeclared licence is visible and opposable — distinct from the blocking gate
+ * undeclared licence is visible and opposable, distinct from the blocking gate
  * that stops such a font being embedded in a distributed deliverable.
  */
 export type FontMetricsRecord = {
@@ -65,7 +65,7 @@ export function guardFontMetrics(
 
 /**
  * Audit font licences. Returns one warning FONT.LICENCE_UNKNOWN per font whose
- * licence is undeclared, sorted by font id. Always ok — an undeclared licence
+ * licence is undeclared, sorted by font id. Always ok: an undeclared licence
  * is a registry warning, while the embedding gate (FONT.NOT_EMBEDDABLE) is what
  * actually blocks distribution.
  */

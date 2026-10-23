@@ -10,26 +10,26 @@ export const site = azimut.table('site', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   name: text('name').notNull(),
   country_code: text('country_code').notNull(),
-  // O4 et A5.2 — fuseau du site, requis. Tous les horaires, disponibilités
+  // O4 et A5.2, fuseau du site, requis. Tous les horaires, disponibilités
   // d'arêtes et échéances s'y interprètent ; les horodatages techniques
   // restent en temps universel.
   timezone: text('timezone').notNull(),
-  // Q5 — entité juridique émettrice. Facultative à la création, requise avant
+  // Q5, entité juridique émettrice. Facultative à la création, requise avant
   // l'émission de la première facture : elle ne sert qu'à facturer.
   legal_entity_id: uuid('legal_entity_id'),
-  // A5.8 — le paquet d'un site n'est plus une colonne : `site_rules_binding`
+  // A5.8, le paquet d'un site n'est plus une colonne : `site_rules_binding`
   // fait foi, et la migration 0066 a retiré `rules_pack_id`.
-  // M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres, recopiée du premier
+  // M01.S1 / D1.1 / N1.2 : origine du repère site, en mètres, recopiée du premier
   // calage et jamais modifiée. Nullable : tant qu'aucun calage n'a eu lieu, le
   // repère n'est pas posé, et ce n'est pas l'origine (0, 0).
   origin_x_m: numeric('origin_x_m'),
   origin_y_m: numeric('origin_y_m'),
-  // N1.2 — langues actives. Nullable : une ligne antérieure à la migration
+  // N1.2, langues actives. Nullable : une ligne antérieure à la migration
   // n'en déclare aucune, et la migration ne va pas en déclarer à sa place.
   // Le CHECK interdit en revanche le tableau vide, qui ne dirait rien de plus
   // que NULL tout en ayant l'air d'une déclaration.
   active_langs: text('active_langs').array(),
-  // D1.1 / N1.2 — altitude du niveau de référence, Z = 0. Nullable : une
+  // D1.1 / N1.2, altitude du niveau de référence, Z = 0. Nullable : une
   // altitude absolue non relevée n'invalide pas les altitudes relatives.
   reference_elevation_m: numeric('reference_elevation_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -46,7 +46,7 @@ export const building = azimut.table('building', {
   name: text('name').notNull(),
   independent_access: boolean('independent_access').notNull().default(false),
   opening_hours: jsonb('opening_hours'),
-  // N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+  // N1.2, largeur héritée par les arêtes du bâtiment à leur création.
   default_edge_width_m: numeric('default_edge_width_m'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -75,7 +75,7 @@ export const footprint = azimut.table('footprint', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   geometry: jsonb('geometry').notNull(),
   kind: text('kind').notNull(),
-  // N1.2 — code d'unité locative, requis pour une cellule, unique par niveau.
+  // N1.2, code d'unité locative, requis pour une cellule, unique par niveau.
   // Nullable : une empreinte relevée avant que son code soit connu doit
   // pouvoir être enregistrée ; c'est le contrôle qui la signale, pas la base
   // qui la refuse.
@@ -93,7 +93,7 @@ export const volume = azimut.table('volume', {
   base_elevation_m: numeric('base_elevation_m').notNull(),
   height_m: numeric('height_m').notNull(),
   material_key: text('material_key').notNull(),
-  // K2.1 — manual painter order; null by default, overrides the computed sort.
+  // K2.1, manual painter order; null by default, overrides the computed sort.
   render_order: integer('render_order'),
 }, (t) => [
   index('idx_volume_org').on(t.org_id),
@@ -104,10 +104,10 @@ export const zone = azimut.table('zone', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  // A5.2 — `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
+  // A5.2, `ZONE_KINDS`, contrainte posée par la migration 0029. Zone du
   // socle, à ne pas confondre avec la zone d'orientation du module 02.
   kind: text('kind').notNull(),
-  // A5.2, version 17 — « empreintes couvertes par la zone, appartenance
+  // A5.2, version 17, « empreintes couvertes par la zone, appartenance
   // déclarée et non calculée, comme pour la zone d'orientation de la partie H ».
   // Migration 0057. La base garantit le type du contenant ; la forme des
   // éléments se valide à la frontière, comme pour `footprint.geometry`.
@@ -124,7 +124,7 @@ export const planSource = azimut.table('plan_source', {
   level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
   storage_path: text('storage_path').notNull(),
   media_type: text('media_type').notNull(),
-  // A5.2 — nature réelle du contenu, constatée à l'import (migration 0068,
+  // A5.2, nature réelle du contenu, constatée à l'import (migration 0068,
   // qui porte aussi la contrainte des trois valeurs).
   content_kind: text('content_kind').notNull(),
   uploaded_at: timestamp('uploaded_at', { withTimezone: true }).notNull().defaultNow(),
@@ -137,13 +137,13 @@ export const planCalibration = azimut.table('plan_calibration', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   plan_source_id: uuid('plan_source_id').notNull().references(() => planSource.id, { onDelete: 'cascade' }),
   scale_m_per_px: numeric('scale_m_per_px').notNull(),
-  // A5.2 — position, dans l'image, de l'origine du repère site. Seules
+  // A5.2, position, dans l'image, de l'origine du repère site. Seules
   // colonnes en pixels que M01.S2 admette avec celles des points de calage.
   // Nullables : l'origine du repère ne tombe pas dans l'image de tous les
   // calages, et aucun écran ne désigne aujourd'hui le point qui la porte.
   origin_x_px: numeric('origin_x_px'),
   origin_y_px: numeric('origin_y_px'),
-  // A5.2 — distance réelle saisie à l'étape 2 de M2 (partie M), celle dont l'échelle est
+  // A5.2, distance réelle saisie à l'étape 2 de M2 (partie M), celle dont l'échelle est
   // tirée. Nullable : le calage par points mesurés n'en produit pas.
   reference_distance_m: numeric('reference_distance_m'),
   rotation_deg: numeric('rotation_deg').notNull().default('0'),
@@ -157,7 +157,7 @@ export const planCalibration = azimut.table('plan_calibration', {
   affine_f: numeric('affine_f'),
   mean_residual_m: numeric('mean_residual_m'),
   max_residual_m: numeric('max_residual_m'),
-  // M01.S1 — date de l'opération de calage, distincte de l'import du fond que date
+  // M01.S1, date de l'opération de calage, distincte de l'import du fond que date
   // `plan_source.uploaded_at`. C'est elle qui rend « le premier calage »
   // identifiable. Nullable et sans valeur par défaut : une ligne enregistrée
   // avant cette colonne n'a pas de date, et `now()` ferait passer la date de
@@ -176,14 +176,14 @@ export const opening = azimut.table('opening', {
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   position: jsonb('position').notNull(),
   width_m: numeric('width_m').notNull(),
-  // A5.2 — `OPENING_KINDS`, contrainte posée par la migration 0029.
+  // A5.2, `OPENING_KINDS`, contrainte posée par la migration 0029.
   kind: text('kind').notNull(),
 }, (t) => [
   index('idx_opening_org').on(t.org_id),
 ]);
 
 /**
- * A5.11, règle M01.S11 — un fait déclaré du site.
+ * A5.11, règle M01.S11 : un fait déclaré du site.
  *
  * « site_fact (id, org_id, site_id, key, value jsonb, status, source_ref,
  * declared_by, declared_at) », `status in ('existing','proposal','to_verify')`.
@@ -211,7 +211,7 @@ export const siteFact = azimut.table('site_fact', {
   // `string`, et les comparaisons de chaînes qui la trient échoueraient.
   declared_at: date('declared_at').notNull(),
   declared_by: uuid('declared_by'),
-  // A5.11 — l'objet sur lequel le fait porte, facultatif. Renseigné, le fait
+  // A5.11, l'objet sur lequel le fait porte, facultatif. Renseigné, le fait
   // porte sur cet objet ; vide, sur le site entier. Les deux colonnes sont
   // entières ou absentes ensemble : `site_fact_target_complete`, migration 0056.
   //
@@ -244,7 +244,7 @@ export const siteFactForbiddenWord = azimut.table('site_fact_forbidden_word', {
  *
  * A5.11, règle M01.S11 : « Un écart entre deux sources reste ouvert et visible
  * tant qu'il n'est pas tranché. » La règle est au cahier des charges, la table
- * n'y est pas — voir `TABLES_WITHOUT_DECLARED_OWNER`.
+ * n'y est pas : voir `TABLES_WITHOUT_DECLARED_OWNER`.
  */
 export const sourceClaim = azimut.table('source_claim', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -280,7 +280,7 @@ export const discrepancyDecision = azimut.table('discrepancy_decision', {
   index('idx_discrepancy_decision_org').on(t.org_id),
 ]);
 
-// A5.3, section S8 — extension d'une empreinte de nature `parking_space`, une
+// A5.3, section S8 : extension d'une empreinte de nature `parking_space`, une
 // ligne par empreinte, sur le modèle de `vertical_link` qui étend une arête.
 // Ne porte que ce que l'empreinte générique n'a pas à porter : le type de place
 // et son repère de travée. Migration 0058.
@@ -300,7 +300,7 @@ export const parkingSpace = azimut.table('parking_space', {
 ]);
 
 /**
- * A5.2 — les points de calage d'une source de plan.
+ * A5.2 : les points de calage d'une source de plan.
  *
  * « Les points de calage permettent de rejouer le calage à l'identique. » Sans
  * eux, la base garde l'échelle obtenue et jamais la mesure qui l'a produite.
@@ -324,7 +324,7 @@ export const planCalibrationPoint = azimut.table('plan_calibration_point', {
 ]);
 
 /**
- * Q5 — l'entité juridique qui émet une facture.
+ * Q5 : l'entité juridique qui émet une facture.
  *
  * Elle appartient à la plateforme (Q2) : une organisation en contient une ou
  * plusieurs, et un site est rattaché à une seule, au plus tard avant sa
@@ -346,7 +346,7 @@ export const legalEntity = azimut.table('legal_entity', {
 ]);
 
 /**
- * A5.3 — la trace des passages de la validation de complétude du graphe.
+ * A5.3 : la trace des passages de la validation de complétude du graphe.
  *
  * Propriété du module 01 (partie L). Insertion seule au sens d'A12.3 : la base
  * refuse toute modification et toute suppression, y compris sous le rôle

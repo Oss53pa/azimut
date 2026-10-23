@@ -10,7 +10,7 @@ import type { SiteData } from '@azimut/core-model';
  * Deux bâtiments, deux entrées propres, cinq niveaux, et entre les deux les
  * seules arêtes qui franchissent une limite de bâtiment : la passerelle
  * couverte du premier étage et le parvis découvert du rez-de-chaussée. Chacune
- * porte sa ligne `building_link` (M01.S10) et sa liaison verticale (A5.3) —
+ * porte sa ligne `building_link` (M01.S10) et sa liaison verticale (A5.3) :
  * deux niveaux de deux bâtiments sont deux niveaux différents, et l'arête qui
  * les relie n'échappe pas à la règle.
  *
@@ -21,7 +21,7 @@ import type { SiteData } from '@azimut/core-model';
  */
 export const REF_RETAIL_GRAPH: SiteData['graph'] = {
   nodes: [
-    // — Galerie, rez-de-chaussée —
+    // (Galerie, rez-de-chaussée)
     {
       id: 'n-rt-g-entree',
       org_id: 'org-test-001',
@@ -71,7 +71,7 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
       position: { x_m: 55, y_m: 10 },
       label: 'Parvis, côté galerie',
     },
-    // — Galerie, premier étage —
+    // (Galerie, premier étage)
     {
       id: 'n-rt-g-asc-r1',
       org_id: 'org-test-001',
@@ -112,7 +112,7 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
       position: { x_m: 55, y_m: 10 },
       label: 'Passerelle, côté galerie',
     },
-    // — Galerie, deuxième étage —
+    // (Galerie, deuxième étage)
     {
       id: 'n-rt-g-asc-r2',
       org_id: 'org-test-001',
@@ -145,7 +145,7 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
       position: { x_m: 20, y_m: 20 },
       label: 'Boutique G-201',
     },
-    // — Annexe, rez-de-chaussée —
+    // (Annexe, rez-de-chaussée)
     {
       id: 'n-rt-a-entree',
       org_id: 'org-test-001',
@@ -194,7 +194,7 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
       position: { x_m: 80, y_m: 10 },
       label: 'Parvis, côté annexe',
     },
-    // — Annexe, premier étage —
+    // (Annexe, premier étage)
     {
       id: 'n-rt-a-asc-r1',
       org_id: 'org-test-001',
@@ -237,13 +237,13 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
     },
   ],
   edges: [
-    // — Galerie, rez-de-chaussée —
+    // (Galerie, rez-de-chaussée)
     edge('e-rt-g-entree-lobby', 'n-rt-g-entree', 'n-rt-g-lobby', 2.4, 10),
     edge('e-rt-g-lobby-asc', 'n-rt-g-lobby', 'n-rt-g-asc-rdc', 2.4, 10),
     edge('e-rt-g-lobby-esc', 'n-rt-g-lobby', 'n-rt-g-esc-rdc', 1.6, 10),
     edge('e-rt-g-lobby-dest', 'n-rt-g-lobby', 'n-rt-g-dest-rdc', 2.4, 14.142),
     edge('e-rt-g-lobby-parvis', 'n-rt-g-lobby', 'n-rt-g-parvis', 2.4, 25),
-    // — Galerie, cage d'ascenseur et cage d'escalier —
+    // (Galerie, cage d'ascenseur et cage d'escalier)
     edge('e-rt-g-asc-rdc-r1', 'n-rt-g-asc-rdc', 'n-rt-g-asc-r1', 1.8, 4.5),
     edge('e-rt-g-asc-r1-r2', 'n-rt-g-asc-r1', 'n-rt-g-asc-r2', 1.8, 4.5),
     edge('e-rt-g-esc-rdc-r1', 'n-rt-g-esc-rdc', 'n-rt-g-esc-r1', 1.6, 4.5, {
@@ -252,32 +252,32 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
     edge('e-rt-g-esc-r1-r2', 'n-rt-g-esc-r1', 'n-rt-g-esc-r2', 1.6, 4.5, {
       accessible: false, evacuation_route: true,
     }),
-    // — Galerie, premier étage —
+    // (Galerie, premier étage)
     edge('e-rt-g-asc-r1-hall', 'n-rt-g-asc-r1', 'n-rt-g-hall-r1', 2.4, 10),
     edge('e-rt-g-esc-r1-hall', 'n-rt-g-esc-r1', 'n-rt-g-hall-r1', 1.6, 10),
     edge('e-rt-g-hall-r1-dest', 'n-rt-g-hall-r1', 'n-rt-g-dest-r1', 2.4, 14.142),
     edge('e-rt-g-hall-r1-passerelle', 'n-rt-g-hall-r1', 'n-rt-g-passerelle', 2.4, 25),
-    // — Galerie, deuxième étage —
+    // (Galerie, deuxième étage)
     edge('e-rt-g-asc-r2-hall', 'n-rt-g-asc-r2', 'n-rt-g-hall-r2', 2.4, 10),
     edge('e-rt-g-esc-r2-hall', 'n-rt-g-esc-r2', 'n-rt-g-hall-r2', 1.6, 10),
     edge('e-rt-g-hall-r2-dest', 'n-rt-g-hall-r2', 'n-rt-g-dest-r2', 2.4, 14.142),
-    // — Annexe, rez-de-chaussée —
+    // (Annexe, rez-de-chaussée)
     edge('e-rt-a-entree-lobby', 'n-rt-a-entree', 'n-rt-a-lobby', 1.1, 10),
     edge('e-rt-a-lobby-asc', 'n-rt-a-lobby', 'n-rt-a-asc-rdc', 1.1, 7),
     edge('e-rt-a-lobby-esc', 'n-rt-a-lobby', 'n-rt-a-esc-rdc', 1.1, 7),
     edge('e-rt-a-lobby-dest', 'n-rt-a-lobby', 'n-rt-a-dest-rdc', 1.1, 12.207),
     edge('e-rt-a-lobby-parvis', 'n-rt-a-lobby', 'n-rt-a-parvis', 1.1, 15),
-    // — Annexe, cage d'ascenseur et cage d'escalier —
+    // (Annexe, cage d'ascenseur et cage d'escalier)
     edge('e-rt-a-asc-rdc-r1', 'n-rt-a-asc-rdc', 'n-rt-a-asc-r1', 1.1, 3.6),
     edge('e-rt-a-esc-rdc-r1', 'n-rt-a-esc-rdc', 'n-rt-a-esc-r1', 1.1, 3.6, {
       accessible: false, evacuation_route: true,
     }),
-    // — Annexe, premier étage —
+    // (Annexe, premier étage)
     edge('e-rt-a-asc-r1-hall', 'n-rt-a-asc-r1', 'n-rt-a-hall-r1', 1.1, 7),
     edge('e-rt-a-esc-r1-hall', 'n-rt-a-esc-r1', 'n-rt-a-hall-r1', 1.1, 7),
     edge('e-rt-a-hall-r1-dest', 'n-rt-a-hall-r1', 'n-rt-a-dest-r1', 1.1, 12.207),
     edge('e-rt-a-hall-r1-passerelle', 'n-rt-a-hall-r1', 'n-rt-a-passerelle', 1.1, 15),
-    // — Les deux seules arêtes entre bâtiments —
+    // (Les deux seules arêtes entre bâtiments)
     //
     // La passerelle couverte descend de trente centimètres sur vingt-cinq
     // mètres, la galerie étant posée plus haut que l'annexe.
@@ -297,14 +297,14 @@ export const REF_RETAIL_GRAPH: SiteData['graph'] = {
     link('vl-rt-g-esc-r1-r2', 'e-rt-g-esc-r1-r2', 'stair', 60, false),
     link('vl-rt-a-asc-rdc-r1', 'e-rt-a-asc-rdc-r1', 'elevator', 6, true),
     link('vl-rt-a-esc-rdc-r1', 'e-rt-a-esc-rdc-r1', 'stair', 40, false),
-    // A5.3 — les deux arêtes entre bâtiments relient elles aussi deux niveaux
+    // A5.3, les deux arêtes entre bâtiments relient elles aussi deux niveaux
     // différents, et portent donc leur liaison. Ce sont des rampes : elles
     // gagnent leur dénivelée en avançant.
     link('vl-rt-passerelle', 'e-rt-passerelle', 'ramp', 40, true),
     link('vl-rt-parvis', 'e-rt-parvis', 'ramp', 60, true),
   ],
   /**
-   * M01.S10 — une couverte, une non couverte, comme C1 le demande de ce site.
+   * M01.S10 : une couverte, une non couverte, comme C1 le demande de ce site.
    *
    * Le contre-exemple n'est pas ici : c'est `ref-broken` qui porte l'arête
    * entre bâtiments à laquelle la ligne manque, et sur laquelle

@@ -76,7 +76,7 @@ function sansProfil(site: SiteData): SiteData {
   return { ...site, travel_profiles: [] };
 }
 
-describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE — toutes les entrées desservent-elles tout', () => {
+describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE : toutes les entrées desservent-elles tout', () => {
   it('ne signale rien sur le site de référence', () => {
     expect(destinationNotReachedFromEveryEntranceFindings(refMultilevel)).toHaveLength(0);
   });
@@ -87,7 +87,7 @@ describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE — toutes les entrées desservent
 
   it('voit le sens unique qui coupe une entrée d’une destination', () => {
     // L'arête va du hall vers l'entrée seulement : depuis l'entrée sud, on
-    // n'atteint plus rien. C'est le cas que le contrôle existant ne voit pas —
+    // n'atteint plus rien. C'est le cas que le contrôle existant ne voit pas :
     // l'aile reste reliée au sens du modèle, et il ne lit pas `direction`.
     const site = oriente(deuxEntrees(refMultilevel), 'e-ml-vestibule-sud-hall', 'backward');
     const findings = destinationNotReachedFromEveryEntranceFindings(site);
@@ -167,7 +167,7 @@ describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE — toutes les entrées desservent
    * La portée tranchée par l'éditeur : seules comptent les entrées qu'au moins
    * un profil de visiteur emprunte.
    */
-  describe('portée — les entrées empruntées par au moins un profil', () => {
+  describe('portée : les entrées empruntées par au moins un profil', () => {
     it('ne compte pas une porte qu’aucun profil ne peut franchir', () => {
       // La porte sud ne s'ouvre que dans le sens de la sortie : son unique
       // arête ne se franchit que vers elle. On n'entre pas par là, et exiger
@@ -180,7 +180,7 @@ describe('GRAPH.DESTINATION_ENTRANCE_COVERAGE — toutes les entrées desservent
 
     /**
      * « Au moins un » : il suffit d'un profil. La porte sud n'est pas
-     * accessible, donc le profil PMR ne l'emprunte pas — le profil standard,
+     * accessible, donc le profil PMR ne l'emprunte pas : le profil standard,
      * lui, l'emprunte, et elle reste comptée.
      */
     it('retient une entrée qu’un seul des profils emprunte', () => {

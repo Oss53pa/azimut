@@ -1,5 +1,5 @@
 /**
- * O11 — les fermetures temporaires (`temporary_closure`, migration 0069).
+ * O11 : les fermetures temporaires (`temporary_closure`, migration 0069).
  *
  * « Une fermeture temporaire porte une ou plusieurs arêtes, une date de
  * début, une date de fin, un motif. Pendant la fermeture, les parcours sont
@@ -10,7 +10,7 @@
  * `AAAA-MM-JJTHH:MM:SS`, fin incluse ; deux instants de ce format se comparent
  * comme des chaînes. Un calcul ne lit jamais l'horloge (INV-4) : une
  * fermeture ne compte qu'à l'instant qu'on lui donne, et les rendus durables,
- * qui n'en reçoivent pas, ne la voient pas — O11 : la signalétique provisoire
+ * qui n'en reçoivent pas, ne la voient pas, O11 : la signalétique provisoire
  * « ne modifie jamais le tableau des messages nominal ».
  */
 import { codePointCompare } from './empreinte.js';

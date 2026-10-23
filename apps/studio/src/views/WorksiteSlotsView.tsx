@@ -18,7 +18,7 @@ const UNPLANNED = 'unplanned';
 const SLOT_REF_LENGTH = 8;
 
 /**
- * Module 07 — le planning de pose (H6.2), au gabarit « registre » : un
+ * Module 07, le planning de pose (H6.2), au gabarit « registre » : un
  * créneau par ligne, sa zone, ses supports, jour ou nuit, et les poses qui
  * attendent encore une date. Lu en base (0042), ou dans le jeu de
  * démonstration du dépôt de référence.
@@ -66,10 +66,10 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
         ? <Tag label={t('worksite.slot.unplanned')} severity="warning" />
         : <Tag label={t('worksiteslots.state.planned')} severity="valid" />),
     },
-    { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.planned_on ?? undefined, lang) ?? '—' },
+    { id: 'date', header: t('worksite.col.date'), cell: s => formatDay(s.planned_on ?? undefined, lang) ?? '–' },
   ];
 
-  // O11 — les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
+  // O11 : les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
   const closureInfo = (slot: InstallSlot): readonly InspectorRow[] => {
     if (slot.planned_on === null) return [{ id: 'undated', label: t('worksiteslots.closures.undated'), value: '' }];
     const closures = closuresOnDay(site, slot.support_ids, slot.planned_on);
@@ -108,7 +108,7 @@ export function WorksiteSlotsView({ siteKey }: WorksiteSlotsViewProps): JSX.Elem
           {
             id: 'closures',
             title: t('worksiteslots.section.closures'),
-            // O11 — les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
+            // O11, les fermetures qui portent une arête aboutissant aux supports du créneau, le jour de pose.
             rows: closureInfo(selected),
           },
         ]}

@@ -6,11 +6,11 @@
  * d'un état vide dès que le stockage local ne portait rien, et un site
  * modélisé la veille s'ouvrait comme un site neuf.
  *
- * N1.7 critère 1 — « Un site modélisé se recharge à l'identique. » Le chemin
+ * N1.7 critère 1 : « Un site modélisé se recharge à l'identique. » Le chemin
  * d'écriture le tenait déjà côté base ; il manquait le retour.
  *
  * Aucun nom de colonne n'est réécrit ici. Les objets du modèle portent déjà
- * ceux de la base — `level_id`, `from_node_id`, `width_m` — et le magasin
+ * ceux de la base (`level_id`, `from_node_id`, `width_m`) et le magasin
  * garde les lignes telles quelles. Une seconde nomenclature serait exactement
  * ce qui a fait écrire `category_id` dans une table qui n'en a pas.
  */
@@ -20,7 +20,7 @@ import { NO_SCHEDULE_RECORDS } from '../data/site-repository.js';
 import type { SessionState, StoredRow } from './session-store.js';
 import { EMPTY_SESSION } from './session-store.js';
 
-/** J3 — les lignes d'esquisse relues à part du site. */
+/** J3 : les lignes d'esquisse relues à part du site. */
 export type SketchRows = {
   readonly layers: readonly (Readonly<Record<string, unknown>> & Identified)[];
   readonly strokes: readonly (Readonly<Record<string, unknown>> & Identified)[];
@@ -50,7 +50,7 @@ function rowsFor(
 export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
   return [
     ...rowsFor('site', [site.site]),
-    // A5.8 — le rattachement aux paquets fait foi en table ; le modèle n'en
+    // A5.8, le rattachement aux paquets fait foi en table ; le modèle n'en
     // garde que le paquet et le rôle, la ligne reprend son site et son
     // organisation pour rester celle de la base.
     ...rowsFor('site_rules_binding', site.rules_bindings.map(binding => ({
@@ -64,11 +64,11 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
     ...rowsFor('node', site.graph.nodes),
     ...rowsFor('edge', site.graph.edges),
     ...rowsFor('vertical_link', site.graph.vertical_links),
-    // L3.1 — les profils de parcours, que l'atelier du graphe lit pour
+    // L3.1, les profils de parcours, que l'atelier du graphe lit pour
     // montrer le parcours d'un visiteur. En lecture : aucune commande ne les
     // écrit depuis l'atelier.
     ...rowsFor('travel_profile', site.travel_profiles),
-    // R12 — l'annuaire, que les conditions de l'émission pour revue lisent :
+    // R12, l'annuaire, que les conditions de l'émission pour revue lisent :
     // la continuité du jalonnement (H2.4) et les collisions de nommage (H2.2)
     // portent sur les destinations et leurs noms. En lecture, comme les profils.
     ...rowsFor('destination', site.destinations),
@@ -91,18 +91,18 @@ export function sessionFromSite(
     ...EMPTY_SESSION,
     rows: [
       ...sessionRowsFromSite(site),
-      // J3 — l'esquisse vient à part : elle n'est pas du site que le
+      // J3, l'esquisse vient à part : elle n'est pas du site que le
       // compilateur lit (J3.3), mais l'atelier la montre.
       ...rowsFor('sketch_layer', sketch.layers),
       ...rowsFor('sketch_stroke', sketch.strokes),
-      // R12 — le circuit du tableau des messages, à part du site lui aussi :
+      // R12, le circuit du tableau des messages, à part du site lui aussi :
       // les versions, leurs lignes, les décisions, et les passages de
       // validation que l'émission pour revue lit (M02.W11).
       ...rowsFor('graph_validation', records.validations),
       ...rowsFor('message_schedule', records.schedules),
       ...rowsFor('message_line', records.lines),
       ...rowsFor('message_schedule_approval', records.approvals),
-      // J4 — les annotations de révision et leur fil : le panneau R7.4 les
+      // J4, les annotations de révision et leur fil : le panneau R7.4 les
       // montre, et une annotation ouverte bloque l'approbation (R12).
       ...rowsFor('review_annotation', records.annotations),
       ...rowsFor('review_annotation_reply', records.annotationReplies),

@@ -1,5 +1,5 @@
 /**
- * Résolution de règles — partie sans entrées-sorties.
+ * Résolution de règles : partie sans entrées-sorties.
  *
  * Séparée de `loader.ts` parce qu'elle doit rester utilisable dans un
  * navigateur. Le chargement d'un paquet lit le disque et calcule une
@@ -29,12 +29,12 @@ export type RuleScopeContext = {
 };
 
 /**
- * D3.5 — Scope specificity as a lexicographic priority, from strongest to
+ * D3.5, Scope specificity as a lexicographic priority, from strongest to
  * weakest: supportRegistry, then context, then sectorKey, then no scope.
  * Encoded as distinct bit weights so supportRegistry outranks any combination
  * of the lower dimensions (4 > 2 + 1). Because the weights are distinct powers
  * of two, two scopes share a specificity value only when they carry the exact
- * same set of dimensions — which is the "égalité stricte de spécificité" that
+ * same set of dimensions : which is the "égalité stricte de spécificité" that
  * makes a load ambiguous.
  */
 export function scopeSpecificity(scope: RuleScope): number {
@@ -56,8 +56,8 @@ function scopeMatches(scope: RuleScope, ctx: RuleScopeContext): boolean {
 }
 
 /**
- * Two scopes are ambiguous only when they are IDENTICAL — same dimensions AND
- * same values — because only then could a single context match both with equal
+ * Two scopes are ambiguous only when they are IDENTICAL (same dimensions AND
+ * same values) because only then could a single context match both with equal
  * specificity. Two rules that share the dimension set but differ in value
  * (e.g. context interior vs exterior, or registry wayfinding vs safety)
  * partition the scope space and are never both selected for one context, so

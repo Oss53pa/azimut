@@ -1,14 +1,14 @@
 /**
- * E1.4 — Editing context guard.
+ * E1.4: Editing context guard.
  *
  * Wraps tool actions with permission checks against the editing context.
  * Before any tool mutation reaches the tool reducer, the guard checks
  * the permission matrix (editing-context.ts).
  *
  * Three contexts:
- *   Context 1 (site geometry) — full editing
- *   Context 2 (templates)     — visual editing, produces data only
- *   Context 3 (support faces) — NO editing, view/control only
+ *   Context 1 (site geometry) (full editing
+ *   Context 2 (templates)) visual editing, produces data only
+ *   Context 3 (support faces), NO editing, view/control only
  *
  * "Toute demande d'assouplissement de la colonne « contexte 3 »
  *  relève de la procédure d'arrêt et de demande." (E1.4)
@@ -72,7 +72,7 @@ export type GuardResult =
  *
  * @param action - Tool action to check.
  * @param context - Current editing context.
- * @returns GuardResult — allowed (with action) or blocked (with finding).
+ * @returns GuardResult: allowed (with action) or blocked (with finding).
  */
 export function guardToolAction(
   action: ToolAction,

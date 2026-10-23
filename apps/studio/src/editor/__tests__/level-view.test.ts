@@ -20,7 +20,7 @@ function decoration(x: number, y: number): DecorationShape {
   };
 }
 
-describe('E3.2 — framing a level', () => {
+describe('E3.2: framing a level', () => {
   describe('levelBounds', () => {
     it('covers the business content of the level', () => {
       const bounds = levelBounds(refMultilevel, LEVEL, []);

@@ -6,7 +6,7 @@ export type VolumeEntry = {
 };
 
 /**
- * D5.2 criterion 2 — `min(x) + min(y)` of the footprint, computed over the
+ * D5.2 criterion 2: `min(x) + min(y)` of the footprint, computed over the
  * vertices. The two minima are taken independently (they may come from
  * different vertices), which is not the same as `min(x + y)`.
  */
@@ -23,7 +23,7 @@ function footprintDepth(vertices: readonly Point[]): number {
 const utf8Encoder = new TextEncoder();
 
 /**
- * D5.2 criterion 3 — byte-wise lexicographic comparison of volume ids, so the
+ * D5.2 criterion 3: byte-wise lexicographic comparison of volume ids, so the
  * tiebreaker is deterministic across implementations regardless of the
  * runtime's native string ordering (which is UTF-16 code-unit based).
  */
@@ -40,7 +40,7 @@ function compareUtf8Bytes(a: string, b: string): number {
 }
 
 /**
- * K2.1 — Manual painter order. A volume's `render_order`, when set, takes
+ * K2.1: Manual painter order. A volume's `render_order`, when set, takes
  * precedence over the computed depth sort. Volumes without one (null/absent,
  * the default) keep the computed order and are drawn first (behind); volumes
  * with a render_order are drawn after them, in ascending render_order, so a
@@ -112,7 +112,7 @@ export function detectOverlaps(
           code: 'GEOM.FOOTPRINTS_OVERLAP',
           severity: 'warning',
           entity: { kind: 'footprint', id: fpA.id },
-          // K2.1 — propose manual painter order (volume.render_order).
+          // K2.1, propose manual painter order (volume.render_order).
           params: { footprint_a: fpA.id, footprint_b: fpB.id, remedy: 'render_order' },
           ruleRef: null,
         });

@@ -15,7 +15,7 @@ import { useFootprintInk } from './useFootprintInk.js';
 import type { SeriesDraft } from '../screens/FootprintsScreen.js';
 
 /**
- * M3 (partie M) — l'adaptateur du tracé des empreintes.
+ * M3 (partie M) : l'adaptateur du tracé des empreintes.
  *
  * À part dans un fichier depuis que la duplication en série y est : les quatre
  * adaptateurs d'atelier portaient `workshop-adapters.tsx` près des 400 lignes
@@ -26,8 +26,8 @@ import type { SeriesDraft } from '../screens/FootprintsScreen.js';
  * Le contour proposé à l'ouverture.
  *
  * La zone de travail n'est pas construite : sans contour de départ, la saisie
- * numérique des sommets — « le moyen le plus précis et le seul accessible au
- * clavier » (M3, partie M) — n'aurait aucun sommet à modifier. Quatre sommets,
+ * numérique des sommets (« le moyen le plus précis et le seul accessible au
+ * clavier » (M3, partie M)) n'aurait aucun sommet à modifier. Quatre sommets,
  * que l'opérateur déplace au clavier.
  */
 const DEFAULT_FOOTPRINT: readonly Point[] = [
@@ -63,7 +63,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
   const [reference, setReference] = useState<Reference | null>(null);
 
   const drawn = countOf(session.state, 'footprint');
-  // J1 — la zone de travail au stylet : un trait lu remplace le contour en
+  // J1, la zone de travail au stylet : un trait lu remplace le contour en
   // cours, que `close` ferme comme une saisie au clavier.
   const ink = useFootprintInk(session, levelId, tool, vertices, setVertices);
 
@@ -98,7 +98,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
   }
 
   /**
-   * M3 (partie M) critère 4 — « La duplication en série de 20 cellules se fait
+   * M3 (partie M) critère 4 : « La duplication en série de 20 cellules se fait
    * en une commande annulable d'un seul geste. »
    *
    * Un seul `write`, donc une seule entrée de pile : le magasin empile un
@@ -132,7 +132,7 @@ export function FootprintsScreenAdapter({ session, levelId }: {
   }
 
   /**
-   * M3 (partie M) — la table des raccourcis, rendue opposable.
+   * M3 (partie M) : la table des raccourcis, rendue opposable.
    *
    * Elle était affichée en bas de l'écran et n'était liée à rien : `Entrée`,
    * `Échap`, `Retour arrière` et `Ctrl+D` ne faisaient rien. Un écran qui

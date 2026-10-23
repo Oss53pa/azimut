@@ -8,7 +8,7 @@ import { computeWayfinding } from '../wayfinding-session.js';
 
 const enc = new TextEncoder();
 
-describe('D10.5 — loadKioskSite rehydrates a SiteData from the tree', () => {
+describe('D10.5: loadKioskSite rehydrates a SiteData from the tree', () => {
   it('reconstructs the shipped collections and site identity', () => {
     const loaded = loadKioskSite(kioskDataFiles(refMultilevel));
 
@@ -23,7 +23,7 @@ describe('D10.5 — loadKioskSite rehydrates a SiteData from the tree', () => {
     expect(loaded.levels).toEqual(refMultilevel.levels);
   });
 
-  it('A5.8 — ne porte aucun rattachement : le champ est absent, pas vide', () => {
+  it('A5.8, ne porte aucun rattachement : le champ est absent, pas vide', () => {
     // Une liste vide dirait « site sans paquet ». Le paquet de borne ne
     // transporte simplement pas les rattachements ; le site chargé ne doit donc
     // pas en avoir, ni au typage ni à l'exécution.

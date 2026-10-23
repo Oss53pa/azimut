@@ -1,5 +1,5 @@
 /**
- * A5.6 — déclarer ou modifier une face de support (`support_face`).
+ * A5.6 : déclarer ou modifier une face de support (`support_face`).
  *
  * Une face s'identifie par son support et son indice ; elle porte un gabarit
  * (`template_key`) et ses langues (`langs`). Le nombre de faces d'un support

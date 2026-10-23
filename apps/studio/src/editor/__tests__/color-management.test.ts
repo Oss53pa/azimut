@@ -25,7 +25,7 @@ function charterColor(overrides: Partial<CharterColor> = {}): CharterColor {
   };
 }
 
-describe('E13 — color management', () => {
+describe('E13: color management', () => {
   describe('relativeLuminance', () => {
     it('white has luminance ~1', () => {
       expect(relativeLuminance(white)).toBeCloseTo(1, 2);

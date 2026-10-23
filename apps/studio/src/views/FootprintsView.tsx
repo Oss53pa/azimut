@@ -25,7 +25,7 @@ type FootprintRow = {
 };
 
 /**
- * Tranche M · écran M3 — les empreintes.
+ * Tranche M · écran M3 : les empreintes.
  *
  * Le tracé lui-même appartient à l'atelier (module 12) : le dupliquer ici
  * créerait deux chemins vers la même géométrie, ce que l'invariant 1 interdit.
@@ -46,7 +46,7 @@ export function FootprintsView({ onNavigate }: FootprintsViewProps): JSX.Element
   const geometry = useMemo(() => validateGeometry(site), [site]);
   const geometryFindings: readonly Finding[] = useMemo(() => {
     const fromGeometry = geometry.ok ? geometry.warnings : geometry.findings;
-    // N1.4 — le code d'unité est contrôlé par `runChecks`, pas par la
+    // N1.4 : le code d'unité est contrôlé par `runChecks`, pas par la
     // géométrie. Les deux anomalies rejoignent la liste, sans quoi l'écran
     // des empreintes montrerait une colonne Code sans jamais dire ce qui ne
     // va pas avec elle.

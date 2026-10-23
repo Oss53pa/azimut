@@ -1,5 +1,5 @@
 /**
- * A5.8 — les lignes de l'écran « Charte » : un élément de charte par ligne,
+ * A5.8, les lignes de l'écran « Charte » : un élément de charte par ligne,
  * quelle que soit sa table. Les valeurs sont citées en texte, jamais
  * appliquées à l'interface (F1.3).
  */

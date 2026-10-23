@@ -4,7 +4,7 @@ import type { TableSelection } from '../message-table-selection.js';
 import { MESSAGE_TABLE_SHORTCUTS, actionOfKey } from '../message-table-keys.js';
 
 /**
- * R15 et R17 (partie R) — le clavier du tableau des messages.
+ * R15 et R17 (partie R) : le clavier du tableau des messages.
  *
  * Critère 12 de R18 : « Parcours complet au clavier seul, de l'ouverture à
  * l'approbation. » Sa moitié consultation s'éprouve ici sans rendre un seul
@@ -25,7 +25,7 @@ function after(
   return actions.reduce((state, action) => applyAction(state, action, CONTEXT), from);
 }
 
-describe('R15 (partie R) — la table de raccourcis', () => {
+describe('R15 (partie R) : la table de raccourcis', () => {
   it('reconnaît chaque appui déclaré', () => {
     for (const binding of MESSAGE_TABLE_SHORTCUTS) {
       const action = actionOfKey({
@@ -79,7 +79,7 @@ describe('R15 (partie R) — la table de raccourcis', () => {
   });
 });
 
-describe('R15 (partie R) — déplacement du focus', () => {
+describe('R15 (partie R) : déplacement du focus', () => {
   it('la première flèche prend la première ligne, dans les deux sens', () => {
     expect(after(['next']).focusedId).toBe('l-1');
     expect(after(['previous']).focusedId).toBe('l-1');
@@ -101,7 +101,7 @@ describe('R15 (partie R) — déplacement du focus', () => {
   });
 });
 
-describe('R15 (partie R) — sélection', () => {
+describe('R15 (partie R) : sélection', () => {
   it('l’espace ajoute puis retire la ligne sous le focus', () => {
     const added = after(['next', 'toggle_select']);
     expect(added.selectedIds).toEqual(['l-1']);
@@ -131,7 +131,7 @@ describe('R15 (partie R) — sélection', () => {
   });
 });
 
-describe('R15 (partie R) — détail, recherche, anomalies', () => {
+describe('R15 (partie R) : détail, recherche, anomalies', () => {
   it('Entrée ouvre le détail de la ligne sous le focus', () => {
     expect(after(['next', 'open_detail']).detailOpen).toBe(true);
   });

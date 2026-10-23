@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H8 — Budget and estimation rest on a historised unit cost per typology (and
+ * H8: Budget and estimation rest on a historised unit cost per typology (and
  * substrate and manufacturer). A carnet is estimated automatically from the
  * quantitatif, so a support typology used in the estimate with no reference
  * cost cannot be priced. This audit surfaces each such typology as a warning
@@ -12,7 +12,7 @@ import { codePointCompare } from '@azimut/core-model';
 /**
  * Audit that every referenced typology has a reference cost. Returns one
  * warning COST.REFERENCE_MISSING per referenced typology absent from the
- * priced set, sorted and de-duplicated by typology id. Always ok — a missing
+ * priced set, sorted and de-duplicated by typology id. Always ok: a missing
  * reference warns and leaves that line unpriced.
  */
 export function auditCostReferences(

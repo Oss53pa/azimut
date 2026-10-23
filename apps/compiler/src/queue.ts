@@ -1,12 +1,12 @@
 import type { Job, JobTrace } from './job.js';
 
 /**
- * D9.2 — retry policy: 3 attempts with exponential backoff of 5, 30 then 120
+ * D9.2, retry policy: 3 attempts with exponential backoff of 5, 30 then 120
  * seconds before each successive retry.
  */
 export const RETRY_BACKOFF_SECONDS: readonly number[] = [5, 30, 120];
 
-/** D9.2 — attempts before a job is failed for good. */
+/** D9.2: attempts before a job is failed for good. */
 export const MAX_ATTEMPTS = 3;
 
 /** Backoff in milliseconds before retrying after the given (1-based) attempt. */
@@ -16,7 +16,7 @@ export function retryBackoffMs(attempt: number): number {
   return (RETRY_BACKOFF_SECONDS[clamped] as number) * 1000;
 }
 
-/** D9.2 — a job with no progress for 30 minutes is considered failed. */
+/** D9.2: a job with no progress for 30 minutes is considered failed. */
 export const STALL_TIMEOUT_MS = 30 * 60 * 1000;
 
 export type JobQueue = {
@@ -104,7 +104,7 @@ export class MemoryQueue implements JobQueue {
       job.state = 'queued';
       job.started_at = null;
       job.finished_at = null;
-      // D9.2 — exponential backoff before the next attempt.
+      // D9.2: exponential backoff before the next attempt.
       job.next_attempt_at = new Date(now.getTime() + retryBackoffMs(job.attempts));
     } else {
       job.state = 'failed';

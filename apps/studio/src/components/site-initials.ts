@@ -6,7 +6,7 @@
  * langue.
  */
 export function siteInitials(name: string, lang: string): string {
-  const words = name.trim().split(/[\s\-–—]+/u).filter(w => w !== '');
+  const words = name.trim().split(/[\s\-\u2013\u2014]+/u).filter(w => w !== '');
   const letters = words.slice(0, 2).map(w => [...w][0] ?? '');
   return letters.join('').toLocaleUpperCase(lang);
 }

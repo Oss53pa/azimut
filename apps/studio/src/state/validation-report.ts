@@ -1,10 +1,10 @@
 /**
- * M5 (partie M) — validation de complétude.
+ * M5 (partie M) : validation de complétude.
  *
  * L'écran a une règle qui le résume : « Un écran vide qui ressemble à une
  * réussite alors que rien n'a été calculé est le pire des états possibles. »
- * C'est M7.11 (partie M) — « aucun résultat vide n'est présenté comme un
- * succès si le calcul n'a pas eu lieu » — et c'est ce que ce module rend
+ * C'est M7.11 (partie M) (« aucun résultat vide n'est présenté comme un
+ * succès si le calcul n'a pas eu lieu ») et c'est ce que ce module rend
  * impossible à confondre : l'absence de calcul et l'absence d'anomalie sont
  * deux états distincts, nommés, qui ne se réduisent pas l'un à l'autre.
  */
@@ -115,7 +115,7 @@ export function countsBySeverity(
 }
 
 // ---------------------------------------------------------------------------
-// M7.11 (partie M) — ce que l'écran a le droit de dire
+// M7.11 (partie M) : ce que l'écran a le droit de dire
 // ---------------------------------------------------------------------------
 
 /**
@@ -205,7 +205,7 @@ export function prepareExport(
 }
 
 // ---------------------------------------------------------------------------
-// M5 (partie M) — la référence normative
+// M5 (partie M) : la référence normative
 // ---------------------------------------------------------------------------
 
 /**
@@ -215,7 +215,7 @@ export function prepareExport(
  *
  * A7 décrit `ruleRef` comme la « référence au paquet de règles, si origine
  * normative ». C'est donc lui, et lui seul, qui marque l'origine : une
- * anomalie levée depuis un paquet de règles le porte par construction —
+ * anomalie levée depuis un paquet de règles le porte par construction,
  * `rule-checks.ts` y inscrit le code de la règle.
  *
  * J'avais d'abord classé l'origine par domaine, en tenant tout `LAYOUT` pour

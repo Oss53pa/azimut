@@ -165,7 +165,7 @@ describe('T-2.9 renderOrientedPlan', () => {
   });
 });
 
-describe('D6.2 — orientationDegForAzimuth', () => {
+describe('D6.2: orientationDegForAzimuth', () => {
   it('negates the azimuth, normalized to [0,360)', () => {
     expect(orientationDegForAzimuth(0)).toBe(0);
     expect(orientationDegForAzimuth(90)).toBe(270);
@@ -174,7 +174,7 @@ describe('D6.2 — orientationDegForAzimuth', () => {
   });
 });
 
-describe('D6.4 — decisive test: front destination in upper half', () => {
+describe('D6.4, decisive test: front destination in upper half', () => {
   it('north-facing support: destination to the north appears in upper half', () => {
     const viewerPos = { x_m: 20, y_m: 10 };
     const opts: OrientedPlanOptions = {
@@ -202,7 +202,7 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
 
   // Viewer at (0,15); the destination "Bureau RDC" (node at (5,15)) is due
   // east of the viewer. Facing east must put it above the viewer; facing the
-  // opposite way must put it below. A sign inversion flips both — this is the
+  // opposite way must put it below. A sign inversion flips both: this is the
   // assertion the old test lacked.
   function labelY(svg: string): number {
     const m = svg.match(/<text[^>]* y="([^"]+)"[^>]*>Bureau RDC<\/text>/);
@@ -283,7 +283,7 @@ describe('D6.4 — decisive test: front destination in upper half', () => {
   });
 
   it('single-point geometry uses fallback scale of 1', () => {
-    // Level with zero footprints and zero nodes — only the viewer marker
+    // Level with zero footprints and zero nodes, only the viewer marker
     const site = {
       ...refMultilevel,
       footprints: [],

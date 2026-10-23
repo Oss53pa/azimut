@@ -1,5 +1,5 @@
 /**
- * Calage mesuré d'un fond de plan — M2 (partie M).
+ * Calage mesuré d'un fond de plan : M2 (partie M).
  *
  * « En complément du calage à deux points, qui reste le minimum, l'écran
  * accepte un calage à n points homologues, ajusté et mesuré. Il produit un
@@ -11,8 +11,8 @@
  * d'architecte recomposé se calent sans que rien ne le signale.
  *
  * Le calage mesuré répond à cela. L'opérateur pose au moins trois paires de
- * points homologues — un point du fond, le même point dans le repère métier du
- * niveau — et l'ajustement rend, avec la transformation, le résidu de chaque
+ * points homologues (un point du fond, le même point dans le repère métier du
+ * niveau) et l'ajustement rend, avec la transformation, le résidu de chaque
  * point en mètres. Le résidu est la mesure de ce que le calage ne sait pas
  * représenter.
  *
@@ -320,7 +320,7 @@ export function auditCalibrationResiduals(
   for (const residual of calibration.residuals) {
     if (residual.residual_m > tolerance.point_m) {
       // La nature désignée est la paire, et non une table. L'identité portée
-      // est celle que l'appelant a donnée à la paire — côté atelier, celle du
+      // est celle que l'appelant a donnée à la paire, côté atelier, celle du
       // nœud servant d'amer : nommer ici une table ferait passer un
       // identifiant de nœud pour la clé d'une ligne qui n'existe pas.
       findings.push({

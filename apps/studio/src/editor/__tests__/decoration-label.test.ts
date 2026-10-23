@@ -20,7 +20,7 @@ function shape(kind: DecorationKind, label: string): DecorationShape {
   };
 }
 
-describe('E6.3 — accessible name of a habillage object', () => {
+describe('E6.3: accessible name of a habillage object', () => {
   it('uses the label the operator gave the object', () => {
     expect(decorationLabel(shape('area', 'Jardin nord'), t)).toBe("Zone d'habillage Jardin nord");
   });

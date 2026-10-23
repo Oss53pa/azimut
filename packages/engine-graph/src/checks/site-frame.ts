@@ -2,13 +2,13 @@ import type { SiteData, Finding } from '@azimut/core-model';
 import { calibratedLevelIds, firstCalibration, siteOrigin, codePointCompare } from '@azimut/core-model';
 
 /**
- * N1.4 — un niveau sans plan calé est une anomalie bloquante.
+ * N1.4 : un niveau sans plan calé est une anomalie bloquante.
  *
  * Un niveau est calé quand il porte au moins un fond de plan lui-même calé
  * (`calibratedLevelIds`). Deux situations distinctes tombent sous le même
  * code, comme le veut la partie N, et `plan_source_count` les sépare dans le
  * rapport : aucun fond importé du tout, ou un fond importé que personne n'a
- * calé. La conduite à tenir n'est pas la même — importer, ou caler.
+ * calé. La conduite à tenir n'est pas la même : importer, ou caler.
  *
  * Le contrôle porte sur le niveau et non sur l'empreinte : un niveau vide mais
  * non calé est déjà en faute, parce que la première empreinte qu'on y tracera
@@ -41,7 +41,7 @@ export function checkLevelCalibrated(site: SiteData): Finding[] {
 }
 
 /**
- * M01.S1 — le repère site est celui du premier calage.
+ * M01.S1 : le repère site est celui du premier calage.
  *
  * `calibrated_at` rend ce contrôle possible : sans lui, « le premier calage »
  * n'était pas identifiable et la règle, bien qu'opposable, restait
@@ -52,12 +52,12 @@ export function checkLevelCalibrated(site: SiteData): Finding[] {
  * désormais une position en pixels de l'image, et non plus une origine en
  * mètres. Les deux grandeurs ne sont plus comparables, et A5 ne dit pas
  * comment elles se correspondent. La moitié du contrôle qui reposait sur
- * cette comparaison — `origin_differs` — est donc retirée plutôt que
+ * cette comparaison (`origin_differs`) est donc retirée plutôt que
  * devinée, et le point est porté au rapport selon A2.2.
  *
  * Ce qui reste, et qui suffit à ce que rien ne passe en silence :
  * `origin_absent`, le premier calage a eu lieu et le site n'a pas de repère.
- * Rien d'autre ne le dirait — les niveaux étant calés,
+ * Rien d'autre ne le dirait : les niveaux étant calés,
  * `CALIB.LEVEL_NOT_CALIBRATED` se tait.
  *
  * Le contrôle ne dit rien quand le premier calage n'est pas déterminable, à

@@ -11,7 +11,7 @@ export const ruleScopeSchema = z.object({
 export type RuleScope = z.infer<typeof ruleScopeSchema>;
 
 /**
- * D3.6 — constraint direction for country-overlay comparison. `key` names the
+ * D3.6: constraint direction for country-overlay comparison. `key` names the
  * param that carries the comparable value; `tighten` says which direction is
  * more constraining. A country rule that does not declare this cannot be
  * proven more constraining, so the overlay keeps the base (socle) rule.

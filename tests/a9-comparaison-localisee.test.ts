@@ -7,7 +7,7 @@ import {
 } from './a9-perimetre.js';
 
 /**
- * A9, version 28 — « Cette section s'applique à tout code qui produit une
+ * A9, version 28, « Cette section s'applique à tout code qui produit une
  * sortie ou une empreinte : les moteurs, le noyau, le compilateur et
  * l'exécution de borne. Ce n'est pas le nom du dossier qui décide, c'est le
  * fait de produire. L'interface du studio [...] en est exclue, sauf pour ce qui
@@ -52,7 +52,7 @@ function currentCounts(): Map<string, number> {
   return counts;
 }
 
-describe('A9 — le périmètre contrôlé', () => {
+describe('A9 : le périmètre contrôlé', () => {
   it('le motif reconnaît chaque forme de comparaison localisée', () => {
     expect(countLocalized('a.localeCompare(b)')).toBe(1);
     expect(countLocalized('new Intl.Collator("fr").compare')).toBe(1);
@@ -88,7 +88,7 @@ describe('A9 — le périmètre contrôlé', () => {
   });
 });
 
-describe('A9 — aucune comparaison localisée là où la section s’applique', () => {
+describe('A9 : aucune comparaison localisée là où la section s’applique', () => {
   it('aucun fichier du périmètre n’en compte une seule', () => {
     const found = [...currentCounts()].map(([file, count]) => `${file} : ${count}`);
     expect(found, 'Comparer par points de code (codePointCompare), jamais selon une langue').toEqual([]);

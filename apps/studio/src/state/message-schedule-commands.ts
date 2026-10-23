@@ -28,7 +28,7 @@ export type ScheduleWrite = {
   readonly lineIds: readonly string[];
 };
 
-/** N2.2 — les six directions, relatives à l'usager. */
+/** N2.2 : les six directions, relatives à l'usager. */
 export const LINE_DIRECTIONS = ['left', 'right', 'ahead', 'up', 'down', 'back'] as const;
 export type LineDirection = (typeof LINE_DIRECTIONS)[number];
 

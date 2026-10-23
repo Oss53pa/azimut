@@ -16,7 +16,7 @@ function withFaces(faces: readonly SupportFace[]): SiteData {
   return { ...refMultilevel, support_faces: faces };
 }
 
-describe('A5.6 — emplacements de face', () => {
+describe('A5.6 : emplacements de face', () => {
   it('prévoit autant de faces que la typologie, déclarées ou non', () => {
     const slots = faceSlots(refMultilevel);
     const total = refMultilevel.supports.reduce((n, s) => n + supportFaceCount(refMultilevel, s.id), 0);
@@ -31,7 +31,7 @@ describe('A5.6 — emplacements de face', () => {
   });
 });
 
-describe('A5.6 — saisie d’une face', () => {
+describe('A5.6 : saisie d’une face', () => {
   it('déclare une face avec son gabarit et ses langues, dans l’ordre du site', () => {
     const langs = [...refMultilevel.site.active_langs].reverse();
     const out = declareFaceCommand(refMultilevel, support.id, 0, { template_key: null, langs }, ENV);

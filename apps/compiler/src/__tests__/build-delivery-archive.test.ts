@@ -57,7 +57,7 @@ const basePayload = {
   ],
 };
 
-describe('D11 — createBuildDeliveryArchiveHandler', () => {
+describe('D11: createBuildDeliveryArchiveHandler', () => {
   it('renders items, assembles the archive and writes it to storage', async () => {
     const sink = memoryAssetStore();
     const result = await createBuildDeliveryArchiveHandler(context(sink))(makeJob(basePayload));
@@ -95,7 +95,7 @@ describe('D11 — createBuildDeliveryArchiveHandler', () => {
 
   it('dedups faces of one physical support (same node + reference)', async () => {
     // Two items sharing (node, reference) are one support for the quantitative,
-    // even though they are two archive files — here distinguished by type_code
+    // even though they are two archive files: here distinguished by type_code
     // so the D11 names do not collide.
     const sink = memoryAssetStore();
     const payload = {

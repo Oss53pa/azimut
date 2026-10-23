@@ -3,7 +3,7 @@
  *
  * Aucune clé, aucune URL n'est écrite dans le code : tout vient de
  * l'environnement de compilation (A2.4). Sans configuration, l'application
- * sert les sites de référence et le dit — elle ne prétend jamais lire un
+ * sert les sites de référence et le dit : elle ne prétend jamais lire un
  * dépôt qu'elle n'a pas.
  */
 import { createReferenceRepository } from './reference-repository.js';

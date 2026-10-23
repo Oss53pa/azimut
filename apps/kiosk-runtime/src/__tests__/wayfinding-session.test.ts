@@ -13,7 +13,7 @@ const accP: TravelProfile = refMultilevel.travel_profiles.find(
   (p) => p.key === 'accessible',
 ) as TravelProfile;
 
-/** Compact wayfinding call — returns value or throws. */
+/** Compact wayfinding call: returns value or throws. */
 function wf(
   from: string, to: string,
   opts?: { site?: KioskSite; profile?: TravelProfile; lang?: WayfindingOptions['lang'] },

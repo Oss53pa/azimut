@@ -15,7 +15,7 @@ import type { SketchStroke } from '../state/sketch.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 /**
- * F15, `viewport/` — la zone de travail du graphe.
+ * F15, `viewport/` : la zone de travail du graphe.
  *
  * M4 (partie M), « Affichage » : « Les nœuds sont différenciés par leur forme,
  * jamais par la seule couleur. Les arêtes non accessibles sont tracées en
@@ -74,7 +74,7 @@ export type GraphViewProps = {
   readonly selected: GraphSelection | null;
   readonly onSelect: (selection: GraphSelection) => void;
   /**
-   * J1 (partie J) — le tracé au stylet ou à la souris dans la vue. Absent, la
+   * J1 (partie J) : le tracé au stylet ou à la souris dans la vue. Absent, la
    * vue ne fait que montrer et sélectionner.
    */
   readonly ink?: Pick<StrokeCaptureOptions, 'onStroke' | 'onTouchRefused'>;
@@ -86,7 +86,7 @@ export type GraphViewProps = {
   readonly frame?: readonly Point[];
   /** Clé de mémoire de la vue : la zone et son niveau (E3.3). */
   readonly viewKey?: string;
-  /** J3 — la couche d'esquisse du niveau, sous le réseau, et ses outils. */
+  /** J3 : la couche d'esquisse du niveau, sous le réseau, et ses outils. */
   readonly sketch?: {
     readonly strokes: readonly SketchStroke[];
     readonly selected: readonly string[];

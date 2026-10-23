@@ -1,5 +1,5 @@
 /**
- * D12.1 — les quatre écrans de catalogue : typologies de support, gabarits,
+ * D12.1, les quatre écrans de catalogue : typologies de support, gabarits,
  * annuaire des destinations, épreuves et bons à tirer.
  */
 export const CATALOGUE_FR = {
@@ -118,7 +118,7 @@ export const CATALOGUE_FR = {
   'proofs.event.reject': 'rejeter',
   'proofs.event.approve': 'approuver',
   'proofs.event.supersede': 'remplacer',
-  'proofs.g7.note': "G7 : une version approuvée est immuable, une correction crée une nouvelle version. Depuis « approuvé », la machine n'admet qu'un remplacement — aucune modification, aucun retour en arrière. La base fige en outre l'empreinte de toute version non brouillon.",
+  'proofs.g7.note': "G7 : une version approuvée est immuable, une correction crée une nouvelle version. Depuis « approuvé », la machine n'admet qu'un remplacement : aucune modification, aucun retour en arrière. La base fige en outre l'empreinte de toute version non brouillon.",
   'proofs.machine.terminal': 'état terminal',
   'proofs.machine.note': "Ces transitions sont interrogées dans la machine à états, pas recopiées : elles ne peuvent pas diverger de ce que le moteur applique.",
   'proofs.panel.blockers': 'Refus de composition',
@@ -238,7 +238,7 @@ export const CATALOGUE_EN: Readonly<Record<keyof typeof CATALOGUE_FR, string>> =
   'proofs.event.reject': 'reject',
   'proofs.event.approve': 'approve',
   'proofs.event.supersede': 'supersede',
-  'proofs.g7.note': 'G7: an approved version is immutable, a correction creates a new version. From “approved” the machine admits only a supersede — no modification, no going back. The database also freezes the content hash of any non-draft version.',
+  'proofs.g7.note': 'G7: an approved version is immutable, a correction creates a new version. From “approved” the machine admits only a supersede: no modification, no going back. The database also freezes the content hash of any non-draft version.',
   'proofs.machine.terminal': 'terminal state',
   'proofs.machine.note': 'These transitions are queried from the state machine, not copied: they cannot drift from what the engine enforces.',
   'proofs.panel.blockers': 'Composition refusals',

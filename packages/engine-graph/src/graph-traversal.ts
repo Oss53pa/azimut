@@ -3,8 +3,8 @@ import type { GraphNode, Edge } from '@azimut/core-model';
 /**
  * Adjacence non orientée : `direction` n'est pas lue, et c'est voulu.
  *
- * Elle sert aux contrôles de structure — le graphe est-il d'un seul tenant, un
- * nœud est-il relié à quelque chose — qui posent une question de modèle et non
+ * Elle sert aux contrôles de structure (le graphe est-il d'un seul tenant, un
+ * nœud est-il relié à quelque chose) qui posent une question de modèle et non
  * de circulation. Un couloir à sens unique relie bien les deux salles qu'il
  * joint, même si on ne peut le prendre que dans un sens.
  *

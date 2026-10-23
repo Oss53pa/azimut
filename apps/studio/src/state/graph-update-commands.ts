@@ -1,5 +1,5 @@
 /**
- * M4 (partie M) — la modification d'un nœud ou d'une arête déjà écrits.
+ * M4 (partie M) : la modification d'un nœud ou d'une arête déjà écrits.
  *
  * Le panneau de propriétés de M4 édite ce que la saisie a posé. Une
  * modification passe par une commande de mise à jour, qui porte l'état avant

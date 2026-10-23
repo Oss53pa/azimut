@@ -2,7 +2,7 @@ import { STRICTNESS_LEVELS } from './recognition-thresholds.js';
 import type { Strictness } from './recognition-thresholds.js';
 
 /**
- * J1.3 (partie J) — « L'intensité du redressement est réglable sur trois
+ * J1.3 (partie J) : « L'intensité du redressement est réglable sur trois
  * niveaux, du plus strict au plus permissif, et le niveau retenu est mémorisé
  * par utilisateur. »
  *

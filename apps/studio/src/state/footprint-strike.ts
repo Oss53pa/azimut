@@ -4,14 +4,14 @@ import type { ColumnValue } from '@azimut/core-model';
 import type { StoredRow } from './session-store.js';
 
 /**
- * J1.2 (partie J) — « Trait barrant une forme : suppression de la forme »,
+ * J1.2 (partie J), « Trait barrant une forme : suppression de la forme »,
  * dans l'atelier des empreintes.
  *
  * La suppression est une commande, annulable d'une frappe (E5.1) : `before`
  * porte la ligne, colonne par colonne, pour que l'annulation la rétablisse.
  *
- * Une empreinte que d'autres lignes citent — volume, destination, et tout ce
- * qui porte son `footprint_id` — n'est pas supprimée. La base les emporterait
+ * Une empreinte que d'autres lignes citent (volume, destination, et tout ce
+ * qui porte son `footprint_id`) n'est pas supprimée. La base les emporterait
  * par ses clés étrangères, et l'annulation ne rétablirait que l'empreinte :
  * c'est la règle de la suppression d'un niveau peuplé, appliquée au barré.
  */

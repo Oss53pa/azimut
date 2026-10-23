@@ -17,7 +17,7 @@ import { orgOfSession } from './session-identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
- * J1.2 (partie J) — le réseau de circulation tracé au stylet, dans l'atelier
+ * J1.2 (partie J) : le réseau de circulation tracé au stylet, dans l'atelier
  * du graphe (M4, partie M).
  *
  * Outil « Nœud » : un point appuyé pose un nœud du type choisi avant le geste.
@@ -56,7 +56,7 @@ export function useGraphInk(inputs: GraphInkInputs): {
     onFindings([]);
   }
 
-  // J1.3 — le niveau de redressement retenu par l'utilisateur.
+  // J1.3 : le niveau de redressement retenu par l'utilisateur.
   const straightening = useStrictness(`redressement-graphe-${levelId}`);
 
   /** Un tracé lu comme une saisie du réseau : un trait, ou une esquisse promue (J3.3). */
@@ -93,7 +93,7 @@ export function useGraphInk(inputs: GraphInkInputs): {
     void write(graphCommands([], [{ id, edge: edge.value }], [], scope, `edge:${id}`));
   }
 
-  // J3 — la même couche d'esquisse que dans l'atelier des empreintes : elle
+  // J3, la même couche d'esquisse que dans l'atelier des empreintes : elle
   // est celle du niveau, pas celle d'un atelier.
   const sketch = useSketchInk(session, levelId, setNotice, read);
 

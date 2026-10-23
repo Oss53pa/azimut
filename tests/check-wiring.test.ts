@@ -12,7 +12,7 @@ const ROOT = resolve(HERE, '..');
  * `error-code-reachability` vérifie qu'un code du catalogue est levé quelque
  * part. Il ne voit pas le cas d'après : la fonction qui le lève existe, ses
  * essais passent, et aucun appelant ne la fait tourner. C'est exactement ce qui
- * est arrivé deux fois — `auditParking` avec `forDeliverable`, puis
+ * est arrivé deux fois : `auditParking` avec `forDeliverable`, puis
  * `verticalLinkMisalignedFindings`, écrit et laissé hors de `validateGraph`
  * par un script d'édition interrompu. La seconde fois, seul un essai
  * d'intégration l'a vu.
@@ -42,23 +42,23 @@ const CHECK_NAME = /^export function ((?:audit|guard|check|validate)[A-Z]\w*|\w*
  */
 const DECLARED_NOT_WIRED: Readonly<Record<string, string>> = {
   guardTemplateBlockOverflow:
-    'E10 — refus d’enregistrer un gabarit dont un bloc déborde de la grille. L’éditeur ne fait pas encore d’édition de gabarit.',
+    'E10 : refus d’enregistrer un gabarit dont un bloc déborde de la grille. L’éditeur ne fait pas encore d’édition de gabarit.',
   guardToolForPointer:
-    'G3.1/G3.5 — désactivation des outils de tracé libre sous un pointeur grossier. L’éditeur ne distingue pas encore le type de pointeur.',
+    'G3.1/G3.5 : désactivation des outils de tracé libre sous un pointeur grossier. L’éditeur ne distingue pas encore le type de pointeur.',
   guardToolAction:
-    'E1.4 — matrice de permissions par contexte d’édition, à interposer avant le réducteur d’outils. Le réducteur ne passe pas encore par elle.',
+    'E1.4 : matrice de permissions par contexte d’édition, à interposer avant le réducteur d’outils. Le réducteur ne passe pas encore par elle.',
   checkOutputProfile:
-    'E13 — chaîne colorimétrique, profil de sortie d’une couleur de charte. Aucun écran ne produit encore de sortie profilée.',
+    'E13 : chaîne colorimétrique, profil de sortie d’une couleur de charte. Aucun écran ne produit encore de sortie profilée.',
   guardUndoTarget:
-    'E5.3 — refus d’annuler une modification déjà synchronisée. La synchronisation hors ligne n’est pas construite.',
+    'E5.3 : refus d’annuler une modification déjà synchronisée. La synchronisation hors ligne n’est pas construite.',
   auditExtractionRate:
-    'I3 — taux d’extraction des assistances. Aucune assistance n’est proposée à l’écran.',
+    'I3 : taux d’extraction des assistances. Aucune assistance n’est proposée à l’écran.',
   guardModuleOperation:
-    'I5.2 — droits par module souscrit. Le studio n’a pas de notion de souscription active.',
+    'I5.2 : droits par module souscrit. Le studio n’a pas de notion de souscription active.',
   auditVectorImports:
-    'G7.2 — reprise de fichiers vectoriels en référence de fond. L’écran d’import n’existe pas.',
+    'G7.2 : reprise de fichiers vectoriels en référence de fond. L’écran d’import n’existe pas.',
   guardObjectEdit:
-    'G4.2 — verrou consultatif de quinze minutes sur un objet en cours d’édition. L’édition concurrente n’est pas construite.',
+    'G4.2 : verrou consultatif de quinze minutes sur un objet en cours d’édition. L’édition concurrente n’est pas construite.',
 };
 
 function walk(dir: string): string[] {
@@ -130,7 +130,7 @@ describe('tout contrôle est branché, ou inscrit comme ne l’étant pas', () =
   it('aucun contrôle n’est orphelin sans raison inscrite', () => {
     const unexplained = orphans
       .filter(o => !(o.name in DECLARED_NOT_WIRED))
-      .map(o => `${o.name} — ${relative(ROOT, o.file)}`);
+      .map(o => `${o.name}: ${relative(ROOT, o.file)}`);
     expect(
       unexplained,
       'Contrôles exportés qu’aucun autre fichier n’appelle :\n' + unexplained.join('\n') +

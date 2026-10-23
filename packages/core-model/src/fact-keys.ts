@@ -1,7 +1,7 @@
 import type { FactValue, SiteFact, FactTarget } from './site-facts.js';
 
 /**
- * Convention de clé des faits du site — A5.11.
+ * Convention de clé des faits du site : A5.11.
  *
  * « Une clé de fait est composée d'un espace de noms et d'un nom, séparés par
  * un point, et chaque clé déclare le type attendu de sa valeur. Sans ce type,
@@ -16,8 +16,8 @@ import type { FactValue, SiteFact, FactTarget } from './site-facts.js';
  * convient-elle à cette clé. Il ne ferme pas l'ensemble des clés. A5.11 refuse
  * une valeur mal typée, en toutes lettres ; elle ne refuse pas une clé
  * inconnue, et l'inventer bannirait les faits déclarés avant que la convention
- * existe, que le document n'a pas retirés. La discipline d'inscription — une
- * clé nouvelle entre dans la table au même commit que son premier usage —
+ * existe, que le document n'a pas retirés. La discipline d'inscription (une
+ * clé nouvelle entre dans la table au même commit que son premier usage)
  * porte sur l'auteur du commit, non sur l'exécution.
  *
  * **Où le refus s'applique.** Au passage obligé de l'écriture, `buildCommand`
@@ -53,7 +53,7 @@ export type FactKeyDeclaration = {
    * La nature de cet objet dans sa propre table : `parking` pour la zone,
    * `parking_space` pour l'empreinte. Deux clés peuvent viser la même table
    * sans viser les mêmes lignes, et la colonne « Cible » d'A5.11 nomme les
-   * deux — « zone de nature `parking` », « empreinte de nature
+   * deux : « zone de nature `parking` », « empreinte de nature
    * `parking_space` ».
    */
   readonly target_object_kind: string;
@@ -63,7 +63,7 @@ export const PARKING_CAPACITY_KEY = 'parking.capacity';
 export const PARKING_FREE_KEY = 'parking.free';
 export const PARKING_UNDIGITIZED_SPACES_KEY = 'parking.undigitized_spaces';
 /**
- * Le motif pour lequel une surface de parking n'est pas numérisée — S-37.
+ * Le motif pour lequel une surface de parking n'est pas numérisée : S-37.
  *
  * « Une empreinte de nature `parking_space` peut être marquée non numérisée,
  * avec le nombre de places qu'elle est censée porter, le motif pour lequel

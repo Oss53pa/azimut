@@ -1,5 +1,5 @@
 /**
- * H6.2 — les lignes des écrans du chantier : lots, réserves de pose.
+ * H6.2, les lignes des écrans du chantier : lots, réserves de pose.
  *
  * Une réserve ouverte vient du garde `auditInstallReserves` : on ne la juge
  * pas ici, on range son anomalie sous la réserve et sous le lot. Un lot n'est

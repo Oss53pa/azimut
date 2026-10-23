@@ -20,7 +20,7 @@
   // construction de Cloudflare le fournit, et l'ajouter ferait entrer une
   // bibliothèque tierce que rien d'autre n'emploie (A2.2-4).
   //
-  // A2.4 — « ne pas employer une fonctionnalité de la plateforme d'hébergement
+  // A2.4 : « ne pas employer une fonctionnalité de la plateforme d'hébergement
   // indisponible en installation autonome ». Ce déploiement n'en emploie
   // aucune : il sert des fichiers statiques, et rien d'autre. Pas de fonction
   // serveur, pas de stockage propriétaire, pas de moteur d'exécution
@@ -30,7 +30,7 @@
   // Le nom n'est pas libre : il désigne le Worker à mettre à jour. Celui du
   // compte s'appelle `azimut`, créé le 21 septembre à 12 h 59 par Cloudflare
   // au moment de relier le dépôt. Déployer sous un autre nom en créerait un
-  // second et laisserait le premier — celui qui porte la route — servir
+  // second et laisserait le premier (celui qui porte la route) servir
   // indéfiniment le « Hello world » de départ.
   "name": "azimut",
 

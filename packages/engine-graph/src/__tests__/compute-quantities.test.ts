@@ -286,7 +286,7 @@ describe('T-2.13 quantityReportToCsv', () => {
   });
 });
 
-describe('computeQuantities — fallback paths', () => {
+describe('computeQuantities: fallback paths', () => {
   it('unknown support_type_key falls back to key as name', () => {
     const supports: PlacedSupport[] = [
       { id: 'sup-1', node_id: 'n-junction', support_type_key: 'unknown-key' },

@@ -8,7 +8,7 @@ const COMPLETE = {
   AZIMUT_KIOSK_MIN_RUNTIME: '1.0.0',
 };
 
-describe('T-0.11 — configuration du service', () => {
+describe('T-0.11 : configuration du service', () => {
   it('lit une configuration complète, avec les cadences par défaut', () => {
     const read = readServiceConfig(COMPLETE);
     expect(read).toEqual({

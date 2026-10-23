@@ -14,14 +14,14 @@ import {
 } from './queue.js';
 
 /**
- * T-0.11 et D9.2 — la file des travaux en base, côté service (migration 0071).
+ * T-0.11 et D9.2 : la file des travaux en base, côté service (migration 0071).
  *
  * Le service ne lit aucune table sous son propre nom. Il prend un travail par
  * la fonction de prise, puis en lit le contenu et le clôt sous l'identité de
  * son demandeur (A6.1, migration 0070).
  *
- * Un travail que nul ne peut porter — sans demandeur, ou dont le demandeur ne
- * le voit plus — est abandonné, en échec, avec la raison : un nouvel essai n'y
+ * Un travail que nul ne peut porter (sans demandeur, ou dont le demandeur ne
+ * le voit plus) est abandonné, en échec, avec la raison : un nouvel essai n'y
  * changerait rien.
  *
  * La trace de A12.2 est la ligne elle-même : état, heures de début et de fin,
@@ -34,7 +34,7 @@ export const REQUESTER_CANNOT_WRITE =
   'requester can no longer write the job (not a member of its organization)';
 
 export type DbWorkerQueueOptions = {
-  /** D9.2 — tentatives avant l'échec définitif. */
+  /** D9.2 : tentatives avant l'échec définitif. */
   readonly maxAttempts: number;
 };
 

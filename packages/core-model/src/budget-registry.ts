@@ -1,5 +1,5 @@
 /**
- * H8 — le budget tel que la base le porte (migration 0043) : coûts de
+ * H8, le budget tel que la base le porte (migration 0043) : coûts de
  * référence de l'organisation, lignes budgétaires du site.
  *
  * Un montant est un entier d'unité mineure avec sa devise, jamais un

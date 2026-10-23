@@ -36,7 +36,7 @@ function build(): MessageSchedule {
   return outcome.value;
 }
 
-describe('H2.5 — export en tableur', () => {
+describe('H2.5 : export en tableur', () => {
   it('porte un en-tête nommé', () => {
     const header = messageScheduleToCsv(build()).split('\n')[0] ?? '';
     expect(header).toContain('Identifiant');
@@ -126,7 +126,7 @@ describe('H2.5 — export en tableur', () => {
   });
 });
 
-describe('H2.5 — export en document', () => {
+describe('H2.5 : export en document', () => {
   it('porte un en-tête traçable', () => {
     const doc = messageScheduleToMarkdown(build());
     expect(doc).toContain('# Tableau des messages');

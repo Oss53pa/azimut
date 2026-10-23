@@ -30,7 +30,7 @@ function run(surveyed: SurveyedSupport[], expected: ExpectedSupport[], tol = 5) 
   return reconcile(refMultilevel, stdProfile, surveyed, expected, tol);
 }
 
-describe('reconciliation — undersized single dimension', () => {
+describe('reconciliation: undersized single dimension', () => {
   it('flags when only width is below minimum', () => {
     const result = run([sv({ width_m: 0.3, height_m: 0.8 })], [ex()]);
     expect(result.ok).toBe(true);
@@ -50,7 +50,7 @@ describe('reconciliation — undersized single dimension', () => {
   });
 });
 
-describe('reconciliation — orientation tolerance boundaries', () => {
+describe('reconciliation: orientation tolerance boundaries', () => {
   it('rejects azimuth exactly one degree past tolerance', () => {
     const result = run([sv({ azimuth_deg: 51 })], [ex()]);
     expect(result.ok).toBe(true);
@@ -76,7 +76,7 @@ describe('reconciliation — orientation tolerance boundaries', () => {
   });
 });
 
-describe('reconciliation — superfluous detection', () => {
+describe('reconciliation: superfluous detection', () => {
   it('flags support on non-decision-point node as superfluous', () => {
     const result = run([sv({ id: 'sup-orphan', node_id: 'n-ml-dest-rdc', azimuth_deg: 0, width_m: 0.5, height_m: 1.0 })], []);
     expect(result.ok).toBe(true);
@@ -88,7 +88,7 @@ describe('reconciliation — superfluous detection', () => {
   });
 });
 
-describe('reconciliation — uncovered detection', () => {
+describe('reconciliation: uncovered detection', () => {
   it('flags decision-point nodes with no surveyed support', () => {
     const result = run([], []);
     expect(result.ok).toBe(true);
@@ -100,7 +100,7 @@ describe('reconciliation — uncovered detection', () => {
   });
 });
 
-describe('reconciliation — combined issues', () => {
+describe('reconciliation: combined issues', () => {
   it('flags both dimensions undersized in a single line', () => {
     const result = run([sv({ id: 'sup-small', width_m: 0.2, height_m: 0.3 })], [ex()]);
     expect(result.ok).toBe(true);

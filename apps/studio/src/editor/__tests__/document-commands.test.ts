@@ -36,7 +36,7 @@ function docWith(shapes: readonly DecorationShape[]): EditorDocument {
   return { siteId: 'site-1', layers: [LAYER], shapes };
 }
 
-describe('E5 — document commands', () => {
+describe('E5: document commands', () => {
   describe('identifier derivation', () => {
     it('starts at one on an empty document', () => {
       expect(nextShapeId(emptyDocument('site-1'))).toBe('dec-1');

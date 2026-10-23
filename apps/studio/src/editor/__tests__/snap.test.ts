@@ -18,7 +18,7 @@ function target(
   return { kind, point: { x_m: x, y_m: y }, screenX: sx, screenY: sy, sourceId };
 }
 
-describe('E8 — snap (magnétisme)', () => {
+describe('E8 : snap (magnétisme)', () => {
   describe('findSnapTarget', () => {
     it('returns unsnapped position when no targets in range', () => {
       const cursor = { x_m: 5, y_m: 5 };

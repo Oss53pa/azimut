@@ -1,5 +1,5 @@
 /**
- * E7.4 — Boolean operations on footprint polygons.
+ * E7.4: Boolean operations on footprint polygons.
  *
  * Union, subtraction, intersection. No external geometry library (A3.3).
  *
@@ -43,7 +43,7 @@ export type BooleanResult =
   | { readonly ok: false; readonly finding: Finding };
 
 // ---------------------------------------------------------------------------
-// Validation (same as manual input — E7.4)
+// Validation (same as manual input: E7.4)
 // ---------------------------------------------------------------------------
 
 /** Minimum area tolerance for valid footprint (m²). */

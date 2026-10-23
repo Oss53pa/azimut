@@ -6,7 +6,7 @@ import { eraseCommands, layerVisibilityCommand, sketchStrokeCommands } from '../
 import { randomUUID } from 'node:crypto';
 
 /**
- * J3 (partie J) — la couche d'esquisse contre la base réelle (migration 0072),
+ * J3 (partie J) : la couche d'esquisse contre la base réelle (migration 0072),
  * par le chemin d'écriture ordinaire et sous cloisonnement forcé.
  *
  * Ce qui s'éprouve : un trait et sa couche s'écrivent d'un geste ; le tracé et
@@ -81,7 +81,7 @@ afterAll(async () => {
   await db.$client.end();
 });
 
-describe('J3 — la couche d’esquisse en base', () => {
+describe('J3 : la couche d’esquisse en base', () => {
   it('un trait et sa couche s’écrivent d’un geste, le tracé et sa pression intacts', async () => {
     const out = sketchStrokeCommands(
       { newId: LAYER, name: 'Esquisse' },

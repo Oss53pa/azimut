@@ -269,7 +269,7 @@ describe('MemoryQueue', () => {
     await q.markFailed('j1', 'transient', t2);
     const afterFail = await q.getJob('j1');
     expect(afterFail?.error).toBe('transient');
-    // Attempt 2: succeed — error must be cleared
+    // Attempt 2: succeed, error must be cleared
     await q.markRunning('j1', t3);
     await q.markSucceeded('j1', { ok: true }, t4);
     const afterSuccess = await q.getJob('j1');
@@ -291,7 +291,7 @@ describe('MemoryQueue', () => {
     expect(next?.id).toBe('q1');
   });
 
-  it('D9.2 — applies exponential backoff of 5s then 30s before retries', async () => {
+  it('D9.2: applies exponential backoff of 5s then 30s before retries', async () => {
     const q = new MemoryQueue();
     await q.enqueue(makeJob({ max_attempts: 3 }));
     const t0 = new Date('2025-01-01T00:00:00Z');
@@ -310,7 +310,7 @@ describe('MemoryQueue', () => {
     expect((await q.dequeue(new Date('2025-01-01T00:00:35Z')))?.id).toBe('j1');
   });
 
-  it('D9.2 — reapStalled fails a job with no progress for 30 minutes', async () => {
+  it('D9.2: reapStalled fails a job with no progress for 30 minutes', async () => {
     const q = new MemoryQueue();
     await q.enqueue(makeJob({ max_attempts: 1 }));
     const start = new Date('2025-01-01T00:00:00Z');
@@ -329,7 +329,7 @@ describe('MemoryQueue', () => {
     expect(job?.error).toContain('stalled');
   });
 
-  it('D9.2 — a reaped job with attempts remaining is re-queued with backoff', async () => {
+  it('D9.2: a reaped job with attempts remaining is re-queued with backoff', async () => {
     const q = new MemoryQueue();
     await q.enqueue(makeJob({ max_attempts: 3 }));
     const start = new Date('2025-01-01T00:00:00Z');
@@ -346,13 +346,13 @@ describe('MemoryQueue', () => {
   it('markFailed at max_attempts is terminal and not dequeueable', async () => {
     const q = new MemoryQueue();
     await q.enqueue(makeJob({ max_attempts: 2 }));
-    // Attempt 1: fail — still below max, should re-queue
+    // Attempt 1: fail, still below max, should re-queue
     await q.markRunning('j1', new Date('2025-01-01T00:01:00Z'));
     await q.markFailed('j1', 'err1', new Date('2025-01-01T00:02:00Z'));
     const afterFirst = await q.getJob('j1');
     expect(afterFirst?.state).toBe('queued');
     expect(afterFirst?.attempts).toBe(1);
-    // Attempt 2: fail — attempts === max_attempts, terminal
+    // Attempt 2: fail, attempts === max_attempts, terminal
     await q.markRunning('j1', new Date('2025-01-01T00:03:00Z'));
     await q.markFailed('j1', 'err2', new Date('2025-01-01T00:04:00Z'));
     const afterSecond = await q.getJob('j1');

@@ -1,5 +1,5 @@
 /**
- * Q5 — les clients de l'organisation : ses entités juridiques, listées et
+ * Q5, les clients de l'organisation : ses entités juridiques, listées et
  * créées sous la liste des sites.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;

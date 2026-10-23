@@ -1,5 +1,5 @@
 /**
- * H4 — la régie publicitaire telle que la base la porte (migration 0045) :
+ * H4, la régie publicitaire telle que la base la porte (migration 0045) :
  * emplacements, réservations, options, visuels enregistrés.
  *
  * L'état « libre » d'un emplacement ne se stocke pas : c'est l'absence de

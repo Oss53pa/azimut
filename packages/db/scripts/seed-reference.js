@@ -9,7 +9,7 @@
  * l'interface. » Ce script est la seconde moitié : la migration pose la table,
  * ce script y verse le fichier.
  *
- * Il s'exécute dans tous les environnements, à chaque déploiement — à la
+ * Il s'exécute dans tous les environnements, à chaque déploiement, à la
  * différence de `db:reset`, qui refuse hors du local. Un référentiel absent en
  * production ferait refuser des créations de site pour une raison qui n'a rien
  * de métier.

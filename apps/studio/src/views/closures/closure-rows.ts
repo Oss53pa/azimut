@@ -1,5 +1,5 @@
 /**
- * O11 — les fermetures temporaires, lues pour l'écran.
+ * O11 : les fermetures temporaires, lues pour l'écran.
  *
  * Rien n'est jugé ici : une arête fermée à un instant l'est parce qu'une
  * fermeture en cours la porte, et c'est le moteur d'itinéraire qui en tire la

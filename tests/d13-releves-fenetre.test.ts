@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 /**
- * D13, version 29 — « Taille de fenêtre déclarée avec le relevé, pour toute
+ * D13, version 29 : « Taille de fenêtre déclarée avec le relevé, pour toute
  * mesure qui dépend d'un rendu [...]. Deux relevés pris dans des fenêtres
  * différentes ne se comparent pas, et un relevé sans cette mention ne vaut
  * pas comme base de révision. »
@@ -30,7 +30,7 @@ function isWindow(value: unknown): boolean {
   return Number.isInteger(width) && Number.isInteger(height) && Number(width) > 0 && Number(height) > 0;
 }
 
-describe('D13 — un relevé qui dépend d’un rendu déclare sa fenêtre', () => {
+describe('D13 : un relevé qui dépend d’un rendu déclare sa fenêtre', () => {
   it('le relevé du critère 4 de M8 (partie M) déclare la fenêtre où il a été pris', () => {
     expect(isWindow(field(read('releve-m8-parcours.json'), 'fenetre'))).toBe(true);
   });

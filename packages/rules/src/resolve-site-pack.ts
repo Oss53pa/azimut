@@ -11,7 +11,7 @@ export type RulesPackIndex = ReadonlyMap<string, LoadedRulesPack>;
 
 /** One corpus entry: the bound id and the directory that holds the pack. */
 export type RulesPackSource = {
-  /** The id a site binds to — matches `site_rules_binding.rules_pack_id` / `rules_pack.id`. */
+  /** The id a site binds to: matches `site_rules_binding.rules_pack_id` / `rules_pack.id`. */
   readonly id: string;
   /** Directory under `rules-packs/` holding the manifest and rule files. */
   readonly directory: string;
@@ -28,7 +28,7 @@ function packNotBound(rulesPackId: string | null): Finding {
 }
 
 /**
- * Le paquet en vigueur pour un site, depuis ses rattachements — A5.8 et D3.6.
+ * Le paquet en vigueur pour un site, depuis ses rattachements : A5.8 et D3.6.
  *
  * « Cette table fait foi pour le rattachement d'un site à ses paquets. Un site
  * porte au plus un socle et au plus une surcouche pays. Précédence, pour une
@@ -88,7 +88,7 @@ export function resolveSiteRulesPack(
 }
 
 /**
- * Les paquets d'un site tels que l'empreinte de contenu les porte — D7.1.
+ * Les paquets d'un site tels que l'empreinte de contenu les porte : D7.1.
  *
  * « Les deux rattachements entrent dans l'empreinte, et non le seul résultat
  * de leur fusion. » `mergeCountryOverlay` garde la clé et la version du socle :

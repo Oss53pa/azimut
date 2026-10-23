@@ -5,7 +5,7 @@ import type { UiMessageKey } from '../i18n/messages.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
- * J1.4 (partie J) — le fond du décalque d'un niveau.
+ * J1.4 (partie J) : le fond du décalque d'un niveau.
  *
  * Le plan calé du niveau, lu dans les lignes de la session ; son image, gardée
  * par la session depuis le calage. L'image n'est posée que si c'est une image

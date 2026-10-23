@@ -9,7 +9,7 @@ import { applyCommands } from '../write-path.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
 
 /**
- * A6.1, second test obligatoire — « un utilisateur de l'organisation A ne peut
+ * A6.1, second test obligatoire : « un utilisateur de l'organisation A ne peut
  * lire, écrire, ni détecter l'existence d'aucune ligne de l'organisation B ».
  *
  * Il demande une base : `pnpm test:db`. Mise en place dans
@@ -118,15 +118,15 @@ describe('chemin d’écriture et cloisonnement en écriture (A6.1)', () => {
 });
 
 /**
- * E5.1 et M1 (partie M) — `azimut.apply_commands`, le chemin d'écriture
+ * E5.1 et M1 (partie M) : `azimut.apply_commands`, le chemin d'écriture
  * atteignable depuis le poste.
  *
  * Le poste parle à PostgREST et ne peut pas ouvrir de transaction. Or M1 veut
- * qu'un site naisse avec un bâtiment et un niveau — « un site sans niveau est
- * un état inutile » — et trois requêtes séparées laisseraient ce cas se
+ * qu'un site naisse avec un bâtiment et un niveau (« un site sans niveau est
+ * un état inutile ») et trois requêtes séparées laisseraient ce cas se
  * produire au moindre incident.
  */
-describe('apply_commands — le chemin d’écriture du poste', () => {
+describe('apply_commands : le chemin d’écriture du poste', () => {
   const ORG = ORG_A;
 
   async function callAs(userId: string, commands: unknown): Promise<unknown> {
@@ -182,7 +182,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     expect((await readAs(ALICE, site)).length).toBe(0);
   });
 
-  /** Q5 — un client (entité juridique) s'écrit dans son organisation, et pas ailleurs. */
+  /** Q5 : un client (entité juridique) s'écrit dans son organisation, et pas ailleurs. */
   it('écrit une entité juridique dans son organisation et la refuse ailleurs', async () => {
     const id = 'aa000000-0000-0000-0000-00000000ee01';
     const entity = (org: string, key: string) => ({
@@ -206,7 +206,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
   });
 
   /**
-   * O11 et 0069 — une fermeture temporaire s'écrit dans `temporary_closure`,
+   * O11 et 0069 : une fermeture temporaire s'écrit dans `temporary_closure`,
    * se relit telle qu'écrite, reste invisible d'une autre organisation, et se
    * retire. La base refuse une plage inversée et une liste d'arêtes vide.
    */
@@ -257,7 +257,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
   });
 
   /**
-   * A5.6 et 0049 — une face et un bloc s'écrivent selon A5.6 : une face sans
+   * A5.6 et 0049, une face et un bloc s'écrivent selon A5.6 : une face sans
    * `side`, un bloc sans `ordinal`. Un bloc sans aucune position est refusé,
    * et le bloc se retire en laissant sa face.
    */
@@ -295,7 +295,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     expect(await count('support_content_block', block)).toBe(0);
     expect(await count('support_face', face)).toBe(1);
 
-    // A5.6 — la face se modifie : gabarit et langues, écrits en texte, relus en jsonb.
+    // A5.6, la face se modifie : gabarit et langues, écrits en texte, relus en jsonb.
     await callAs(ALICE, [{ operation: 'update', table: 'support_face', id: face,
       before: { template_key: null, langs: null }, after: { template_key: 'tpl-essai', langs: '["fr","en"]' } }]);
     const faceRow = await db.transaction(async (tx) => {
@@ -305,7 +305,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     });
     expect(faceRow[0]).toEqual({ template_key: 'tpl-essai', langs: ['fr', 'en'] });
 
-    // D8.3 — un bloc libre porte son texte par langue ; il se réécrit, puis se retire.
+    // D8.3 : un bloc libre porte son texte par langue ; il se réécrit, puis se retire.
     const free = 'ac000000-0000-0000-0000-00000000ee08';
     await callAs(ALICE, [{ operation: 'create', table: 'support_content_block', id: free,
       after: { id: free, org_id: ORG, face_id: face, block_index: '1', kind: 'free', free_text: '{"fr":"Sortie"}' } }]);

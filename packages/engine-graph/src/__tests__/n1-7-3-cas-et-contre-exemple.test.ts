@@ -93,7 +93,7 @@ const PAIRS: readonly Pair[] = [
   },
 ];
 
-describe('N1.7 critère 3 — chaque cas a son site et son contre-exemple', () => {
+describe('N1.7 critère 3 : chaque cas a son site et son contre-exemple', () => {
   it('le site voisin de référence ne déclenche rien de bloquant', () => {
     const outcome = validateGraph(refMinimal);
     expect(outcome.ok, `ref-minimal doit passer : ${codesOf(refMinimal).join(', ')}`).toBe(true);
@@ -112,7 +112,7 @@ describe('N1.7 critère 3 — chaque cas a son site et son contre-exemple', () =
   }
 });
 
-describe('N1.7 critère 3 — les cas multiniveaux', () => {
+describe('N1.7 critère 3 : les cas multiniveaux', () => {
   it('le site multiniveau de référence ne déclenche rien de bloquant', () => {
     const outcome = validateGraph(refMultilevel);
     expect(
@@ -142,7 +142,7 @@ describe('N1.7 critère 3 — les cas multiniveaux', () => {
   });
 });
 
-describe('N1.7 critère 3 — l’audit refuse de chiffrer un graphe non validé', () => {
+describe('N1.7 critère 3 : l’audit refuse de chiffrer un graphe non validé', () => {
   /**
    * A7.1 : « `auditCoverage` refuse de produire un taux si `validateGraph`
    * n'est pas passé. » C'est le seul cas du catalogue que `validateGraph` ne

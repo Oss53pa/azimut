@@ -13,7 +13,7 @@ type ClosuresPanelProps = {
   readonly disabled?: boolean | undefined;
 };
 
-/** O11 — les fermetures temporaires du site, telles quelles. */
+/** O11 : les fermetures temporaires du site, telles quelles. */
 export function ClosuresPanel({ onWithdraw, disabled = false }: ClosuresPanelProps): JSX.Element {
   const site = useSiteData();
   const { t, lang } = useI18n();
@@ -24,7 +24,7 @@ export function ClosuresPanel({ onWithdraw, disabled = false }: ClosuresPanelPro
   // Une arête que le graphe ne porte plus s'affiche par son identifiant.
   const edgeLabel = (id: string): string => {
     const edge = edges.get(id);
-    return edge === undefined ? id : `${labels.node(edge.from_node_id)} — ${labels.node(edge.to_node_id)}`;
+    return edge === undefined ? id : `${labels.node(edge.from_node_id)} – ${labels.node(edge.to_node_id)}`;
   };
   const columns: Column<TemporaryClosure>[] = [
     { id: 'edge', header: t('closures.col.edge'), cell: c => c.edge_ids.map(edgeLabel).join(' ; ') },

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const STUDIO_SRC = resolve(HERE, '..', '..');
 
-// F9.1/F9.2 — interface icons are stroke-only, from a controlled set, never a
+// F9.1/F9.2: interface icons are stroke-only, from a controlled set, never a
 // filled/coloured glyph. Emoji (Extended_Pictographic) are exactly the "aplat
 // plein" F9 forbids, and several risk confusion with wayfinding/safety
 // pictograms. F16 requires the static iconographic control.
@@ -23,7 +23,7 @@ function walk(dir: string): string[] {
   return out;
 }
 
-describe('F9 / F16 — no emoji or filled-glyph icons in the studio', () => {
+describe('F9 / F16: no emoji or filled-glyph icons in the studio', () => {
   it('no Extended_Pictographic character in any component', () => {
     const violations: string[] = [];
     for (const file of walk(STUDIO_SRC)) {

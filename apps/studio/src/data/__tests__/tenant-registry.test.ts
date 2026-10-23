@@ -22,7 +22,7 @@ const DOSSIER = {
   height_mm: 1120, overhang_mm: 95, material: 'plexiglas', lighting: 'indirect', features: ['neon_nu'],
 };
 
-describe('H5 — enseignes, sites de référence', () => {
+describe('H5 : enseignes, sites de référence', () => {
   it('rattache le jeu de démonstration aux destinations du site ouvert', async () => {
     const registry = await createReferenceRepository().loadTenantRegistry('ref-multilevel');
     expect(registry.dossiers.length).toBeGreaterThan(0);
@@ -35,7 +35,7 @@ describe('H5 — enseignes, sites de référence', () => {
   });
 });
 
-describe('H5 — enseignes, API REST', () => {
+describe('H5: enseignes, API REST', () => {
   it('lit versions, dossiers et pièces, pièces triées sous leur dossier', async () => {
     stubTables({
       site: [{ id: 'aaaa0008-0000-4000-8000-000000000001' }],

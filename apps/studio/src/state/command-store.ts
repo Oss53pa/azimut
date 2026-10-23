@@ -1,5 +1,5 @@
 /**
- * F15 — `state/`, « magasin et commandes, écrit dans le dépôt ».
+ * F15 : `state/`, « magasin et commandes, écrit dans le dépôt ».
  *
  * C'est le seul endroit de l'interface qui mène à une écriture. M12.A2
  * le formule comme une interdiction : « L'atelier n'écrit jamais directement
@@ -7,13 +7,13 @@
  * empêche la règle de propriété unique d'être contournée par l'interface. »
  *
  * Le magasin ne connaît ni SQL, ni schéma, ni organisation. Il tient une pile
- * et confie les commandes à un émetteur qu'on lui donne — ce qui le rend
+ * et confie les commandes à un émetteur qu'on lui donne : ce qui le rend
  * vérifiable sans base, et empêche l'interface de court-circuiter le chemin.
  */
 import type { EntityCommand, Outcome } from '@azimut/core-model';
 import { inverseCommand } from '@azimut/core-model';
 
-/** E5.2 — profondeur de la pile d'annulation, constante nommée. */
+/** E5.2 : profondeur de la pile d'annulation, constante nommée. */
 export const UNDO_DEPTH = 200;
 
 /**
@@ -100,7 +100,7 @@ function capped(entries: readonly UndoEntry[]): readonly UndoEntry[] {
  * Ce qu'une annulation rend : l'état, et si elle a eu lieu.
  *
  * `applied` vaut faux quand la pile était vide. Ce n'est pas un refus : une
- * pile vide est un état d'écran (F7), et l'écran le sait déjà — les boutons
+ * pile vide est un état d'écran (F7), et l'écran le sait déjà, les boutons
  * sont désactivés par `canUndo` et `canRedo`. Le code d'anomalie qui portait
  * ce cas a été retiré du catalogue par l'éditeur, D2.2 le réservant aux
  * anomalies produites par un moteur.
@@ -185,7 +185,7 @@ export function canRedo(state: StoreState): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// E5.3 — la synchronisation vide la pile
+// E5.3 : la synchronisation vide la pile
 // ---------------------------------------------------------------------------
 
 /**

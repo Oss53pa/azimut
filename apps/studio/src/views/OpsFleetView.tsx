@@ -16,7 +16,7 @@ const ALL = 'all';
 const INSTALLED = 'installed';
 const NOT_INSTALLED = 'notinstalled';
 const OPEN = 'open';
-const EMPTY = '—';
+const EMPTY = '–';
 
 type OpsFleetViewProps = {
   /** Clé du site dans le dépôt, celle dont la coquille l'a chargé. */
@@ -24,7 +24,7 @@ type OpsFleetViewProps = {
 };
 
 /**
- * Module 08 — l'état du parc (A5.7), au gabarit « registre » : un support du
+ * Module 08, l'état du parc (A5.7), au gabarit « registre » : un support du
  * site par ligne, ses poses et les divergences relevées sur elles, lues en
  * base. L'écran ne pose rien et ne résout rien.
  */

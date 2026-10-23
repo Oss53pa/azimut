@@ -1,12 +1,12 @@
 /**
- * M3 (partie M) — écriture des empreintes, et duplication en série.
+ * M3 (partie M) : écriture des empreintes, et duplication en série.
  *
  * « La duplication en série est l'action qui fait gagner le plus de temps sur
  * une galerie à trame régulière, elle est en évidence et non enfouie. »
  *
  * Critère d'acceptation 4 : « La duplication en série de 20 cellules se fait
  * en une commande annulable d'un seul geste. » Un geste, un groupe, une
- * annulation — c'est E5.2 appliqué au cas où il compte le plus : vingt
+ * annulation, c'est E5.2 appliqué au cas où il compte le plus : vingt
  * annulations successives pour défaire une seule action seraient une punition.
  */
 import type { EntityCommand, Outcome, Point } from '@azimut/core-model';
@@ -54,7 +54,7 @@ export function createFootprintCommands(
         geometry: JSON.stringify({ vertices: row.footprint.vertices }),
         // `category_id` n'est pas écrit : A5.2 ne donne aucune colonne de
         // catégorie à `footprint`, et la base n'en a pas. La commande en
-        // portait une, et chaque création d'empreinte était refusée — « column
+        // portait une, et chaque création d'empreinte était refusée : « column
         // category_id of relation footprint does not exist ». La catégorie
         // d'une cellule est celle de sa destination (A5.4), que l'annuaire
         // portera. Le champ du panneau de M3 (partie M) reste donc sans
@@ -109,7 +109,7 @@ export function seriesVertices(
  * serait refusée vingt fois. Le suffixe est numérique et part de 2 : la
  * première copie suit l'original, qui garde son code.
  *
- * Aucune règle de nommage n'est inventée ici — `naming_rule` appartient au
+ * Aucune règle de nommage n'est inventée ici : `naming_rule` appartient au
  * module 02 (L3) et n'existe pas encore. Ce suffixe est une commodité de
  * saisie, renommable, et l'écran le dit.
  */

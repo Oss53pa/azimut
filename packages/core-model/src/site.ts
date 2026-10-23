@@ -56,7 +56,7 @@ export type Site = {
   readonly name: string;
   readonly country_code: string;
   /**
-   * O4 et A5.2 — fuseau du site, requis.
+   * O4 et A5.2 : fuseau du site, requis.
    *
    * Tous les horaires, disponibilités d'arêtes, plages de fermeture et
    * échéances s'y interprètent. Les horodatages techniques restent en temps
@@ -64,28 +64,28 @@ export type Site = {
    */
   readonly timezone: string;
   /**
-   * Q5 — entité juridique émettrice, facultative à la création et requise
+   * Q5 : entité juridique émettrice, facultative à la création et requise
    * avant l'émission de la première facture. Elle ne sert qu'à facturer.
    */
   readonly legal_entity_id?: string;
   /**
-   * N1.2 — langues actives. Au moins une est attendue ; une liste vide dit que
+   * N1.2 : langues actives. Au moins une est attendue ; une liste vide dit que
    * rien n'est déclaré, et non que le français s'applique. Voir `lang.ts`.
    */
   readonly active_langs: readonly ActiveLang[];
   /**
-   * M01.S1 / D1.1 / N1.2 — origine du repère site, en mètres.
+   * M01.S1 / D1.1 / N1.2 : origine du repère site, en mètres.
    *
    * Les deux nombres sont ceux du premier calage du site, recopiés ici, et
    * jamais modifiés ensuite. Absents tant qu'aucun calage n'a eu lieu : un
    * repère non posé ne se lit pas comme un repère à l'origine (0, 0). Les deux
    * colonnes s'apparient par `siteOrigin` et se protègent par
-   * `guardSiteOrigin` — voir `plan.ts`.
+   * `guardSiteOrigin`: voir `plan.ts`.
    */
   readonly origin_x_m?: number;
   readonly origin_y_m?: number;
   /**
-   * D1.1 / N1.2 — altitude du niveau de référence, à laquelle Z vaut 0.
+   * D1.1 / N1.2 : altitude du niveau de référence, à laquelle Z vaut 0.
    * Absente quand l'altitude absolue du site n'est pas relevée : les
    * `level.elevation_m` restent justes, ils sont relatifs à ce niveau.
    */
@@ -98,10 +98,10 @@ export type Building = {
   readonly site_id: string;
   readonly name: string;
   readonly independent_access: boolean;
-  /** N1.2 — horaires d'ouverture. Absents quand rien n'est déclaré. Voir `opening-hours.ts`. */
+  /** N1.2 : horaires d'ouverture. Absents quand rien n'est déclaré. Voir `opening-hours.ts`. */
   readonly opening_hours?: OpeningHours;
   /**
-   * N1.2 — largeur héritée par les arêtes du bâtiment à leur création.
+   * N1.2 : largeur héritée par les arêtes du bâtiment à leur création.
    *
    * Une valeur de saisie, pas une valeur de calcul : `edge.width_m` reste la
    * seule largeur qu'un moteur lit (M01.S6 pour la longueur, même principe). Une
@@ -126,7 +126,7 @@ export type Footprint = {
   readonly geometry: Polygon;
   readonly kind: FootprintKind;
   /**
-   * N1.2 — code d'unité locative. Requis quand la nature est `cell`, unique
+   * N1.2 : code d'unité locative. Requis quand la nature est `cell`, unique
    * par niveau ; absent pour les autres natures.
    *
    * Le champ est facultatif au modèle et la contrainte vit dans les contrôles
@@ -145,7 +145,7 @@ export type Volume = {
   readonly height_m: number;
   readonly material_key: string;
   /**
-   * K2.1 — Optional manual painter order. Null/absent by default (the computed
+   * K2.1: Optional manual painter order. Null/absent by default (the computed
    * depth sort applies); when set, it takes precedence over the computed sort.
    */
   readonly render_order?: number | null;
@@ -204,7 +204,7 @@ export type VerticalLink = {
 };
 
 /**
- * A5.3 et M01.S10 — le passage entre deux bâtiments.
+ * A5.3 et M01.S10 : le passage entre deux bâtiments.
  *
  * « Toute arête dont les deux extrémités appartiennent à des bâtiments
  * différents porte une ligne `building_link`, qui déclare si le passage est
@@ -244,7 +244,7 @@ export type Pictogram = {
   readonly svg_path: string;
   readonly registry: PictogramRegistry;
   /**
-   * À quoi sert ce pictogramme, et non d'où il vient — A5.4.
+   * À quoi sert ce pictogramme, et non d'où il vient : A5.4.
    *
    * C'est par elle qu'un moteur demande « le pictogramme d'accessibilité »
    * sans connaître son code. Voir `pictogram-functions.ts`, qui porte le
@@ -253,7 +253,7 @@ export type Pictogram = {
    */
   readonly function_key: string | null;
   /**
-   * Le paquet de règles qui porte ce pictogramme — A5.4.
+   * Le paquet de règles qui porte ce pictogramme : A5.4.
    *
    * Requis pour le registre de sécurité, d'où vient toute désignation de ce
    * registre ; c'est aussi la portée de son unicité : une fonction y est
@@ -279,7 +279,7 @@ export type Destination = {
   readonly occupancy_status: OccupancyStatus;
   readonly display_priority: number;
   /**
-   * N1.2 / M01.S5 — période d'occupation, dates ISO 8601 `AAAA-MM-JJ`.
+   * N1.2 / M01.S5 : période d'occupation, dates ISO 8601 `AAAA-MM-JJ`.
    *
    * L'historique est conservé : une cellule peut porter plusieurs occupants
    * successifs, chacun avec sa période. `valid_to` absent désigne l'occupant
@@ -319,11 +319,11 @@ export type SiteGraph = {
   readonly building_links: readonly BuildingLink[];
 };
 
-/** A5.8 — le rôle d'un paquet rattaché à un site. */
+/** A5.8 : le rôle d'un paquet rattaché à un site. */
 export type RulesPackRole = 'base' | 'overlay';
 
 /**
- * A5.8 — le rattachement d'un site à un paquet de règles.
+ * A5.8 : le rattachement d'un site à un paquet de règles.
  *
  * « Cette table fait foi pour le rattachement d'un site à ses paquets. Un site
  * porte au plus un socle et au plus une surcouche pays. » Le site ne porte plus
@@ -340,7 +340,7 @@ export type SiteData = {
   readonly organization: Organization;
   readonly site: Site;
   /**
-   * A5.8 — les paquets rattachés au site, zéro, un ou deux. Requis au type :
+   * A5.8 : les paquets rattachés au site, zéro, un ou deux. Requis au type :
    * un site sans rattachement le dit par une liste vide, et un jeu d'essai
    * qui l'oublierait ne compilerait pas au lieu de passer pour non rattaché.
    */
@@ -348,14 +348,14 @@ export type SiteData = {
   readonly buildings: readonly Building[];
   readonly levels: readonly Level[];
   /**
-   * A5.2 — fonds de plan importés et leurs calages. Séparés du reste de la
+   * A5.2 : fonds de plan importés et leurs calages. Séparés du reste de la
    * scène parce qu'ils ne sont pas de la géométrie métier : ils disent
    * seulement comment un fond se lit en mètres. Voir `plan.ts`.
    */
   readonly plan_sources: readonly PlanSource[];
   readonly plan_calibrations: readonly PlanCalibration[];
   /**
-   * A5.2 — zones du socle, avec les empreintes qu'elles couvrent.
+   * A5.2 : zones du socle, avec les empreintes qu'elles couvrent.
    *
    * Absentes de l'entrée des moteurs jusqu'à la version 17 : une zone ne
    * portait alors qu'un nom et une nature, et aucun contrôle n'avait de raison
@@ -383,17 +383,17 @@ export type SiteData = {
   readonly support_versions: readonly SupportVersion[];
   readonly face_templates: readonly FaceTemplate[];
   /**
-   * A5.3 — ce que les empreintes de place portent en plus, quand elles le
+   * A5.3 : ce que les empreintes de place portent en plus, quand elles le
    * portent. Une ligne par empreinte, au plus ; une empreinte sans extension
    * reste une place standard sans repère de travée.
    *
    * Le stationnement n'a plus d'autre entrée ici. Les parkings sont des zones,
-   * les places des empreintes, et les capacités annoncées des faits d'A5.11 —
+   * les places des empreintes, et les capacités annoncées des faits d'A5.11 :
    * section S8, règles S-35 à S-37.
    */
   readonly parking_spaces: readonly ParkingSpace[];
   /**
-   * O11 — les fermetures temporaires du site. Facultatif au type pour les
+   * O11 : les fermetures temporaires du site. Facultatif au type pour les
    * jeux d'essai qui n'en portent pas : absent vaut aucune fermeture.
    */
   readonly temporary_closures?: readonly TemporaryClosure[];

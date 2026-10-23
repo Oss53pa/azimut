@@ -23,7 +23,7 @@ export const OK = stateColors['state-valid'];
  * Fixed date, as the production export requires from its caller
  * (export-pdf.ts takes `creation_date`). Without it pdf-lib stamps the
  * wall clock into CreationDate and ModDate at second granularity, and
- * two renders straddling a tick differ on those bytes alone — which
+ * two renders straddling a tick differ on those bytes alone: which
  * made the determinism test below measure the clock instead of the
  * renderer, and fail intermittently.
  */

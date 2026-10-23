@@ -17,7 +17,7 @@ type FaceFormProps = {
 };
 
 /**
- * A5.6 — le gabarit et les langues d'une face, déclarée ou à déclarer. Monté
+ * A5.6 : le gabarit et les langues d'une face, déclarée ou à déclarer. Monté
  * avec une clé par face : changer de face repart de ses valeurs en base.
  */
 export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {

@@ -28,7 +28,7 @@ const theme = (text: string, accent: string, background: string): FaceTheme => (
   border: text,
 });
 
-describe('G6.2 — checkFaceContrast (wired to FaceTheme)', () => {
+describe('G6.2: checkFaceContrast (wired to FaceTheme)', () => {
   it('passes a high-contrast face', () => {
     const r = checkFaceContrast(pack(), {
       face_id: 'f-1',

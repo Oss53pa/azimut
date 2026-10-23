@@ -29,7 +29,7 @@ function first<T>(arr: readonly T[], label: string): T {
 const profile: TravelProfile = first(refMinimal.travel_profiles, 'profile');
 const dirTemplate: FaceTemplate = first(refMinimal.face_templates, 'template');
 
-// A face that renders no destination list — must never go stale on a
+// A face that renders no destination list: must never go stale on a
 // destination change.
 const headerOnlyTemplate: FaceTemplate = {
   id: 'ftpl-header-only',
@@ -71,7 +71,7 @@ function renameDestination(destId: string, lang: string, value: string): SiteDat
   };
 }
 
-describe('D7.3 — computeStaleFaces', () => {
+describe('D7.3: computeStaleFaces', () => {
   it('reports no stale faces when nothing changed', () => {
     const faces = [
       descriptor('dir@junction', dirTemplate, 'n-junction'),
@@ -117,7 +117,7 @@ describe('D7.3 — computeStaleFaces', () => {
   });
 });
 
-describe('D7.2 — une face sans paquet n’a pas d’empreinte', () => {
+describe('D7.2 : une face sans paquet n’a pas d’empreinte', () => {
   it('refuse le rapport et nomme la face, au lieu de la dire périmée ou non', () => {
     const face = { ...descriptor('dir@junction', dirTemplate, 'n-junction'), rules_packs: {} };
     const report = computeStaleFaces(refMinimal, [face]);

@@ -1,5 +1,5 @@
 /**
- * M2 (partie M), version 27 — « Un fichier sans contenu vectoriel exploitable
+ * M2 (partie M), version 27 : « Un fichier sans contenu vectoriel exploitable
  * est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED`.
  * Cela vise l'image en mode point comme le PDF qui se présente comme vectoriel
  * sans l'être : c'est le contenu qui est contrôlé, jamais l'extension. »

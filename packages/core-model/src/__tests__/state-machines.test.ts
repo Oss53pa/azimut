@@ -39,7 +39,7 @@ const PROOF_ALLOWED: [string, string][] = [
   ['approved', 'superseded'],
 ];
 
-describe('D9.1 — proof version state machine', () => {
+describe('D9.1: proof version state machine', () => {
   it.each(PROOF_ALLOWED)('allows %s → %s', (from, to) => {
     expect(() => assertProofTransition(from, to)).not.toThrow();
   });
@@ -63,7 +63,7 @@ const JOB_ALLOWED: [string, string][] = [
   ['running', 'queued'],
 ];
 
-describe('D9.2 — job state machine', () => {
+describe('D9.2: job state machine', () => {
   it.each(JOB_ALLOWED)('allows %s → %s', (from, to) => {
     expect(() => assertJobTransition(from, to)).not.toThrow();
   });
@@ -84,7 +84,7 @@ const DIVERGENCE_ALLOWED: [string, string][] = [
   ['detected', 'accepted'],
 ];
 
-describe('D9.3 — divergence state machine', () => {
+describe('D9.3: divergence state machine', () => {
   it.each(DIVERGENCE_ALLOWED)('allows %s → %s', (from, to) => {
     expect(() => assertDivergenceTransition(from, to)).not.toThrow();
   });
@@ -109,7 +109,7 @@ const WORK_ORDER_ALLOWED: [string, string][] = [
   ['in_progress', 'cancelled'],
 ];
 
-describe('D9.4 — work order state machine', () => {
+describe('D9.4: work order state machine', () => {
   it.each(WORK_ORDER_ALLOWED)('allows %s → %s', (from, to) => {
     expect(() => assertWorkOrderTransition(from, to)).not.toThrow();
   });
@@ -124,7 +124,7 @@ describe('D9.4 — work order state machine', () => {
 
 // ── Edge cases ────────────────────────────────────
 
-describe('D9 — unknown and edge-case states', () => {
+describe('D9: unknown and edge-case states', () => {
   it('rejects completely unknown from-state', () => {
     expect(() => assertJobTransition('nonexistent', 'running')).toThrow(/forbidden/);
   });
@@ -141,22 +141,22 @@ describe('D9 — unknown and edge-case states', () => {
     expect(() => assertDivergenceTransition('detected', '')).toThrow(/forbidden/);
   });
 
-  it('error message includes domain name — Job', () => {
+  it('error message includes domain name: Job', () => {
     expect(() => assertJobTransition('succeeded', 'queued'))
       .toThrow(/Job/);
   });
 
-  it('error message includes domain name — ProofVersion', () => {
+  it('error message includes domain name: ProofVersion', () => {
     expect(() => assertProofTransition('superseded', 'draft'))
       .toThrow(/ProofVersion/);
   });
 
-  it('error message includes domain name — Divergence', () => {
+  it('error message includes domain name: Divergence', () => {
     expect(() => assertDivergenceTransition('resolved', 'detected'))
       .toThrow(/Divergence/);
   });
 
-  it('error message includes domain name — WorkOrder', () => {
+  it('error message includes domain name: WorkOrder', () => {
     expect(() => assertWorkOrderTransition('done', 'draft'))
       .toThrow(/WorkOrder/);
   });
@@ -185,7 +185,7 @@ describe('D9 — unknown and edge-case states', () => {
  * endroits. Une seule table fait foi désormais ; ce test interdit à la
  * dérivation de diverger (invariant 1).
  */
-describe('D9 — une seule table pour la version de support', () => {
+describe('D9 : une seule table pour la version de support', () => {
   it('admet exactement les transitions que la table d’événements porte', () => {
     for (const from of SUPPORT_VERSION_STATES) {
       const admitted = new Set(admittedEvents(from).map(a => a.to));

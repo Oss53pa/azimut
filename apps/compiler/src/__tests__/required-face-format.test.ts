@@ -50,12 +50,12 @@ function input(overrides: Partial<RequiredFormatInput> = {}): RequiredFormatInpu
 const TWO = [{ fr: 'Sortie', en: 'Exit' }, { fr: 'Accueil', en: 'Reception' }];
 
 /**
- * N4.3 — règle M04.G3. Le format se calcule depuis le contenu, la distance de
+ * N4.3 : règle M04.G3. Le format se calcule depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue. Ce fichier éprouve la
  * lecture de ces trois entrées sur une face résolue ; `face-format.test.ts`
  * éprouve le calcul lui-même.
  */
-describe('G3 — le format exigé par une face', () => {
+describe('G3 : le format exigé par une face', () => {
   it('porte la hauteur de caractère que la distance impose', () => {
     // Le paquet d'essai : 5 m × facteur 7 = 35 mm, au-dessus du plancher 33.
     const format = requiredFaceFormat(input(), face(TWO));

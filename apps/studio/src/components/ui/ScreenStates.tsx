@@ -4,7 +4,7 @@ import { Button } from './Button.js';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F7 — les six états obligatoires d'un écran.
+ * F7 : les six états obligatoires d'un écran.
  *
  * « Tout écran affichant des données traite les six états suivants. Un écran
  * qui n'en traite que le cas nominal est incomplet et refusé en revue. »
@@ -54,8 +54,8 @@ export type ScreenStatesProps = {
 /**
  * Rend l'écran selon son état.
  *
- * Trois états laissent voir le contenu : `ready`, `partial` — « ce qui est
- * disponible s'affiche » — et `offline`, où le travail continue. Les trois
+ * Trois états laissent voir le contenu : `ready`, `partial` (« ce qui est
+ * disponible s'affiche ») et `offline`, où le travail continue. Les trois
  * autres le remplacent, parce qu'il n'y a rien de fiable à montrer.
  */
 export function ScreenStates({

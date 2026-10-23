@@ -54,7 +54,7 @@ export const templateSchema = z.object({
 
 /**
  * La liaison D8 : d'où vient une valeur, et laquelle. Exportée pour être
- * réutilisée hors des gabarits de panneau — le texte lié d'un document de
+ * réutilisée hors des gabarits de panneau : le texte lié d'un document de
  * stratégie (A5.11, règle M01.S11) désigne ses valeurs de la même façon, et deux notations pour
  * la même idée finiraient par diverger.
  */
@@ -70,7 +70,7 @@ export type TemplateValidationError = {
 };
 
 /**
- * D8.3 — a style role must reference a charter role, never a direct colour.
+ * D8.3: a style role must reference a charter role, never a direct colour.
  * Reject anything that reads as a literal colour value.
  */
 function looksLikeColor(role: string): boolean {

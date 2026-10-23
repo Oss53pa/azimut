@@ -50,7 +50,7 @@ describe('siteActiveLangs', () => {
   });
 });
 
-describe('createKioskPackageJobHandler (D10 — job-driven)', () => {
+describe('createKioskPackageJobHandler (D10: job-driven)', () => {
   it('loads the site, assembles, persists and records in one flow', async () => {
     const loaded: Array<{ orgId: string; siteId: string; requestedBy: string }> = [];
     const records: Array<{ record: KioskPackageRecord; orgId: string }> = [];
@@ -106,7 +106,7 @@ describe('createKioskPackageJobHandler (D10 — job-driven)', () => {
     expect(manifest.langs).toEqual(['en', 'fr']);
   });
 
-  it('A6.1 — refuse un travail sans demandeur, sans lire le site', async () => {
+  it('A6.1 : refuse un travail sans demandeur, sans lire le site', async () => {
     let reads = 0;
     const handler = createKioskPackageJobHandler({
       loadSite: async () => { reads++; return refMultilevel; },

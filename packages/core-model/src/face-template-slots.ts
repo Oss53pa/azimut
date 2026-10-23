@@ -1,10 +1,10 @@
 /**
- * A5.6 / D8 — le gabarit d'une face, et ses emplacements.
+ * A5.6 / D8 : le gabarit d'une face, et ses emplacements.
  *
  * Un bloc saisi sur une face n'a pas de région : il remplit l'emplacement du
  * gabarit de même indice, s'il est de même nature (décision du 26/09/2026).
  * L'indice d'un emplacement est la place du bloc dans le gabarit trié par
- * ordinal puis par nature — celle que prend `message_line.block_index`.
+ * ordinal puis par nature : celle que prend `message_line.block_index`.
  *
  * L'indice d'une face est la place de son côté parmi les faces de la
  * typologie triées par côté, comme dans la génération du tableau des

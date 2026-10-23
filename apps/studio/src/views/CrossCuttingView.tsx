@@ -13,7 +13,7 @@ import {
 /**
  * Abonnements de démonstration : les douze modules actifs, sauf le portefeuille
  * suspendu et les parcours clients à l'essai, pour que les deux règles de I5.2
- * — absent de la navigation, mais lisible en export — soient observables.
+ * (absent de la navigation, mais lisible en export) soient observables.
  */
 const DEMO_ENTITLEMENTS: readonly ModuleEntitlement[] = PRODUCT_MODULES.map(
   (module): ModuleEntitlement => ({
@@ -39,7 +39,7 @@ const MISSING_BRICKS = [
 ] as const;
 
 /**
- * Module 11 — les fonctions transverses. Deux briques existent et sont
+ * Module 11 : les fonctions transverses. Deux briques existent et sont
  * mesurables ici : l'internationalisation et les droits par module. Les quatre
  * autres n'existent pas, et l'écran le dit au lieu de les mimer.
  */

@@ -63,7 +63,7 @@ export function loadRulesPack(
   const groupResult = groupAndCheckAmbiguity(pack.rules);
   if (!groupResult.ok) return groupResult;
 
-  // D7.2 — l'identité du paquet est son empreinte canonique, calculée par la
+  // D7.2 : l'identité du paquet est son empreinte canonique, calculée par la
   // même fonction que celle d'un paquet de répertoire.
   const checksum = rulesPackEmpreinte([{ content: raw }], pack.key);
   if (!checksum.ok) return checksum;
@@ -84,7 +84,7 @@ export function loadRulesPack(
 }
 
 /**
- * Garde-fou 3 — every rule must carry a non-empty documentary reference, so the
+ * Garde-fou 3: every rule must carry a non-empty documentary reference, so the
  * obligation posed by partie D is not bypassed. Checked before delegating so a
  * missing reference yields RULES.SOURCE_REF_MISSING rather than a generic schema
  * error.
@@ -178,7 +178,7 @@ function loadRulesPackFromDirectory(
   }
   const manifest = manifestResult.data;
 
-  // Garde-fou 2 — a TEST-jurisdiction pack is refused outside a test environment.
+  // Garde-fou 2: a TEST-jurisdiction pack is refused outside a test environment.
   if (manifest.jurisdiction === 'TEST' && environment !== 'test') {
     return {
       ok: false,
@@ -204,7 +204,7 @@ function loadRulesPackFromDirectory(
   const sourceRefCheck = checkSourceRefs(manifest.files, ruleFileContents);
   if (!sourceRefCheck.ok) return sourceRefCheck;
 
-  // The manifest is already parsed and validated above — hand it over parsed so
+  // The manifest is already parsed and validated above: hand it over parsed so
   // it is not parsed and validated a second time.
   return loadPackDirectoryParsed(manifest, ruleFileContents);
 }

@@ -3,7 +3,7 @@ import { auditVectorImports, type VectorImport } from '../vector-import.js';
 
 const imp = (id: string, file_name: string): VectorImport => ({ id, file_name });
 
-describe('G7.2 — auditVectorImports (IMPORT.VECTOR_AS_REFERENCE_ONLY)', () => {
+describe('G7.2: auditVectorImports (IMPORT.VECTOR_AS_REFERENCE_ONLY)', () => {
   it('records each vector import as a background reference', () => {
     const r = auditVectorImports([imp('v-1', 'plan.ai')]);
     expect(r.ok).toBe(true);

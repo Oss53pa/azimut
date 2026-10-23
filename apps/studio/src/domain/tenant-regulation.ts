@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H5.2 / H5.3 — A tenant sign is instructed and followed against the site's
+ * H5.2 / H5.3: A tenant sign is instructed and followed against the site's
  * sign regulation, never designed by Azimut, so it is a distinct entity, not a
  * support. The regulation is expressed as controllable rules; the measurable
  * ones are checked automatically here (heights, overhangs, materials, lighting,

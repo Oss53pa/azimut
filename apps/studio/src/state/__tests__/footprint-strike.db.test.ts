@@ -7,7 +7,7 @@ import { strikeFootprints } from '../footprint-strike.js';
 import type { StoredRow } from '../session-store.js';
 
 /**
- * J1.2 (partie J) — le trait barrant une empreinte, contre la base réelle :
+ * J1.2 (partie J), le trait barrant une empreinte, contre la base réelle :
  * la suppression passe par le chemin d'écriture ordinaire, sous cloisonnement
  * forcé, et son inverse rétablit la ligne telle qu'elle était.
  */
@@ -72,7 +72,7 @@ afterAll(async () => {
   await db.$client.end();
 });
 
-describe('J1.2 — le trait barrant une empreinte, en base', () => {
+describe('J1.2 : le trait barrant une empreinte, en base', () => {
   it('la suppression passe, et son inverse rétablit la ligne entière', async () => {
     const created = createFootprintCommands([{
       id: FOOTPRINT,

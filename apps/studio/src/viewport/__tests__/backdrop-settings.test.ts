@@ -10,7 +10,7 @@ function memoryStore(): Pick<Storage, 'getItem' | 'setItem'> & { readonly data: 
   };
 }
 
-describe('J1.4 — les réglages du fond de décalque', () => {
+describe('J1.4 : les réglages du fond de décalque', () => {
   it('se retrouvent par zone et par niveau', () => {
     const store = memoryStore();
     rememberBackdrop('empreintes:n1', { opacity: 0.3, showShapes: false }, store);

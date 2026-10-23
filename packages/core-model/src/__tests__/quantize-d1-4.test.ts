@@ -3,14 +3,14 @@ import { quantizePosition, quantizePoint } from '../view-transform.js';
 import { roundHalfAwayFromZero } from '../round.js';
 
 /**
- * D1.4 — une seule primitive d'arrondi, « au plus loin de zéro », et le zéro
+ * D1.4 : une seule primitive d'arrondi, « au plus loin de zéro », et le zéro
  * négatif interdit en sortie.
  *
  * `quantizePosition` employait `Math.round`. Deux écarts, trouvés par le
- * critère 3 de M3 (partie M) — « une empreinte tracée à la souris et la même
- * saisie au clavier produisent des données identiques » — et non par relecture.
+ * critère 3 de M3 (partie M) (« une empreinte tracée à la souris et la même
+ * saisie au clavier produisent des données identiques ») et non par relecture.
  */
-describe('D1.4 — quantification au millimètre', () => {
+describe('D1.4 : quantification au millimètre', () => {
   it('arrondit au plus loin de zéro, comme la primitive unique', () => {
     // `Math.round(-0.5)` rend -0 ; « au plus loin de zéro » rend -1.
     expect(quantizePosition(-0.0005)).toBe(-0.001);

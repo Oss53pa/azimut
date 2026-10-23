@@ -23,7 +23,7 @@ export type ReadSchedule = {
   /** L'identifiant de stockage du tableau : les transitions de R12 l'écrivent. */
   readonly scheduleId: string;
   readonly schedule: MessageSchedule;
-  /** R9 — l'écartement de M02.W9, par identifiant stable de ligne. */
+  /** R9 : l'écartement de M02.W9, par identifiant stable de ligne. */
   readonly exclusions: ReadonlyMap<string, Exclusion>;
   /**
    * L'identifiant de stockage de chaque ligne, par identifiant stable.
@@ -190,7 +190,7 @@ function readLine(row: StoredRow): MessageLine | null {
 /**
  * Le tableau enregistré pour un site.
  *
- * Sans `version`, c'est la version la plus haute — celle que R4 affiche.
+ * Sans `version`, c'est la version la plus haute : celle que R4 affiche.
  * Avec, c'est cette version-là : R11 (partie R) en compare deux, et la
  * comparaison ne peut pas se contenter de la dernière.
  *

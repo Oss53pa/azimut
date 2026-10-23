@@ -1,5 +1,5 @@
 /**
- * M3 (partie M) — la duplication en série, en un seul geste.
+ * M3 (partie M) : la duplication en série, en un seul geste.
  *
  * Critère d'acceptation 4 : « La duplication en série de 20 cellules se fait
  * en une commande annulable d'un seul geste. » Les deux moitiés comptent. Un
@@ -14,7 +14,7 @@
  *
  * Aucune copie n'est écrite si une seule est refusée. Une série à moitié
  * écrite laisserait l'opérateur avec une trame trouée, et la seule façon de
- * s'en sortir serait de supprimer les copies une à une — soit exactement ce
+ * s'en sortir serait de supprimer les copies une à une : soit exactement ce
  * que le critère veut éviter.
  */
 import type { Outcome, Finding } from '@azimut/core-model';

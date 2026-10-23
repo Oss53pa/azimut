@@ -4,8 +4,8 @@ import { codePointCompare } from '@azimut/core-model';
 /**
  * Les textes du site qu'un contrôle de vocabulaire peut juger.
  *
- * Une seule définition, parce que deux contrôles les parcourent — le lexique de
- * charte et les faits du site — et qu'ils doivent porter sur le même ensemble.
+ * Une seule définition, parce que deux contrôles les parcourent (le lexique de
+ * charte et les faits du site) et qu'ils doivent porter sur le même ensemble.
  * Si l'un couvrait les dénominations et l'autre les blocs de face, une charte
  * propre et un fait respecté ne diraient plus la même chose du même livrable.
  *

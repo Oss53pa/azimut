@@ -20,16 +20,16 @@ function source(name: string): string {
 }
 
 /**
- * F7 et M7.1 (partie M) — « Les six états sont traités. Un écran qui ne traite
+ * F7 et M7.1 (partie M) : « Les six états sont traités. Un écran qui ne traite
  * que le cas nominal est incomplet. »
  *
  * Aucune bibliothèque de rendu n'est installée, et A3.3 n'en préautorise
  * aucune : le contrôle porte donc sur la structure des écrans, à la manière
- * de ceux du corpus de migrations. Il attrape le défaut qui compte — un écran
- * qui ne passe pas par l'enveloppe des six états — sans prétendre remplacer
+ * de ceux du corpus de migrations. Il attrape le défaut qui compte (un écran
+ * qui ne passe pas par l'enveloppe des six états) sans prétendre remplacer
  * l'essai au clavier que F16 demande par ailleurs, et qui reste à faire.
  */
-describe('M7.1 (partie M) — les six états, sur chaque écran de la tranche', () => {
+describe('M7.1 (partie M) : les six états, sur chaque écran de la tranche', () => {
   it('les six états de F7 sont ceux du cahier', () => {
     expect([...F7_STATES]).toEqual([
       'empty', 'loading', 'partial', 'error', 'offline', 'permission_denied',
@@ -43,7 +43,7 @@ describe('M7.1 (partie M) — les six états, sur chaque écran de la tranche', 
 
   /**
    * L'enveloppe traite les six états en un seul endroit. Un écran qui la
-   * contourne les traiterait à sa façon, ou les oublierait — et c'est
+   * contourne les traiterait à sa façon, ou les oublierait : et c'est
    * exactement ce que F7 refuse.
    */
   it('chaque écran passe par l’enveloppe des six états', () => {
@@ -68,12 +68,12 @@ describe('M7.1 (partie M) — les six états, sur chaque écran de la tranche', 
 });
 
 /**
- * M6 (partie M) — « Tous figurent dans la liste fermée de la partie F. Cette
+ * M6 (partie M) : « Tous figurent dans la liste fermée de la partie F. Cette
  * tranche n'en introduit aucun nouveau. Si un écran de cette tranche semble
  * exiger un composant absent de la liste, c'est l'écran qu'il faut revoir,
  * pas la liste qu'il faut étendre. »
  */
-describe('M6 (partie M) — aucun composant hors de la liste fermée', () => {
+describe('M6 (partie M) : aucun composant hors de la liste fermée', () => {
   it('les écrans n’importent leurs composants que de la bibliothèque', () => {
     for (const screen of TRANCHE_M) {
       const imports = [...source(screen).matchAll(/from '([^']+)'/g)].map(m => m[1] ?? '');
@@ -90,7 +90,7 @@ describe('M6 (partie M) — aucun composant hors de la liste fermée', () => {
    *
    * Une seule exception, nommée : les deux sélecteurs de fichier de M2
    * (partie M), que F6 range parmi les superpositions. M2 en demande deux, et
-   * leurs actions diffèrent — « Fichier » à l'étape 1, et « Remplacer le
+   * leurs actions diffèrent : « Fichier » à l'étape 1, et « Remplacer le
    * fond », qui est l'une des trois actions de l'écran. Le compte est figé :
    * un troisième `<input>` ferait échouer ce contrôle, comme il l'a fait quand
    * le second est apparu.
@@ -105,10 +105,10 @@ describe('M6 (partie M) — aucun composant hors de la liste fermée', () => {
 });
 
 /**
- * M7.3 (partie M) — « Toute valeur calculée est en lecture seule, et son
+ * M7.3 (partie M) : « Toute valeur calculée est en lecture seule, et son
  * caractère calculé est visible. »
  */
-describe('M7.3 (partie M) — les valeurs calculées se disent calculées', () => {
+describe('M7.3 (partie M) : les valeurs calculées se disent calculées', () => {
   it('la surface d’une empreinte est marquée calculée', () => {
     const body = source('FootprintsScreen.tsx');
     const area = body.slice(body.indexOf("label={t('fp.field.area')}"));
@@ -123,13 +123,13 @@ describe('M7.3 (partie M) — les valeurs calculées se disent calculées', () =
 });
 
 /**
- * M7.4 (partie M) — « Tout champ dimensionnel affiche son unité. »
+ * M7.4 (partie M) : « Tout champ dimensionnel affiche son unité. »
  *
  * Le type l'impose déjà : `unit` est obligatoire sur le champ numérique. Ce
- * contrôle guette le contournement — une unité vide, qui satisferait le type
+ * contrôle guette le contournement : une unité vide, qui satisferait le type
  * sans rien afficher.
  */
-describe('M7.4 (partie M) — aucune unité vide', () => {
+describe('M7.4 (partie M) : aucune unité vide', () => {
   it('aucun champ numérique ne passe une unité vide', () => {
     for (const screen of TRANCHE_M) {
       expect(source(screen), screen).not.toMatch(/unit=(""|''|\{''\}|\{""\})/);

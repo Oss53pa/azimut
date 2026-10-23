@@ -139,13 +139,13 @@ describe('ref-broken specifics', () => {
 });
 
 /**
- * C1 — « `ref-retail` : commerce multibâtiment, 5 niveaux. Accès indépendants,
+ * C1, « `ref-retail` : commerce multibâtiment, 5 niveaux. Accès indépendants,
  * lobby commun, horaires distincts par bâtiment, une liaison inter-bâtiments
  * couverte et une non couverte. »
  *
  * Ce qui se vérifie ici est la donnée : que le site porte bien ce que C1 lui
- * assigne. Ce que le moteur en fait — l'absence d'anomalie bloquante, et la
- * levée de `GRAPH.BUILDING_LINK_MISSING` sur son contre-exemple — se vérifie
+ * assigne. Ce que le moteur en fait (l'absence d'anomalie bloquante, et la
+ * levée de `GRAPH.BUILDING_LINK_MISSING` sur son contre-exemple) se vérifie
  * dans `engine-graph`, qui ne peut pas être appelé d'ici : c'est lui qui
  * dépend de ce paquet, et non l'inverse (A4.1).
  */
@@ -186,7 +186,7 @@ describe('ref-retail specifics (C1)', () => {
   });
 
   /**
-   * M01.S10 — la ligne est exigée de **toute** arête entre deux bâtiments. Que
+   * M01.S10 : la ligne est exigée de **toute** arête entre deux bâtiments. Que
    * les deux du site en portent une est ce qui en fait le contre-exemple ; une
    * troisième arête entre bâtiments, non doublée, le rendrait fautif.
    */
@@ -204,11 +204,11 @@ describe('ref-retail specifics (C1)', () => {
 });
 
 /**
- * C1 — « Chaque cas de détection de `validateGraph` dispose d'un site qui le
+ * C1 : « Chaque cas de détection de `validateGraph` dispose d'un site qui le
  * déclenche et d'un site voisin qui ne le déclenche pas. » Le site qui
  * déclenche `GRAPH.BUILDING_LINK_MISSING` est `ref-broken`.
  */
-describe('ref-broken specifics — M01.S10', () => {
+describe('ref-broken specifics: M01.S10', () => {
   it('porte une arête entre bâtiments sans sa ligne', () => {
     const buildingOfLevel = new Map(refBroken.levels.map(l => [l.id, l.building_id]));
     const buildingOfNode = new Map(refBroken.graph.nodes
@@ -222,12 +222,12 @@ describe('ref-broken specifics — M01.S10', () => {
 });
 
 /**
- * N1.2 — la déclaration de langues d'un site de référence dit ce que le site
+ * N1.2 : la déclaration de langues d'un site de référence dit ce que le site
  * porte réellement. Un écart dans un sens laisserait une dénomination hors
  * de toute langue active ; dans l'autre, il déclarerait une langue que rien
  * ne remplit.
  */
-describe('N1.2 — langues déclarées et langues présentes', () => {
+describe('N1.2 : langues déclarées et langues présentes', () => {
   for (const [key, site] of allReferenceSites) {
     it(`${key} déclare exactement les langues de ses dénominations`, () => {
       const declared = [...site.site.active_langs].sort();
@@ -239,7 +239,7 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
 });
 
 /**
- * M01.S1 — le repère site est fixé au premier calage.
+ * M01.S1 : le repère site est fixé au premier calage.
  *
  * `calibrated_at` rend « le premier » identifiable : le test porte donc sur le
  * premier calage et non sur un calage quelconque.
@@ -251,7 +251,7 @@ describe('N1.2 — langues déclarées et langues présentes', () => {
  * modèle que A5 ne prend pas. Ce qui reste vérifiable, et qui est vérifié
  * ici : un site calé porte un repère, un site sans calage n'en porte pas.
  */
-describe('M01.S1 — repère site et premier calage', () => {
+describe('M01.S1 : repère site et premier calage', () => {
   for (const [key, site] of allReferenceSites) {
     it(`${key} porte un repère si et seulement s’il est calé`, () => {
       const origin = siteOrigin(site.site);
@@ -270,11 +270,11 @@ describe('M01.S1 — repère site et premier calage', () => {
 });
 
 /**
- * A5.2 — un fond de plan porte un calage et pas deux. La base le garantit par
+ * A5.2 : un fond de plan porte un calage et pas deux. La base le garantit par
  * un index unique (migration 0023) ; les jeux d'essai ne doivent pas décrire un
  * état que la base refuse.
  */
-describe('A5.2 — un calage par fond de plan', () => {
+describe('A5.2 : un calage par fond de plan', () => {
   for (const [key, site] of allReferenceSites) {
     it(`${key} ne cale aucun fond deux fois`, () => {
       const sourceIds = site.plan_calibrations.map(c => c.plan_source_id);

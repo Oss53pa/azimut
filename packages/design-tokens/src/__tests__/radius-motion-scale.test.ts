@@ -43,7 +43,7 @@ function durationViolations(line: string): string[] {
   return bad;
 }
 
-describe('F4.3 — radius scale', () => {
+describe('F4.3: radius scale', () => {
   it('holds exactly {0, 4, 6}', () => {
     expect([...RADIUS_SCALE]).toEqual([0, 4, 6]);
     expect(isAllowedRadius(0)).toBe(true);
@@ -62,7 +62,7 @@ describe('F4.3 — radius scale', () => {
   });
 });
 
-describe('F11 — motion durations (three values only)', () => {
+describe('F11: motion durations (three values only)', () => {
   it('declares exactly 120, 200, 240 ms', () => {
     expect(Object.values(durations)).toEqual([120, 200, 240]);
   });

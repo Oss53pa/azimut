@@ -30,7 +30,7 @@ import {
 
 /**
  * Identifiant exposé : la clé du site de référence, pas son `site.id`. C'est
- * elle qui nomme le cas — « ref-broken » dit ce qu'il contient.
+ * elle qui nomme le cas : « ref-broken » dit ce qu'il contient.
  */
 export function createReferenceRepository(): SiteRepository {
   return {
@@ -162,7 +162,7 @@ export function createReferenceRepository(): SiteRepository {
     },
 
     /**
-     * Q9 — le même fichier que celui versé dans `azimut.country` par
+     * Q9, le même fichier que celui versé dans `azimut.country` par
      * `pnpm seed:reference`. Sur un poste sans base, l'écran de création doit
      * rester praticable, et une seconde liste divergerait de la table (INV-1).
      */

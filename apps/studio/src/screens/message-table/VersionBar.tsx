@@ -5,7 +5,7 @@ import type { UiMessageKey } from '../../i18n/index.js';
 import type { MessageSchedule, ScheduleState, ScheduleTrigger } from '@azimut/engine-graph';
 
 /**
- * R4 (partie R) — la barre de version.
+ * R4 (partie R) : la barre de version.
  *
  * Quatre éléments lus sur `message_schedule`, et les actions permises. R4 :
  * « Une action non permise est absente, jamais grisée. » Le tableau des
@@ -18,7 +18,7 @@ export type VersionBarProps = {
   /** Les actions à offrir, déjà croisées état et rôle. */
   readonly actions: readonly ScheduleTrigger[];
   readonly onAction: (trigger: ScheduleTrigger) => void;
-  /** R4 (partie R) — « Comparer | Au moins deux versions ». */
+  /** R4 (partie R) : « Comparer | Au moins deux versions ». */
   readonly canCompare: boolean;
   readonly onCompare: () => void;
   readonly canExport: boolean;

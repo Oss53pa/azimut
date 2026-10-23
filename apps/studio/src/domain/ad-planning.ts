@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H4.3 / H4.4 — Advertising placement planning. A placement carries a calendar
+ * H4.3 / H4.4: Advertising placement planning. A placement carries a calendar
  * with states free / option / reserved / occupied / maintenance / retired, and
  * options carry an automatic expiry date. Two automatic controls surface here:
  *  - AD.PLACEMENT_DOUBLE_BOOKED (blocking): two committed bookings overlap in
@@ -92,7 +92,7 @@ export type PlacementOption = {
 /**
  * Audit options for expiry. Returns one info AD.OPTION_EXPIRED per option whose
  * expiry date is on or before the supplied date, sorted by option id. Always
- * ok — expiry is informational, the option simply lapses.
+ * ok: expiry is informational, the option simply lapses.
  */
 export function auditOptionExpiry(
   options: readonly PlacementOption[],

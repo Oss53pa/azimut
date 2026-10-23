@@ -1,5 +1,5 @@
 /**
- * M1bis à M4 (partie M) — ce que l'atelier ajoute aux écrans de
+ * M1bis à M4 (partie M), ce que l'atelier ajoute aux écrans de
  * `workshop-screens.ts` : fiche de site, bâtiments et niveaux, choix de la page
  * du fond et points de calage saisis, duplication en série, place de
  * stationnement, vue du graphe, axe de circulation et liaison verticale.
@@ -32,7 +32,7 @@ export const WORKSHOP_STRUCTURE_FR = {
   'graph.status.links': 'Liaisons',
   'level.bar': 'Niveaux',
   'level.in_building': '{level} · {building}',
-  // M1bis (partie M) — fiche de site, bâtiments et niveaux.
+  // M1bis (partie M), fiche de site, bâtiments et niveaux.
   'record.loading': 'Chargement de la fiche de site…',
   'record.empty.message': 'Ce site ne porte aucun bâtiment. Un bâtiment contient les niveaux, et un niveau porte son plan et sa géométrie.',
   'record.action.new_building': 'Nouveau bâtiment',

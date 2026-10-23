@@ -12,13 +12,13 @@ export const refBroken: SiteData = {
     name: 'Site cassé',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // M01.S1 — aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
+    // M01.S1, aucun calage n'a eu lieu sur ce site : le repère n'est pas posé, et
     // `origin_x_m` / `origin_y_m` sont absents. Ce n'est pas l'origine (0, 0).
-    // N1.2 — site bilingue. L'altitude du niveau de référence n'est pas
+    // N1.2 : site bilingue. L'altitude du niveau de référence n'est pas
     // relevée : les altitudes de niveau restent justes, elles sont relatives.
     active_langs: ['fr', 'en'],
   },
-  // A5.8 — aucun paquet rattaché.
+  // A5.8, aucun paquet rattaché.
   rules_bindings: [],
   buildings: [
     {
@@ -29,7 +29,7 @@ export const refBroken: SiteData = {
       independent_access: true,
     },
     /**
-     * M01.S10 — le second bâtiment, et le cas que ce site porte pour la règle :
+     * M01.S10, le second bâtiment, et le cas que ce site porte pour la règle :
      * une arête le relie au bâtiment A, et aucune ligne `building_link` ne la
      * double. `GRAPH.BUILDING_LINK_MISSING` se lève dessus.
      *
@@ -71,7 +71,7 @@ export const refBroken: SiteData = {
     },
   ],
   /**
-   * N1.4 — les deux situations que `CALIB.LEVEL_NOT_CALIBRATED` recouvre :
+   * N1.4, les deux situations que `CALIB.LEVEL_NOT_CALIBRATED` recouvre :
    *  - `lvl-brk-rdc` porte un fond de plan que personne n'a calé
    *    (`plan_source_count` vaut 1, la conduite à tenir est de caler) ;
    *  - `lvl-brk-r1` n'a aucun fond importé
@@ -90,11 +90,11 @@ export const refBroken: SiteData = {
   ],
   plan_calibrations: [],
   /**
-   * N1.4 — trois empreintes, chacune posée pour un cas :
+   * N1.4, trois empreintes, chacune posée pour un cas :
    *  - `fp-brk-nocode` : cellule sans code, DATA.UNIT_CODE_REQUIRED ;
    *  - `fp-brk-dup-a` et `fp-brk-dup-b` : même code sur le même niveau,
    *    DATA.CODE_DUPLICATE ;
-   *  - `fp-brk-other-level` : même code, mais sur l'autre niveau — il ne
+   *  - `fp-brk-other-level` : même code, mais sur l'autre niveau, il ne
    *    doit PAS être signalé, la portée de l'unicité étant le niveau.
    */
   footprints: [
@@ -269,12 +269,12 @@ export const refBroken: SiteData = {
         length_m: 3,
       },
       /**
-       * M01.S10 — l'arête entre deux bâtiments à laquelle la ligne manque.
+       * M01.S10, l'arête entre deux bâtiments à laquelle la ligne manque.
        *
        * Elle franchit aussi une limite de niveau, et c'est inévitable : un
        * niveau appartient à un bâtiment, donc deux nœuds de bâtiments
        * différents sont toujours sur deux niveaux différents. Les deux
-       * anomalies se lèvent ensemble, ce qui est exact — il manque ici les
+       * anomalies se lèvent ensemble, ce qui est exact : il manque ici les
        * deux lignes.
        */
       {

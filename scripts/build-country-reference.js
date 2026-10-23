@@ -8,10 +8,10 @@
  * choses : il les lit là où elles font autorité, et rend un fichier.
  *
  * Trois sources, toutes citables et toutes présentes sur la machine :
- *  · `iso3166.tab` de la base de données des fuseaux — les codes et les noms
+ *  · `iso3166.tab` de la base de données des fuseaux, les codes et les noms
  *    anglais, que le fichier tient d'ISO 3166-1 ;
- *  · `zone.tab` de la même base — les fuseaux de chaque pays ;
- *  · CLDR, par l'ICU du moteur d'exécution — les noms français.
+ *  · `zone.tab` de la même base : les fuseaux de chaque pays ;
+ *  · CLDR, par l'ICU du moteur d'exécution : les noms français.
  *
  * La devise par défaut reste absente : aucune source de la machine ne porte la
  * correspondance d'un pays vers sa devise, et l'inventer serait une faute. La
@@ -19,7 +19,7 @@
  *
  * Le fichier produit est committé : c'est lui qui fait foi ensuite, pas la
  * machine qui l'a produit. Le régénérer sur une autre version de la base de
- * données des fuseaux produit un fichier différent, et c'est voulu — la
+ * données des fuseaux produit un fichier différent, et c'est voulu : la
  * référence documentaire le dit.
  *
  * Usage : node scripts/build-country-reference.js [répertoire zoneinfo]

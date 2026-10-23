@@ -3,7 +3,7 @@ import { sitesByName } from '../site-order.js';
 
 const site = (id: string, name: string) => ({ id, name });
 
-describe('A9 — les sites ordonnés pour l’affichage, dans la langue déclarée', () => {
+describe('A9 : les sites ordonnés pour l’affichage, dans la langue déclarée', () => {
   it('range les noms accentués à leur place de lecteur, non par points de code', () => {
     const sites = [site('s3', 'Zénith'), site('s1', 'Étoile'), site('s2', 'Arcades')];
     expect(sitesByName(sites, 'fr').map(s => s.name)).toEqual(['Arcades', 'Étoile', 'Zénith']);

@@ -5,7 +5,7 @@ import {
   sha256Binary,
 } from '../index.js';
 
-describe('canonicalSerialize — sérialisation des fichiers de données, hors empreinte', () => {
+describe('canonicalSerialize : sérialisation des fichiers de données, hors empreinte', () => {
   it('sorts object keys alphabetically', () => {
     const result = canonicalSerialize({ b: 1, a: 2 });
     expect(result).toBe('{"a":2,"b":1}');
@@ -44,7 +44,7 @@ describe('canonicalSerialize — sérialisation des fichiers de données, hors e
     expect(result).toBe('{"items":[{"a":2,"z":1}],"name":"test"}');
   });
 
-  it('is deterministic — same input always same output', () => {
+  it('is deterministic: same input always same output', () => {
     const obj = { position: { x_m: 1.5, y_m: 2.333 }, id: 'abc' };
     const a = canonicalSerialize(obj);
     const b = canonicalSerialize(obj);
@@ -57,7 +57,7 @@ describe('canonicalSerialize — sérialisation des fichiers de données, hors e
   });
 });
 
-describe('D7.2 — SHA-256', () => {
+describe('D7.2: SHA-256', () => {
   it('produces 64-char lowercase hex', () => {
     const hash = sha256Hex('test');
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
@@ -97,7 +97,7 @@ describe('sha256Binary', () => {
   });
 });
 
-describe('canonicalSerialize — additional edge cases', () => {
+describe('canonicalSerialize: additional edge cases', () => {
   it('serializes booleans correctly', () => {
     expect(canonicalSerialize({ f: false, t: true })).toBe('{"f":false,"t":true}');
   });
@@ -123,7 +123,7 @@ describe('canonicalSerialize — additional edge cases', () => {
   });
 });
 
-describe('sha256Hex — additional edge cases', () => {
+describe('sha256Hex: additional edge cases', () => {
   it('handles multi-byte UTF-8 (accented French)', () => {
     const hash = sha256Hex('Façade entrée');
     expect(hash).toMatch(/^[a-f0-9]{64}$/);
@@ -136,7 +136,7 @@ describe('sha256Hex — additional edge cases', () => {
   });
 });
 
-describe('canonicalSerialize — non-primitive fallbacks', () => {
+describe('canonicalSerialize: non-primitive fallbacks', () => {
   it('serializes function values as null', () => {
     const fn = () => 0;
     expect(canonicalSerialize({ fn })).toBe('{"fn":null}');
@@ -153,7 +153,7 @@ describe('canonicalSerialize — non-primitive fallbacks', () => {
   });
 });
 
-describe('canonicalSerialize — top-level primitives', () => {
+describe('canonicalSerialize: top-level primitives', () => {
   it('serializes top-level null', () => {
     expect(canonicalSerialize(null)).toBe('null');
   });
@@ -183,7 +183,7 @@ describe('canonicalSerialize — top-level primitives', () => {
   });
 });
 
-describe('sha256Hex — multi-block input', () => {
+describe('sha256Hex: multi-block input', () => {
   it('hashes 64-byte input requiring two SHA-256 blocks', () => {
     expect(sha256Hex('a'.repeat(64))).toBe(
       'ffe054fe7ae0cb6dc65c3af9b61d5209f439851db43d0ba5997337df154668eb',
@@ -191,7 +191,7 @@ describe('sha256Hex — multi-block input', () => {
   });
 });
 
-describe('canonicalSerialize — additional edge cases', () => {
+describe('canonicalSerialize: additional edge cases', () => {
   it('top-level function serializes to null', () => {
     expect(canonicalSerialize(() => 0)).toBe('null');
   });

@@ -44,7 +44,7 @@ describe('dbKioskPackageRecorder', () => {
 
     await recorder(record, 'org-42', 'user-42');
 
-    // A6.1 — role and identity set inside the transaction, then the insert.
+    // A6.1: role and identity set inside the transaction, then the insert.
     expect(captured.identityStatements).toBe(2);
     expect(captured.inTransaction).toBe(true);
 

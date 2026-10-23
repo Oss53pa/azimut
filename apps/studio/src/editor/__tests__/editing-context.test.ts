@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { checkPermission, isAllowed } from '../editing-context.js';
 import type { EditingContext, EditOperation } from '../editing-context.js';
 
-describe('E1 — editing context enforcement', () => {
+describe('E1: editing context enforcement', () => {
   describe('context 1: site', () => {
     const ctx: EditingContext = 'site';
 

@@ -1,5 +1,5 @@
 /**
- * M2 à M5 (partie M) — les écrans de l'atelier : import et calage, tracé des
+ * M2 à M5 (partie M), les écrans de l'atelier : import et calage, tracé des
  * empreintes, saisie du graphe, validation de complétude. Sortis de
  * `data-source.ts`, qui ne garde que l'accès au dépôt et la création de site.
  *
@@ -8,7 +8,7 @@
  * ne compile pas.
  */
 export const WORKSHOP_SCREENS_FR = {
-  // M2 (partie M) — import et calage. Raccourcis et étapes.
+  // M2 (partie M) : import et calage. Raccourcis et étapes.
   'calib.shortcut.zoom_fit': 'Ajuster à la fenêtre',
   'calib.shortcut.next_step': 'Étape suivante',
   'calib.shortcut.cancel_point': 'Annuler le point en cours',
@@ -21,7 +21,7 @@ export const WORKSHOP_SCREENS_FR = {
   'calib.blocked.orientation': 'Le tracé attend l’azimut du nord.',
   'calib.replace.kept': 'Les dimensions concordent : le calage du fond précédent sera reporté sur le nouveau.',
   'calib.replace.lost': 'Les dimensions diffèrent : le calage sera perdu et le plan devra être recalé.',
-  // M3 (partie M) — tracé des empreintes : outils et raccourcis.
+  // M3 (partie M), tracé des empreintes : outils et raccourcis.
   'fp.tool.select': 'Sélection',
   'fp.tool.cell': 'Cellule',
   'fp.tool.free_polygon': 'Polygone libre',
@@ -33,7 +33,7 @@ export const WORKSHOP_SCREENS_FR = {
   'fp.shortcut.undo': 'Annuler',
   'fp.shortcut.duplicate': 'Dupliquer',
   'fp.series.hint': 'Les codes dérivés sont une commodité de saisie : ils se renomment.',
-  // M2 (partie M) — l'écran lui-même.
+  // M2 (partie M), l'écran lui-même.
   'calib.trail': 'Étapes du calage',
   'calib.trail.current': 'en cours',
   'calib.status.step': 'Étape',
@@ -59,7 +59,7 @@ export const WORKSHOP_SCREENS_FR = {
   'unit.metre': 'm',
   'unit.square_metre': 'm²',
   'unit.percent': '%',
-  // M3 (partie M) — l'écran lui-même.
+  // M3 (partie M), l'écran lui-même.
   'fp.toolbar': 'Outils de tracé',
   'fp.properties': 'Propriétés',
   'fp.status.count': 'Empreintes',
@@ -80,7 +80,7 @@ export const WORKSHOP_SCREENS_FR = {
   'fp.kind.vertical_core': 'Noyau vertical',
   'fp.action.close': 'Fermer le polygone',
   'fp.action.abandon': 'Abandonner le tracé',
-  // M4 (partie M) — l'écran de saisie du graphe.
+  // M4 (partie M), l'écran de saisie du graphe.
   'graph.toolbar': 'Outils du graphe',
   'graph.properties': 'Propriétés',
   'graph.no_selection': 'Sélectionnez un nœud ou une arête.',
@@ -123,7 +123,7 @@ export const WORKSHOP_SCREENS_FR = {
   'graph.remedy.action': 'Créer la liaison',
   'graph.action.place_node': 'Poser un nœud',
   'graph.action.draw_edges': 'Tracer les arêtes',
-  // M5 (partie M) — validation de complétude.
+  // M5 (partie M), validation de complétude.
   'valid.loading': 'Chargement du rapport…',
   'valid.running': 'Validation en cours…',
   'valid.never_run': 'La validation n’a pas encore été lancée. Aucun résultat n’est disponible : ce n’est ni une réussite ni un échec.',

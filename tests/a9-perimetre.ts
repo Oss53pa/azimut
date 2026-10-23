@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 /**
- * A9 — ce que les deux contrôles des comparaisons localisées ont en commun :
+ * A9, ce que les deux contrôles des comparaisons localisées ont en commun :
  * le motif, et la frontière entre le code qui produit et l'interface.
  *
  * `a9-comparaison-localisee.test.ts` garde le code qui produit : aucune

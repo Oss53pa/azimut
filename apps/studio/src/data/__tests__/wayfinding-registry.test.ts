@@ -17,7 +17,7 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
   return calls;
 }
 
-describe('N2.2 — registre du wayfinding, sites de référence', () => {
+describe('N2.2 : registre du wayfinding, sites de référence', () => {
   const repository = createReferenceRepository();
 
   it('rend un registre vide : aucun site de référence n’en déclare', async () => {
@@ -30,7 +30,7 @@ describe('N2.2 — registre du wayfinding, sites de référence', () => {
   });
 });
 
-describe('N2.2 — registre du wayfinding, API REST', () => {
+describe('N2.2 : registre du wayfinding, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
     const error: unknown = await createPostgrestRepository(config).loadWayfindingRegistry('aaaa0001-0000-4000-8000-000000000001')

@@ -7,7 +7,7 @@ function zone(code: string, footprint_ids: readonly string[]): OrientationZone {
   return { id: `z-${code}`, code, name_fr: code, name_en: code, kind: 'mall', footprint_ids };
 }
 
-describe('N2.2 — zones d’orientation', () => {
+describe('N2.2 : zones d’orientation', () => {
   const [fp1, fp2] = refMultilevel.footprints;
 
   it('additionne la surface des empreintes de la zone', () => {

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ACTIVE_LANGS, isActiveLang, readActiveLangs } from '../lang.js';
 
 /**
- * N1.2 — « Au moins une, `fr` et `en` seules valeurs admises en V1 ».
+ * N1.2 : « Au moins une, `fr` et `en` seules valeurs admises en V1 ».
  */
 describe('ACTIVE_LANGS', () => {
   it('porte exactement les deux langues de la V1', () => {

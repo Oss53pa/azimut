@@ -6,7 +6,7 @@ import { currentAdvertiser, inventoryRows } from '../inventory-rows.js';
 
 const TODAY = '2026-09-25';
 
-describe('H4.1 — inventaire des emplacements', () => {
+describe('H4.1 : inventaire des emplacements', () => {
   const rows = inventoryRows(DEMO_PLACEMENTS, DEMO_BOOKINGS, TODAY, 12);
 
   it('rend un emplacement par ligne, dans l’ordre des codes', () => {

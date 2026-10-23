@@ -3,7 +3,7 @@ import { isWorkColourHex } from '@azimut/core-model';
 import { themePapier, stateColorsPapier, themeInstrument } from '@azimut/design-tokens';
 
 /**
- * S9, version 17 — « `hex` : même notation que les jetons de la partie F, six
+ * S9, version 17, « `hex` : même notation que les jetons de la partie F, six
  * chiffres hexadécimaux précédés d'un croisillon, en majuscules ».
  *
  * **Pourquoi cet essai vit ici et non dans `core-model`.** Éprouver
@@ -31,7 +31,7 @@ function jetonsDeCouleur(): readonly string[] {
   ];
 }
 
-describe('S9 — la couleur de travail emploie la notation des jetons de la partie F', () => {
+describe('S9 : la couleur de travail emploie la notation des jetons de la partie F', () => {
   it('les jetons sont bien lus, sinon l’essai ne prouverait rien', () => {
     expect(jetonsDeCouleur().length).toBeGreaterThan(20);
   });

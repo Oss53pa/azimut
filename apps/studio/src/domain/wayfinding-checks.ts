@@ -1,5 +1,5 @@
 /**
- * H2.2 / H2.4 — entrées des deux garde-fous de wayfinding, dérivées des
+ * H2.2 / H2.4 : entrées des deux garde-fous de wayfinding, dérivées des
  * données du site et du tableau des messages.
  *
  * Rien n'est saisi ici : la séquence de jalonnement se lit dans le tableau
@@ -31,7 +31,7 @@ function buildingOfNode(site: WayfindingCheckSite, nodeId: string): string {
 
 /**
  * Séquence de jalonnement du site : un pas par point de décision cité par le
- * tableau, dans l'ordre alphabétique des points — le seul ordre stable tant
+ * tableau, dans l'ordre alphabétique des points, le seul ordre stable tant
  * qu'aucun itinéraire n'est choisi.
  *
  * `announced` : les destinations mentionnées par les lignes rattachées au point.
@@ -44,7 +44,7 @@ export function jalonnementFromSchedule(
   const announced = new Map<string, Set<string>>();
 
   for (const line of schedule.lines) {
-    // M02.W4 — toute ligne porte son point de décision : le moteur n'en produit
+    // M02.W4, toute ligne porte son point de décision : le moteur n'en produit
     // aucune qui n'en ait pas.
     const point = line.decision_point_id;
     const set = announced.get(point) ?? new Set<string>();

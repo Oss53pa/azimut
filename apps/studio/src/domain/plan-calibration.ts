@@ -1,5 +1,5 @@
 /**
- * Tranche M · écran M2 — calage d'un fond de plan.
+ * Tranche M · écran M2 : calage d'un fond de plan.
  *
  * Les anomalies d'ici citent `partieM-M2`, et non `M2` : le complément
  * atelier emploie `M2` pour son module de stationnement, et un jeton nu ne
@@ -85,7 +85,7 @@ function pixelDistance(a: PlanPoint, b: PlanPoint): number {
 /**
  * Calcule le calage. Rend une anomalie bloquante quand la mesure ne peut pas
  * être exploitée, et un avertissement CALIB.SCALE_IMPLAUSIBLE quand elle l'est
- * mais sort de la plage de vraisemblance — l'opérateur peut passer outre, et
+ * mais sort de la plage de vraisemblance : l'opérateur peut passer outre, et
  * le passage outre reste visible.
  */
 export function computeCalibration(input: CalibrationInput): Outcome<Calibration> {

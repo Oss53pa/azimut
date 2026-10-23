@@ -1,5 +1,5 @@
 /**
- * M2 (partie M) — la lecture des flux d'un PDF, commune au compte des tracés
+ * M2 (partie M) : la lecture des flux d'un PDF, commune au compte des tracés
  * et au compte des pages.
  *
  * Elle ne lit que ce qu'elle sait lire sans bibliothèque (A3.3) : les flux sans

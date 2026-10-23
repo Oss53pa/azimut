@@ -1,5 +1,5 @@
 /**
- * E5.1 — le vocabulaire d'écriture du module 01.
+ * E5.1 : le vocabulaire d'écriture du module 01.
  *
  * « Toute modification de donnée passe par une commande, objet sérialisable
  * comportant : un type, une cible, les valeurs avant et après, et un
@@ -38,14 +38,14 @@ export type { ColumnValue, RowValues } from './row-values.js';
  * Rend une liste sous la forme qu'attend une colonne de tableau.
  *
  * Une commande ne transporte que des valeurs simples, et les deux chemins
- * d'écriture — la fonction `apply_commands` pour le poste, `applyCommands`
- * pour le service — aplatissent tout en texte avant d'atteindre la base. Une
+ * d'écriture (la fonction `apply_commands` pour le poste, `applyCommands`
+ * pour le service) aplatissent tout en texte avant d'atteindre la base. Une
  * liste doit donc voyager dans l'encodage de sa colonne, comme une structure
  * voyage déjà en JSON pour une colonne `jsonb`.
  *
  * Le défaut que cette fonction ferme : `site.active_langs` est une colonne de
  * tableau, et la création d'un site y écrivait du JSON. La base refusait
- * chaque création — « malformed array literal » — et rien ne le voyait, faute
+ * chaque création (« malformed array literal ») et rien ne le voyait, faute
  * d'essai qui applique les commandes du formulaire contre une base réelle.
  *
  * Les éléments sont rendus dans l'ordre reçu. Le tri, quand il compte, est la
@@ -112,7 +112,7 @@ export type CommandDraft = {
  * Construit une commande, ou refuse.
  *
  * Trois refus, et chacun protège une règle :
- *  · une table — ou, pour `support`, une colonne — que le module émetteur ne
+ *  · une table (ou, pour `support`, une colonne) que le module émetteur ne
  *    possède pas (INT-1 et INT-2, et la scission de L0) ;
  *  · une forme incohérente avec l'opération, qui rendrait l'inverse incalculable ;
  *  · un horodatage absent, que la commande ne peut pas suppléer sans lire
@@ -178,7 +178,7 @@ export function ownsTable(module: ModuleKey, table: string): boolean {
  * Ce que la propriété unique refuse dans cette commande.
  *
  * Le cas courant est la table entière : un module qui ne la possède pas n'y
- * écrit rien. `support` fait exception — L0 lui donne deux propriétaires,
+ * écrit rien. `support` fait exception : L0 lui donne deux propriétaires,
  * colonne par colonne, et c'est ce qui supprime le cycle entre les modules 02
  * et 04. Le contrôle y porte donc sur les colonnes que la commande changerait,
  * et non sur le nom de la table.

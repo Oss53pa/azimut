@@ -1,5 +1,5 @@
 /**
- * A5.7 — lecture du parc posé par l'API REST : supports posés, divergences
+ * A5.7, lecture du parc posé par l'API REST : supports posés, divergences
  * enregistrées, ordres de travaux (migrations 0006 et 0041).
  *
  * Une divergence désigne un support du site, ou le nœud d'un point non

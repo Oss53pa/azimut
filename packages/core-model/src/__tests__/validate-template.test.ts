@@ -4,7 +4,7 @@ import type { Template } from '../template-schema.js';
 import { validTemplate } from './template-fixtures.js';
 
 // Suite de template-schema.test.ts : contraintes D8.3.
-describe('D8.3 — validateTemplate', () => {
+describe('D8.3: validateTemplate', () => {
   it('accepts a valid template', () => {
     const errors = validateTemplate(validTemplate());
     expect(errors).toEqual([]);

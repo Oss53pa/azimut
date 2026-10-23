@@ -127,7 +127,7 @@ describe('WCAG_AA_LARGE threshold', () => {
   });
 });
 
-describe('WCAG AA contrast — Papier theme (F2.3)', () => {
+describe('WCAG AA contrast: Papier theme (F2.3)', () => {
   for (const fg of foregrounds) {
     for (const bg of surfaces) {
       it(`${fg.key} on ${bg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
@@ -138,7 +138,7 @@ describe('WCAG AA contrast — Papier theme (F2.3)', () => {
   }
 });
 
-describe('white on each token — "Blanc posé dessus" (F2.3)', () => {
+describe('white on each token : "Blanc posé dessus" (F2.3)', () => {
   for (const fg of foregrounds) {
     it(`white on ${fg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
       const ratio = contrastRatio(WHITE, fg.hex);
@@ -156,7 +156,7 @@ describe('border-interactive meets 3.0 threshold (F2.4)', () => {
   }
 });
 
-// Theme Instrument (dark) — F2.5: a complete second set of reserved colours,
+// Theme Instrument (dark), F2.5: a complete second set of reserved colours,
 // because the light values are illegible on a dark ground. The interface text
 // tokens sit on the DARK surfaces; surface-canvas stays light (the work area,
 // F0) and never carries interface text, so it is excluded here.
@@ -179,7 +179,7 @@ const instrumentForegrounds = [
   { key: 'state-info', hex: stateColorsInstrument['state-info'] },
 ] as const;
 
-describe('WCAG AA contrast — Instrument dark theme (F2.5)', () => {
+describe('WCAG AA contrast: Instrument dark theme (F2.5)', () => {
   for (const fg of instrumentForegrounds) {
     for (const bg of instrumentSurfaces) {
       it(`${fg.key} on ${bg.key} meets ${WCAG_AA_NORMAL}:1`, () => {
@@ -199,11 +199,11 @@ describe('Instrument border-interactive meets 3.0 threshold (F2.4)', () => {
   }
 });
 
-// Kiosk (F13/F14) — public-facing display, read standing at a distance.
+// Kiosk (F13/F14): public-facing display, read standing at a distance.
 // Calculated, never estimated: text over both grounds, in both modes. `k-line`
 // is a structural separator (like border-hairline) and is exempt.
 const AAA = 7;
-describe('WCAG contrast — kiosk (F13/F14)', () => {
+describe('WCAG contrast: kiosk (F13/F14)', () => {
   for (const [mode, tk] of [
     ['base', kioskTokens],
     ['high-contrast', kioskTokensHighContrast],

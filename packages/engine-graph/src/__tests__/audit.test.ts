@@ -92,7 +92,7 @@ describe('auditCoverage', () => {
 
 });
 
-describe('auditCoverage — anomalies nommées (N2.4)', () => {
+describe('auditCoverage : anomalies nommées (N2.4)', () => {
   it('lève GRAPH.DECISION_POINT_UNCOVERED, bloquant, par point non couvert', () => {
     const result = auditCoverage(refMinimal, stdProfile, []);
     expect(result.ok).toBe(true);
@@ -187,7 +187,7 @@ describe('auditCoverage — anomalies nommées (N2.4)', () => {
     expect(ids).toEqual(['sup-a', 'sup-z']);
   });
 
-  it('M02.W10 — aucun rapport, donc aucun taux, tant que le graphe ne valide pas', () => {
+  it('M02.W10 : aucun rapport, donc aucun taux, tant que le graphe ne valide pas', () => {
     const profile = refBroken.travel_profiles[0];
     if (profile === undefined) throw new Error('No profile in refBroken');
     const result = auditCoverage(refBroken, profile, [
@@ -202,7 +202,7 @@ describe('auditCoverage — anomalies nommées (N2.4)', () => {
   });
 });
 
-describe('auditCoverage — zero decision points', () => {
+describe('auditCoverage: zero decision points', () => {
   it('coverage_ratio is 1 when total is 0', () => {
     // Build a linear graph: two nodes with one edge → max out-degree 1 → no DPs.
     const linearSite: SiteData = {

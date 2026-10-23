@@ -6,7 +6,7 @@ import type { AnnotationState, InkNote, ReviewAnnotation } from '../../state/rev
 import { InkNoteView, InkPad } from './InkPad.js';
 
 /**
- * R7.4 (partie R) et J4 (partie J) — les annotations de révision ancrées sur la
+ * R7.4 (partie R) et J4 (partie J), les annotations de révision ancrées sur la
  * ligne : auteur, date, état, fil de réponses ; création depuis le panneau.
  *
  * Une remarque se rédige au clavier, se trace au stylet, ou les deux. Avec une
@@ -14,7 +14,7 @@ import { InkNoteView, InkPad } from './InkPad.js';
  */
 export type AnnotationPanelProps = {
   readonly annotations: readonly ReviewAnnotation[];
-  /** R2 (partie R) — le rôle peut-il annoter ? Sinon le panneau se consulte. */
+  /** R2 (partie R) : le rôle peut-il annoter ? Sinon le panneau se consulte. */
   readonly canAnnotate: boolean;
   /** Le nombre de lignes que la remarque visera : la sélection, ou la ligne. */
   readonly targetCount: number;

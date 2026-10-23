@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { allUpSql, upMigrations } from '../migration-corpus.js';
 
 /**
- * T-2.14a, critère d'acceptation nº 9 — insertion seule des approbations.
+ * T-2.14a, critère d'acceptation nº 9 : insertion seule des approbations.
  *
  * « La table des approbations est en insertion seule, garanti au niveau de la
  * base et non par convention applicative. Une tentative de modification ou de
@@ -11,10 +11,10 @@ import { allUpSql, upMigrations } from '../migration-corpus.js';
  * La migration 0009 pose deux déclencheurs, BEFORE UPDATE et BEFORE DELETE,
  * tous deux par ligne. Éprouvés sur une base réelle avec le rôle propriétaire,
  * ils refusent bien les deux tentatives. Mais TRUNCATE ne déclenche aucun
- * déclencheur par ligne, et vidait la table — vérifié, note du préalable K4
+ * déclencheur par ligne, et vidait la table : vérifié, note du préalable K4
  * nº 7. Trois voies, trois barrages.
  */
-describe('T-2.14a nº 9 — approval en insertion seule', () => {
+describe('T-2.14a nº 9 : approval en insertion seule', () => {
   const sql = allUpSql();
 
   it('refuse la modification et la suppression, par déclencheur de ligne', () => {

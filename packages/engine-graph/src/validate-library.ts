@@ -8,7 +8,7 @@ import type {
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * INV-3 — les trois gardes du registre de sécurité vivaient ici et n'étaient
+ * INV-3 : les trois gardes du registre de sécurité vivaient ici et n'étaient
  * appelés par rien. Ils sont descendus dans `core-model`, où `buildCommand`
  * peut les appeler : c'est le passage obligé de toute écriture, et A4.1
  * interdit à `core-model` de lire un moteur. Réexportés pour que les appelants

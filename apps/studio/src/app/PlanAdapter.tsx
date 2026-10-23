@@ -17,13 +17,13 @@ import { judgeReplacement } from '../state/plan-import.js';
 import type { ReplacementVerdict } from '../state/plan-import.js';
 
 /**
- * M2 (partie M) — l'adaptateur de l'import et du calage.
+ * M2 (partie M) : l'adaptateur de l'import et du calage.
  *
  * F15 sépare les adaptateurs du routeur : il décide quel écran paraît, ils
  * décident ce que chaque écran reçoit. Un fichier par écran, chacun tenant
  * l'état du sien.
  *
- * Le contenu de la zone de travail — le tracé au pointeur, la vue du fond —
+ * Le contenu de la zone de travail (le tracé au pointeur, la vue du fond)
  * n'est pas encore construit : les écrans reçoivent un panneau vide, et tout
  * ce qui se saisit au clavier fonctionne. C'est l'ordre voulu, puisque M8
  * (partie M) critère 2 exige le parcours au clavier seul.
@@ -39,7 +39,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   const [pointA, setPointA] = useState<PartialPoint>(NO_POINT);
   const [pointB, setPointB] = useState<PartialPoint>(NO_POINT);
   const [pending, setPending] = useState<ReplacementVerdict | null>(null);
-  /** J1.4 — le contenu lu à l'import, gardé pour le fond du décalque. */
+  /** J1.4 : le contenu lu à l'import, gardé pour le fond du décalque. */
   const [content, setContent] = useState<Uint8Array | null>(null);
   const [findings, setFindings] = useState<readonly Finding[]>([]);
   // M2 (partie M), versions 27 et 28 : le fond se juge sur son contenu, lu
@@ -160,7 +160,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           if (draft.plan === null) return;
           setBusy(true);
           // Les deux points sont ceux que l'opérateur a saisis, et rien
-          // d'autre. L'écran en posait deux d'office quand ils manquaient —
+          // d'autre. L'écran en posait deux d'office quand ils manquaient :
           // c'était écrire en base un calage que personne n'avait fait, et
           // `CALIB.POINT_REQUIRED` existe précisément pour le refuser.
           const measured = computeCalibration({
@@ -181,7 +181,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
             planSourceId,
             calibrationId: session.newId(),
             storagePath: `plans/${siteId}/${levelId}`,
-            // A5.2 — les deux points de la mesure, dans l'ordre de pose.
+            // A5.2, les deux points de la mesure, dans l'ordre de pose.
             points: [
               ...(draft.a !== null ? [{ id: session.newId(), point: draft.a }] : []),
               ...(draft.b !== null ? [{ id: session.newId(), point: draft.b }] : []),

@@ -1,5 +1,5 @@
 /**
- * H2.5 — Tableau des messages.
+ * H2.5 : Tableau des messages.
  *
  * Livrable central du wayfinding : pour chaque face de chaque support,
  * le contenu exact dans chaque langue, le pictogramme, la direction, le
@@ -102,16 +102,16 @@ export type MessageLine = {
   readonly face_index: number;
   readonly block_index: number;
   readonly block_kind: ContentBlockKind;
-  /** Contenu structuré du bloc — le `content jsonb` de H11. */
+  /** Contenu structuré du bloc : le `content jsonb` de H11. */
   readonly entries: readonly MessageEntry[];
   readonly pictogram_id: string | null;
   readonly direction: string | null;
   readonly information_level: InformationLevel | null;
   /**
-   * N2.2 — **requis**. Le point de décision qui justifie la ligne.
+   * N2.2 : **requis**. Le point de décision qui justifie la ligne.
    *
    * M02.W4 : une ligne sans justification est une anomalie bloquante, et le
-   * critère N2.7-4 va plus loin — une telle ligne ne peut pas être créée.
+   * critère N2.7-4 va plus loin, une telle ligne ne peut pas être créée.
    * C'est ce qui empêche un panneau de dire quelque chose que rien ne motive,
    * et c'est pourquoi ce champ n'est pas nullable.
    */
@@ -120,7 +120,7 @@ export type MessageLine = {
 };
 
 /**
- * N2.2 et R12 (partie R) — les quatre états d'un tableau, et eux seuls.
+ * N2.2 et R12 (partie R) : les quatre états d'un tableau, et eux seuls.
  *
  * Le vocabulaire des bons à tirer, `pending` et `rejected`, ne convient pas :
  * R12 fait reposer l'émission pour revue sur `in_review`, qui n'y existe pas,
@@ -149,8 +149,8 @@ export type MessageSchedule = {
 /**
  * Empreinte du contenu d'une ligne, hors drapeau de péremption.
  *
- * Elle sert à deux endroits — la péremption de M02.W8 et la comparaison de
- * versions de R11 (partie R) — et elle est définie une fois : deux empreintes
+ * Elle sert à deux endroits (la péremption de M02.W8 et la comparaison de
+ * versions de R11 (partie R)) et elle est définie une fois : deux empreintes
  * concurrentes finiraient par juger la même ligne changée ici et intacte là.
  *
  * `stale` en est exclu : il est dérivé, jamais saisi (R10), et une ligne qui
@@ -196,7 +196,7 @@ export type ScheduleInputs = {
  * de l'annuaire, des supports, des gabarits ou des principes la change,
  * ce qui rend la péremption détectable (H2.5).
  *
- * D7.2 — la forme canonique commune, ensembles triés par point de code (A9).
+ * D7.2 : la forme canonique commune, ensembles triés par point de code (A9).
  * Une valeur non hachable est refusée par `DATA.HASH_INPUT_INVALID`. Un
  * tableau enregistré sous l'ancienne forme ne se convertit pas : son
  * empreinte ne correspond plus, et il se lit périmé jusqu'à sa régénération.
@@ -259,7 +259,7 @@ export function computeScheduleInputsHash(inputs: ScheduleInputs): Outcome<strin
       .sort((a, b) => codePointCompare(a.support_type_key, b.support_type_key))
       .map(l => ({ key: l.support_type_key, levels: [...l.levels].sort((a, b) => a - b) })),
     rules,
-    // A5.6 — les blocs saisis sur les faces des supports du tableau. Absents,
+    // A5.6, les blocs saisis sur les faces des supports du tableau. Absents,
     // la clé l'est aussi : un site sans bloc d'instance garde son empreinte.
     ...instanceBlocksHashPart(site, supports),
   }, { kind: 'site', id: site.site.id });

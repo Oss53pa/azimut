@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M4 (partie M) — « Propriétés d'un nœud » et « Propriétés d'une arête ».
+ * M4 (partie M) : « Propriétés d'un nœud » et « Propriétés d'une arête ».
  *
  * Les deux panneaux étaient spécifiés au champ près et inatteignables : la
  * sélection restait nulle, et aucun geste ne la posait. Libellé, position,
@@ -29,7 +29,7 @@ async function drawPair(page: Page): Promise<void> {
   await expect(page.getByText(/Arêtes\s*1|Edges\s*1/)).toBeVisible();
 }
 
-test.describe('M4 (partie M) — le panneau de propriétés', () => {
+test.describe('M4 (partie M) : le panneau de propriétés', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(GRAPH);
   });
@@ -62,9 +62,9 @@ test.describe('M4 (partie M) — le panneau de propriétés', () => {
 
   /**
    * Le cœur de M4 (partie M) : « La longueur est recalculée à toute modification de
-   * position. » L'incohérence ne se verrait pas à l'écran — une arête dont la
+   * position. » L'incohérence ne se verrait pas à l'écran (une arête dont la
    * longueur ne correspond plus à ses extrémités a la même allure qu'une arête
-   * juste — et se paierait au premier calcul d'itinéraire.
+   * juste) et se paierait au premier calcul d'itinéraire.
    */
   test('déplacer un nœud recalcule la longueur de son arête', async ({ page }) => {
     await drawPair(page);

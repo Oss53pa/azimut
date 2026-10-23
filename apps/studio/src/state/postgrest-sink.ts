@@ -7,7 +7,7 @@
  *
  * Trois choses restent chez la base, et aucune ne remonte ici :
  *  · le cloisonnement, tenu par les politiques (A6.1) ;
- *  · l'atomicité, tenue par la transaction — M1 (partie M) interdit qu'un site
+ *  · l'atomicité, tenue par la transaction : M1 (partie M) interdit qu'un site
  *    naisse sans niveau, et trois requêtes séparées le permettraient ;
  *  · la décision de refus, que cette fonction ne réinterprète pas.
  */
@@ -67,7 +67,7 @@ export function createPostgrestSink(
 
 /**
  * La forme que la fonction de base attend : l'opération, la table, la ligne, et
- * les deux états. Le module et l'horodatage restent au poste — la base ne les
+ * les deux états. Le module et l'horodatage restent au poste : la base ne les
  * lit pas, et les envoyer laisserait croire qu'elle s'en sert.
  *
  * Exportée pour que l'essai de base applique exactement ce que le poste

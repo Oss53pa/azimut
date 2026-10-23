@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J4 (partie J) et R7.4 (partie R) — l'annotation en révision, dans le
+ * J4 (partie J) et R7.4 (partie R) : l'annotation en révision, dans le
  * panneau de détail du tableau des messages.
  *
  * Les commandes et la lecture sont essayées dans
@@ -54,7 +54,7 @@ async function openLine(page: Page): Promise<void> {
   await expect(page.getByRole('list', { name: 'Annotations de la ligne' })).toBeAttached();
 }
 
-test.describe('J4 (partie J) — l’annotation en révision', () => {
+test.describe('J4 (partie J) : l’annotation en révision', () => {
   test('une remarque au clavier bloque l’approbation, jusqu’à ce qu’elle soit traitée', async ({ page }) => {
     await openLine(page);
     await expect(page.getByText(/annotation\(s\) ouverte\(s\) sur ce tableau/)).toHaveCount(0);

@@ -1,5 +1,5 @@
 /**
- * H8 — les montants du budget. Ils sont stockés en unité mineure avec leur
+ * H8 : les montants du budget. Ils sont stockés en unité mineure avec leur
  * devise ; tout calcul se fait en unité mineure, et deux devises ne se
  * comparent ni ne s'additionnent : aucun taux n'est déclaré.
  */

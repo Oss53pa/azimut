@@ -163,7 +163,7 @@ describe('assemblePackage', () => {
     const result = assemblePackage(refMinimal, 'pkg-001', '2024-06-15T12:00:00Z', inputs);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // Mutate original metadata — manifest should be unaffected
+    // Mutate original metadata: manifest should be unaffected
     meta['support_id'] = 'MUTATED';
     expect(result.value.artifacts[0]?.metadata['support_id']).toBe('sup-001');
   });

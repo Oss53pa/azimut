@@ -18,7 +18,7 @@ import { readSessionGraph } from '../session-graph.js';
 import { graphCommands } from '../graph-commands.js';
 
 /**
- * A5.3 et M02.W11 — l'enregistrement d'un passage de validation, et ce qu'il
+ * A5.3 et M02.W11 : l'enregistrement d'un passage de validation, et ce qu'il
  * vaut.
  *
  * Le point qui compte : une validation ne vaut que pour le graphe dont elle
@@ -47,7 +47,7 @@ function commandOf(findings: readonly Finding[]) {
   return out.value;
 }
 
-describe('A5.3 — la commande d’enregistrement d’un passage', () => {
+describe('A5.3 : la commande d’enregistrement d’un passage', () => {
   it('écrit le passage avec son empreinte et son horodatage', () => {
     const command = commandOf([]);
     expect(command.table).toBe('graph_validation');
@@ -100,7 +100,7 @@ describe('A5.3 — la commande d’enregistrement d’un passage', () => {
   });
 });
 
-describe('M02.W11 — une validation ne vaut que pour son graphe', () => {
+describe('M02.W11 : une validation ne vaut que pour son graphe', () => {
   const record = (over: Partial<ValidationRecord> = {}): ValidationRecord => ({
     graphHash: 'sha256:abc', ranAt: STAMP, passed: true, ...over,
   });
@@ -138,10 +138,10 @@ describe('M02.W11 — une validation ne vaut que pour son graphe', () => {
 });
 
 // ---------------------------------------------------------------------------
-// D7.2 — l'empreinte, relue depuis le magasin
+// D7.2 : l'empreinte, relue depuis le magasin
 // ---------------------------------------------------------------------------
 
-describe('D7.2 — l’empreinte du graphe de la session', () => {
+describe('D7.2 : l’empreinte du graphe de la session', () => {
   function store(nodes: readonly { id: string; x: number; y: number }[]): SessionState {
     const out = graphCommands(
       nodes.map(n => ({
@@ -186,7 +186,7 @@ describe('D7.2 — l’empreinte du graphe de la session', () => {
     expect(computeGraphHash(forward)).toBe(computeGraphHash(backward));
   });
 
-  it('D7.2 — un passage enregistré sous l’ancienne forme ne vaut plus, sans conversion', () => {
+  it('D7.2 : un passage enregistré sous l’ancienne forme ne vaut plus, sans conversion', () => {
     // L'ancienne forme n'avait pas de préfixe : aucun enregistrement fait avant
     // l'alignement ne peut égaler une empreinte d'aujourd'hui. Il n'est pas
     // converti ; la validation se rejoue, comme M02.W11 le prévoit.

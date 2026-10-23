@@ -1,5 +1,5 @@
 /**
- * E8.3 — Visual snap indicator.
+ * E8.3: Visual snap indicator.
  *
  * Renders a small visual cue at the snap target position when
  * the snap pipeline locks onto a target. Different shapes for
@@ -40,7 +40,7 @@ function indicatorPath(kind: SnapKind, x: number, y: number): string {
       // Rendered as circle via separate element
       return '';
     case 'grid':
-      // Small dot — rendered as circle
+      // Small dot, rendered as circle
       return '';
   }
 }

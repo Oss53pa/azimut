@@ -1,5 +1,5 @@
 /**
- * A5.8 — lecture de la charte du site par l'API REST : charte, couleurs,
+ * A5.8, lecture de la charte du site par l'API REST : charte, couleurs,
  * caractères, règles et lexique (migration 0006).
  *
  * Les énumérés sont restreints par les listes de `core-model`, qu'un test

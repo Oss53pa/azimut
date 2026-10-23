@@ -2,7 +2,7 @@ import type { Finding, Outcome } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * G5.2 — Font registry and embedding rules.
+ * G5.2: Font registry and embedding rules.
  *
  * A font may always be used for on-screen preview, but embedding it in a
  * distributed deliverable is gated: the licence must be known, the asset must

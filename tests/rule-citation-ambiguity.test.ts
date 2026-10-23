@@ -7,10 +7,10 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * N0 — une règle numérotée est opposable : elle se cite en revue et en test.
+ * N0, une règle numérotée est opposable : elle se cite en revue et en test.
  *
- * Les règles de module portent leur numéro de module — `M01.S2`, `M02.W6`,
- * `M04.G1` — et les quatre règles d'intégration de la partie L s'appellent
+ * Les règles de module portent leur numéro de module (`M01.S2`, `M02.W6`,
+ * `M04.G1`) et les quatre règles d'intégration de la partie L s'appellent
  * `INT-1` à `INT-4`. Ce préfixe lève la collision du côté du cahier des
  * charges consolidé. Elle demeurait du côté des seize documents antérieurs,
  * qui ne font plus foi, et dont du code écrit sous eux citait encore les
@@ -29,10 +29,10 @@ const ROOT = resolve(HERE, '..');
  *
  * Deux endroits sont balayés, et deux seulement. Les commentaires, où la
  * citation s'écrit en prose. Et les champs `ruleRef` d'une anomalie, qui sont
- * des citations par construction — un `ruleRef` ne contient rien d'autre. Le
+ * des citations par construction : un `ruleRef` ne contient rien d'autre. Le
  * reste du code est laissé tranquille : les mêmes jetons y sont des données
- * légitimes — `level: 'R1'` désigne un niveau, `d="M10 10"` est un chemin SVG
- * — et un balayage plus large rendrait l'essai bruyant, donc tôt ou tard
+ * légitimes (`level: 'R1'` désigne un niveau, `d="M10 10"` est un chemin SVG)
+ * et un balayage plus large rendrait l'essai bruyant, donc tôt ou tard
  * affaibli.
  */
 
@@ -47,7 +47,7 @@ const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b(?!\.[A-Z
 /**
  * Ce qui lève l'ambiguïté, et rien d'autre.
  *
- * Une référence de section de la partie N — `N3.2`, `N5.2` — compte comme
+ * Une référence de section de la partie N (`N3.2`, `N5.2`) compte comme
  * qualificatif : c'est là que vivent les règles `S`, `W`, `P`, `G`, `R` et les
  * autres, et la citer nomme le document aussi sûrement que d'écrire « partie
  * N ». La partie R, spécification de l'écran du tableau des messages, numérote
@@ -58,7 +58,7 @@ const AMBIGUOUS = /\b(?:M(?:1[0-7]|[1-9])|R[1-6]|P[1-7])(?:\.[0-9]+)?\b(?!\.[A-Z
  * jusqu'ici, et c'était le moindre mal quand du code les citait encore. Ils ne
  * font plus foi, et une citation qui les nommerait enverrait le lecteur à un
  * document qu'on lui interdit d'ouvrir pour trancher. Un jeton ambigu ne se
- * qualifie donc plus que par une partie du consolidé — ce qui, en pratique,
+ * qualifie donc plus que par une partie du consolidé : ce qui, en pratique,
  * veut dire que la règle citée doit d'abord y avoir été retrouvée.
  */
 const QUALIFIER = /partie ?[MNLR]-?|tranche M|\bN[0-9](?:\.[0-9]+)?\b/i;
@@ -81,7 +81,7 @@ const REF_QUALIFIER = /^(?:partieM|partieN|partieL|partieR)-/;
  * Le nom du document retiré, assemblé à l'exécution.
  *
  * Écrit d'un trait, il ferait correspondre ce fichier à son propre balayage, et
- * il faudrait alors une liste d'exceptions — c'est-à-dire une porte. Assemblé,
+ * il faudrait alors une liste d'exceptions : c'est-à-dire une porte. Assemblé,
  * le balayage n'a aucune exception et se passe lui-même.
  */
 const RETIRED_DOCUMENT = ['atelier', 'complément'].reverse().join(' ');
@@ -126,7 +126,7 @@ function sources(): string[] {
   return out;
 }
 
-describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () => {
+describe('N0 : un jeton de règle ambigu nomme le document qui le porte', () => {
   it('aucun commentaire ne cite M, R ou P sans dire de quel document', () => {
     const offenders: string[] = [];
     for (const file of sources()) {
@@ -145,7 +145,7 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     expect(
       offenders,
       'Citations ambiguës (CLAUDE.md, collisions de codes) :\n' + offenders.join('\n') +
-      '\n\nÉcrivez « M4 (partie M) », « P1 (partie N) » — le jeton seul désigne ' +
+      '\n\nÉcrivez « M4 (partie M) », « P1 (partie N) » : le jeton seul désigne ' +
       'deux règles différentes selon le document, et seul le consolidé fait foi.',
     ).toHaveLength(0);
   });
@@ -201,8 +201,8 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
    * Plus aucune mention du document retiré, nulle part.
    *
    * Les deux essais ci-dessus visent les citations de règle. Celui-ci vise le
-   * nom du document lui-même, y compris dans un commentaire de provenance —
-   * « cette table vient de tel document » — qui n'est pas une citation de règle
+   * nom du document lui-même, y compris dans un commentaire de provenance (
+   * « cette table vient de tel document ») qui n'est pas une citation de règle
    * mais envoie le lecteur au même endroit interdit.
    *
    * Ce qu'il portait de vivant est repris par le consolidé, et c'est la section
@@ -239,7 +239,7 @@ describe('N0 — un jeton de règle ambigu nomme le document qui le porte', () =
     expect(AMBIGUOUS.test('// le contrôle M2 demande')).toBe(true);
     expect(QUALIFIER.test('// le contrôle M2 demande')).toBe(false);
     expect(QUALIFIER.test('// écran M4 (partie M)')).toBe(true);
-    expect(QUALIFIER.test('// N5.2 — R5 et R6')).toBe(true);
+    expect(QUALIFIER.test('// N5.2 : R5 et R6')).toBe(true);
     expect(QUALIFIER.test('// R5 tout seul')).toBe(false);
     // Et il ne mord pas sur ce qui n'est pas un jeton de règle.
     expect(AMBIGUOUS.test('// un chemin d="M20 30"')).toBe(false);

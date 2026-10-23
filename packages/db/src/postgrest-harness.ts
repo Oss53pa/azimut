@@ -7,7 +7,7 @@
  * l'application ne parle jamais à PostgreSQL, elle parle à PostgREST, qui pose
  * lui-même le rôle depuis un jeton. Entre les deux se trouvent l'exposition du
  * schéma, la conversion du jeton en rôle, les en-têtes de comptage et les
- * messages d'erreur — c'est-à-dire précisément les canaux indirects que la
+ * messages d'erreur : c'est-à-dire précisément les canaux indirects que la
  * règle nomme.
  *
  * Le banc reproduit ce que la plateforme fournit en production, et rien de

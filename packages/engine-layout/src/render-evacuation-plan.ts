@@ -133,15 +133,15 @@ export function renderEvacuationPlan(
     (e) => nodeIdSet.has(e.from_node_id) && nodeIdSet.has(e.to_node_id),
   );
 
-  // S-39 — « plan d'évacuation : la place n'y apparaît pas, sauf si elle porte
+  // S-39, « plan d'évacuation : la place n'y apparaît pas, sauf si elle porte
   // un cheminement d'évacuation ». Un plan d'évacuation montre par où l'on
   // sort ; un parking dessiné place par place l'encombre de deux cents
   // rectangles qui ne disent rien de la sortie.
   //
   // « Porter un cheminement » se lit sur la donnée : une place le porte quand
   // un nœud d'une arête d'évacuation se trouve dans son tracé. C'est le seul
-  // rattachement que le modèle permet — ni l'arête ni l'empreinte ne se
-  // désignent l'une l'autre — et il suffit : un cheminement qui traverse un
+  // rattachement que le modèle permet (ni l'arête ni l'empreinte ne se
+  // désignent l'une l'autre) et il suffit : un cheminement qui traverse un
   // parking y a forcément un nœud, faute de quoi il n'y passe pas.
   const spaces = parkingSpacesOfLevel(site, levelId, []).spaces;
   const evacuationPoints = site.graph.edges

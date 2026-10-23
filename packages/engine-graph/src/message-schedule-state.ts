@@ -1,5 +1,5 @@
 /**
- * R12 (partie R) — circuit de validation du tableau des messages.
+ * R12 (partie R) : circuit de validation du tableau des messages.
  *
  * M02.W7 : « Le tableau des messages est versionné et validé selon le même
  * circuit que les bons à tirer. » R12 transpose pour lui la machine à états de
@@ -30,7 +30,7 @@ import { codePointCompare } from '@azimut/core-model';
  * `generate` et `regenerate` sont distincts parce que R12 en fait deux lignes
  * distinctes : la première crée la première version, la seconde remplace un
  * brouillon. Les confondre laisserait régénérer par-dessus une version en
- * revue, que R12 interdit — « l'émission pour revue fige le contenu ».
+ * revue, que R12 interdit : « l'émission pour revue fige le contenu ».
  */
 export const SCHEDULE_TRIGGERS = [
   'generate',

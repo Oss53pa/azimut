@@ -6,7 +6,7 @@ import {
 } from '@azimut/core-model';
 
 /**
- * Contrôle du stationnement — section S8, règles S-35 à S-37.
+ * Contrôle du stationnement : section S8, règles S-35 à S-37.
  *
  * « Une place de stationnement est une empreinte de nature `parking_space`. Un
  * parking est une zone de nature `parking`. Ce sont les objets du socle,
@@ -29,8 +29,8 @@ import {
  * admis à concurrence des places déclarées. » (S-37)
  *
  * **Ce que ce module lisait avant, et pourquoi il ne le lit plus.** Il lisait
- * trois tables d'un module de stationnement — `parking`, `parking_space`,
- * `parking_uncovered_area` — que la section S8 rend redondantes : la première
+ * trois tables d'un module de stationnement (`parking`, `parking_space`,
+ * `parking_uncovered_area`) que la section S8 rend redondantes : la première
  * doublait `zone`, la deuxième doublait `footprint`, la troisième portait ce
  * qu'un fait ciblé porte désormais. Les trois sont retirées ; ce contrôle lit
  * les objets du socle et les faits d'A5.11.
@@ -38,8 +38,8 @@ import {
  * **Ce que la marque d'une empreinte non numérisée est devenue.** Non plus une
  * table, mais l'existence du fait `parking.undigitized_spaces` qui désigne
  * l'empreinte. Une empreinte marquée ne vaut donc pas une place : elle vaut le
- * nombre que le fait déclare. C'est ce qui rend l'écart quantitatif — « admis à
- * concurrence des places déclarées » — là où l'ancienne table `parking_uncovered_area`
+ * nombre que le fait déclare. C'est ce qui rend l'écart quantitatif (« admis à
+ * concurrence des places déclarées ») là où l'ancienne table `parking_uncovered_area`
  * le rendait seulement excusable.
  *
  * **Ce que la disparition du statut d'objet emporte.** `parking` et
@@ -63,7 +63,7 @@ export type ParkingReport = {
    *
    * Ce n'est pas le nombre de places : une empreinte marquée non numérisée est
    * une empreinte, et vaut plusieurs places. S-38 impose une règle de comptage
-   * unique, et ce champ n'en est pas un — il dit combien de surfaces ont été
+   * unique, et ce champ n'en est pas un : il dit combien de surfaces ont été
    * dessinées, non combien de places elles portent.
    */
   readonly digitized_count: number;
@@ -90,7 +90,7 @@ type Counted = {
 };
 
 /**
- * Le comptage des places d'un parking — S-38.
+ * Le comptage des places d'un parking : S-38.
  *
  * « Une empreinte de place vaut une place, sauf si elle est marquée non
  * numérisée, auquel cas elle vaut le nombre déclaré par son fait et ne compte
@@ -101,8 +101,8 @@ type Counted = {
  * numérisée n'est pas un emplacement qui porterait en plus d'autres places,
  * c'est l'étendue où ces places se trouvent.
  *
- * Un fait de valeur négative ne peut pas venir de la base — la clé déclare un
- * entier, et rien n'écrit un compte négatif — mais le total s'en protège,
+ * Un fait de valeur négative ne peut pas venir de la base (la clé déclare un
+ * entier, et rien n'écrit un compte négatif) mais le total s'en protège,
  * faute de quoi une marque mal saisie réduirait la capacité expliquée au lieu
  * de l'augmenter. Une marque de valeur nulle est en revanche légitime : une
  * surface relevée dont on sait qu'elle ne porte aucune place.
@@ -159,7 +159,7 @@ export function auditParking(
     );
     // Aucune capacité annoncée : rien à comparer. S-36 fait du fait le terme de
     // la comparaison, et un parking dont personne n'a annoncé la capacité n'est
-    // pas en écart — il est sans annonce.
+    // pas en écart : il est sans annonce.
     if (declared === null) continue;
 
     // Les deux comptes voyagent avec l'anomalie. `counted` est celui que S-38
@@ -206,7 +206,7 @@ export function auditParking(
 }
 
 /**
- * Les surfaces non numérisées dont le motif manque ou est vide — S-37.
+ * Les surfaces non numérisées dont le motif manque ou est vide : S-37.
  *
  * « Une empreinte de nature `parking_space` peut être marquée non numérisée,
  * avec le nombre de places qu'elle est censée porter, le motif pour lequel
@@ -219,8 +219,8 @@ export function auditParking(
  * même façon. Toute empreinte de place est examinée, qu'une zone de parking la
  * déclare ou non : le fait vise l'empreinte, pas la zone.
  *
- * Un motif vide est valide au regard du type — A5.11 refuse une valeur mal
- * typée, non une valeur pauvre — mais il ne dit pas pourquoi : il est signalé
+ * Un motif vide est valide au regard du type (A5.11 refuse une valeur mal
+ * typée, non une valeur pauvre) mais il ne dit pas pourquoi : il est signalé
  * comme un motif absent. Un motif fait de seuls blancs est vide. Le paramètre
  * `reason` distingue les deux cas, pour que la correction soit évidente :
  * déclarer le fait, ou le remplir.
@@ -257,8 +257,8 @@ function unexplainedSurfaces(
  *
  * L'anomalie désigne l'objet, non le fait : c'est le parking ou la place que
  * le livrable montre, et c'est là que le lecteur doit regarder. La clé et le
- * statut sont en paramètres, pour que le chemin de correction — réviser le
- * fait — reste visible.
+ * statut sont en paramètres, pour que le chemin de correction (réviser le
+ * fait) reste visible.
  */
 function unpublishableFacts(
   parkings: readonly SiteZone[],

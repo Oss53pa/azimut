@@ -6,7 +6,7 @@ import { orientedItinerary } from '../oriented-itinerary.js';
 import type { OrientedItineraryOptions } from '../oriented-itinerary.js';
 
 /**
- * Partie P, écran Itinéraire — le tracé sur le plan orienté de la borne
+ * Partie P, écran Itinéraire : le tracé sur le plan orienté de la borne
  * (D10.3, D6.2). Le test décisif est celui de D6.4, porté sur l'itinéraire :
  * une destination devant la borne apparaît dans la moitié haute.
  */
@@ -53,11 +53,11 @@ function wayTo(destinationId: string) {
   return { route: way.value.route, target: destination.node_id };
 }
 
-describe('partie P, écran Itinéraire — le tracé sur le plan orienté de la borne', () => {
+describe('partie P, écran Itinéraire : le tracé sur le plan orienté de la borne', () => {
   const { route, target } = wayTo('dest-ml-rdc');
   const ahead = bearing(position(kioskNode), position(target));
 
-  it('D6.4 — la destination devant la borne est dans la moitié haute, derrière elle dans la basse', () => {
+  it('D6.4 : la destination devant la borne est dans la moitié haute, derrière elle dans la basse', () => {
     for (const [azimuth, inFront] of [[ahead, true], [(ahead + 180) % 360, false]] as const) {
       const out = orientedItinerary(site, { nodeId: kioskNode, azimuthDeg: azimuth }, profile, route, options);
       if (!out.ok) throw new Error('rendu attendu');

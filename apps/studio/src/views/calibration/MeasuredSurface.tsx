@@ -19,7 +19,7 @@ type MeasuredSurfaceProps = {
  *
  * Chaque paire se lit comme un segment : l'amer où le site le situe, le point
  * où l'opérateur l'a posé sur le fond, et le trait entre les deux. Ce trait est
- * l'écart de saisie, pas le résidu — le résidu ne se connaît qu'après
+ * l'écart de saisie, pas le résidu : le résidu ne se connaît qu'après
  * ajustement et se lit au tableau. Les montrer ensemble sur la carte ferait
  * croire qu'il s'agit de la même chose.
  */

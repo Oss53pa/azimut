@@ -153,7 +153,7 @@ describe('runSnapPipeline', () => {
     const objects: SceneObject[] = [
       { id: 'obj', vertices: [vertexPoint] },
     ];
-    // Cursor 20px away — beyond 8px tolerance
+    // Cursor 20px away, beyond 8px tolerance
     const cursorScreen = { x: vertexScreen.x + 20, y: vertexScreen.y };
     const cursorMeter: Point = { x_m: 1.2, y_m: 0 };
 
@@ -255,7 +255,7 @@ describe('runSnapPipeline', () => {
     const objects: SceneObject[] = [
       { id: 'obj', vertices: [p] },
     ];
-    // 5px away — beyond 2px tolerance
+    // 5px away, beyond 2px tolerance
     const cursorScreen = { x: pScreen.x + 5, y: pScreen.y };
     const cursorMeter: Point = { x_m: 1.05, y_m: 0 };
 

@@ -74,7 +74,7 @@ function compose(template: FaceTemplate, site: SiteData = SITE) {
 // Repérage de face
 // ---------------------------------------------------------------------------
 
-describe('H2.5 — repérage de la face', () => {
+describe('H2.5 : repérage de la face', () => {
   it('trouve l’indice du côté déclaré', () => {
     const type = SITE.support_types.find(t => t.key === 'directional');
     if (type === undefined) throw new Error('typologie absente');
@@ -111,7 +111,7 @@ const ALL_KINDS: readonly ContentBlockKind[] = [
   'map', 'legend', 'free_text', 'logo', 'emergency_info',
 ];
 
-describe('H2.5 — la composition via le tableau est équivalente à la résolution directe', () => {
+describe('H2.5 : la composition via le tableau est équivalente à la résolution directe', () => {
   it('produit la même face sur le gabarit de référence', () => {
     const template = refTemplate();
     const direct = resolveFaceContent(SITE, template, NODE, profile());
@@ -193,7 +193,7 @@ describe('H2.5 — la composition via le tableau est équivalente à la résolut
 // Lecture depuis un tableau fourni
 // ---------------------------------------------------------------------------
 
-describe('H2.5 — lecture depuis un tableau fourni', () => {
+describe('H2.5 : lecture depuis un tableau fourni', () => {
   it('consomme un tableau déjà généré sans en refaire un', () => {
     const template = refTemplate();
     const schedule = scheduleFor(template);
@@ -296,7 +296,7 @@ describe('H2.5 — lecture depuis un tableau fourni', () => {
   });
 });
 
-describe('H2.5 — tolérance à la génération, refus face à un tableau enregistré', () => {
+describe('H2.5 : tolérance à la génération, refus face à un tableau enregistré', () => {
   it('compose malgré une typologie non déclarée, comme avant la bascule', () => {
     // Le catalogue classe une face absente de la typologie en
     // avertissement, pas en refus. La bascule ne durcit pas cette

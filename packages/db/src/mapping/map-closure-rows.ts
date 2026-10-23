@@ -1,9 +1,9 @@
 /**
- * O11 — les lignes de `temporary_closure`, lues pour le modèle.
+ * O11 : les lignes de `temporary_closure`, lues pour le modèle.
  *
  * La base garantit une plage ordonnée et au moins une arête (migration 0069).
  * Une ligne que le modèle ne sait pas lire n'est donc pas une donnée à
- * écarter en silence : c'est une incohérence, et la lecture s'arrête — une
+ * écarter en silence : c'est une incohérence, et la lecture s'arrête, une
  * fermeture perdue ouvrirait sans le dire une circulation fermée.
  */
 import { localInstantOf, sortClosures, type TemporaryClosure } from '@azimut/core-model';

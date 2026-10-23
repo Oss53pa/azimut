@@ -28,14 +28,14 @@ type ResidualRow = {
 };
 
 /**
- * Calage à n points — section M2 (partie M), et section de l'écran M2.
+ * Calage à n points : section M2 (partie M), et section de l'écran M2.
  *
  * L'opérateur arme un amer, le pose sur le fond, recommence. L'ajustement
  * tourne à chaque pose et rend ses résidus.
  *
  * Les deux tolérances sont saisies, sans valeur par défaut. Tant qu'elles sont
  * vides, l'écran affiche les résidus et le dit : il ne rend aucun verdict.
- * L'origine de ces seuils — norme opposable ou paramètre de produit — n'est pas
+ * L'origine de ces seuils (norme opposable ou paramètre de produit) n'est pas
  * tranchée, et INV-5 interdit d'en inscrire un dans le code. Un défaut affiché
  * passerait pour une valeur retenue.
  */
@@ -47,7 +47,7 @@ export function MeasuredCalibrationPanel(
   const [armedId, setArmedId] = useState<string | null>(null);
   const [meanTolerance, setMeanTolerance] = useState('');
   const [pointTolerance, setPointTolerance] = useState('');
-  // E6.2 — saisie numérique du point, équivalent clavier du clic.
+  // E6.2 : saisie numérique du point, équivalent clavier du clic.
   const [entryX, setEntryX] = useState('');
   const [entryY, setEntryY] = useState('');
   const [announcement, setAnnouncement] = useState('');
@@ -77,7 +77,7 @@ export function MeasuredCalibrationPanel(
     setArmedId(null);
     setEntryX('');
     setEntryY('');
-    // E6.3 — le résultat de l'opération est annoncé, pas seulement dessiné.
+    // E6.3 : le résultat de l'opération est annoncé, pas seulement dessiné.
     setAnnouncement(t('measured.announce.placed', {
       landmark: label,
       x: Math.round(point.x_px),
@@ -137,7 +137,7 @@ export function MeasuredCalibrationPanel(
       id: 'residual',
       header: t('measured.col.residual'),
       numeric: true,
-      cell: (row) => (row.residual_mm === null ? '—' : String(row.residual_mm)),
+      cell: (row) => (row.residual_mm === null ? '–' : String(row.residual_mm)),
     },
   ];
 
@@ -153,13 +153,13 @@ export function MeasuredCalibrationPanel(
     {
       id: 'mean',
       label: t('measured.metric.mean'),
-      value: state.calibration === null ? '—' : String(Math.round(state.calibration.mean_residual_m * 1000)),
+      value: state.calibration === null ? '–' : String(Math.round(state.calibration.mean_residual_m * 1000)),
       note: t('measured.unit.mm'),
     },
     {
       id: 'max',
       label: t('measured.metric.max'),
-      value: state.calibration === null ? '—' : String(Math.round(state.calibration.max_residual_m * 1000)),
+      value: state.calibration === null ? '–' : String(Math.round(state.calibration.max_residual_m * 1000)),
       note: t('measured.unit.mm'),
     },
   ];

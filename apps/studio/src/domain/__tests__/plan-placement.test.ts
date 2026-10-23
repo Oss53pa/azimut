@@ -9,7 +9,7 @@ const placement = (north_azimuth_deg: number): PlanPlacement => ({
 
 function close(a: number, b: number): boolean { return Math.abs(a - b) < 1e-9; }
 
-describe('J1.4 — le plan calé dans le repère du site', () => {
+describe('J1.4 : le plan calé dans le repère du site', () => {
   it('le point A du calage est l’origine du site', () => {
     const origin = imageToWorld({ x_px: 100, y_px: 200 }, placement(0));
     expect(close(origin.x_m, 0) && close(origin.y_m, 0)).toBe(true);

@@ -33,7 +33,7 @@ function baseInput(overrides?: Partial<KioskPackageInput>): KioskPackageInput {
   };
 }
 
-describe('D10.1 / D10.2 — assembleKioskPackage', () => {
+describe('D10.1 / D10.2: assembleKioskPackage', () => {
   it('assembles the required tree and a conformant manifest', () => {
     const result = assembleKioskPackage(baseInput());
     expect(result.ok).toBe(true);

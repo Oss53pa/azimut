@@ -2,7 +2,7 @@ import type { PostgresJsDatabase } from '@azimut/db';
 import { insertDeliveryPackage } from '@azimut/db';
 
 /**
- * D11 — the delivery archive metadata recorded as a `delivery_package` row,
+ * D11: the delivery archive metadata recorded as a `delivery_package` row,
  * everything except the org (supplied from the job).
  */
 export type DeliveryRecord = {

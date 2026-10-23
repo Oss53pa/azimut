@@ -15,7 +15,7 @@ import {
 import type { ScheduleTransitionContext } from '../message-schedule-state.js';
 
 /**
- * R12 (partie R) — le circuit de validation du tableau des messages.
+ * R12 (partie R) : le circuit de validation du tableau des messages.
  *
  * L'essai ne relit pas la table de transitions : il l'exerce. Chacune des six
  * lignes de R12 est jouée, chaque condition de sa colonne « Condition » est
@@ -87,7 +87,7 @@ function codes(result: ReturnType<typeof transitionSchedule>): readonly string[]
 // Les six lignes de la table
 // ---------------------------------------------------------------------------
 
-describe('R12 — les six transitions de la table, et elles seules', () => {
+describe('R12 : les six transitions de la table, et elles seules', () => {
   it('aucune version puis Générer donne un brouillon', () => {
     const r = transitionSchedule('generate', context({ schedule: null }));
     expect(r.ok).toBe(true);
@@ -136,7 +136,7 @@ describe('R12 — les six transitions de la table, et elles seules', () => {
 
   /**
    * Le cœur de l'essai : tout ce que la table ne porte pas est refusé. Trente
-   * couples possibles, six permis, vingt-quatre refusés — et le compte est
+   * couples possibles, six permis, vingt-quatre refusés : et le compte est
    * vérifié pour qu'un déclencheur ajouté sans ligne ne passe pas inaperçu.
    */
   it('tout couple absent de la table est refusé, sans exception', () => {
@@ -187,7 +187,7 @@ describe('R12 — les six transitions de la table, et elles seules', () => {
 // Conditions d'émission pour revue
 // ---------------------------------------------------------------------------
 
-describe('R12 — émettre pour revue', () => {
+describe('R12 : émettre pour revue', () => {
   it('une anomalie bloquante empêche l’émission et est rendue telle quelle', () => {
     const r = transitionSchedule('submit_for_review', context({
       findings: [blocking('WAYFIND.CONTINUITY_BROKEN')],
@@ -252,7 +252,7 @@ describe('R12 — émettre pour revue', () => {
 // Conditions de rejet et d'approbation
 // ---------------------------------------------------------------------------
 
-describe('R12 — rejeter et approuver', () => {
+describe('R12 : rejeter et approuver', () => {
   const inReview = schedule('in_review');
 
   it('un rejet sans motif est refusé', () => {
@@ -318,7 +318,7 @@ describe('R12 — rejeter et approuver', () => {
 // Remplacement
 // ---------------------------------------------------------------------------
 
-describe('R12 — remplacement par une version ultérieure', () => {
+describe('R12 : remplacement par une version ultérieure', () => {
   it('sans version qui remplace, le remplacement est refusé', () => {
     const r = transitionSchedule('supersede', context({ schedule: schedule('approved') }));
     expect(r.ok).toBe(false);
@@ -346,7 +346,7 @@ describe('R12 — remplacement par une version ultérieure', () => {
 // Déterminisme (invariant 4)
 // ---------------------------------------------------------------------------
 
-describe('INV-4 — deux appels identiques rendent le même refus', () => {
+describe('INV-4 : deux appels identiques rendent le même refus', () => {
   it('les anomalies sortent dans le même ordre, au même contenu', () => {
     const ctx = context({
       schedule: schedule('in_review', [line('l-3', true), line('l-1', true)]),
@@ -371,7 +371,7 @@ describe('INV-4 — deux appels identiques rendent le même refus', () => {
 // Les codes employés existent déjà
 // ---------------------------------------------------------------------------
 
-describe('R14 — cet écran ne crée aucun code', () => {
+describe('R14 : cet écran ne crée aucun code', () => {
   it('tous les codes de refus sont au catalogue', async () => {
     const { ERROR_CATALOG } = await import('@azimut/core-model');
     const used = [

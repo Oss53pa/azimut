@@ -15,7 +15,7 @@ export const job = azimut.table('job', {
   started_at: timestamp('started_at', { withTimezone: true }),
   finished_at: timestamp('finished_at', { withTimezone: true }),
   error: text('error'),
-  /** A6.1 — le demandeur, posé par la base et fixe (migration 0070). */
+  /** A6.1, le demandeur, posé par la base et fixe (migration 0070). */
   requested_by: uuid('requested_by').default(sql`azimut.current_user_id()`),
 }, (t) => [
   index('idx_job_org').on(t.org_id),

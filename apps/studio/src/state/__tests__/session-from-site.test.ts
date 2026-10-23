@@ -6,14 +6,14 @@ import { rowsOf } from '../session-store.js';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * E5.4 et N1.7 critère 1 — un site enregistré se rouvre tel qu'il est.
+ * E5.4 et N1.7 critère 1 : un site enregistré se rouvre tel qu'il est.
  *
  * Le chemin d'écriture était prouvé ; le retour ne l'était pas. Ces essais
  * portent sur le point où il se casse le plus discrètement : le magasin reçoit
  * des lignes de deux origines qui n'encodent pas de la même façon, et une
  * origine mal lue rendrait un graphe amputé plutôt qu'une erreur.
  */
-describe('E5.4 — l’atelier repart de l’état du dépôt', () => {
+describe('E5.4 : l’atelier repart de l’état du dépôt', () => {
   it('rend une ligne par entité, sous le nom de sa table', () => {
     const rows = sessionRowsFromSite(refMinimal);
     expect(rowsOf({ rows, queued: [], online: true }, 'site')).toHaveLength(1);
@@ -67,7 +67,7 @@ describe('E5.4 — l’atelier repart de l’état du dépôt', () => {
   });
 
   /**
-   * A5.8 — le rattachement fait foi en table, et l'atelier le lit dans ses
+   * A5.8, le rattachement fait foi en table, et l'atelier le lit dans ses
    * lignes : le bandeau « aucun paquet » de M02.W9 en dépend. La ligne reprend
    * le site et l'organisation, comme en base.
    */

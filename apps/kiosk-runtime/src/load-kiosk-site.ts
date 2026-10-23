@@ -18,14 +18,14 @@ import type {
 } from '@azimut/core-model';
 
 /**
- * D10.5 — Rehydrate a {@link SiteData} from the kiosk deployment tree's data
+ * D10.5: Rehydrate a {@link SiteData} from the kiosk deployment tree's data
  * files, so the runtime operates entirely offline on the bytes shipped in the
  * package (no network, no database).
  *
  * The inverse of `buildKioskDataFiles` in @azimut/compiler: it reads
  * `data/graph.json`, `data/directory.json`, `data/scene.json` and
  * `data/site.json`. Panel-authoring collections (support types, face
- * templates) are not shipped to a kiosk and come back empty — the runtime does
+ * templates) are not shipped to a kiosk and come back empty: the runtime does
  * not render supports.
  *
  * Throws on a missing file or a structurally invalid document. Byte integrity
@@ -33,7 +33,7 @@ import type {
  */
 
 /**
- * A5.8 — le site tel qu'une borne le connaît : sans rattachement aux paquets
+ * A5.8, le site tel qu'une borne le connaît : sans rattachement aux paquets
  * de règles. Le champ est absent, et non vide : une liste vide dirait « site
  * sans paquet », ce qui est faux, alors que le paquet de borne ne transporte
  * simplement pas les rattachements. Un code qui voudrait résoudre une fonction
@@ -108,7 +108,7 @@ export function loadKioskSite(
   const nodes = readArray(graphDoc, 'nodes', 'data/graph.json') as GraphNode[];
   const shippedEdges = readArray(graphDoc, 'edges', 'data/graph.json') as Edge[];
 
-  // M01.S6 — la longueur d'une arête est calculée, jamais lue. Le paquet la
+  // M01.S6 : la longueur d'une arête est calculée, jamais lue. Le paquet la
   // transporte, le terminal ne la croit pas : un itinéraire est une somme de
   // longueurs, et une longueur reçue fausse donnerait un itinéraire faux sans
   // que rien ne le signale.
@@ -138,7 +138,7 @@ export function loadKioskSite(
       'data/site.json',
     ) as unknown as Organization,
     site: readObject(identityDoc, 'site', 'data/site.json') as unknown as Site,
-    // A5.8 — pas de `rules_bindings` : voir KioskSite. Le champ manque, il
+    // A5.8, pas de `rules_bindings` : voir KioskSite. Le champ manque, il
     // n'est pas vide.
     buildings: readArray(sceneDoc, 'buildings', 'data/scene.json') as Building[],
     levels,
@@ -177,7 +177,7 @@ export function loadKioskSite(
     // Not shipped to a kiosk: a terminal draws from metric geometry, never
     // from a raster background, so the plan sources and their calibrations
     // stay in the studio. A kiosk site is consequently not a site `runChecks`
-    // can judge — N1.4's calibration check would flag every level.
+    // can judge: N1.4's calibration check would flag every level.
     plan_sources: [],
     plan_calibrations: [],
     // Not shipped to a kiosk: supports and panels are authored, not displayed

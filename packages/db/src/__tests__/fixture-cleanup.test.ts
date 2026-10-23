@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { dependencyOrder } from '../fixture-cleanup.js';
 
 /**
- * A5.11 — le retrait d'un décor d'essai suit l'ordre de dépendance, faute de
+ * A5.11 : le retrait d'un décor d'essai suit l'ordre de dépendance, faute de
  * cascade. L'ordre se calcule, il ne s'écrit pas : ces essais portent sur le
  * calcul, sans base.
  */
-describe('A5.11 — ordre de dépendance du retrait', () => {
+describe('A5.11 : ordre de dépendance du retrait', () => {
   it('place une fille avant sa mère', () => {
     const order = dependencyOrder(
       ['site', 'building', 'level'],

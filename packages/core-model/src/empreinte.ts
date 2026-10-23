@@ -3,7 +3,7 @@ import { sha256Hex } from './hash.js';
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * T-2.14a §4 et D7.2 — la forme canonique, et la seule. Depuis la version 25,
+ * T-2.14a §4 et D7.2 : la forme canonique, et la seule. Depuis la version 25,
  * elle vaut pour toutes les empreintes du produit : contenu d'une face,
  * entrées d'un tableau des messages, graphe d'une validation, entrées d'un
  * parcours, paquet de règles, manifeste. Aucune ne passe ailleurs.
@@ -12,7 +12,7 @@ import type { Finding, Outcome } from './outcome.js';
  * §4 rules, in order:
  *  1. JSON, UTF-8, no whitespace, no newline.
  *  2. Object keys sorted by code point.
- *  3. Absent field omitted — never `null`, never `""` as a stand-in. Equivalent
+ *  3. Absent field omitted: never `null`, never `""` as a stand-in. Equivalent
  *     states produce the same string (a key whose value is null/undefined is
  *     dropped, so absence and null are indistinguishable).
  *  4. Business-ordered arrays keep their order; unordered sets are sorted by id
@@ -38,7 +38,7 @@ function formatNumber(value: number): string {
     }
     return s;
   }
-  // §4.5 — three decimals via the single rounding function; §4.6 — no -0.
+  // §4.5: three decimals via the single rounding function; §4.6: no -0.
   const s = String(roundSvg(value));
   if (s.includes('e') || s.includes('E')) {
     throw new Error('empreinte: number not representable in fixed notation');
@@ -72,7 +72,7 @@ export function codePointCompare(a: string, b: string): number {
 
 function canon(value: unknown): string {
   if (value === null || value === undefined) {
-    // §4.3 — null/undefined never appear as a value: objects omit such keys,
+    // §4.3, null/undefined never appear as a value: objects omit such keys,
     // and arrays must not carry them. Reaching here is a builder error.
     throw new Error('empreinte: null/undefined must be omitted, not serialized');
   }
@@ -89,16 +89,16 @@ function canon(value: unknown): string {
       }
       if (!isPlainObject(value)) {
         // A Date, Map, Set or class instance would collapse to '{}' and hide a
-        // real content difference — refuse it instead (§4 determinism).
+        // real content difference: refuse it instead (§4 determinism).
         throw new Error('empreinte: only plain objects are serializable');
       }
       const obj = value as Record<string, unknown>;
-      // §4.2 / D7.2 ("clés triées") — object keys are sorted by code point and
+      // §4.2 / D7.2 ("clés triées") : object keys are sorted by code point and
       // serialized verbatim. They are structural identifiers (field names,
       // language codes), never free text, so they are NOT NFC-normalized: the
       // §4.7 NFC rule is justified by accented *labels*, which reach `canon` as
       // string VALUES and are normalized there. Leaving keys verbatim also keeps
-      // the mapping injective — two byte-distinct keys can never merge into one
+      // the mapping injective: two byte-distinct keys can never merge into one
       // duplicate key. A key whose value is null/undefined is omitted (§4.3).
       const keys = Object.keys(obj)
         .filter((k) => obj[k] !== null && obj[k] !== undefined)
@@ -117,7 +117,7 @@ export function canonicalContentJson(value: unknown): string {
 }
 
 /**
- * §4.9 — SHA-256 of the canonical serialization, lowercase hex, `sha256:`
+ * §4.9, SHA-256 of the canonical serialization, lowercase hex, `sha256:`
  * prefixed. The empreinte of two equivalent states is byte-for-byte identical.
  */
 export function empreinte(value: unknown): string {
@@ -125,7 +125,7 @@ export function empreinte(value: unknown): string {
 }
 
 /**
- * D7.2 et D2.2 — l'empreinte, ou son refus. Toute empreinte du produit passe
+ * D7.2 et D2.2 : l'empreinte, ou son refus. Toute empreinte du produit passe
  * par cette fonction : une valeur non hachable (nombre non fini, objet non
  * simple, nul dans un tableau) est refusée par `DATA.HASH_INPUT_INVALID`, au
  * lieu d'être écrite nulle ou de lever une exception hors du moteur (A7).

@@ -27,7 +27,7 @@ const STATE_SEVERITY: Readonly<Record<BookingState, Severity>> = {
 };
 
 /**
- * Module 05 — l'inventaire des emplacements publicitaires (H4.1), au gabarit
+ * Module 05 : l'inventaire des emplacements publicitaires (H4.1), au gabarit
  * « registre ». Les emplacements se lisent en base (0045), ou dans le jeu de
  * démonstration du dépôt de référence. L'état, l'occupation, l'annonceur et
  * les conflits sont calculés depuis les réservations.
@@ -70,7 +70,7 @@ export function AdInventoryView({ siteKey }: AdInventoryViewProps): JSX.Element 
     { id: 'typology', header: t('ads.col.typology'), cell: r => r.placement.typology_key },
     { id: 'level', header: t('adinventory.col.level'), cell: r => labels.level(r.placement.level_id) },
     { id: 'area', header: t('ads.col.area'), numeric: true, cell: r => formatNumber(r.placement.area_m2, lang, 2) },
-    { id: 'advertiser', header: t('ads.col.advertiser'), cell: r => r.advertiser ?? '—' },
+    { id: 'advertiser', header: t('ads.col.advertiser'), cell: r => r.advertiser ?? '–' },
     {
       id: 'state',
       header: t('sitesheet.col.state'),
@@ -98,7 +98,7 @@ export function AdInventoryView({ siteKey }: AdInventoryViewProps): JSX.Element 
               { id: 'typology', label: t('ads.col.typology'), value: selected.placement.typology_key },
               { id: 'level', label: t('adinventory.col.level'), value: labels.level(selected.placement.level_id) },
               { id: 'area', label: t('ads.col.area'), value: formatNumber(selected.placement.area_m2, lang, 2) },
-              { id: 'advertiser', label: t('ads.col.advertiser'), value: selected.advertiser ?? '—' },
+              { id: 'advertiser', label: t('ads.col.advertiser'), value: selected.advertiser ?? '–' },
             ],
           },
           {

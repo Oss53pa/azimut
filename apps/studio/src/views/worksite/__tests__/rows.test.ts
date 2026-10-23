@@ -4,7 +4,7 @@ import { lotRows, reserveRows } from '../rows.js';
 
 const { lots, reserves } = REFERENCE_WORKSITE;
 
-describe('H6.2 — lots et réserves de pose', () => {
+describe('H6.2 : lots et réserves de pose', () => {
   it('rattache à chaque réserve ouverte l’anomalie du garde, et aucune à une réserve levée', () => {
     const rows = reserveRows(reserves);
     for (const row of rows) {

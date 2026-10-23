@@ -3,19 +3,19 @@ import { findLexiconMatches, factValueText, PUBLISHABLE_FACT_STATUSES, codePoint
 import { checkableTexts } from './site-texts.js';
 
 /**
- * Contrôle des textes du site contre ses faits — A5.11, règle M01.S11.
+ * Contrôle des textes du site contre ses faits : A5.11, règle M01.S11.
  *
  * « Un texte de livrable qui contredit un fait déclaré est refusé. »
  *
  * Un fait vérifié bannit des mots : « parking gratuit » interdit paiement,
  * payant, tarif. L'anomalie nomme le fait, sa valeur et sa source, parce que la
- * correction n'est pas toujours d'effacer le mot — elle peut être de réviser le
+ * correction n'est pas toujours d'effacer le mot : elle peut être de réviser le
  * fait, si c'est lui qui a cessé d'être vrai. Une anomalie qui dirait seulement
  * « mot interdit » cacherait ce second chemin.
  *
  * **Deux contrôles de plus, et ils viennent du statut.** D2.2 range
- * `PARK.SOURCE_MISSING` au niveau du fait — « Fait du site sans source
- * déclarée, règle M01.S11 » — et `PARK.PROPOSAL_AS_EXISTING` au statut de
+ * `PARK.SOURCE_MISSING` au niveau du fait (« Fait du site sans source
+ * déclarée, règle M01.S11 ») et `PARK.PROPOSAL_AS_EXISTING` au statut de
  * proposition affiché comme un existant. Les deux se levaient jusqu'ici sur les
  * objets de stationnement, faute de colonne pour porter le statut d'un fait :
  * le statut vivait sur les objets, et un fait déclaré n'en avait aucun, donc

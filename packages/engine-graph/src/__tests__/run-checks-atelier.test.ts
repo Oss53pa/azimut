@@ -14,7 +14,7 @@ import type { CharterRule, SiteFact } from '@azimut/core-model';
 import { PARKING_CAPACITY_KEY, codePointCompare } from '@azimut/core-model';
 
 /**
- * La capacité annoncée du parking de `refMultilevel` — A5.11, S-36.
+ * La capacité annoncée du parking de `refMultilevel` : A5.11, S-36.
  *
  * Un fait du site, donc porté par le vocabulaire et non par `SiteData` : c'est
  * l'appelant de `runChecks` qui le fournit. Quatre places, quatre annoncées.
@@ -45,7 +45,7 @@ describe('vocabulaire du site : exercé, ou déclaré non exercé', () => {
     { key: 'niveaux', source: 'Charte', value: '3', recorded_on: '2026-01-10' },
     { key: 'niveaux', source: 'Plans', value: '2', recorded_on: '2026-05-04' },
   ];
-  // A5.8 — les deux règles de rédaction, portées par la charte du site.
+  // A5.8 : les deux règles de rédaction, portées par la charte du site.
   const charterRules: readonly CharterRule[] = [
     {
       id: 'cr-ref-caracteres',
@@ -133,7 +133,7 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
   it('l’exerce même sans capacité annoncée, et ne trouve alors rien à dire', () => {
     // Le contrôle porte sur les zones, pas sur les faits : il tourne dès qu'un
     // parking est déclaré. Sans capacité annoncée, il n'a simplement rien à
-    // comparer — c'est un contrôle exercé et muet, pas un contrôle absent.
+    // comparer : c'est un contrôle exercé et muet, pas un contrôle absent.
     const r = runChecks(refMultilevel);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -151,7 +151,7 @@ describe('stationnement : contrôlé quand il y en a, silencieux quand il n’y 
 });
 
 describe('mode de contrôle : atelier ou livrable', () => {
-  // A5.11 — le statut porte sur le fait, non sur l'objet : `zone` et
+  // A5.11, le statut porte sur le fait, non sur l'objet : `zone` et
   // `footprint` n'en déclarent aucun. Une capacité annoncée mais non arrêtée
   // est une proposition, et c'est elle qu'un livrable ne peut pas montrer.
   const site = refMultilevel;

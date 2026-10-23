@@ -34,7 +34,7 @@ import {
 } from '../state/review-annotation.js';
 
 /**
- * Partie R — le branchement de l'écran du tableau des messages.
+ * Partie R : le branchement de l'écran du tableau des messages.
  *
  * L'écran est site et non niveau : R2 lui donne `/sites/:siteId/wayfinding/
  * messages`, et il appartient à la famille Registre, non à l'atelier. Il ne
@@ -49,12 +49,12 @@ import {
  */
 export function MessageTableAdapter({ siteId, actor }: {
   readonly siteId: string;
-  /** R2 (partie R) — le rôle qui consulte. */
+  /** R2 (partie R) : le rôle qui consulte. */
   readonly actor: ScheduleActor;
 }): JSX.Element {
   // Même émetteur que l'atelier : réel si le dépôt est configuré, local sinon.
   const remote = useMemo(() => appSink() ?? undefined, []);
-  // R12 — ce que le dépôt porte du site et de son tableau, comme l'atelier.
+  // R12 : ce que le dépôt porte du site et de son tableau, comme l'atelier.
   const repository = useMemo(() => appRepository(), []);
   const load = useCallback(() => loadSiteSession(repository, siteId), [repository, siteId]);
   const session = useTrancheSession(
@@ -62,12 +62,12 @@ export function MessageTableAdapter({ siteId, actor }: {
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);
-  // R11 (partie R) — la comparaison, fermée tant qu'on ne la demande pas.
+  // R11 (partie R) : la comparaison, fermée tant qu'on ne la demande pas.
   const [comparing, setComparing] = useState(false);
   const [showUnchanged, setShowUnchanged] = useState(false);
   const [referenceVersion, setReferenceVersion] = useState<number | null>(null);
   const [comparedVersion, setComparedVersion] = useState<number | null>(null);
-  // R12 — les refus de la dernière transition demandée, rendus tels quels.
+  // R12 : les refus de la dernière transition demandée, rendus tels quels.
   const [refusals, setRefusals] = useState<readonly Finding[]>([]);
 
   const read = useMemo(
@@ -75,7 +75,7 @@ export function MessageTableAdapter({ siteId, actor }: {
     [session.state, siteId],
   );
 
-  // A5.6 — le code lisible d'un support. Vide tant qu'aucun support n'est
+  // A5.6 : le code lisible d'un support. Vide tant qu'aucun support n'est
   // implanté dans cette session : R5 (partie R) marque alors la cellule au
   // lieu de la laisser muette.
   const supportCodes = useMemo(() => {
@@ -118,11 +118,11 @@ export function MessageTableAdapter({ siteId, actor }: {
 
   const focusedRow = filtered.rows.find(row => row.line.id === selection.focusedId) ?? null;
 
-  // A5.8 — le paquet de règles du site, lu dans la table de rattachement qui
+  // A5.8 : le paquet de règles du site, lu dans la table de rattachement qui
   // fait foi. Son absence est un bandeau, jamais un blocage : R14 et N2.8
   // disent que le plafond de M02.W9 ne s'applique alors pas et que l'écran le dit.
   const rulesPackBound = rulesPackBoundIn(session.state, siteId);
-  // M02.W11 — le dernier passage de validation du site, pour le graphe actuel.
+  // M02.W11 : le dernier passage de validation du site, pour le graphe actuel.
   const graphValidated = useMemo(
     () => graphValidatedForSite(session.state, siteId), [session.state, siteId]);
 
@@ -158,13 +158,13 @@ export function MessageTableAdapter({ siteId, actor }: {
     return permission !== null && can(actor, permission);
   });
 
-  // R7.4 et J4 — les annotations de révision, relues dans la session. Celles
+  // R7.4 et J4 : les annotations de révision, relues dans la session. Celles
   // qui restent ouvertes sur les lignes du tableau bloquent l'approbation
   // (R12) : `transitionSchedule` les reçoit par `openAnnotationIds`.
   const annotations = useMemo(() => readAnnotations(session.state.rows), [session.state.rows]);
   const openAnnotationIds = openAnnotationIdsOn(annotations, rows.map(row => row.line.id));
   const canAnnotate = can(actor, 'annotate');
-  // R8 — une remarque posée sur la sélection crée une annotation par ligne ;
+  // R8 : une remarque posée sur la sélection crée une annotation par ligne ;
   // sans sélection, elle vise la ligne ouverte dans le détail.
   const targets = selection.selectedIds.length > 0
     ? [...selection.selectedIds].sort(codePointCompare)
@@ -196,7 +196,7 @@ export function MessageTableAdapter({ siteId, actor }: {
     />
   );
 
-  // E5.4 — l'écran partage le magasin de la session ; il en partage donc la
+  // E5.4 : l'écran partage le magasin de la session ; il en partage donc la
   // cérémonie de reprise. Adopter l'état local sans le demander parce que cet
   // écran ne l'écrit pas ferait deux comportements là où il n'y en a qu'un.
   const resume = session.pendingResume;
@@ -229,10 +229,10 @@ export function MessageTableAdapter({ siteId, actor }: {
       onFocusRow={id => { setSelection(current => ({ ...current, focusedId: id })); }}
       focusedRow={focusedRow}
       profilesAtDecisionPoint={[]}
-      onOpenSource={() => { /* R7.3 — la navigation vers l'écran source */ }}
+      onOpenSource={() => { /* R7.3 : la navigation vers l'écran source */ }}
       actions={actions}
       onTrigger={trigger => {
-        // R12 — l'émission pour revue. Générer relève de la moitié génération ;
+        // R12 : l'émission pour revue. Générer relève de la moitié génération ;
         // approuver et rejeter attendent un approbateur authentifié, et R2 (partie R) les
         // refuse au rôle de la session : ils ne sont jamais offerts ici.
         if (trigger !== 'submit_for_review' || read === null) return;
@@ -267,17 +267,17 @@ export function MessageTableAdapter({ siteId, actor }: {
         onClose: () => { setComparing(false); },
       } : null}
       canExport={can(actor, 'export')}
-      onExport={() => { /* R13 — l'export */ }}
+      onExport={() => { /* R13: l'export */ }}
       staleCount={rows.filter(row => row.state === 'stale').length}
       blockingCount={rows.filter(row => row.state === 'blocking').length}
       excludedCount={filtered.excluded}
-      onRegenerate={() => { /* R12 — régénérer écrit */ }}
+      onRegenerate={() => { /* R12 : régénérer écrit */ }}
       graphValidated={graphValidated}
       rulesPackBound={rulesPackBound}
       onOpenValidation={() => { /* lien vers l'écran de validation */ }}
       unreadableCount={read?.unreadable.length ?? 0}
       online={session.state.online}
-      onEmptyAction={() => { /* R12 — générer écrit */ }}
+      onEmptyAction={() => { /* R12 : générer écrit */ }}
       annotationPanel={annotationPanel}
       openAnnotationCount={openAnnotationIds.length}
     />
@@ -320,6 +320,6 @@ function optionsOf(values: readonly string[]): readonly { value: string; label: 
     .map(value => ({ value, label: value }));
 }
 
-/** D12.1 — les deux langues actives. Le site les portera en donnée (N1.2). */
+/** D12.1 : les deux langues actives. Le site les portera en donnée (N1.2). */
 const LANGS = ['fr', 'en'] as const;
 

@@ -2,7 +2,7 @@ import { createService, readServiceConfig } from './service.js';
 import { runWorkerLoop } from './worker.js';
 
 /**
- * T-0.11 — point d'entrée du service de compilation.
+ * T-0.11 : point d'entrée du service de compilation.
  *
  * Lit la configuration, prend les travaux de la file en base jusqu'à un
  * signal d'arrêt, puis termine le travail en cours et ferme la connexion. Un

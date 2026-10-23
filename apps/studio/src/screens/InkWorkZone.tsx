@@ -19,7 +19,7 @@ import { SketchStrokes } from './SketchStrokes.js';
 import type { PointerKind } from '../editor/ink/pointer-kind.js';
 
 /**
- * J1 et J1.4 (partie J) — la zone de travail de l'atelier des empreintes.
+ * J1 et J1.4 (partie J) : la zone de travail de l'atelier des empreintes.
  *
  * Le plan calé en fond, les empreintes déjà posées, le contour en cours, et le
  * trait que l'on trace. À la levée du stylet, le trait est remis à l'atelier,
@@ -112,7 +112,7 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
   });
   const { view } = zone;
 
-  // J1.4 — opacité du fond et formes tracées, mémorisées par zone et niveau.
+  // J1.4 : opacité du fond et formes tracées, mémorisées par zone et niveau.
   const [backdrop, setBackdrop] = useState<BackdropSettings>(() => recallBackdrop(props.viewKey, browserStore()));
   const changeBackdrop = (next: BackdropSettings): void => {
     setBackdrop(next);

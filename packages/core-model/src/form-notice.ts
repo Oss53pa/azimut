@@ -1,5 +1,5 @@
 /**
- * D2.2 — refus et avis de saisie qui ne sont pas des anomalies de moteur.
+ * D2.2 : refus et avis de saisie qui ne sont pas des anomalies de moteur.
  *
  * « Toute anomalie produite par un moteur figure dans ce catalogue. » Un
  * formulaire qui refuse une date mal écrite ou un texte vide ne produit pas
@@ -14,14 +14,14 @@ import type { Finding, Outcome } from './outcome.js';
 
 /** Les clés des refus de saisie. L'interface porte une traduction pour chacune. */
 export const FORM_NOTICE_KEYS = [
-  // Q4 et Q5 — client (entité juridique).
+  // Q4 et Q5 : client (entité juridique).
   'form.currency.invalid',
-  // O11 — fermeture temporaire.
+  // O11: fermeture temporaire.
   'form.closure.edges.required',
   'form.closure.edge.unknown',
   'form.closure.range.invalid',
   'form.closure.reason.required',
-  // A5.6 et D8.3 — face de support et bloc libre.
+  // A5.6 et D8.3 : face de support et bloc libre.
   'form.face.support.unknown',
   'form.face.index.out_of_range',
   'form.face.already_declared',

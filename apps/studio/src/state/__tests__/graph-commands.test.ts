@@ -42,7 +42,7 @@ function accepting(): { sink: CommandSink; seen: string[][] } {
   return { sink, seen };
 }
 
-describe('M4 (partie M) — écriture du graphe', () => {
+describe('M4 (partie M) : écriture du graphe', () => {
   const edges: readonly EdgeRow[] = [{ id: 'e-1', edge: acceptedEdge('n-1', 'n-2', 10) }];
 
   it('n’écrit que des tables du module 01', () => {

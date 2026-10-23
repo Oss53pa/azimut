@@ -1,10 +1,10 @@
 /**
- * E6.3 — Accessible names for the habillage layer.
+ * E6.3: Accessible names for the habillage layer.
  *
  * "Chaque objet expose un nom accessible construit depuis ses données
  * métier, jamais depuis sa forme." A decoration object carries no
  * business attribute (E9.2), so its name comes from its own label and
- * kind — never from its outline, its size, or its colour.
+ * kind: never from its outline, its size, or its colour.
  */
 
 import type { DecorationShape } from './scene-objects.js';

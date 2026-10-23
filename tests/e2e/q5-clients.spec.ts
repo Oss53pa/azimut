@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Q5 — les clients de l'organisation (entités juridiques), sous la liste des
+ * Q5 : les clients de l'organisation (entités juridiques), sous la liste des
  * sites. Sans dépôt configuré, la commande est acceptée sans être envoyée :
  * l'essai vérifie le formulaire et ses refus, pas l'écriture en base, que
  * `write-path.db.test.ts` couvre.
  */
-test.describe('Q5 — création d’un client', () => {
+test.describe('Q5 : création d’un client', () => {
   test('le formulaire s’ouvre depuis la page des sites', async ({ page }) => {
     await page.goto('/sites');
     await expect(page.getByRole('region', { name: 'Clients' })).toBeVisible();

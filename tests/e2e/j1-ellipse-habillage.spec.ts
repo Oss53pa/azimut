@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Locator } from '@playwright/test';
 
 /**
- * J1.2 (partie J) — « Cercle ou ovale approximatif : ellipse, cercle si
+ * J1.2 (partie J), « Cercle ou ovale approximatif : ellipse, cercle si
  * proche », dans l'éditeur d'habillage, avec l'outil Ellipse et le stylet.
  *
  * La lecture du trait est essayée dans `editor/ink/__tests__/editor-shapes.test.ts`.
@@ -28,7 +28,7 @@ async function penOval(canvas: Locator, rx: number, ry: number, tilt_deg = 0): P
   await canvas.dispatchEvent('pointerup', { ...pen, ...at(2 * Math.PI), buttons: 0 });
 }
 
-test.describe('J1.2 (partie J) — le cercle et l’ovale dans l’éditeur d’habillage', () => {
+test.describe('J1.2 (partie J) : le cercle et l’ovale dans l’éditeur d’habillage', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /^(Atelier de dessin|Drawing workshop)$/ }).first().click();
@@ -59,7 +59,7 @@ test.describe('J1.2 (partie J) — le cercle et l’ovale dans l’éditeur d’
   });
 });
 
-test.describe('J1.2 (partie J) — le rectangle au stylet dans l’éditeur d’habillage', () => {
+test.describe('J1.2 (partie J) : le rectangle au stylet dans l’éditeur d’habillage', () => {
   test('un rectangle approximatif au stylet devient un rectangle de l’habillage', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /^(Atelier de dessin|Drawing workshop)$/ }).first().click();

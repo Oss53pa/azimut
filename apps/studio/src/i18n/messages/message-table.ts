@@ -1,5 +1,5 @@
 /**
- * D12.1 — partie R, l'écran du tableau des messages.
+ * D12.1 : partie R, l'écran du tableau des messages.
  *
  * Fragment à part : la partie R spécifie cet écran au champ près, et son
  * vocabulaire n'est pas celui du tableau exploratoire du fragment
@@ -13,7 +13,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.title': 'Tableau des messages',
   'msgtable.subtitle': 'Ce que chaque face dira, et ce qui le justifie',
 
-  // R4 (partie R) — barre de version
+  // R4 (partie R), barre de version
   'msgtable.version': 'Version {version}',
   'msgtable.generated_at': 'Généré le',
   'msgtable.inputs_hash': 'Empreinte des entrées',
@@ -31,7 +31,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.action.compare': 'Comparer',
   'msgtable.action.export': 'Exporter',
 
-  // R5 (partie R) — colonnes
+  // R5 (partie R), colonnes
   'msgtable.column.stable_id': 'Identifiant',
   'msgtable.column.support': 'Support',
   'msgtable.column.face': 'Face',
@@ -48,13 +48,13 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.cell.no_pictogram': 'Aucun',
   'msgtable.cell.no_direction': 'Aucune',
 
-  // R5 (partie R) — niveaux d'information
+  // R5 (partie R), niveaux d'information
   'msgtable.level.1': 'Identification',
   'msgtable.level.2': 'Orientation',
   'msgtable.level.3': 'Direction',
   'msgtable.level.4': 'Confirmation',
 
-  // N2.2 — les six directions, relatives à l'usager
+  // N2.2, les six directions, relatives à l'usager
   'msgtable.direction.left': 'À gauche',
   'msgtable.direction.right': 'À droite',
   'msgtable.direction.ahead': 'Tout droit',
@@ -62,13 +62,13 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.direction.down': 'Vers le bas',
   'msgtable.direction.back': 'En arrière',
 
-  // R10 — état des lignes
+  // R10, état des lignes
   'msgtable.linestate.current': 'À jour',
   'msgtable.linestate.stale': 'Périmée',
   'msgtable.linestate.blocking': 'Anomalie bloquante',
   'msgtable.linestate.excluded': 'Écartée',
 
-  // R6 (partie R) — regroupement, filtres, recherche
+  // R6 (partie R), regroupement, filtres, recherche
   'msgtable.grouping': 'Regrouper par',
   'msgtable.grouping.support': 'Support',
   'msgtable.grouping.zone': 'Zone d’orientation',
@@ -90,7 +90,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.search': 'Recherche',
   'msgtable.search.hint': 'Contenus, codes de support, codes de point de décision',
 
-  // R7 — panneau de détail
+  // R7, panneau de détail
   'msgtable.detail': 'Détail de la ligne',
   'msgtable.detail.none': 'Aucune ligne sélectionnée.',
   'msgtable.detail.justification': 'Justification',
@@ -112,7 +112,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.source.wayfinding': 'Point de décision et parcours · Plan de jalonnement, module 02',
   'msgtable.source.pictogram': 'Pictogramme · Bibliothèque, partie J',
 
-  // R3 (partie R) — barre d'état
+  // R3 (partie R), barre d'état
   'msgtable.status.lines': '{count} ligne(s)',
   'msgtable.status.stale': '{count} périmée(s)',
   'msgtable.status.blocking': '{count} bloquante(s)',
@@ -120,7 +120,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.status.sync': 'Synchronisé',
   'msgtable.status.offline': 'Hors ligne',
 
-  // R10, R14 — bandeaux
+  // R10, R14, bandeaux
   'msgtable.banner.stale': '{count} ligne(s) périmée(s). Un tableau périmé ne peut pas être approuvé en l’état.',
   'msgtable.banner.stale.action': 'Générer une nouvelle version',
   'msgtable.banner.graph_not_validated': 'La validation de complétude du graphe n’est pas passée. L’émission pour revue est impossible.',
@@ -131,7 +131,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.banner.approved.unread': 'Version approuvée. La décision qui l’approuve n’a pas pu être lue : approbateur et date inconnus.',
   'msgtable.banner.unreadable': '{count} ligne(s) enregistrée(s) n’ont pas pu être lues et ne sont pas affichées.',
 
-  // R16 — états de l'écran
+  // R16, états de l'écran
   'msgtable.empty.message': 'Aucune version de tableau pour ce site. Prérequis : graphe validé, jalonnement établi, paquet de règles rattaché.',
   'msgtable.empty.action': 'Générer la première version',
   'msgtable.loading': 'Chargement du tableau des messages.',
@@ -142,7 +142,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.refused': 'La transition demandée est refusée. Chaque motif ci-dessous se corrige à sa source.',
   'msgtable.denied': 'Ce rôle ne consulte pas le tableau des messages.',
 
-  // R15 — raccourcis
+  // R15, raccourcis
   'msgtable.shortcuts': 'Raccourcis',
   'msgtable.shortcut.rows': 'Ligne précédente, suivante',
   'msgtable.shortcut.select': 'Ajouter à la sélection',
@@ -155,7 +155,7 @@ export const MESSAGE_TABLE_FR = {
   'msgtable.table.caption': 'Lignes du tableau des messages, une par bloc de face',
   'msgtable.table.empty': 'Aucune ligne ne répond aux filtres.',
   'msgtable.readonly': 'Aucune cellule de ce tableau n’est modifiable. Une ligne fausse se corrige à sa source.',
-  // R11 (partie R) — comparaison de versions
+  // R11 (partie R), comparaison de versions
   'msgtable.compare.title': 'Comparaison de versions',
   'msgtable.compare.reference': 'Version de référence',
   'msgtable.compare.compared': 'Version comparée',

@@ -26,7 +26,7 @@ describe('roundHalfAwayFromZero', () => {
   });
 });
 
-describe('roundSvg — D1.4 mandatory test', () => {
+describe('roundSvg: D1.4 mandatory test', () => {
   it('rounds 0.0005 to 0.001', () => {
     expect(roundSvg(0.0005)).toBe(0.001);
   });
@@ -120,7 +120,7 @@ describe('ceilMm', () => {
   });
 });
 
-describe('roundHalfAwayFromZero — additional edge cases', () => {
+describe('roundHalfAwayFromZero: additional edge cases', () => {
   it('handles large positive integer', () => {
     expect(roundHalfAwayFromZero(1e10)).toBe(1e10);
   });
@@ -138,7 +138,7 @@ describe('roundHalfAwayFromZero — additional edge cases', () => {
   });
 });
 
-describe('roundSvg — additional edge cases', () => {
+describe('roundSvg: additional edge cases', () => {
   it('preserves integer values', () => {
     expect(roundSvg(42)).toBe(42);
   });
@@ -148,7 +148,7 @@ describe('roundSvg — additional edge cases', () => {
   });
 });
 
-describe('formatSvg — additional edge cases', () => {
+describe('formatSvg: additional edge cases', () => {
   it('serialises negative value', () => {
     expect(formatSvg(-1.23456)).toBe('-1.235');
   });
@@ -158,13 +158,13 @@ describe('formatSvg — additional edge cases', () => {
   });
 });
 
-describe('ceilMm — additional edge cases', () => {
+describe('ceilMm: additional edge cases', () => {
   it('exact negative integer stays unchanged', () => {
     expect(ceilMm(-5)).toBe(-5);
   });
 });
 
-describe('roundHalfAwayFromZero — additional', () => {
+describe('roundHalfAwayFromZero: additional', () => {
   it('rounds 1.5 to 2 (away from zero)', () => {
     expect(roundHalfAwayFromZero(1.5)).toBe(2);
   });
@@ -174,14 +174,14 @@ describe('roundHalfAwayFromZero — additional', () => {
   });
 });
 
-describe('roundSvg — negative-to-zero boundary', () => {
+describe('roundSvg: negative-to-zero boundary', () => {
   it('rounds small negative to positive zero (not -0)', () => {
     expect(roundSvg(-0.0004)).toBe(0);
     expect(Object.is(roundSvg(-0.0004), 0)).toBe(true);
   });
 });
 
-describe('roundMm — exact half-point boundaries', () => {
+describe('roundMm: exact half-point boundaries', () => {
   it('roundMm(-0.5) resolves away from zero to -1 (D1.4), not JS +∞ rounding', () => {
     expect(roundMm(-0.5)).toBe(-1);
   });
@@ -190,7 +190,7 @@ describe('roundMm — exact half-point boundaries', () => {
   });
 });
 
-describe('roundSvg — exact 3-decimal half-points', () => {
+describe('roundSvg: exact 3-decimal half-points', () => {
   it('rounds positive half-point 1.2345 up to 1.235', () => {
     expect(roundSvg(1.2345)).toBe(1.235);
   });
@@ -200,14 +200,14 @@ describe('roundSvg — exact 3-decimal half-points', () => {
   });
 });
 
-describe('formatSvg — negative-to-zero', () => {
+describe('formatSvg: negative-to-zero', () => {
   it('serialises small negative as "0" (not "-0")', () => {
     expect(formatSvg(-0.0004)).toBe('0');
   });
 });
 
 /**
- * D1.4 / D1.5 — une longueur en mètres, gardée au millimètre : en deçà, deux
+ * D1.4 / D1.5, une longueur en mètres, gardée au millimètre : en deçà, deux
  * points sont le même point et la longueur ne veut plus rien dire.
  */
 describe('roundMetres', () => {

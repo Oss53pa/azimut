@@ -14,7 +14,7 @@ const LABEL: Readonly<Record<Strictness, UiMessageKey>> = {
 };
 
 /**
- * J1.3 — le niveau de redressement, partagé par les ateliers et retrouvé à la
+ * J1.3 : le niveau de redressement, partagé par les ateliers et retrouvé à la
  * session suivante, avec son réglage au clavier comme au pointeur (E6.2).
  */
 export function useStrictness(id: string): { readonly level: Strictness; readonly control: JSX.Element } {

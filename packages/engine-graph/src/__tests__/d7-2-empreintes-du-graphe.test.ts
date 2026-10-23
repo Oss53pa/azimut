@@ -19,7 +19,7 @@ function computeInputsHash(...args: Parameters<typeof computeInputsHashOutcome>)
 }
 
 /**
- * D7.2, version 25 — « Ces règles valent pour toutes les empreintes du
+ * D7.2, version 25, « Ces règles valent pour toutes les empreintes du
  * produit » : l'empreinte des entrées d'un parcours et celle du graphe qu'une
  * validation enregistre suivent la même forme canonique que l'empreinte de
  * contenu.
@@ -44,7 +44,7 @@ function withJunction(node: unknown): SiteData {
   };
 }
 
-describe('D7.2 — forme canonique des empreintes du graphe', () => {
+describe('D7.2 : forme canonique des empreintes du graphe', () => {
   it('porte le préfixe `sha256:` et un condensé hexadécimal minuscule', () => {
     expect(computeGraphHash(refMinimal.graph)).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(computeInputsHash(refMinimal, profile)).toMatch(/^sha256:[0-9a-f]{64}$/);
@@ -74,7 +74,7 @@ describe('D7.2 — forme canonique des empreintes du graphe', () => {
   });
 });
 
-describe('D2.2 — une valeur non hachable est refusée, jamais écrite nulle', () => {
+describe('D2.2 : une valeur non hachable est refusée, jamais écrite nulle', () => {
   const broken = withJunction({ ...junction, position: { x_m: Number.NaN, y_m: 0 } });
 
   it('l’empreinte du graphe refuse par DATA.HASH_INPUT_INVALID', () => {

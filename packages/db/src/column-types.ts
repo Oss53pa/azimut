@@ -5,7 +5,7 @@
  *
  * Le chemin d'écriture en a besoin pour une raison précise : le client
  * `postgres` sérialise une valeur destinée à une colonne booléenne par
- * `x === true ? 't' : 'f'`. Toute autre valeur — la chaîne `'true'` comprise —
+ * `x === true ? 't' : 'f'`. Toute autre valeur (la chaîne `'true'` comprise)
  * s'écrit donc « faux », sans erreur. Le dépôt ne peut pas laisser passer une
  * écriture qui change la valeur en silence.
  */

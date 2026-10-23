@@ -6,7 +6,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * M8 (partie M) critère 5 — contrôle automatisé d'accessibilité sur les cinq
+ * M8 (partie M) critère 5 : contrôle automatisé d'accessibilité sur les cinq
  * écrans de la tranche.
  *
  * Ce que cet essai établit : **l'absence de violation détectable
@@ -26,7 +26,7 @@ const require = createRequire(import.meta.url);
 const AXE = require.resolve('axe-core/axe.min.js');
 const HERE = dirname(fileURLToPath(import.meta.url));
 
-/** D12.1 — les deux langues actives. */
+/** D12.1 : les deux langues actives. */
 const LANGS = ['fr', 'en'] as const;
 
 const SITE = 'site-axe';
@@ -170,7 +170,7 @@ async function check(
   }
 
   const readable = run.violations.map(v =>
-    `${v.id} (${v.impact ?? 'sans gravité déclarée'}) — ${v.help}\n`
+    `${v.id} (${v.impact ?? 'sans gravité déclarée'}) : ${v.help}\n`
     + v.nodes.map(n => `    ${n.target.join(' ')}`).join('\n'));
 
   expect(
@@ -189,7 +189,7 @@ function url(path: string, lang: string): string {
  */
 test.describe.configure({ mode: 'serial' });
 
-test.describe('M8 (partie M) critère 5 — aucune violation détectable automatiquement', () => {
+test.describe('M8 (partie M) critère 5 : aucune violation détectable automatiquement', () => {
   for (const screen of SCREENS) {
     for (const lang of LANGS) {
       test(`${screen.key}, état nominal, ${lang}`, async ({ page }) => {
@@ -200,7 +200,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
   }
 
   /**
-   * F7 — l'état vide. Il se distingue du nominal sur les écrans d'atelier :
+   * F7 : l'état vide. Il se distingue du nominal sur les écrans d'atelier :
    * une session neuve n'a ni empreinte ni nœud.
    */
   for (const lang of LANGS) {
@@ -220,7 +220,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
     });
   }
 
-  /** F7 — l'état hors ligne, avec son bandeau permanent. */
+  /** F7 : l'état hors ligne, avec son bandeau permanent. */
   for (const lang of LANGS) {
     test(`M4 saisie du graphe, hors ligne, ${lang}`, async ({ page, context }) => {
       await page.goto(url(`/sites/${SITE}/levels/${LEVEL}/graph`, lang));
@@ -231,7 +231,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
     });
   }
 
-  /** F7 — l'état partiel de M2 (partie M) : fond chargé, calage incomplet. */
+  /** F7, l'état partiel de M2 (partie M) : fond chargé, calage incomplet. */
   for (const lang of LANGS) {
     test(`M2 import et calage, état partiel, ${lang}`, async ({ page }) => {
       await page.goto(url(`/sites/${SITE}/levels/${LEVEL}/plan`, lang));
@@ -245,7 +245,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
   }
 
   /**
-   * M7.9 (partie M) — les boîtes de dialogue, qui portent leur propre piège de
+   * M7.9 (partie M) : les boîtes de dialogue, qui portent leur propre piège de
    * focus et dont le contenu n'est analysable que quand elles sont ouvertes.
    *
    * Deux sont atteignables : le remplacement de fond de M2, et la création
@@ -286,7 +286,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
   }
 
   /**
-   * Partie R — l'écran du tableau des messages, critère 14 de R18 : « Aucune
+   * Partie R, l'écran du tableau des messages, critère 14 de R18 : « Aucune
    * violation détectable automatiquement aux niveaux A et AA, résultats
    * incomplets listés pour revue manuelle. »
    *
@@ -327,7 +327,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
     const path = resolve(HERE, '..', '..', 'docs', 'releve-axe.json');
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, `${JSON.stringify({
-      mesure: 'M8 (partie M) critère 5 — absence de violation détectable automatiquement',
+      mesure: 'M8 (partie M) critère 5 : absence de violation détectable automatiquement',
       outil: 'axe-core, dépendance de développement, jamais livrée',
       regles: WCAG_A_AA,
       portee: 'Les cinq écrans de la partie M, leurs deux boîtes de dialogue et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.',

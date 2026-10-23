@@ -14,7 +14,7 @@ import { orgOfSession } from './session-identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
- * J3 (partie J) — la couche d'esquisse dans la zone de travail.
+ * J3 (partie J) : la couche d'esquisse dans la zone de travail.
  *
  * En mode esquisse, le trait n'est pas lu : il est gardé tel quel, avec sa
  * pression, et écrit dans la couche du niveau, créée au premier trait. La
@@ -91,7 +91,7 @@ export function useSketchInk(
 
   function onStroke(points: readonly Point[], detail: StrokeDetail, pxPerMeter: number, pointer: PointerKind): void {
     if (!visible) { onNotice('ink.sketch.hidden'); return; }
-    // J1.5 — le bout gomme ou le bouton latéral du stylet gomment, quel que
+    // J1.5 : le bout gomme ou le bouton latéral du stylet gomment, quel que
     // soit l'outil choisi.
     if (pen === 'eraser' || detail.eraser) {
       if (sketch.layer?.locked === true) { onNotice('ink.sketch.locked'); return; }

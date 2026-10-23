@@ -1,7 +1,7 @@
 import { empreinteOutcome } from '@azimut/core-model';
 
 /**
- * T-0.10 et D7.2 — l'empreinte stable d'une valeur du banc d'essai, site de
+ * T-0.10 et D7.2 : l'empreinte stable d'une valeur du banc d'essai, site de
  * référence compris. Elle suit la forme canonique commune à toutes les
  * empreintes du produit, et n'en est pas une seconde : c'est la même
  * fonction. Une valeur non hachable fait échouer l'essai qui la demande, en

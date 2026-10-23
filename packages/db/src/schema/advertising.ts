@@ -5,7 +5,7 @@ import { site, level } from './site.js';
 import { node } from './graph.js';
 
 /**
- * H4 — les tables du module 05, régie publicitaire.
+ * H4 : les tables du module 05, régie publicitaire.
  *
  * Migration `0045` (famille C de la proposition de schéma, 5.1). Aucune
  * contrainte d'exclusion sur le chevauchement des réservations : le garde le

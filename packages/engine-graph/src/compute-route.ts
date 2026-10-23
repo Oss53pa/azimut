@@ -148,7 +148,7 @@ function dijkstra(
 
 export type RouteOptions = {
   /**
-   * O11 — instant, heure locale du site (`AAAA-MM-JJTHH:MM:SS`), auquel les
+   * O11, instant, heure locale du site (`AAAA-MM-JJTHH:MM:SS`), auquel les
    * fermetures temporaires comptent : « pendant la fermeture, les parcours
    * sont recalculés sans ces arêtes ». Absent, elles ne comptent pas : c'est
    * le cas de tout rendu durable. L'appelant lit l'horloge, jamais le moteur,

@@ -10,7 +10,7 @@ function bounds(id: string, minX: number, minY: number, maxX: number, maxY: numb
   return { id, minX_m: minX, minY_m: minY, maxX_m: maxX, maxY_m: maxY };
 }
 
-describe('E7.3 — alignment and distribution', () => {
+describe('E7.3: alignment and distribution', () => {
   describe('computeAlignment', () => {
     it('returns empty for fewer than 2 items', () => {
       const items = [bounds('a', 0, 0, 1, 1)];

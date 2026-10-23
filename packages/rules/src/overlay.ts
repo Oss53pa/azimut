@@ -3,7 +3,7 @@ import type { RulesPackRule, RuleScope, RuleConstraint } from './schema.js';
 import { groupAndCheckAmbiguity, type LoadedRulesPack } from './rule-resolution.js';
 
 /**
- * D3.6 — Country overlay. A site may bind a base (international) pack and a
+ * D3.6: Country overlay. A site may bind a base (international) pack and a
  * country pack. A country rule takes precedence **only if it is at least as
  * constraining** as the base rule it overrides; a less-constraining country
  * rule is rejected at load with RULES.OVERLAY_LESS_RESTRICTIVE. The overlay

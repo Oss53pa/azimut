@@ -12,7 +12,7 @@ export function parseNumber(raw: string): number | null {
   return n;
 }
 
-/** D4.1 — the decimal separator is declared in the import header. */
+/** D4.1: the decimal separator is declared in the import header. */
 export type DecimalSeparator = 'point' | 'comma';
 
 /**
@@ -33,7 +33,7 @@ export function parseNumberDecl(
   return n;
 }
 
-/** D4.1 — installed_at must be an ISO 8601 date (YYYY-MM-DD). */
+/** D4.1: installed_at must be an ISO 8601 date (YYYY-MM-DD). */
 export function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const d = new Date(`${value}T00:00:00Z`);

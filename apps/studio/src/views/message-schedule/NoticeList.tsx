@@ -8,7 +8,7 @@ type NoticeListProps = {
 };
 
 /**
- * D2.2 — un refus de saisie sans code au catalogue. Il se dit par son message
+ * D2.2 : un refus de saisie sans code au catalogue. Il se dit par son message
  * seul : il n'a pas de code à montrer, et n'en invente pas.
  */
 export function NoticeList({ notices }: NoticeListProps): JSX.Element | null {

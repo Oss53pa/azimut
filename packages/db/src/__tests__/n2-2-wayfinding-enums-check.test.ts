@@ -10,7 +10,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const MIGRATION = resolve(HERE, '..', '..', 'migrations', '0027_n2_2_wayfinding_tables.up.sql');
 
 /**
- * N2.2 — les énumérés du registre du wayfinding, côté TypeScript et côté
+ * N2.2 : les énumérés du registre du wayfinding, côté TypeScript et côté
  * base, disent la même chose. Le dépôt restreint les lignes lues par ces
  * listes : si elles divergeaient du CHECK, une valeur valide en base serait
  * écartée à la lecture, ou l'inverse.
@@ -22,7 +22,7 @@ function inList(column: string): readonly string[] {
   return (match[1] ?? '').split(',').map(p => p.trim().replace(/^'|'$/g, '')).filter(p => p !== '');
 }
 
-describe('N2.2 — registre du wayfinding : le type et la base coïncident', () => {
+describe('N2.2, registre du wayfinding : le type et la base coïncident', () => {
   it('orientation_zone.kind', () => {
     expect([...inList('kind')].sort()).toEqual([...ORIENTATION_ZONE_KINDS].sort());
   });

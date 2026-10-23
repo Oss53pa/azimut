@@ -15,7 +15,7 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): void {
   }));
 }
 
-describe('I5.6 — tournées, sites de référence', () => {
+describe('I5.6 : tournées, sites de référence', () => {
   it('sert le jeu de démonstration, que les écrans signalent', async () => {
     expect(await createReferenceRepository().loadInspectionRegistry('ref-multilevel')).toBe(REFERENCE_INSPECTION);
   });
@@ -27,7 +27,7 @@ describe('I5.6 — tournées, sites de référence', () => {
   });
 });
 
-describe('I5.6 — tournées, API REST', () => {
+describe('I5.6 : tournées, API REST', () => {
   it('lit tournées et constats du site', async () => {
     stubTables({
       site: [{ id: 'aaaa0005-0000-4000-8000-000000000001' }],

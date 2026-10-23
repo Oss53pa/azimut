@@ -1,5 +1,5 @@
 /**
- * E12 — Deterministic text measurement.
+ * E12: Deterministic text measurement.
  *
  * Text measurement is computed from font metrics, NEVER from
  * browser measurement (which varies by engine, system, and DPI).

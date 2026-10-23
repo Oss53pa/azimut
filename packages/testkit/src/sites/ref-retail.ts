@@ -2,7 +2,7 @@ import type { SiteData } from '@azimut/core-model';
 import { REF_RETAIL_GRAPH } from './ref-retail-graph.js';
 
 /**
- * C1 — site de référence `ref-retail`.
+ * C1 : site de référence `ref-retail`.
  *
  * « Commerce multibâtiment, 5 niveaux. Ce qu'il éprouve : accès indépendants,
  * lobby commun, horaires distincts par bâtiment, une liaison inter-bâtiments
@@ -33,14 +33,14 @@ export const refRetail: SiteData = {
     name: 'Centre commercial de référence',
     country_code: 'FR',
     timezone: 'Europe/Paris',
-    // M01.S1 — repère posé au premier calage, celui du RDC de la galerie.
+    // M01.S1, repère posé au premier calage, celui du RDC de la galerie.
     origin_x_m: -6,
     origin_y_m: -4,
     active_langs: ['fr', 'en'],
-    // D1.1 — altitude du niveau de référence, celui de la galerie.
+    // D1.1, altitude du niveau de référence, celui de la galerie.
     reference_elevation_m: 112,
   },
-  // A5.8 — rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
+  // A5.8, rattaché en socle au paquet d'essai du dépôt, `testkit/fixtures/
   // rules-packs/test-fixture`. Le pictogramme de sécurité du site vient de ce
   // paquet (A5.4) : sans rattachement, aucun site ne le verrait, et le site de
   // référence ne porterait pas le cas qu'il éprouve.
@@ -50,7 +50,7 @@ export const refRetail: SiteData = {
   /**
    * Deux bâtiments, deux accès propres, deux horaires : c'est ce que ce site
    * éprouve et qu'aucun autre ne porte. La galerie ouvre tard le samedi, et
-   * l'annexe — bureaux et services — ferme le samedi.
+   * l'annexe (bureaux et services) ferme le samedi.
    *
    * `default_edge_width_m` diffère aussi, et ce n'est pas un détail de
    * remplissage : M4 (partie M) fait hériter la largeur d'une arête du
@@ -106,7 +106,7 @@ export const refRetail: SiteData = {
     lvl('lvl-rt-a-rdc', 'bldg-rt-annexe', 'Annexe RDC', 0, 0.6),
     lvl('lvl-rt-a-r1', 'bldg-rt-annexe', 'Annexe R+1', 1, 4.2),
   ],
-  /** A5.2 / N1.4 — les cinq niveaux sont relevés et calés. */
+  /** A5.2 / N1.4, les cinq niveaux sont relevés et calés. */
   plan_sources: [
     source('ps-rt-g-rdc', 'lvl-rt-g-rdc', '09:00'),
     source('ps-rt-g-r1', 'lvl-rt-g-r1', '09:05'),
@@ -308,13 +308,13 @@ function shop(
     occupant_name: occupant,
     occupancy_status: 'occupied',
     display_priority: priority,
-    // N1.2 / M01.S5 — occupant en cours : la sortie n'est pas connue.
+    // N1.2 / M01.S5, occupant en cours : la sortie n'est pas connue.
     valid_from: '2026-01-01',
   };
 }
 
 /**
- * N1.2 — le site déclare `fr` et `en`, et chaque destination porte les deux.
+ * N1.2 : le site déclare `fr` et `en`, et chaque destination porte les deux.
  * Une dénomination manquante lèverait `GRAPH.DESTINATION_NAME_MISSING`.
  */
 function names(

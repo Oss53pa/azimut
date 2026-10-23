@@ -12,7 +12,7 @@ export type MaintenanceRegistryState = {
 };
 
 /**
- * A5.7 — charge le parc posé d'un site, à la demande de l'écran qui le
+ * A5.7 : charge le parc posé d'un site, à la demande de l'écran qui le
  * montre. Un échec se déclare `failed` et rend un registre vide que l'écran
  * ne prend pas pour un fait.
  */

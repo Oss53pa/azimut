@@ -1,4 +1,4 @@
-/** Écrans du socle — libellés anglais, typés contre la table française. */
+/** Écrans du socle : libellés anglais, typés contre la table française. */
 import type { FOUNDATION_FR } from './foundation-fr.js';
 
 export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>> = {
@@ -118,7 +118,7 @@ export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>>
   'calibration.frame.unposed': 'not set',
   'calibration.frame.message.unposed': 'The frame is not set yet. The first calibration will fix it.',
   'calibration.frame.message.locked': 'Frame fixed by the first calibration. It no longer moves.',
-  'calibration.frame.note': 'M01.S1: the site frame origin is the first calibration’s, copied onto the site, and never modified. The first calibration is the one its date names; if any calibration of the site is undated, it stays undetermined and the check says nothing rather than guessing. Moving it would leave every footprint, node and support at its coordinates while pointing somewhere else — nothing could undo that. An unset origin is not the origin (0, 0).',
+  'calibration.frame.note': 'M01.S1: the site frame origin is the first calibration’s, copied onto the site, and never modified. The first calibration is the one its date names; if any calibration of the site is undated, it stays undetermined and the check says nothing rather than guessing. Moving it would leave every footprint, node and support at its coordinates while pointing somewhere else: nothing could undo that. An unset origin is not the origin (0, 0).',
   'calibration.panel.levels': 'Level status',
   'calibration.levels.col.level': 'Level',
   'calibration.levels.col.sources': 'Imported backgrounds',
@@ -132,7 +132,7 @@ export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>>
   'calibration.levels.note': 'The calibration shown here is the stored one, not the measure in progress: that measure is not written anywhere yet. A level with no calibrated background plan is a blocking anomaly (N1.4).',
   'calibration.note': 'Footprint tracing stays refused until the orientation is entered: a footprint drawn on an unoriented background is wrong with nothing to signal it.',
 
-  // M2 bis (partie M) — n-point calibration, section M2
+  // M2 bis (partie M), n-point calibration, section M2
   'measured.section': 'Measured calibration',
   'measured.panel.surface': 'Landmark surface',
   'measured.panel.surface.note': '{placed} of {total} placed',
@@ -185,7 +185,7 @@ export const FOUNDATION_EN: Readonly<Record<keyof typeof FOUNDATION_FR, string>>
   'footprints.panel.note': 'area computed from the outline',
   'footprints.col.unitcode': 'Unit code',
   'footprints.unitcode.missing': 'missing',
-  'footprints.unitcode.none': '—',
+  'footprints.unitcode.none': '–',
   'footprints.col.code': 'Identifier',
   'footprints.col.kind': 'Kind',
   'footprints.col.level': 'Level',

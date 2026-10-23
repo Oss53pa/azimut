@@ -1,4 +1,4 @@
-# Azimut — Règles de conduite
+# Azimut : Règles de conduite
 
 Ce fichier contient ce que la section C2 du cahier des charges lui assigne, et
 rien de plus : les cinq invariants, les interdictions permanentes, les quatre
@@ -104,8 +104,8 @@ Non vérifié : <liste ou "rien">
 
 ## Renvoi
 
-Pour tout le reste — modèle de données, contrats des moteurs, conventions,
-formats, algorithmes, écrans, modules, tâches, registre des points ouverts — le
+Pour tout le reste (modèle de données, contrats des moteurs, conventions,
+formats, algorithmes, écrans, modules, tâches, registre des points ouverts) le
 **cahier des charges de développement consolidé** fait seul foi. Il porte les
 parties A à Q et les annexes T et Z, et il se lit en commençant par sa section
 A0. Il est dans le dépôt, à `docs/cahier-des-charges.md`, avec son empreinte

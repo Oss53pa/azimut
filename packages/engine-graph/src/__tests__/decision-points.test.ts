@@ -308,7 +308,7 @@ describe('deriveDecisionPoints', () => {
   });
 
   it('handles edges referencing orphan node ids (fallback ?? 0)', () => {
-    // Edge endpoints not in nodes array — outDegree.get returns undefined
+    // Edge endpoints not in nodes array, outDegree.get returns undefined
     const site: SiteData = {
       ...refMinimal,
       graph: {
@@ -330,7 +330,7 @@ describe('deriveDecisionPoints', () => {
         ],
       },
     };
-    // Should not crash — orphan edges increment via ?? 0 but orphan nodes
+    // Should not crash: orphan edges increment via ?? 0 but orphan nodes
     // are not in the nodes array so they never appear in sorted results.
     const result = deriveDecisionPoints(site, stdProfile, refMinimal.destinations);
     expect(result.ok).toBe(true);

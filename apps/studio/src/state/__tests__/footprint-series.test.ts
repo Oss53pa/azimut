@@ -3,7 +3,7 @@ import { acceptSeries } from '../footprint-series.js';
 import type { FootprintDraft } from '../footprint-input.js';
 
 /**
- * M3 (partie M) critère 4 — « La duplication en série de 20 cellules se fait
+ * M3 (partie M) critère 4 : « La duplication en série de 20 cellules se fait
  * en une commande annulable d'un seul geste. »
  *
  * Ce fichier porte le jugement de la série. Le geste unique et son annulation
@@ -21,7 +21,7 @@ const REFERENCE: FootprintDraft = {
 
 const EMPTY = { codesOnLevel: [] as readonly string[], existing: [] as readonly (readonly { x_m: number; y_m: number }[])[] };
 
-describe('M3 (partie M) critère 4 — la duplication en série', () => {
+describe('M3 (partie M) critère 4 : la duplication en série', () => {
   it('rend vingt copies pour une série de vingt', () => {
     const outcome = acceptSeries(REFERENCE, { dx_m: 6, dy_m: 0, count: 20 }, EMPTY);
     expect(outcome.ok).toBe(true);

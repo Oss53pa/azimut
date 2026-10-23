@@ -24,7 +24,7 @@ function vol(id: string, fpId: string, baseElev: number, height: number): Volume
   };
 }
 
-describe('D5.2 — sortVolumesPainter', () => {
+describe('D5.2: sortVolumesPainter', () => {
   it('sorts by base_elevation_m ascending', () => {
     const entries: VolumeEntry[] = [
       { volume: vol('v2', 'f2', 3, 1), footprint: fp('f2', [{ x_m: 0, y_m: 0 }]) },
@@ -67,7 +67,7 @@ describe('D5.2 — sortVolumesPainter', () => {
   });
 });
 
-describe('K2.1 — sortVolumesPainter with manual render_order', () => {
+describe('K2.1: sortVolumesPainter with manual render_order', () => {
   const withOrder = (v: Volume, render_order: number | null): Volume => ({
     ...v,
     render_order,
@@ -120,7 +120,7 @@ describe('K2.1 — sortVolumesPainter with manual render_order', () => {
   });
 });
 
-describe('D5.2 — detectOverlaps', () => {
+describe('D5.2: detectOverlaps', () => {
   it('detects bounding-box overlap', () => {
     const footprints = [
       fp('f1', [{ x_m: 0, y_m: 0 }, { x_m: 2, y_m: 0 }, { x_m: 2, y_m: 2 }, { x_m: 0, y_m: 2 }]),
@@ -191,7 +191,7 @@ describe('D5.2 — detectOverlaps', () => {
   });
 });
 
-describe('sortVolumesPainter — footprint depth min(x)+min(y)', () => {
+describe('sortVolumesPainter: footprint depth min(x)+min(y)', () => {
   it('uses minimum x and minimum y across all vertices', () => {
     const entries: VolumeEntry[] = [
       { volume: vol('v1', 'f1', 0, 1), footprint: fp('f1', [{ x_m: 10, y_m: 10 }, { x_m: 1, y_m: 1 }]) },
@@ -218,7 +218,7 @@ describe('sortVolumesPainter — footprint depth min(x)+min(y)', () => {
   it('breaks ties by UTF-8 byte order, not UTF-16 code units', () => {
     // '！' (U+FF01) UTF-8 = EF BC 81; '\u{1F600}' (U+1F600) UTF-8 = F0 9F 98 80.
     // By bytes, EF < F0 so '！' sorts first. Native UTF-16 `<` would put the
-    // emoji (lead unit 0xD83D) before '！' (0xFF01) — the opposite order.
+    // emoji (lead unit 0xD83D) before '！' (0xFF01): the opposite order.
     const same = (id: string): VolumeEntry => ({
       volume: vol(id, 'f', 0, 1),
       footprint: fp('f', [{ x_m: 0, y_m: 0 }]),
@@ -236,7 +236,7 @@ describe('sortVolumesPainter — footprint depth min(x)+min(y)', () => {
     ];
     const sorted = sortVolumesPainter(entries);
     expect(sorted).toHaveLength(2);
-    // Both survive — comparator returning 0 keeps original order
+    // Both survive: comparator returning 0 keeps original order
     expect(sorted[0]?.volume.id).toBe('v-same');
     expect(sorted[1]?.volume.id).toBe('v-same');
   });

@@ -3,7 +3,7 @@ import { roundHalfAwayFromZero } from './round.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * G6 — Colour chain. A charter colour is not a value but a bundle of
+ * G6: Colour chain. A charter colour is not a value but a bundle of
  * representations (G6.1): a reference (which is authoritative and goes to the
  * manufacturer), optional measured CIELAB values, and a display approximation.
  *
@@ -77,7 +77,7 @@ export function colorDelta(
  * Audit charter colours for unverifiable references. Returns one info
  * COLOR.REFERENCE_UNVERIFIABLE per colour that names a swatch reference
  * (reference_system other than 'none' with a code) but carries no measured
- * values, sorted by colour id. Always ok — the reference still travels to the
+ * values, sorted by colour id. Always ok: the reference still travels to the
  * manufacturer as text, it simply cannot be verified in-product.
  */
 export function auditColorReferences(

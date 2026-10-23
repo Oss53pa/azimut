@@ -55,8 +55,8 @@ describe('transitionSupportVersion (T-2.14a §5 / §6.8)', () => {
 
   it('only draft recomputes the hash; frozen states do not (§6.10, logic)', () => {
     // A modify is only legal from draft, and its effect is the recompute. From
-    // in_review or approved the modify is forbidden, so no recompute path exists
-    // — the empreinte stays frozen.
+    // in_review or approved the modify is forbidden, so no recompute path exists:
+    // the empreinte stays frozen.
     expect(transitionSupportVersion('draft', 'modify').ok).toBe(true);
     expect(transitionSupportVersion('in_review', 'modify').ok).toBe(false);
     expect(transitionSupportVersion('approved', 'modify').ok).toBe(false);
@@ -65,10 +65,10 @@ describe('transitionSupportVersion (T-2.14a §5 / §6.8)', () => {
 });
 
 /**
- * M04.G7 — « Une version approuvée est immuable. Une correction crée une nouvelle
+ * M04.G7 : « Une version approuvée est immuable. Une correction crée une nouvelle
  * version. » C'est la table d'événements qui le dit ; ce test l'y tient.
  */
-describe('M04.G7 — ce qu’une version approuvée admet', () => {
+describe('M04.G7 : ce qu’une version approuvée admet', () => {
   it('n’admet que le remplacement', () => {
     expect(admittedEvents('approved')).toEqual([
       { event: 'supersede', to: 'superseded' },

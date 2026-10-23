@@ -1,9 +1,9 @@
 /**
- * M1 (partie M) — création d'un site.
+ * M1 (partie M) : création d'un site.
  *
  * Le formulaire de M1 (partie M) porte six champs. Cette fonction tient les
- * quatre contrôles bloquants — nom, pays, fuseau, langues — et rend les
- * commandes à écrire — elle n'écrit pas elle-même :
+ * quatre contrôles bloquants (nom, pays, fuseau, langues) et rend les
+ * commandes à écrire, elle n'écrit pas elle-même :
  * M12.A2 veut que l'interface passe par les commandes du module
  * propriétaire, et le module 01 possède `site`, `building` et `level` (L3),
  * ainsi que `site_rules_binding` (Q2).
@@ -27,7 +27,7 @@ export type SiteDraft = {
   /** Code pays sur deux lettres, tel que M1 (partie M) l'affiche en colonne. */
   readonly countryCode: string;
   /**
-   * O4 et A5.2 — identifiant de fuseau, requis à la création.
+   * O4 et A5.2 : identifiant de fuseau, requis à la création.
    *
    * « Tous les horaires, disponibilités d'arêtes, plages de fermeture et
    * échéances de contrats s'interprètent dans ce fuseau. » La colonne est
@@ -40,7 +40,7 @@ export type SiteDraft = {
   /** M1 (partie M) : « au moins une, français et anglais proposés ». */
   readonly activeLangs: readonly string[];
   /**
-   * Q5 et M1 (partie M), version 7 — l'entité juridique émettrice.
+   * Q5 et M1 (partie M), version 7 : l'entité juridique émettrice.
    *
    * « Facultative à la création, requise avant l'émission de la première
    * facture. Le champ n'apparaît que si l'organisation porte au moins une
@@ -51,7 +51,7 @@ export type SiteDraft = {
 };
 
 /**
- * Q9 — ce que le référentiel des pays apporte au contrôle.
+ * Q9 : ce que le référentiel des pays apporte au contrôle.
  *
  * La forme est réduite à ce dont la validation a besoin. Le référentiel
  * complet, avec ses noms dans les deux langues, appartient à l'écran.
@@ -69,14 +69,14 @@ export type CreationContext = {
   readonly buildingId: string;
   readonly levelId: string;
   /**
-   * A5.8 — l'identifiant du rattachement au paquet choisi, tiré comme les
+   * A5.8 : l'identifiant du rattachement au paquet choisi, tiré comme les
    * autres. Il ne sert que si un paquet est choisi.
    */
   readonly bindingId: string;
   /** Les noms des sites de l'organisation, pour l'unicité de M1 (partie M). */
   readonly existingNames: readonly string[];
   /**
-   * Q9 — les pays du référentiel, lus dans la table `country`.
+   * Q9 : les pays du référentiel, lus dans la table `country`.
    *
    * Le contrôle du pays et celui du fuseau s'y adossent tous les deux : un
    * fuseau n'est valable que s'il est l'un de ceux que le pays déclare, ce que
@@ -182,7 +182,7 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
         elevation_m: 0,
       },
     },
-    // A5.8, version 22 — le paquet choisi n'est plus une colonne du site : il
+    // A5.8, version 22, le paquet choisi n'est plus une colonne du site : il
     // est porté par `site_rules_binding`, qui fait foi. Un seul paquet se
     // choisit à la création ; c'est le socle, D3.6 nommant surcouche le
     // paquet pays qui en durcit un autre. Rien ne s'écrit sans choix.
@@ -228,7 +228,7 @@ function checkName(name: string, existing: readonly string[]): readonly Finding[
 }
 
 /**
- * Q9 — le pays doit figurer au référentiel, et pas seulement ressembler à un
+ * Q9 : le pays doit figurer au référentiel, et pas seulement ressembler à un
  * code. Un code de deux majuscules qu'aucune ligne de `country` ne porte
  * donnerait un site dont le fuseau ne se contrôle contre rien.
  */
@@ -241,7 +241,7 @@ function checkCountry(
 }
 
 /**
- * O4 et M1 (partie M) — le fuseau du site, « valeurs issues de
+ * O4 et M1 (partie M) : le fuseau du site, « valeurs issues de
  * `country.timezones` ».
  *
  * Version 7 : le contrôle ne porte plus sur les fuseaux que la plateforme

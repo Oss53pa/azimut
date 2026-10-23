@@ -1,12 +1,12 @@
 /**
- * Partie H — la carte du produit.
+ * Partie H : la carte du produit.
  *
  * Quatorze modules, rangés comme la maquette « logiciel autonome v2 » les
  * range : conception, réalisation, exploitation, livrables, et le pilotage
  * (portefeuille et fonctions transverses), qu'on atteint par l'en-tête plutôt
  * que par la barre latérale. Chaque module déclare l'état réel de sa
  * construction : un écran qui existe, un moteur qui existe, ou l'absence de
- * l'un des deux. Cet état n'est pas décoratif — l'écran « Carte du produit »
+ * l'un des deux. Cet état n'est pas décoratif : l'écran « Carte du produit »
  * le rend tel quel, et le tableau de bord s'en sert pour dire ce qui manque.
  *
  * La règle d'or de ce fichier : il ne contient aucun texte d'interface, que
@@ -75,7 +75,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'floor-plans', labelKey: 'nav.item.floorplans' },
     ],
     // Partiel : M01.S1 à M01.S4 et M01.S6 à M01.S8 tiennent, M01.S6 depuis qu'une longueur d'arête
-    // se calcule au lieu d'être crue. M01.S5 ne l'est qu'à moitié — les champs de
+    // se calcule au lieu d'être crue. M01.S5 ne l'est qu'à moitié : les champs de
     // période existent, aucune lecture ne les filtre et aucun jeu d'essai ne
     // porte deux occupants successifs. M01.S9 n'a aucun moteur : un fond de plan
     // remplacé sans recalage n'est ni détecté ni signalé. Et
@@ -99,7 +99,7 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'coverage-audit', labelKey: 'nav.item.coverage' },
     ],
     // Partiel : M02.W1, M02.W3 à M02.W6, M02.W8 et M02.W10 tiennent. M02.W2 ne détecte que les
-    // collisions — les règles `naming_rule` se lisent et s'affichent, mais
+    // collisions : les règles `naming_rule` se lisent et s'affichent, mais
     // aucune création ne se vérifie encore contre elles. M02.W7 tient sur la
     // forme, le tableau portant version, état et empreinte, mais aucun circuit
     // ne les fait transiter. M02.W9 a son contrôle et pas ses valeurs plafonds,
@@ -137,8 +137,8 @@ export const PRODUCT_MODULES: readonly ProductModule[] = [
       { view: 'proofs', labelKey: 'nav.item.proofs' },
     ],
     // Partiel : M04.G1, M04.G2, M04.G4, M04.G5, M04.G6, M04.G8 et M04.G10 tiennent. M04.G3 et M04.G7 ont leur
-    // moteur — le format se calcule, une version approuvée n'admet que son
-    // remplacement — mais aucune écriture ne les emprunte, faute de chemin
+    // moteur (le format se calcule, une version approuvée n'admet que son
+    // remplacement) mais aucune écriture ne les emprunte, faute de chemin
     // d'écriture : rien n'écrit `dimensions_source: 'computed'`, rien n'appelle
     // `transitionSupportVersion`. M04.G9 vaut pour le SVG ; N4.8 laisse le
     // déterminisme du PDF ouvert, et c'est la tâche T-0.9 qui le tranche.

@@ -20,7 +20,7 @@ const ZONE = {
   footprintIds: ['fp-1', 'fp-2'],
 };
 
-describe('module 02 — zone d’orientation', () => {
+describe('module 02 : zone d’orientation', () => {
   it('écrit une zone, sous le module qui la possède', () => {
     const out = createOrientationZone(ZONE, WRITE);
     expect(out.ok).toBe(true);
@@ -60,7 +60,7 @@ describe('module 02 — zone d’orientation', () => {
   });
 });
 
-describe('module 02 — règle de nommage', () => {
+describe('module 02 : règle de nommage', () => {
   const RULE = {
     id: 'rrrrrrrr-0000-0000-0000-000000000001',
     target: 'door' as const,
@@ -90,7 +90,7 @@ describe('module 02 — règle de nommage', () => {
   });
 });
 
-describe('module 02 — niveau d’information et jalonnement', () => {
+describe('module 02 : niveau d’information et jalonnement', () => {
   const LEVEL = {
     id: 'iiiiiiii-0000-0000-0000-000000000001',
     typologyId: 'tttttttt-0000-0000-0000-000000000001',
@@ -138,7 +138,7 @@ describe('module 02 — niveau d’information et jalonnement', () => {
   });
 });
 
-describe('module 02 — ce que la propriété unique interdit', () => {
+describe('module 02 : ce que la propriété unique interdit', () => {
   it('n’écrit jamais hors des tables du module', () => {
     // INT-1 : la garantie ne vient pas de la discipline de l'appelant mais du
     // refus de `buildCommand`. Les quatre constructeurs nomment leur table en
@@ -172,7 +172,7 @@ describe('module 02 — ce que la propriété unique interdit', () => {
   });
 });
 
-describe('module 02 — le code d’un support, colonne de la table scindée', () => {
+describe('module 02 : le code d’un support, colonne de la table scindée', () => {
   const DRAFT = {
     supportId: 'uuuuuuuu-0000-0000-0000-000000000001',
     previousCode: null,

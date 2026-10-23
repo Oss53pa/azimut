@@ -9,7 +9,7 @@ import {
 import type { Finding } from './outcome.js';
 
 /**
- * Ce qu'un rendu doit savoir des places de stationnement d'un niveau — S-39.
+ * Ce qu'un rendu doit savoir des places de stationnement d'un niveau : S-39.
  *
  * « Rendu d'une place de stationnement, dans toutes les vues : plan de niveau
  * et plan orienté, contour léger, sans libellé ; place accessible, pictogramme
@@ -81,8 +81,8 @@ export function parkingSpacesOfLevel(
  * Le pictogramme d'une place accessible, lui, n'y figure plus. Il y a figuré
  * tant qu'INV-5 empêchait le moteur de le nommer : désigner le pictogramme
  * normalisé était une valeur d'origine normative, et le moteur dessinait ce
- * qu'on lui donnait sans pouvoir en répondre. A5.4 a tranché autrement — le
- * moteur nomme la fonction, la donnée nomme le pictogramme — et le passer en
+ * qu'on lui donnait sans pouvoir en répondre. A5.4 a tranché autrement (le
+ * moteur nomme la fonction, la donnée nomme le pictogramme) et le passer en
  * contexte rouvrirait la porte que la désignation ferme : un appelant y
  * glisserait le symbole de son choix, que S-39 refuse en toutes lettres.
  */
@@ -91,10 +91,10 @@ export type PlanContext = {
 };
 
 /**
- * Ce qu'un rendu tire de la demande de marque d'une place accessible — S-39.
+ * Ce qu'un rendu tire de la demande de marque d'une place accessible : S-39.
  *
  * Deux champs plutôt qu'un : le pictogramme quand la fonction est désignée, et
- * ce que la résolution oppose sinon. Les deux sont utiles ensemble — la règle
+ * ce que la résolution oppose sinon. Les deux sont utiles ensemble : la règle
  * veut que la marque soit omise **et signalée**, donc qu'un rendu sans marque
  * ne soit pas un rendu silencieux.
  */

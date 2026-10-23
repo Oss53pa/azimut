@@ -1,5 +1,5 @@
 /**
- * E7.1 + E8 — Tool gesture hook.
+ * E7.1 + E8: Tool gesture hook.
  *
  * Wires pointer events from the Viewport to the tool state machine,
  * passing through the snap pipeline for position resolution.
@@ -10,7 +10,7 @@
  *   3. Dispatch gesture events to the tool reducer.
  *   4. Expose the active snap target for visual feedback (snap indicator).
  *
- * This module is a React hook — the only stateful integration point.
+ * This module is a React hook: the only stateful integration point.
  * All heavy logic is delegated to pure functions (snap-integration,
  * tool-state, view-transform).
  */
@@ -112,7 +112,7 @@ function buildPointerData(
  *     = useToolGesture({ view, viewport, sceneObjects, ... });
  *
  * The handlers should be attached to the SVG element. They will not
- * interfere with pan (middle-button / space+left) — those are filtered
+ * interfere with pan (middle-button / space+left): those are filtered
  * by `isPanMode` and button check.
  */
 export function useToolGesture(

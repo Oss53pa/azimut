@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * I5.2 — Rights are held per module (module_entitlement). This is the
+ * I5.2: Rights are held per module (module_entitlement). This is the
  * application layer: engines never consult rights, so this guard lives in the
  * app so that commercial partitioning does not contaminate any computation.
  *
@@ -57,7 +57,7 @@ function effectiveState(
 
 /**
  * A module is navigable when a subscription (active or trial) currently covers
- * the date. Suspended, expired, or absent modules are not navigable — and the
+ * the date. Suspended, expired, or absent modules are not navigable: and the
  * navigation must drop them, never grey them (I5.2).
  */
 export function isModuleNavigable(

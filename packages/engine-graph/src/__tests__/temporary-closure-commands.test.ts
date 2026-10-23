@@ -22,7 +22,7 @@ const keys = (draft: ClosureDraft): readonly string[] => {
   return out.ok ? [] : [...out.findings.map(f => f.code), ...out.notices.map(n => n.key)];
 };
 
-describe('O11 — fermetures temporaires', () => {
+describe('O11: fermetures temporaires', () => {
   it('lit les instants locaux, avec ou sans fractions de seconde', () => {
     expect(isLocalInstant('2026-03-03T00:00:00')).toBe(true);
     expect(isLocalInstant('2026-03-03T00:00:00Z')).toBe(false);

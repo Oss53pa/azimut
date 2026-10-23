@@ -1,12 +1,12 @@
 /**
- * Places de stationnement et validation géométrique — section S8.
+ * Places de stationnement et validation géométrique : section S8.
  *
  * Séparé des essais du socle : réunis, ils franchissaient les quatre cents
  * lignes (A2.4).
  *
  * Cet essai portait sur l'emprise d'une table `parking`, que la section S8 a
  * retirée : « un parking est une zone de nature `parking` », et une zone n'a
- * pas de géométrie propre — elle déclare les empreintes qu'elle couvre (A5.2).
+ * pas de géométrie propre, elle déclare les empreintes qu'elle couvre (A5.2).
  * Ce qu'il tenait reste à tenir : une place de stationnement dégénérée ne doit
  * pas passer. Elle est maintenant une empreinte, donc les quatre contrôles
  * polygonaux la voient sans qu'on ait à les allonger, et c'est précisément ce

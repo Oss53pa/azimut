@@ -1,5 +1,5 @@
 /**
- * E13 — Color management.
+ * E13: Color management.
  *
  * Charter colors are expressed in Pantone or RAL references.
  * Screen displays in RGB, fabrication works in CMYK or spot color.
@@ -51,7 +51,7 @@ export type OutputProfile = {
 export type CharterColor = {
   readonly id: string;
   readonly roleId: string;
-  /** Reference of origin — authoritative for the manufacturer. */
+  /** Reference of origin: authoritative for the manufacturer. */
   readonly reference: ColorReference;
   /** Display value for screen preview. */
   readonly display: RGBColor;

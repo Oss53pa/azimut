@@ -71,7 +71,7 @@ const CHEVRON_STYLE: React.CSSProperties = {
 };
 
 /**
- * Partie H — la navigation est la carte du produit, rangée comme la maquette :
+ * Partie H, la navigation est la carte du produit, rangée comme la maquette :
  * l'accueil, puis quatre familles et leurs modules. Un module se déplie quand
  * il est actif, ou quand on ouvre son chevron ; replié, le menu ne garde que
  * les icônes, et chaque icône garde son nom en info-bulle.

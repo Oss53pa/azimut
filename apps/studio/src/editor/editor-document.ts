@@ -1,5 +1,5 @@
 /**
- * E5 + E9 — Editable document of the habillage layer.
+ * E5 + E9: Editable document of the habillage layer.
  *
  * The document is the state a Command (E5.1) reads and writes. Without
  * it a command has nothing to apply to and the undo stack is inert.
@@ -26,7 +26,7 @@ export type EditorDocument = {
   readonly siteId: string;
   /** Decoration layers, one per level by default (E9.3). */
   readonly layers: readonly DecorationLayer[];
-  /** Shapes in draw order — index 0 is backmost (E7.3). */
+  /** Shapes in draw order: index 0 is backmost (E7.3). */
   readonly shapes: readonly DecorationShape[];
 };
 
@@ -35,7 +35,7 @@ export function emptyDocument(siteId: string): EditorDocument {
 }
 
 // ---------------------------------------------------------------------------
-// Patch — the before/after payload of a document command
+// Patch: the before/after payload of a document command
 // ---------------------------------------------------------------------------
 
 /**
@@ -95,7 +95,7 @@ export function shapesOfLevel(
   return doc.shapes.filter(s => levelLayerIds.has(s.layerId));
 }
 
-/** Shapes of one level that are editable — visible and unlocked (E9.3). */
+/** Shapes of one level that are editable: visible and unlocked (E9.3). */
 export function editableShapesOfLevel(
   doc: EditorDocument,
   levelId: string,
@@ -194,7 +194,7 @@ export function applyPatch(
 }
 
 // ---------------------------------------------------------------------------
-// Type guard — history stores commands as `Command<unknown>`
+// Type guard: history stores commands as `Command<unknown>`
 // ---------------------------------------------------------------------------
 
 function isShapeSlot(value: unknown): value is ShapeSlot {

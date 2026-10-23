@@ -1,5 +1,5 @@
 /**
- * D12.1 — Écrans de consultation du socle et de la signalétique.
+ * D12.1 : Écrans de consultation du socle et de la signalétique.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;
  * la table anglaise est typée contre elle, une traduction manquante

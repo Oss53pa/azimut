@@ -18,7 +18,7 @@ const ANOMALIES = 'anomalies';
 const hasAnomaly = (r: ZoneRow): boolean => r.missingFootprints.length > 0 || r.sharedFootprints.length > 0;
 
 /**
- * Module 02 — le zonage d'orientation (N2.2), au gabarit « registre ». Les
+ * Module 02 : le zonage d'orientation (N2.2), au gabarit « registre ». Les
  * zones et les règles de nommage sont lues du registre du wayfinding ; la
  * surface et les destinations d'une zone se calculent depuis ses empreintes.
  * L'écran lit, il n'écrit pas.

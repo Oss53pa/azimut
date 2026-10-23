@@ -66,7 +66,7 @@ function makeJob(payload: Record<string, unknown>): Job {
   };
 }
 
-describe('D6.1 — buildWallPlanFamily', () => {
+describe('D6.1: buildWallPlanFamily', () => {
   it('produces one D11-named SVG per placement, oriented by azimuth', () => {
     const result = buildWallPlanFamily(refMultilevel, placements, familyOpts);
     expect(result.ok).toBe(true);
@@ -117,7 +117,7 @@ describe('D6.1 — buildWallPlanFamily', () => {
   });
 });
 
-describe('D6.1 — createBuildWallPlansHandler', () => {
+describe('D6.1: createBuildWallPlansHandler', () => {
   it('writes the plan family to storage', async () => {
     const sink = memoryAssetStore();
     const result = await createBuildWallPlansHandler(context(sink))(

@@ -6,7 +6,7 @@ import { support, supportFace } from './signage.js';
 import { messageLine } from './wayfinding.js';
 
 /**
- * J4 — l'annotation en révision (migration 0073). Ancrée sur exactement une
+ * J4 : l'annotation en révision (migration 0073). Ancrée sur exactement une
  * entité ; elle n'entre dans aucun calcul ni aucun livrable : aucun chargeur
  * de site ne la lit.
  */

@@ -1,5 +1,5 @@
 /**
- * Module 03 — ce que chaque profil de déplacement donne sur le graphe du site.
+ * Module 03 : ce que chaque profil de déplacement donne sur le graphe du site.
  *
  * Pour chaque profil, on calcule le plus court chemin de chaque entrée vers
  * chaque destination (`computeRoute`) : combien aboutissent, combien restent
@@ -40,7 +40,7 @@ function lengths(site: SiteData, profile: TravelProfile, at: string | undefined)
 }
 
 /**
- * `at` — instant simulé, heure locale du site : les arêtes fermées à cet
+ * `at`, instant simulé, heure locale du site : les arêtes fermées à cet
  * instant ne se parcourent pas (A5.3). Absent, les fermetures ne comptent pas.
  */
 export function profileRoutes(site: SiteData, at?: string): readonly ProfileRoutes[] {

@@ -26,7 +26,7 @@ const SITE: SiteData = {
 };
 const ENV = { newId: () => 'blk-new', timestamp: '2026-09-26T00:00:00.000Z' };
 
-describe('D8.3 — emplacements du gabarit', () => {
+describe('D8.3 : emplacements du gabarit', () => {
   it('place un bloc libre dans l’emplacement libre du gabarit, sans avis', () => {
     const out = declareBlockCommand(SITE, FACE, 'free', { fr: 'Sortie', en: 'Exit' }, ENV);
     expect(out.ok && out.value.after?.['block_index']).toBe(2);
@@ -42,7 +42,7 @@ describe('D8.3 — emplacements du gabarit', () => {
     expect(!taken.ok && taken.notices.map(n => n.key)).toEqual(['form.block.slot.taken']);
   });
 
-  it('E1.4 — refuse toute autre nature que free, par EDIT.CONTEXT_VIOLATION', () => {
+  it('E1.4 : refuse toute autre nature que free, par EDIT.CONTEXT_VIOLATION', () => {
     for (const kind of ['legend', 'map', 'resolved', 'pictogram']) {
       const out = declareBlockCommand(SITE, FACE, kind, {}, ENV);
       expect(!out.ok && out.findings.map(f => f.code)).toEqual(['EDIT.CONTEXT_VIOLATION']);

@@ -1,5 +1,5 @@
 /**
- * F15, `state/` — le magasin de session de la tranche M (partie M).
+ * F15, `state/` : le magasin de session de la tranche M (partie M).
  *
  * Il tient ce que l'opérateur construit pendant le parcours de M8 : le site,
  * son niveau, le calage, les empreintes, les nœuds, les arêtes. Il n'est pas
@@ -57,7 +57,7 @@ export function countOf(state: SessionState, table: string): number {
 }
 
 // ---------------------------------------------------------------------------
-// E5.4 — la sauvegarde locale
+// E5.4 : la sauvegarde locale
 // ---------------------------------------------------------------------------
 
 /** La clé du stockage local. Une par site : deux sites ne se mélangent pas. */
@@ -68,7 +68,7 @@ export function storageKey(siteId: string): string {
 /**
  * Sauvegarde l'état local. Appelée après chaque commande validée.
  *
- * Le stockage peut être refusé — navigation privée, quota, site bloqué. Un
+ * Le stockage peut être refusé : navigation privée, quota, site bloqué. Un
  * refus n'interrompt pas le travail : il fait perdre la reprise après
  * incident, pas la session en cours.
  */
@@ -94,7 +94,7 @@ export function saveSession(
  *
  * E5.4 : « Reprise proposée à la réouverture après incident, avec choix
  * explicite de l'utilisateur entre l'état local et l'état serveur. Aucune
- * fusion silencieuse. » Cette fonction *propose* — elle ne restaure rien
+ * fusion silencieuse. » Cette fonction *propose* : elle ne restaure rien
  * d'elle-même, et ne fusionne jamais.
  */
 export function readSession(siteId: string, storage: Storage | null): SessionState | null {
@@ -122,7 +122,7 @@ export function clearSession(siteId: string, storage: Storage | null): void {
 }
 
 // ---------------------------------------------------------------------------
-// E5.3 — hors ligne, et la synchronisation
+// E5.3 : hors ligne, et la synchronisation
 // ---------------------------------------------------------------------------
 
 /**
@@ -130,7 +130,7 @@ export function clearSession(siteId: string, storage: Storage | null): void {
  *
  * Hors ligne, elles entrent en file et l'état local avance : M8 (partie M)
  * critère 3 veut que « le même parcours soit réalisable hors ligne ». En
- * ligne, elles partent, et n'entrent en file que si l'envoi échoue — sans
+ * ligne, elles partent, et n'entrent en file que si l'envoi échoue : sans
  * quoi une coupure au milieu du parcours perdrait le travail.
  */
 export async function writeToSession(
@@ -168,7 +168,7 @@ export async function flushQueue(
 }
 
 // ---------------------------------------------------------------------------
-// E5.4 — la reprise, et ce qui la distingue d'une simple navigation
+// E5.4 : la reprise, et ce qui la distingue d'une simple navigation
 // ---------------------------------------------------------------------------
 
 /**
@@ -176,7 +176,7 @@ export async function flushQueue(
  *
  * Elle vit dans le stockage de session du navigateur : elle disparaît à la
  * fermeture de l'onglet, et ne suit pas l'onglet voisin. C'est exactement ce
- * qui sépare les deux cas que E5.4 traite différemment — passer d'un écran à
+ * qui sépare les deux cas que E5.4 traite différemment : passer d'un écran à
  * l'autre du même parcours, et rouvrir l'application sur un travail laissé là.
  */
 export function openMarkKey(siteId: string): string {
@@ -198,12 +198,12 @@ export function isOpenInTab(siteId: string, tabStorage: Storage | null): boolean
  *
  * Trois cas, et un seul appelle une question :
  *
- *   · `rien` — il n'y a pas d'état local, ou il est vide ;
- *   · `poursuivre` — cet onglet travaille déjà sur ce site. Changer d'écran
+ *   · `rien`, il n'y a pas d'état local, ou il est vide ;
+ *   · `poursuivre` : cet onglet travaille déjà sur ce site. Changer d'écran
  *     n'est pas rouvrir : reposer la question à chaque écran rendrait le
  *     parcours de M8 (partie M) critère 1 impraticable, et il n'y a d'ailleurs
  *     rien à arbitrer, l'état local étant celui qu'on vient d'écrire ;
- *   · `proposer` — un travail a été laissé là par un autre onglet, ou par une
+ *   · `proposer` : un travail a été laissé là par un autre onglet, ou par une
  *     session interrompue. C'est la réouverture après incident : l'utilisateur
  *     tranche, et rien n'est fusionné.
  */
@@ -223,7 +223,7 @@ export function resumeDecision(
 /**
  * Le rang du dernier identifiant local d'un état repris.
  *
- * Les identifiants de session sont tirés en suite — `…-000000000001`, puis
+ * Les identifiants de session sont tirés en suite : `…-000000000001`, puis
  * `…-000000000002`. Reprendre un état sans reprendre ce compteur ferait
  * réécrire les lignes déjà là au lieu d'en ajouter : la reprise perdrait
  * exactement ce qu'elle prétend sauver.

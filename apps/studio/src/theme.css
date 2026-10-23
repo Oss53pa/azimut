@@ -36,7 +36,7 @@ a {
  * Deux indicateurs, deux géométries, et c'est délibéré :
  *
  *   · le focus est un contour *extérieur*, détaché de deux pixels, dans le
- *     jeton que F désigne pour cet usage — « `border-interactive` est la
+ *     jeton que F désigne pour cet usage, « `border-interactive` est la
  *     bordure des champs, des boutons et de l'indicateur de focus » ;
  *   · la sélection est un fond, et non un contour.
  *

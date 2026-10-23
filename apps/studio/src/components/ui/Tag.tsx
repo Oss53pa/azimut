@@ -9,7 +9,7 @@ type TagProps = {
 };
 
 /**
- * F4.3 — a state chip. The label always says the state in words; the
+ * F4.3: a state chip. The label always says the state in words; the
  * colour only repeats it, so the chip survives greyscale.
  */
 export function Tag({ label, severity, muted = false }: TagProps): JSX.Element {

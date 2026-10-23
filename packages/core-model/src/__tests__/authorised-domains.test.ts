@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { ERROR_CATALOG, ANOMALY_DOMAINS, RETIRED_CODES } from '../error-catalog.js';
 
 /**
- * D2.1 — « Domaines autorisés, et eux seuls. »
+ * D2.1 : « Domaines autorisés, et eux seuls. »
  *
  * Ce qui se vérifie ici tient au seul catalogue du dépôt. Que la liste des
  * domaines tienne dans celle de D2.1, et que le catalogue se recoupe avec
@@ -11,11 +11,11 @@ import { ERROR_CATALOG, ANOMALY_DOMAINS, RETIRED_CODES } from '../error-catalog.
  * main aurait vieilli sans que personne s'en aperçoive, ce qui est arrivé.
  *
  * `NET` n'était autorisé par aucun document. Il figurait pourtant au
- * catalogue, attribué à la « tranche M » — une attribution fausse. C'était
+ * catalogue, attribué à la « tranche M » : une attribution fausse. C'était
  * aussi une erreur de catégorie : D2.2 réserve le catalogue aux anomalies
  * produites par un moteur, et un moteur n'a ni réseau ni base (A4.1).
  */
-describe('D2.1 — domaines autorisés, et eux seuls', () => {
+describe('D2.1 : domaines autorisés, et eux seuls', () => {
   it('`NET` n’est ni un domaine ni un préfixe de code', () => {
     expect([...ANOMALY_DOMAINS]).not.toContain('NET');
     const codes = Object.keys(ERROR_CATALOG).filter(c => c.startsWith('NET.'));
@@ -32,11 +32,11 @@ describe('D2.1 — domaines autorisés, et eux seuls', () => {
 });
 
 /**
- * D2.1 — « Un code est stable à vie. Il n'est jamais renommé, jamais traduit,
+ * D2.1 : « Un code est stable à vie. Il n'est jamais renommé, jamais traduit,
  * jamais réutilisé pour un autre sens. Un code retiré est marqué obsolète et
  * sa valeur reste réservée. »
  */
-describe('D2.1 — les codes retirés restent réservés', () => {
+describe('D2.1 : les codes retirés restent réservés', () => {
   it('aucun code retiré ne reparaît au catalogue', () => {
     const revenus = Object.keys(RETIRED_CODES).filter(c => c in ERROR_CATALOG);
     expect(revenus).toEqual([]);
@@ -70,7 +70,7 @@ describe('D2.1 — les codes retirés restent réservés', () => {
  * catalogue au moment du versement. Construire un écran de la tranche sans eux
  * aurait obligé à en inventer, ce que la section 7 de la consigne interdit.
  */
-describe('partie M — les codes que les cinq écrans nomment', () => {
+describe('partie M : les codes que les cinq écrans nomment', () => {
   const NAMED_BY_PARTIE_M = [
     'CALIB.AZIMUTH_INVALID', 'CALIB.DISTANCE_INVALID', 'CALIB.POINTS_TOO_CLOSE',
     'CALIB.POINT_REQUIRED', 'CALIB.SCALE_IMPLAUSIBLE',

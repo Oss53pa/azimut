@@ -5,7 +5,7 @@
  * les bâtiments, les niveaux, le graphe, les destinations, leurs noms, les
  * empreintes et les profils de parcours. Demander le reste n'ajoutait aucun contrôle et coûtait cher là
  * où le site n'est pas encore complet : l'atelier tient une session de travail
- * — un plan calé, des empreintes, des nœuds — et aucune organisation, aucune
+ * (un plan calé, des empreintes, des nœuds) et aucune organisation, aucune
  * fiche de site. Pour appeler le moteur, il aurait fallu en inventer, c'est-à-
  * dire produire de la donnée qu'aucun contrôle ne regarde. C'est ce qui a tenu
  * l'écran de validation de M5 (partie M) sur un contrôle écrit à la main.

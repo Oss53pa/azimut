@@ -95,7 +95,7 @@ beforeAll(async () => {
   // l'organisation contourne les politiques, comme le ferait un import
   // d'administration, et les rétablit aussitôt.
   //
-  // A5.11, version 7 : supprimer le site n'emporte plus ce qu'il porte — la
+  // A5.11, version 7 : supprimer le site n'emporte plus ce qu'il porte, la
   // cascade a disparu, et le refus prendrait sa place. Le décor se retire
   // dans l'ordre de dépendance, calculé depuis le schéma.
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
@@ -116,7 +116,7 @@ afterAll(async () => {
   await client.end();
 });
 
-describe('N1.7 critère 1 — un site modélisé se recharge à l’identique', () => {
+describe('N1.7 critère 1 : un site modélisé se recharge à l’identique', () => {
   it('s’écrit entièrement par le chemin d’écriture du module 01', async () => {
     const written = await applyCommands(db, { userId: USER }, [
       command('site', SITE, {

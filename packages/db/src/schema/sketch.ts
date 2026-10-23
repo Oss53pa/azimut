@@ -4,7 +4,7 @@ import { organization } from './org.js';
 import { site, level } from './site.js';
 
 /**
- * J3.4 — la couche d'esquisse (migration 0072). Elle n'entre dans aucun calcul
+ * J3.4 : la couche d'esquisse (migration 0072). Elle n'entre dans aucun calcul
  * ni aucun livrable (J3.3) : aucun chargeur de site ne la lit.
  */
 export const sketchLayer = azimut.table('sketch_layer', {

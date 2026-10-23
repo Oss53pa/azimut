@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = resolve(HERE, '..', '..', 'migrations');
 
 /**
- * A5.2 — l'énuméré fermé côté TypeScript et le CHECK côté base disent la même
+ * A5.2 : l'énuméré fermé côté TypeScript et le CHECK côté base disent la même
  * chose, ou l'un des deux mentirait.
  *
  * Le passage ligne → modèle restreint `footprint.kind` par un cast, adossé à
@@ -56,7 +56,7 @@ function effectiveMigration(): string {
   return resolve(MIGRATIONS_DIR, derniere);
 }
 
-describe('A5.2 — natures d’empreinte : le type et la base coïncident', () => {
+describe('A5.2, natures d’empreinte : le type et la base coïncident', () => {
   it('la migration effective déclare exactement les natures du modèle', () => {
     expect([...kindsDeclaredInMigration()].sort())
       .toEqual([...FOOTPRINT_KINDS].sort());

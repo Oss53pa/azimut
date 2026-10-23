@@ -14,7 +14,7 @@ import { LOT_STATE_KEYS, LOT_STATE_SEVERITY } from './worksite/labels.js';
 const ALL = 'all';
 
 /**
- * Module 07 — l'allotissement (H6.2), au gabarit « registre » : un lot par
+ * Module 07, l'allotissement (H6.2), au gabarit « registre » : un lot par
  * ligne, son fabricant, son état, et les réserves de pose qui l'empêchent
  * d'être déclaré posé. Le nombre de supports d'un lot se compte, il ne se
  * saisit pas. Lu en base (0042), ou dans le jeu de démonstration du dépôt de

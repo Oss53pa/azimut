@@ -15,14 +15,14 @@ function lineText(line: MessageLine, lang: string): string {
     .join(' · ');
 }
 
-const EMPTY_CELL = '—';
+const EMPTY_CELL = '–';
 
 function orEmpty(value: string | null): string {
   return value === null || value.length === 0 ? EMPTY_CELL : value;
 }
 
 /**
- * H11 — une ligne du tableau par bloc résolu. Les deux langues sont côte à
+ * H11 : une ligne du tableau par bloc résolu. Les deux langues sont côte à
  * côte : c'est ainsi que la maîtrise d'ouvrage valide (D12.2).
  */
 export function ScheduleTable({ lines }: ScheduleTableProps): JSX.Element {

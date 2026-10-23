@@ -1,5 +1,5 @@
 /**
- * D12.1 — module 01 et tranche M : sites, socle, calage, empreintes.
+ * D12.1, module 01 et tranche M : sites, socle, calage, empreintes.
  *
  * Fragment du catalogue.
  */

@@ -1,4 +1,4 @@
-# Note de décision — Table de métriques de police et mesure déterministe
+# Note de décision : Table de métriques de police et mesure déterministe
 
 **Statut : proposition (A2.2 §2, choix de modèle de données). Soumise, pas figée dans le code.**
 
@@ -14,7 +14,7 @@ partie G en fixe le contenu, cette note en fixe la forme, à ratifier.
 
 `checkFaceContentFit` (engine-graph) est écrit, exporté, testé et déjà câblé
 dans le compilateur (`apps/compiler/src/artwork.ts`) : il s'exécute dès qu'un
-`TextMeasure` lui est fourni. Il reste dormant pour une seule raison — aucun
+`TextMeasure` lui est fourni. Il reste dormant pour une seule raison, aucun
 producteur de mesure n'existe :
 
 - `FontMetricsRecord` (font-registry) ne porte aujourd'hui que la **présence**
@@ -46,12 +46,12 @@ Un type pur core-model, sans dépendance, distinct du `FontMetricsRecord`
 d'intégrité (qui reste tel quel pour le contrôle présence/empreinte) :
 
 ```ts
-/** G5.1 — table de métriques d'une police, unité : unités de police (upm). */
+/** G5.1, table de métriques d'une police, unité : unités de police (upm). */
 export type FontMetricsTable = {
   readonly font_id: string;
   /** Unités par cadratin (typiquement 1000 ou 2048). */
   readonly units_per_em: number;
-  /** Hauteur de cadratin, hauteur d'x, jambages hauts et bas — en upm. */
+  /** Hauteur de cadratin, hauteur d'x, jambages hauts et bas : en upm. */
   readonly em_height: number;
   readonly x_height: number;
   readonly ascender: number;
@@ -74,7 +74,7 @@ Justifications des choix ouverts (ce qui relève de A2.2) :
 - **Approches en table plate `"cp1,cp2"`** plutôt qu'imbriquée : sérialisation
   et empreinte directes, pas d'objets creux.
 - L'empreinte de la table réutilise le sérialiseur §4 (`empreinte`) déjà en
-  place — pas de second mécanisme de hachage.
+  place : pas de second mécanisme de hachage.
 
 ---
 
@@ -100,7 +100,7 @@ module unique D1.4. Pure, déterministe, sans horloge ni navigateur. Le
 
 ---
 
-## 5. Glyphe absent de la table — décision demandée
+## 5. Glyphe absent de la table : décision demandée
 
 Un caractère à mesurer dont la chasse manque ne peut pas être approximé sans
 réintroduire de l'indéterminisme. Deux options, cohérentes avec l'esprit de
@@ -150,4 +150,4 @@ pas un contenu à rendre au mieux.
   portant son empreinte (INV-1, INV-5).
 
 Tant que le §6 n'est pas tranché, le contrôle reste dormant, comme
-aujourd'hui — aucune régression, mais aucune activation non plus.
+aujourd'hui : aucune régression, mais aucune activation non plus.

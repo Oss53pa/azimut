@@ -18,8 +18,8 @@ const DB = resolve(HERE, '..', '..');
  *
  * J'ai créé deux fois le même défaut sur cette branche : une colonne `geom`
  * présente en SQL et chez Drizzle, absente du type de ligne et du modèle. Elle
- * était `NOT NULL` la première fois, ce qui rendait toute insertion impossible
- * — et rien ne le disait, parce que rien ne lit une base qui n'existe pas
+ * était `NOT NULL` la première fois, ce qui rendait toute insertion impossible :
+ * et rien ne le disait, parce que rien ne lit une base qui n'existe pas
  * pendant les essais. Deux fois de suite, par relecture seule.
  */
 

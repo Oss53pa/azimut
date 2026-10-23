@@ -1,5 +1,5 @@
 /**
- * M2 (partie M) — « Valider le calage | Écrit `plan_calibration`, débloque le
+ * M2 (partie M) : « Valider le calage | Écrit `plan_calibration`, débloque le
  * tracé ».
  *
  * Le geste écrit deux lignes, parfois trois : le fond de plan, son calage, et
@@ -10,7 +10,7 @@
  * M2 (partie M), critère d'acceptation 3, tel que A5.2 le borne : « Aucune
  * coordonnée **de géométrie du site** n'est écrite en pixels. Seuls les points
  * de calage de la source de plan le sont. » Ce qui est écrit du site est donc
- * en mètres ; ce qui est écrit de l'image — les points de la mesure — est en
+ * en mètres ; ce qui est écrit de l'image (les points de la mesure) est en
  * pixels et le dit dans son nom. Un test le vérifie sur les commandes.
  */
 import type { EntityCommand, Finding, Outcome, Point } from '@azimut/core-model';
@@ -30,13 +30,13 @@ export type CalibrationWrite = {
   /** Chemin de l'artefact téléversé, hors de la base. */
   readonly storagePath: string;
   /**
-   * A5.2 — les points de calage, dans l'ordre où l'opérateur les a posés, avec
+   * A5.2 : les points de calage, dans l'ordre où l'opérateur les a posés, avec
    * l'identifiant tiré pour chacun. « Les points de calage permettent de
    * rejouer le calage à l'identique » : sans eux, la base garde l'échelle et
    * perd la mesure qui l'a produite.
    */
   readonly points: readonly { readonly id: string; readonly point: PlanPoint }[];
-  /** A5.2 — la distance réelle saisie à l'étape 2 de M2 (partie M). */
+  /** A5.2 : la distance réelle saisie à l'étape 2 de M2 (partie M). */
   readonly referenceDistanceM: number;
   /** ISO-8601, fourni par l'appelant (E5.1). */
   readonly timestamp: string;
@@ -109,7 +109,7 @@ export function calibrationCommands(
 
   const commands: EntityCommand[] = [source.value, calibrated.value];
 
-  // A5.2 — les points de la mesure, en pixels de l'image. Seconde des deux
+  // A5.2 : les points de la mesure, en pixels de l'image. Seconde des deux
   // exceptions que M01.S2 admet : ils décrivent l'image, jamais le site.
   for (const [ordinal, entry] of write.points.entries()) {
     const stored = buildCommand({
@@ -131,7 +131,7 @@ export function calibrationCommands(
   }
 
   // M01.S1 (partie N) : le premier calage fixe le repère du site. Les suivants le
-  // confirment, et n'écrivent donc rien — repasser la même valeur n'est pas
+  // confirment, et n'écrivent donc rien : repasser la même valeur n'est pas
   // une modification, et `guardSiteOrigin` l'a déjà admise.
   if (siteOrigin(origin.site) === null) {
     const fixed = buildCommand({

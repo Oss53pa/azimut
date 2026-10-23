@@ -3,7 +3,7 @@ import { refMultilevel } from '@azimut/testkit';
 import { buildKioskMapFiles } from '../build-kiosk-tree.js';
 
 /**
- * A5.8 et S-39 — les marques de sécurité d'un plan de borne sont figées à la
+ * A5.8 et S-39 : les marques de sécurité d'un plan de borne sont figées à la
  * construction du paquet.
  *
  * Le paquet ne transporte pas les rattachements du site à ses paquets de
@@ -21,7 +21,7 @@ function plansOf(site: typeof refMultilevel): readonly string[] {
   return [...built.value.values()].map(bytes => new TextDecoder().decode(bytes));
 }
 
-describe('Plan de borne — la marque d’accessibilité est figée à la construction', () => {
+describe('Plan de borne : la marque d’accessibilité est figée à la construction', () => {
   it('porte le pictogramme désigné par le paquet rattaché au site', () => {
     expect(DESIGNATED).toBeDefined();
     const path = `d="${DESIGNATED?.svg_path ?? ''}"`;
@@ -29,7 +29,7 @@ describe('Plan de borne — la marque d’accessibilité est figée à la constr
   });
 
   it('refuse le paquet si le site n’est rattaché à aucun paquet : la marque se résout à la construction', () => {
-    // D10.0 — une marque de sécurité omise bloque la construction du paquet.
+    // D10.0, une marque de sécurité omise bloque la construction du paquet.
     const built = buildKioskMapFiles({ ...refMultilevel, rules_bindings: [] });
     expect(built.ok).toBe(false);
     if (!built.ok) {

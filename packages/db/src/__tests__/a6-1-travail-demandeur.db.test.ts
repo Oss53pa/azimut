@@ -9,7 +9,7 @@ import { deleteOrgFixture } from '../fixture-cleanup.js';
 import { provisionOrganization } from '../provision-organization.js';
 
 /**
- * A6.1 — le service de compilation lit sous l'identité du demandeur du travail
+ * A6.1 : le service de compilation lit sous l'identité du demandeur du travail
  * (migration 0070).
  *
  * Ce qui s'éprouve ici, contre la base réelle et sous `FORCE ROW LEVEL
@@ -111,7 +111,7 @@ afterAll(async () => {
   await client.end();
 });
 
-describe('A6.1 — le service lit sous l’identité du demandeur', () => {
+describe('A6.1 : le service lit sous l’identité du demandeur', () => {
   it('le demandeur lit le site de son organisation', async () => {
     const site = await loadSiteDataAs(db, USER_B, ORG_B, SITE_B);
     expect(site.site.id).toBe(SITE_B);
@@ -139,7 +139,7 @@ describe('A6.1 — le service lit sous l’identité du demandeur', () => {
   });
 });
 
-describe('A6.1 — le demandeur d’un travail est posé par la base', () => {
+describe('A6.1 : le demandeur d’un travail est posé par la base', () => {
   it('par défaut, le demandeur est l’utilisateur qui insère', async () => {
     const id = await asUser(USER_A, async (tx) => {
       const rows: unknown = await tx.execute(sql`

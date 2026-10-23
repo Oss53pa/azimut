@@ -1,5 +1,5 @@
 /**
- * E7.3 — Bridge between the document and the clipboard.
+ * E7.3: Bridge between the document and the clipboard.
  *
  * The clipboard stores serializable data, never object references, so
  * shapes are encoded on copy and decoded on paste. Decoding validates

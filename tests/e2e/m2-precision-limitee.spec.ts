@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M2 (partie M), version 27 — « Un fichier sans contenu vectoriel exploitable
+ * M2 (partie M), version 27 : « Un fichier sans contenu vectoriel exploitable
  * est accepté en dernier recours et lève `IMPORT.RASTER_PRECISION_LIMITED`.
  * [...] c'est le contenu qui est contrôlé, jamais l'extension. »
  *
@@ -53,7 +53,7 @@ const PDF_THREE_PAGES = pdf(
   '<< /Type /Page /Parent 2 0 R >>',
 );
 
-test.describe('M2 (partie M) — précision limitée, jugée sur le contenu', () => {
+test.describe('M2 (partie M) : précision limitée, jugée sur le contenu', () => {
   test('un PDF sans tracé lève l’avertissement, sans bloquer le calage', async ({ page }) => {
     await page.goto(PLAN);
     await drop(page, 'niveau-0.pdf', 'application/pdf', PDF_WITHOUT_PATH);

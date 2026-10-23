@@ -14,7 +14,7 @@ function computeInputsHash(...args: Parameters<typeof computeInputsHashOutcome>)
 }
 
 /**
- * D7.2 — l'empreinte de contenu n'a qu'une implantation, dans core-model ;
+ * D7.2 : l'empreinte de contenu n'a qu'une implantation, dans core-model ;
  * ces essais la prennent par le chemin d'engine-graph, `resolvedFaceContentHash`.
  */
 type ContentHashInput = {
@@ -69,7 +69,7 @@ function resolveAtNode(
   };
 }
 
-describe('D7.1 — inputs_hash', () => {
+describe('D7.1: inputs_hash', () => {
   it('produces a sha256-prefixed lowercase hex hash (D7.2)', () => {
     const hash = computeInputsHash(refMinimal, profile);
     expect(hash).toMatch(/^sha256:[a-f0-9]{64}$/);
@@ -161,7 +161,7 @@ describe('D7.1 — inputs_hash', () => {
   });
 
   /**
-   * D7.1 — « Les liaisons entre bâtiments n'y entrent pas, parce qu'aucun
+   * D7.1 : « Les liaisons entre bâtiments n'y entrent pas, parce qu'aucun
    * calcul de parcours ne lit aujourd'hui leur attribut de passage couvert. »
    *
    * Ce n'est pas un oubli, c'est la composition voulue : une empreinte
@@ -220,7 +220,7 @@ describe('D7.1 — inputs_hash', () => {
   });
 });
 
-describe('D7.1 — content_hash', () => {
+describe('D7.1: content_hash', () => {
   it('produces a sha256-prefixed lowercase hex hash (T-2.14a §4.9)', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
     const hash = hashOf(input);
@@ -333,7 +333,7 @@ const headerOnlyTemplate: FaceTemplate = {
   ],
 };
 
-describe('D7.3 — staleness precision', () => {
+describe('D7.3: staleness precision', () => {
   it('destination change affects face with destination_list', () => {
     const input = resolveAtNode(refMinimal, template, 'n-junction');
     const before = hashOf(input);
@@ -372,7 +372,7 @@ describe('D7.3 — staleness precision', () => {
     expect(after).toBe(before);
   });
 
-  it('stale count is exact — only faces with destination_list are marked', () => {
+  it('stale count is exact: only faces with destination_list are marked', () => {
     const nodeId = 'n-junction';
     const templates = [template, headerOnlyTemplate];
 

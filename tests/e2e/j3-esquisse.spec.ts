@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J3 (partie J) — la couche d'esquisse dans la zone de travail des empreintes.
+ * J3 (partie J) : la couche d'esquisse dans la zone de travail des empreintes.
  *
  * Les commandes et la lecture sont essayées dans `state/__tests__/sketch.test.ts`
  * et contre la base dans `sketch.db.test.ts`. Ce qui ne se prouve qu'à l'écran :
@@ -47,7 +47,7 @@ async function sketchMode(page: Page): Promise<void> {
   await expect(page.getByRole('button', { name: /^(Esquisser|Sketch)$/ })).toHaveAttribute('aria-pressed', 'true');
 }
 
-test.describe('J3 (partie J) — la couche d’esquisse', () => {
+test.describe('J3 (partie J) : la couche d’esquisse', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();

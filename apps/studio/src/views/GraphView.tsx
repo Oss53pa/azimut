@@ -23,7 +23,7 @@ type EdgeRow = {
 };
 
 /**
- * Module 01 · écran M4 (partie M) — le graphe de circulation.
+ * Module 01 · écran M4 (partie M) : le graphe de circulation.
  *
  * Le tracé appartient à l'atelier : un second canevas de tracé ouvrirait deux
  * chemins vers la même géométrie. Cet écran porte ce qui manquait autour du
@@ -95,7 +95,7 @@ export function GraphView({ onNavigate }: GraphViewProps): JSX.Element {
     {
       id: 'decision',
       label: t('graph.metric.decision'),
-      value: decisionPoints === null ? '—' : String(decisionPoints.length),
+      value: decisionPoints === null ? '–' : String(decisionPoints.length),
     },
   ];
 

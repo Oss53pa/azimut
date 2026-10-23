@@ -1,5 +1,5 @@
 /**
- * L'extension d'une empreinte de place de stationnement — A5.3, section S8.
+ * L'extension d'une empreinte de place de stationnement : A5.3, section S8.
  *
  * ```sql
  * parking_space (id, org_id, footprint_id, space_kind, row_label)
@@ -12,8 +12,8 @@
  * repère de travée. »
  *
  * **Ce que ce module portait, et ce qu'il ne porte plus.** Il portait un module
- * de stationnement entier — un parking, une place autonome, une surface non
- * couverte, un portail véhicule — écrit avant que la section S8 n'existe. S8 a
+ * de stationnement entier (un parking, une place autonome, une surface non
+ * couverte, un portail véhicule) écrit avant que la section S8 n'existe. S8 a
  * tranché : « Une place de stationnement est une empreinte de nature
  * `parking_space`. Un parking est une zone de nature `parking`. Ce sont les
  * objets du socle, module 01. » `parking` doublait donc `zone`, et la place
@@ -41,7 +41,7 @@
  */
 
 /**
- * Le type d'une place — A5.3.
+ * Le type d'une place : A5.3.
  *
  * Cinq valeurs, celles du document. L'ancienne liste en comptait trois, en
  * français (`standard`, `pmr`, `livraison`) ; A5.3 les nomme en anglais comme
@@ -64,7 +64,7 @@ export function isParkingSpaceKind(value: string): value is ParkingSpaceKind {
  *
  * Une ligne par empreinte : `footprint_id` est la clé du rattachement, et
  * l'unicité est tenue en base. Une empreinte de place sans extension reste une
- * place — de type standard, sans repère de travée — comme une arête sans
+ * place (de type standard, sans repère de travée) comme une arête sans
  * `vertical_link` reste une arête.
  */
 export type ParkingSpace = {

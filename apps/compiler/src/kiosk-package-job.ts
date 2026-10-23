@@ -9,7 +9,7 @@ import type { PackageRecorder } from './db-package-recorder.js';
 import type { Job } from './job.js';
 
 /**
- * D10 — Job-driven `build_kiosk_package` handler.
+ * D10: Job-driven `build_kiosk_package` handler.
  *
  * Ties every port together into one worker-registrable handler: per job it
  * loads the site, reads the runtime bundle from storage, assembles the tree and
@@ -50,7 +50,7 @@ export function siteActiveLangs(site: SiteData): readonly string[] {
 /**
  * Adapt a live database into a per-job site loader.
  *
- * A6.1 — the site is read under the requester's identity, in a transaction
+ * A6.1, the site is read under the requester's identity, in a transaction
  * that sets it and drops it: the service sees exactly what the requester sees.
  */
 export function dbLoadSite(
@@ -83,7 +83,7 @@ export function createKioskPackageJobHandler(
   return async (job: Job): Promise<Record<string, unknown>> => {
     const siteId = requireString(job.payload, 'site_id');
     const version = requireVersion(job.payload);
-    // A6.1 — no requester, no identity to read under: refused, never guessed.
+    // A6.1, no requester, no identity to read under: refused, never guessed.
     if (job.requested_by === null || job.requested_by === '') {
       throw new Error('build_kiosk_package job has no requester (requested_by)');
     }

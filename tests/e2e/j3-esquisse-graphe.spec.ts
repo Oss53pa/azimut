@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J3 et J3.3 (partie J) — la couche d'esquisse dans l'atelier du graphe (M4,
+ * J3 et J3.3 (partie J) : la couche d'esquisse dans l'atelier du graphe (M4,
  * partie M).
  *
  * La couche est celle du niveau : ce qui est esquissé dans un atelier se voit
@@ -27,7 +27,7 @@ async function viewBox(page: Page): Promise<{ x: number; y: number; width: numbe
   return box;
 }
 
-test.describe('J3 (partie J) — l’esquisse dans l’atelier du graphe', () => {
+test.describe('J3 (partie J) : l’esquisse dans l’atelier du graphe', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(GRAPH);
     await expect(page.getByRole('button', { name: /Nœud N|Node N/, pressed: true })).toBeVisible();

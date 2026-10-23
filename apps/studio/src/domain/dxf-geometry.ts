@@ -1,5 +1,5 @@
 /**
- * M2 (partie M), version 27 — un DXF est accepté comme fond de plan ; qu'il
+ * M2 (partie M), version 27 : un DXF est accepté comme fond de plan ; qu'il
  * porte un contenu vectoriel exploitable se juge sur son contenu.
  *
  * Ce module compte les entités géométriques d'un DXF texte : celles de la

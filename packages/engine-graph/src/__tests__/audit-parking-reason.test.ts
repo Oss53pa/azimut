@@ -6,7 +6,7 @@ import {
 import { auditParking } from '../audit-parking.js';
 
 /**
- * S-37 — le motif d'une surface non numérisée.
+ * S-37 : le motif d'une surface non numérisée.
  *
  * « Une empreinte de nature `parking_space` peut être marquée non numérisée,
  * avec le nombre de places qu'elle est censée porter, le motif pour lequel
@@ -55,7 +55,7 @@ function avertissements(facts: readonly SiteFact[], forDeliverable = false) {
   }, forDeliverable).findings.filter(f => f.code === 'PARK.UNDIGITIZED_REASON_MISSING');
 }
 
-describe('S-37 — PARK.UNDIGITIZED_REASON_MISSING', () => {
+describe('S-37: PARK.UNDIGITIZED_REASON_MISSING', () => {
   it('signale une surface marquée sans motif, en avertissement', () => {
     const [finding, ...reste] = avertissements([marque('fp-a', 20)]);
     expect(reste).toEqual([]);

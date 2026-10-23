@@ -12,12 +12,12 @@ export type AxisReport = {
 };
 
 /**
- * M4 (partie M) — l'axe de circulation, saisi point par point.
+ * M4 (partie M) : l'axe de circulation, saisi point par point.
  *
  * L'action est refusée sous deux points : un axe sans segment ne trace rien,
  * et laisser presser un bouton qui ne fera rien est pire que de le refuser en
  * le disant. Le compte rendu nomme ce que la passe a repris et ce qu'elle a
- * passé — « sans doublon » ne se voit pas autrement, le graphe ayant la même
+ * passé : « sans doublon » ne se voit pas autrement, le graphe ayant la même
  * allure qu'il ait doublé un nœud ou non.
  */
 export function AxisFields({ axis, onPoint, onAdd, onRemove, onDraw, report }: {

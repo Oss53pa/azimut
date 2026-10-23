@@ -5,7 +5,7 @@ import type { ViewPoint, ViewState, Viewport } from './view-transform.js';
 import { browserStore, forgetView, recallView, rememberView } from './view-memory.js';
 
 /**
- * E3.3 — la navigation dans une zone de travail : zoom à la molette autour du
+ * E3.3, la navigation dans une zone de travail : zoom à la molette autour du
  * pointeur, déplacement au bouton du milieu ou espace enfoncée, boutons de
  * zoom et de recadrage pour le clavier (E6.2).
  *

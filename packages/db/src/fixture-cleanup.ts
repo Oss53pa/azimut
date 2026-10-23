@@ -1,13 +1,13 @@
 /**
  * Retrait d'un décor d'essai, dans l'ordre de dépendance.
  *
- * A5.11 — « Aucune clé étrangère vers `organization` ou vers `site` ne
+ * A5.11 : « Aucune clé étrangère vers `organization` ou vers `site` ne
  * supprime en cascade. » Un décor d'essai ne se retire donc plus en
  * supprimant son organisation : les tables filles se vident avant les tables
  * mères, faute de quoi la base refuse.
  *
  * L'ordre n'est pas écrit ici. Il se calcule depuis le graphe des clés
- * étrangères du schéma, ce qui le garde juste quand une table s'ajoute — et
+ * étrangères du schéma, ce qui le garde juste quand une table s'ajoute : et
  * une table s'ajoute à chaque tranche. Les ex aequo sont départagés par nom,
  * pour que deux exécutions rendent la même suite (A9).
  *
@@ -24,7 +24,7 @@ export type SqlRunner = (text: string) => Promise<unknown>;
 export type SqlReader = (text: string) => Promise<ReadonlyArray<Record<string, unknown>>>;
 
 /**
- * A12.3 — les tables en insertion seule. Aucune suppression n'y est possible,
+ * A12.3 : les tables en insertion seule. Aucune suppression n'y est possible,
  * pour aucun rôle, et une cascade n'est pas une exception. Le retrait d'un
  * décor les laisse donc intactes et se plaint si elles portent encore des
  * lignes de l'organisation : c'est le comportement qu'O15 attend d'une purge,
@@ -134,7 +134,7 @@ async function foreignKeys(read: SqlReader): Promise<readonly Edge[]> {
  * Range les tables de sorte qu'une fille précède sa mère.
  *
  * Tri topologique de Kahn sur le graphe « mère dépend de sa fille ». Une table
- * prise dans un cycle — le schéma n'en porte pas — resterait en fin de liste
+ * prise dans un cycle (le schéma n'en porte pas) resterait en fin de liste
  * plutôt que de disparaître silencieusement : la suppression échouerait alors
  * en le disant, ce qui vaut mieux qu'un décor à moitié retiré.
  */

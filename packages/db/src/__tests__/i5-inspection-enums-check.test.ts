@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const MIGRATION = resolve(HERE, '..', '..', 'migrations', '0044_i5_inspection_tables.up.sql');
 
 /**
- * I5.6 — les énumérés des tournées d'inspection, côté TypeScript et côté base, disent la
+ * I5.6 : les énumérés des tournées d'inspection, côté TypeScript et côté base, disent la
  * même chose. Le dépôt refuse une valeur hors liste : si les listes
  * divergeaient, une ligne valide en base ferait échouer la lecture.
  */
@@ -22,7 +22,7 @@ function inList(table: string, column: string): readonly string[] {
   return (match[1] ?? '').split(',').map(p => p.trim().replace(/^'|'$/g, '')).filter(p => p !== '');
 }
 
-describe('I5.6 — tournées : le type et la base coïncident', () => {
+describe('I5.6, tournées : le type et la base coïncident', () => {
   it('inspection_round.sync_state', () => {
     expect([...inList('inspection_round', 'sync_state')].sort()).toEqual([...INSPECTION_SYNC_STATES].sort());
   });

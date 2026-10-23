@@ -3,7 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /**
- * A5.8 — la borne ne résout aucune fonction de pictogramme.
+ * A5.8 : la borne ne résout aucune fonction de pictogramme.
  *
  * Le paquet de borne ne transporte pas les rattachements du site à ses
  * paquets de règles, et `loadKioskSite` rend un site où ce champ est absent,
@@ -43,7 +43,7 @@ function importedNames(text: string): readonly string[] {
   return names;
 }
 
-describe('A5.8 — aucune résolution de fonction à l’exécution sur la borne', () => {
+describe('A5.8 : aucune résolution de fonction à l’exécution sur la borne', () => {
   it('le code d’exécution n’importe rien qui résolve une fonction de pictogramme', () => {
     const offending = runtimeSources().flatMap(({ file, text }) =>
       importedNames(text).filter(name => FORBIDDEN.has(name)).map(name => `${file}: ${name}`));

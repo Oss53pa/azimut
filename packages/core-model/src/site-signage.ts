@@ -1,7 +1,7 @@
 import type { PictogramRegistry } from './site.js';
 
 /**
- * A5.6 — la famille signalétique du modèle : type de support, support, face,
+ * A5.6, la famille signalétique du modèle : type de support, support, face,
  * bloc de contenu, gabarit, version, épreuve et approbation.
  *
  * Sortie de `site.ts`, qui franchissait les quatre cents lignes (A2.4). La
@@ -15,7 +15,7 @@ export type SupportTypeFace = {
 };
 
 /**
- * A support typology (A5.6 `support_typology`) — the template of a physical
+ * A support typology (A5.6 `support_typology`): the template of a physical
  * support model. `template_key` binds it to a face template. `faces` carries
  * the typology's default face sizes, a convenience seed for composition: the
  * authoritative per-support dimensions live on the `Support` instance (A5.6),
@@ -33,7 +33,7 @@ export type SupportType = {
 };
 
 /**
- * Reading context of a support — indoors or outdoors. It scopes the rules
+ * Reading context of a support: indoors or outdoors. It scopes the rules
  * (D3.3/D3.5 `context` dimension: interior thresholds differ from exterior).
  * The spec does not derive it from geometry: whether a panel is indoors is a
  * placement fact a surveyor records, like the azimuth and mounting, so it is
@@ -42,14 +42,14 @@ export type SupportType = {
 export type SupportContext = 'interior' | 'exterior';
 
 /**
- * A support instance (A5.6 `support`) — a physical panel placed on a node.
+ * A support instance (A5.6 `support`): a physical panel placed on a node.
  * Carries the per-instance normative inputs the typology cannot hold: the
  * reading distance that feeds the legibility formula, the registry that scopes
  * the rules (and drives the safety hardening), and the reading context. Minimal
  * A5.6 subset: the remaining columns (typology link, dimensions_source,
  * substrate, mounting) are additive and not yet modelled in memory.
  */
-/** A5.6 — whether a support's dimensions are engine-computed or hand-set. */
+/** A5.6: whether a support's dimensions are engine-computed or hand-set. */
 export type DimensionsSource = 'computed' | 'overridden';
 
 export type Support = {
@@ -57,7 +57,7 @@ export type Support = {
   readonly org_id: string;
   readonly site_id: string;
   /**
-   * A5.6 et N2.2 — code lisible, unique par site, par exemple `D-042`.
+   * A5.6 et N2.2 : code lisible, unique par site, par exemple `D-042`.
    * Propriété du module 02 (implantation, scission L0), et segment de support
    * du nom de fichier livré (D11).
    *
@@ -71,14 +71,14 @@ export type Support = {
   readonly reading_distance_m: number;
   readonly azimuth_deg: number;
   /**
-   * A5.6 — dimensions carried by the instance (mm). When set they override the
+   * A5.6: dimensions carried by the instance (mm). When set they override the
    * typology's default face size; when absent the typology default is used.
    */
   readonly width_mm?: number;
   readonly height_mm?: number;
   readonly dimensions_source?: DimensionsSource;
   /**
-   * A5.6 — la typologie du support (`support.typology_id`). Facultative : la
+   * A5.6 : la typologie du support (`support.typology_id`). Facultative : la
    * colonne est nullable en base et une typologie supprimée la remet à nul
    * (0015). Un support sans typologie ne s'invente pas la première venue ;
    * c'est l'appelant qui dit ce qu'il suppose, et le montre.
@@ -87,7 +87,7 @@ export type Support = {
 };
 
 /**
- * A5.6 — la typologie d'un support, ou `null` quand le support n'en porte
+ * A5.6 : la typologie d'un support, ou `null` quand le support n'en porte
  * pas, ou en porte une que le site ne connaît pas.
  */
 export function supportTypologyOf(
@@ -99,7 +99,7 @@ export function supportTypologyOf(
 }
 
 /**
- * A5.6 `support_face` — one face of a support instance. Binds to a face
+ * A5.6 `support_face`: one face of a support instance. Binds to a face
  * template for its layout (`template_key`) and declares the active languages.
  * Loaded for A5.6 completeness; composition still runs off the type-level
  * FaceTemplate + message schedule, so nothing consumes this yet.
@@ -114,7 +114,7 @@ export type SupportFace = {
 };
 
 /**
- * A5.6 `content_block` — one block of a support face. `kind` is the block
+ * A5.6 `content_block`: one block of a support face. `kind` is the block
  * category ('resolved' | 'free' | 'pictogram' | 'map' | 'legend'); it is kept
  * as a raw string because the pre-A5.6 column may still hold a render kind and
  * nothing consumes it yet. `binding` describes how a resolved block resolves;
@@ -130,8 +130,8 @@ export type ContentBlockInstance = {
   readonly free_text?: Record<string, unknown>;
 };
 
-/** A5.6 `support_version` state — the approval lifecycle of a support. */
-/** A5.6 / M04.G7 — états d'une version de support, énuméré fermé. */
+/** A5.6 `support_version` state: the approval lifecycle of a support. */
+/** A5.6 / M04.G7 : états d'une version de support, énuméré fermé. */
 export const SUPPORT_VERSION_STATES = [
   'draft', 'in_review', 'approved', 'superseded',
 ] as const;
@@ -139,7 +139,7 @@ export const SUPPORT_VERSION_STATES = [
 export type SupportVersionState = (typeof SUPPORT_VERSION_STATES)[number];
 
 /**
- * A5.6 `support_version` — a versioned state of a support (its proof/approval
+ * A5.6 `support_version`: a versioned state of a support (its proof/approval
  * spine), with the content hash and the produced artwork path. Loaded for
  * completeness; the compile/approval flow does not read it yet.
  */

@@ -6,7 +6,7 @@ import { EMPTY_VOCABULARY } from '@azimut/core-model';
  *
  * Aucune donnée client : ces registres sont inventés pour exercer les
  * contrôles, comme les sites de référence eux-mêmes. Quatre cas, un par
- * registre d'A5.8 et d'A5.11 — règles de rédaction de la charte, charte qui
+ * registre d'A5.8 et d'A5.11 : règles de rédaction de la charte, charte qui
  * impose visiteurs plutôt que clients, parking gratuit contre les mots du
  * paiement, charte contre plans sur le nombre de niveaux de parking.
  *
@@ -16,7 +16,7 @@ import { EMPTY_VOCABULARY } from '@azimut/core-model';
  */
 const MULTILEVEL: SiteVocabulary = {
   /**
-   * A5.8 — les deux règles de rédaction que le dépôt sait opposer.
+   * A5.8, les deux règles de rédaction que le dépôt sait opposer.
    *
    * Elles étaient écrites dans le code des contrôles, comme des valeurs du
    * produit. A5.8 les range parmi les règles de charte, et elles sont donc ici,

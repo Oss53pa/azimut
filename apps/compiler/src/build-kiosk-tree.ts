@@ -6,14 +6,14 @@ import { themePapier, stateColorsPapier } from '@azimut/design-tokens';
 import type { AssetStore } from './asset-store.js';
 
 /**
- * D10.1 — Build the kiosk deployment tree files from the site.
+ * D10.1: Build the kiosk deployment tree files from the site.
  *
  * Produces the deterministic `data/*.json` and `maps/level-<ordinal>.svg`
  * files and merges them with the provided runtime app assets (index.html,
  * app.js, app.css and any embedded fonts). The result feeds
  * assembleKioskPackage, which validates the tree and builds the manifest.
  *
- * The runtime app itself is not generated here — it is the built kiosk-runtime
+ * The runtime app itself is not generated here: it is the built kiosk-runtime
  * bundle, supplied as bytes. Colours come from the design-tokens module (the
  * single source of truth), never hardcoded.
  */
@@ -65,7 +65,7 @@ const FLOOR_OPTS: Omit<FloorPlanOptions, 'theme'> = {
  * everything the kiosk runtime consumes offline: the routing graph, the
  * searchable directory (with pictograms), the scene geometry, and the site
  * identity plus travel profiles. Panel-authoring collections (support types,
- * face templates) are intentionally not shipped — a kiosk renders maps and
+ * face templates) are intentionally not shipped: a kiosk renders maps and
  * wayfinding, not supports. `loadKioskSite` in @azimut/kiosk-runtime rehydrates
  * a SiteData from exactly these files.
  */
@@ -101,7 +101,7 @@ export function buildKioskDataFiles(site: SiteData): Map<string, Uint8Array> {
 }
 
 /**
- * D10.0 — une marque de sécurité omise faute de fonction désignée.
+ * D10.0 : une marque de sécurité omise faute de fonction désignée.
  *
  * `PICTO.FUNCTION_NOT_DESIGNATED` est un avertissement au catalogue : un plan
  * d'atelier se rend sans la marque et le dit. Sur une borne, personne ne lit
@@ -117,7 +117,7 @@ function isOmittedSafetyMark(finding: Finding): boolean {
  * One `maps/level-<ordinal>.svg` per level, rendered deterministically with
  * design-token colours.
  *
- * D10.0 — « l'assemblage d'un paquet agrège les anomalies de chaque rendu
+ * D10.0 : « l'assemblage d'un paquet agrège les anomalies de chaque rendu
  * qu'il embarque, et ne lit jamais le seul succès ». Chaque niveau est rendu,
  * et ses anomalies sont rassemblées, dans l'ordre des niveaux, avec le niveau
  * qui les porte (`level_id`) : la même marque manquante sur deux niveaux fait

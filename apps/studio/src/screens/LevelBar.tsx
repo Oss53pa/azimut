@@ -3,15 +3,15 @@ import { SPACE, TEXT } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 
 /**
- * T-1.5 — la barre de niveaux de l'atelier.
+ * T-1.5 : la barre de niveaux de l'atelier.
  *
  * Les quatre écrans d'atelier portent sur un niveau, que leur chemin nomme :
  * `/sites/:siteId/levels/:levelId/...`. La session, elle, charge le site
- * entier et porte donc tous ses niveaux — mais rien ne les montrait, et le
+ * entier et porte donc tous ses niveaux : mais rien ne les montrait, et le
  * seul moyen de passer de l'un à l'autre était de réécrire l'adresse. Un
  * bâtiment à plusieurs étages était ainsi modélisable et non parcourable.
  *
- * La maquette de M2 (partie M) porte déjà ce fil d'Ariane en tête d'écran —
+ * La maquette de M2 (partie M) porte déjà ce fil d'Ariane en tête d'écran :
  * « Azimut | Site | Niveau R+1 ». Cette barre le rend, et le rend agissant.
  *
  * Elle ne crée aucun niveau. Les niveaux d'un site viennent du dépôt, et leur
@@ -35,8 +35,8 @@ export type LevelBarProps = {
 export function LevelBar(props: LevelBarProps): JSX.Element | null {
   const { t } = useI18n();
 
-  // Un site dont la session ne porte aucun niveau — un site ouvert hors ligne,
-  // par exemple — n'a rien à choisir. Une barre vide dirait qu'il y a quelque
+  // Un site dont la session ne porte aucun niveau (un site ouvert hors ligne,
+  // par exemple) n'a rien à choisir. Une barre vide dirait qu'il y a quelque
   // chose et que le chargement traîne.
   if (props.levels.length === 0) return null;
 

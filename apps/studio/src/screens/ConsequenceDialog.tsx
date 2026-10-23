@@ -2,7 +2,7 @@ import { type JSX } from 'react';
 import { Button, Dialog, SPACE, TEXT } from '../components/ui/index.js';
 
 /**
- * M7.9 (partie M) — « Une action irréversible ou à conséquence lointaine
+ * M7.9 (partie M) : « Une action irréversible ou à conséquence lointaine
  * demande une confirmation qui nomme la conséquence. »
  *
  * Nommer la conséquence, et non demander « êtes-vous sûr ». Une confirmation

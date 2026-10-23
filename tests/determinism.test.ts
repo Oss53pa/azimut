@@ -159,7 +159,7 @@ function getTemplate(id: string): FaceTemplate {
   return t;
 }
 
-describe('INV-4 — deterministic rendering', () => {
+describe('INV-4: deterministic rendering', () => {
   it('renderFloorPlan produces identical output across runs', () => {
     const results = Array.from({ length: RUNS }, () =>
       renderFloorPlan(refMultilevel, 'lvl-ml-rdc', floorOpts),

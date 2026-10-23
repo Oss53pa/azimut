@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H6.2 — Between an approved proof and an installed support lies the worksite
+ * H6.2, Between an approved proof and an installed support lies the worksite
  * phase: factory or on-site reception with reserves, and the tracked lifting of
  * those reserves. A support only flips to "installed" once its reserves are
  * lifted. This audit surfaces every installation reserve still open as a
@@ -17,7 +17,7 @@ export type InstallReserve = {
 /**
  * Audit installation reserves. Returns one warning INSTALL.RESERVATION_OPEN per
  * reserve not yet lifted, sorted by reserve id; the finding names the support.
- * Always ok — an open reserve is a warning that blocks the flip to installed at
+ * Always ok: an open reserve is a warning that blocks the flip to installed at
  * the caller, not a catalog-level block on its own.
  */
 export function auditInstallReserves(

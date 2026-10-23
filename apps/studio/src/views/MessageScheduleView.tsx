@@ -19,7 +19,7 @@ import { UntypedSupportsBanner } from './signage/UntypedSupportsBanner.js';
 const LEVEL_FILTERS = [0, 1, 2, 3, 4] as const;
 
 /**
- * Module 02 — H2.5. Le tableau des messages s'intercale entre le graphe et la
+ * Module 02 : H2.5. Le tableau des messages s'intercale entre le graphe et la
  * composition : c'est lui que la maîtrise d'ouvrage valide, et c'est lui que le
  * moteur de composition consomme. L'écran ne saisit aucun contenu de face, il
  * affiche ce que le moteur résout.
@@ -79,8 +79,8 @@ export function MessageScheduleView(): JSX.Element {
   });
 
   const metrics: readonly Metric[] = [
-    { id: 'version', label: t('schedule.metric.version'), value: schedule === null ? '—' : `v${String(schedule.version)}` },
-    { id: 'state', label: t('schedule.metric.state'), value: schedule?.state ?? '—' },
+    { id: 'version', label: t('schedule.metric.version'), value: schedule === null ? '–' : `v${String(schedule.version)}` },
+    { id: 'state', label: t('schedule.metric.state'), value: schedule?.state ?? '–' },
     { id: 'hash', label: t('schedule.metric.hash'), value: model.inputsHash.slice(0, 8) },
     { id: 'lines', label: t('schedule.metric.lines'), value: String(schedule?.lines.length ?? 0) },
     {

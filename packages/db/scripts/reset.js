@@ -10,7 +10,7 @@
  *  2. La base doit être jointe par une adresse de bouclage. C'est le fait,
  *     quand la déclaration n'est qu'une intention.
  *
- * Et une limite : le script ne supprime que ce que les migrations ont créé —
+ * Et une limite : le script ne supprime que ce que les migrations ont créé,
  * le schéma `azimut`, la table des migrations et la fonction d'horodatage.
  * L'ancienne version supprimait le schéma `public` entier, ce qui emportait
  * tout ce que la base pouvait porter par ailleurs, et ne supprimait pas
@@ -24,7 +24,7 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import postgres from 'postgres';
 
-/** A13.1 — trois environnements, et un seul admet une remise à zéro. */
+/** A13.1 : trois environnements, et un seul admet une remise à zéro. */
 const LOCAL = 'local';
 
 /** Les seules adresses par lesquelles une base locale se joint. */

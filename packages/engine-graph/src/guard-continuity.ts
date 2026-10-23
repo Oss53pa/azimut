@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * H2.4 — The staggering plan (plan de jalonnement) produces, per route and
+ * H2.4: The staggering plan (plan de jalonnement) produces, per route and
  * profile, the ordered sequence of decision points. Message continuity is
  * required: a destination announced at a point must be taken up or confirmed at
  * the next point, all the way until it is reached. A break in continuity is the
@@ -32,7 +32,7 @@ function analyseDestination(
   reachedIndex: number,
 ): Break | null {
   const firstIndex = present.indexOf(true);
-  if (firstIndex === -1) return null; // never involved — nothing to check.
+  if (firstIndex === -1) return null; // never involved: nothing to check.
 
   if (reachedIndex === -1) {
     // Announced but never reached: abandoned before arrival.

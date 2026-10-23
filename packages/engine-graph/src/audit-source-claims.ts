@@ -2,7 +2,7 @@ import type { Discrepancy, DiscrepancyDecision, Finding, SourceClaim } from '@az
 import { detectDiscrepancies } from '@azimut/core-model';
 
 /**
- * Audit des écarts entre sources — A5.11, règle M01.S11.
+ * Audit des écarts entre sources : A5.11, règle M01.S11.
  *
  * « Un écart entre deux sources reste ouvert et visible tant qu'il n'est pas
  * tranché. »
@@ -17,7 +17,7 @@ import { detectDiscrepancies } from '@azimut/core-model';
 export type SourceDiscrepancyReport = {
   /**
    * Affirmations lues. À zéro, le rapport n'a rien contrôlé, ce qui ne veut pas
-   * dire que les sources s'accordent — même raison qu'au rapport du lexique.
+   * dire que les sources s'accordent : même raison qu'au rapport du lexique.
    */
   readonly checked_claims: number;
   readonly total: number;

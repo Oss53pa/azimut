@@ -1,5 +1,5 @@
 /**
- * Les valeurs d'une ligne telles qu'une commande les transporte — E5.1.
+ * Les valeurs d'une ligne telles qu'une commande les transporte : E5.1.
  *
  * Fichier minuscule et délibérément à part : `site-commands.ts` déclare ce
  * qu'est une commande, `command-checks.ts` dit ce qui la refuse, et les deux
@@ -19,7 +19,7 @@ export type RowValues = Readonly<Record<string, ColumnValue>>;
  * Création et suppression touchent toutes les colonnes nommées : il n'y a rien
  * à comparer, et l'union des deux jeux de clés est la réponse juste. Une
  * modification ne retient que celles dont la valeur change, ce qui rend
- * `changedColumns` utile — une commande peut nommer des colonnes qu'elle ne
+ * `changedColumns` utile : une commande peut nommer des colonnes qu'elle ne
  * change pas.
  */
 export function touchedColumns(

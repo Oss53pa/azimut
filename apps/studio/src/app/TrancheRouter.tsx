@@ -24,7 +24,7 @@ import { SitesAdapter } from './SitesAdapter.js';
 import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 
 /**
- * F15 — `app/`, la composition des écrans.
+ * F15 : `app/`, la composition des écrans.
  *
  * Les cinq écrans de la tranche M (partie M) vivent à leurs chemins. Tout
  * autre chemin retombe sur l'atelier existant, qui navigue par vue : les
@@ -53,12 +53,12 @@ function TrancheWorkspace({ route }: {
   const levelId = 'levelId' in route ? route.levelId : '';
   // Le chemin d'écriture réel dès que le dépôt est configuré. Sans
   // configuration, `appSink` rend `null` et la session retombe sur son
-  // émetteur local — le cas hors ligne de M8 (partie M) critère 3.
+  // émetteur local : le cas hors ligne de M8 (partie M) critère 3.
   const remote = useMemo(() => appSink() ?? undefined, []);
 
-  // E5.4 — le second terme du choix de reprise : ce que le dépôt porte.
+  // E5.4, le second terme du choix de reprise : ce que le dépôt porte.
   const repository = useMemo(() => appRepository(), []);
-  // J3 — l'atelier, seul, relit l'esquisse avec le site (J3.3).
+  // J3 : l'atelier, seul, relit l'esquisse avec le site (J3.3).
   const load = useCallback(
     () => loadSiteSession(repository, route.siteId, id => repository.loadSketch(id)),
     [repository, route.siteId]);
@@ -69,13 +69,13 @@ function TrancheWorkspace({ route }: {
     levelId,
   }, remote, load);
 
-  // E5.4 — la reprise se pose par-dessus l'écran, qui reste visible derrière.
+  // E5.4 : la reprise se pose par-dessus l'écran, qui reste visible derrière.
   // Cacher le travail pendant qu'on demande quoi en faire priverait
   // l'utilisateur de ce sur quoi il doit se décider.
   const resume = session.pendingResume;
 
   /**
-   * E5.2 et M3 (partie M) — `Ctrl+Z` annule, `Ctrl+Maj+Z` rétablit.
+   * E5.2 et M3 (partie M) : `Ctrl+Z` annule, `Ctrl+Maj+Z` rétablit.
    *
    * La liaison est posée ici et non dans chaque écran : la portée de la pile
    * est « le site en cours d'édition », et deux liaisons concurrentes
@@ -97,7 +97,7 @@ function TrancheWorkspace({ route }: {
   return (
     <>
       {/*
-        F7 (partie F) — un site vide et un site illisible ne se ressemblent
+        F7 (partie F) : un site vide et un site illisible ne se ressemblent
         pas. Quand le dépôt n'a pas pu être lu, l'atelier le dit au lieu de
         laisser croire que le site ne porte rien.
       */}
@@ -105,7 +105,7 @@ function TrancheWorkspace({ route }: {
         <StateBanner severity="blocking" message={t('session.load.failed')} />
       )}
       {/*
-        T-1.5 — les niveaux du site, et le passage de l'un à l'autre. Posé ici
+        T-1.5 : les niveaux du site, et le passage de l'un à l'autre. Posé ici
         et non dans un écran : les quatre écrans d'atelier portent sur un
         niveau, et une barre par écran en ferait quatre à tenir d'accord.
         L'écran de validation porte sur le site entier et n'en reçoit pas.
@@ -160,7 +160,7 @@ function screenOf(
  * Le bâtiment n'est nommé que si le site en porte plusieurs : sur un site à
  * un seul bâtiment, le répéter à chaque niveau n'ajoute rien et allonge la
  * barre. Le niveau courant figure toujours, même quand la session ne le
- * porte pas — l'adresse en nomme un, et une barre qui ne le montrerait pas
+ * porte pas : l'adresse en nomme un, et une barre qui ne le montrerait pas
  * laisserait croire qu'on est ailleurs.
  */
 function levelChoices(

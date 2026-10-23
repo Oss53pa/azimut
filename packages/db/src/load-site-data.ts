@@ -45,7 +45,7 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
     .from(site)
     .where(eq(site.id, siteId));
   if (!siteRow) throw new Error(`site ${siteId} not found`);
-  // A6.1 — le site doit appartenir à l'organisation demandée. Sans cette
+  // A6.1 : le site doit appartenir à l'organisation demandée. Sans cette
   // vérification, un utilisateur membre de deux organisations ferait lire le
   // site de l'une sous le nom de l'autre.
   if (siteRow.org_id !== orgId) {
@@ -57,7 +57,7 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
     .from(building)
     .where(eq(building.site_id, siteId));
 
-  // A5.8 — la table de rattachement fait foi pour les paquets du site.
+  // A5.8 : la table de rattachement fait foi pour les paquets du site.
   const bindingRows = await db
     .select()
     .from(siteRulesBinding)
@@ -139,19 +139,19 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
     ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
     : [];
 
-  // A5.2 — les zones du socle. Elles pendent au niveau, comme les empreintes
+  // A5.2 : les zones du socle. Elles pendent au niveau, comme les empreintes
   // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et c'est
   // par ici que les contrôles du domaine `PARK` le voient désormais.
   const [zoneRows, parkingSpaceRows, closureRows] = await Promise.all([
     levelIds.length > 0
       ? db.select().from(zone).where(inArray(zone.level_id, levelIds))
       : Promise.resolve([]),
-    // A5.3 — l'extension des empreintes de place, qui pend à l'empreinte.
+    // A5.3, l'extension des empreintes de place, qui pend à l'empreinte.
     footprintIds.length > 0
       ? db.select().from(parkingSpace)
         .where(inArray(parkingSpace.footprint_id, footprintIds))
       : Promise.resolve([]),
-    // O11 — les fermetures temporaires du site.
+    // O11, les fermetures temporaires du site.
     db.select().from(temporaryClosure).where(eq(temporaryClosure.site_id, siteId)),
   ]);
 
@@ -186,7 +186,7 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
 }
 
 /**
- * A6.1 — lit un site sous l'identité d'un utilisateur, dans une transaction
+ * A6.1 : lit un site sous l'identité d'un utilisateur, dans une transaction
  * qui la pose et la retire.
  *
  * C'est la lecture du service de compilation : un travail porte son demandeur

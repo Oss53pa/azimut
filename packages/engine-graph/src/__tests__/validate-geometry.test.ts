@@ -34,7 +34,7 @@ describe('validateGeometry', () => {
   });
 
   it('does not flag polygon with distant first/last vertex', () => {
-    // First and last vertices are 10m apart — not coincident.
+    // First and last vertices are 10m apart: not coincident.
     const result = validateGeometry(siteWith([GOOD_FP]));
     expect(result.ok).toBe(true);
   });

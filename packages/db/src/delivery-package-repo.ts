@@ -2,7 +2,7 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { deliveryPackage } from './schema/deliveries.js';
 
 /**
- * D11 — Insert input for a produced delivery archive, mirroring the
+ * D11: Insert input for a produced delivery archive, mirroring the
  * `delivery_package` table. `built_at` is an ISO-8601 string; omit it to let the
  * column default to now().
  */

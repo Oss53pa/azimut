@@ -16,9 +16,9 @@ const ROOT = resolve(HERE, '..');
  *
  * Deux barrières, et la seconde attrape ce que la première ne voit pas :
  *
- *   · la déclaration — `axe-core` est en dépendance de développement, à
+ *   · la déclaration, `axe-core` est en dépendance de développement, à
  *     version exacte, et ne figure dans aucune dépendance d'exécution ;
- *   · la source — aucun fichier du produit ne le nomme, donc aucun assembleur
+ *   · la source : aucun fichier du produit ne le nomme, donc aucun assembleur
  *     ne peut l'embarquer.
  *
  * L'inspection des artefacts construits est la troisième barrière. Elle ne
@@ -90,7 +90,7 @@ describe('axe-core est un outil d’essai, jamais un livrable', () => {
   it('n’est importé par aucune source du produit', () => {
     // C'est la garantie de fond : un assembleur n'embarque que ce qui est
     // importé. Vérifier la source vaut pour toute construction à venir, là où
-    // inspecter un `dist` ne vaut que pour celle qu'on vient de faire — et ne
+    // inspecter un `dist` ne vaut que pour celle qu'on vient de faire : et ne
     // vaut rien du tout quand il n'a pas encore été construit.
     //
     // L'inspection des artefacts construits existe aussi : elle est une étape

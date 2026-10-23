@@ -1,7 +1,7 @@
 import type { Point } from './geometry.js';
 
 /**
- * D1.3 — Compass convention. 0 = north, clockwise, stored in [0, 360).
+ * D1.3: Compass convention. 0 = north, clockwise, stored in [0, 360).
  */
 
 export function normalizeAzimuth(deg: number): number {
@@ -10,7 +10,7 @@ export function normalizeAzimuth(deg: number): number {
 }
 
 /**
- * D6.2 — l'orientation d'affichage qui met en haut ce que l'usager regarde,
+ * D6.2 : l'orientation d'affichage qui met en haut ce que l'usager regarde,
  * pour un support d'azimut donné (D1.3). Un support d'azimut 90, tourné vers
  * l'est, donne un plan où l'est est en haut. Normalisée dans [0, 360).
  *
@@ -22,7 +22,7 @@ export function orientationDegForAzimuth(azimuthDeg: number): number {
 }
 
 /**
- * D6.2 — un point du site (X est, Y nord, D1.1) dans le repère d'un plan
+ * D6.2, un point du site (X est, Y nord, D1.1) dans le repère d'un plan
  * orienté : tourné de `orientationDeg` autour de `center`, puis retourné pour
  * que l'axe des y descende comme celui de l'écran. La rotation est la même
  * pour le plan mural et pour l'itinéraire de la borne : un seul calcul.

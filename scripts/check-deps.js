@@ -66,7 +66,7 @@ for (const dir of [PACKAGES_DIR, APPS_DIR]) {
       for (const dep of internalDeps) {
         if (!ALLOWED_ENGINE_DEPS.has(dep)) {
           errors.push(
-            `${pkg.name} depends on ${dep} — engine-* may only depend on core-model and rules`,
+            `${pkg.name} depends on ${dep}: engine-* may only depend on core-model and rules`,
           );
         }
       }

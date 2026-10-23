@@ -18,7 +18,7 @@ const charter: SiteCharter = {
   lexicon: [{ id: 'l1', lang: 'fr', term: 'Issue', severity: 'discouraged' }],
 };
 
-describe('A5.8 — lignes de la charte', () => {
+describe('A5.8 : lignes de la charte', () => {
   it('rend un élément par ligne de chaque table, dans l’ordre couleur, caractère, règle, terme', () => {
     expect(charterElements(charter).map(e => e.kind)).toEqual(['color', 'color', 'color', 'typeface', 'rule', 'term']);
   });

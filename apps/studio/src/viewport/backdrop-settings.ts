@@ -1,5 +1,5 @@
 /**
- * J1.4 (partie J) — les réglages du fond de décalque : opacité du plan calé,
+ * J1.4 (partie J), les réglages du fond de décalque : opacité du plan calé,
  * affichage ou masquage des formes déjà tracées.
  *
  * Ce sont des préférences de travail, comme la position de vue (E3.3) : elles

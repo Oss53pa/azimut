@@ -1,12 +1,12 @@
 /**
- * Module 08 — la couche de divergence : le rapprochement entre ce que le
+ * Module 08, la couche de divergence : le rapprochement entre ce que le
  * carnet prévoit et ce que le site porte.
  *
  * Le relevé, ce sont les supports du site avec leur azimut et leurs
  * dimensions ; l'attendu, un support par point de décision du profil.
  * Aucune plage d'orientation ni dimension minimale n'est déclarée par le
  * modèle : les bornes sont ouvertes, et le rapprochement ne rend que ce qu'il
- * peut établir — le superflu et le non couvert. Rien n'est inventé pour
+ * peut établir, le superflu et le non couvert. Rien n'est inventé pour
  * remplir les colonnes d'orientation et de taille.
  */
 import { supportTypologyOf, type SiteData, type TravelProfile, codePointCompare } from '@azimut/core-model';

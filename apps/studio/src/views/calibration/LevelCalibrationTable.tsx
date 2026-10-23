@@ -2,7 +2,7 @@ import type { Translate } from '../../i18n/index.js';
 import { Tag, type Column } from '../../components/ui/index.js';
 
 /**
- * N1.4 — état de calage niveau par niveau, tel que l'écran M2 (partie M) le
+ * N1.4 : état de calage niveau par niveau, tel que l'écran M2 (partie M) le
  * montre.
  *
  * Sorti de `PlanCalibrationView`, qui franchissait les quatre cents lignes

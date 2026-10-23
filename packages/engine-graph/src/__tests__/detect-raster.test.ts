@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { guardPictogramsVector } from '../detect-raster.js';
 
-describe('J5.2 — guardPictogramsVector', () => {
+describe('J5.2: guardPictogramsVector', () => {
   it('passes on pure vector pictograms', () => {
     const r = guardPictogramsVector([
       { id: 'p-exit', svg: '<svg><path d="M0 0L10 10Z"/></svg>' },

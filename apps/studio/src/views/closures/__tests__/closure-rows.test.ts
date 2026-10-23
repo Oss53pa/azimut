@@ -10,7 +10,7 @@ const other = refMultilevel.graph.edges.find(e => e.id !== incident?.id);
 if (incident === undefined || other === undefined) throw new Error('jeu incomplet');
 
 const base = { org_id: refMultilevel.site.org_id, site_id: refMultilevel.site.id };
-/** O11 — une fermeture de travaux sur l'arête du support, une autre, plus tard, ailleurs. */
+/** O11 : une fermeture de travaux sur l'arête du support, une autre, plus tard, ailleurs. */
 const WORKS: TemporaryClosure = {
   ...base, id: 'tc-b', edge_ids: [incident.id], from_at: '2026-10-12T00:00:00', to_at: '2026-10-16T23:59:59', reason: 'Travaux',
 };
@@ -26,7 +26,7 @@ const site: SiteData = {
   temporary_closures: [LATER, WORKS],
 };
 
-describe('O11 — fermetures temporaires lues pour l’écran', () => {
+describe('O11 : fermetures temporaires lues pour l’écran', () => {
   it('rend les fermetures du site dans l’ordre de leur début', () => {
     expect(closureRows(site).map(c => c.id)).toEqual(['tc-b', 'tc-a']);
     expect(closureRows(refMultilevel)).toEqual([]);

@@ -1,5 +1,5 @@
 /**
- * E9 — SVG rendering of the habillage layer.
+ * E9: SVG rendering of the habillage layer.
  *
  * Renders the decoration shapes of one level, in draw order, with
  * native hit-testing and accessibility attributes. Coordinates are in

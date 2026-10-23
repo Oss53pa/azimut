@@ -1,5 +1,5 @@
 /**
- * E3 + E7 — Editor status bar.
+ * E3 + E7: Editor status bar.
  *
  * Displays contextual information at the bottom of the editor:
  *   - Current tool name
@@ -9,7 +9,7 @@
  *   - Editing context indicator
  *
  * Uses design-token CSS variables exclusively (A2.4).
- * This is a view component — it displays state, never mutates it (INV-2).
+ * This is a view component: it displays state, never mutates it (INV-2).
  */
 
 import type { JSX } from 'react';
@@ -32,7 +32,7 @@ type StatusBarProps = {
   readonly canRedo: boolean;
   readonly onUndo: () => void;
   readonly onRedo: () => void;
-  /** G2.2 — current adaptive render mode; shown here, never silent. */
+  /** G2.2: current adaptive render mode; shown here, never silent. */
   readonly renderMode: RenderMode;
 };
 
@@ -114,7 +114,7 @@ export function StatusBar({
           Y: {formatCoord(cursorPosition.y_m)} m
         </span>
       ) : (
-        <span>—</span>
+        <span>–</span>
       )}
 
       {/* Snap indicator */}
@@ -130,7 +130,7 @@ export function StatusBar({
       {/* Spacer */}
       <span style={{ flex: 1 }} />
 
-      {/* Render mode (G2.2) — always shown, never silent */}
+      {/* Render mode (G2.2): always shown, never silent */}
       <span
         aria-label={t('editor.render.aria')}
         style={{

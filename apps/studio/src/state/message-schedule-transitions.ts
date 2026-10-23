@@ -1,5 +1,5 @@
 /**
- * R12 (partie R) — les transitions du tableau des messages, en commandes.
+ * R12 (partie R) : les transitions du tableau des messages, en commandes.
  *
  * Ce module ne juge pas : la machine de R12 (`transitionSchedule`) dit si un
  * déclencheur est permis, et ses refus sont rendus tels quels. Ce module
@@ -9,7 +9,7 @@
  *  · rejeter : l'état revient à `draft`, et une décision `rejected` s'écrit
  *    dans `message_schedule_approval`, portant le motif ;
  *  · approuver : l'état passe à `approved`, une décision `approved` s'écrit,
- *    et la version approuvée précédente passe à `superseded` — R12,
+ *    et la version approuvée précédente passe à `superseded`, R12,
  *    « Automatique ».
  *
  * La décision ne porte ni approbateur ni date : la base les pose (0074), et

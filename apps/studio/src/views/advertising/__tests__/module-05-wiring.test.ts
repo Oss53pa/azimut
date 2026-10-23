@@ -20,13 +20,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const VIEW = readFileSync(resolve(HERE, '..', '..', 'AdvertisingView.tsx'), 'utf8');
 
 /**
- * N5.2 — M05.R5 et M05.R7 branchés sur le module 05.
+ * N5.2 : M05.R5 et M05.R7 branchés sur le module 05.
  *
  * Les deux moteurs existaient sans que rien ne les appelle. Ce fichier garde
  * l'appel : un test sur la seule fonction repasserait au vert le jour où
  * l'écran cesserait de l'employer.
  */
-describe('M05.R7 — le paquet de règles publicitaires', () => {
+describe('M05.R7 : le paquet de règles publicitaires', () => {
   it('manque, et le jeu d’essai n’en invente pas', () => {
     // N5.7 : le corpus par pays n'existe pas. En attacher un ici inventerait
     // ce que M05.R7 interdit d'inventer.
@@ -47,7 +47,7 @@ describe('M05.R7 — le paquet de règles publicitaires', () => {
   });
 });
 
-describe('M05.R5 — l’assainissement passe sur les visuels reçus', () => {
+describe('M05.R5 : l’assainissement passe sur les visuels reçus', () => {
   const intakes = receiveCreatives(DEMO_CREATIVES, DEMO_CREATIVE_SPEC,
     sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, false));
 

@@ -2,7 +2,7 @@ import { type JSX, type ReactNode, useId } from 'react';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F6 — l'enveloppe commune des composants de saisie : libellé, unité, état
+ * F6, l'enveloppe commune des composants de saisie : libellé, unité, état
  * d'erreur, aide.
  *
  * F6.1 : « Un champ numérique affiche toujours son unité. Un champ

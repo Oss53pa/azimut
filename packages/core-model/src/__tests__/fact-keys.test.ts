@@ -41,7 +41,7 @@ function commandeDeFait(after: Record<string, string | number | boolean>): Comma
   };
 }
 
-describe('A5.11 — la table des clés déclarées', () => {
+describe('A5.11 : la table des clés déclarées', () => {
   it('porte les quatre clés du document, avec leur type et leur cible', () => {
     expect(DECLARED_FACT_KEYS.map(d => [d.key, d.value_type, d.target_kind, d.target_object_kind]))
       .toEqual([
@@ -81,7 +81,7 @@ describe('A5.11 — la table des clés déclarées', () => {
   });
 });
 
-describe('A5.11 — « une valeur qui ne correspond pas au type déclaré est refusée »', () => {
+describe('A5.11 : « une valeur qui ne correspond pas au type déclaré est refusée »', () => {
   it('accepte un entier pour un entier, un booléen pour un booléen', () => {
     expect(factValueMatchesType(120, 'integer')).toBe(true);
     expect(factValueMatchesType(0, 'integer')).toBe(true);
@@ -101,14 +101,14 @@ describe('A5.11 — « une valeur qui ne correspond pas au type déclaré est re
   });
 
   it('ne juge pas une clé que la table ne porte pas', () => {
-    // Les faits déclarés avant la convention — `parking_gratuit`,
-    // `niveaux_parking` — ne sont pas retirés par le document. Refuser faute
+    // Les faits déclarés avant la convention (`parking_gratuit`,
+    // `niveaux_parking`) ne sont pas retirés par le document. Refuser faute
     // de déclaration les bannirait tous.
     expect(factValueFault('parking_gratuit', 'oui')).toBe(null);
   });
 });
 
-describe('A5.11 — le refus s’applique au passage obligé de l’écriture', () => {
+describe('A5.11 : le refus s’applique au passage obligé de l’écriture', () => {
   it('refuse une commande de fait dont la valeur contredit le type déclaré', () => {
     const outcome = buildCommand(commandeDeFait({ key: PARKING_FREE_KEY, value: 'oui' }));
     expect(outcome.ok).toBe(false);
@@ -139,7 +139,7 @@ describe('A5.11 — le refus s’applique au passage obligé de l’écriture', 
   });
 });
 
-describe('S-37 — le motif d’une surface non numérisée', () => {
+describe('S-37 : le motif d’une surface non numérisée', () => {
   // « Le nombre et le motif sont deux faits ciblant cette empreinte, clés
   // parking.undigitized_spaces et parking.undigitized_reason. »
   const motif = (value: string | number | boolean): CommandDraft => commandeDeFait({
@@ -178,7 +178,7 @@ describe('S-37 — le motif d’une surface non numérisée', () => {
   });
 });
 
-describe('A5.11 — lire une valeur entière déclarée sur une cible', () => {
+describe('A5.11 : lire une valeur entière déclarée sur une cible', () => {
   const zoneP1 = { kind: 'zone', id: 'zone-p1' };
 
   it('rend la valeur du fait qui porte sur cette cible, et non celle d’une autre', () => {
@@ -211,7 +211,7 @@ describe('A5.11 — lire une valeur entière déclarée sur une cible', () => {
   });
 });
 
-describe('S-37 — lire un motif déclaré sur une empreinte', () => {
+describe('S-37 : lire un motif déclaré sur une empreinte', () => {
   const surface = { kind: 'footprint', id: 'fp-surface' };
   const motif = (value: string | number, id = 'fp-surface'): SiteFact => fait({
     key: PARKING_UNDIGITIZED_REASON_KEY, value, target: { kind: 'footprint', id },

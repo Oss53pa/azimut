@@ -29,10 +29,10 @@ function violations(versions: readonly SupportVersion[]): readonly Finding[] {
 }
 
 /**
- * N4.3 — règle M04.G7. « Une version approuvée est immuable. Une correction crée
+ * N4.3 : règle M04.G7. « Une version approuvée est immuable. Une correction crée
  * une nouvelle version. »
  */
-describe('G7 — immuabilité d’une version approuvée', () => {
+describe('G7 : immuabilité d’une version approuvée', () => {
   it('ne signale rien sur une colonne vertébrale saine', () => {
     expect(violations([
       version('sv-1', { version: 1, state: 'superseded' }),

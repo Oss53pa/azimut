@@ -5,7 +5,7 @@ import type { Route, RouteAnimation, RouteAnimationOptions } from '@azimut/engin
 import type { KioskSite } from './load-kiosk-site.js';
 
 /**
- * Partie P, écran Itinéraire — le tracé animé sur le plan orienté de la borne.
+ * Partie P, écran Itinéraire : le tracé animé sur le plan orienté de la borne.
  *
  * La borne connaît sa place par sa configuration locale (D10.3) : le nœud où
  * elle se trouve et l'azimut vers lequel elle regarde. Le plan est tourné

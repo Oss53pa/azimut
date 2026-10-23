@@ -15,7 +15,7 @@ const seq = (
   steps: JalonnementSequence['steps'],
 ): JalonnementSequence => ({ id, steps });
 
-describe('H2.4 — guardWayfindingContinuity', () => {
+describe('H2.4: guardWayfindingContinuity', () => {
   it('passes when a destination is carried through to arrival', () => {
     const r = guardWayfindingContinuity([
       seq('r-1', [

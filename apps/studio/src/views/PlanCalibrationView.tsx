@@ -24,10 +24,10 @@ import {
 } from './calibration/LevelCalibrationTable.js';
 
 /**
- * Tranche M · écran M2 — calage du fond de plan.
+ * Tranche M · écran M2 : calage du fond de plan.
  *
  * Trois étapes, dans l'ordre : le fond, l'échelle, l'orientation. Le tracé des
- * empreintes reste inaccessible tant que l'orientation n'est pas saisie — un
+ * empreintes reste inaccessible tant que l'orientation n'est pas saisie : un
  * fond non orienté produit des empreintes fausses que rien ne signalerait.
  */
 export function PlanCalibrationView(): JSX.Element {
@@ -39,7 +39,7 @@ export function PlanCalibrationView(): JSX.Element {
     [site],
   );
   /**
-   * N1.4 — état de calage enregistré, niveau par niveau. Lu depuis le site,
+   * N1.4 : état de calage enregistré, niveau par niveau. Lu depuis le site,
    * pas depuis la mesure en cours : rien n'écrit encore de calage, et un
    * écran qui présenterait la mesure comme un calage mentirait.
    */
@@ -56,7 +56,7 @@ export function PlanCalibrationView(): JSX.Element {
   const uncalibratedCount = levelStates.filter(l => !l.calibrated).length;
 
   /**
-   * M01.S1 — le repère site. Posé au premier calage, jamais modifié ensuite.
+   * M01.S1 : le repère site. Posé au premier calage, jamais modifié ensuite.
    *
    * Le garde-fou était interrogé avec l'origine du premier calage. Depuis que
    * `plan_calibration` suit A5.2, cette ligne ne porte plus d'origine en
@@ -76,7 +76,7 @@ export function PlanCalibrationView(): JSX.Element {
   const [pointB, setPointB] = useState<PlanPoint | null>(null);
   const [distance, setDistance] = useState('42.500');
   const [azimuth, setAzimuth] = useState('');
-  // E6.2 — saisie numérique du point, équivalent clavier du clic sur la surface.
+  // E6.2 : saisie numérique du point, équivalent clavier du clic sur la surface.
   const [entryX, setEntryX] = useState('');
   const [entryY, setEntryY] = useState('');
   const [announcement, setAnnouncement] = useState('');
@@ -155,24 +155,24 @@ export function PlanCalibrationView(): JSX.Element {
     {
       id: 'pixels',
       label: t('calibration.metric.pixels'),
-      value: calibration === null ? '—' : calibration.pixel_distance.toFixed(1),
+      value: calibration === null ? '–' : calibration.pixel_distance.toFixed(1),
       note: t('calibration.unit.px'),
     },
     {
       id: 'resolution',
       label: t('calibration.metric.resolution'),
-      value: calibration === null ? '—' : calibration.resolution_px_per_m.toFixed(3),
+      value: calibration === null ? '–' : calibration.resolution_px_per_m.toFixed(3),
       note: t('calibration.unit.pxperm'),
     },
     {
       id: 'scale',
       label: t('calibration.metric.scale'),
-      value: calibration === null ? '—' : `1:${String(calibration.scale_denominator)}`,
+      value: calibration === null ? '–' : `1:${String(calibration.scale_denominator)}`,
     },
     {
       id: 'north',
       label: t('calibration.metric.north'),
-      value: calibration === null ? '—' : `${calibration.north_azimuth_deg.toFixed(1)}°`,
+      value: calibration === null ? '–' : `${calibration.north_azimuth_deg.toFixed(1)}°`,
       severity: parsedAzimuth === null ? 'blocking' : 'valid',
     },
   ];

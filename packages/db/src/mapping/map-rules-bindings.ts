@@ -2,7 +2,7 @@ import type { SiteRulesBinding } from '@azimut/core-model';
 import type { SiteRulesBindingRow } from './row-types.js';
 
 /**
- * A5.8 — les lignes de rattachement d'un site, passées au modèle.
+ * A5.8 : les lignes de rattachement d'un site, passées au modèle.
  *
  * Un rôle hors des deux valeurs n'entre pas au modèle : le CHECK de la
  * migration 0065 l'exclut en base, et le lire comme un socle déciderait d'une

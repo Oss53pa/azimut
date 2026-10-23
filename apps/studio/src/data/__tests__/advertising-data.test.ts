@@ -22,7 +22,7 @@ const BASE = {
   ad_placement: [{ id: 'aaaa0002-0000-4000-8000-000000000006', code: 'AP-1', level_id: 'aaaa0002-0000-4000-8000-000000000005', node_id: null, typology_key: 'caisson', area_m2: '2.5' }],
 };
 
-describe('H4 — régie, sites de référence', () => {
+describe('H4 : régie, sites de référence', () => {
   it('sert le jeu de démonstration, file de réception et fiche technique comprises', async () => {
     const data = await createReferenceRepository().loadAdvertisingData('ref-multilevel');
     expect(data).toBe(REFERENCE_ADVERTISING);
@@ -31,7 +31,7 @@ describe('H4 — régie, sites de référence', () => {
   });
 });
 
-describe('H4 — régie, API REST', () => {
+describe('H4 : régie, API REST', () => {
   it('lit les emplacements actifs et ce qui en pend, sans file de réception ni fiche inventées', async () => {
     const calls = stubTables({
       ...BASE,

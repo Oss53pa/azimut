@@ -2,7 +2,7 @@ import { empreinteOutcome } from '@azimut/core-model';
 import type { Outcome } from '@azimut/core-model';
 
 /**
- * D3.2, D3.4 et D7.2 — l'empreinte d'un paquet de règles.
+ * D3.2, D3.4 et D7.2 : l'empreinte d'un paquet de règles.
  *
  * Elle est calculée ici et nulle part ailleurs : le chargeur de répertoire la
  * compare au `checksum` du manifeste, le chargeur d'un paquet en un seul

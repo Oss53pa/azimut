@@ -30,7 +30,7 @@ const baseStyle: TextStyle = {
   fontSize_m: 0.1, // 100mm
 };
 
-describe('E12 — deterministic text measurement', () => {
+describe('E12: deterministic text measurement', () => {
   describe('measureLine', () => {
     it('measures single character width from metrics', () => {
       const w = measureLine('A', testMetrics, baseStyle);

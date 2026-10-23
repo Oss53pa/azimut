@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * J3.3 (partie J) — la promotion d'une esquisse : l'entourer, puis demander
+ * J3.3 (partie J), la promotion d'une esquisse : l'entourer, puis demander
  * sa conversion.
  *
  * Le choix au lasso et la mise bout à bout sont essayés dans
@@ -50,7 +50,7 @@ async function vertexValues(page: Page, axis: 'X' | 'Y'): Promise<readonly strin
 
 const PROMOTE = /Convertir en forme|Convert to a shape/;
 
-test.describe('J3.3 (partie J) — la promotion d’une esquisse', () => {
+test.describe('J3.3 (partie J) : la promotion d’une esquisse', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
     await expect(page.getByRole('img', { name: ZONE })).toBeVisible();

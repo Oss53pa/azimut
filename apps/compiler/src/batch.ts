@@ -27,7 +27,7 @@ export type BatchReport = {
 
 export type BatchOptions = {
   readonly org_id: string;
-  /** A6.1 — l'utilisateur qui lance le lot ; chaque travail le porte. */
+  /** A6.1 : l'utilisateur qui lance le lot ; chaque travail le porte. */
   readonly requested_by: string;
   readonly kind: JobKind;
   readonly queue: JobQueue;

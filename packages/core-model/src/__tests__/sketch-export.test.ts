@@ -5,7 +5,7 @@ import {
   SKETCH_COLLECTIONS,
 } from '../sketch-export.js';
 
-describe('J3.3 — guardExportExcludesSketch', () => {
+describe('J3.3: guardExportExcludesSketch', () => {
   it('passes when no sketch collection is included', () => {
     const r = guardExportExcludesSketch(['support', 'face', 'proof']);
     expect(r.ok).toBe(true);
@@ -53,7 +53,7 @@ describe('J3.3 — guardExportExcludesSketch', () => {
   });
 });
 
-describe('J3.4 — isSketchCollection', () => {
+describe('J3.4: isSketchCollection', () => {
   it('is true for every declared sketch collection', () => {
     for (const name of SKETCH_COLLECTIONS) {
       expect(isSketchCollection(name)).toBe(true);

@@ -1,7 +1,7 @@
 import type { Point } from '@azimut/core-model';
 
 /**
- * J1.4 (partie J) — le plan calé, posé dans le repère du site.
+ * J1.4 (partie J) : le plan calé, posé dans le repère du site.
  *
  * Le calage garde l'échelle (mètres par pixel de l'image), l'azimut du nord et
  * les points de la mesure, en pixels de l'image (M01.S2). Décision de

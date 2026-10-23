@@ -1,14 +1,14 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * F16 — « Rendu en niveaux de gris : aucune information perdue. »
+ * F16, « Rendu en niveaux de gris : aucune information perdue. »
  *
  * Et M7.7 (partie M) : « Aucune information n'est portée par la seule
  * couleur. » L'essai retire la couleur et vérifie que ce qui distinguait deux
  * éléments distingue encore.
  *
- * La méthode : deux éléments dont le sens diffère — une anomalie bloquante et
- * un avertissement, un outil actif et un outil au repos — doivent différer par
+ * La méthode : deux éléments dont le sens diffère (une anomalie bloquante et
+ * un avertissement, un outil actif et un outil au repos) doivent différer par
  * autre chose que leur teinte. Le texte, la bordure, l'état ARIA. Si leur
  * seule différence est une couleur, le rendu en niveaux de gris les confond.
  */
@@ -21,7 +21,7 @@ async function desaturate(page: import('@playwright/test').Page): Promise<void> 
   await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
 }
 
-test.describe('F16 — le produit se lit sans les couleurs', () => {
+test.describe('F16 : le produit se lit sans les couleurs', () => {
   test('l’outil actif se distingue autrement que par sa teinte', async ({ page }) => {
     await page.goto(`/sites/${SITE}/levels/${LEVEL}/footprints`);
     await desaturate(page);
@@ -67,7 +67,7 @@ test.describe('F16 — le produit se lit sans les couleurs', () => {
     const body = await page.locator('body').innerText();
     expect(body).toMatch(/en attente du calcul|awaiting the computation/);
     // Ni zéro ni tiret à la place du taux.
-    expect(body).not.toMatch(/Taux de couverture\s*[0—–-]\s*$/m);
+    expect(body).not.toMatch(/Taux de couverture\s*[0\u2014\u2013-]\s*$/m);
   });
 
   /**

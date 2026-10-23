@@ -9,7 +9,7 @@ const pack: AdRulesPack = {
   source_ref: 'Code de la consommation, art. L121-1',
 };
 
-describe('I5.4 — guardAdRulesPack', () => {
+describe('I5.4: guardAdRulesPack', () => {
   it('passes when an ad rules pack with a documentary reference is attached', () => {
     expect(guardAdRulesPack(pack).ok).toBe(true);
   });

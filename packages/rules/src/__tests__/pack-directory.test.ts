@@ -55,7 +55,7 @@ const contrastRules = makeRuleFile([
   },
 ]);
 
-describe('D3.1 — loadPackDirectory', () => {
+describe('D3.1: loadPackDirectory', () => {
   it('loads a valid multi-file pack', () => {
     const files = { 'legibility.json': legibilityRules, 'contrast.json': contrastRules };
     const manifest = makeManifest(files);
@@ -232,7 +232,7 @@ describe('D3.1 — loadPackDirectory', () => {
   });
 });
 
-describe('D7.2 — l’empreinte d’un paquet suit la forme canonique commune', () => {
+describe('D7.2 : l’empreinte d’un paquet suit la forme canonique commune', () => {
   it('ne dépend ni des espaces ni de l’ordre des clés d’un fichier', () => {
     const compact = { 'rules.json': JSON.stringify([{ a: 1, b: 'é' }]) };
     const spaced = { 'rules.json': '[ { "b": "é", "a": 1 } ]' };

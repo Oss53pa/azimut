@@ -1,5 +1,5 @@
 /**
- * E7.3 + E5 — Editing operations bound to the document.
+ * E7.3 + E5: Editing operations bound to the document.
  *
  * Each operation computes its result with the pure engines (alignment,
  * clipboard, shape geometry), turns it into a reversible command, and

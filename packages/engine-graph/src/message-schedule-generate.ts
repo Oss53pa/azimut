@@ -1,5 +1,5 @@
 /**
- * H2.5 — Génération du tableau des messages.
+ * H2.5 : Génération du tableau des messages.
  *
  * Parcourt les supports posés, résout chaque face par
  * `resolveFaceContent`, et aplatit le résultat en lignes de message.
@@ -40,7 +40,7 @@ export type GenerateScheduleOptions = ScheduleInputs & {
   /** ISO-8601 fourni par l'appelant (E5.1, jamais lu dans un moteur). */
   readonly generated_at: string;
   /**
-   * A5.6 — les blocs saisis sur la face d'un support. Par défaut, ceux du site
+   * A5.6 : les blocs saisis sur la face d'un support. Par défaut, ceux du site
    * à cet indice de face ; `composeFace` le fournit quand il génère sur une
    * typologie synthétique dont les indices ne sont pas ceux de la face réelle.
    */
@@ -79,7 +79,7 @@ function entriesOfBlock(block: ResolvedBlock): readonly MessageEntry[] {
     case 'free_text':
       return [{
         destination_id: null,
-        // D8.3 — les variantes saisies sur la face, sinon le texte du gabarit.
+        // D8.3, les variantes saisies sur la face, sinon le texte du gabarit.
         text: content.texts ?? { fr: content.text, en: content.text },
         direction: null,
         distance_m: null,
@@ -161,7 +161,7 @@ export function generateMessageSchedule(
       levelsByKey.get(support.support_type_key) ?? [],
     );
 
-    // M02.W4 / N2.7-4 — une ligne sans point de décision ne peut pas être créée.
+    // M02.W4 / N2.7-4 : une ligne sans point de décision ne peut pas être créée.
     // Un support posé ailleurs qu'à un point de décision ne produit donc
     // aucune ligne : il est signalé, comme l'est une typologie inconnue ou
     // une face sans gabarit. Mieux vaut une ligne manquante et nommée qu'une
@@ -224,7 +224,7 @@ export function generateMessageSchedule(
     });
   }
 
-  // D7.2 et D2.2 — un tableau sans empreinte d'entrées ne se versionne pas :
+  // D7.2 et D2.2, un tableau sans empreinte d'entrées ne se versionne pas :
   // sa péremption ne pourrait jamais se juger.
   const inputsHash = computeScheduleInputsHash({
     site, supports, profile, informationLevels, rules,

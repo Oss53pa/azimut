@@ -2,17 +2,17 @@ import type { Finding, Outcome } from './outcome.js';
 import type { SupportVersionState } from './site.js';
 
 /**
- * M04.G7 / T-2.14a §5 — Support-version state machine.
+ * M04.G7 / T-2.14a §5: Support-version state machine.
  *
  * « Une version approuvée est immuable. Une correction crée une nouvelle
  * version. » C'est cette table qui le dit : depuis `approved`, aucun événement
  * n'est admis sauf `supersede`, qui ne modifie pas la version mais la remplace.
  *
  * Vit dans `core-model` et non dans `packages/db` : c'est une décision pure,
- * sans ORM ni réseau, et l'écran des épreuves doit pouvoir l'interroger — il
+ * sans ORM ni réseau, et l'écran des épreuves doit pouvoir l'interroger, il
  * ne peut pas atteindre la racine de `@azimut/db`, qui ouvre une connexion.
  *
- * T-2.14a §5 — Support-version state machine. Unlisted transitions are
+ * T-2.14a §5: Support-version state machine. Unlisted transitions are
  * forbidden and raise a blocking finding with a stable code. Pure: it decides
  * the target state and the effect; the effect (recompute the empreinte, freeze
  * it, write an approval row, supersede) is carried out by the caller. The

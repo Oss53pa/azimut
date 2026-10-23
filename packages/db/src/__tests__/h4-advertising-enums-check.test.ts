@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const MIGRATION = resolve(HERE, '..', '..', 'migrations', '0045_h4_advertising_tables.up.sql');
 
 /**
- * H4 — les énumérés de la régie, côté TypeScript et côté base, disent la
+ * H4 : les énumérés de la régie, côté TypeScript et côté base, disent la
  * même chose. Le dépôt refuse une valeur hors liste : si les listes
  * divergeaient, une ligne valide en base ferait échouer la lecture.
  */
@@ -22,7 +22,7 @@ function inList(table: string, column: string): readonly string[] {
   return (match[1] ?? '').split(',').map(p => p.trim().replace(/^'|'$/g, '')).filter(p => p !== '');
 }
 
-describe('H4 — régie : le type et la base coïncident', () => {
+describe('H4, régie : le type et la base coïncident', () => {
   it('ad_booking.state', () => {
     expect([...inList('ad_booking', 'state')].sort()).toEqual([...AD_BOOKING_STATES].sort());
   });

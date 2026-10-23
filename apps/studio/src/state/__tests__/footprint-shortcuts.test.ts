@@ -10,8 +10,8 @@ const SQUARE: readonly Point[] = [
   { x_m: 0, y_m: 0 }, { x_m: 3, y_m: 0 }, { x_m: 3, y_m: 4 }, { x_m: 0, y_m: 4 },
 ];
 
-/** M3 (partie M) — outils et raccourcis. */
-describe('M3 (partie M) — outils', () => {
+/** M3 (partie M) : outils et raccourcis. */
+describe('M3 (partie M): outils', () => {
   it('les cinq outils sont ceux de M3 (partie M), avec leurs touches', () => {
     expect(FOOTPRINT_TOOLS.map(t => t.key)).toEqual(['V', 'C', 'P', 'R', 'A']);
   });
@@ -23,7 +23,7 @@ describe('M3 (partie M) — outils', () => {
   });
 });
 
-describe('M3 (partie M) — raccourcis', () => {
+describe('M3 (partie M): raccourcis', () => {
   it('porte les cinq raccourcis de M3 (partie M)', () => {
     expect(FOOTPRINT_SHORTCUTS.map(s => s.key))
       .toEqual(['Enter', 'Escape', 'Backspace', 'z', 'd']);
@@ -52,11 +52,11 @@ describe('M3 (partie M) — raccourcis', () => {
 });
 
 /**
- * E6.2 — « Déplacement de l'objet sélectionné par touches directionnelles,
+ * E6.2 : « Déplacement de l'objet sélectionné par touches directionnelles,
  * pas de 0,01 m, pas augmenté avec la touche de modification. » M3 (partie M)
  * donne les deux valeurs.
  */
-describe('M3 (partie M) — déplacement au clavier', () => {
+describe('M3 (partie M) : déplacement au clavier', () => {
   it('les deux pas sont ceux de M3 (partie M)', () => {
     expect(NUDGE_STEP_M).toBe(0.01);
     expect(NUDGE_COARSE_STEP_M).toBe(0.10);

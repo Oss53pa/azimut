@@ -35,7 +35,7 @@ function input(items: DeliveryItem[]) {
   };
 }
 
-describe('D11 — assembleDeliveryArchive', () => {
+describe('D11: assembleDeliveryArchive', () => {
   it('names files by the D11 scheme and the archive without support segments', () => {
     const result = assembleDeliveryArchive(input([item('D-042', 'F1')]));
     expect(result.ok).toBe(true);

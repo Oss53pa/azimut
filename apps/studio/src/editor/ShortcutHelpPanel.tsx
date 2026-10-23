@@ -1,11 +1,11 @@
 /**
- * E16 — Shortcut help panel.
+ * E16: Shortcut help panel.
  *
  * Renders the full shortcut table grouped by category.
  * Triggered by pressing '?' or via a toolbar help button.
  *
  * Uses design-token CSS variables exclusively (A2.4).
- * This is a view component — it displays data, never mutates (INV-2).
+ * This is a view component: it displays data, never mutates (INV-2).
  */
 
 import { type JSX, useMemo } from 'react';

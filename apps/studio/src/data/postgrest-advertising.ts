@@ -1,5 +1,5 @@
 /**
- * H4 — lecture de la régie par l'API REST : emplacements du site, leurs
+ * H4, lecture de la régie par l'API REST : emplacements du site, leurs
  * réservations, options et visuels enregistrés (migration 0045).
  *
  * Une valeur hors liste ne peut venir que d'un schéma qui a dérivé ; la

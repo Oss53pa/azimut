@@ -25,7 +25,7 @@ function walk(dir: string): string[] {
   return out;
 }
 
-describe('F10.3 / F16 — no UI text written in a component', () => {
+describe('F10.3 / F16: no UI text written in a component', () => {
   it('every studio component string goes through an i18n key', () => {
     const violations: string[] = [];
     for (const file of walk(STUDIO_SRC)) {

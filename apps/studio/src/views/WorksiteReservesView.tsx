@@ -18,7 +18,7 @@ const OPEN = 'open';
 const LIFTED = 'lifted';
 
 /**
- * Module 07 — les réserves de pose (H6.2), au gabarit « registre ». Une
+ * Module 07 : les réserves de pose (H6.2), au gabarit « registre ». Une
  * réserve ouverte est relevée par le garde `auditInstallReserves` ; tant
  * qu'elle l'est, son support ne bascule pas en « posé ». Lu en base (0042),
  * ou dans le jeu de démonstration du dépôt de référence.
@@ -60,7 +60,7 @@ export function WorksiteReservesView({ siteKey }: WorksiteReservesViewProps): JS
   const lot = (r: ReserveRow): string => lotCodes.get(r.reserve.lot_id) ?? r.reserve.lot_id;
   const support = (r: ReserveRow): string => supportCodes.get(r.reserve.support_id) ?? r.reserve.support_id;
   const lifted = (r: ReserveRow): string =>
-    (r.reserve.lifted_at === null ? '—' : formatDay(r.reserve.lifted_at.slice(0, 10), lang) ?? r.reserve.lifted_at);
+    (r.reserve.lifted_at === null ? '–' : formatDay(r.reserve.lifted_at.slice(0, 10), lang) ?? r.reserve.lifted_at);
 
   const columns: readonly Column<ReserveRow>[] = [
     { id: 'reserve', header: t('worksite.col.reserve'), cell: r => r.reserve.id },

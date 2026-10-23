@@ -7,8 +7,8 @@ import { validateGraph } from '../validate-graph.js';
  * La validation du graphe ne demande que ce qu'elle lit.
  *
  * L'enjeu n'est pas la commodité : il est qu'un appelant qui ne porte pas de
- * site complet — l'atelier de M5 (partie M), qui tient une session de travail
- * — puisse appeler le moteur sans inventer une organisation, une fiche de
+ * site complet (l'atelier de M5 (partie M), qui tient une session de travail)
+ * puisse appeler le moteur sans inventer une organisation, une fiche de
  * site ou un paquet de règles qu'aucun contrôle ne regarde.
  *
  * Deux choses sont vérifiées ici, et la seconde compte autant que la première :

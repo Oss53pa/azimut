@@ -1,5 +1,5 @@
 /**
- * N2.2 — les lignes de l'écran « Zonage » : une zone d'orientation par ligne,
+ * N2.2, les lignes de l'écran « Zonage » : une zone d'orientation par ligne,
  * et ce que ses empreintes portent. La zone n'a pas de géométrie propre ;
  * sa surface est celle de ses empreintes (INV-1).
  */

@@ -1,5 +1,5 @@
 /**
- * M4 (partie M) — les quatre outils de la saisie du graphe, et leur touche.
+ * M4 (partie M) : les quatre outils de la saisie du graphe, et leur touche.
  *
  * | Nœud | `N` | Le type se choisit avant le geste, jamais après |
  * | Arête | `E` | Relie deux nœuds |

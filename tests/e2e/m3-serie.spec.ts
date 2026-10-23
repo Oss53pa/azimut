@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M3 (partie M) critère 4 — « La duplication en série de 20 cellules se fait
+ * M3 (partie M) critère 4 : « La duplication en série de 20 cellules se fait
  * en une commande annulable d'un seul geste. »
  *
  * Les deux moitiés se prouvent ici, et nulle part ailleurs : le jugement de la
@@ -27,7 +27,7 @@ async function setSeries(page: Page, dx: string, count: string): Promise<void> {
   await page.getByLabel(/Nombre de copies|Number of copies/).fill(count);
 }
 
-test.describe('M3 (partie M) critère 4 — la duplication en série', () => {
+test.describe('M3 (partie M) critère 4 : la duplication en série', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(FOOTPRINTS);
   });

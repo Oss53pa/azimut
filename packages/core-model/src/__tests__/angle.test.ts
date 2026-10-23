@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeAzimuth } from '../index.js';
 
-describe('normalizeAzimuth — D1.3 compass convention', () => {
+describe('normalizeAzimuth: D1.3 compass convention', () => {
   it('keeps 0 as 0', () => {
     expect(normalizeAzimuth(0)).toBe(0);
   });

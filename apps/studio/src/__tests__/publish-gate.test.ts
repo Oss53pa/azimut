@@ -7,7 +7,7 @@ import type { SiteFact } from '@azimut/core-model';
 import { PARKING_CAPACITY_KEY } from '@azimut/core-model';
 
 /**
- * A5.11 — le statut porte sur le fait, non sur l'objet.
+ * A5.11 : le statut porte sur le fait, non sur l'objet.
  *
  * Ni `zone` ni `footprint` n'en déclarent : la section S8 a retiré les tables
  * de stationnement qui en portaient un. Une capacité annoncée mais non arrêtée

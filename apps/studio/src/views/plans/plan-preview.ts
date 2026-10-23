@@ -5,7 +5,7 @@
  * rendu par le moteur dans les jetons de l'interface : ce n'est pas le plan
  * émis. Le plan livré prend ses couleurs de la charte du site et, pour tout ce
  * qui relève de l'évacuation, du registre de sécurité (INV-3) ; le compilateur
- * les lui fournit. L'accent marque ce que le moteur a calculé — le
+ * les lui fournit. L'accent marque ce que le moteur a calculé : le
  * cheminement et le repère « vous êtes ici » (M7.10 de la partie M).
  */
 import type { EvacuationTheme, OrientedPlanTheme } from '@azimut/engine-layout';

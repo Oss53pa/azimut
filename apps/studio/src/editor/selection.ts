@@ -1,5 +1,5 @@
 /**
- * E6.1 — Selection model.
+ * E6.1: Selection model.
  *
  * Selection is UI-only state, never persisted.
  * Order is stable and deterministic: draw order, then by id.
@@ -18,7 +18,7 @@ import { codePointCompare } from '@azimut/core-model';
 /** A selectable object in the scene. */
 export type SelectableItem = {
   readonly id: string;
-  /** Draw order — lower values are drawn first (back). */
+  /** Draw order: lower values are drawn first (back). */
   readonly drawOrder: number;
 };
 
@@ -165,7 +165,7 @@ export function selectionReducer(
 }
 
 // ---------------------------------------------------------------------------
-// Hit-test helpers (E3.4 — native SVG hit-testing)
+// Hit-test helpers (E3.4: native SVG hit-testing)
 // ---------------------------------------------------------------------------
 
 /**

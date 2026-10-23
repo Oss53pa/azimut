@@ -13,7 +13,7 @@ import { formatDay } from './register/format.js';
 const ALL = 'all';
 
 /**
- * Module 08 — les constats sur support relevés en tournée (H7), au gabarit
+ * Module 08 : les constats sur support relevés en tournée (H7), au gabarit
  * « registre ». Un constat bloquant appelle une intervention ; l'ordre de
  * travaux lui-même, né d'une décision humaine, n'a pas encore de moteur.
  * Lu en base (0044), ou dans le jeu de démonstration du dépôt de référence.
@@ -57,7 +57,7 @@ export function OpsIncidentsView({ siteKey }: OpsIncidentsViewProps): JSX.Elemen
     { id: 'nature', header: t('operations.col.nature'), cell: o => nature(o.nature_key) },
     { id: 'severity', header: t('operations.col.severity'), cell: severityTag },
     { id: 'round', header: t('operations.col.round'), cell: o => o.round_id },
-    { id: 'date', header: t('operations.col.surveyed'), cell: o => formatDay(rounds.get(o.round_id)?.surveyed_on ?? undefined, lang) ?? '—' },
+    { id: 'date', header: t('operations.col.surveyed'), cell: o => formatDay(rounds.get(o.round_id)?.surveyed_on ?? undefined, lang) ?? '–' },
   ];
 
   const round = selected === null ? undefined : rounds.get(selected.round_id);
@@ -77,8 +77,8 @@ export function OpsIncidentsView({ siteKey }: OpsIncidentsViewProps): JSX.Elemen
             rows: [
               { id: 'nature', label: t('operations.col.nature'), value: nature(selected.nature_key) },
               { id: 'round', label: t('operations.col.round'), value: selected.round_id },
-              { id: 'zone', label: t('operations.col.zone'), value: round?.zone_label ?? '—' },
-              { id: 'by', label: t('operations.col.surveyor'), value: round?.surveyor_id ?? '—' },
+              { id: 'zone', label: t('operations.col.zone'), value: round?.zone_label ?? '–' },
+              { id: 'by', label: t('operations.col.surveyor'), value: round?.surveyor_id ?? '–' },
               {
                 id: 'sync',
                 label: t('operations.col.sync'),

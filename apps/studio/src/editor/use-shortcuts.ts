@@ -1,11 +1,11 @@
 /**
- * E16 — Central keyboard shortcut dispatcher.
+ * E16: Central keyboard shortcut dispatcher.
  *
  * "Single declaration table. Never scattered across components."
  *
  * This hook listens for keyboard events and dispatches to the
  * appropriate subsystem based on DEFAULT_SHORTCUTS table matching.
- * All keyboard handling converges here — individual hooks
+ * All keyboard handling converges here: individual hooks
  * (use-undo-redo, use-clipboard) provide action callbacks,
  * and this hook calls them when matched.
  *
@@ -55,7 +55,7 @@ export type ShortcutHandlers = {
 /**
  * Map shortcut action names to ToolId values.
  * Domain tools (E7.2) like node placement are not yet
- * wired as ToolIds — they will be added when the tool
+ * wired as ToolIds: they will be added when the tool
  * state machine is extended for domain-specific tools.
  */
 const TOOL_ACTION_MAP: Readonly<Record<string, ToolId>> = {

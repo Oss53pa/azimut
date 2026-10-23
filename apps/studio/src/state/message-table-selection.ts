@@ -1,5 +1,5 @@
 /**
- * R15 et R17 (partie R) — le focus et la sélection du tableau, séparés.
+ * R15 et R17 (partie R) : le focus et la sélection du tableau, séparés.
  *
  * R17 : « Indicateur de focus sur la ligne, distinct de l'indicateur de
  * sélection. » Ce sont donc deux états distincts et non un seul : une ligne
@@ -14,9 +14,9 @@ export type TableSelection = {
   /** La ligne sous le focus, par son identifiant stable. */
   readonly focusedId: string | null;
   readonly selectedIds: readonly string[];
-  /** R3 (partie R) — le panneau de détail est repliable. */
+  /** R3 (partie R) : le panneau de détail est repliable. */
   readonly detailOpen: boolean;
-  /** R15 — « `/` place le focus dans la recherche ». */
+  /** R15 : « `/` place le focus dans la recherche ». */
   readonly searchFocused: boolean;
 };
 
@@ -30,7 +30,7 @@ export const NO_SELECTION: TableSelection = {
 export type SelectionContext = {
   /** Les lignes visibles, dans l'ordre où le tableau les montre. */
   readonly visibleIds: readonly string[];
-  /** R15 — « `N` va à la prochaine ligne périmée ou en anomalie ». */
+  /** R15 : « `N` va à la prochaine ligne périmée ou en anomalie ». */
   readonly issueIds: readonly string[];
 };
 

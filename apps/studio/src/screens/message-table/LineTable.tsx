@@ -5,7 +5,7 @@ import type { UiMessageKey } from '../../i18n/index.js';
 import type { LineState, RowGroup, ScheduleRow } from '../../state/message-schedule-rows.js';
 
 /**
- * R3, R5, R10 et R17 (partie R) — le tableau lui-même.
+ * R3, R5, R10 et R17 (partie R) : le tableau lui-même.
  *
  * **Aucune cellule n'est éditable, par aucune voie.** Règle M02.W6, critère 2
  * de R18 : le tableau ne porte ni champ de saisie, ni élément modifiable, ni
@@ -13,8 +13,8 @@ import type { LineState, RowGroup, ScheduleRow } from '../../state/message-sched
  * panneau de détail nomme.
  *
  * R17 : « Indicateur de focus sur la ligne, distinct de l'indicateur de
- * sélection. » Les deux sont portés séparément — un filet à gauche pour le
- * focus, un fond pour la sélection — et la ligne focalisée porte
+ * sélection. » Les deux sont portés séparément (un filet à gauche pour le
+ * focus, un fond pour la sélection) et la ligne focalisée porte
  * `aria-selected` seulement quand elle est aussi sélectionnée.
  */
 export type LineTableProps = {
@@ -108,7 +108,7 @@ export function LineTable(props: LineTableProps): JSX.Element {
         </thead>
         {props.groups.map(group => (
           <tbody key={group.key}>
-            {/* R6.1 (partie R) — l'en-tête rappelle le groupe et son compte. */}
+            {/* R6.1 (partie R) : l'en-tête rappelle le groupe et son compte. */}
             <tr>
               {/* L'en-tête coiffe le groupe de lignes qui suit, pas une
                   colonne : `rowgroup` est la portée que cette place appelle. */}

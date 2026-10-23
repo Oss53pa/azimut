@@ -22,7 +22,7 @@ const conforming: Creative = {
   weight_bytes: 2_000_000,
 };
 
-describe('H4.6 — guardCreativeAgainstSpec (AD.CREATIVE_SPEC_MISMATCH)', () => {
+describe('H4.6: guardCreativeAgainstSpec (AD.CREATIVE_SPEC_MISMATCH)', () => {
   it('passes a conforming creative', () => {
     expect(guardCreativeAgainstSpec(conforming, SPEC).ok).toBe(true);
   });

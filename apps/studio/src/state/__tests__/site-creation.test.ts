@@ -9,7 +9,7 @@ const CONTEXT: CreationContext = {
   levelId: 'level-1',
   bindingId: 'binding-1',
   existingNames: ['Centre commercial du Port'],
-  // Q9 — un extrait du référentiel. Les contrôles de pays et de fuseau s'y
+  // Q9, un extrait du référentiel. Les contrôles de pays et de fuseau s'y
   // adossent ; l'essai n'a pas besoin des 249 lignes pour les exercer.
   countries: [
     { code: 'FR', timezones: ['Europe/Paris'] },
@@ -36,9 +36,9 @@ function codes(draft: Partial<SiteDraft>, context: Partial<CreationContext> = {}
 }
 
 /**
- * M1 (partie M), formulaire de création — quatre champs, quatre contrôles.
+ * M1 (partie M), formulaire de création : quatre champs, quatre contrôles.
  */
-describe('M1 (partie M) — création d’un site', () => {
+describe('M1 (partie M) : création d’un site', () => {
   describe('nom du site', () => {
     it('refuse un nom vide', () => {
       expect(codes({ name: '' })).toContain('DATA.NAME_REQUIRED');
@@ -88,7 +88,7 @@ describe('M1 (partie M) — création d’un site', () => {
     });
 
     /**
-     * Q9, version 7 — le pays se juge contre le référentiel et non contre une
+     * Q9, version 7 : le pays se juge contre le référentiel et non contre une
      * forme. Un code bien formé qu'aucune ligne de `country` ne porte donnerait
      * un site dont le fuseau ne se contrôle contre rien.
      */
@@ -118,7 +118,7 @@ describe('M1 (partie M) — création d’un site', () => {
    * M1 (partie M), version 6 : « facultatif à la création | aucune anomalie à
    * la création ; information affichée ». `RULES.PACK_NOT_BOUND` a désormais
    * une gravité unique, bloquante, et se lève à l'opération qui exige des
-   * règles — jamais ici.
+   * règles : jamais ici.
    */
   describe('paquet de règles', () => {
     it('est facultatif, et son absence ne lève aucune anomalie', () => {
@@ -157,7 +157,7 @@ describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * O4 et A5.2 — le fuseau du site est requis. La colonne est NOT NULL en
+   * O4 et A5.2 : le fuseau du site est requis. La colonne est NOT NULL en
    * base : sans contrôle ici, la création échouerait à l'écriture sur une
    * violation de contrainte, là où il faut dire quel champ manque.
    */
@@ -208,7 +208,7 @@ describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * Q5 et M1 (partie M), version 7 — l'entité juridique est facultative à la
+   * Q5 et M1 (partie M), version 7 : l'entité juridique est facultative à la
    * création, « requise avant l'émission de la première facture ».
    */
   describe('entité juridique', () => {
@@ -227,7 +227,7 @@ describe('M1 (partie M) — création d’un site', () => {
   });
 
   /**
-   * M7.5 (partie M) — « Un refus de saisie n'efface jamais le travail en
+   * M7.5 (partie M) : « Un refus de saisie n'efface jamais le travail en
    * cours. » Corriger un champ pour découvrir le suivant ferait du formulaire
    * un couloir : les anomalies sortent ensemble.
    */
@@ -244,7 +244,7 @@ describe('M1 (partie M) — création d’un site', () => {
  * nommés par défaut et renommables. Un site sans niveau est un état inutile
  * que l'utilisateur devrait corriger lui-même. »
  */
-describe('M1 (partie M) — le site naît avec un bâtiment et un niveau', () => {
+describe('M1 (partie M) : le site naît avec un bâtiment et un niveau', () => {
   it('rend trois commandes, dans l’ordre des dépendances', () => {
     // Sans paquet choisi : le rattachement, facultatif, est une quatrième
     // commande, essayée à part (A5.8).

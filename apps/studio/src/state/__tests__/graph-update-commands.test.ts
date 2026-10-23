@@ -4,7 +4,7 @@ import { inverseCommand } from '@azimut/core-model';
 import { updateNodeCommands, updateEdgeCommands } from '../graph-update-commands.js';
 
 /**
- * M4 (partie M) — « La longueur est recalculée à toute modification de
+ * M4 (partie M) : « La longueur est recalculée à toute modification de
  * position. Un champ de longueur saisissable serait une source permanente
  * d'incohérence. »
  *
@@ -35,7 +35,7 @@ const C = node('n-c', 10, 10);
 const AB = edge('e-ab', 'n-a', 'n-b', 10);
 const BC = edge('e-bc', 'n-b', 'n-c', 10);
 
-describe('M4 (partie M) — modification d’un nœud', () => {
+describe('M4 (partie M) : modification d’un nœud', () => {
   it('rend une commande pour le nœud', () => {
     const outcome = updateNodeCommands(
       A, { kind: 'entrance', label: 'Entrée nord', position: { x_m: 0, y_m: 0 } },
@@ -111,7 +111,7 @@ describe('M4 (partie M) — modification d’un nœud', () => {
   });
 });
 
-describe('M4 (partie M) — modification d’une arête', () => {
+describe('M4 (partie M) : modification d’une arête', () => {
   it('écrit les cinq champs du panneau, et pas la longueur', () => {
     const outcome = updateEdgeCommands(AB, {
       widthM: 2.2, slopePct: -3, accessible: false,

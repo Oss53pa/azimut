@@ -61,7 +61,7 @@ describe('multiLevelWithoutAnyVlFindings', () => {
   });
 
   it('does not fire when VLs exist even if not accessible', () => {
-    // refMultilevel has VLs — making them non-accessible should still pass
+    // refMultilevel has VLs: making them non-accessible should still pass
     // the "any VL" check (only the accessible check should fire).
     const site: SiteData = {
       ...refMultilevel,
@@ -85,7 +85,7 @@ describe('multiLevelWithoutAnyVlFindings', () => {
   });
 });
 
-describe('multiLevelWithoutAnyVlFindings — VL edge not found', () => {
+describe('multiLevelWithoutAnyVlFindings: VL edge not found', () => {
   it('skips VL whose edge_id does not exist in edges', () => {
     // Give a VL that references a non-existent edge. The check should
     // still report no VL for the building (the orphan VL is skipped).
@@ -113,7 +113,7 @@ describe('multiLevelWithoutAnyVlFindings — VL edge not found', () => {
   });
 });
 
-describe('multiLevelWithoutAnyVlFindings — same-level VL ignored', () => {
+describe('multiLevelWithoutAnyVlFindings: same-level VL ignored', () => {
   it('flags building when VL edge connects nodes on same level', () => {
     const site: SiteData = {
       ...refMultilevel,
@@ -137,7 +137,7 @@ describe('multiLevelWithoutAnyVlFindings — same-level VL ignored', () => {
   });
 });
 
-describe('multiLevelWithoutAccessibleVlFindings — same-level VL ignored', () => {
+describe('multiLevelWithoutAccessibleVlFindings: same-level VL ignored', () => {
   it('flags building when accessible VL edge connects nodes on same level', () => {
     const site: SiteData = {
       ...refMultilevel,
@@ -161,7 +161,7 @@ describe('multiLevelWithoutAccessibleVlFindings — same-level VL ignored', () =
   });
 });
 
-describe('multiLevelWithoutAccessibleVlFindings — VL edge not found', () => {
+describe('multiLevelWithoutAccessibleVlFindings: VL edge not found', () => {
   it('skips VL whose edge_id does not exist in edges', () => {
     const site: SiteData = {
       ...refMultilevel,
@@ -202,12 +202,12 @@ describe('orphan node in VL edge', () => {
     },
   };
 
-  it('multiLevelWithoutAnyVl — orphan VL does not count as cross-level', () => {
+  it('multiLevelWithoutAnyVl: orphan VL does not count as cross-level', () => {
     const findings = multiLevelWithoutAnyVlFindings(orphanVlSite);
     expect(findings.some((f) => f.code === 'GRAPH.LEVEL_NO_VERTICAL_LINK')).toBe(true);
   });
 
-  it('multiLevelWithoutAccessibleVl — orphan VL does not count as cross-level', () => {
+  it('multiLevelWithoutAccessibleVl: orphan VL does not count as cross-level', () => {
     const findings = multiLevelWithoutAccessibleVlFindings(orphanVlSite);
     expect(findings.some((f) => f.code === 'GRAPH.LEVEL_NO_ACCESSIBLE_LINK')).toBe(true);
   });

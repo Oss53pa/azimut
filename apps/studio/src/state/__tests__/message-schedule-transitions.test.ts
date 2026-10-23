@@ -4,7 +4,7 @@ import { transitionCommands } from '../message-schedule-transitions.js';
 import type { StoredSchedule, TransitionConditions } from '../message-schedule-transitions.js';
 
 /**
- * R12 (partie R) — les transitions traduites en écritures : un seul geste par
+ * R12 (partie R), les transitions traduites en écritures : un seul geste par
  * transition, les refus de la machine rendus tels quels, la décision écrite
  * dans `message_schedule_approval` et jamais dans `approval`.
  */
@@ -27,7 +27,7 @@ const ready: TransitionConditions = {
 };
 const write = { orgId: 'org', timestamp: '2026-10-06T09:00:00.000Z', decisionId: 'd1' };
 
-describe('R12 — les transitions du tableau, en écritures', () => {
+describe('R12 : les transitions du tableau, en écritures', () => {
   it('émettre pour revue : l’état seul change, aucune décision n’est écrite', () => {
     const out = transitionCommands('submit_for_review', stored('t7', 7, 'draft'), ready, null, write);
     if (!out.ok) throw new Error(JSON.stringify(out.findings));

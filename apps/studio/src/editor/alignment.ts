@@ -1,8 +1,8 @@
 /**
- * E7.3 — Alignment and distribution operations.
+ * E7.3: Alignment and distribution operations.
  *
  * All operations take a set of bounding boxes and return
- * computed positions. They never mutate geometry directly —
+ * computed positions. They never mutate geometry directly:
  * the caller applies the results via Command (E5).
  */
 

@@ -1,5 +1,5 @@
 /**
- * I5.6 — les tournées d'inspection telles que la base les porte (migration
+ * I5.6, les tournées d'inspection telles que la base les porte (migration
  * 0044) : tournées de relevé et constats faits sur les supports.
  *
  * Le nombre de constats d'une tournée se compte ; il ne se stocke pas. Comme

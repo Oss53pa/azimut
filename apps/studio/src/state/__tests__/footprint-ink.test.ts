@@ -13,7 +13,7 @@ const context = (overrides: Partial<StrokeContext> = {}): StrokeContext => ({
 const rect = [{ x_m: 0, y_m: 0 }, { x_m: 6, y_m: 0 }, { x_m: 6, y_m: 4 }, { x_m: 0, y_m: 4 }];
 const trapeze = [{ x_m: 0, y_m: 0 }, { x_m: 8, y_m: 0 }, { x_m: 6, y_m: 4 }, { x_m: 2, y_m: 4 }];
 
-describe('J1.1 et J2 — un trait dans l’atelier des empreintes', () => {
+describe('J1.1 et J2 : un trait dans l’atelier des empreintes', () => {
   it('l’outil cellule applique le rectangle reconnu au contour en cours', () => {
     const out = strokeToFootprint(rotate(loop(rect, 20, 0.05), 2), context());
     expect(out.kind).toBe('applied');

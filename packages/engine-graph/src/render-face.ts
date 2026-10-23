@@ -20,7 +20,7 @@ export type RenderFaceOptions = {
   readonly theme: FaceTheme;
   readonly font_family: string;
   /**
-   * D12 — active language to render destination names in. When omitted, the
+   * D12: active language to render destination names in. When omitted, the
    * first available variant is used (deterministic by resolution order),
    * preserving the previous behavior. When set, the named variant is used,
    * falling back to the first available one if that language is missing.
@@ -124,7 +124,7 @@ function renderFaceParts(
  * the renderer: the header bar, arrow blocks, legend swatches, and the
  * direction arrows of a destination list are drawn in `theme.accent`; every
  * other block uses text or background colours. The accent (pictogram) contrast
- * check is meaningful only when this holds — a face with none of these draws no
+ * check is meaningful only when this holds: a face with none of these draws no
  * accent, so checking its accent colour would raise a spurious anomaly.
  */
 export function faceUsesAccent(face: ResolvedFace): boolean {
@@ -146,15 +146,15 @@ export function faceUsesAccent(face: ResolvedFace): boolean {
 /**
  * Deterministic text measurement (G5.1): the width in millimetres of `text`
  * drawn at `fontSizeMm`, computed from a versioned font-metrics table, never the
- * browser. Supplied by the caller — no metrics table ships in the repository
+ * browser. Supplied by the caller: no metrics table ships in the repository
  * yet, so the content-fit check below stays dormant until one is provided.
  */
 export type TextMeasure = (text: string, fontSizeMm: number) => number;
 
 /**
  * Content-fit control (A7.2, LAYOUT.CONTENT_OVERFLOW): the composition-level
- * check that a face's text fits the format it is drawn in. Each primary text —
- * the header's site name and each destination name — is measured at the exact
+ * check that a face's text fits the format it is drawn in. Each primary text (
+ * the header's site name and each destination name) is measured at the exact
  * size the renderer draws it (shared font-size helpers) against the width of its
  * block; a piece wider than its block raises a blocking anomaly. Text overflow
  * is thus detected by calculation, never visually (E12/D14). Returns [] when no
@@ -208,7 +208,7 @@ export function renderFace(
 /**
  * Render a face and return, alongside the SVG, the measurements a normative
  * check reads back. The SVG is byte-for-byte identical to {@link renderFace}'s
- * (same layout pass) — the measures are recorded, never re-derived.
+ * (same layout pass): the measures are recorded, never re-derived.
  */
 export function renderFaceWithMeasures(
   face: ResolvedFace,

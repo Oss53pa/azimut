@@ -1,5 +1,5 @@
 /**
- * D12.1 — la langue d'affichage des écrans de la tranche M (partie M).
+ * D12.1 : la langue d'affichage des écrans de la tranche M (partie M).
  *
  * Les cinq écrans passent tous par des clés, mais rien ne montait de
  * fournisseur au-dessus d'eux : ils tombaient sur le contexte par défaut, en
@@ -11,7 +11,7 @@
  * ouvre l'écran dans sa langue par un lien, sans réglage préalable.
  */
 
-/** D12.1 — les deux langues actives de la V1. */
+/** D12.1 : les deux langues actives de la V1. */
 export const ACTIVE_LANGS = ['fr', 'en'] as const;
 export type ActiveLang = (typeof ACTIVE_LANGS)[number];
 

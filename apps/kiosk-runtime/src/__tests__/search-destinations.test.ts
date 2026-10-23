@@ -81,7 +81,7 @@ describe('searchDestinations', () => {
   });
 
   it('rejects queries with too many errors', () => {
-    // "Xyzeau" — too far from any destination name
+    // "Xyzeau": too far from any destination name
     const results = searchDestinations(refMultilevel, 'Xyzeau', 'fr', 10);
     expect(results.length).toBe(0);
   });
@@ -214,7 +214,7 @@ describe('searchDestinations', () => {
         { id: 'dn-s', org_id: 'org-test-001', destination_id: 'd-short', lang: 'fr' as const, value: 'AB' },
       ],
     };
-    // Query much longer than value — cannot match via prefix or substring
+    // Query much longer than value: cannot match via prefix or substring
     const results = searchDestinations(site, 'ABCDEFGHIJ', 'fr', 10);
     // Score is likely 0 (fuzzy distance too large) → empty results
     expect(results.length).toBe(0);
@@ -272,7 +272,7 @@ describe('searchDestinations', () => {
   it('same destination matched via both languages when lang is null', () => {
     const results = searchDestinations(refMultilevel, 'Bureau RDC', null, 10);
     const rdcResults = results.filter((r) => r.destination.id === 'dest-ml-rdc');
-    // Should find FR name "Bureau RDC" — EN name unlikely to match
+    // Should find FR name "Bureau RDC" : EN name unlikely to match
     expect(rdcResults.length).toBeGreaterThanOrEqual(1);
     // When lang is null, both FR and EN names are searched
     const frMatch = rdcResults.find((r) => r.matched_name.lang === 'fr');
@@ -333,7 +333,7 @@ describe('searchDestinations', () => {
         value: 'ABCDF',
       }],
     };
-    // query "ABCDE" vs value "ABCDF" — same length, edit distance 1
+    // query "ABCDE" vs value "ABCDF": same length, edit distance 1
     // nq.length <= nv.length → slice(0, 5) = "abcdf" → levenshtein("abcde","abcdf")=1
     // maxDist = max(1, floor(5*0.3))=1, bestDist=1 → score = 50 - 5 = 45
     const results = searchDestinations(site, 'ABCDE', 'fr', 10);

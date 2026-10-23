@@ -4,7 +4,7 @@ import { resolve, relative, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 /**
- * D7.2 — « Ces règles valent pour toutes les empreintes du produit […]. Une
+ * D7.2 : « Ces règles valent pour toutes les empreintes du produit […]. Une
  * seconde forme canonique, même implicite, en serait une de trop. » Et : « Une
  * seule implantation. L'empreinte est calculée par une seule fonction,
  * employée par tous les appelants. »
@@ -42,7 +42,7 @@ const ALL: readonly { readonly path: string; readonly text: string }[] = ['packa
 const matching = (pattern: RegExp): string[] =>
   ALL.filter(f => pattern.test(f.text)).map(f => f.path);
 
-describe('D7.2 — une seule forme canonique, une seule implantation', () => {
+describe('D7.2 : une seule forme canonique, une seule implantation', () => {
   it('la forme canonique n’est définie qu’une fois, dans core-model', () => {
     expect(matching(/\bfunction\s+(empreinte|empreinteOutcome|canonicalContentJson)\b/)).toEqual([FORM]);
   });

@@ -17,7 +17,7 @@ type HierarchyRow = {
 };
 
 /**
- * Module 02 — la hiérarchie de l'information : quels niveaux (1 à 4) chaque
+ * Module 02, la hiérarchie de l'information : quels niveaux (1 à 4) chaque
  * typologie de support du site peut porter, lus du registre du wayfinding.
  * Les mêmes déclarations alimentent le tableau des messages ; les seuils de
  * lecture, eux, ne sont pas ici : ils viennent du paquet de règles (INV-5).
@@ -58,7 +58,7 @@ export function InformationLevelsView(): JSX.Element {
   const levelColumn = (level: InformationLevelRank): Column<HierarchyRow> => ({
     id: `level-${String(level)}`,
     header: t('hierarchy.col.level', { level }),
-    cell: r => (r.levels.has(level) ? <Tag label={t('hierarchy.cell.declared')} severity="valid" /> : '—'),
+    cell: r => (r.levels.has(level) ? <Tag label={t('hierarchy.cell.declared')} severity="valid" /> : '–'),
   });
 
   const columns: readonly Column<HierarchyRow>[] = [

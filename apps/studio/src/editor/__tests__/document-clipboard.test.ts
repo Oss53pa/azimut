@@ -37,7 +37,7 @@ const TARGET = {
   idAt: (index: number) => `dec-new-${String(index)}`,
 };
 
-describe('E7.3 — clipboard bridge', () => {
+describe('E7.3: clipboard bridge', () => {
   describe('buildClipboardPayload', () => {
     it('encodes the selected shapes with the source context', () => {
       const payload = buildClipboardPayload(docWith([shape('dec-1', 0)]), ['dec-1'], CONTEXT);

@@ -17,7 +17,7 @@ const DOWN = readFileSync(
 /**
  * Corps SQL sans les commentaires : les assertions portent sur les
  * instructions, pas sur le texte qui explique pourquoi telle instruction est
- * absente — un commentaire qui cite `now()` pour dire qu'il n'est pas employé
+ * absente, un commentaire qui cite `now()` pour dire qu'il n'est pas employé
  * ne doit pas faire échouer le contrôle.
  */
 function statementsOf(sql: string): string {
@@ -28,7 +28,7 @@ function statementsOf(sql: string): string {
 }
 
 /**
- * N1.2 — les cinq champs que la partie N spécifie et que le schéma n'avait pas.
+ * N1.2 : les cinq champs que la partie N spécifie et que le schéma n'avait pas.
  *
  * Ce test garde les contraintes de la base alignées sur le modèle, et interdit
  * à la migration de toucher aux données existantes (A2.2-7).

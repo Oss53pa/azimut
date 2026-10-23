@@ -3,7 +3,7 @@ import { resolveMaxSentenceWords } from '@azimut/core-model';
 import { templateFreeTexts } from './audit-typography.js';
 
 /**
- * Phrase plus longue que la limite portée par la charte — A5.8.
+ * Phrase plus longue que la limite portée par la charte : A5.8.
  *
  * `charter_rule` porte la nature `max_sentence_words`, et D2.2 nomme
  * l'anomalie « Phrase plus longue que la limite portée par la charte ». La
@@ -13,7 +13,7 @@ import { templateFreeTexts } from './audit-typography.js';
  * ce contrôle. Aucun nombre n'est écrit ici. Quand la charte ne porte pas la
  * règle, le contrôle ne s'exécute pas et le dit, et il n'applique aucune
  * valeur par défaut : « une règle absente n'est pas une règle permissive ».
- * Une limite par défaut serait la pire des issues possibles — elle
+ * Une limite par défaut serait la pire des issues possibles : elle
  * signalerait au nom d'une charte qui n'a rien demandé.
  *
  * Une limite déclarée mais illisible, elle, lève `CHARTER.RULE_MALFORMED` en
@@ -35,7 +35,7 @@ import { templateFreeTexts } from './audit-typography.js';
  * Sur le point final, le point d'exclamation, le point d'interrogation et les
  * points de suspension, suivis d'une espace ou de la fin du texte.
  *
- * **Une abréviation coupe la phrase à tort** — « M. Dupont » compte pour deux.
+ * **Une abréviation coupe la phrase à tort** : « M. Dupont » compte pour deux.
  * La conséquence est du bon côté : une phrase coupée trop tôt est plus courte,
  * donc moins signalée. Le contrôle sous-estime, il ne sur-signale pas, et c'est
  * ce qu'on veut d'un contrôle signalant dont on ne veut pas qu'il soit ignoré à
@@ -71,8 +71,8 @@ export type SentenceLengthReport = {
  * à réécrire sont deux réécritures, et un compte agrégé obligerait à relire
  * pour savoir lesquelles.
  *
- * L'ordre suit celui de `templateFreeTexts` — par gabarit puis par rang de
- * bloc — puis le rang de la phrase dans le texte.
+ * L'ordre suit celui de `templateFreeTexts` (par gabarit puis par rang de
+ * bloc) puis le rang de la phrase dans le texte.
  */
 export function auditSentenceLength(
   site: SiteData,

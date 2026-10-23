@@ -1,5 +1,5 @@
 /**
- * E4.4 — Mandatory test.
+ * E4.4: Mandatory test.
  *
  * "Rejouer une séquence enregistrée d'opérations d'édition sur un site
  * de référence, deux fois, et vérifier l'égalité stricte de l'état
@@ -202,7 +202,7 @@ function replay(sequence: readonly Operation[]): ReplayState {
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('E4.4 — replaying an edit sequence is deterministic', () => {
+describe('E4.4: replaying an edit sequence is deterministic', () => {
   it('produces the same final document twice', () => {
     expect(replay(SEQUENCE).document).toEqual(replay(SEQUENCE).document);
   });

@@ -3,7 +3,7 @@ import { levelsOfSession } from '../session-scope.js';
 import type { SessionState, StoredRow } from '../session-store.js';
 
 /**
- * T-1.5 — la session multi-niveaux.
+ * T-1.5 : la session multi-niveaux.
  *
  * L'atelier ne connaissait qu'un niveau, celui du chemin, alors que le
  * magasin en porte autant que le site en compte : la session charge le site

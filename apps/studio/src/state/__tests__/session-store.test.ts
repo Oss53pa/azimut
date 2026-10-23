@@ -49,7 +49,7 @@ function memoryStorage(): Storage & { readonly map: Map<string, string> } {
   } as Storage & { readonly map: Map<string, string> };
 }
 
-describe('magasin de session — l’état local du parcours', () => {
+describe('magasin de session : l’état local du parcours', () => {
   it('ajoute une ligne à la création', () => {
     const state = applyToSession(EMPTY_SESSION, cmd('site', 's1'));
     expect(countOf(state, 'site')).toBe(1);
@@ -75,10 +75,10 @@ describe('magasin de session — l’état local du parcours', () => {
 });
 
 /**
- * E5.4 — « Sauvegarde locale à chaque commande validée, en stockage local du
+ * E5.4 : « Sauvegarde locale à chaque commande validée, en stockage local du
  * navigateur, distincte de la synchronisation serveur. »
  */
-describe('E5.4 — sauvegarde locale', () => {
+describe('E5.4: sauvegarde locale', () => {
   it('une clé par site : deux sites ne se mélangent pas', () => {
     expect(storageKey('s1')).not.toBe(storageKey('s2'));
   });
@@ -105,7 +105,7 @@ describe('E5.4 — sauvegarde locale', () => {
   });
 
   /**
-   * Un refus du stockage — navigation privée, quota — fait perdre la reprise
+   * Un refus du stockage (navigation privée, quota) fait perdre la reprise
    * après incident, jamais la session en cours.
    */
   it('n’interrompt pas le travail quand le stockage refuse', () => {
@@ -124,10 +124,10 @@ describe('E5.4 — sauvegarde locale', () => {
 });
 
 /**
- * M8 (partie M) critère 3 — « Le même parcours est réalisable hors ligne, avec
+ * M8 (partie M) critère 3 : « Le même parcours est réalisable hors ligne, avec
  * synchronisation au retour du réseau. »
  */
-describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
+describe('M8 (partie M) critère 3 : hors ligne et synchronisation', () => {
   const offline: SessionState = { ...EMPTY_SESSION, online: false };
 
   it('hors ligne, l’état local avance et les commandes entrent en file', async () => {
@@ -177,7 +177,7 @@ describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
 });
 
 
-describe('E5.4 — la reprise, et ce qui la distingue d’une navigation', () => {
+describe('E5.4 : la reprise, et ce qui la distingue d’une navigation', () => {
   const site = 'site-reprise';
 
   function saved(rows: number): SessionState {

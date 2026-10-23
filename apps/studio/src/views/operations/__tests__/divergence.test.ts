@@ -3,7 +3,7 @@ import { refMultilevel } from '@azimut/testkit';
 import { deriveDecisionPoints } from '@azimut/engine-graph';
 import { divergenceReport } from '../divergence.js';
 
-describe('Module 08 — couche de divergence', () => {
+describe('Module 08 : couche de divergence', () => {
   const profile = refMultilevel.travel_profiles[0];
 
   it('relève comme non couverts les points de décision sans support', () => {

@@ -1,5 +1,5 @@
 /**
- * D12.1 / H2 — module 02, le tableau des messages.
+ * D12.1 / H2 : module 02, le tableau des messages.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;
  * la table anglaise est typée contre elle.

@@ -19,13 +19,13 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
 
 const SITE = { site: [{ id: 'aaaa0003-0000-4000-8000-000000000001', org_id: 'aaaa0003-0000-4000-8000-000000000002' }] };
 
-describe('H8 — budget, sites de référence', () => {
+describe('H8 : budget, sites de référence', () => {
   it('sert le jeu de démonstration, que les écrans signalent', async () => {
     expect(await createReferenceRepository().loadBudgetRegistry('ref-multilevel')).toBe(REFERENCE_BUDGET);
   });
 });
 
-describe('H8 — budget, API REST', () => {
+describe('H8: budget, API REST', () => {
   it('lit les coûts par organisation et les lignes par site', async () => {
     const calls = stubTables({
       ...SITE,

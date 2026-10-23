@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { refMultilevel } from '@azimut/testkit';
 import { declaredInformationLevels } from '../schedule-model.js';
 
-describe('H2.3 — niveaux d’information déclarés, lus dans le registre', () => {
+describe('H2.3 : niveaux d’information déclarés, lus dans le registre', () => {
   const firstKey = refMultilevel.support_types[0]?.key ?? '';
 
   it('ne donne aucun niveau à une typologie sans déclaration', () => {

@@ -42,7 +42,7 @@ const SAFETY_PROBE: readonly CharterApplication[] = [
 ];
 
 /**
- * Module 04 — la signalétique.
+ * Module 04 : la signalétique.
  *
  * Une face est une vue : son contenu est résolu depuis le graphe et l'annuaire
  * au moment du rendu. Cet écran montre ce que le moteur compose, les contrôles

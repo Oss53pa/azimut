@@ -1,5 +1,5 @@
 /**
- * H2.4 — le plan de jalonnement, parcours par parcours.
+ * H2.4 : le plan de jalonnement, parcours par parcours.
  *
  * Une séquence relie une entrée du site à une destination par le plus court
  * chemin du profil (`computeRoute`). Ses étapes sont les points de décision

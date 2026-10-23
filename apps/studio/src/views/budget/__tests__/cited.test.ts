@@ -13,7 +13,7 @@ const priced: CostReference = {
   unit_cost: { minor: 100, currency: 'EUR' }, since: null,
 };
 
-describe('H8 — typologies citées par les supports du site', () => {
+describe('H8 : typologies citées par les supports du site', () => {
   it('ne cite rien pour des supports sans typologie : rien ne leur en est supposé', () => {
     expect(citedTypologies(refMultilevel)).toEqual([]);
   });

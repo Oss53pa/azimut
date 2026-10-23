@@ -44,11 +44,11 @@ function auditSite(site: SiteData): readonly Finding[] {
 }
 
 /**
- * Module 10 — le portefeuille.
+ * Module 10 : le portefeuille.
  *
  * Il n'y a pas de moteur de portefeuille : ce que cet écran montre, ce sont
  * les mêmes contrôles exécutés site par site, rassemblés. Rien n'est consolidé
- * au delà de ce que ces contrôles rendent — et les chartes de groupe, l'héritage
+ * au delà de ce que ces contrôles rendent : et les chartes de groupe, l'héritage
  * et la comparaison restent à construire ; l'écran le dit plutôt que de les
  * faire semblant.
  */

@@ -48,7 +48,7 @@ function schedule(s: SiteData) {
   return out.value;
 }
 
-describe('D8.3 — rendu des blocs saisis sur une face', () => {
+describe('D8.3 : rendu des blocs saisis sur une face', () => {
   it('rend le texte saisi dans la langue active, à la place du texte du gabarit', () => {
     const s = site({ fr: 'Sortie', en: 'Exit' });
     expect(render(s, 'fr')).toContain('>Sortie<');

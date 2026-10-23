@@ -6,7 +6,7 @@ const s = (id: string, sync_state: SurveyRecord['sync_state']): SurveyRecord => 
   sync_state,
 });
 
-describe('I5.6 — auditSurveySync (SURVEY.SYNC_PENDING)', () => {
+describe('I5.6: auditSurveySync (SURVEY.SYNC_PENDING)', () => {
   it('reports nothing when every survey is synced', () => {
     const r = auditSurveySync([s('t-1', 'synced'), s('t-2', 'synced')]);
     expect(r.ok).toBe(true);

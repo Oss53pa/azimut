@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * E12 — Text overflow is detected by calculation, never visually: text is
+ * E12, Text overflow is detected by calculation, never visually: text is
  * measured from the font metrics (not the browser), on the longest active
  * language variant (D12.2), with hyphenation off by default. When a computed
  * text box exceeds the space available to it, a blocking TYPO.TEXT_OVERFLOW is

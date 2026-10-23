@@ -1,5 +1,5 @@
 /**
- * M4 (partie M), « Affichage » — comment le graphe se distingue à l'œil.
+ * M4 (partie M), « Affichage » : comment le graphe se distingue à l'œil.
  *
  * « Les nœuds sont différenciés par leur forme, jamais par la seule couleur.
  * Les arêtes non accessibles sont tracées en trait interrompu. Les
@@ -7,8 +7,8 @@
  * distinctions ne repose sur la couleur seule, contrôle vérifié en niveaux de
  * gris. »
  *
- * C'est M7.7 (partie M) — « aucune information n'est portée par la seule
- * couleur » — sur le cas le plus dense de la tranche. L'encodage est donc une
+ * C'est M7.7 (partie M) (« aucune information n'est portée par la seule
+ * couleur ») sur le cas le plus dense de la tranche. L'encodage est donc une
  * donnée, et un test vérifie qu'aucun trait distinctif n'est une couleur.
  */
 import type { NodeKind } from '@azimut/core-model';
@@ -22,8 +22,8 @@ export type NodeShape = (typeof NODE_SHAPES)[number];
 /**
  * La forme de chaque type de nœud.
  *
- * Deux types partagent une forme quand ils partagent une nature — les trois
- * liaisons verticales, par exemple, sont des chevrons — et se distinguent
+ * Deux types partagent une forme quand ils partagent une nature (les trois
+ * liaisons verticales, par exemple, sont des chevrons) et se distinguent
  * alors par leur libellé, jamais par une teinte. Un lecteur qui ne perçoit
  * pas les couleurs lit le même plan qu'un autre.
  */

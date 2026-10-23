@@ -1,5 +1,5 @@
 /**
- * H8 — lecture du budget par l'API REST : coûts de référence de
+ * H8, lecture du budget par l'API REST : coûts de référence de
  * l'organisation, lignes budgétaires du site (migration 0043).
  *
  * Un montant se lit en entier d'unité mineure avec sa devise. Un entier que

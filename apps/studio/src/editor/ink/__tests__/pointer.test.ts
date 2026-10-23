@@ -5,7 +5,7 @@ import {
 import { INITIAL_ARBITER, PEN_IDLE_MS, arbitrate, penActive } from '../pointer-arbiter.js';
 import type { ArbiterState, ArbitratedEvent } from '../pointer-arbiter.js';
 
-describe('G3.1 — trois types de pointeur', () => {
+describe('G3.1 : trois types de pointeur', () => {
   it('lit le type depuis pointerType, et tient l’inconnu pour une souris', () => {
     expect(pointerKindOf('pen')).toBe('pen');
     expect(pointerKindOf('touch')).toBe('touch');
@@ -20,7 +20,7 @@ describe('G3.1 — trois types de pointeur', () => {
   });
 });
 
-describe('G3.2 — tolérances par type de pointeur', () => {
+describe('G3.2 : tolérances par type de pointeur', () => {
   it('reprend la table : souris 4 et 8, stylet 3 et 6, doigt 12 et 16', () => {
     expect(POINTER_TOLERANCES).toEqual({
       mouse: { select_px: 4, snap_px: 8 },
@@ -31,7 +31,7 @@ describe('G3.2 — tolérances par type de pointeur', () => {
   });
 });
 
-describe('G3.4 et J1.5 — rejet de la paume', () => {
+describe('G3.4 et J1.5 : rejet de la paume', () => {
   const ev = (kind: ArbitratedEvent['kind'], phase: ArbitratedEvent['phase'], at_ms: number, pointerId = 1): ArbitratedEvent =>
     ({ kind, phase, at_ms, pointerId });
 

@@ -1,5 +1,5 @@
 /**
- * L3.1 et A7.3 — le parcours d'un visiteur, montré dans l'atelier du graphe.
+ * L3.1 et A7.3 : le parcours d'un visiteur, montré dans l'atelier du graphe.
  */
 export const ROUTE_FR = {
   'route.title': 'Parcours d’un visiteur',
@@ -11,7 +11,7 @@ export const ROUTE_FR = {
   'route.static': 'Vue statique',
   'route.next_level': 'Niveau suivant',
   'route.previous_level': 'Niveau précédent',
-  'route.frame': 'Niveau {level} — tronçon {index} sur {count}, {length} m',
+  'route.frame': 'Niveau {level} : tronçon {index} sur {count}, {length} m',
   'route.frame_label': 'Parcours sur le niveau {level}',
   'route.change': 'Changement de niveau : {means}, vers {level}',
   'route.means.elevator': 'ascenseur',
@@ -44,7 +44,7 @@ export const ROUTE_EN: Readonly<Record<keyof typeof ROUTE_FR, string>> = {
   'route.static': 'Static view',
   'route.next_level': 'Next level',
   'route.previous_level': 'Previous level',
-  'route.frame': 'Level {level} — leg {index} of {count}, {length} m',
+  'route.frame': 'Level {level}: leg {index} of {count}, {length} m',
   'route.frame_label': 'Route on level {level}',
   'route.change': 'Level change: {means}, to {level}',
   'route.means.elevator': 'lift',

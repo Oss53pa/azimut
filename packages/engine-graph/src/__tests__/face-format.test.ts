@@ -15,10 +15,10 @@ function input(overrides: Partial<FaceFormatInput> = {}): FaceFormatInput {
 }
 
 /**
- * N4.3 — règle M04.G3. Le format se calcule depuis le contenu, la distance de
+ * N4.3 : règle M04.G3. Le format se calcule depuis le contenu, la distance de
  * lecture et la variante linguistique la plus longue.
  */
-describe('destinationListBlockHeightMm — l’inverse du dimensionnement du rendu', () => {
+describe('destinationListBlockHeightMm : l’inverse du dimensionnement du rendu', () => {
   it('rend la hauteur à laquelle le rendu dessine exactement cette taille', () => {
     for (const entries of [1, 2, 5, 12]) {
       for (const size of [8, 30, 120]) {
@@ -40,7 +40,7 @@ describe('destinationListBlockHeightMm — l’inverse du dimensionnement du ren
   });
 });
 
-describe('computeFaceFormat — la hauteur', () => {
+describe('computeFaceFormat : la hauteur', () => {
   it('calcule une hauteur qui porte la hauteur de caractère exigée', () => {
     const result = computeFaceFormat(input());
     expect(result.ok).toBe(true);
@@ -73,7 +73,7 @@ describe('computeFaceFormat — la hauteur', () => {
   });
 });
 
-describe('computeFaceFormat — la largeur', () => {
+describe('computeFaceFormat : la largeur', () => {
   /** Mesure d'essai : chaque caractère vaut la moitié de la hauteur. */
   const measure = (text: string, size: number): number => text.length * size * 0.5;
 
@@ -108,7 +108,7 @@ describe('computeFaceFormat — la largeur', () => {
   });
 });
 
-describe('computeFaceFormat — ce qu’il refuse', () => {
+describe('computeFaceFormat : ce qu’il refuse', () => {
   it('refuse une face sans ligne', () => {
     const result = computeFaceFormat(input({ entry_count: 0 }));
     expect(result.ok).toBe(false);

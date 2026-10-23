@@ -36,7 +36,7 @@ type QueueEntry = {
 };
 
 /**
- * H10 — le tableau de bord ne montre que ce qui attend une action.
+ * H10 : le tableau de bord ne montre que ce qui attend une action.
  *
  * Les compteurs de niveaux, de nœuds et de destinations appartiennent au
  * socle, pas ici : ce qui figure sur cet écran est ce qu'un utilisateur doit

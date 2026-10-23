@@ -73,8 +73,8 @@ function pickProfileFields(
  * **Réserve, et elle est du document :** « Le jour où un profil en tiendrait
  * compte, elles devraient y entrer, faute de quoi un changement de passage
  * laisserait des parcours faux en cache. » Le jour où un profil préférera les
- * cheminements couverts — une option de `travel_profile`, un coût qui lit
- * `sheltered` — ce module est le premier à reprendre, avant le profil
+ * cheminements couverts (une option de `travel_profile`, un coût qui lit
+ * `sheltered`) ce module est le premier à reprendre, avant le profil
  * lui-même. `compute-hashes.test.ts` garde cette réserve visible.
  */
 function graphParts(graph: SiteData['graph']): {
@@ -96,7 +96,7 @@ function graphParts(graph: SiteData['graph']): {
 }
 
 /**
- * D7.1 et D7.2 — l'empreinte des entrées d'un parcours, pour l'invalidation du
+ * D7.1 et D7.2 : l'empreinte des entrées d'un parcours, pour l'invalidation du
  * cache. Elle suit la forme canonique commune à toutes les empreintes du
  * produit : chaînes en NFC, champ absent omis, `sha256:` en tête.
  *
@@ -117,12 +117,12 @@ export function computeInputsHash(
 }
 
 /**
- * A5.3 et D7.2 — l'empreinte du graphe d'un site, **sans profil**.
+ * A5.3 et D7.2 : l'empreinte du graphe d'un site, **sans profil**.
  *
  * Elle est portée par chaque enregistrement de `graph_validation` : une
  * validation de complétude ne vaut que pour le graphe dont elle porte
  * l'empreinte. C'est ce qui rend la règle M02.W11 vérifiable sans qu'on ait à
- * supprimer un enregistrement quand le graphe change — il cesse simplement de
+ * supprimer un enregistrement quand le graphe change : il cesse simplement de
  * correspondre.
  *
  * Le profil en est exclu parce que la complétude n'en dépend pas : un graphe

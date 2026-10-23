@@ -21,7 +21,7 @@ function observation(
     destination_id: id,
     performance,
     source_kind: 'footfall_count',
-    source_label: 'Comptage porte — prestataire A',
+    source_label: 'Comptage porte: prestataire A',
     observed_at: '2026-03-01',
     ...overrides,
   };
@@ -48,7 +48,7 @@ const OPPOSED = {
   ],
 };
 
-describe('assessCorrelation — mesure', () => {
+describe('assessCorrelation: mesure', () => {
   it('rend +1 sur un accord de rangs parfait', () => {
     const result = assessCorrelation(AGREEING.indices, AGREEING.observations);
     expect(result.status).toBe('established');
@@ -129,7 +129,7 @@ describe('assessCorrelation — mesure', () => {
   });
 });
 
-describe('M03.P5 — un montant est refusé tant que la corrélation est sous le seuil', () => {
+describe('M03.P5 : un montant est refusé tant que la corrélation est sous le seuil', () => {
   it('laisse passer une corrélation qui atteint le seuil', () => {
     const result = guardMonetaryEstimate(
       { min_correlation: 0.8 },

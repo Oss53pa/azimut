@@ -5,7 +5,7 @@ import { sessionFromSite } from '../state/session-from-site.js';
 import type { SessionState } from '../state/session-store.js';
 
 /**
- * E5.4 — le second terme du choix de reprise : ce que le dépôt porte d'un site.
+ * E5.4, le second terme du choix de reprise : ce que le dépôt porte d'un site.
  *
  * Le site et le circuit de son tableau des messages (R12) se relisent
  * ensemble. L'atelier y ajoute son esquisse (J3), qu'il est seul à lire

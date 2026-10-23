@@ -130,7 +130,7 @@ describe('ce que l’écriture refuse, et sous quelle règle', () => {
   });
 });
 
-describe('M02.W9 — l’écartement est tracé, jamais silencieux', () => {
+describe('M02.W9 : l’écartement est tracé, jamais silencieux', () => {
   const EXCLUSION: Exclusion = {
     cap: 4,
     ruleRef: 'WAYFIND.MAX_DESTINATIONS',

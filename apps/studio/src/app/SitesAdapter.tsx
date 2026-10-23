@@ -17,7 +17,7 @@ import { orgOfSession } from './session-identity.js';
 import { ClientsSection } from './ClientsSection.js';
 
 /**
- * M1 (partie M) — la liste des sites, et le formulaire de création monté
+ * M1 (partie M) : la liste des sites, et le formulaire de création monté
  * dessus.
  *
  * Le formulaire existait depuis la tranche M et n'était monté nulle part :
@@ -40,7 +40,7 @@ export function SitesAdapter(): JSX.Element {
    * Le chemin d'écriture réel dès que le dépôt est configuré : la commande
    * part vers `apply_commands`, en une transaction, et la liste se recharge
    * depuis le dépôt qui reste la source de vérité. Sans configuration, la
-   * commande est acceptée sans être envoyée — c'est le cas hors ligne de M8
+   * commande est acceptée sans être envoyée : c'est le cas hors ligne de M8
    * (partie M) critère 3, et le refuser rendrait l'écran invérifiable sur un
    * poste nu.
    */
@@ -81,7 +81,7 @@ export function SitesAdapter(): JSX.Element {
   });
 
   /**
-   * Q9 — les pays viennent de la table, jamais d'une liste écrite ici. Le nom
+   * Q9 : les pays viennent de la table, jamais d'une liste écrite ici. Le nom
    * affiché est celui de la langue active ; le référentiel porte les deux et
    * ne se relit pas à la bascule.
    */
@@ -138,7 +138,7 @@ export function SitesAdapter(): JSX.Element {
   );
 }
 
-/** D12.1 — les deux langues actives. Le site les portera en donnée (N1.2). */
+/** D12.1 : les deux langues actives. Le site les portera en donnée (N1.2). */
 const ACTIVE_LANGS: readonly Option[] = [
   { value: 'fr', label: 'Français' },
   { value: 'en', label: 'English' },

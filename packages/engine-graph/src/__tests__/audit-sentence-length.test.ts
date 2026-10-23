@@ -7,7 +7,7 @@ import { refMultilevel } from '@azimut/testkit';
 import type { CharterRule, SiteData, SiteVocabulary } from '@azimut/core-model';
 
 /**
- * La limite de la charte d'un site d'essai — A5.8, `charter_rule`.
+ * La limite de la charte d'un site d'essai : A5.8, `charter_rule`.
  *
  * Vingt-cinq est la valeur que le contrôle portait en dur. Elle est ici, dans
  * une charte inventée, et le contrôle ne connaît plus aucun nombre.
@@ -41,7 +41,7 @@ function mots(n: number): string {
   return Array.from({ length: n }, (_, i) => `mot${String(i + 1)}`).join(' ');
 }
 
-describe('LAYOUT.SENTENCE_TOO_LONG — A5.8, la limite vient de la charte', () => {
+describe('LAYOUT.SENTENCE_TOO_LONG : A5.8, la limite vient de la charte', () => {
   it('ne signale rien sur les sites de référence', () => {
     // Le contrôle naît sans rien à dire ; sans cette vérification, une panne
     // aurait l'air d'une vertu.
@@ -138,7 +138,7 @@ describe('LAYOUT.SENTENCE_TOO_LONG — A5.8, la limite vient de la charte', () =
   });
 
   /**
-   * A5.8 — « Quand la charte ne porte pas une règle, le contrôle correspondant
+   * A5.8 : « Quand la charte ne porte pas une règle, le contrôle correspondant
    * ne s'exécute pas et le signale. Il n'applique aucune valeur par défaut. »
    *
    * La phrase de quarante mots est le cas décisif : l'ancienne limite de
@@ -173,7 +173,7 @@ describe('LAYOUT.SENTENCE_TOO_LONG — A5.8, la limite vient de la charte', () =
   });
 
   /**
-   * D2.2 — « Une règle déclarée et cassée bloque, parce qu'elle a été voulue. »
+   * D2.2 : « Une règle déclarée et cassée bloque, parce qu'elle a été voulue. »
    *
    * Zéro refuserait toute phrase, y compris celles d'un mot : ce n'est pas une
    * limite, donc la règle ne correspond pas à sa nature. Le contrôle ne juge

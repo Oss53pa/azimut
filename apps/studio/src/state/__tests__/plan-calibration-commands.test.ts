@@ -40,10 +40,10 @@ function calibration() {
 }
 
 /**
- * M2 (partie M) — « Valider le calage | Écrit `plan_calibration`, débloque le
+ * M2 (partie M) : « Valider le calage | Écrit `plan_calibration`, débloque le
  * tracé ».
  */
-describe('M2 (partie M) — écriture du calage', () => {
+describe('M2 (partie M) : écriture du calage', () => {
   it('écrit le fond, son calage, et fixe l’origine au premier calage', () => {
     const r = calibrationCommands(PLAN, calibration(), ORIGIN_FREE, WRITE);
     expect(r.ok).toBe(true);
@@ -67,7 +67,7 @@ describe('M2 (partie M) — écriture du calage', () => {
 
   /**
    * M01.S1 (partie N) : « le repère est fixé par le premier calage ». Un second
-   * calage le confirme sans le réécrire — repasser la même valeur n'est pas
+   * calage le confirme sans le réécrire : repasser la même valeur n'est pas
    * une modification.
    */
   it('n’écrit plus le repère quand le site en a déjà un', () => {
@@ -94,7 +94,7 @@ describe('M2 (partie M) — écriture du calage', () => {
   });
 
   /**
-   * M2 (partie M), critère d'acceptation 3 — « Aucune coordonnée en pixels n'est écrite
+   * M2 (partie M), critère d'acceptation 3 : « Aucune coordonnée en pixels n'est écrite
    * en base. » Les pixels servent à mesurer, puis disparaissent.
    *
    * Une *coordonnée* en pixels, donc, et non toute mention du pixel :
@@ -128,7 +128,7 @@ describe('M2 (partie M) — écriture du calage', () => {
   });
 
   /**
-   * A5.2 — « Les points de calage permettent de rejouer le calage à
+   * A5.2 : « Les points de calage permettent de rejouer le calage à
    * l'identique. » Ils sont écrits dans l'ordre de pose, et c'est le rang qui
    * le dit : deux points sans rang ne se rejouent pas.
    */
@@ -177,7 +177,7 @@ describe('M2 (partie M) — écriture du calage', () => {
   });
 
   /**
-   * M2 (partie M), critère d'acceptation 2 — « Le calage rejoué sur les mêmes points
+   * M2 (partie M), critère d'acceptation 2 : « Le calage rejoué sur les mêmes points
    * donne exactement le même résultat. »
    */
   it('rejoué sur les mêmes points, donne exactement les mêmes commandes', () => {

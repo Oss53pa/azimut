@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * I5.6 — Tour surveys are captured offline (an installable web app, reusing the
+ * I5.6: Tour surveys are captured offline (an installable web app, reusing the
  * kiosk-package offline mechanism) and synchronised later. Until a survey has
  * been synced, its observations are not yet reconciled; this audit surfaces that
  * as an informational SURVEY.SYNC_PENDING so an unsynced tour is visible rather
@@ -18,7 +18,7 @@ export type SurveyRecord = {
 
 /**
  * Audit tour surveys for sync state. Returns one info SURVEY.SYNC_PENDING per
- * survey still pending synchronisation, sorted by id. Always ok — a pending
+ * survey still pending synchronisation, sorted by id. Always ok: a pending
  * sync is informational, not blocking.
  */
 export function auditSurveySync(

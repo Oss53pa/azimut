@@ -1,5 +1,5 @@
 /**
- * T-1.2d — Snap integration with tools and scene.
+ * T-1.2d: Snap integration with tools and scene.
  *
  * Bridges the snap system (E8) with the tool state machine (E7.1)
  * and the scene objects. Generates snap targets from actual scene

@@ -12,14 +12,14 @@ import {
 } from '@azimut/core-model';
 import { accessibleMarkSvg } from './parking-mark.js';
 
-/** L'épaisseur de trait d'une place — S-39, « contour léger ». */
+/** L'épaisseur de trait d'une place : S-39, « contour léger ». */
 const PARKING_STROKE_WIDTH = 0.5;
 
 export type OrientedPlanTheme = {
   readonly background: string;
   readonly footprint_fill: string;
   readonly footprint_stroke: string;
-  /** Place de stationnement — S-39, contour léger, distinct du bâti. */
+  /** Place de stationnement : S-39, contour léger, distinct du bâti. */
   readonly parking_fill: string;
   readonly parking_stroke: string;
   readonly edge_stroke: string;
@@ -44,7 +44,7 @@ export type OrientedPlanOptions = {
   /**
    * Display orientation in degrees. Per D6.2 the plan is oriented so what the
    * viewer faces is at the top; the value to pass is
-   * {@link orientationDegForAzimuth}(support.azimuth_deg), NOT the raw azimuth —
+   * {@link orientationDegForAzimuth}(support.azimuth_deg), NOT the raw azimuth:
    * the sign difference is exactly the inversion D6.4 guards against.
    */
   readonly orientation_deg: number;
@@ -52,7 +52,7 @@ export type OrientedPlanOptions = {
   readonly show_north_arrow: boolean;
 };
 
-/** D6.2 — défini dans core-model, partagé avec l'itinéraire de la borne. */
+/** D6.2 : défini dans core-model, partagé avec l'itinéraire de la borne. */
 export { orientationDegForAzimuth };
 
 /** Lot 6 de l'audit : l'échappement unique de `core-model`, apostrophe comprise. */
@@ -134,7 +134,7 @@ export function renderOrientedPlan(
   levelId: string,
   options: OrientedPlanOptions,
   /**
-   * Ce que le plan lit en plus de la scène — voir `renderFloorPlan`. S-39
+   * Ce que le plan lit en plus de la scène, voir `renderFloorPlan`. S-39
    * impose au plan orienté le même traitement des places qu'au plan de niveau.
    */
   context: PlanContext = {},
@@ -169,7 +169,7 @@ export function renderOrientedPlan(
     (d) => nodeIdSet.has(d.node_id),
   );
 
-  // S-39 — les places se dessinent autrement que le bâti, et de la même façon
+  // S-39 : les places se dessinent autrement que le bâti, et de la même façon
   // qu'au plan de niveau. La lecture est commune aux quatre vues.
   const view = parkingSpacesOfLevel(site, levelId, context.facts ?? []);
 
@@ -254,7 +254,7 @@ export function renderOrientedPlan(
     );
   }
 
-  // S-39 — la marque d'une place accessible, après les empreintes. Même
+  // S-39 : la marque d'une place accessible, après les empreintes. Même
   // traitement qu'au plan de niveau : la fonction n'est demandée que s'il y a
   // une place à marquer, non désignée la marque est omise et signalée,
   // ambiguë le plan refuse.

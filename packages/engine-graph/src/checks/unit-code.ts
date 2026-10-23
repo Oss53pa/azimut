@@ -2,7 +2,7 @@ import type { SiteData, Finding } from '@azimut/core-model';
 import { isCellFootprint, codePointCompare } from '@azimut/core-model';
 
 /**
- * N1.4 — règle M01.S3. Une empreinte de nature cellule porte obligatoirement un
+ * N1.4 : règle M01.S3. Une empreinte de nature cellule porte obligatoirement un
  * code d'unité ; les autres natures ne l'exigent pas.
  *
  * Un code vide ou fait d'espaces vaut un code absent : sur un panneau, il ne
@@ -27,12 +27,12 @@ export function checkUnitCodeRequired(site: SiteData): Finding[] {
 }
 
 /**
- * N1.4 — unicité du code d'unité par niveau.
+ * N1.4 : unicité du code d'unité par niveau.
  *
  * La portée est le niveau, pas le site : deux cellules « 104 » sur deux
  * niveaux différents ne se confondent pas, deux sur le même niveau si. Les
  * codes sont comparés sans casse ni espaces de bord, comme les noms
- * d'orientation — un lecteur ne distingue pas « C-104 » de « c-104 ».
+ * d'orientation : un lecteur ne distingue pas « C-104 » de « c-104 ».
  */
 export function checkUnitCodeDuplicate(site: SiteData): Finding[] {
   // Deux niveaux de Map plutôt qu'une clé composée : aucun séparateur à

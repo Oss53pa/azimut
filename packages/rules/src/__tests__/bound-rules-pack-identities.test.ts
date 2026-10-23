@@ -4,7 +4,7 @@ import { boundRulesPackIdentities, resolveSiteRulesPack, type RulesPackIndex } f
 import { loadRulesPack } from '../loader.js';
 
 /**
- * D7.1 — les paquets d'un site, tels que l'empreinte de contenu les porte.
+ * D7.1 : les paquets d'un site, tels que l'empreinte de contenu les porte.
  *
  * Les deux rattachements, chacun avec sa clé et sa version, et non l'identité
  * du paquet fusionné, qui garde celle du socle.
@@ -26,7 +26,7 @@ function index(): RulesPackIndex {
 const socle: SiteRulesBinding = { id: 'rb-1', rules_pack_id: SOCLE_ID, role: 'base' };
 const pays: SiteRulesBinding = { id: 'rb-2', rules_pack_id: PAYS_ID, role: 'overlay' };
 
-describe('D7.1 — boundRulesPackIdentities', () => {
+describe('D7.1: boundRulesPackIdentities', () => {
   it('rend le socle et la surcouche, chacun avec sa clé et sa version', () => {
     const packs = index();
     const socleKey = packs.get(SOCLE_ID);

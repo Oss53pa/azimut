@@ -2,11 +2,11 @@ import { type JSX, type ReactNode, useEffect, useRef } from 'react';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F6, famille « Superposition » — boîte de dialogue.
+ * F6, famille « Superposition » : boîte de dialogue.
  *
  * E6.2 et M7.2 (partie M) veulent que tout soit atteignable au clavier. Une
  * boîte de dialogue qui laisse le focus derrière elle, ou qui ne se ferme pas
- * à l'échappement, rend l'écran inutilisable au clavier seul — et M8 critère 2
+ * à l'échappement, rend l'écran inutilisable au clavier seul : et M8 critère 2
  * exige que le parcours entier s'y fasse.
  *
  * Trois obligations, donc : le focus entre à l'ouverture, il ne sort pas tant

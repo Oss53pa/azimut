@@ -3,7 +3,7 @@ import type { Outcome, Finding } from '@azimut/core-model';
 import { scanForNetworkDependency } from './scan-network.js';
 
 /**
- * D10.1 / D10.2 — Kiosk package assembler.
+ * D10.1 / D10.2: Kiosk package assembler.
  *
  * Lays a validated kiosk deployment tree and produces a conformant manifest:
  *
@@ -170,7 +170,7 @@ export function assembleKioskPackage(
 }
 
 /**
- * D10.2 et D7.2 — l'empreinte d'un manifeste, calculée en un seul endroit :
+ * D10.2 et D7.2, l'empreinte d'un manifeste, calculée en un seul endroit :
  * l'assemblage l'écrit, le protocole de mise à jour la recalcule, et les deux
  * passent par ici. Elle porte tout le manifeste sauf `builtAt`, dans la forme
  * canonique commune ; une valeur non hachable est refusée par

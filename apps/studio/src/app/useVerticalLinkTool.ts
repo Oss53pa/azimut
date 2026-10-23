@@ -10,18 +10,18 @@ import type { SessionGraph } from '../state/session-graph.js';
 import type { VerticalLinkFieldsProps } from '../screens/VerticalLinkFields.js';
 
 /**
- * T-1.5 et M4 (partie M) — l'outil « Liaison verticale ».
+ * T-1.5 et M4 (partie M) : l'outil « Liaison verticale ».
  *
  * Hors de `GraphAdapter` pour une raison tenue par A2.4 : l'adaptateur
  * approchait des quatre cents lignes, et l'outil en demande une soixantaine à
  * lui seul. Le partage suit une ligne de sens et pas seulement une ligne de
- * compte — tout ce qui tient à la liaison est ici, l'adaptateur n'en garde que
+ * compte : tout ce qui tient à la liaison est ici, l'adaptateur n'en garde que
  * le branchement.
  *
  * L'outil n'écrit qu'un couple : l'arête inter-niveaux et la liaison qui la
  * justifie, dans un seul groupe d'annulation. A5.3 : « Une arête entre deux
  * niveaux différents doit avoir une ligne `vertical_link`. » Les écrire en
- * deux gestes laisserait, entre les deux, un état que la validation refuse —
+ * deux gestes laisserait, entre les deux, un état que la validation refuse :
  * et qu'une annulation pourrait figer.
  */
 
@@ -137,7 +137,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
       accessible,
       capacity,
       // M4 (partie M) : la largeur utile est héritée du bâtiment. Une liaison
-      // verticale est une arête, et elle hérite comme les autres — de son
+      // verticale est une arête, et elle hérite comme les autres : de son
       // bâtiment de départ, celui du niveau où l'opérateur travaille. Une
       // passerelle en relie deux, qui peuvent déclarer deux largeurs ; retenir
       // celle du départ suit le geste, et la largeur reste modifiable au
@@ -187,7 +187,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
  *
  * `edgeLengthBetween` est tridimensionnelle : deux nœuds superposés à
  * l'aplomb l'un de l'autre, tous deux posés à l'altitude zéro, donneraient une
- * longueur nulle et la liaison serait refusée — alors que c'est exactement la
+ * longueur nulle et la liaison serait refusée, alors que c'est exactement la
  * liaison que `GRAPH.VERTICAL_LINK_MISALIGNED` (D2.2) veut voir.
  */
 function end(

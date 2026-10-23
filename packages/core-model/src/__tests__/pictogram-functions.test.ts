@@ -7,7 +7,7 @@ import {
 import type { Pictogram, PictogramScope, SiteRulesBinding } from '../index.js';
 
 /**
- * A5.4 — la désignation de fonction d'un pictogramme.
+ * A5.4 : la désignation de fonction d'un pictogramme.
  *
  * « À quoi il sert, et non d'où il vient. C'est par elle qu'un moteur demande
  * le pictogramme d'accessibilité sans connaître son code. »
@@ -37,7 +37,7 @@ function picto(partiel: Partial<Pictogram> & { readonly id: string }): Pictogram
   };
 }
 
-describe('A5.4 — le vocabulaire des fonctions', () => {
+describe('A5.4 : le vocabulaire des fonctions', () => {
   it('donne à chaque fonction la forme espace de noms, point, nom', () => {
     for (const declaration of DECLARED_PICTOGRAM_FUNCTIONS) {
       expect(isFunctionKeyShape(declaration.key), declaration.key).toBe(true);
@@ -66,7 +66,7 @@ describe('A5.4 — le vocabulaire des fonctions', () => {
   });
 });
 
-describe('A5.4 — la résolution d’une fonction', () => {
+describe('A5.4 : la résolution d’une fonction', () => {
   const désigné = picto({ id: 'p-1' });
 
   it('rend le pictogramme quand un seul porte la fonction', () => {
@@ -108,7 +108,7 @@ describe('A5.4 — la résolution d’une fonction', () => {
   });
 });
 
-describe('A5.4 — la portée d’unicité : le paquet pour la sécurité, l’organisation pour l’orientation', () => {
+describe('A5.4, la portée d’unicité : le paquet pour la sécurité, l’organisation pour l’orientation', () => {
   // « Une organisation qui exploite deux sites rattachés à deux paquets
   // différents porte légitimement deux pictogrammes de même fonction, un par
   // paquet : l'unicité par organisation les déclarerait ambigus à tort. »
@@ -157,7 +157,7 @@ describe('A5.4 — la portée d’unicité : le paquet pour la sécurité, l’o
   });
 });
 
-describe('A5.8 — la surcouche l’emporte, l’ambiguïté se juge dans un paquet', () => {
+describe('A5.8 : la surcouche l’emporte, l’ambiguïté se juge dans un paquet', () => {
   // « Précédence, pour une même fonction de pictogramme comme pour une
   // règle : la surcouche l'emporte sur le socle. L'ambiguïté ne se juge qu'à
   // l'intérieur d'un même paquet ; deux paquets qui désignent la même
@@ -209,7 +209,7 @@ describe('A5.8 — la surcouche l’emporte, l’ambiguïté se juge dans un paq
   });
 });
 
-describe('A5.4 — ce que la résolution oppose au moteur', () => {
+describe('A5.4 : ce que la résolution oppose au moteur', () => {
   const sans = resolvePictogramFunction([], SECU_A, ACCESSIBLE_FUNCTION_KEY);
   const deux = resolvePictogramFunction(
     [picto({ id: 'p-a' }), picto({ id: 'p-b' })], SECU_A, ACCESSIBLE_FUNCTION_KEY,

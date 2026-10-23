@@ -78,7 +78,7 @@ function blockCount(): number {
   return template.blocks.length;
 }
 
-describe('N2.7 critère 1 — le tableau généré est exactement celui attendu', () => {
+describe('N2.7 critère 1 : le tableau généré est exactement celui attendu', () => {
   it('produit une ligne par bloc du gabarit, et pas une de plus', () => {
     const out = generate();
     expect(out.ok).toBe(true);
@@ -122,7 +122,7 @@ describe('N2.7 critère 1 — le tableau généré est exactement celui attendu'
       .flatMap(l => l.entries)
       .filter(e => e.destination_id !== null);
 
-    // Ce que le site déclare atteignable depuis le hall, lu dans l'annuaire —
+    // Ce que le site déclare atteignable depuis le hall, lu dans l'annuaire :
     // et non ce que le générateur a rendu.
     const expected = SITE.destinations.map(d => d.id);
     expect(listed.map(e => e.destination_id)).toEqual(expected);

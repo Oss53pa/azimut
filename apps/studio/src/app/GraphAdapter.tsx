@@ -23,10 +23,10 @@ import type {
 } from '../screens/GraphScreen.js';
 
 /**
- * M4 (partie M) — l'adaptateur de la saisie du graphe.
+ * M4 (partie M) : l'adaptateur de la saisie du graphe.
  *
  * À part dans un fichier depuis que l'axe de circulation y est : l'écran tient
- * trois gestes — poser un nœud, tracer les arêtes, tracer un axe — et
+ * trois gestes (poser un nœud, tracer les arêtes, tracer un axe) et
  * `workshop-adapters.tsx` repassait au-delà des 400 lignes qu'A2.4 fixe.
  */
 
@@ -64,7 +64,7 @@ export function GraphScreenAdapter({ session, levelId }: {
   const [remedy, setRemedy] = useState<EdgeRemedy | null>(null);
 
   const graph = readSessionGraph(session.state);
-  // T-1.5 — la session porte tous les niveaux du site, et non le seul niveau
+  // T-1.5 : la session porte tous les niveaux du site, et non le seul niveau
   // du chemin. L'outil de liaison verticale a besoin de l'autre extrémité :
   // sans cette lecture il n'aurait rien à relier, et il ne pouvait donc pas
   // être construit.
@@ -76,7 +76,7 @@ export function GraphScreenAdapter({ session, levelId }: {
   // la reçoivent ensemble.
   const inheritedWidthM = inheritedEdgeWidthM(session.state, levelId);
   const link = useVerticalLinkTool(session);
-  // L3.1 — le parcours d'un visiteur, sous la zone de travail.
+  // L3.1 : le parcours d'un visiteur, sous la zone de travail.
   const route = useRoutePreview(session);
 
   /**
@@ -120,7 +120,7 @@ export function GraphScreenAdapter({ session, levelId }: {
   }
 
   /**
-   * M4 (partie M) — l'application des propriétés, en un geste annulable.
+   * M4 (partie M) : l'application des propriétés, en un geste annulable.
    *
    * Déplacer un nœud recalcule la longueur des arêtes qui le touchent, dans la
    * même commande : « La longueur est recalculée à toute modification de
@@ -165,8 +165,8 @@ export function GraphScreenAdapter({ session, levelId }: {
    *
    * Les lignes n'étaient pas filtrées. Tant que la session n'en portait qu'un,
    * cela ne se voyait pas ; dès qu'elle en porte deux, l'écran mêlait les
-   * nœuds des deux étages, l'outil « Arête » les reliait deux à deux — donc
-   * entre niveaux, donc en refus — et le tracé d'axe reprenait comme
+   * nœuds des deux étages, l'outil « Arête » les reliait deux à deux (donc
+   * entre niveaux, donc en refus) et le tracé d'axe reprenait comme
    * coïncident un nœud situé un étage plus haut.
    */
   const nodes: readonly StoredRow[] = session.state.rows.filter(
@@ -180,7 +180,7 @@ export function GraphScreenAdapter({ session, levelId }: {
     && onLevel.has(String(r.values['from_node_id'] ?? ''))
     && onLevel.has(String(r.values['to_node_id'] ?? '')));
   const levelNodes = graph.nodes.filter(node => node.level_id === levelId);
-  // J1.2 — le réseau tracé au stylet : point appuyé, nœud ; trait, arête.
+  // J1.2, le réseau tracé au stylet : point appuyé, nœud ; trait, arête.
   const ink = useGraphInk({ session, levelId, tool, nextNodeKind, inheritedWidthM, levelNodes, onFindings: setFindings });
   const levelEdges = graph.edges.filter(edge =>
     onLevel.has(edge.from_node_id) && onLevel.has(edge.to_node_id));
@@ -323,8 +323,8 @@ export function GraphScreenAdapter({ session, levelId }: {
             const a = positionOf(from);
             const b = positionOf(to);
             // Une position illisible n'est pas remplacée par l'origine. Elle
-            // l'était, et un nœud rouvert depuis le dépôt — qui porte sa
-            // position déjà analysée, non en JSON — se retrouvait en (0, 0) :
+            // l'était, et un nœud rouvert depuis le dépôt (qui porte sa
+            // position déjà analysée, non en JSON) se retrouvait en (0, 0) :
             // toutes les arêtes tracées après un rechargement auraient été de
             // longueur nulle, donc refusées, sans que l'écran dise pourquoi.
             if (a === null || b === null) {
@@ -371,7 +371,7 @@ export function GraphScreenAdapter({ session, levelId }: {
       }}
     >
       {/*
-        F15 — la zone de travail, montée ici parce que l'adaptateur sait ce
+        F15 : la zone de travail, montée ici parce que l'adaptateur sait ce
         que la session porte. M4 (partie M) veut que les nœuds se distinguent
         par leur forme et les arêtes par leur trait : c'est cette vue qui le
         rend, depuis l'encodage en donnée.

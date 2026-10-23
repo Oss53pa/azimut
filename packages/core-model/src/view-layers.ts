@@ -2,11 +2,11 @@ import type { Finding } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * Calques thématiques et coloration de travail — sections S2.3 et S3.
+ * Calques thématiques et coloration de travail : sections S2.3 et S3.
  *
  * Deux mécanismes que la partie S ajoute à l'atelier, et qu'on tient ici
- * ensemble parce qu'ils répondent au même besoin — voir et organiser son
- * travail — sans jamais toucher ce qui se publie.
+ * ensemble parce qu'ils répondent au même besoin (voir et organiser son
+ * travail) sans jamais toucher ce qui se publie.
  *
  * **Ce que ce module n'est pas.** Le calque thématique n'est pas la couche
  * d'habillage d'E9.3. `decoration_layer` porte des objets dessinés, propres à
@@ -19,13 +19,13 @@ import { codePointCompare } from './empreinte.js';
  */
 
 /**
- * S-10 — les dix calques thématiques, énuméré fermé.
+ * S-10 : les dix calques thématiques, énuméré fermé.
  *
  * L'ordre est celui de la section S9, qui est aussi celui de la phrase de S-10,
  * du fond vers le dessus : « plan de fond, empreintes, circulation et parcours,
  * signalétique, publicité, mobilier et habillage, pictogrammes, annotations,
- * esquisse, cotations ». Il ne vaut pas rang de superposition — `z_order` s'en
- * charge, et il se règle — mais il fixe l'ordre de lecture et celui des
+ * esquisse, cotations ». Il ne vaut pas rang de superposition (`z_order` s'en
+ * charge, et il se règle) mais il fixe l'ordre de lecture et celui des
  * anomalies, ce qu'A9 exige.
  */
 export const VIEW_LAYER_KEYS = [
@@ -44,7 +44,7 @@ export const VIEW_LAYER_KEYS = [
 export type ViewLayerKey = (typeof VIEW_LAYER_KEYS)[number];
 
 /**
- * Restreint une chaîne venue de l'extérieur — base, import — à un calque
+ * Restreint une chaîne venue de l'extérieur (base, import) à un calque
  * connu. À employer à toute frontière qui reçoit du texte libre.
  */
 export function isViewLayerKey(value: string): value is ViewLayerKey {
@@ -52,7 +52,7 @@ export function isViewLayerKey(value: string): value is ViewLayerKey {
 }
 
 /**
- * S-11 — le calque d'esquisse, nommé parce qu'une règle le distingue.
+ * S-11 : le calque d'esquisse, nommé parce qu'une règle le distingue.
  *
  * « Un calque d'esquisse visible à l'écran ne s'imprime jamais, section E9. »
  * C'est le seul des dix dont les deux visibilités ne sont pas libres.
@@ -60,7 +60,7 @@ export function isViewLayerKey(value: string): value is ViewLayerKey {
 export const SKETCH_LAYER_KEY = 'sketch';
 
 /**
- * Un calque thématique — section S9, table `view_layer`.
+ * Un calque thématique : section S9, table `view_layer`.
  *
  * `visible` et `print_visible` sont **deux réglages distincts**, et non un
  * réglage et son héritage. S-11 le dit, et c'est ce qui rend la règle de
@@ -104,7 +104,7 @@ export function screenLayerKeys(layers: readonly ViewLayer[]): readonly ViewLaye
  *
  * Indépendante de la précédente, et pas un sous-ensemble : un calque de
  * repérage peut n'exister qu'à l'impression. Seule l'esquisse est contrainte,
- * et par `auditViewLayers`, non ici — une fonction de lecture ne corrige pas
+ * et par `auditViewLayers`, non ici : une fonction de lecture ne corrige pas
  * en silence ce qu'un contrôle doit refuser.
  */
 export function printLayerKeys(layers: readonly ViewLayer[]): readonly ViewLayerKey[] {
@@ -112,7 +112,7 @@ export function printLayerKeys(layers: readonly ViewLayer[]): readonly ViewLayer
 }
 
 /**
- * S-11 — refuse une esquisse qui s'imprimerait.
+ * S-11 : refuse une esquisse qui s'imprimerait.
  *
  * Le code est celui que D2.2 porte déjà : `SKETCH.IN_DELIVERABLE`, bloquant,
  * « Couche d'esquisse présente dans un export destiné à un tiers ». Un plan
@@ -140,7 +140,7 @@ export function auditViewLayers(layers: readonly ViewLayer[]): readonly Finding[
 }
 
 /**
- * S-8 — ce qu'une coloration de travail peut viser.
+ * S-8 : ce qu'une coloration de travail peut viser.
  *
  * Trois natures, et ce sont celles que la règle nomme : « Un concepteur peut
  * colorer librement des empreintes, des zones ou des calques pour son propre
@@ -156,7 +156,7 @@ export function isWorkColourTargetKind(value: string): value is WorkColourTarget
 }
 
 /**
- * Une coloration de travail — section S9, table `work_color`.
+ * Une coloration de travail : section S9, table `work_color`.
  *
  * `user_id` n'est pas une colonne d'audit, c'est la clé du cloisonnement :
  * S-8 dit que la coloration « est propre à l'utilisateur, n'est jamais
@@ -164,8 +164,8 @@ export function isWorkColourTargetKind(value: string): value is WorkColourTarget
  *
  * `hex` est une donnée, et non une couleur écrite dans le code : elle vient de
  * la base, elle est propre à un utilisateur, et elle ne décrit aucun rendu
- * publiable. L'interdiction d'A2.4 — aucune couleur en dur hors du fichier de
- * jetons — porte sur les couleurs du produit, pas sur celles qu'un concepteur
+ * publiable. L'interdiction d'A2.4 (aucune couleur en dur hors du fichier de
+ * jetons) porte sur les couleurs du produit, pas sur celles qu'un concepteur
  * se donne pour lui-même.
  *
  * **Sa forme est celle des jetons de la partie F**, et la version 17 la fixe :
@@ -232,7 +232,7 @@ export function workColoursOf(
 }
 
 /**
- * S-9 — ce que l'interface doit dire en permanence.
+ * S-9 : ce que l'interface doit dire en permanence.
  *
  * « L'interface indique en permanence qu'une coloration de travail est active,
  * et permet de la retirer d'un geste. Sans cela, un concepteur jugerait un plan

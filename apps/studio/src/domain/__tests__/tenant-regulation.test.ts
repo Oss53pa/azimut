@@ -22,7 +22,7 @@ const conforming: SignProject = {
   features: ['static'],
 };
 
-describe('H5.2 — guardSignProject (TENANT.RULE_VIOLATION)', () => {
+describe('H5.2: guardSignProject (TENANT.RULE_VIOLATION)', () => {
   it('passes a conforming sign project', () => {
     expect(guardSignProject(conforming, REG).ok).toBe(true);
   });

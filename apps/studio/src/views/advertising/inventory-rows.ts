@@ -1,5 +1,5 @@
 /**
- * H4.1 / H4.3 — l'inventaire des emplacements publicitaires, ligne par ligne.
+ * H4.1 / H4.3 : l'inventaire des emplacements publicitaires, ligne par ligne.
  *
  * Tout est dérivé des réservations : l'état du mois, le taux d'occupation sur
  * une fenêtre de mois, le premier mois libre, et les conflits que le garde

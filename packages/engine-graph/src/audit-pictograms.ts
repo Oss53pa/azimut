@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { codePointCompare } from '@azimut/core-model';
 
 /**
- * J5.3 — Each orientation-registry pictogram carries a comprehension-test
+ * J5.3, Each orientation-registry pictogram carries a comprehension-test
  * state: untested, tested, or failed. An untested pictogram may still be used,
  * but the state is visible and must appear in the audit report. This audit
  * emits an informational PICTO.UNTESTED for every orientation pictogram left
@@ -22,7 +22,7 @@ export type PictogramComprehension = {
 /**
  * Audit orientation pictograms for comprehension testing. Returns one info
  * PICTO.UNTESTED finding per untested orientation pictogram, sorted by id.
- * Always ok — an untested pictogram is opposable, not blocking (J5.3).
+ * Always ok: an untested pictogram is opposable, not blocking (J5.3).
  */
 export function auditPictogramComprehension(
   pictograms: readonly PictogramComprehension[],

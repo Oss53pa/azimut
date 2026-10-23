@@ -1,5 +1,5 @@
 /**
- * E7.1 — Tool preview renderer.
+ * E7.1: Tool preview renderer.
  *
  * Renders the intermediate geometry while a tool gesture is active.
  * This is a meter-space component (placed inside the view transform `<g>`).
@@ -11,7 +11,7 @@
  *   - polyline: dashed polyline with vertex dots
  *   - measure/dimension: line with endpoints
  *
- * Styling uses design-token CSS variables (A2.4 — no hardcoded colors).
+ * Styling uses design-token CSS variables (A2.4, no hardcoded colors).
  */
 
 import type { JSX } from 'react';

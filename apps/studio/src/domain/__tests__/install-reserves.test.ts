@@ -10,7 +10,7 @@ const rv = (id: string, lifted: boolean, support_id = 's-1'): InstallReserve => 
   lifted,
 });
 
-describe('H6.2 — auditInstallReserves (INSTALL.RESERVATION_OPEN)', () => {
+describe('H6.2: auditInstallReserves (INSTALL.RESERVATION_OPEN)', () => {
   it('reports nothing when every reserve is lifted', () => {
     const r = auditInstallReserves([rv('r-1', true), rv('r-2', true)]);
     expect(r.ok).toBe(true);

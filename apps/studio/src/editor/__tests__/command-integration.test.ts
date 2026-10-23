@@ -5,7 +5,7 @@ import type { ToolPreview } from '../tool-state.js';
 
 const TS = '2026-01-01T00:00:00Z';
 
-describe('E5+E7 — command integration', () => {
+describe('E5+E7: command integration', () => {
   describe('previewToCommand', () => {
     it('converts rect preview to command with quantized points', () => {
       const preview: ToolPreview = {
@@ -158,7 +158,7 @@ describe('E5+E7 — command integration', () => {
       const cmd = previewToCommand(preview, 'rectangle', 's1', TS);
       expect(cmd).not.toBeNull();
       if (cmd !== null && cmd.before.kind === 'rect') {
-        // Before is zero — undo removes the shape
+        // Before is zero: undo removes the shape
         expect(cmd.before.origin.x_m).toBe(0);
         expect(cmd.before.corner.x_m).toBe(0);
       }

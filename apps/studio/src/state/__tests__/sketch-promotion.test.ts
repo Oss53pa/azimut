@@ -11,7 +11,7 @@ function stroke(id: string, points: readonly (readonly [number, number])[]): Ske
 
 const loop = [{ x_m: 0, y_m: 0 }, { x_m: 10, y_m: 0 }, { x_m: 10, y_m: 10 }, { x_m: 0, y_m: 10 }];
 
-describe('J3.3 — la promotion d’une esquisse', () => {
+describe('J3.3 : la promotion d’une esquisse', () => {
   it('le lasso ne choisit que les traits qu’il entoure entièrement', () => {
     const strokes = [
       stroke('dedans', [[2, 2], [5, 5]]),

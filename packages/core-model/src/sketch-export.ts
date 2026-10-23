@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from './outcome.js';
 
 /**
- * J3.3 — The sketch layer is the one place where a stroke is kept as-is: it is
+ * J3.3, The sketch layer is the one place where a stroke is kept as-is: it is
  * never quantified, never part of any computation, and never appears in a
  * manufacturing deliverable, a kiosk package, or any export destined for a
  * third party. This guard is the automated control on exports required there:

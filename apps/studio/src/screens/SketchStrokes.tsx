@@ -4,7 +4,7 @@ import { strokeStyle } from '../state/sketch.js';
 import type { SketchStroke } from '../state/sketch.js';
 
 /**
- * J3.2 (partie J) — les traits d'esquisse, tels qu'ils ont été tracés.
+ * J3.2 (partie J) : les traits d'esquisse, tels qu'ils ont été tracés.
  *
  * Chaque segment prend l'épaisseur et l'opacité de la pression moyenne de
  * ses deux extrémités. Le marqueur est translucide d'un bloc : l'opacité est portée par le

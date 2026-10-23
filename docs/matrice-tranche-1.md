@@ -1,4 +1,4 @@
-# Matrice de traçabilité — tranche 1
+# Matrice de traçabilité : tranche 1
 
 Périmètre : module 01 et les cinq écrans de la partie M. Confrontée au cahier
 des charges consolidé, et à lui seul.
@@ -16,16 +16,16 @@ après la remise de la version en cours du cahier des charges consolidé.
 
 | Règle | État | Preuve |
 | --- | --- | --- |
-| **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` — le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` — la contrainte tient les deux colonnes ensemble |
-| **M01.S10** Toute arête entre deux bâtiments porte sa ligne `building_link` | **tenu** | `engine-graph/__tests__/checks-structure.test.ts` — `GRAPH.BUILDING_LINK_MISSING`, son contre-exemple, et la remontée jusqu'à `validateGraph` ; `state/__tests__/graph-vertical-link.test.ts` — l'outil de liaison écrit l'arête et sa ligne en un geste. Le cas et son contre-exemple sont désormais portés par des sites de référence : `ref-broken` porte l'arête entre bâtiments sans sa ligne, `ref-retail` les deux passages avec la leur, une couverte et une non couverte (C1). La table existait en base depuis la migration 0004 sans que rien ne la lise. Limite déclarée par la règle : aucun calcul ne lit encore l'attribut de passage couvert |
-| **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` — analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0052 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
+| **M01.S1** Le repère site est fixé au premier calage et jamais modifié | tenu | `state/__tests__/plan-calibration-commands.test.ts` : le second calage ne réécrit pas l'origine ; `db/__tests__/site-origin-check.test.ts` : la contrainte tient les deux colonnes ensemble |
+| **M01.S10** Toute arête entre deux bâtiments porte sa ligne `building_link` | **tenu** | `engine-graph/__tests__/checks-structure.test.ts` : `GRAPH.BUILDING_LINK_MISSING`, son contre-exemple, et la remontée jusqu'à `validateGraph` ; `state/__tests__/graph-vertical-link.test.ts` : l'outil de liaison écrit l'arête et sa ligne en un geste. Le cas et son contre-exemple sont désormais portés par des sites de référence : `ref-broken` porte l'arête entre bâtiments sans sa ligne, `ref-retail` les deux passages avec la leur, une couverte et une non couverte (C1). La table existait en base depuis la migration 0004 sans que rien ne la lise. Limite déclarée par la règle : aucun calcul ne lit encore l'attribut de passage couvert |
+| **M01.S2** Aucune coordonnée en pixels stockée | **tenu** | `db/__tests__/n1-3-no-pixels-in-schema.test.ts` : analyse du schéma entier, comme N1.7 critère 2 l'exige. Plus aucune infraction déclarée : la migration 0052 a supprimé `control_point`, et `plan_calibration_point` reste la seule table de points de calage |
 | **M01.S3** Une empreinte `cell` porte un code | tenu | `engine-graph/__tests__/unit-code.test.ts`, `core-model/__tests__/partie-n-codes.test.ts` |
-| **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` — `GRAPH.DESTINATION_UNLINKED` |
-| **M01.S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
-| **M01.S6** `edge.length_m` calculée, jamais saisie | tenu | `state/__tests__/graph-input.test.ts` — recalcul à chaque déplacement, dénivelée comprise |
-| **M01.S7** La couche d'habillage ne participe à aucun calcul | tenu | `tests/s7-habillage-hors-calcul.test.ts` — `SiteData` ne porte aucune table d'habillage, et aucun des cinq moteurs ne la nomme ni n'importe l'atelier |
-| **M01.S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` — la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
-| **M01.S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` — les deux branches, et la conséquence nommée |
+| **M01.S4** Une destination est rattachée à une empreinte et à un nœud d'accès | tenu | `engine-graph/__tests__/validate-directory.test.ts` : `GRAPH.DESTINATION_UNLINKED` |
+| **M01.S5** L'historique d'occupation est conservé | tenu | `core-model/__tests__/occupancy.test.ts` : quatre occupants successifs sur une cellule, l'occupant en vigueur à une date, le recouvrement rendu plutôt que tranché. Les colonnes existent depuis la migration `0020` ; c'est la lecture qui manquait |
+| **M01.S6** `edge.length_m` calculée, jamais saisie | tenu | `state/__tests__/graph-input.test.ts` : recalcul à chaque déplacement, dénivelée comprise |
+| **M01.S7** La couche d'habillage ne participe à aucun calcul | tenu | `tests/s7-habillage-hors-calcul.test.ts` : `SiteData` ne porte aucune table d'habillage, et aucun des cinq moteurs ne la nomme ni n'importe l'atelier |
+| **M01.S8** Légende et rose des vents générées, jamais dessinées | tenu | `core-model/__tests__/plan-legend.test.ts` : la légende tombe dès que sa dernière destination s'en va ; la rose suit la rotation de la carte (D6.3) |
+| **M01.S9** Fond remplacé : calage conservé si les dimensions concordent | tenu | `state/__tests__/plan-import.test.ts` : les deux branches, et la conséquence nommée |
 
 **Les dix règles sont tenues**, sans dette déclarée.
 
@@ -36,54 +36,54 @@ destructrice, et trois réserves de périmètre nommées à leur place.
 
 Correction du 22 septembre : une première rédaction de cette matrice déclarait
 M01.S5 absente au motif que `destination` ne portait ni `valid_from` ni `valid_to`.
-C'était faux — la migration `0020` les ajoute par `ALTER TABLE`, avec sa
+C'était faux : la migration `0020` les ajoute par `ALTER TABLE`, avec sa
 contrainte. Le manque était la lecture de l'historique, pas son stockage.
 
 ## 1bis. Module 01, critères d'acceptation (N1.7)
 
 | Critère | État | Preuve |
 | --- | --- | --- |
-| 1. Un site modélisé se recharge à l'identique | tenu | `db/__tests__/n1-7-1-rechargement.db.test.ts` — écriture par le chemin d'écriture, relecture par `loadSiteData`, cinq essais, contre une base réelle |
+| 1. Un site modélisé se recharge à l'identique | tenu | `db/__tests__/n1-7-1-rechargement.db.test.ts` : écriture par le chemin d'écriture, relecture par `loadSiteData`, cinq essais, contre une base réelle |
 | 2. Aucune coordonnée en pixels en base, par analyse du schéma | tenu | `db/__tests__/n1-3-no-pixels-in-schema.test.ts`, une infraction déclarée au §5 |
-| 3. Chaque cas de `validateGraph` a son site et son contre-exemple | tenu | `engine-graph/__tests__/n1-7-3-cas-et-contre-exemple.test.ts` — 18 essais. A révélé que `GRAPH.DESTINATION_UNLINKED` n'était levé par rien. `GRAPH.BUILDING_LINK_MISSING` a rejoint la liste avec `ref-broken` pour cas et `ref-retail` pour contre-exemple |
-| 4. L'historique survit à trois changements successifs | tenu | `core-model/__tests__/occupancy.test.ts` — quatre occupants, donc trois changements |
+| 3. Chaque cas de `validateGraph` a son site et son contre-exemple | tenu | `engine-graph/__tests__/n1-7-3-cas-et-contre-exemple.test.ts` : 18 essais. A révélé que `GRAPH.DESTINATION_UNLINKED` n'était levé par rien. `GRAPH.BUILDING_LINK_MISSING` a rejoint la liste avec `ref-broken` pour cas et `ref-retail` pour contre-exemple |
+| 4. L'historique survit à trois changements successifs | tenu | `core-model/__tests__/occupancy.test.ts` : quatre occupants, donc trois changements |
 
 ## 2. Écrans de la partie M, critères d'acceptation
 
-### M2, import et calage — 5 critères
+### M2, import et calage : 5 critères
 
 | Critère | État | Preuve |
 | --- | --- | --- |
-| 1. Distance restituée à moins de 1 % | tenu | `domain/__tests__/plan-calibration.test.ts` — une distance tierce, droite, oblique, et au calage le plus serré |
-| 2. Calage rejoué donne le même résultat | tenu | même fichier — « rend deux fois le même résultat pour la même saisie » |
+| 1. Distance restituée à moins de 1 % | tenu | `domain/__tests__/plan-calibration.test.ts` : une distance tierce, droite, oblique, et au calage le plus serré |
+| 2. Calage rejoué donne le même résultat | tenu | même fichier : « rend deux fois le même résultat pour la même saisie » |
 | 3. Aucune coordonnée en pixels en base | tenu | `plan-calibration-commands.test.ts`, complété par le garde de schéma de §1 |
 | 4. Parcours réalisable au clavier seul | tenu | `tests/e2e/m8-tranche.spec.ts`, critère 2. Le critère était porté tenu à tort : les deux points de calage n'étaient saisissables nulle part, et l'adaptateur en posait deux d'office à la validation |
 | 5. Remplacement de fond : confirmation nommant la conséquence | tenu | `plan-import.test.ts` + `tests/e2e/m7-screen-rules.spec.ts` M7.9 |
-| — État « Partiel » : l'écran dit pourquoi le tracé reste inaccessible | tenu | `tests/e2e/m7-screen-rules.spec.ts` M7.1 — le motif suit la saisie, et le nord franc n'est pas une absence d'orientation. `blockingReason` le calculait depuis toujours, affiché nulle part |
+|, État « Partiel » : l'écran dit pourquoi le tracé reste inaccessible | tenu | `tests/e2e/m7-screen-rules.spec.ts` M7.1 : le motif suit la saisie, et le nord franc n'est pas une absence d'orientation. `blockingReason` le calculait depuis toujours, affiché nulle part |
 
-### M3, tracé des empreintes — 4 critères
+### M3, tracé des empreintes : 4 critères
 
 | Critère | État | Preuve |
 | --- | --- | --- |
 | 1. Polygone auto-intersectant refusé, tracé conservé | tenu | `state/__tests__/footprint-input.test.ts` ; M7.5 en bout en bout |
-| 2. Coordonnées en mètres, quantifiées au millimètre | tenu | `core-model/__tests__/quantize-d1-4.test.ts` — arrondi au plus loin de zéro, jamais de zéro négatif ; `state/__tests__/footprint-input.test.ts` — « quantifie les sommets à la fermeture » |
+| 2. Coordonnées en mètres, quantifiées au millimètre | tenu | `core-model/__tests__/quantize-d1-4.test.ts` : arrondi au plus loin de zéro, jamais de zéro négatif ; `state/__tests__/footprint-input.test.ts` : « quantifie les sommets à la fermeture » |
 | 3. Souris et clavier produisent des données identiques | tenu | `footprint-input.test.ts` |
-| 4. Duplication en série de 20 cellules, une commande annulable | tenu | `state/__tests__/footprint-series.test.ts` — le jugement de la série, 8 essais ; `tests/e2e/m3-serie.spec.ts` — vingt copies, un `Ctrl+Z`, l'original seul reste, et le contre-exemple du second appui qui refuse la série entière sans rien écrire |
-| — Table des raccourcis opposable | tenu | `tests/e2e/m3-serie.spec.ts` — `Ctrl+D` déclenche la série. La table était affichée et liée à rien : `Entrée`, `Échap`, `Retour arrière` et `Ctrl+D` ne faisaient rien |
+| 4. Duplication en série de 20 cellules, une commande annulable | tenu | `state/__tests__/footprint-series.test.ts` : le jugement de la série, 8 essais ; `tests/e2e/m3-serie.spec.ts` : vingt copies, un `Ctrl+Z`, l'original seul reste, et le contre-exemple du second appui qui refuse la série entière sans rien écrire |
+| : Table des raccourcis opposable | tenu | `tests/e2e/m3-serie.spec.ts` : `Ctrl+D` déclenche la série. La table était affichée et liée à rien : `Entrée`, `Échap`, `Retour arrière` et `Ctrl+D` ne faisaient rien |
 
-### M4, saisie du graphe — 4 critères
+### M4, saisie du graphe : 4 critères
 
 | Critère | État | Preuve |
 | --- | --- | --- |
-| 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | tenu | `state/__tests__/graph-axis.test.ts` — 10 essais, dont le doublon de nœud, le doublon d'arête dans les deux sens, et leurs contre-exemples ; `tests/e2e/m4-axe.spec.ts` — la passe est un geste, donc une annulation, et l'écran rend compte de ce qu'il a repris |
-| — Propriétés d'un nœud et d'une arête, atteignables et écrites | tenu | `tests/e2e/m4-proprietes.spec.ts` — la zone de travail rend le graphe, la sélection remplit le panneau au pointeur comme au clavier, et déplacer un nœud recalcule la longueur de ses arêtes. Les deux panneaux étaient construits et inatteignables |
-| — Affichage : forme, trait interrompu, liseré | tenu | `viewport/GraphView.tsx` branche `graph-encoding`, qui portait l'encodage en donnée sans qu'aucun écran l'appelle ; `tests/e2e/greyscale.spec.ts` |
-| — Outil « Arête », tenu au niveau courant | tenu | `tests/e2e/m4-arete-niveau.spec.ts` — tracer au rez-de-chaussée ne pose aucune arête à l'étage. L'outil relisait le magasin entier au lieu des nœuds du niveau : il appariait des nœuds d'étages différents en les écrivant comme s'ils étaient sur le niveau courant. Sur `ref-multilevel`, l'étage passait de trois arêtes à six. Le défaut était hors d'atteinte tant que l'atelier ne connaissait qu'un niveau |
-| — Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` — le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
+| 1. Un axe tracé en une passe produit nœuds et arêtes, sans doublon | tenu | `state/__tests__/graph-axis.test.ts` : 10 essais, dont le doublon de nœud, le doublon d'arête dans les deux sens, et leurs contre-exemples ; `tests/e2e/m4-axe.spec.ts` : la passe est un geste, donc une annulation, et l'écran rend compte de ce qu'il a repris |
+| : Propriétés d'un nœud et d'une arête, atteignables et écrites | tenu | `tests/e2e/m4-proprietes.spec.ts` : la zone de travail rend le graphe, la sélection remplit le panneau au pointeur comme au clavier, et déplacer un nœud recalcule la longueur de ses arêtes. Les deux panneaux étaient construits et inatteignables |
+|, Affichage : forme, trait interrompu, liseré | tenu | `viewport/GraphView.tsx` branche `graph-encoding`, qui portait l'encodage en donnée sans qu'aucun écran l'appelle ; `tests/e2e/greyscale.spec.ts` |
+| : Outil « Arête », tenu au niveau courant | tenu | `tests/e2e/m4-arete-niveau.spec.ts` : tracer au rez-de-chaussée ne pose aucune arête à l'étage. L'outil relisait le magasin entier au lieu des nœuds du niveau : il appariait des nœuds d'étages différents en les écrivant comme s'ils étaient sur le niveau courant. Sur `ref-multilevel`, l'étage passait de trois arêtes à six. Le défaut était hors d'atteinte tant que l'atelier ne connaissait qu'un niveau |
+| : Le type du nœud se choisit avant le geste | tenu | `tests/e2e/m8-tranche.spec.ts` : le sélecteur précède le bouton, et l'essai du critère 2 l'atteint au clavier. Il n'existait qu'au panneau de propriétés, donc après coup, et l'écran ne posait que des carrefours |
 | 2. Longueur jamais saisissable, recalculée | tenu | `graph-input.test.ts` ; M7.3 en bout en bout |
-| 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` — `GRAPH.VERTICAL_LINK_MISSING` et le remède ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` — la proposition ouvre l'outil qui crée la liaison |
-| — Outil « Liaison verticale », touche `L` | tenu | `state/__tests__/graph-vertical-link.test.ts` — 7 essais ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` — la touche, le passage d'un niveau à l'autre, l'arête et la liaison en un geste annulable |
-| — Largeur utile héritée du bâtiment, `building.default_edge_width_m` | tenu | `state/__tests__/edge-width.test.ts` — le chemin arête → niveau → bâtiment, et ce qu'il fait d'un bâtiment qui ne déclare rien ; `tests/e2e/m4-largeur-heritee.spec.ts` — sur `ref-retail`, une arête tracée dans la galerie reçoit 2,4 m et la même dans l'annexe 1,1 m. L'écran posait une valeur unique, écrite dans son code, pour toutes les arêtes de tous les sites |
+| 3. Arête inter-niveaux sans liaison refusée, avec proposition | tenu | `graph-input.test.ts` : `GRAPH.VERTICAL_LINK_MISSING` et le remède ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` : la proposition ouvre l'outil qui crée la liaison |
+| : Outil « Liaison verticale », touche `L` | tenu | `state/__tests__/graph-vertical-link.test.ts` : 7 essais ; `tests/e2e/t-1-5-liaison-verticale.spec.ts` : la touche, le passage d'un niveau à l'autre, l'arête et la liaison en un geste annulable |
+| : Largeur utile héritée du bâtiment, `building.default_edge_width_m` | tenu | `state/__tests__/edge-width.test.ts` : le chemin arête → niveau → bâtiment, et ce qu'il fait d'un bâtiment qui ne déclare rien ; `tests/e2e/m4-largeur-heritee.spec.ts` : sur `ref-retail`, une arête tracée dans la galerie reçoit 2,4 m et la même dans l'annexe 1,1 m. L'écran posait une valeur unique, écrite dans son code, pour toutes les arêtes de tous les sites |
 | 4. Graphe saisissable au clavier seul | tenu | `m8-tranche.spec.ts`, critère 2 |
 
 Les quatre outils de M4 sont construits, et leurs quatre touches sont liées.
@@ -99,19 +99,19 @@ range la fiche de site parmi les écrans qui « restent à spécifier », et c'e
 là que la gestion des bâtiments et des niveaux appartient. Les niveaux d'un
 site viennent donc du dépôt. Voir §5.
 
-### M1bis, fiche de site — 5 critères
+### M1bis, fiche de site : 5 critères
 
 | Critère | État | Preuve |
 | --- | --- | --- |
-| 1. Deux bâtiments et quatre niveaux se créent par l'écran seul | tenu | `tests/e2e/m1bis-fiche-site.spec.ts` — sans intervention en base. C'est ce critère qui débloque T-1.5 : sans second niveau, l'outil de liaison verticale n'a rien à relier |
-| 2. Deux niveaux de même rang refusés | tenu | `state/__tests__/site-structure.test.ts` et l'essai de bout en bout — `DATA.LEVEL_ORDINAL_DUPLICATE` |
-| 3. Un niveau portant des empreintes ou des nœuds ne se supprime pas | tenu | même paire d'essais — `DATA.LEVEL_NOT_EMPTY`, et l'écran dit ce que le niveau porte au lieu de laisser presser puis refuser |
+| 1. Deux bâtiments et quatre niveaux se créent par l'écran seul | tenu | `tests/e2e/m1bis-fiche-site.spec.ts` : sans intervention en base. C'est ce critère qui débloque T-1.5 : sans second niveau, l'outil de liaison verticale n'a rien à relier |
+| 2. Deux niveaux de même rang refusés | tenu | `state/__tests__/site-structure.test.ts` et l'essai de bout en bout : `DATA.LEVEL_ORDINAL_DUPLICATE` |
+| 3. Un niveau portant des empreintes ou des nœuds ne se supprime pas | tenu | même paire d'essais : `DATA.LEVEL_NOT_EMPTY`, et l'écran dit ce que le niveau porte au lieu de laisser presser puis refuser |
 | 4. L'altitude saisie est celle que lit la géométrie | tenu | essai de bout en bout, relu au magasin ; l'outil de liaison verticale en tire la longueur de l'arête |
 | 5. Parcours complet au clavier seul | tenu | essai de bout en bout, sans un clic |
 
 Rang et altitude sont requis sans code d'anomalie : M1bis en donne un au nom
-et au rang en double, aucun à leur absence. Le refus est donc préventif —
-l'action reste inactive tant que les trois champs ne sont pas saisis — plutôt
+et au rang en double, aucun à leur absence. Le refus est donc préventif (
+l'action reste inactive tant que les trois champs ne sont pas saisis) plutôt
 que d'ajouter au catalogue que la version 11 vient de compléter.
 
 ### M1 et M5
@@ -132,10 +132,10 @@ entier que par sa signature : il n'en lit que six champs, que `GraphScope`
 nomme désormais, et `graphScopeFromSession` les assemble depuis la session
 sans rien compléter. Preuve : `state/__tests__/session-scope.test.ts`,
 `engine-graph/__tests__/graph-scope.test.ts`, et le contre-exemple de bout en
-bout — quatre carrefours, aucune entrée, `GRAPH.NO_ENTRANCE` nommé à l'écran.
+bout, quatre carrefours, aucune entrée, `GRAPH.NO_ENTRANCE` nommé à l'écran.
 
-`runChecks` reste hors tranche : il porte les contrôles sémantiques — annuaire,
-lexique de charte, faits de site — dont aucun n'a de donnée à lire avant le
+`runChecks` reste hors tranche : il porte les contrôles sémantiques (annuaire,
+lexique de charte, faits de site) dont aucun n'a de donnée à lire avant le
 module 02.
 
 ## 3. M7, les onze règles d'écran
@@ -155,8 +155,8 @@ et le graphe sans entrée que l'écran refuse en nommant le code.
 | 1. La chaîne fonctionne, site vide → graphe validé | tenu | `m8-tranche.spec.ts` |
 | 2. Le même parcours au clavier seul | tenu | même fichier, sans un seul clic |
 | 3. Le même parcours hors ligne, synchronisation au retour | tenu | même fichier, trois essais : file hors ligne, reprise proposée, abandon sans fusion |
-| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json` — protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine et condition déclarées. **Le relevé fait foi, et ce tableau n'en recopie aucun chiffre** : chaque passage de la suite le réécrit, la médiane bouge d'un passage à l'autre de l'ordre de dix pour cent sur cette machine, et un chiffre recopié ici vieillirait en silence. C'est ce qui venait d'arriver : la ligne annonçait une médiane que le relevé ne portait plus |
-| 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` — 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
+| 4. Le temps du parcours mesuré et consigné | tenu | `docs/releve-m8-parcours.json`, protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine et condition déclarées. **Le relevé fait foi, et ce tableau n'en recopie aucun chiffre** : chaque passage de la suite le réécrit, la médiane bouge d'un passage à l'autre de l'ordre de dix pour cent sur cette machine, et un chiffre recopié ici vieillirait en silence. C'est ce qui venait d'arriver : la ligne annonçait une médiane que le relevé ne portait plus |
+| 5. Absence de violation détectable automatiquement sur les cinq écrans | tenu | `tests/e2e/a11y-axe.spec.ts` : 22 essais, axe-core borné aux niveaux A et AA de WCAG 2.0, 2.1 et 2.2, dans les deux langues. Zéro violation, zéro incomplet. La conformité AA elle-même relève de l'audit externe du lot 4.7 |
 | 6. Aucune couleur en dur, aucun espacement hors échelle, aucune chaîne dans un composant | tenu | `design-tokens/__tests__/no-hardcoded-colors.test.ts`, `spacing-scale.test.ts`, contrôle du dictionnaire i18n |
 
 Le critère 4 est un parcours automatisé. K3.4 place la mesure sur opérateur
@@ -166,14 +166,14 @@ réel dans les sessions d'essai sur usagers, qui n'ont pas eu lieu.
 
 | Sujet | Nature | Ce qu'il faut |
 | --- | --- | --- |
-| Secrets du banc d'essai | Résolu. Le secret de signature des jetons et le mot de passe du rôle `authenticator` étaient écrits en clair, au motif qu'ils étaient jetables — le même motif pour les deux, et A6.3 ne distingue pas les secrets selon leur portée. Ils passent par `AZIMUT_TEST_JWT_SECRET` et `AZIMUT_TEST_POSTGREST_DB_URI`, sans valeur de repli ; la chaîne d'intégration tire le secret à chaque exécution et le masque du journal | Rien. `tests/a6-3-no-secret-in-repo.test.ts` balaie le dépôt et refuse qu'un secret y revienne, en tolérant une valeur nommée et motivée plutôt qu'un fichier entier |
-| Intermittence de `tests/e2e/keyboard-traversal.spec.ts` | Essai vert. La cause est **probable et non prouvée** : l'attente du rendu ajoutée avant la tabulation corrige une course réelle — `page.goto` rend la main avant que React 18 n'ait rendu — mais l'échec n'a jamais été reproduit, ni par vingt-quatre sondes dédiées ni par six exécutions complètes. Rien ne prouve que c'était cette course-là | Rien tant que l'essai reste vert. Une garde bornée fait désormais échouer l'essai sur « l'application n'a rien rendu », avec le corps du document, pour qu'une régression se présente comme une erreur et non comme une intermittence. Si l'intermittence revient, le point se rouvre et la cause est à chercher ailleurs |
+| Secrets du banc d'essai | Résolu. Le secret de signature des jetons et le mot de passe du rôle `authenticator` étaient écrits en clair, au motif qu'ils étaient jetables : le même motif pour les deux, et A6.3 ne distingue pas les secrets selon leur portée. Ils passent par `AZIMUT_TEST_JWT_SECRET` et `AZIMUT_TEST_POSTGREST_DB_URI`, sans valeur de repli ; la chaîne d'intégration tire le secret à chaque exécution et le masque du journal | Rien. `tests/a6-3-no-secret-in-repo.test.ts` balaie le dépôt et refuse qu'un secret y revienne, en tolérant une valeur nommée et motivée plutôt qu'un fichier entier |
+| Intermittence de `tests/e2e/keyboard-traversal.spec.ts` | Essai vert. La cause est **probable et non prouvée** : l'attente du rendu ajoutée avant la tabulation corrige une course réelle (`page.goto` rend la main avant que React 18 n'ait rendu) mais l'échec n'a jamais été reproduit, ni par vingt-quatre sondes dédiées ni par six exécutions complètes. Rien ne prouve que c'était cette course-là | Rien tant que l'essai reste vert. Une garde bornée fait désormais échouer l'essai sur « l'application n'a rien rendu », avec le corps du document, pour qu'une régression se présente comme une erreur et non comme une intermittence. Si l'intermittence revient, le point se rouvre et la cause est à chercher ailleurs |
 | Fiabilité du relevé du critère 4 | Résolu par le protocole D13 : cinq exécutions, la première écartée, médiane retenue, machine déclarée. Les quatre exécutions retenues tiennent dans 5,6 %, contre un rapport de 1 à 1,7 en relevés isolés | Rien. Conservé ici pour mémoire jusqu'à la prochaine relecture du registre |
 | `loadSiteData` sans identité | Sous `FORCE ROW LEVEL SECURITY`, il ne lit rien ; son unique appelant de production, `apps/compiler/src/kiosk-package-job.ts`, ne pose ni rôle ni identité | À traiter dans la tranche qui touche le service de compilation |
 | Liaisons entre bâtiments et `inputs_hash`, D7.1 | Décision retenue et écrite, avec sa réserve. Les liaisons entre bâtiments n'entrent pas dans `inputs_hash`, parce qu'aucun calcul de parcours ne lit aujourd'hui leur attribut de passage couvert : une empreinte d'invalidation ne porte que ce dont un résultat dépend. **Réserve :** le jour où un profil préférera les cheminements couverts, elles devront y entrer, faute de quoi un changement de passage laisserait des parcours faux en cache | Rien à construire. `engine-graph/__tests__/compute-hashes.test.ts` garde la réserve visible : deux essais, l'un montrant que retourner les deux `sheltered` ne bouge pas l'empreinte, l'autre que l'arête qui les porte, elle, la bouge. Le jour venu, c'est le premier qu'il faudra retourner, et `compute-hashes.ts` est le premier fichier à reprendre |
 | Desserte des entrées | **Clos.** Avertissement et non refus, et portée limitée aux entrées empruntées par au moins un profil de visiteur. La version 13 l'inscrit au catalogue sous cette forme. Le renvoi tombe à `null` : aucune règle numérotée ne porte ce contrôle, et un renvoi inventé vaudrait moins que pas de renvoi | Rien. Conséquence déclarée : un site sans profil ne lève rien, ce qui est le cas de la session d'atelier de la tranche 1 |
-| Alignement des liaisons verticales | **Clos.** Le contrôle exempte l'escalier mécanique et la rampe, qui gagnent leur hauteur en avançant : leurs deux têtes ne peuvent pas coïncider en plan. La version 13 l'inscrit au catalogue sous cette forme — « ascenseurs et escaliers droits seulement, tolérance de la section D1.5 » — et le renvoi de l'anomalie va désormais à D1.5 | Rien. Le contrôle est retenu tel quel par l'éditeur |
-| Codes du dépôt hors du catalogue du consolidé | **Clos par la version 13.** Les 93 codes du relevé sont inscrits au catalogue du consolidé, avec leur gravité et leur sens ; les libellés du dépôt sont alignés sur les leurs. Trois codes sont retirés et réservés — deux d'annulation et celui du vocabulaire illisible — parce que ce sont des états d'écran de F7 et non des anomalies de moteur ; leurs points d'appel ont disparu avec eux. `PARK` et `DOC` sont admis en D2.1 et fondés par la règle M01.S11 ; `CHARTER`, déclaré et vide, est retiré des domaines du dépôt | Rien à arbitrer. `tests/catalogue-consolide.test.ts` lit le consolidé lui-même et recoupe les deux catalogues dans les deux sens : gravités, libellés, codes, domaines, codes réservés. Vingt-trois codes du consolidé restent hors du dépôt, tous de modules non construits, nommés un par un avec leur section. `docs/inventaire-codes.md` garde le relevé qui a servi à l'arbitrage |
+| Alignement des liaisons verticales | **Clos.** Le contrôle exempte l'escalier mécanique et la rampe, qui gagnent leur hauteur en avançant : leurs deux têtes ne peuvent pas coïncider en plan. La version 13 l'inscrit au catalogue sous cette forme (« ascenseurs et escaliers droits seulement, tolérance de la section D1.5 ») et le renvoi de l'anomalie va désormais à D1.5 | Rien. Le contrôle est retenu tel quel par l'éditeur |
+| Codes du dépôt hors du catalogue du consolidé | **Clos par la version 13.** Les 93 codes du relevé sont inscrits au catalogue du consolidé, avec leur gravité et leur sens ; les libellés du dépôt sont alignés sur les leurs. Trois codes sont retirés et réservés (deux d'annulation et celui du vocabulaire illisible) parce que ce sont des états d'écran de F7 et non des anomalies de moteur ; leurs points d'appel ont disparu avec eux. `PARK` et `DOC` sont admis en D2.1 et fondés par la règle M01.S11 ; `CHARTER`, déclaré et vide, est retiré des domaines du dépôt | Rien à arbitrer. `tests/catalogue-consolide.test.ts` lit le consolidé lui-même et recoupe les deux catalogues dans les deux sens : gravités, libellés, codes, domaines, codes réservés. Vingt-trois codes du consolidé restent hors du dépôt, tous de modules non construits, nommés un par un avec leur section. `docs/inventaire-codes.md` garde le relevé qui a servi à l'arbitrage |
 | Report de niveau, E7.2 | Copier les circulations et les noyaux verticaux d'un niveau à l'autre. Le registre de la partie K le range en « T-1.5, étendue » | Non construit. Il vient après l'outil de liaison, et demande le magnétisme et la duplication de E7.2, qui relèvent de T-1.2c et T-1.2d |
 
 ## 6. Divergences hors tranche, relevées à la consolidation
@@ -186,7 +186,7 @@ signature de `resolveFaceContent`, colonnes absentes de `pictogram` et de
 **Clos par la version 14.** Les deux divergences ouvertes par la version 13 sont
 traitées :
 
-- `site_fact` est alignée sur A5.11 par la migration 0053 — `status` avec ses
+- `site_fact` est alignée sur A5.11 par la migration 0053 : `status` avec ses
   trois valeurs, `value` en `jsonb`, `source` renommée `source_ref` et
   `recorded_on` renommée `declared_at`, `declared_by` ajoutée. Deux écarts
   restent, déclarés : `declared_by` est un ajout et non un renommage, la table
@@ -217,7 +217,7 @@ tranchés par l'éditeur :
 Défaut trouvé en appliquant le premier point, et corrigé par la migration
 0054 : la contrainte de `charter_rule.kind` n'admettait que cinq des sept
 natures d'A5.8, celles de la migration 0006. Les deux natures que les contrôles
-de rédaction lisent — `forbidden_character` et `max_sentence_words` — n'étaient
+de rédaction lisent (`forbidden_character` et `max_sentence_words`) n'étaient
 pas stockables. Le chemin existait sans que rien puisse l'emprunter.
 
 Les cinq natures de règle de charte qu'aucun contrôle ne consomme restent sans
@@ -237,8 +237,8 @@ charges, et la façon dont il y entre défait ce que le dépôt en avait fait :
   zone de nature `parking`, que la migration 0029 admettait déjà sans que rien
   s'en serve ; la capacité annoncée reste un fait du site ;
 - l'exclusion définitive de l'édition simultanée, en G4.1, est levée par S6.
-  Aucun artefact vivant du dépôt ne la citait — les deux mentions qui
-  subsistent sont dans les documents antérieurs, conservés pour l'historique —
+  Aucun artefact vivant du dépôt ne la citait (les deux mentions qui
+  subsistent sont dans les documents antérieurs, conservés pour l'historique)
   donc il n'y avait rien à retirer, seulement à le vérifier.
 
 **Ouvert par la version 16, et bloquant pour le rattachement des contrôles
@@ -259,8 +259,8 @@ d'A2.2, point 2, la troisième au titre du point 7 :
    une autre table, avec ses propres natures, et M02.W12 ne parle que d'elle.
    L'appartenance n'est donc pas calculable en l'état. Le code est inscrit aux
    non construits avec ce motif.
-3. **Le sort des quatre tables du dépôt** — `parking`, `parking_space`,
-   `parking_uncovered_area`, `vehicle_gate` — que S-35 rend redondantes. Les
+3. **Le sort des quatre tables du dépôt** (`parking`, `parking_space`,
+   `parking_uncovered_area`, `vehicle_gate`) que S-35 rend redondantes. Les
    supprimer est une migration destructrice. Et `parking_uncovered_area` n'est
    pas qu'une redondance : la zone non couverte est ce qui distingue un parking
    à demi numérisé d'un parking en écart, et `PARK.CAPACITY_UNEXPLAINED` s'y
@@ -269,8 +269,8 @@ d'A2.2, point 2, la troisième au titre du point 7 :
 **Construit pour la tranche, sur les trois éléments de la partie S qui la
 concernent.** Les calques thématiques (S-10 à S-12) et la coloration de travail
 (S-8, S-9) entrent au modèle : dix clés de calque fermées, deux visibilités
-distinctes dont celle d'impression que l'esquisse ne peut pas porter — le refus
-emprunte `SKETCH.IN_DELIVERABLE`, que D2.2 portait déjà — et une coloration
+distinctes dont celle d'impression que l'esquisse ne peut pas porter (le refus
+emprunte `SKETCH.IN_DELIVERABLE`, que D2.2 portait déjà) et une coloration
 dont la lecture exige un identifiant d'utilisateur, ce qu'aucun moteur n'a à
 donner. La persistance attend les tables `view_layer` et `work_color` de S9.
 
@@ -315,7 +315,7 @@ la version 18, et fait** : voir « Le stationnement passé aux objets du socle �
 plus bas. Ce relevé est conservé parce que c'est lui qui a servi à décider, et
 que le retrait d'une table se juge sur ce qu'elle portait.
 
-**`parking`** — 8 colonnes métier : `level_id`, `geometry` (polygone, mètres),
+**`parking`**, 8 colonnes métier : `level_id`, `geometry` (polygone, mètres),
 `name`, `free` (booléen, le parking est-il gratuit), `declared_capacity`
 (entier positif ou nul), `status`, `source`. Contraintes : nom et source non
 blancs, capacité non négative, statut parmi les quatre valeurs d'objet.
@@ -323,7 +323,7 @@ blancs, capacité non négative, statut parmi les quatre valeurs d'objet.
 Ce que S8 remplace : `level_id`, `geometry` et `name` par `zone` ;
 `declared_capacity` par un fait ciblé, puisque S-36 fait de la capacité annoncée
 un fait du site. Ce qui n'a pas d'équivalent : **`free`**, qui n'est ni une
-nature de zone ni un fait déclaré aujourd'hui — un parking gratuit est pourtant
+nature de zone ni un fait déclaré aujourd'hui, un parking gratuit est pourtant
 ce qu'un plan d'accueil écrit, et `bound-text.ts` cite `parking.capacite` comme
 exemple de liaison de document. Il deviendrait naturellement un fait ciblé,
 mais aucune section ne le dit.
@@ -333,19 +333,19 @@ validé comme les autres), `document-bindings` (qui compare capacité annoncée 
 places numérisées pour les textes liés), `render-floor-plan` (qui dessine les
 parkings d'un niveau).
 
-**`parking_space`** — 6 colonnes métier : `parking_id`, `kind`
+**`parking_space`**, 6 colonnes métier : `parking_id`, `kind`
 (`standard`, `pmr`, `livraison`), `row_label` (rangée ou travée du plan
 source), `geometry` (facultative), `status`, `source`.
 
 Ce que S8 remplace : `geometry` et l'appartenance par une empreinte de nature
 `parking_space` et la liste de la zone. Ce qui n'a pas d'équivalent : **`kind`**
-— une place PMR n'est pas une place ordinaire, et A5.2 ne donne à `footprint`
-aucune colonne pour le dire — et **`row_label`**, le repère de travée qui fait
+(une place PMR n'est pas une place ordinaire, et A5.2 ne donne à `footprint`
+aucune colonne pour le dire) et **`row_label`**, le repère de travée qui fait
 le lien avec le plan papier.
 
 Lu par : `audit-parking`, `document-bindings`, `render-floor-plan`.
 
-**`vehicle_gate`** — 6 colonnes métier : `level_id`, `code` (repère du plan
+**`vehicle_gate`**, 6 colonnes métier : `level_id`, `code` (repère du plan
 source, V1 à V5 sur le site qui a servi de relevé), `role`, `width_m`
 (strictement positive), `position` (point), `status`, `source`.
 
@@ -354,14 +354,14 @@ et aucun moteur, aucun rendu, aucun contrôle ne la consulte. Elle n'a pas non
 plus d'équivalent au socle : un portail véhicule n'est ni une empreinte, ni une
 zone, ni un nœud du graphe de circulation, qui porte des cheminements piétons.
 C'est la seule des trois dont la suppression ne perdrait aucune fonction
-existante — et la seule dont la donnée n'est reprise nulle part.
+existante : et la seule dont la donnée n'est reprise nulle part.
 
 La quatrième, `parking_uncovered_area`, portait `parking_id`, `geometry`
 facultative et `reason` non blanche. La version 18 a tranché autrement que ce
 paragraphe ne le prévoyait : la marque d'une empreinte non numérisée est
 l'existence du fait qui la cible, et la table part.
 
-### Le stationnement passé aux objets du socle — version 18
+### Le stationnement passé aux objets du socle : version 18
 
 L'éditeur a tranché les trois tables. Fait en six commits, un par migration,
 les lectures migrées avant toute suppression, comme demandé.
@@ -387,7 +387,7 @@ devenu un fait déclaré, `kind` et `row_label` sont ce qui reste de
 
 **La géométrie d'un parking n'est pas passée à une colonne.** L'arbitrage dit
 « géométrie et nom passent à la zone », et A5.2 donne à `zone` un nom, une
-nature et `footprint_ids`, sans géométrie — « empreintes couvertes par la zone,
+nature et `footprint_ids`, sans géométrie : « empreintes couvertes par la zone,
 appartenance déclarée et non calculée ». L'emprise d'un parking est donc celle
 de ses empreintes, place par place, et le sol lui-même une empreinte de nature
 `outdoor` si le plan la montre. Ajouter un polygone à `zone` aurait été un choix
@@ -411,8 +411,8 @@ qu'il fût.
 en désignant l'objet que le livrable montre.
 
 **Décision assumée, à confirmer : `parking_uncovered_area`.** Elle n'est pas
-l'une des trois tables tranchées. Son retrait est entraîné — elle pend à
-`parking` par une clé étrangère — et S-37 lui donne un remplaçant complet, sauf
+l'une des trois tables tranchées. Son retrait est entraîné (elle pend à
+`parking` par une clé étrangère) et S-37 lui donne un remplaçant complet, sauf
 `reason`, le motif textuel, que la règle ne nomme pas : elle nomme « le nombre
 de places qu'elle est censée porter et sa source ». La source d'un fait porte
 la seconde ; le motif libre n'a pas de place déclarée, et n'en a pas été créé.
@@ -429,14 +429,14 @@ propriétaire déclaré pour le module 01, comme la version 18 l'y range. Elle y
 entre parce qu'elle a changé de nature : extension d'une empreinte, elle suit
 l'empreinte.
 
-### La convention de clé des faits — A5.11, version 18
+### La convention de clé des faits : A5.11, version 18
 
 Trois clés déclarées, chacune avec son type attendu et sa cible :
 `parking.capacity` (entier, zone de nature `parking`), `parking.free` (booléen,
 même cible), `parking.undigitized_spaces` (entier, empreinte de nature
 `parking_space`).
 
-Le refus — « une valeur qui ne correspond pas au type déclaré est refusée » —
+Le refus (« une valeur qui ne correspond pas au type déclaré est refusée »)
 s'applique à `buildCommand`, par `EDIT.COMMAND_SHAPE_INVALID` : une écriture de
 fait mal typée est une commande mal formée, et le catalogue de D2.2 est clos.
 
@@ -444,8 +444,8 @@ fait mal typée est une commande mal formée, et le catalogue de D2.2 est clos.
 valeur mal typée, en toutes lettres ; elle ne refuse pas une clé inconnue. La
 fermer bannirait `parking_gratuit`, `niveaux_parking` et les autres faits
 déclarés avant que la convention existe, que le document n'a pas retirés. La
-discipline d'inscription — « une clé nouvelle s'ajoute à cette table dans le
-même commit que son premier usage » — porte sur l'auteur du commit, non sur
+discipline d'inscription (« une clé nouvelle s'ajoute à cette table dans le
+même commit que son premier usage ») porte sur l'auteur du commit, non sur
 l'exécution.
 
 Deux types déclarés, `integer` et `boolean`, parce que la table en déclare
@@ -459,7 +459,7 @@ tient qu'un contrôle est branché dès qu'un autre fichier le nomme. Un
 
 Sur 86 contrôles exportés, le garde voyait 9 orphelins. Si le baril ne comptait
 pas, et en comptant un appel fait dans le fichier déclarant, il en aurait vu
-**31**. Les 22 de l'écart, vérifiés un par un — aucun n'était appelé dans son
+**31**. Les 22 de l'écart, vérifiés un par un, aucun n'était appelé dans son
 propre fichier non plus :
 
 | Contrôle | Fichier |
@@ -501,7 +501,7 @@ inscription qu'il croit périmée.
 Non corrigé ici, à la demande de l'éditeur : le garde sera traité par une tâche
 qui possède ce code.
 
-### L'invariant 3, à moitié appliqué — corrigé à la version 18
+### L'invariant 3, à moitié appliqué : corrigé à la version 18
 
 **Ce qui manquait.** INV-3 cloisonne le registre de sécurité. Deux chemins y
 mènent : celui de la charte, où une application de charte prétend modifier un
@@ -509,7 +509,7 @@ objet normalisé, et celui de la bibliothèque, où une écriture ordinaire cré
 modifie ou supprime un pictogramme. Le premier était gardé par
 `guardCharterOnSafety`, appelé et éprouvé. Le second avait ses trois gardes,
 écrits et éprouvés un par un, et **aucun appelant**. Le registre était donc
-ouvert à toute écriture passant par la voie normale — la voie que l'atelier
+ouvert à toute écriture passant par la voie normale : la voie que l'atelier
 emprunte.
 
 **Où le brancher.** M12.A2 : « L'atelier n'écrit jamais directement en base. Il
@@ -527,13 +527,13 @@ et `validate-library.ts` les réexporte : aucun appelant existant ne change.
 **Ce que la descente a resserré.** Ils prenaient un `SiteData` entier pour n'y
 lire qu'un registre de pictogramme. Une commande ne porte pas de site, elle
 porte une ligne. Leur premier paramètre est donc devenu
-`readonly PictogramRegistryEntry[]`, soit `{ id, registry }` — la seule chose
+`readonly PictogramRegistryEntry[]`, soit `{ id, registry }` : la seule chose
 qu'ils lisaient. `SiteData.pictograms` le satisfait sans conversion, ce qui
 explique que les onze appels d'essai existants n'aient eu qu'à passer
 `refMinimal.pictograms` au lieu de `refMinimal`.
 
 **La règle de décision retenue.** `safetyRegistryFaults` refuse dès que l'un des
-deux états — avant ou après — déclare `safety`. Lire le seul état antérieur
+deux états (avant ou après) déclare `safety`. Lire le seul état antérieur
 laisserait entrer un pictogramme d'orientation promu au registre de sécurité ;
 lire le seul état postérieur laisserait déclasser un pictogramme normalisé pour
 le modifier au coup suivant. Les deux voies se ferment ensemble.
@@ -542,7 +542,7 @@ Une commande sur `pictogram` qui ne déclare pas la colonne `registry`, ou qui y
 met une valeur que le modèle ne connaît pas, est refusée avec
 `fault: 'registry_undeclared'`. A7 le veut ainsi : un moteur qui reçoit une
 entrée qu'il ne peut pas traiter refuse. Le contraire ouvrirait la voie la plus
-simple de toutes — omettre la colonne.
+simple de toutes : omettre la colonne.
 
 **Ce qui l'éprouve.** `tests/inv3-registre-securite-cloisonne.test.ts`, huit
 voies de contournement et deux contre-exemples, comme N4.7 critère 3 l'exige
@@ -561,7 +561,7 @@ voies de contournement et deux contre-exemples, comme N4.7 critère 3 l'exige
 
 Les deux contre-exemples disent ce que le garde ne doit **pas** fermer : le
 registre d'orientation, que J5.1 ouvre à l'éditeur, et les tables qu'INV-3 ne
-protège pas — une colonne `registry` existe aussi sur `support` et
+protège pas, une colonne `registry` existe aussi sur `support` et
 `support_typology`, et bloquer l'implantation d'un support de sécurité
 n'interdirait rien que le cahier interdise.
 
@@ -571,10 +571,10 @@ tout de suite. »
 
 ### Tranché à la version 18
 
-**Où se stocke la déclaration de S-37.** La question posée à la version 17 —
+**Où se stocke la déclaration de S-37.** La question posée à la version 17 (
 la règle dit qu'une empreinte de place « peut être marquée non numérisée, avec
 le nombre de places qu'elle est censée porter et sa source », et ni S9 ni A5.2
-ne disaient où — est tranchée : la marque est l'existence du fait
+ne disaient où) est tranchée : la marque est l'existence du fait
 `parking.undigitized_spaces` qui cible l'empreinte. La clé manquait, la
 convention d'A5.11 la donne.
 
@@ -583,7 +583,7 @@ convention d'A5.11 la donne.
 **Le comptage, S-38.** Le retrait de la table des surfaces non couvertes a
 révélé que S-37 était incomplète : elle disait que l'écart était admis « à
 concurrence des places déclarées », sans dire ce que valait l'empreinte
-porteuse. S-38 le dit — elle vaut le nombre déclaré, et jamais ce nombre plus
+porteuse. S-38 le dit : elle vaut le nombre déclaré, et jamais ce nombre plus
 un.
 
 Le calcul du dépôt était déjà juste. Ce qui ne l'était pas, c'est ce que le
@@ -593,8 +593,8 @@ anomalies portait le total, places non dessinées comprises. Les deux comptes
 sont maintenant nommés et rendus séparément, `counted_spaces` et
 `digitised_count`, et les anomalies portent les deux.
 
-**Le rendu, S-39.** La question ouverte à la version 18 — ce que les trois
-autres vues font d'une place — est tranchée, et faite.
+**Le rendu, S-39.** La question ouverte à la version 18 (ce que les trois
+autres vues font d'une place) est tranchée, et faite.
 
 | Vue | Ce que S-39 impose | État |
 | --- | --- | --- |
@@ -654,8 +654,8 @@ expose une. Les deux donnent le même résultat ; les réunir est hors périmèt
 
 ## La désignation de fonction, ce que la version 20 ferme
 
-La question posée à la fin de la version 19 — **comment un paquet de règles
-désigne le pictogramme d'un usage** — est tranchée par A5.4 : le pictogramme
+La question posée à la fin de la version 19 (**comment un paquet de règles
+désigne le pictogramme d'un usage**) est tranchée par A5.4 : le pictogramme
 porte une désignation de fonction, `function_key`. À quoi il sert, et non d'où
 il vient.
 
@@ -689,7 +689,7 @@ pas : personne ne l'a demandée. Signaler partout ferait du code un bruit de
 fond, et un code qu'on apprend à ignorer ne signale plus rien.
 
 **Ce que le rendu fait des deux cas.** Non désignée, la marque est omise et
-l'avertissement porté au rendu — omettre en silence ferait d'un plan incomplet
+l'avertissement porté au rendu : omettre en silence ferait d'un plan incomplet
 un plan d'apparence complète. Ambiguë, le plan refuse : départager deux
 désignations serait décider à la place de celui qui a désigné, et A7 fait
 refuser une entrée qu'un moteur ne peut pas traiter.
@@ -712,8 +712,8 @@ même résultat ; les réunir reste hors périmètre.
 
 **Les sites de référence ne désignent aucune fonction.** `refMultilevel` porte
 une place accessible et aucun pictogramme désigné pour elle : tout rendu de son
-rez-de-chaussée porte désormais `PICTO.FUNCTION_NOT_DESIGNATED`. C'est exact —
-la donnée est incomplète et le code le dit — mais c'est un défaut de la donnée
+rez-de-chaussée porte désormais `PICTO.FUNCTION_NOT_DESIGNATED`. C'est exact (
+la donnée est incomplète et le code le dit) mais c'est un défaut de la donnée
 de référence, non du moteur. Le corriger demande d'ajouter un pictogramme de
 sécurité au site de référence, ce qui touche les instantanés visuels : hors du
 périmètre de cette tâche.
@@ -779,9 +779,9 @@ anomalie.
 
 | Ce que la version 22 pose | Où | État |
 | --- | --- | --- |
-| A5.4 — paquet requis pour un pictogramme de sécurité, vide pour l'orientation | Migration `0064`, contrainte `pictogram_pack_by_registry` | Fait |
+| A5.4 : paquet requis pour un pictogramme de sécurité, vide pour l'orientation | Migration `0064`, contrainte `pictogram_pack_by_registry` | Fait |
 | Pictogrammes de sécurité des sites de référence rattachés | `ref-minimal`, `ref-retail` : `rp-test-0001` | Fait |
-| A5.8 — `site_rules_binding.role`, socle ou surcouche, au plus un de chaque | Migration `0065`, index `uq_site_rules_binding_role`, schéma Drizzle | Fait |
+| A5.8 : `site_rules_binding.role`, socle ou surcouche, au plus un de chaque | Migration `0065`, index `uq_site_rules_binding_role`, schéma Drizzle | Fait |
 | La table de rattachement fait foi : lectures migrées | `SiteData.rules_bindings`, chargeur, API REST, studio, compilateur | Fait |
 | Précédence : la surcouche l'emporte, l'ambiguïté se juge dans un paquet | `packsByPrecedence`, `resolvePictogramFunction`, `resolveSiteRulesPack` | Fait |
 | La colonne de paquet disparaît de la table des sites | Migration `0066`, gardée ; Drizzle et liste de dérive dans le même commit | Fait |
@@ -831,11 +831,11 @@ maintenant signalée ; où il s'affiche reste non dit.
 
 | Ce que la version 23 pose | Où | État |
 | --- | --- | --- |
-| D7.1 et annexe T, §3.1.4 — socle et surcouche dans l'empreinte, chacun avec sa clé et sa version | `BoundRulesPacks`, `rulesPacksInRoleOrder`, `computeContentHash`, `computeFaceContentHash` | Fait |
+| D7.1 et annexe T, §3.1.4 : socle et surcouche dans l'empreinte, chacun avec sa clé et sa version | `BoundRulesPacks`, `rulesPacksInRoleOrder`, `computeContentHash`, `computeFaceContentHash` | Fait |
 | L'identité des paquets se lit sur les rattachements, jamais sur la fusion | `boundRulesPackIdentities` | Fait |
 | `ref-minimal` et `ref-retail` rattachés au paquet d'essai | Sites de référence, essai `safety-pictograms-bound` | Fait |
 | Libellés de `PARK.CAPACITY_UNEXPLAINED` alignés sur S8 | Libellés fr et en | Fait |
-| A8 — la limite de 400 lignes vise les fichiers source | Sans effet sur le code | Pris en compte |
+| A8 : la limite de 400 lignes vise les fichiers source | Sans effet sur le code | Pris en compte |
 
 Deux constats de la section précédente sont fermés : l'empreinte d'une
 fusion de paquets, et les deux sites de référence dont le site ne voyait pas
@@ -884,12 +884,12 @@ du paquet du studio, sans correction au passage.
 
 | Ce que la version 24 pose | Où | État |
 | --- | --- | --- |
-| D10.0 — l'assemblage agrège les anomalies de chaque rendu qu'il embarque | `buildKioskMapFiles`, `buildKioskTree`, `buildKioskPackage` | Fait |
-| D10.0 — une marque de sécurité omise faute de fonction désignée bloque la construction | `buildKioskMapFiles`, essai `kiosk-anomalies-d10-0` | Fait |
-| D7.2 — NFC, champ absent omis, site sans paquet refusé | `computeFaceContentHash` (core-model) | Fait |
-| D7.2 — une seule implantation | `computeFaceContentHash` seule ; `computeContentHash` retiré ; essai `d7-2-empreinte-unique` | Fait |
+| D10.0 : l'assemblage agrège les anomalies de chaque rendu qu'il embarque | `buildKioskMapFiles`, `buildKioskTree`, `buildKioskPackage` | Fait |
+| D10.0 : une marque de sécurité omise faute de fonction désignée bloque la construction | `buildKioskMapFiles`, essai `kiosk-anomalies-d10-0` | Fait |
+| D7.2 : NFC, champ absent omis, site sans paquet refusé | `computeFaceContentHash` (core-model) | Fait |
+| D7.2 : une seule implantation | `computeFaceContentHash` seule ; `computeContentHash` retiré ; essai `d7-2-empreinte-unique` | Fait |
 | Vocabulaire d'avant S8 retiré du thème et des commentaires | `undigitised_fill`, `undigitised_stroke` | Fait |
-| A5.8 — le site de borne n'a pas de rattachement : le champ est absent | `KioskSite`, `loadKioskSite` | Fait |
+| A5.8, le site de borne n'a pas de rattachement : le champ est absent | `KioskSite`, `loadKioskSite` | Fait |
 | Tâche de découpage du dépôt PostgREST | Déclarée ci-dessous | Déclarée |
 
 Les cinq premiers constats de la section précédente sont fermés : les
@@ -974,8 +974,8 @@ du paquet du studio, sans correction au passage.
 
 | Ce que la version 25 pose | Où | État |
 | --- | --- | --- |
-| D7.2 — la forme canonique vaut pour toutes les empreintes | `inputs_hash`, `graph_hash` : `computeInputsHash`, `computeGraphHash` passent par `empreinte` | Fait pour les deux empreintes signalées |
-| D7.2 — une empreinte déjà enregistrée ne se convertit pas | Aucune migration ; essai du studio : un passage de validation sous l'ancienne forme ne vaut plus (M02.W11) | Fait |
+| D7.2 : la forme canonique vaut pour toutes les empreintes | `inputs_hash`, `graph_hash` : `computeInputsHash`, `computeGraphHash` passent par `empreinte` | Fait pour les deux empreintes signalées |
+| D7.2 : une empreinte déjà enregistrée ne se convertit pas | Aucune migration ; essai du studio : un passage de validation sous l'ancienne forme ne vaut plus (M02.W11) | Fait |
 | Graphie de la surface non numérisée alignée sur les clés de faits | `undigitized_fill`, `undigitized_stroke`, `parkingSpacesOfLevel().undigitized`, libellés anglais | Fait |
 
 Le premier constat de la section précédente est fermé pour les deux
@@ -1031,12 +1031,12 @@ locale. Relevé, non corrigé.
 
 | Ce que la version 26 pose | Où | État |
 | --- | --- | --- |
-| A12.3 — le journal d'audit en insertion seule, en priorité | Migration `0067_a12_3_audit_log_insert_only` ; essai `a12-3-insertion-seule.db` | Fait |
-| D7.2 — toutes les empreintes suivent la forme canonique, en un seul lot | `empreinteOutcome` (core-model), appelée par chaque empreinte nommée ci-dessous | Fait |
-| A9 — plus de `localeCompare` dans un ensemble haché | `codePointCompare` (core-model) | Fait pour les empreintes |
+| A12.3 : le journal d'audit en insertion seule, en priorité | Migration `0067_a12_3_audit_log_insert_only` ; essai `a12-3-insertion-seule.db` | Fait |
+| D7.2 : toutes les empreintes suivent la forme canonique, en un seul lot | `empreinteOutcome` (core-model), appelée par chaque empreinte nommée ci-dessous | Fait |
+| A9 : plus de `localeCompare` dans un ensemble haché | `codePointCompare` (core-model) | Fait pour les empreintes |
 | Clé de liaison `parking.digitized_spaces` | `document-bindings.ts`, `audit-parking.ts` | Fait |
-| D2.2 — `DATA.HASH_INPUT_INVALID`, bloquant | Catalogue, libellés, `empreinteOutcome` | Fait |
-| M2 — le DWG refusé, le DXF accepté | `ACCEPTED_PLAN_FORMATS` (studio) | Fait |
+| D2.2 : `DATA.HASH_INPUT_INVALID`, bloquant | Catalogue, libellés, `empreinteOutcome` | Fait |
+| M2 : le DWG refusé, le DXF accepté | `ACCEPTED_PLAN_FORMATS` (studio) | Fait |
 
 Le journal d'audit, les empreintes restantes, le tri par `localeCompare`
 dans les empreintes et la graphie en -is- sont fermés. Ce sont les quatre
@@ -1159,11 +1159,11 @@ des `Outcome` par identité après le changement de signature, et seul
 
 | Ce que la version 27 pose | Où | État |
 | --- | --- | --- |
-| D2.2 — `IMPORT.RASTER_PRECISION_LIMITED`, avertissement | Catalogue et libellés (core-model) | Fait |
-| M2 — la précision du fond se juge sur le contenu, jamais sur l'extension | `plan-content.ts`, `pdf-painted-paths.ts`, `dxf-geometry.ts` (studio) ; écran M2 | Fait |
-| M2 — tableau des champs rétabli | Document | Rien à faire dans le code |
-| A9 — contrôle automatique des comparaisons localisées dans `engine-*` | Essai `a9-comparaison-localisee`, relevé `a9-releve-comparaisons-localisees.json` | Fait |
-| A9 — remplacement des comparaisons localisées existantes | Déclaré ci-dessous | Déclarée |
+| D2.2 : `IMPORT.RASTER_PRECISION_LIMITED`, avertissement | Catalogue et libellés (core-model) | Fait |
+| M2 : la précision du fond se juge sur le contenu, jamais sur l'extension | `plan-content.ts`, `pdf-painted-paths.ts`, `dxf-geometry.ts` (studio) ; écran M2 | Fait |
+| M2 : tableau des champs rétabli | Document | Rien à faire dans le code |
+| A9 : contrôle automatique des comparaisons localisées dans `engine-*` | Essai `a9-comparaison-localisee`, relevé `a9-releve-comparaisons-localisees.json` | Fait |
+| A9 : remplacement des comparaisons localisées existantes | Déclaré ci-dessous | Déclarée |
 | Le dossier `tests/` vérifié par le contrôle de types | `tests/tsconfig.json` ; essai `typecheck-couverture` | Fait |
 
 **La précision du fond.** La nature du fichier se lit dans ses premiers
@@ -1262,12 +1262,12 @@ point, sur les flottants, s'en trouve détaché. Son contenu reste appliqué.
 
 | Ce que la version 28 pose | Où | État |
 | --- | --- | --- |
-| A9 — portée : tout code qui produit une sortie ou une empreinte | Essai `a9-comparaison-localisee`, relevé étendu | Contrôle étendu ; tâche redéclarée ci-dessous |
-| M2 — le format se juge sur le contenu ; un contenu hors des formats acceptés est refusé | `acceptPlanFile`, `inspectPlanContent` (studio) | Fait |
-| M2 — le nombre de pages d'un PDF se lit, `IMPORT.PAGE_REQUIRED` se lève | `pdf-pages.ts` ; champ « Page » de l'écran M2 | Fait |
-| A5.2 — `plan_source.content_kind` | Migration `0068_a5_2_plan_source_content_kind` ; écriture à l'import | Fait |
+| A9, portée : tout code qui produit une sortie ou une empreinte | Essai `a9-comparaison-localisee`, relevé étendu | Contrôle étendu ; tâche redéclarée ci-dessous |
+| M2 : le format se juge sur le contenu ; un contenu hors des formats acceptés est refusé | `acceptPlanFile`, `inspectPlanContent` (studio) | Fait |
+| M2 : le nombre de pages d'un PDF se lit, `IMPORT.PAGE_REQUIRED` se lève | `pdf-pages.ts` ; champ « Page » de l'écran M2 | Fait |
+| A5.2 : `plan_source.content_kind` | Migration `0068_a5_2_plan_source_content_kind` ; écriture à l'import | Fait |
 | Cinq fichiers de configuration sous contrôle de types | `tsconfig.config.json` (racine, studio, db) ; essai `typecheck-couverture` | Fait |
-| A9 — liste des sources d'indéterminisme rétablie | Document | Rien à faire dans le code |
+| A9 : liste des sources d'indéterminisme rétablie | Document | Rien à faire dans le code |
 
 Les quatre premiers points ouverts après la version 27 sont fermés : le format
 jugé sur l'extension, le nombre de pages jamais lu, les fichiers de
@@ -1379,9 +1379,9 @@ une autre numérisée passe pour vectoriel, quelle que soit la page choisie.
 
 | Ce que la version 29 pose | Où | État |
 | --- | --- | --- |
-| M2 — la nature d'un document de plusieurs pages se juge sur la page retenue, indéterminée quand le suivi ne conclut pas | `pdf-page-nature.ts`, `pdf-objects.ts`, `pdf-syntax.ts` (studio) ; `precisionOfPage` | Fait |
-| A9 — les tris d'affichage du studio entrent dans la tâche, par la langue active déclarée | Tâche redéclarée ci-dessous | Déclarée |
-| D13 — taille de fenêtre déclarée avec tout relevé qui dépend d'un rendu | Essai `m8-tranche` ; `docs/releves-m8-anterieurs.json` ; essai `d13-releves-fenetre` | Fait |
+| M2 : la nature d'un document de plusieurs pages se juge sur la page retenue, indéterminée quand le suivi ne conclut pas | `pdf-page-nature.ts`, `pdf-objects.ts`, `pdf-syntax.ts` (studio) ; `precisionOfPage` | Fait |
+| A9 : les tris d'affichage du studio entrent dans la tâche, par la langue active déclarée | Tâche redéclarée ci-dessous | Déclarée |
+| D13 : taille de fenêtre déclarée avec tout relevé qui dépend d'un rendu | Essai `m8-tranche` ; `docs/releves-m8-anterieurs.json` ; essai `d13-releves-fenetre` | Fait |
 
 Les deux points ouverts après la version 28 sont fermés : la précision d'un
 PDF de plusieurs pages jugée sur le fichier entier, et les tris d'affichage
@@ -1499,8 +1499,8 @@ s'ajouter sans que rien ne le refuse, avant que la tâche ne s'exécute.
 
 | Ce que la version 30 pose | Où | État |
 | --- | --- | --- |
-| A9 — dans l'interface, un contrôle automatique refuse tout appel qui ne déclare aucune langue | Essai `a9-studio-langue-declaree`, relevé `a9-releve-studio-langue-non-declaree.json` | Fait |
-| A9 — le pliage de casse d'un contrôle d'unicité est indépendant de toute langue | Tâche redéclarée ci-dessous | Déclarée |
+| A9 : dans l'interface, un contrôle automatique refuse tout appel qui ne déclare aucune langue | Essai `a9-studio-langue-declaree`, relevé `a9-releve-studio-langue-non-declaree.json` | Fait |
+| A9 : le pliage de casse d'un contrôle d'unicité est indépendant de toute langue | Tâche redéclarée ci-dessous | Déclarée |
 | Échéance de la tâche : avant le premier livrable réel | Tâche | Confirmée |
 
 Le point ouvert après la version 29 est fermé : le studio est gardé.
@@ -2239,7 +2239,7 @@ comprise, avec les nouveaux boutons), `build` sans erreur.
 
 Décisions prises avec l'utilisateur : J3.4 complété par la règle de A5
 (`updated_at`, `deleted_at` sur les deux tables), et une palette d'esquisse
-de quatre couleurs de feutre — graphite, brique, outremer, sapin — portée par
+de quatre couleurs de feutre (graphite, brique, outremer, sapin) portée par
 des jetons `sketch-*` distincts de ceux de l'interface et des chartes (J3.2).
 
 **Base** (migration 0072, commit à part) :
@@ -2268,7 +2268,7 @@ Le module 12 est propriétaire des deux tables.
   l'esquisse n'entre jamais dans `SiteData`, que lisent moteurs et
   compilateur.
 
-**Contrôle automatisé sur les exports (J3.3)** — `tests/j3-3-esquisse-hors-livrable.test.ts` :
+**Contrôle automatisé sur les exports (J3.3)**, `tests/j3-3-esquisse-hors-livrable.test.ts` :
 
 - `SiteData` ne porte aucune esquisse ;
 - ni les moteurs, ni le compilateur, ni le paquet de borne, ni la couche

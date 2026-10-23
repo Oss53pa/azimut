@@ -1,11 +1,11 @@
 /**
- * E7.3 — Alignment and distribution panel.
+ * E7.3: Alignment and distribution panel.
  *
  * Appears when 2+ items are selected. Provides buttons for
  * alignment (left, center, right, top, middle, bottom),
  * distribution (horizontal, vertical), and z-order operations.
  *
- * This is a view component — it fires callbacks, never mutates
+ * This is a view component: it fires callbacks, never mutates
  * geometry directly (INV-2). The caller applies results via
  * Commands (E5).
  *
@@ -22,7 +22,7 @@ import type { UiMessageKey } from '../i18n/messages.js';
 // ---------------------------------------------------------------------------
 
 type AlignmentPanelProps = {
-  /** Number of selected items — panel hides when < 2. */
+  /** Number of selected items: panel hides when < 2. */
   readonly selectedCount: number;
   /** Called when an alignment button is clicked. */
   readonly onAlign: (axis: AlignAxis) => void;

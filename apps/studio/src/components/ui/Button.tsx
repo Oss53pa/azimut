@@ -2,7 +2,7 @@ import { type JSX, type ReactNode } from 'react';
 import { TEXT } from './tokens.js';
 
 /**
- * F6, famille « Action » — bouton principal, secondaire, discret.
+ * F6, famille « Action »: bouton principal, secondaire, discret.
  *
  * Trois rangs et pas davantage. Un écran qui semble en demander un quatrième
  * demande en réalité qu'on revoie sa hiérarchie d'actions.

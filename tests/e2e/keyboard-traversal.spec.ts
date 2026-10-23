@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * F16 — « Parcours complet au clavier sur chaque écran. »
+ * F16 : « Parcours complet au clavier sur chaque écran. »
  *
  * Et M8 (partie M) critère 2 : « Le même parcours est réalisable au clavier
  * seul. » L'essai ne touche jamais la souris : il tabule, et vérifie qu'il
@@ -49,20 +49,20 @@ const RENDER_TIMEOUT_MS = 5_000;
  * l'ajout de cette attente sont toutes passées, et je n'ai jamais reproduit
  * l'échec. La course décrite ci-dessous est donc une **cause probable, non une
  * cause prouvée** : je ne l'ai pas observée, je l'ai déduite de la forme de
- * l'échec — le focus restant sur `body`, c'est-à-dire un document sans aucune
+ * l'échec, le focus restant sur `body`, c'est-à-dire un document sans aucune
  * cible. Écrire ici que le défaut est corrigé serait affirmer plus que ce que
  * j'ai constaté. Si l'intermittence revient, la cause est à chercher
  * ailleurs.
  *
  * La course supposée : `page.goto` rend la main à l'événement `load`,
- * c'est-à-dire quand le script est exécuté. React 18 ne rend pas pour autant
- * — `render` planifie le travail au lieu de l'accomplir. Tabuler aussitôt
+ * c'est-à-dire quand le script est exécuté. React 18 ne rend pas pour autant :
+ * `render` planifie le travail au lieu de l'accomplir. Tabuler aussitôt
  * visait alors un document encore vide, où le focus reste sur `body`, qui ne
  * porte aucun contour et qu'aucune tabulation ne quitte.
  *
  * **La garde.** L'attente est bornée et son échec est nommé. Sans elle, un
  * rendu qui cesserait d'arriver se présenterait comme « aucun élément atteint
- * au clavier » — le symptôme d'un défaut d'ordre de tabulation, alors que
+ * au clavier » : le symptôme d'un défaut d'ordre de tabulation, alors que
  * rien n'a été rendu. Un défaut de rendu doit se présenter comme un défaut de
  * rendu, immédiatement, et le corps du document est rapporté avec lui : c'est
  * ce qui manquait pour trancher la première fois.

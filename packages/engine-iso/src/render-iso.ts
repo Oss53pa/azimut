@@ -73,7 +73,7 @@ function filterLevelData(
     (f) => f.level_id === levelId,
   );
   const fpIds = new Set(footprints.map((f) => f.id));
-  // S-39 — « vue isométrique : la place reste au sol, sans volume ». Un volume
+  // S-39, « vue isométrique : la place reste au sol, sans volume ». Un volume
   // rattaché à une empreinte de place est donc écarté du rendu, et l'empreinte
   // tombe parmi celles qui se dessinent à plat. La donnée n'est pas modifiée,
   // c'est la vue qui refuse de l'élever : un parking dressé en relief masque

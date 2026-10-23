@@ -1,14 +1,14 @@
 import { roundSvg } from '@azimut/core-model';
 
 /**
- * D4.3 — CAD file qualification.
+ * D4.3: CAD file qualification.
  *
  * Before any import attempt, a CAD file is qualified and a report is produced.
  * This module works on a neutral, already-parsed entity set (the DXF →
  * CadEntitySet adapter is out of scope, like other external-format adapters;
  * M2 (partie M) no longer accepts DWG, which would need a proprietary-licence reader):
- * it computes the D4.3 metrics, estimates an expected extraction rate, and —
- * below a configurable threshold — recommends manual tracing over import and
+ * it computes the D4.3 metrics, estimates an expected extraction rate, and (
+ * below a configurable threshold) recommends manual tracing over import and
  * says why. A half-successful silent import costs more than a redraw and
  * degrades the product's central economic indicator (time-to-commission).
  */
@@ -86,7 +86,7 @@ function countDuplicateOverlaps(entities: readonly CadEntity[]): number {
 }
 
 /**
- * Expected extraction rate — a documented heuristic in [0, 1]. It rewards a
+ * Expected extraction rate: a documented heuristic in [0, 1]. It rewards a
  * high share of closed polylines (the extractable footprints) and exploitable
  * layers with a declared unit, and penalises missing xrefs, superposed
  * duplicates and multi-level files (which need splitting).

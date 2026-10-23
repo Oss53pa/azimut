@@ -30,7 +30,7 @@ const CONTINUITY_SEVERITY: Readonly<Record<Continuity, Severity>> = {
 };
 
 /**
- * Module 02 — le plan de jalonnement (H2.4), au gabarit « registre » : un
+ * Module 02, le plan de jalonnement (H2.4), au gabarit « registre » : un
  * parcours par ligne, de chaque entrée vers chaque destination, et la suite de
  * ses points de décision avec ce que le tableau des messages y annonce.
  */

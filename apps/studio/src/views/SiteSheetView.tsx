@@ -11,7 +11,7 @@ import { formatDay, formatNumber } from './register/format.js';
 import { rulesPackLabel } from '../state/rules-pack-label.js';
 
 const ALL = 'all';
-const EMPTY = '—';
+const EMPTY = '–';
 
 const PLAN_STATE: Readonly<Record<PlanState, { readonly key: UiMessageKey; readonly severity: Severity }>> = {
   calibrated: { key: 'sitesheet.plan.calibrated', severity: 'valid' },
@@ -20,7 +20,7 @@ const PLAN_STATE: Readonly<Record<PlanState, { readonly key: UiMessageKey; reado
 };
 
 /**
- * Module 01 — la fiche de site, au gabarit « registre » de la maquette : les
+ * Module 01, la fiche de site, au gabarit « registre » de la maquette : les
  * niveaux de chaque bâtiment, leur fond de plan et son calage, et ce que le
  * site porte sur chacun. Les surfaces et les comptes sont calculés.
  */

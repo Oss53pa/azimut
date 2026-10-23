@@ -7,7 +7,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * S-8 — « Un concepteur peut colorer librement des empreintes, des zones ou des
+ * S-8 : « Un concepteur peut colorer librement des empreintes, des zones ou des
  * calques pour son propre travail. Cette coloration est propre à
  * l'utilisateur, n'est jamais partagée, n'entre dans aucun livrable, dans aucun
  * export destiné à un tiers et dans aucun paquet de borne. »
@@ -16,7 +16,7 @@ const ROOT = resolve(HERE, '..');
  * eux. Ce n'est pas un oubli : un contrôle qui refuserait un rendu portant une
  * coloration de travail supposerait qu'un rendu puisse en porter une. La règle
  * se tient mieux par la structure, exactement comme M01.S7 tient la couche
- * d'habillage hors des calculs — et pour la même raison : un essai qui
+ * d'habillage hors des calculs, et pour la même raison : un essai qui
  * vérifierait une sortie donnée ne dirait rien de la suivante.
  *
  * Trois barrières :
@@ -54,7 +54,7 @@ function enginePackages(): readonly string[] {
     .map(name => resolve(ROOT, 'packages', name, 'src'));
 }
 
-describe('S-8 — la coloration de travail n’atteint aucun livrable', () => {
+describe('S-8 : la coloration de travail n’atteint aucun livrable', () => {
   it('les moteurs sont bien tous inspectés', () => {
     const packages = enginePackages();
     expect(packages).toHaveLength(5);
@@ -91,7 +91,7 @@ describe('S-8 — la coloration de travail n’atteint aucun livrable', () => {
   it('aucun paquet de borne ni compilateur ne les nomme non plus', () => {
     // « aucun paquet de borne » est l'un des quatre jamais, et le compilateur
     // est ce qui fabrique les livrables. Les deux autres surfaces citées par
-    // S-8 — le livrable et l'export destiné à un tiers — sortent d'ici.
+    // S-8 (le livrable et l'export destiné à un tiers) sortent d'ici.
     const offenders: string[] = [];
     const surfaces = [
       resolve(ROOT, 'apps/compiler/src'),

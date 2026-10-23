@@ -3,7 +3,7 @@ import { codePointCompare } from '@azimut/core-model';
 import type { SketchStroke } from './sketch.js';
 
 /**
- * J3.3 (partie J) — la promotion d'une esquisse : « entourer une esquisse et
+ * J3.3 (partie J), la promotion d'une esquisse : « entourer une esquisse et
  * demander sa conversion produit une forme reconnue, arbitrée et quantifiée
  * comme n'importe quelle saisie. La promotion est explicite, jamais
  * automatique. »

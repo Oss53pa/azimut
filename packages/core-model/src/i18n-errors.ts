@@ -7,8 +7,8 @@ import { ERROR_MESSAGES_EN } from './i18n-errors-en.js';
  *
  * Réunies, elles franchissaient les quatre cents lignes qu'un fichier du dépôt
  * ne dépasse pas sans découpage (A2.4). La coupure est celle qui va de soi :
- * une langue par fichier, et ici la mécanique — la recherche d'un libellé et
- * la liste des langues servies — qui, elle, ne dépend d'aucune des deux.
+ * une langue par fichier, et ici la mécanique (la recherche d'un libellé et
+ * la liste des langues servies) qui, elle, ne dépend d'aucune des deux.
  */
 export type ErrorMessages = Readonly<Record<ErrorCode, string>>;
 

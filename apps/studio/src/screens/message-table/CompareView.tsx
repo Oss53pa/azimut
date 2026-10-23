@@ -10,7 +10,7 @@ import type { LineChange, LineDiff, ScheduleDiff } from '@azimut/engine-graph';
 import { stableLineId } from '../../state/message-schedule-rows.js';
 
 /**
- * R11 (partie R) — comparaison de versions.
+ * R11 (partie R) : comparaison de versions.
  *
  * « Choix de deux versions. Affichage en un seul tableau, chaque ligne
  * marquée. » Un seul tableau, donc : pas deux colonnes de versions côte à

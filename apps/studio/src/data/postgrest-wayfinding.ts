@@ -1,5 +1,5 @@
 /**
- * N2.2 — lecture du registre du wayfinding par l'API REST : zones
+ * N2.2, lecture du registre du wayfinding par l'API REST : zones
  * d'orientation, règles de nommage, niveaux d'information (migration 0027).
  *
  * Les énumérés sont restreints par les listes de `core-model`, qu'un test

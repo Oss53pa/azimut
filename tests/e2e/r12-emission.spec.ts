@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * R12 (partie R) — « Émettre pour revue », à l'écran du tableau des messages.
+ * R12 (partie R) : « Émettre pour revue », à l'écran du tableau des messages.
  *
  * Les commandes et les conditions sont essayées dans
  * `state/__tests__/message-schedule-transitions.test.ts` et
@@ -86,7 +86,7 @@ async function open(page: Page, rows: readonly unknown[]): Promise<void> {
   await expect(page.getByText('Brouillon', { exact: true })).toBeVisible();
 }
 
-test.describe('R12 (partie R) — émettre pour revue', () => {
+test.describe('R12 (partie R) : émettre pour revue', () => {
   test('sans validation du graphe ni paquet de règles, l’émission est refusée et dit pourquoi', async ({ page }) => {
     await open(page, BASE_ROWS);
     // Les deux codes figurent déjà dans les bandeaux de prérequis (R14) ; le

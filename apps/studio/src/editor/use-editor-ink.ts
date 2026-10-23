@@ -8,11 +8,11 @@ import { recallStrictness } from './ink/strictness-memory.js';
 import { browserStore } from '../viewport/view-memory.js';
 
 /**
- * J1 et J1.2 (partie J) — le stylet dans l'éditeur d'habillage.
+ * J1 et J1.2 (partie J) : le stylet dans l'éditeur d'habillage.
  *
  * Avec l'outil Ellipse ou Rectangle, le stylet trace à main levée : le trait
  * apparaît tel quel, puis il est lu à la levée (J1.1) et devient la forme de
- * l'outil — une ellipse, cercle si proche ; un rectangle. La souris garde le geste de l'éditeur, le cadre tiré d'un coin à
+ * l'outil, une ellipse, cercle si proche ; un rectangle. La souris garde le geste de l'éditeur, le cadre tiré d'un coin à
  * l'autre (E7.1) : les deux saisies coexistent, aucune ne remplace l'autre.
  *
  * Le niveau de redressement est celui que l'utilisateur a retenu (J1.3).

@@ -5,7 +5,7 @@ import { refMultilevel } from '@azimut/testkit';
 import type { Footprint, SiteData, SiteZone } from '@azimut/core-model';
 
 /**
- * S8, règle S-35 — `DATA.PARKING_SPACE_WITHOUT_ZONE`.
+ * S8, règle S-35 : `DATA.PARKING_SPACE_WITHOUT_ZONE`.
  *
  * Le contrôle n'était pas calculable avant la version 17 : A5.2 ne donnait à
  * `zone` ni géométrie ni liste d'empreintes. Il figurait aux non construits de
@@ -50,7 +50,7 @@ function zone(id: string, kind: SiteZone['kind'], footprintIds: readonly string[
 /**
  * Le site de référence sans son stationnement.
  *
- * `refMultilevel` porte désormais un parking conforme — une zone et quatre
+ * `refMultilevel` porte désormais un parking conforme : une zone et quatre
  * places. Chaque cas ci-dessous pose le sien, et repart donc d'un site qui n'en
  * porte aucun : sans cela, les places de référence s'ajouteraient à chaque
  * compte et aucune attente ne se lirait plus.
@@ -72,7 +72,7 @@ function site(
   };
 }
 
-describe('DATA.PARKING_SPACE_WITHOUT_ZONE — S8, règle S-35', () => {
+describe('DATA.PARKING_SPACE_WITHOUT_ZONE : S8, règle S-35', () => {
   it('ne signale rien sur un site sans aucune place', () => {
     // Le contrôle naît sans rien à dire ; sans cette vérification, une panne
     // aurait l'air d'une vertu.

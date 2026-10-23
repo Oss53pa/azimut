@@ -273,7 +273,7 @@ describe('T-1.7 validateDirectory', () => {
     });
   });
 
-  describe('GRAPH.DIRECTORY_NAME_MISSING — dest with zero names', () => {
+  describe('GRAPH.DIRECTORY_NAME_MISSING: dest with zero names', () => {
     it('flags all active langs for a dest with no names at all', () => {
       // Remove all names for dest-a but keep names for others.
       const site = patchSite(refMultilevel, {

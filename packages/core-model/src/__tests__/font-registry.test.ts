@@ -10,7 +10,7 @@ const rec = (
   actual_hash: string | null,
 ): FontMetricsRecord => ({ font_id, present, declared_hash, actual_hash });
 
-describe('G5.1 — guardFontMetrics (FONT.METRICS_MISSING)', () => {
+describe('G5.1: guardFontMetrics (FONT.METRICS_MISSING)', () => {
   it('passes when the metrics table is present and its hash matches', () => {
     expect(guardFontMetrics([rec('f-1', true, 'abc', 'abc')]).ok).toBe(true);
   });
@@ -62,7 +62,7 @@ const font = (id: string, licence_kind: FontAsset['licence_kind']): FontAsset =>
   licence_ref: null,
 });
 
-describe('G5.2 — auditFontLicences (FONT.LICENCE_UNKNOWN)', () => {
+describe('G5.2: auditFontLicences (FONT.LICENCE_UNKNOWN)', () => {
   it('reports nothing when every licence is declared', () => {
     const r = auditFontLicences([font('f-1', 'open'), font('f-2', 'purchased')]);
     expect(r.ok).toBe(true);

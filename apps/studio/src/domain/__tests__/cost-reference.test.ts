@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { auditCostReferences } from '../cost-reference.js';
 
-describe('H8 — auditCostReferences (COST.REFERENCE_MISSING)', () => {
+describe('H8: auditCostReferences (COST.REFERENCE_MISSING)', () => {
   it('reports nothing when every referenced typology is priced', () => {
     const r = auditCostReferences(['totem', 'directional'], new Set(['totem', 'directional']));
     expect(r.ok).toBe(true);

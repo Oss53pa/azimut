@@ -3,7 +3,7 @@ import type { Outcome } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * A5.2 — fond de plan et calage.
+ * A5.2 : fond de plan et calage.
  *
  * Un niveau peut porter un ou plusieurs fonds de plan importés
  * (`plan_source`) ; chacun est calé au plus une fois (`plan_calibration`).
@@ -13,15 +13,15 @@ import { codePointCompare } from './empreinte.js';
  * un niveau sans plan calé est une anomalie bloquante.
  *
  * M01.S2 et D1.1 tiennent sans exception : aucune coordonnée en pixels n'est
- * stockée, ici pas davantage qu'ailleurs. Un calage porte une échelle — un
- * rapport, pas une coordonnée —, un angle, et l'origine du fond exprimée en
+ * stockée, ici pas davantage qu'ailleurs. Un calage porte une échelle (un
+ * rapport, pas une coordonnée), un angle, et l'origine du fond exprimée en
  * mètres du repère site. La conversion s'écrit
  * `site = origine + rotation · (pixel × échelle)` : chaque terme stocké y est
  * métrique ou sans dimension, et le pixel n'entre que par l'entrée.
  */
 
 /**
- * A5.2, version 28 — la nature réelle du contenu d'un fond, constatée à
+ * A5.2, version 28 : la nature réelle du contenu d'un fond, constatée à
  * l'import et non déduite de l'extension. `raster` : aucun contenu vectoriel
  * exploitable ; `undetermined` : un contenu que le produit n'a pas su lire, et
  * qui n'est jamais présumé vectoriel (M2, partie M).
@@ -53,7 +53,7 @@ export type PlanSource = {
 /**
  * Calage d'un fond de plan : ce qui transforme un pixel en mètre.
  *
- * `scale_m_per_px` est l'échelle du fond, en mètres réels par pixel — l'inverse
+ * `scale_m_per_px` est l'échelle du fond, en mètres réels par pixel : l'inverse
  * de la résolution manipulée à la saisie (écran M2 de la tranche M,
  * `resolution_px_per_m`). Les deux
  * représentent la même mesure ; A5.2 fixe celle qui est stockée.
@@ -65,7 +65,7 @@ export type PlanSource = {
  * Elles sont facultatives, et c'est un point ouvert plutôt qu'un choix : aucun
  * écran ne désigne le point de l'image qui porte l'origine du repère. A5.2 ne
  * dit pas non plus comment `site.origin_x_m` et ces deux colonnes se
- * correspondent — l'une est un point du repère site, l'autre sa position dans
+ * correspondent : l'une est un point du repère site, l'autre sa position dans
  * une image, et le lien demande une décision de modèle que A5 ne prend pas.
  * Elles restent donc non écrites, et `guardSiteOrigin` continue de tenir
  * M01.S1 sur la seule ligne `site`.
@@ -86,7 +86,7 @@ export type PlanSource = {
  * `calibrated_at`, qui reste la date d'établissement du calage. Le faire suivre
  * la mise à jour déplacerait « le premier calage » à chaque recalage, et
  * `checkSiteOriginCoherent` finirait par comparer le repère du site à l'origine
- * d'un autre fond — donc à lever une anomalie bloquante contre un site correct.
+ * d'un autre fond : donc à lever une anomalie bloquante contre un site correct.
  */
 export type PlanCalibration = {
   readonly id: string;
@@ -94,12 +94,12 @@ export type PlanCalibration = {
   readonly plan_source_id: string;
   readonly scale_m_per_px: number;
   /**
-   * A5.2 — position, dans l'image, de l'origine du repère site. Absente tant
+   * A5.2 : position, dans l'image, de l'origine du repère site. Absente tant
    * que rien ne la désigne : voir la note ci-dessus.
    */
   readonly origin_x_px?: number;
   readonly origin_y_px?: number;
-  /** A5.2 — distance réelle dont l'échelle est tirée, étape 2 de M2 (partie M). */
+  /** A5.2 : distance réelle dont l'échelle est tirée, étape 2 de M2 (partie M). */
   readonly reference_distance_m?: number;
   readonly rotation_deg: number;
   /** Horodatage ISO 8601 du calage. */
@@ -110,7 +110,7 @@ export type PlanCalibration = {
  * Premier calage d'un site, ou `null` quand il n'est pas déterminable.
  *
  * Déterminable veut dire : il y a au moins un calage, et tous portent une date
- * lisible. Un seul calage sans date suffit à rendre la réponse inconnue — il
+ * lisible. Un seul calage sans date suffit à rendre la réponse inconnue : il
  * pourrait être le plus ancien, et rien ne permet de l'écarter. Répondre quand
  * même, en ne classant que les datés, désignerait un premier calage qui n'en
  * est peut-être pas un, et c'est sur lui que M01.S1 est vérifiée.
@@ -158,7 +158,7 @@ export function isUsableScale(scale_m_per_px: number): boolean {
  * Identifiants des niveaux effectivement calés : ceux qui portent au moins un
  * fond de plan lui-même calé par une échelle exploitable.
  *
- * Fonction pure, sans tri ni ordre de sortie significatif — l'ordre des
+ * Fonction pure, sans tri ni ordre de sortie significatif : l'ordre des
  * anomalies est fixé par l'appelant, sur les niveaux et non sur cet ensemble.
  */
 export function calibratedLevelIds(
@@ -180,19 +180,19 @@ export function calibratedLevelIds(
 }
 
 /**
- * M01.S1 / D1.1 — le repère site.
+ * M01.S1 / D1.1 : le repère site.
  *
  * Son origine est celle du premier calage du site : les deux nombres que porte
  * ce calage sont recopiés sur la ligne `site`, en mètres, et n'y sont plus
  * jamais modifiés. Les modifier déplacerait le repère sous toute la géométrie
- * déjà saisie — chaque empreinte, chaque nœud, chaque support garderait ses
+ * déjà saisie : chaque empreinte, chaque nœud, chaque support garderait ses
  * coordonnées en désignant un autre endroit du monde. Aucune migration ne
  * rattraperait cela, puisque rien n'enregistre de quel repère chaque valeur
  * provenait.
  *
  * Tant qu'aucun calage n'a eu lieu, l'origine est absente. C'est l'état d'un
- * site dont le repère n'est pas encore posé, et non un repère à l'origine (0, 0)
- * — les deux se lisent autrement et le premier interdit de tracer.
+ * site dont le repère n'est pas encore posé, et non un repère à l'origine (0, 0) :
+ * les deux se lisent autrement et le premier interdit de tracer.
  */
 export type SiteOriginBearer = {
   readonly origin_x_m?: number;
@@ -214,12 +214,12 @@ export function siteOrigin(site: SiteOriginBearer): Point | null {
 }
 
 /**
- * M01.S1 — garde-fou du repère site.
+ * M01.S1 : garde-fou du repère site.
  *
  * Accepte de poser l'origine quand le site n'en a pas : c'est le premier
  * calage, et c'est lui qui fixe le repère. Refuse toute valeur différente
  * ensuite, par `CALIB.ORIGIN_LOCKED`. Repasser la même valeur n'est pas une
- * modification et ne refuse rien — un second calage du même fond, ou le calage
+ * modification et ne refuse rien : un second calage du même fond, ou le calage
  * d'un autre niveau sur le même repère, doit pouvoir aboutir.
  *
  * La comparaison est exacte, sans tolérance : l'origine n'est pas mesurée à

@@ -8,7 +8,7 @@ const ROOT = resolve(HERE, '..', '..', '..', '..');
 const DESIGN_TOKENS_DIR = resolve(ROOT, 'packages', 'design-tokens');
 
 const HEX_PATTERN = /#(?:[0-9a-fA-F]{3}){1,2}(?=[^0-9a-fA-F]|$)/g;
-// Literal rgb()/rgba() only — a numeric channel immediately follows. Data-driven
+// Literal rgb()/rgba() only: a numeric channel immediately follows. Data-driven
 // calls like rgb(c.r, c.g, c.b) (content colours from data, F2.5) are not flagged.
 const RGBA_LITERAL_PATTERN = /rgba?\(\s*[\d.]/g;
 

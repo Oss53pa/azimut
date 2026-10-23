@@ -6,7 +6,7 @@ import {
 import type { ViewState, Viewport } from '../view-transform.js';
 
 /**
- * E3.1 — la transformation unique entre les deux repères.
+ * E3.1 : la transformation unique entre les deux repères.
  *
  * L'essai porte d'abord sur l'inversion de l'axe vertical, qui est l'erreur
  * de signe la plus fréquente et la moins visible : D1.1 met Y vers le nord
@@ -17,7 +17,7 @@ const VIEW: ViewState = {
   centerX_m: 0, centerY_m: 0, scale_px_per_m: 10, rotationDeg: 0,
 };
 
-describe('E3.1 — repère métier et repère de vue', () => {
+describe('E3.1 : repère métier et repère de vue', () => {
   it('place l’origine au centre de la fenêtre', () => {
     expect(toView({ x_m: 0, y_m: 0 }, VIEW, VIEWPORT)).toEqual({ x_px: 400, y_px: 300 });
   });
@@ -42,7 +42,7 @@ describe('E3.1 — repère métier et repère de vue', () => {
   });
 });
 
-describe('E3 — l’ajustement au contenu', () => {
+describe('E3 : l’ajustement au contenu', () => {
   const SQUARE = [
     { x_m: 0, y_m: 0 }, { x_m: 20, y_m: 0 },
     { x_m: 20, y_m: 10 }, { x_m: 0, y_m: 10 },

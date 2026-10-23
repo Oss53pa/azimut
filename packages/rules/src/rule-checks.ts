@@ -7,13 +7,13 @@ import type { RulesPackRule } from './schema.js';
 
 /**
  * The quality-check engine. Each check RESOLVES its threshold from a loaded
- * rules pack (never a value written in code — INV-5), then compares a measured
+ * rules pack (never a value written in code: INV-5), then compares a measured
  * value against it and raises the matching catalog anomaly. When the rule is
  * absent the resolution failure (RULES.RULE_NOT_FOUND) is propagated: the
  * product refuses rather than inventing a threshold.
  *
  * Measured inputs (character height, reading distance, colours) are supplied by
- * the caller — they are produced by the compose/render pipeline, not held on the
+ * the caller: they are produced by the compose/render pipeline, not held on the
  * site graph.
  */
 
@@ -43,7 +43,7 @@ export type CharHeightInput = {
 };
 
 /**
- * Legibility — LEGIBILITY.MIN_CHAR_HEIGHT. The required height is the formula
+ * Legibility: LEGIBILITY.MIN_CHAR_HEIGHT. The required height is the formula
  * `reading_distance_m * factor`, floored at `minimum_mm`. A measured height
  * below it raises LAYOUT.CHAR_HEIGHT_BELOW_MIN.
  */
@@ -78,7 +78,7 @@ function resolveCharHeight(
 }
 
 /**
- * M04.G3 / M04.G4 — la hauteur de caractère exigée à cette distance de lecture, en
+ * M04.G3 / M04.G4 : la hauteur de caractère exigée à cette distance de lecture, en
  * millimètres, telle que le paquet de règles la définit.
  *
  * Le calcul du format l'emploie sans recopier la formule : le seuil qui refuse
@@ -133,10 +133,10 @@ export type ContrastInput = {
 };
 
 /**
- * Contrast — CONTRAST.MIN_TEXT_ON_BACKGROUND (or the given code). Computes the
+ * Contrast: CONTRAST.MIN_TEXT_ON_BACKGROUND (or the given code). Computes the
  * WCAG luminance-contrast ratio of the two display colours and, when it falls
  * below the resolved minimum, raises LAYOUT.CONTRAST_BELOW_MIN. Scoped by
- * support registry and, when supplied, reading context — the same scope
+ * support registry and, when supplied, reading context: the same scope
  * dimensions as the legibility check, so a context-scoped contrast rule
  * resolves consistently.
  */
@@ -192,7 +192,7 @@ export type StrokeToHeightInput = {
 };
 
 /**
- * Legibility double bound — LEGIBILITY.MIN_STROKE_TO_HEIGHT. The stroke-to-height
+ * Legibility double bound: LEGIBILITY.MIN_STROKE_TO_HEIGHT. The stroke-to-height
  * ratio must sit within [min, max]; outside either bound raises
  * LAYOUT.STROKE_RATIO_OUT_OF_BOUNDS.
  */
@@ -234,7 +234,7 @@ export type MountingHeightInput = {
 };
 
 /**
- * Mounting range — MOUNTING.HEIGHT_RANGE. The mounting height must sit within
+ * Mounting range: MOUNTING.HEIGHT_RANGE. The mounting height must sit within
  * [min_mm, max_mm]; outside either bound raises LAYOUT.MOUNTING_OUT_OF_RANGE.
  */
 export function checkMountingHeight(

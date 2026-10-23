@@ -34,7 +34,7 @@ const profile = refMultilevel.travel_profiles[0];
 const TARGET = 'dest-ml-r1';
 const ID = `n-ml-entrance→${TARGET}`;
 
-describe('H2.4 — plan de jalonnement parcours par parcours', () => {
+describe('H2.4 : plan de jalonnement parcours par parcours', () => {
   it('relie chaque entrée à chaque destination, points de décision dans l’ordre de marche', () => {
     if (profile === undefined) throw new Error('profil manquant');
     const plan = staggeringPlan(refMultilevel, profile, null);

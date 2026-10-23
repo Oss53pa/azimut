@@ -1,5 +1,5 @@
 /**
- * Aperçu d'une face — résolution et rendu.
+ * Aperçu d'une face : résolution et rendu.
  *
  * Une seule implémentation, partagée par l'écran Signalétique et l'écran
  * Faces : la face est résolue par le moteur puis rendue par le moteur, jamais
@@ -93,7 +93,7 @@ export function renderPreview(
 }
 
 /**
- * A5.6 — l'aperçu d'une face réelle : le gabarit de sa typologie, composé sur
+ * A5.6, l'aperçu d'une face réelle : le gabarit de sa typologie, composé sur
  * le support et son nœud, avec les blocs saisis sur la face (D8.3). `null`
  * quand le gabarit n'est pas connu au poste ou que la face ne se compose pas.
  */

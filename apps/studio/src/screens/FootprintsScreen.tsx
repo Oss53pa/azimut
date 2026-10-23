@@ -13,7 +13,7 @@ import { FOOTPRINT_KINDS, UNIT_CODE_MAX } from '../state/footprint-input.js';
 import type { FootprintKind } from '../state/footprint-input.js';
 
 /**
- * M3 (partie M) — écran de tracé des empreintes.
+ * M3 (partie M) : écran de tracé des empreintes.
  *
  * Trois colonnes, comme la structure du document : les calques et les outils à
  * gauche, la zone de travail au centre, les propriétés à droite, une barre
@@ -255,11 +255,11 @@ function kindKey(kind: FootprintKind):
 }
 
 /**
- * M3 (partie M) — la duplication en série, en évidence dans le panneau.
+ * M3 (partie M) : la duplication en série, en évidence dans le panneau.
  *
  * Le bouton est refusé tant qu'aucune empreinte n'a été fermée : la série
  * part de la dernière tracée, et l'écran le dit plutôt que de laisser presser
- * une action sans sujet. Un pas nul n'est pas refusé — deux copies au même
+ * une action sans sujet. Un pas nul n'est pas refusé : deux copies au même
  * endroit se recouvrent, et M3 fait du recouvrement un avertissement.
  */
 function SeriesFields({ series, onSeries, reference, onDuplicate }: {

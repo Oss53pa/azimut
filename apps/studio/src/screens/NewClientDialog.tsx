@@ -23,7 +23,7 @@ type NewClientDialogProps = {
 };
 
 /**
- * Q5 — le formulaire de création d'un client, c'est-à-dire d'une entité
+ * Q5 : le formulaire de création d'un client, c'est-à-dire d'une entité
  * juridique de l'organisation. Il saisit les colonnes de `legal_entity`, sauf
  * l'adresse, dont la forme n'est pas définie.
  */

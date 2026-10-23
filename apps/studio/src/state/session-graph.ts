@@ -19,7 +19,7 @@ export type SessionGraph = {
   readonly nodes: readonly GraphNode[];
   readonly edges: readonly Edge[];
   readonly vertical_links: readonly VerticalLink[];
-  /** M01.S10 — les passages entre bâtiments que la session porte. */
+  /** M01.S10 : les passages entre bâtiments que la session porte. */
   readonly building_links: readonly BuildingLink[];
   /** Identifiants des lignes que le magasin porte et qui n'ont pas pu être lues. */
   readonly unreadable: readonly string[];

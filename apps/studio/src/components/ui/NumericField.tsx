@@ -3,7 +3,7 @@ import { FieldShell } from './Field.js';
 import { controlStyle } from './tokens.js';
 
 /**
- * F6, famille « Saisie » — champ numérique avec unité, et champ d'angle.
+ * F6, famille « Saisie » : champ numérique avec unité, et champ d'angle.
  *
  * F6.1 est sans réserve : « Un champ numérique affiche toujours son unité. Un
  * champ dimensionnel sans unité affichée est refusé en revue. » L'unité est
@@ -86,7 +86,7 @@ export function NumericField({
 }
 
 /**
- * F6 — champ d'angle. Un champ numérique dont l'unité est fixée et le domaine
+ * F6 : champ d'angle. Un champ numérique dont l'unité est fixée et le domaine
  * celui de D1.3 : [0, 360[, convention compas.
  */
 export type AngleFieldProps = Omit<NumericFieldProps, 'unit' | 'min' | 'max' | 'step'>;

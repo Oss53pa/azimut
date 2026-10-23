@@ -14,7 +14,7 @@ const bk = (
   placement_id = 'e-1',
 ): PlacementBooking => ({ id, placement_id, state, from_date, to_date });
 
-describe('H4.3 — guardPlacementBookings (AD.PLACEMENT_DOUBLE_BOOKED)', () => {
+describe('H4.3: guardPlacementBookings (AD.PLACEMENT_DOUBLE_BOOKED)', () => {
   it('passes when committed bookings do not overlap', () => {
     const r = guardPlacementBookings([
       bk('b-1', 'reserved', '2026-01-01', '2026-01-31'),
@@ -62,7 +62,7 @@ const opt = (
   placement_id = 'e-1',
 ): PlacementOption => ({ id, placement_id, expires_at });
 
-describe('H4.4 — auditOptionExpiry (AD.OPTION_EXPIRED)', () => {
+describe('H4.4: auditOptionExpiry (AD.OPTION_EXPIRED)', () => {
   it('reports nothing for options not yet expired', () => {
     const r = auditOptionExpiry([opt('o-1', '2026-12-31')], '2026-06-01');
     expect(r.ok).toBe(true);

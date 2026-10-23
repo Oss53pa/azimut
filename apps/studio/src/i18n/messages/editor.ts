@@ -1,12 +1,12 @@
 /**
- * D12.1 — Atelier de dessin : outils, raccourcis, annonces et habillage.
+ * D12.1, Atelier de dessin : outils, raccourcis, annonces et habillage.
  *
  * Fragment du catalogue. La table française porte le jeu de clés ;
  * la table anglaise est typée contre elle, une traduction manquante
  * ne compile pas.
  */
 export const EDITOR_FR = {
-  // Editor — tools
+  // Editor, tools
   'editor.tool.select': 'Sélection',
   'editor.tool.direct_select': 'Sélection directe',
   'editor.tool.hand': 'Main',
@@ -21,7 +21,7 @@ export const EDITOR_FR = {
   'editor.tool.measure': 'Mesure',
   'editor.levels.aria': 'Niveaux',
 
-  // Editor — shortcut action labels
+  // Editor, shortcut action labels
   'editor.shortcut.undo': 'Annuler',
   'editor.shortcut.redo': 'Rétablir',
   'editor.shortcut.delete': 'Supprimer',
@@ -47,7 +47,7 @@ export const EDITOR_FR = {
   'editor.shortcut.tool_measure': 'Outil mesure',
   'editor.shortcut.show_help': 'Raccourcis clavier',
 
-  // Editor — toolbar / status bar
+  // Editor, toolbar / status bar
   'editor.toolbar.aria': 'Outils',
   'editor.status.aria': 'Barre de statut',
   'editor.status.undo.title': 'Annuler (Ctrl+Z)',
@@ -58,7 +58,7 @@ export const EDITOR_FR = {
   'editor.canvas.default': 'Éditeur de plan',
   'editor.canvas.aria': 'Éditeur : {level}',
 
-  // Editor — alignment panel
+  // Editor, alignment panel
   'editor.align.aria': 'Alignement et distribution',
   'editor.align.section.align': 'Aligner',
   'editor.align.section.distribute': 'Distribuer',
@@ -76,7 +76,7 @@ export const EDITOR_FR = {
   'editor.align.title.backward': 'Reculer',
   'editor.align.title.back': "Mettre à l'arrière-plan",
 
-  // Editor — shortcut help panel
+  // Editor, shortcut help panel
   'editor.shortcuts.title': 'Raccourcis clavier',
   'editor.shortcuts.close': 'Fermer',
   'editor.shortcuts.close.title': 'Fermer (Échap)',
@@ -93,12 +93,12 @@ export const EDITOR_FR = {
   'editor.key.delete': 'Suppr',
   'editor.key.tab': 'Tab',
 
-  // Editor — scene aria labels
+  // Editor, scene aria labels
   'scene.footprint.aria': 'Empreinte {kind} {id}',
   'scene.edge.aria': 'Arête {id}',
   'scene.node.aria': 'Nœud {kind} {label}',
 
-  // Editor — operation announcements (E6.3)
+  // Editor, operation announcements (E6.3)
   'editor.announce.created': 'Objet créé.',
   'editor.announce.deleted': '{count} objet(s) supprimé(s).',
   'editor.announce.aligned': 'Alignement appliqué.',
@@ -115,7 +115,7 @@ export const EDITOR_FR = {
   'editor.ink.rect_oblique': 'Rectangle tracé de biais : le rectangle de l’habillage est posé sur les axes. Retracez-le droit, ou tirez un cadre à la souris.',
   'editor.ink.rect_unrecognized': 'Ce trait ne ressemble pas à un rectangle. Retracez-le.',
 
-  // Editor — decoration (habillage) accessible names
+  // Editor, decoration (habillage) accessible names
   'editor.decoration.area': "Zone d'habillage",
   'editor.decoration.path': "Tracé d'habillage",
   'editor.decoration.symbol': "Symbole d'habillage",

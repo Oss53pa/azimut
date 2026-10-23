@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { createReferenceRepository, createPostgrestRepository, isRepositoryError } from '../index.js';
 
 /**
- * R12 — le circuit du tableau des messages, relu du dépôt : versions, lignes,
+ * R12, le circuit du tableau des messages, relu du dépôt : versions, lignes,
  * décisions, passages de validation.
  */
 afterEach(() => { vi.unstubAllGlobals(); });
@@ -19,7 +19,7 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
   return calls;
 }
 
-describe('R12 — circuit du tableau, sites de référence', () => {
+describe('R12 : circuit du tableau, sites de référence', () => {
   const repository = createReferenceRepository();
 
   it('rend des listes vides : aucun site de référence ne porte de tableau enregistré', async () => {
@@ -33,7 +33,7 @@ describe('R12 — circuit du tableau, sites de référence', () => {
   });
 });
 
-describe('R12 — circuit du tableau, API REST', () => {
+describe('R12 : circuit du tableau, API REST', () => {
   it('lit les versions et les passages du site, puis les lignes et décisions de ces versions', async () => {
     const calls = stubTables({
       message_schedule: [{ id: 'aaaa0007-0000-4000-8000-000000000006', site_id: 'aaaa0007-0000-4000-8000-000000000001', version: 1, state: 'draft' }],

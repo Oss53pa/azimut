@@ -4,7 +4,7 @@ import type { PlanPoint } from '../plan-calibration.js';
 
 const A = { x_px: 100, y_px: 100 };
 
-describe('M2 — calage du fond de plan', () => {
+describe('M2 : calage du fond de plan', () => {
   it('déduit la résolution et l’échelle de deux points et d’une distance', () => {
     // 214 px pour 42,5 m : la résolution vaut 214/42,5 px/m.
     const result = computeCalibration({
@@ -70,7 +70,7 @@ describe('M2 — calage du fond de plan', () => {
 });
 
 /**
- * M2 (partie M), étape 2 et étape 3 — les contrôles de saisie que la
+ * M2 (partie M), étape 2 et étape 3 : les contrôles de saisie que la
  * spécification nomme, et que le dépôt n'avait pas.
  *
  * Trois écarts relevés au versement de la partie M : l'écart minimal entre les
@@ -78,7 +78,7 @@ describe('M2 — calage du fond de plan', () => {
  * n'existait pas ; et l'azimut manquant levait `CALIB.NORTH_MISSING`, un code
  * inventé, là où M2 nomme `CALIB.AZIMUTH_INVALID`.
  */
-describe('M2 (partie M) — contrôles de saisie du calage', () => {
+describe('M2 (partie M) : contrôles de saisie du calage', () => {
   const base = {
     a: { x_px: 0, y_px: 0 },
     b: { x_px: 100, y_px: 0 },
@@ -86,7 +86,7 @@ describe('M2 (partie M) — contrôles de saisie du calage', () => {
     north_azimuth_deg: 0,
   };
 
-  describe('étape 2 — les deux points', () => {
+  describe('étape 2 : les deux points', () => {
     it('refuse un point A non posé', () => {
       const r = computeCalibration({ ...base, a: null });
       expect(r.ok).toBe(false);
@@ -121,7 +121,7 @@ describe('M2 (partie M) — contrôles de saisie du calage', () => {
     });
   });
 
-  describe('étape 3 — azimut du nord', () => {
+  describe('étape 3 : azimut du nord', () => {
     it('accepte le nord franc, qui vaut zéro (D1.3)', () => {
       expect(computeCalibration({ ...base, north_azimuth_deg: 0 }).ok).toBe(true);
     });
@@ -159,7 +159,7 @@ describe('M2 (partie M) — contrôles de saisie du calage', () => {
  * travers de la résolution retenue. C'est le seul aller-retour qui éprouve
  * quelque chose : poser, calculer l'échelle, puis remesurer ailleurs.
  */
-describe('M2 (partie M) critère 1 — une distance connue est restituée', () => {
+describe('M2 (partie M) critère 1 : une distance connue est restituée', () => {
   /** Mesure une distance en mètres depuis la résolution calculée. */
   function measured_m(resolution_px_per_m: number, a: PlanPoint, b: PlanPoint): number {
     const dx = b.x_px - a.x_px;

@@ -1,5 +1,5 @@
 /**
- * M2 (partie M) — la table des objets d'un PDF, lue sans bibliothèque (A3.3).
+ * M2 (partie M) : la table des objets d'un PDF, lue sans bibliothèque (A3.3).
  *
  * Les objets se lisent dans l'ordre du fichier, la dernière révision d'un
  * objet l'emportant, qu'elle soit écrite en clair ou rangée dans un flux

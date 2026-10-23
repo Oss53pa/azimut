@@ -4,7 +4,7 @@ import { controlStyle } from './tokens.js';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F6, famille « Saisie » — champ texte, sélecteur, choix multiple.
+ * F6, famille « Saisie » : champ texte, sélecteur, choix multiple.
  *
  * Aucun n'est nouveau au sens de M6 : les trois figurent dans la liste fermée
  * de F6. Ce fichier les construit, il ne l'étend pas.

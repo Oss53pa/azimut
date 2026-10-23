@@ -10,8 +10,8 @@ const ROOT = resolve(HERE, '..');
  * Un caractère de contrôle brut dans une source la fait passer pour un binaire.
  *
  * `guard-naming.ts` portait un octet nul littéral dans un gabarit de chaîne,
- * comme séparateur de clé composite. Le procédé est bon — un nom ne peut pas
- * contenir d'octet nul, la clé est donc sans collision — mais écrit tel quel
+ * comme séparateur de clé composite. Le procédé est bon (un nom ne peut pas
+ * contenir d'octet nul, la clé est donc sans collision) mais écrit tel quel
  * dans le fichier, il avait une conséquence qu'on ne voit pas : `file` classait
  * la source comme « data », et `grep` la sautait en annonçant « binary file
  * matches », sans son contenu.
@@ -94,7 +94,7 @@ describe('aucune source ne porte de caractère de contrôle brut', () => {
     expect(firstControlChar('clé\u0000valeur')).toBe(0x00);
     expect(firstControlChar('retour\u000Bvertical')).toBe(0x0b);
     expect(firstControlChar('suppression\u007Ffinale')).toBe(0x7f);
-    expect(firstControlChar('tabulation\tet accents éàü — tiret cadratin')).toBeNull();
+    expect(firstControlChar('tabulation\tet accents éàü : tiret cadratin')).toBeNull();
     expect(firstControlChar('un échappement écrit \\u0000 en toutes lettres')).toBeNull();
   });
 });

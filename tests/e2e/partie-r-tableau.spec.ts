@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * Partie R — l'écran du tableau des messages, moitié consultation, dans un
+ * Partie R : l'écran du tableau des messages, moitié consultation, dans un
  * vrai navigateur.
  *
  * Ce que les essais unitaires ne peuvent pas établir : qu'aucune cellule du
- * tableau rendu ne se laisse modifier — critère 2 de R18, « par aucune voie :
- * clic, clavier, collage » — et que le parcours du clavier de R15 fonctionne
+ * tableau rendu ne se laisse modifier (critère 2 de R18, « par aucune voie :
+ * clic, clavier, collage ») et que le parcours du clavier de R15 fonctionne
  * sur le document réel, critère 12.
  *
  * Le tableau est posé dans le magasin local par le même format que le chemin
@@ -121,15 +121,15 @@ async function openTable(page: Page, lang = 'fr'): Promise<void> {
     [`azimut.session.${SITE}`, JSON.stringify(SESSION)] as const,
   );
   await page.goto(`${PATH}?lang=${lang}`);
-  // E5.4 — la reprise est proposée, jamais appliquée d'elle-même.
+  // E5.4 : la reprise est proposée, jamais appliquée d'elle-même.
   await page.getByRole('button', { name: /Reprendre le travail local|Resume local work/ }).click();
   await expect(page.getByRole('table')).toBeVisible();
 }
 
-test.describe('partie R — le tableau des messages en consultation', () => {
+test.describe('partie R : le tableau des messages en consultation', () => {
   test('affiche la version, son état et l’empreinte de ses entrées', async ({ page }) => {
     await openTable(page);
-    // R4 (partie R) — les quatre éléments de la barre de version. C'est la
+    // R4 (partie R) : les quatre éléments de la barre de version. C'est la
     // version la plus haute qui s'affiche : deux sont enregistrées.
     await expect(page.getByText('Version 8')).toBeVisible();
     await expect(page.getByText('Brouillon', { exact: true })).toBeVisible();
@@ -191,7 +191,7 @@ test.describe('partie R — le tableau des messages en consultation', () => {
     await expect(page.getByText(/2 ligne\(s\) masquée\(s\) par les filtres/)).toBeVisible();
   });
 
-  /** R10 : aucun état porté par la seule couleur — la pastille porte son libellé. */
+  /** R10 : aucun état porté par la seule couleur, la pastille porte son libellé. */
   test('l’état d’une ligne se lit en toutes lettres', async ({ page }) => {
     await openTable(page);
     await expect(page.getByText('Périmée', { exact: true })).toBeVisible();
@@ -227,7 +227,7 @@ test.describe('partie R — le tableau des messages en consultation', () => {
   });
 
   /**
-   * R11 (partie R) — comparaison de versions, et critère 7 de R18 : « distingue
+   * R11 (partie R), comparaison de versions, et critère 7 de R18 : « distingue
    * ajoutées, supprimées et modifiées, sans fausse suppression d'une ligne
    * regénérée ».
    */

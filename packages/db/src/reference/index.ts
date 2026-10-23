@@ -1,5 +1,5 @@
 /**
- * Q9 — le référentiel des pays, lu depuis son fichier.
+ * Q9 : le référentiel des pays, lu depuis son fichier.
  *
  * Deux lecteurs, un seul fichier (INV-1) :
  *  · `pnpm seed:reference` le verse dans `azimut.country`, que l'application

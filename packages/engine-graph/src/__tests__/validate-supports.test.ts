@@ -167,7 +167,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
-  describe('DATA.SUPPORT_BLOCK_REGION_INVALID — boundary acceptance', () => {
+  describe('DATA.SUPPORT_BLOCK_REGION_INVALID: boundary acceptance', () => {
     function regionSite(region: { x_pct: number; y_pct: number; w_pct: number; h_pct: number }): SiteData {
       return patchSite(refMinimal, {
         face_templates: [{
@@ -191,7 +191,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
-  describe('DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND — available_sides param', () => {
+  describe('DATA.SUPPORT_TEMPLATE_SIDE_NOT_FOUND: available_sides param', () => {
     it('includes sorted available sides in finding params', () => {
       const site = patchSite(refMinimal, {
         face_templates: [{
@@ -297,7 +297,7 @@ describe('T-2.1 / T-2.2 validateSupports', () => {
     });
   });
 
-  describe('DATA.SUPPORT_BLOCK_REGION_INVALID — y_pct + h_pct > 100', () => {
+  describe('DATA.SUPPORT_BLOCK_REGION_INVALID: y_pct + h_pct > 100', () => {
     it('flags block where only vertical overflow fails', () => {
       const site = patchSite(refMinimal, {
         face_templates: [{

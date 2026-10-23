@@ -1,10 +1,10 @@
 /**
- * M4 (partie M) — contrôles à la saisie du graphe.
+ * M4 (partie M) : contrôles à la saisie du graphe.
  *
  * Trois refus, et l'un d'eux est particulier : « Arête entre niveaux sans
  * liaison verticale | `GRAPH.VERTICAL_LINK_MISSING` | Refus, avec proposition
  * de créer la liaison. » Le refus porte donc une correction, et ne se contente
- * pas de dire non — c'est le seul des trois où l'écran sait quoi proposer.
+ * pas de dire non : c'est le seul des trois où l'écran sait quoi proposer.
  *
  * La longueur n'est jamais saisie. M4 (partie M) : « La longueur est recalculée à toute
  * modification de position. Un champ de longueur saisissable serait une source
@@ -34,7 +34,7 @@ export type EdgeDirection = (typeof EDGE_DIRECTIONS)[number];
  *
  * C'est une borne de saisie, non un seuil de conformité : une pente
  * réglementaire vient du paquet de règles (INV-5). Celle-ci écarte la faute de
- * frappe — une rampe à 200 % n'existe pas — et rien de plus.
+ * frappe (une rampe à 200 % n'existe pas) et rien de plus.
  */
 export const SLOPE_MIN_PCT = -20;
 export const SLOPE_MAX_PCT = 20;
@@ -71,7 +71,7 @@ export type AcceptedNode = {
  *
  * Le type est donc porté par l'outil actif, et `NodeKind` est une union
  * fermée : un type inconnu ne franchit pas le typage. Rien à contrôler ici
- * qu'un code d'anomalie devrait dire — et M4 (partie M) n'en donne aucun pour ce champ.
+ * qu'un code d'anomalie devrait dire : et M4 (partie M) n'en donne aucun pour ce champ.
  *
  * Ce que cette fonction fait, c'est quantifier : E4 veut la quantification à
  * la validation du geste, et la position d'un nœud posé au pointeur en a
@@ -207,7 +207,7 @@ function finding(code: string, params: Record<string, string | number>): Finding
 }
 
 // ---------------------------------------------------------------------------
-// M4 (partie M) — l'axe de circulation
+// M4 (partie M) : l'axe de circulation
 // ---------------------------------------------------------------------------
 
 /**
@@ -243,7 +243,7 @@ export type AxisResult = {
  *  · deux points consécutifs à la même position quantifiée n'en font qu'un, et
  *    ne produisent pas d'arête de longueur nulle ;
  *  · un point qui repasse sur une position déjà vue dans le même axe réutilise
- *    le sommet déjà créé — un axe en boucle se ferme au lieu de se dédoubler.
+ *    le sommet déjà créé : un axe en boucle se ferme au lieu de se dédoubler.
  */
 export function unfoldAxis(points: readonly AxisPoint[]): AxisResult {
   const vertices: AxisVertex[] = [];

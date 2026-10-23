@@ -38,11 +38,11 @@ const DWG = latin1('AC1032\0\0\0\0\0');
 const SVG = latin1('<svg xmlns="http://www.w3.org/2000/svg"></svg>');
 
 /**
- * M2 (partie M), étape 1 — « Fichier : PDF vectoriel, DXF, PNG, JPG. 60 Mo
+ * M2 (partie M), étape 1, « Fichier : PDF vectoriel, DXF, PNG, JPG. 60 Mo
  * maximum ». « Le DWG n'est pas accepté. » Version 28 : « Le format se juge
  * sur le contenu, jamais sur l'extension ni sur le type annoncé. »
  */
-describe('M2 (partie M) — import du fond de plan', () => {
+describe('M2 (partie M) : import du fond de plan', () => {
   describe('format, jugé sur le contenu', () => {
     it('accepte les quatre formats que M2 (partie M) nomme, lus dans leurs octets', async () => {
       for (const [name, bytes, key] of [
@@ -110,7 +110,7 @@ describe('M2 (partie M) — import du fond de plan', () => {
     });
 
     /**
-     * Version 29 — « la nature se juge sur la page retenue » : les tracés
+     * Version 29, « la nature se juge sur la page retenue » : les tracés
      * d'une autre page ne masquent pas leur absence sur celle-ci.
      */
     it('la nature est celle de la page retenue', () => {
@@ -169,7 +169,7 @@ describe('M2 (partie M) — import du fond de plan', () => {
   });
 
   /**
-   * M7.5 (partie M) — « Un refus de saisie n'efface jamais le travail en
+   * M7.5 (partie M) : « Un refus de saisie n'efface jamais le travail en
    * cours. » Découvrir les défauts un par un ferait reprendre le dépôt autant
    * de fois.
    */
@@ -180,12 +180,12 @@ describe('M2 (partie M) — import du fond de plan', () => {
 });
 
 /**
- * M2 (partie M) — « Remplacer un fond sans recaler est le geste qui décale
+ * M2 (partie M) : « Remplacer un fond sans recaler est le geste qui décale
  * silencieusement toute une modélisation. Il demande donc une confirmation
  * nommant la conséquence. » C'est M7.9 (partie M) au cas le plus coûteux de la
  * tranche, et le critère d'acceptation 5 de l'écran.
  */
-describe('M2 (partie M) — remplacer le fond', () => {
+describe('M2 (partie M) : remplacer le fond', () => {
   const A = { widthPx: 2480, heightPx: 3508 };
 
   it('conserve le calage quand les dimensions concordent', () => {

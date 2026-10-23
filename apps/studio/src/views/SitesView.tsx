@@ -13,7 +13,7 @@ type SitesViewProps = {
   readonly currentKey: string;
   readonly onOpenSite: (key: string) => void;
   /**
-   * M1 (partie M) — « Création réservée à `admin` et `designer` ».
+   * M1 (partie M) : « Création réservée à `admin` et `designer` ».
    *
    * Absente, l'action n'est pas dessinée : F5bis.2 veut qu'une action non
    * permise soit absente, jamais grisée.
@@ -22,7 +22,7 @@ type SitesViewProps = {
 };
 
 /**
- * Module 01 · écran M1 (partie M) — la liste des sites.
+ * Module 01 · écran M1 (partie M) : la liste des sites.
  *
  * Elle vient du dépôt, quel qu'il soit : les sites de référence quand aucune
  * URL n'est configurée, le dépôt réel sinon. L'écran dit toujours laquelle des

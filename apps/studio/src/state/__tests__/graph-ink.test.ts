@@ -11,7 +11,7 @@ const context = (overrides: Partial<GraphStrokeContext> = {}): GraphStrokeContex
 
 const tapAt = (x_m: number, y_m: number) => [{ x_m, y_m }, { x_m: x_m + 0.01, y_m }];
 
-describe('J1.2 — le réseau de circulation au stylet', () => {
+describe('J1.2 : le réseau de circulation au stylet', () => {
   it('outil Nœud : un point appuyé pose un nœud, au millimètre', () => {
     expect(strokeToGraph(tapAt(5.00031, 3.99968), context())).toEqual({ kind: 'place_node', at: { x_m: 5.005, y_m: 4 } });
   });

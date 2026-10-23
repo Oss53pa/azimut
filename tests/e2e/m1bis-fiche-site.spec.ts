@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * M1bis (partie M) — fiche de site, bâtiments et niveaux.
+ * M1bis (partie M) : fiche de site, bâtiments et niveaux.
  *
  * Critère 1 : « Un site à deux bâtiments et quatre niveaux se crée
  * entièrement par cet écran, sans intervention en base. » C'est le critère qui
@@ -48,7 +48,7 @@ async function addLevel(
   await panel.getByRole('button', { name: CREATE_LEVEL }).click();
 }
 
-test.describe('M1bis (partie M) — la fiche de site', () => {
+test.describe('M1bis (partie M) : la fiche de site', () => {
   test('un site vide invite à créer un bâtiment, et le dit', async ({ page }) => {
     await page.goto(RECORD);
     await ready(page);

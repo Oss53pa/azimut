@@ -75,7 +75,7 @@ function scheduleOrThrow(over = {}): MessageSchedule {
 // Niveaux d'information
 // ---------------------------------------------------------------------------
 
-describe('H2.3 — niveaux d’information', () => {
+describe('H2.3 : niveaux d’information', () => {
   it('en déclare quatre, du plus général au plus spécifique', () => {
     expect(INFORMATION_LEVELS).toEqual([1, 2, 3, 4]);
   });
@@ -101,7 +101,7 @@ describe('H2.3 — niveaux d’information', () => {
 // Génération
 // ---------------------------------------------------------------------------
 
-describe('H2.5 — génération du tableau des messages', () => {
+describe('H2.5 : génération du tableau des messages', () => {
   it('produit une ligne par bloc de chaque face', () => {
     const schedule = scheduleOrThrow();
     // Le gabarit de référence porte deux blocs : header et destination_list.
@@ -163,7 +163,7 @@ describe('H2.5 — génération du tableau des messages', () => {
     expect(schedule.lines[0]?.decision_point_id).toBe('n-ml-hall');
   });
 
-  it('M02.W4 — ne crée aucune ligne pour un support hors point de décision', () => {
+  it('M02.W4 : ne crée aucune ligne pour un support hors point de décision', () => {
     const outcome = generate({
       supports: [{ id: 'sup-x', node_id: 'n-ml-entrance', support_type_key: 'directional' }],
     });
@@ -181,7 +181,7 @@ describe('H2.5 — génération du tableau des messages', () => {
     expect(unjustified[0]?.ruleRef).toBe('N2.4');
   });
 
-  it('M02.W4 — un nœud absent du graphe garde sa cause propre, pas « ligne non justifiée »', () => {
+  it('M02.W4 : un nœud absent du graphe garde sa cause propre, pas « ligne non justifiée »', () => {
     // Un nœud inconnu n'est pas un point de décision, mais le dire ainsi
     // ferait chercher au mauvais endroit : la résolution de contenu nomme la
     // vraie faute, et c'est elle qui doit remonter.
@@ -197,7 +197,7 @@ describe('H2.5 — génération du tableau des messages', () => {
     expect(codes).not.toContain('WAYFIND.LINE_UNJUSTIFIED');
   });
 
-  it('M02.W4 — toute ligne produite porte son point de décision', () => {
+  it('M02.W4 : toute ligne produite porte son point de décision', () => {
     const schedule = scheduleOrThrow();
     expect(schedule.lines.length).toBeGreaterThan(0);
     for (const line of schedule.lines) {
@@ -205,7 +205,7 @@ describe('H2.5 — génération du tableau des messages', () => {
     }
   });
 
-  it('M02.W4 — le support justifié produit ses lignes, celui qui ne l\u2019est pas non', () => {
+  it('M02.W4 : le support justifié produit ses lignes, celui qui ne l\u2019est pas non', () => {
     const outcome = generate({
       supports: [
         { id: 'sup-ok', node_id: 'n-ml-hall', support_type_key: 'directional' },
@@ -274,7 +274,7 @@ describe('H2.5 — génération du tableau des messages', () => {
 // Empreinte des entrées
 // ---------------------------------------------------------------------------
 
-describe('H2.5 — empreinte des entrées', () => {
+describe('H2.5 : empreinte des entrées', () => {
   const base = {
     site: SITE,
     supports: SUPPORTS,

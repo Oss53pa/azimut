@@ -1,13 +1,13 @@
 /**
- * M01.S5 (partie N) — « L'historique d'occupation est conservé. Une cellule qui
+ * M01.S5 (partie N) : « L'historique d'occupation est conservé. Une cellule qui
  * change d'occupant ne perd pas la trace du précédent, ce qui alimente les
  * modules 03 et 09. »
  *
  * Les colonnes existent depuis la migration `0020` et la contrainte refuse
  * déjà une période renversée. Ce qui manquait est la lecture : sans elle, la
- * trace est conservée sans être consultable, et le critère 4 de N1.7 —
- * « l'historique survit à trois changements successifs sur une même cellule »
- * — n'a rien à vérifier.
+ * trace est conservée sans être consultable, et le critère 4 de N1.7 (
+ * « l'historique survit à trois changements successifs sur une même cellule »)
+ * n'a rien à vérifier.
  *
  * Aucune horloge ici, conformément à A4.1 : la date à laquelle on se place est
  * toujours un paramètre.
@@ -24,7 +24,7 @@ export type IsoDate = string;
  * Ordre : `valid_from` croissant, une entrée non relevée passant en premier
  * puisqu'elle précède nécessairement ce qui est daté. Départage final par
  * identifiant, sans quoi deux occupations de même date sortiraient dans un
- * ordre variable — A9 l'interdit.
+ * ordre variable: A9 l'interdit.
  */
 export function occupancyHistory(
   destinations: readonly Destination[],

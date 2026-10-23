@@ -46,7 +46,7 @@ function scan(line: string): string[] {
   return bad;
 }
 
-describe('F3.4 — typographic scale', () => {
+describe('F3.4: typographic scale', () => {
   it('holds the seven roles with two weights only', () => {
     expect(Object.keys(typeScale)).toEqual([
       'micro', 'fieldLabel', 'body', 'value', 'panelTitle', 'screenTitle', 'docTitle',
@@ -60,7 +60,7 @@ describe('F3.4 — typographic scale', () => {
   });
 });
 
-describe('F16 — no off-scale typography in the studio app', () => {
+describe('F16: no off-scale typography in the studio app', () => {
   it('every font size is on the scale and every weight is 400 or 500', () => {
     const violations: string[] = [];
     for (const file of walk(STUDIO_DIR)) {

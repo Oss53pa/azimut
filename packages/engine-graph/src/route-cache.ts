@@ -27,7 +27,7 @@ export class RouteCache {
     to: string,
   ): Outcome<Route> {
     const key = makeCacheKey(profile.id, from, to);
-    // D7.2 — une seule implantation : le cache s'invalide sur l'empreinte
+    // D7.2, une seule implantation : le cache s'invalide sur l'empreinte
     // des entrées de D7.1, et non sur une chaîne composée à part.
     const inputs = computeInputsHash(site, profile);
     if (!inputs.ok) return inputs;

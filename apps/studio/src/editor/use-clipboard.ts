@@ -1,13 +1,13 @@
 /**
- * E7.3 — Clipboard actions hook.
+ * E7.3: Clipboard actions hook.
  *
  * Provides copy, cut, and paste callbacks bridging
  * the internal ClipboardState to clipboard pure functions.
  *
- * Keyboard shortcuts are handled by useShortcuts (E16) — this hook
+ * Keyboard shortcuts are handled by useShortcuts (E16): this hook
  * only exposes the action functions.
  *
- * The hook does NOT access the browser clipboard API — it operates
+ * The hook does NOT access the browser clipboard API: it operates
  * on the internal ClipboardState. Browser clipboard integration
  * would require async permissions and is a separate concern.
  *

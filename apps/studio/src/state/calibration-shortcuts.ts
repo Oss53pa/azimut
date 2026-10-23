@@ -1,5 +1,5 @@
 /**
- * M2 (partie M) — les raccourcis de l'écran d'import et de calage.
+ * M2 (partie M) : les raccourcis de l'écran d'import et de calage.
  *
  * E16 veut que la table des raccourcis soit une donnée, et non des `if` semés
  * dans les gestionnaires d'événements. Celle-ci est propre à l'écran, pour

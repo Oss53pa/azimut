@@ -1,5 +1,5 @@
 /**
- * M2 (partie M) — la syntaxe des objets PDF, commune au lecteur de contenu et
+ * M2 (partie M), la syntaxe des objets PDF, commune au lecteur de contenu et
  * au lecteur de dictionnaires : où finit un nom, une chaîne, une valeur.
  *
  * Une valeur mal formée rend `null`, jamais une fin supposée : le suivi d'une

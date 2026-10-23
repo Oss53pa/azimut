@@ -20,7 +20,7 @@ const registry: MaintenanceRegistry = {
   work_orders: [],
 };
 
-describe('A5.7 — parc posé', () => {
+describe('A5.7 : parc posé', () => {
   it('rend une ligne par support du site, poses triées, dernière pose en tête de lecture', () => {
     const rows = fleetRows(refMultilevel, registry);
     expect(rows).toHaveLength(refMultilevel.supports.length);

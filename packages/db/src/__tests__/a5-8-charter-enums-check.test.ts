@@ -9,7 +9,7 @@ const MIGRATIONS = resolve(HERE, '..', '..', 'migrations');
 const MIGRATION = resolve(MIGRATIONS, '0006_a5_5_to_a5_10_remaining.up.sql');
 
 /**
- * A5.8 — les énumérés de la charte, côté TypeScript et côté base, disent la
+ * A5.8 : les énumérés de la charte, côté TypeScript et côté base, disent la
  * même chose. Le dépôt refuse une valeur hors liste : si les listes
  * divergeaient, une ligne valide en base ferait échouer la lecture.
  */
@@ -49,7 +49,7 @@ function parseList(raw: string): readonly string[] {
   return raw.split(',').map(p => p.trim().replace(/^'|'$/g, '')).filter(p => p !== '');
 }
 
-describe('A5.8 — registre de charte : le type et la base coïncident', () => {
+describe('A5.8, registre de charte : le type et la base coïncident', () => {
   it('charter_rule.kind', () => {
     expect([...inList('charter_rule', 'kind')].sort()).toEqual([...CHARTER_RULE_KINDS].sort());
   });

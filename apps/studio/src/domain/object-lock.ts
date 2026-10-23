@@ -1,7 +1,7 @@
 import type { Finding, Outcome } from '@azimut/core-model';
 
 /**
- * G4.2 — Consultative object locking. Real-time co-editing is excluded (G4.1);
+ * G4.2: Consultative object locking. Real-time co-editing is excluded (G4.1);
  * instead, editing an object places a consultative lock carrying its holder and
  * a 15-minute expiry, renewed while editing continues. Another user sees the
  * object marked, may consult it, and cannot modify it without an explicit

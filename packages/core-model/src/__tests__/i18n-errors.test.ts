@@ -10,7 +10,7 @@ import type { ErrorCode } from '../error-catalog.js';
 
 const allCodes = Object.keys(ERROR_CATALOG) as ErrorCode[];
 
-describe('D12.1 — error code dictionaries', () => {
+describe('D12.1: error code dictionaries', () => {
   it('FR dictionary covers every catalog code', () => {
     const frKeys = new Set(Object.keys(ERROR_MESSAGES_FR));
     const missing = allCodes.filter((c) => !frKeys.has(c));
@@ -53,7 +53,7 @@ describe('D12.1 — error code dictionaries', () => {
   });
 });
 
-describe('D12.1 — getErrorMessage', () => {
+describe('D12.1: getErrorMessage', () => {
   it('returns the French message', () => {
     const msg = getErrorMessage('GRAPH.NODE_ORPHAN', 'fr');
     expect(msg).toContain('arête');
@@ -84,7 +84,7 @@ describe('D12.1 — getErrorMessage', () => {
   });
 });
 
-describe('D12.1 — getSupportedErrorLangs', () => {
+describe('D12.1: getSupportedErrorLangs', () => {
   it('returns fr and en', () => {
     const langs = getSupportedErrorLangs();
     expect(langs).toContain('fr');

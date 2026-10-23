@@ -1,5 +1,5 @@
 /**
- * R16 (partie R) — « Version approuvée | Bandeau d'état indiquant
+ * R16 (partie R) : « Version approuvée | Bandeau d'état indiquant
  * l'approbateur et la date. »
  *
  * La décision se lit dans `message_schedule_approval` (0074) : la dernière

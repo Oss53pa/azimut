@@ -2,7 +2,7 @@ import { type JSX, type ReactNode } from 'react';
 import { SPACE, TEXT } from './tokens.js';
 
 /**
- * F6, famille « Structure » — barre d'outils et barre d'état.
+ * F6, famille « Structure » : barre d'outils et barre d'état.
  *
  * La barre d'outils est un groupe de boutons à bascule : un seul outil est
  * actif, et l'outil actif se lit au texte et à l'état ARIA, jamais à la seule
@@ -75,7 +75,7 @@ export function Toolbar({ label, items, active, onSelect, disabled = false }: To
 }
 
 /**
- * F6 — barre d'état. Des couples libellé/valeur, en bas de l'écran d'atelier.
+ * F6 : barre d'état. Des couples libellé/valeur, en bas de l'écran d'atelier.
  * Chaque valeur porte son libellé : une valeur seule ne se lit pas.
  */
 export type StatusItem = {

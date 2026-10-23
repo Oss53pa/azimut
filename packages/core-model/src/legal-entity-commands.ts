@@ -1,5 +1,5 @@
 /**
- * Q5 — déclarer une entité juridique : le « client » de l'organisation.
+ * Q5, déclarer une entité juridique : le « client » de l'organisation.
  *
  * L'entité juridique est la société qui possède ou exploite un site, et au
  * nom de laquelle une facture s'émet. Le formulaire saisit exactement les

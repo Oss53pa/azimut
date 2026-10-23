@@ -18,7 +18,7 @@ const DECLARED = 'declared';
 const UNDECLARED = 'undeclared';
 
 /**
- * Module 04 — les faces des supports (A5.6), au gabarit « registre » : une
+ * Module 04, les faces des supports (A5.6), au gabarit « registre » : une
  * ligne par face que la typologie prévoit, déclarée ou non. L'inspecteur
  * déclare la face ou modifie son gabarit et ses langues, par commande ; le
  * site se relit ensuite. Sans base configurée, la saisie est inactive.
@@ -44,7 +44,7 @@ export function SupportFacesView(): JSX.Element {
   };
   const level = (r: FaceSlot): string => {
     const id = labels.nodeLevel(r.support.node_id);
-    return id === null ? '—' : labels.level(id);
+    return id === null ? '–' : labels.level(id);
   };
 
   const filters: readonly RegisterFilter[] = [
@@ -65,8 +65,8 @@ export function SupportFacesView(): JSX.Element {
     { id: 'support', header: t('supportfaces.col.support'), cell: r => r.support.code ?? r.support.id },
     { id: 'level', header: t('supportfaces.col.level'), cell: level },
     { id: 'face', header: t('supportfaces.col.face'), numeric: true, cell: r => String(r.faceIndex) },
-    { id: 'template', header: t('supportfaces.col.template'), cell: r => (r.face === undefined ? '—' : templateName(r.face.template_key)) },
-    { id: 'langs', header: t('supportfaces.col.langs'), cell: r => (r.face === undefined ? '—' : langsOf(r)) },
+    { id: 'template', header: t('supportfaces.col.template'), cell: r => (r.face === undefined ? '–' : templateName(r.face.template_key)) },
+    { id: 'langs', header: t('supportfaces.col.langs'), cell: r => (r.face === undefined ? '–' : langsOf(r)) },
     { id: 'blocks', header: t('supportfaces.col.blocks'), numeric: true, cell: r => String(r.blocks) },
     { id: 'state', header: t('supportfaces.col.state'), cell: state },
   ];

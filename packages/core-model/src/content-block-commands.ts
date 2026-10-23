@@ -1,5 +1,5 @@
 /**
- * A5.6 / D8.3 — saisir les blocs de contenu d'une face de support.
+ * A5.6 / D8.3 : saisir les blocs de contenu d'une face de support.
  *
  * « Un bloc `free` est le seul dont le texte est saisi » (D8.3), et E1.4 ne
  * laisse, en contexte 3, que « Saisir du texte libre : blocs `free`
@@ -7,8 +7,8 @@
  * tableau des messages (INV-1, INV-2). Toute autre nature se refuse par
  * `EDIT.CONTEXT_VIOLATION`.
  *
- * Le texte d'un bloc libre a une entrée par langue — `{"fr": "…", "en": "…"}`
- * (A5.6) — parmi les langues de la face, à défaut celles du site. Une langue
+ * Le texte d'un bloc libre a une entrée par langue (`{"fr": "…", "en": "…"}`
+ * (A5.6)) parmi les langues de la face, à défaut celles du site. Une langue
  * de la face restée sans texte est signalée, sans bloquer. Ces contrôles de
  * saisie n'ont pas de code au catalogue : ce sont des refus de formulaire
  * (D2.2, décision du 28/09/2026).
@@ -41,7 +41,7 @@ export type BlockEnvironment = {
 
 const MODULE = '04-signaletique';
 
-/** E1.4 — une nature de bloc que le contexte 3 ne laisse pas saisir. */
+/** E1.4 : une nature de bloc que le contexte 3 ne laisse pas saisir. */
 function contextViolation(faceId: string, kind: string): FormOutcome<never> {
   const finding: Finding = {
     code: 'EDIT.CONTEXT_VIOLATION', severity: 'blocking', entity: { kind: 'face', id: faceId },

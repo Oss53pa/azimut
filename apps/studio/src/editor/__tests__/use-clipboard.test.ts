@@ -2,7 +2,7 @@
  * Tests for clipboard integration.
  *
  * Tests the underlying pure functions (clipboard.ts), not the React hook.
- * The hook is thin wiring — keyboard listeners + state updates.
+ * The hook is thin wiring: keyboard listeners + state updates.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -48,7 +48,7 @@ const CROSS_ORG: PasteContext = {
 
 const CENTER = { x_m: 10, y_m: 10 };
 
-describe('E7.3 — clipboard integration', () => {
+describe('E7.3: clipboard integration', () => {
   describe('copy / cut', () => {
     it('copy stores payload in clipboard', () => {
       const state = copyToClipboard(EMPTY_CLIPBOARD, PAYLOAD);

@@ -38,7 +38,7 @@ function pack(
   return result.value;
 }
 
-describe('D3.6 — mergeCountryOverlay', () => {
+describe('D3.6: mergeCountryOverlay', () => {
   it('applies a stricter country rule (higher)', () => {
     const base = pack('intl', 'INTL', [
       { code: 'MIN_H', params: { minimum_mm: 20 }, source_ref: 'base' },

@@ -46,7 +46,7 @@ describe('exportArtworkPdf', () => {
     expect(bytes1).toEqual(bytes2);
   });
 
-  // T-0.9 / INV-4 — "Deux compilations d'un même état de données produisent des
+  // T-0.9 / INV-4 : "Deux compilations d'un même état de données produisent des
   // fichiers strictement identiques, octet pour octet." The self-consistency
   // check above (pdf1 === pdf2 in one call pair) passes even if some ambient
   // factor shifted BOTH outputs together. These three close that gap: the
@@ -71,7 +71,7 @@ describe('exportArtworkPdf', () => {
   it('an unrelated export in between does not perturb the output (no leaked state)', async () => {
     const before = Array.from(await exportArtworkPdf(makeOptions()));
     // A different export (different title, target, dimensions) between two
-    // identical ones must not change the identical ones — no module-level state.
+    // identical ones must not change the identical ones: no module-level state.
     await exportArtworkPdf(
       makeOptions({ title: 'Autre', target: 'pdf-a', width_mm: 300, height_mm: 150 }),
     );
@@ -114,7 +114,7 @@ describe('exportArtworkPdf', () => {
 
   it('handles unicode title in ID hash', async () => {
     const pdf = await exportArtworkPdf(
-      makeOptions({ title: 'Façade entrée — étage 1' }),
+      makeOptions({ title: 'Façade entrée : étage 1' }),
     );
     expect(pdf).toBeInstanceOf(Uint8Array);
     expect(pdf.length).toBeGreaterThan(0);
@@ -123,7 +123,7 @@ describe('exportArtworkPdf', () => {
   });
 
   it('unicode title is deterministic (INV-4)', async () => {
-    const opts = makeOptions({ title: 'Accès PMR — bâtiment B' });
+    const opts = makeOptions({ title: 'Accès PMR : bâtiment B' });
     const pdf1 = await exportArtworkPdf(opts);
     const pdf2 = await exportArtworkPdf(opts);
     expect(Array.from(pdf1)).toEqual(Array.from(pdf2));

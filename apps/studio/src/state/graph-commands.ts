@@ -1,5 +1,5 @@
 /**
- * M4 (partie M) — écriture du graphe.
+ * M4 (partie M) : écriture du graphe.
  *
  * Un axe tracé en une passe produit des nœuds, des arêtes, et parfois des
  * liaisons verticales ou inter-bâtiments. Les quatre tables appartiennent au
@@ -28,7 +28,7 @@ export type VerticalLinkRow = {
 };
 
 /**
- * M01.S10 — la liaison inter-bâtiments qui accompagne une arête.
+ * M01.S10 : la liaison inter-bâtiments qui accompagne une arête.
  *
  * `sheltered` déclare si le passage est couvert. Aucun calcul ne le lit
  * aujourd'hui, la règle le dit elle-même ; il est écrit parce qu'un
@@ -47,8 +47,8 @@ export type BuildingLinkRow = {
  * Les commandes d'un geste de saisie du graphe.
  *
  * L'ordre suit les dépendances : les nœuds, puis les arêtes qui les citent,
- * puis les liaisons — verticales et inter-bâtiments — qui citent les arêtes.
- * L'annulation les inverse en ordre inverse, ce que le magasin fait déjà —
+ * puis les liaisons (verticales et inter-bâtiments) qui citent les arêtes.
+ * L'annulation les inverse en ordre inverse, ce que le magasin fait déjà :
  * c'est la seule façon de ne pas heurter les clés étrangères.
  */
 export function graphCommands(

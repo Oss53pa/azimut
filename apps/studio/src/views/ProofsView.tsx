@@ -37,7 +37,7 @@ type FaceStatus = {
  *
  * L'écran interrogeait jusqu'ici la table de D9, qui ne porte que les états.
  * Il interroge désormais celle des versions de support, qui porte les
- * événements — et c'est elle qui dit M04.G7 : depuis `approved`, aucun événement
+ * événements, et c'est elle qui dit M04.G7 : depuis `approved`, aucun événement
  * n'est admis sauf le remplacement. Montrer « approuvé → remplacé » sans
  * nommer l'événement laissait croire qu'une version approuvée pouvait encore
  * bouger d'elle-même.
@@ -49,11 +49,11 @@ function admittedFrom(
 }
 
 /**
- * Module 04 — les épreuves et le bon à tirer.
+ * Module 04 : les épreuves et le bon à tirer.
  *
  * Une face ne part en épreuve que si elle se compose. L'écran mesure donc
  * d'abord cela, face par face, puis montre la colonne vertébrale des versions
- * — brouillon, en revue, approuvé, remplacé — et les transitions que la machine
+ * (brouillon, en revue, approuvé, remplacé) et les transitions que la machine
  * à états autorise depuis chacune.
  */
 export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
@@ -172,7 +172,7 @@ export function ProofsView({ onNavigate }: ProofsViewProps): JSX.Element {
         />
       ),
     },
-    { id: 'hash', header: t('proofs.col.hash'), cell: v => v.content_hash?.slice(0, 12) ?? '—' },
+    { id: 'hash', header: t('proofs.col.hash'), cell: v => v.content_hash?.slice(0, 12) ?? '–' },
     { id: 'created', header: t('proofs.col.created'), cell: v => v.created_at },
   ];
 

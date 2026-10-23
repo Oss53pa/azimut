@@ -2,7 +2,7 @@ import type { Finding } from './outcome.js';
 import { codePointCompare } from './empreinte.js';
 
 /**
- * Règles de charte — A5.8, table `charter_rule`.
+ * Règles de charte : A5.8, table `charter_rule`.
  *
  * « Aucune valeur de charte n'est écrite dans le code : caractères interdits,
  * limite de phrase, largeurs et tailles minimales viennent tous de ces tables.
@@ -22,7 +22,7 @@ import { codePointCompare } from './empreinte.js';
  * **Deux natures sont lues, et deux seulement.** Les cinq autres natures
  * d'A5.8 n'ont pas de forme de paramètres déclarée, volontairement : chacune
  * sera définie quand un contrôle la consommera. Elles traversent donc ce
- * module sans être validées — rien ne les lit, rien ne peut donc dire si
+ * module sans être validées : rien ne les lit, rien ne peut donc dire si
  * elles sont bien formées.
  *
  * **Ce n'est pas INV-5.** Aucune norme ne décide qu'un tiret cadratin est
@@ -91,7 +91,7 @@ export type ForbiddenCharacterRange = {
  * charte et l'a refusée.
  *
  * `value` dit ce que le contrôle peut opposer. Il vaut `null` quand rien de
- * lisible n'a été déclaré — et le contrôle ne juge alors aucun texte, sans pour
+ * lisible n'a été déclaré : et le contrôle ne juge alors aucun texte, sans pour
  * autant appliquer de valeur par défaut.
  */
 export type CharterRuleResolution<T> = {

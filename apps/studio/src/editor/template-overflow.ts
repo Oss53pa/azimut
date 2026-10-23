@@ -1,7 +1,7 @@
 import type { Finding, Outcome, Template } from '@azimut/core-model';
 
 /**
- * E10 — Template (gabarit) editing, context 2. Saving a template a block of
+ * E10: Template (gabarit) editing, context 2. Saving a template a block of
  * which overflows the grid is refused, with the dedicated code. A block spans
  * columns from `col` over `colSpan`; it overflows when its last column exceeds
  * the grid's column count. This guard is that save-time control, raising a

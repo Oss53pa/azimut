@@ -5,11 +5,11 @@
  */
 
 /**
- * A5.2 — natures d'empreinte, énuméré fermé.
+ * A5.2 : natures d'empreinte, énuméré fermé.
  *
  * La liste fait foi : une nature hors liste n'est pas représentable. La base
  * porte la même contrainte par un CHECK (migrations 0019 puis 0055), comme
- * pour toute autre énumération du schéma — `node.kind`, `vertical_link.kind`,
+ * pour toute autre énumération du schéma : `node.kind`, `vertical_link.kind`,
  * `destination.occupancy_status`. Un test structurel vérifie que les deux
  * listes coïncident.
  *
@@ -20,8 +20,8 @@
  * cellule, et non plus un objet à part.
  *
  * Deux conséquences qu'A5.2 pose et que S-37 confirme : une place n'est ni une
- * destination ni une cellule, donc elle ne porte pas de code d'unité — seule
- * `cell` en porte, règle M01.S3 — et elle n'entre dans aucun quantitatif de
+ * destination ni une cellule, donc elle ne porte pas de code d'unité (seule
+ * `cell` en porte, règle M01.S3) et elle n'entre dans aucun quantitatif de
  * signalétique.
  *
  * L'écran de saisie du tracé, en partie M, n'offre que quatre natures :
@@ -46,7 +46,7 @@ export const FOOTPRINT_KINDS = [
 export type FootprintKind = (typeof FOOTPRINT_KINDS)[number];
 
 /**
- * Restreint une chaîne venue de l'extérieur — base, import, fichier — à une
+ * Restreint une chaîne venue de l'extérieur (base, import, fichier) à une
  * nature connue. À employer à toute frontière qui reçoit du texte libre.
  */
 export function isFootprintKind(value: string): value is FootprintKind {
@@ -54,7 +54,7 @@ export function isFootprintKind(value: string): value is FootprintKind {
 }
 
 /**
- * A5.2 — natures de zone, énuméré fermé.
+ * A5.2 : natures de zone, énuméré fermé.
  *
  * Une zone du socle est une division technique du niveau. Elle ne se confond
  * pas avec la zone d'orientation du module 02, qui a sa table et ses propres
@@ -76,7 +76,7 @@ export function isSiteZoneKind(value: string): value is SiteZoneKind {
   return (ZONE_KINDS as readonly string[]).includes(value);
 }
 
-/** A5.2 — natures d'ouverture, énuméré fermé. */
+/** A5.2 : natures d'ouverture, énuméré fermé. */
 export const OPENING_KINDS = [
   'door',
   'automatic_door',
@@ -100,10 +100,10 @@ export function isCellFootprint(kind: FootprintKind): boolean {
 }
 
 /**
- * S-35 — la nature d'empreinte qui porte une place de stationnement.
+ * S-35 : la nature d'empreinte qui porte une place de stationnement.
  *
  * Nommée plutôt que répétée en littéral : les contrôles du domaine `PARK` la
- * comparent, et une faute de frappe dans l'un d'eux ne se verrait pas — le
+ * comparent, et une faute de frappe dans l'un d'eux ne se verrait pas, le
  * contrôle compterait zéro place et ne signalerait rien, ce qui a l'apparence
  * d'un site sain.
  */
@@ -115,7 +115,7 @@ export function isParkingSpaceFootprint(kind: FootprintKind): boolean {
 }
 
 /**
- * S-35 — la nature de zone qui porte un parking.
+ * S-35 : la nature de zone qui porte un parking.
  *
  * Nommée pour la même raison que la précédente, et parce que la nature de zone
  * `parking` d'A5.2 existait bien avant que la section S8 ne lui donne un sens :
@@ -129,7 +129,7 @@ export function isParkingZone(kind: SiteZoneKind): boolean {
 }
 
 /**
- * Une zone du socle — A5.2.
+ * Une zone du socle : A5.2.
  *
  * Elle entre au modèle avec la version 17, qui lui donne `footprint_ids` :
  * « empreintes couvertes par la zone, appartenance déclarée et non calculée,

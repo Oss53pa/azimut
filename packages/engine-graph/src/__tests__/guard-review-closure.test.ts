@@ -11,7 +11,7 @@ const ann = (
   anchorId = 'f-1',
 ): ReviewAnnotation => ({ id, state, anchor: { kind: anchorKind, id: anchorId } });
 
-describe('J4 — guardReviewClosure', () => {
+describe('J4: guardReviewClosure', () => {
   it('closes a review when every annotation is handled or rejected', () => {
     const r = guardReviewClosure([
       ann('a-1', 'handled'),

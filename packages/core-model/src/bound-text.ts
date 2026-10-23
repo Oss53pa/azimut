@@ -1,5 +1,5 @@
 /**
- * Texte lié — A5.11, règle M01.S11.
+ * Texte lié : A5.11, règle M01.S11.
  *
  * « Un nombre affiché dans un livrable provient d'un fait ou d'un calcul,
  * jamais d'un littéral écrit dans un gabarit. »
@@ -13,8 +13,8 @@
  * relevé en trouve 93, et rien ne le dira.
  *
  * Un paragraphe est donc une suite de segments, littéraux ou liés, et non une
- * chaîne portant une syntaxe à interpréter. C'est le choix de D8.1 — « un
- * gabarit est une donnée, pas un composant » — et il évite d'inventer un
+ * chaîne portant une syntaxe à interpréter. C'est le choix de D8.1 (« un
+ * gabarit est une donnée, pas un composant ») et il évite d'inventer un
  * mini-langage de plus, avec ses échappements et ses cas limites.
  *
  * La liaison est celle de D8, réexportée : deux notations pour la même idée
@@ -37,8 +37,8 @@ export type BindingValues = Readonly<Record<string, Readonly<Record<string, stri
 /**
  * Ce que chaque source sait offrir, qu'elle ait une valeur ou non.
  *
- * Sans ce catalogue, une liaison vers `parking.capacite` — orthographiée à la
- * française alors que le champ est `capacity` — et une liaison vers
+ * Sans ce catalogue, une liaison vers `parking.capacite` (orthographiée à la
+ * française alors que le champ est `capacity`) et une liaison vers
  * `parking.capacity` d'un site qui n'a pas de parking se ressemblent
  * exactement : dans les deux cas la recherche ne rend rien.
  *
@@ -53,7 +53,7 @@ export type BindingCatalogue = Readonly<Record<string, readonly string[]>>;
 export type MissingBinding = {
   readonly binding: Binding;
   /**
-   * `unknown` : ni la source ni le champ ne figurent au catalogue — le document
+   * `unknown` : ni la source ni le champ ne figurent au catalogue, le document
    * désigne quelque chose qui n'existe pas. `empty` : le champ existe et le site
    * n'a rien à y mettre.
    */
@@ -83,7 +83,7 @@ function isDeclared(catalogue: BindingCatalogue | undefined, binding: Binding): 
  * sont nommées.
  *
  * C'est délibérément brutal. Un document de stratégie qui perdrait sa capacité
- * de parking en chemin se lirait normalement — « le parking compte  places » —
+ * de parking en chemin se lirait normalement (« le parking compte  places »)
  * et personne ne verrait le trou avant la réunion. Mieux vaut un document qui
  * ne se compile pas qu'un document qui ment poliment.
  */

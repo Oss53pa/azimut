@@ -12,17 +12,17 @@ import {
 } from './csv-utils.js';
 
 /**
- * D4.1 — Existing support inventory import.
+ * D4.1: Existing support inventory import.
  *
  * Column contract (obligatory: reference, typology, building, level).
  * Optional columns carry position (node_ref, or x_m/y_m), orientation
  * (azimuth_deg, compass convention D1.3), overridden dimensions (width_mm,
- * height_mm — their presence flips dimensions_source to 'overridden'),
+ * height_mm: their presence flips dimensions_source to 'overridden'),
  * reading_distance_m, substrate, condition (enumerated), installed_at (ISO
  * 8601) and observed content (content_fr, content_en).
  *
  * Valid rows are imported, others rejected, and a row-by-row report is always
- * produced — never a silent truncation. A row with neither a node_ref nor an
+ * produced: never a silent truncation. A row with neither a node_ref nor an
  * x_m/y_m pair is rejected with IMPORT.ROW_INVALID.
  */
 
@@ -73,7 +73,7 @@ export type ImportReport = {
 };
 
 export type ImportSupportsOptions = {
-  /** D4.1 — decimal separator declared in the import header. Default 'point'. */
+  /** D4.1: decimal separator declared in the import header. Default 'point'. */
   readonly decimalSeparator?: DecimalSeparator;
   /** Lot 4 de l'audit : les bornes de l'import, lues dans la configuration. */
   readonly limits: CsvLimits;
@@ -186,7 +186,7 @@ function buildSupport(
   const contentFr = get('content_fr');
   const contentEn = get('content_en');
 
-  // D4.1 — declaring width_mm/height_mm overrides the typology default.
+  // D4.1: declaring width_mm/height_mm overrides the typology default.
   const dimensionsSource: DimensionsSource =
     width.value !== null || height.value !== null ? 'overridden' : 'default';
 

@@ -10,7 +10,7 @@ import type { ValidationState } from '../state/validation-report.js';
 import { ValidationScreen } from '../screens/ValidationScreen.js';
 
 /**
- * M5 (partie M) — « Relancer | Recalcule, affiche la durée réelle, enregistre
+ * M5 (partie M) : « Relancer | Recalcule, affiche la durée réelle, enregistre
  * le passage dans `graph_validation`. »
  *
  * L'enregistrement est ce qui distingue cet écran d'un calcul jetable : la
@@ -63,7 +63,7 @@ export function ValidationScreenAdapter({ session, siteId }: {
         const outcome = validateGraph(scope);
         findings.push(...(outcome.ok ? outcome.warnings : outcome.findings));
 
-        // D2.2 — un graphe dont l'empreinte est refusée ne s'enregistre pas :
+        // D2.2, un graphe dont l'empreinte est refusée ne s'enregistre pas :
         // un passage sans empreinte ne vaudrait pour aucun graphe (M02.W11).
         const graphHash = computeGraphHash(scope.graph);
         if (!graphHash.ok) findings.push(...graphHash.findings);

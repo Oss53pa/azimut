@@ -1,5 +1,5 @@
 /**
- * K-Tier-A — les résolveurs des blocs dont le contenu tient dans le gabarit
+ * K-Tier-A : les résolveurs des blocs dont le contenu tient dans le gabarit
  * (plan, légende, logo, consigne de sécurité). Partagés par la résolution
  * directe et par la lecture du tableau des messages ; sortis de
  * `resolve-face.ts` pour tenir la limite de taille des fichiers.
@@ -67,7 +67,7 @@ export function resolveLegendContent(config: Record<string, unknown>): ResolvedC
 /**
  * A `logo` block embeds a sanitized inline SVG (`svg_markup`, per E14) provided
  * in the config; when none is supplied the `label` (defaulting to the org name)
- * is drawn instead. Never free-drawn — resolved from data (INV-2).
+ * is drawn instead. Never free-drawn: resolved from data (INV-2).
  */
 export function resolveLogoContent(
   config: Record<string, unknown>,
@@ -82,7 +82,7 @@ export function resolveLogoContent(
 
 /**
  * An `emergency_info` block carries regulatory instruction text (held in data,
- * never in code — INV-5) and a safety-registry pictogram resolved read-only by
+ * never in code: INV-5) and a safety-registry pictogram resolved read-only by
  * category (INV-3). The pictogram must belong to the `safety` registry.
  */
 export function resolveEmergencyContent(

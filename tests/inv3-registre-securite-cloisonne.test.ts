@@ -5,7 +5,7 @@ import { refMinimal } from '@azimut/testkit';
 import type { CommandDraft, Outcome, Finding } from '@azimut/core-model';
 
 /**
- * INV-3 — « Aucune charte client ne peut modifier une couleur, une géométrie,
+ * INV-3 : « Aucune charte client ne peut modifier une couleur, une géométrie,
  * un pictogramme ou une proportion relevant du registre de sécurité. Le moteur
  * refuse l'opération et lève une erreur. Il n'avertit pas, il ne dégrade pas,
  * il refuse. »
@@ -14,8 +14,8 @@ import type { CommandDraft, Outcome, Finding } from '@azimut/core-model';
  * échoue, **un test par voie de contournement**. »
  *
  * **Ce que cet essai ferme.** L'invariant n'était appliqué que sur le chemin de
- * la charte. Les trois gardes de la bibliothèque — création, modification,
- * suppression — existaient, étaient éprouvés un par un, et **rien ne les
+ * la charte. Les trois gardes de la bibliothèque (création, modification,
+ * suppression) existaient, étaient éprouvés un par un, et **rien ne les
  * appelait**. Le garde de câblage ne le voyait pas, parce qu'il tient un
  * ré-export de baril pour un appelant. Le registre était donc protégé à
  * moitié, et c'est la moitié la moins évidente qui manquait.
@@ -47,7 +47,7 @@ function codes(outcome: Outcome<unknown>): readonly string[] {
   return refus(outcome).map(f => f.code);
 }
 
-describe('INV-3 — le registre de sécurité refuse chaque voie de contournement', () => {
+describe('INV-3 : le registre de sécurité refuse chaque voie de contournement', () => {
   it('voie 1 : créer un pictogramme dans le registre de sécurité', () => {
     const findings = refus(buildCommand(commande({
       operation: 'create',
@@ -94,7 +94,7 @@ describe('INV-3 — le registre de sécurité refuse chaque voie de contournemen
 
   it('voie 6 : ne pas déclarer le registre du tout', () => {
     // La voie la plus simple de toutes, si rien ne la ferme : une commande qui
-    // omet la colonne ne dit pas ce qu'elle touche. A7 tranche — un moteur qui
+    // omet la colonne ne dit pas ce qu'elle touche. A7 tranche : un moteur qui
     // reçoit une entrée qu'il ne peut pas traiter refuse.
     const findings = refus(buildCommand(commande({
       before: { svg_path: 'M0 0' },
@@ -119,7 +119,7 @@ describe('INV-3 — le registre de sécurité refuse chaque voie de contournemen
 
   it('voie 7 bis : saisir la désignation de fonction d’un pictogramme de sécurité', () => {
     // A5.4 : « Pour le registre de sécurité, la désignation vient du paquet de
-    // règles et n'est jamais saisie. » Aucun garde neuf n'est posé pour cela —
+    // règles et n'est jamais saisie. » Aucun garde neuf n'est posé pour cela :
     // une désignation saisie est une modification, et INV-3 les refuse toutes.
     // L'essai le tient quand même : c'est la règle d'A5.4 qui compte, non le
     // chemin par lequel elle se trouve tenue.
@@ -157,7 +157,7 @@ describe('INV-3 — le registre de sécurité refuse chaque voie de contournemen
   /**
    * Le contre-exemple. Sans lui, un garde qui refuserait toute écriture sur
    * `pictogram` passerait les huit essais ci-dessus, et le registre
-   * d'orientation deviendrait inutilisable — la partie J en fait pourtant le
+   * d'orientation deviendrait inutilisable : la partie J en fait pourtant le
    * lieu où l'éditeur travaille.
    */
   it('mais laisse passer le registre d’orientation, que J5.1 ouvre', () => {

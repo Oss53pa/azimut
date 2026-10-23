@@ -8,7 +8,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * D2 — un code déclaré au catalogue et qu'aucun moteur ne lève.
+ * D2 : un code déclaré au catalogue et qu'aucun moteur ne lève.
  *
  * C'est un contrôle qui a l'air d'exister et qui ne tourne pas. Le défaut est
  * passé trois fois : les deux codes du lexique de charte figuraient au
@@ -22,8 +22,8 @@ const ROOT = resolve(HERE, '..');
  * écrite et laissée hors de son point d'entrée lui paraît saine. C'est
  * `check-wiring.test.ts` qui tient ce second cas, et il a fallu les deux.
  *
- * Cet essai la rend systématique. Il ne demande pas que tout code soit levé —
- * plusieurs attendent une capacité non construite ou une décision non prise —
+ * Cet essai la rend systématique. Il ne demande pas que tout code soit levé (
+ * plusieurs attendent une capacité non construite ou une décision non prise)
  * mais que la liste de ceux qui ne le sont pas soit tenue à jour et motivée.
  * Elle est comparée dans les deux sens : un code qu'on se met à lever doit
  * sortir de la liste, faute de quoi elle vieillirait en silence, ce qui est le
@@ -38,7 +38,7 @@ const CATALOGUE_FILES = [
 ];
 
 /**
- * Codes déclarés, non levés, et la raison — vérifiée, pas supposée.
+ * Codes déclarés, non levés, et la raison : vérifiée, pas supposée.
  *
  * Trois familles de raisons, et aucune n'est « on a oublié » :
  * la capacité n'est pas construite, la donnée manque au modèle, ou le paquet
@@ -116,7 +116,7 @@ function isAnomalyCode(code: string): boolean {
   return (ANOMALY_DOMAINS as readonly string[]).includes(domain);
 }
 
-describe('D2 — tout code du catalogue est levé, ou déclaré non levé et motivé', () => {
+describe('D2 : tout code du catalogue est levé, ou déclaré non levé et motivé', () => {
   // Le catalogue se lit comme un objet, non comme du texte. Le balayage
   // textuel prenait aussi les codes de `RETIRED_CODES` pour des déclarations,
   // alors qu'un code retiré n'est précisément plus au catalogue : sa valeur
@@ -143,7 +143,7 @@ describe('D2 — tout code du catalogue est levé, ou déclaré non levé et mot
       'Codes déclarés au catalogue D2 qu’aucun moteur ne lève, et qui ne figurent pas ' +
       'dans DECLARED_NOT_RAISED :\n' + unexplained.join('\n') +
       '\n\nUn code muet est un contrôle qui a l’air d’exister. Levez-le, ou inscrivez-le ' +
-      'ici avec la raison — capacité non construite, donnée absente du modèle, paquet de ' +
+      'ici avec la raison : capacité non construite, donnée absente du modèle, paquet de ' +
       'règles manquant.',
     ).toHaveLength(0);
   });
@@ -169,7 +169,7 @@ describe('D2 — tout code du catalogue est levé, ou déclaré non levé et mot
    * L'essai vérifiait qu'un code du catalogue est levé. Il ne vérifiait pas
    * qu'un code levé est au catalogue, et `DATA.TIMEZONE_REQUIRED` est passé
    * par ce trou : levé par le formulaire de création de M1 (partie M) depuis
-   * l'origine, absent du catalogue, donc sans entrée de dictionnaire — l'écran
+   * l'origine, absent du catalogue, donc sans entrée de dictionnaire, l'écran
    * affichait le code brut à l'opérateur.
    *
    * D2.2 : « Toute anomalie produite par un moteur figure dans ce catalogue.

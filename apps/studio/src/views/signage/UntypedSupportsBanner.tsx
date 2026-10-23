@@ -10,7 +10,7 @@ type UntypedSupportsBannerProps = {
 };
 
 /**
- * A5.6 — un écran qui suppose une typologie aux supports qui n'en portent pas
+ * A5.6 : un écran qui suppose une typologie aux supports qui n'en portent pas
  * le dit, avec leur nombre. Rien ne s'affiche quand tous sont rattachés.
  */
 export function UntypedSupportsBanner({ assumedTypeKey }: UntypedSupportsBannerProps): JSX.Element | null {

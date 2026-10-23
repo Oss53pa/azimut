@@ -2,7 +2,7 @@ import { readFile, readdir, writeFile, mkdir } from 'node:fs/promises';
 import { join, relative, dirname, sep, posix } from 'node:path';
 
 /**
- * D10 — Storage port for kiosk runtime bundle assets.
+ * D10: Storage port for kiosk runtime bundle assets.
  *
  * The kiosk deployment tree mixes two kinds of files: the static runtime app
  * bundle (index.html, assets/app.js, assets/app.css, fonts…) which does not

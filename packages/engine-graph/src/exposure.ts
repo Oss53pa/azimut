@@ -2,7 +2,7 @@ import type { Finding, Outcome } from '@azimut/core-model';
 import { WEIGHT_SUM_TOLERANCE } from '@azimut/core-model';
 
 /**
- * I5.3 — Exposure hypotheses.
+ * I5.3: Exposure hypotheses.
  *
  * The exposure of a cell is derived from computed routes weighted by three
  * DECLARED factors: entry weights (share of footfall per access), attraction
@@ -11,7 +11,7 @@ import { WEIGHT_SUM_TOLERANCE } from '@azimut/core-model';
  * site, never a visitor count.
  *
  * Blocking rule (I5.3): a flow report cannot be produced without its
- * hypotheses. This guard enforces exactly that — the three declarations must be
+ * hypotheses. This guard enforces exactly that: the three declarations must be
  * present before any exposure is computed or exported. The exposure computation
  * itself (route enumeration and visibility, still provisional in I5.3) is not
  * implemented here.
@@ -25,7 +25,7 @@ export type EntryWeight = {
 /**
  * Total attendu des parts de fréquentation (N3.3).
  *
- * La fiche l'exprime en pour-cent — « somme des parts différente de 100 % » ;
+ * La fiche l'exprime en pour-cent : « somme des parts différente de 100 % » ;
  * les parts étant portées en fraction, le total vaut l'unité. C'est la même
  * règle, dans l'unité du modèle.
  */
@@ -64,8 +64,8 @@ function undeclared(factor: string): Finding {
  * Deux causes sous un code, séparées par `reason`, comme la partie N le fait
  * déjà pour `DATA.APPROVED_VERSION_NOT_IMMUTABLE` : `negative` pour une part
  * ou un pouvoir d'attraction sous zéro, `not_finite` pour ce qui n'est pas un
- * nombre du tout. Les deux disent la même chose au lecteur — cette valeur
- * n'est pas une pondération — et la distinction, qui porte sur la saisie, est
+ * nombre du tout. Les deux disent la même chose au lecteur (cette valeur
+ * n'est pas une pondération) et la distinction, qui porte sur la saisie, est
  * dans le paramètre.
  *
  * Ni l'une ni l'autre ne se déduit de la normalisation : deux parts de -0,5 et
@@ -114,9 +114,9 @@ export function entryWeightSum(weights: readonly EntryWeight[]): number {
  *
  * Deux refus, dans cet ordre :
  *
- * 1. M03.P1 — les trois pondérations sont déclarées. Une anomalie
+ * 1. M03.P1 : les trois pondérations sont déclarées. Une anomalie
  *    `FLOW.WEIGHTS_UNDECLARED` par facteur manquant.
- * 2. N3.3 — les parts de fréquentation somment à l'unité. Une anomalie
+ * 2. N3.3 : les parts de fréquentation somment à l'unité. Une anomalie
  *    `FLOW.WEIGHTS_NOT_NORMALIZED` sinon.
  *
  * L'ordre n'est pas indifférent : un jeu vide somme à zéro, et le dire
@@ -127,7 +127,7 @@ export function entryWeightSum(weights: readonly EntryWeight[]): number {
  * Un troisième refus s'intercale pour la même raison : une pondération
  * négative ou non finie rend la somme muette, et signaler la normalisation
  * désignerait le jeu entier là où une seule ligne est fautive. Il porte sur
- * les deux familles de pondérations — une part ne se soustrait pas, et une
+ * les deux familles de pondérations : une part ne se soustrait pas, et une
  * destination n'a pas un pouvoir d'attraction négatif, elle n'attire pas.
  *
  * Seules les parts de fréquentation sont normalisées. Le pouvoir d'attraction
@@ -180,7 +180,7 @@ export function guardExposureHypotheses(
 }
 
 /**
- * H12 / I5.3 — a flow result can never be exported without its hypotheses. This
+ * H12 / I5.3: a flow result can never be exported without its hypotheses. This
  * export guard raises a blocking FLOW.HYPOTHESIS_MISSING when the export bundle
  * carries no hypotheses at all, and otherwise defers to guardExposureHypotheses
  * so an attached-but-incomplete set of hypotheses still blocks the export.

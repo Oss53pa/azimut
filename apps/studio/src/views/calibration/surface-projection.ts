@@ -1,7 +1,7 @@
 /**
  * Projection du niveau sur la surface de calage.
  *
- * À défaut d'un fond téléversé — l'application n'a pas de dépôt de fichier — la
+ * À défaut d'un fond téléversé (l'application n'a pas de dépôt de fichier) la
  * surface rend les empreintes du niveau. Deux surfaces s'en servent, celle du
  * calage à deux points et celle du calage mesuré, et elles doivent cadrer
  * identiquement : un même niveau, un même cadrage. D'où une seule

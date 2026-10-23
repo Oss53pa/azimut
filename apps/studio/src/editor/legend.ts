@@ -1,9 +1,9 @@
 /**
- * E9.4 — Legend generation.
+ * E9.4: Legend generation.
  *
  * The legend is NOT a drawn object. It is generated from the categories
  * actually present on the level. Only its position is composed.
- * This guarantees it can never become stale — unlike a manually drawn
+ * This guarantees it can never become stale: unlike a manually drawn
  * legend in a traditional graphics file.
  *
  * Same rule for the compass rose: oriented from data, not drawn.

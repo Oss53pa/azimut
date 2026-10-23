@@ -11,7 +11,7 @@ import { matchShortcut, DEFAULT_SHORTCUTS } from '../shortcuts.js';
 // We test the pure-function matching from shortcuts.ts, which
 // is what use-shortcuts.ts uses internally.
 
-describe('E16 — shortcut matching', () => {
+describe('E16: shortcut matching', () => {
   function event(key: string, opts: {
     ctrlKey?: boolean;
     shiftKey?: boolean;

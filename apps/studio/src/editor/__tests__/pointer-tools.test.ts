@@ -8,7 +8,7 @@ import {
 const drawTool: EditorTool = { id: 'freehand', requires_free_draw: true };
 const selectTool: EditorTool = { id: 'select', requires_free_draw: false };
 
-describe('G3.1 — pointer tool availability', () => {
+describe('G3.1: pointer tool availability', () => {
   it('mouse and stylus can use every tool', () => {
     expect(isToolAvailable(drawTool, 'mouse')).toBe(true);
     expect(isToolAvailable(drawTool, 'stylus')).toBe(true);

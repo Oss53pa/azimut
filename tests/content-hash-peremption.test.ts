@@ -58,7 +58,7 @@ describe('content_hash peremption precision (T-2.14a §6.7)', () => {
     const dirBefore = hashFace(refMultilevel, directional, node);
     const hdrBefore = hashFace(refMultilevel, headerOnly, node);
 
-    const modified = withRenamedDestination(shownDestId, 'Bureau RDC — renommé');
+    const modified = withRenamedDestination(shownDestId, 'Bureau RDC : renommé');
 
     // Precondition: the directional face's resolved content really changed.
     const dirResolvedBefore = resolveFaceContent(refMultilevel, directional, node, profile);

@@ -51,7 +51,7 @@ describe('validateGraph', () => {
       ['GRAPH.VERTICAL_LINK_MISSING', 'e-brk-cross-level'],
       ['GRAPH.DEAD_END_UNJUSTIFIED', 'n-brk-deadend'],
       ['GRAPH.LEVEL_NO_ACCESSIBLE_LINK', 'bldg-brk-001'],
-      // M01.S10 — l'arête entre bâtiments à laquelle la ligne manque. Elle
+      // M01.S10 : l'arête entre bâtiments à laquelle la ligne manque. Elle
       // lève aussi `VERTICAL_LINK_MISSING`, un niveau appartenant à un
       // bâtiment : les deux lignes manquent, et les deux sont dites.
       ['GRAPH.BUILDING_LINK_MISSING', 'e-brk-cross-building'],

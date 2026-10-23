@@ -1,5 +1,5 @@
 /**
- * E7.1 — Tool state machine.
+ * E7.1: Tool state machine.
  *
  * Every editing gesture flows through a tool. A tool has three phases:
  *   idle → drawing/dragging → committed/cancelled
@@ -41,7 +41,7 @@ export type ToolId =
 export type ToolPhase = 'idle' | 'active' | 'done';
 
 // ---------------------------------------------------------------------------
-// Pointer data — passed to tool handlers
+// Pointer data: passed to tool handlers
 // ---------------------------------------------------------------------------
 
 export type PointerData = {
@@ -68,7 +68,7 @@ export type GestureEvent =
   | { readonly type: 'commit' };
 
 // ---------------------------------------------------------------------------
-// Tool geometry — what a tool is building
+// Tool geometry: what a tool is building
 // ---------------------------------------------------------------------------
 
 /**
@@ -161,7 +161,7 @@ function buildPolygonPreview(
 }
 
 // ---------------------------------------------------------------------------
-// Reducer — shape drawing tools
+// Reducer: shape drawing tools
 // ---------------------------------------------------------------------------
 
 function handleShapeGesture(
@@ -212,7 +212,7 @@ function handleShapeGesture(
 }
 
 // ---------------------------------------------------------------------------
-// Reducer — polyline/Bézier
+// Reducer : polyline/Bézier
 // ---------------------------------------------------------------------------
 
 function handlePolylineGesture(
@@ -248,7 +248,7 @@ function handlePolylineGesture(
 }
 
 // ---------------------------------------------------------------------------
-// Reducer — measure/dimension
+// Reducer: measure/dimension
 // ---------------------------------------------------------------------------
 
 function handleMeasureGesture(

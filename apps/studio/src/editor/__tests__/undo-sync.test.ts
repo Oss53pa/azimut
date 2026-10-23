@@ -6,7 +6,7 @@ const entry = (command_id: string, synced: boolean): UndoEntry => ({
   synced,
 });
 
-describe('E5.3 — guardUndoTarget (EDIT.UNDO_AFTER_SYNC)', () => {
+describe('E5.3: guardUndoTarget (EDIT.UNDO_AFTER_SYNC)', () => {
   it('allows undo of a local, unsynced command', () => {
     const r = guardUndoTarget(entry('c-1', false));
     expect(r.ok).toBe(true);

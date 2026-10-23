@@ -11,7 +11,7 @@ const e = (
   kind = 'door',
 ): NamedEntity => ({ id, name, scope, kind });
 
-describe('H2.2 — guardNamingCollisions', () => {
+describe('H2.2: guardNamingCollisions', () => {
   it('passes when every orientation name is unique in scope', () => {
     const r = guardNamingCollisions([e('d-1', 'Porte A'), e('d-2', 'Porte B')]);
     expect(r.ok).toBe(true);

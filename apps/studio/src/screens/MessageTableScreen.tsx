@@ -23,7 +23,7 @@ import { CompareView } from './message-table/CompareView.js';
 import type { CompareViewProps } from './message-table/CompareView.js';
 
 /**
- * Partie R — l'écran du tableau des messages, moitié consultation.
+ * Partie R : l'écran du tableau des messages, moitié consultation.
  *
  * R1 : « Le tableau des messages dit, pour chaque face de chaque support, ce
  * qui y sera écrit, dans quelle langue, avec quel pictogramme, dans quelle
@@ -61,14 +61,14 @@ export type MessageTableScreenProps = {
   readonly profilesAtDecisionPoint: readonly string[];
   readonly onOpenSource: (source: SourceKey) => void;
 
-  /** R4 (partie R) — actions croisées : légalité de l'état (R12) et droit (R2). */
+  /** R4 (partie R), actions croisées : légalité de l'état (R12) et droit (R2). */
   readonly actions: readonly ScheduleTrigger[];
   readonly onTrigger: (trigger: ScheduleTrigger) => void;
-  /** R4 (partie R) — « Comparer | Au moins deux versions ». */
+  /** R4 (partie R) : « Comparer | Au moins deux versions ». */
   readonly canCompare: boolean;
   readonly onCompare: () => void;
   /**
-   * R11 — la comparaison, quand elle est ouverte. Elle prend la place du
+   * R11 : la comparaison, quand elle est ouverte. Elle prend la place du
    * tableau : R11 en veut « un seul tableau », et en montrer deux ferait
    * chercher l'écart d'un œil à l'autre.
    */
@@ -76,13 +76,13 @@ export type MessageTableScreenProps = {
   readonly canExport: boolean;
   readonly onExport: () => void;
 
-  /** R10 — nombre de lignes périmées, toutes versions confondues du tableau. */
+  /** R10 : nombre de lignes périmées, toutes versions confondues du tableau. */
   readonly staleCount: number;
   readonly blockingCount: number;
   readonly excludedCount: number;
   readonly onRegenerate: () => void;
 
-  /** R14 — les deux bandeaux de prérequis. */
+  /** R14 : les deux bandeaux de prérequis. */
   readonly graphValidated: boolean;
   readonly rulesPackBound: boolean;
   readonly onOpenValidation: () => void;
@@ -90,14 +90,14 @@ export type MessageTableScreenProps = {
   readonly unreadableCount: number;
   readonly online: boolean;
   readonly onEmptyAction: () => void;
-  /** R7.4 et J4 — le panneau des annotations de la ligne, dans le détail. */
+  /** R7.4 et J4 : le panneau des annotations de la ligne, dans le détail. */
   readonly annotationPanel: JSX.Element | null;
-  /** R12 — les annotations ouvertes sur ce tableau, qui bloquent l'approbation. */
+  /** R12 : les annotations ouvertes sur ce tableau, qui bloquent l'approbation. */
   readonly openAnnotationCount: number;
-  /** R12 — les refus de la dernière transition demandée, chacun avec son code. */
+  /** R12 : les refus de la dernière transition demandée, chacun avec son code. */
   readonly refusals: readonly Finding[];
   /**
-   * R16 — la décision qui approuve la version affichée, quand elle est
+   * R16 : la décision qui approuve la version affichée, quand elle est
    * approuvée. `null` si la décision n'est pas lue : l'écran le dit.
    */
   readonly approval: { readonly approverId: string; readonly decidedAt: string } | null;
@@ -178,7 +178,7 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
             />
           </div>
 
-          {/* R3 (partie R) — le panneau de détail est repliable. */}
+          {/* R3 (partie R) : le panneau de détail est repliable. */}
           {props.selection.detailOpen && (
             <LineDetail
               row={props.focusedRow}
@@ -210,7 +210,7 @@ export function MessageTableScreen(props: MessageTableScreenProps): JSX.Element 
   );
 }
 
-/** R10 et R14 — les bandeaux, dans l'ordre où ils bloquent. */
+/** R10 et R14 : les bandeaux, dans l'ordre où ils bloquent. */
 function Banners(props: MessageTableScreenProps): JSX.Element {
   const { t, lang } = useI18n();
   return (
@@ -285,7 +285,7 @@ function Banners(props: MessageTableScreenProps): JSX.Element {
   );
 }
 
-/** R3 (partie R) — la barre d'état : lignes, périmées, bloquantes, écartées. */
+/** R3 (partie R), la barre d'état : lignes, périmées, bloquantes, écartées. */
 function StatusLine(props: {
   readonly lines: number;
   readonly stale: number;

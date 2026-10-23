@@ -6,7 +6,7 @@ import {
 } from './stroke-geometry.js';
 
 /**
- * J1.2 et J1.3 (partie J) — ajuster une forme sur un trait.
+ * J1.2 et J1.3 (partie J) : ajuster une forme sur un trait.
  *
  * « Le redressement s'applique à la forme entière, pas segment par segment. »
  * Les côtés d'un contour sont redressés ensemble, sur une même orientation de

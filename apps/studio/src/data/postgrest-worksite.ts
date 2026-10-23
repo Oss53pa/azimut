@@ -1,5 +1,5 @@
 /**
- * H6 — lecture du chantier par l'API REST : lots de fabrication, créneaux de
+ * H6, lecture du chantier par l'API REST : lots de fabrication, créneaux de
  * pose, réserves de pose (migration 0042).
  *
  * Les tables de liaison se replient sur leur lot ou leur créneau : l'écran lit

@@ -12,7 +12,7 @@ import type { PlannedRoute } from '../state/route-preview.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
- * L3.1 (partie L) — le parcours d'un visiteur, dans l'atelier du graphe : un
+ * L3.1 (partie L), le parcours d'un visiteur, dans l'atelier du graphe : un
  * départ, une arrivée, un profil du site, et le tracé progressif niveau par
  * niveau, avec la transition dite à chaque changement de niveau.
  *
@@ -100,9 +100,9 @@ export function useRoutePreview(session: TrancheSession): { readonly panel: JSX.
           <>
             <div style={{ display: 'flex', gap: SPACE.sm, flexWrap: 'wrap', alignItems: 'flex-end' }}>
               <SelectField label={t('route.from')} value={from} onChange={setFrom}
-                options={[{ value: '', label: '—' }, ...options]} />
+                options={[{ value: '', label: '–' }, ...options]} />
               <SelectField label={t('route.to')} value={to} onChange={setTo}
-                options={[{ value: '', label: '—' }, ...options]} />
+                options={[{ value: '', label: '–' }, ...options]} />
               <SelectField label={t('route.profile')} value={profile?.id ?? ''} onChange={setProfileId}
                 options={profiles.map(p => ({ value: p.id, label: p.name }))} />
               <Button rank="primary" onClick={trace}>{t('route.trace')}</Button>

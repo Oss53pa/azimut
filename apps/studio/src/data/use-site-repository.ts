@@ -3,7 +3,7 @@
  *
  * Quatre états, pas trois : rien n'est encore demandé, une requête est en
  * cours, elle a rendu un site, elle a échoué. L'écran doit pouvoir les
- * distinguer — un écran vide qui ressemble à une réussite est le pire des
+ * distinguer : un écran vide qui ressemble à une réussite est le pire des
  * états (M5, partie M).
  */
 import { useCallback, useEffect, useState } from 'react';
@@ -56,7 +56,7 @@ export function useSiteList(repository: SiteRepository): {
 }
 
 /**
- * Q9 — le référentiel des pays, chargé une fois.
+ * Q9 : le référentiel des pays, chargé une fois.
  *
  * Il ne dépend d'aucun site et ne change pas en cours de session : il se lit à
  * l'ouverture de l'écran et ne se recharge pas.
@@ -65,7 +65,7 @@ export function useCountries(repository: SiteRepository): AsyncState<readonly Co
   return useLoaded(repository, useCallback(() => repository.listCountries(), [repository]));
 }
 
-/** Q5 — les entités juridiques de l'organisation, relues à chaque changement de `reloadKey`. */
+/** Q5 : les entités juridiques de l'organisation, relues à chaque changement de `reloadKey`. */
 export function useLegalEntities(
   repository: SiteRepository,
   /** Change pour relire la liste : après la création d'un client (Q5). */
@@ -138,7 +138,7 @@ export function useSite(repository: SiteRepository, siteId: string): {
  * Le portefeuille a besoin du contenu de chaque site, pas seulement de son
  * nom : il n'y a pas de moteur de portefeuille, les indicateurs viennent des
  * mêmes contrôles exécutés site par site. Le chargement est donc séquentiel et
- * son avancement est visible — un portefeuille de vingt sites ne doit pas
+ * son avancement est visible : un portefeuille de vingt sites ne doit pas
  * paraître figé.
  */
 export function useAllSites(repository: SiteRepository): {
@@ -229,7 +229,7 @@ export function useSiteVocabularyLoad(
 }
 
 /**
- * N2.2 — charge le registre du wayfinding d'un site, à part du site. Un échec
+ * N2.2 : charge le registre du wayfinding d'un site, à part du site. Un échec
  * se déclare `failed` et rend un registre vide que l'écran ne prend pas pour
  * un fait.
  */
