@@ -20,6 +20,7 @@ import type { Finding } from './outcome.js';
 import { touchedColumns } from './row-values.js';
 import type { RowValues } from './row-values.js';
 import type { CommandDraft } from './site-commands.js';
+import { validateSvg } from './svg/svg-validate.js';
 
 /** Une anomalie de commande, au sens d'E5.1. */
 function finding(
@@ -161,4 +162,57 @@ function mutationsOf(
     old_value: String(before?.[field] ?? ''),
     new_value: String(after?.[field] ?? ''),
   }));
+}
+
+// ---------------------------------------------------------------------------
+// SVG intégrés d'un bloc de face (lot 5 de l'audit, E14.2)
+// ---------------------------------------------------------------------------
+
+const BLOCK_TABLE = 'support_content_block';
+const BLOCK_CONFIG_COLUMN = 'config';
+/** Les deux champs de configuration qui portent un SVG intégré tel quel dans une face. */
+const EMBEDDED_SVG_FIELDS = ['svg_markup', 'plan_svg'] as const;
+
+function configOf(raw: unknown): Record<string, unknown> | null {
+  if (raw !== null && typeof raw === 'object') return raw as Record<string, unknown>;
+  if (typeof raw !== 'string') return null;
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return parsed !== null && typeof parsed === 'object' ? parsed as Record<string, unknown> : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Un SVG intégré qu'un bloc de face porterait, refusé à l'écriture s'il ne
+ * passe pas l'analyseur par liste blanche. C'était le chemin d'une faille XSS
+ * stockée : `svg_markup` et `plan_svg` étaient insérés tels quels dans la face,
+ * puis affichés. Le rendu les refuse aussi (`block-resolvers.ts`) : une ligne
+ * écrite avant ce contrôle, ou par un autre chemin, n'est pas rendue pour
+ * autant.
+ */
+export function embeddedSvgFaults(
+  draft: CommandDraft,
+  after: RowValues | null,
+): readonly Finding[] {
+  if (draft.table !== BLOCK_TABLE || after === null) return [];
+  const config = configOf(after[BLOCK_CONFIG_COLUMN]);
+  if (config === null) return [];
+  const out: Finding[] = [];
+  for (const field of EMBEDDED_SVG_FIELDS) {
+    const value = config[field];
+    if (typeof value !== 'string') continue;
+    const checked = validateSvg(value, 'asset');
+    if (!checked.ok) {
+      out.push({
+        code: 'ASSET.SANITIZATION_FAILED',
+        severity: 'blocking',
+        entity: { kind: 'command', id: draft.id },
+        params: { field, reason: checked.reason },
+        ruleRef: 'E14.2',
+      });
+    }
+  }
+  return out;
 }
