@@ -14,6 +14,7 @@ export type { NetworkScanResult } from './scan-network.js';
 export {
   assembleKioskPackage,
   kioskManifestToJson,
+  kioskManifestContentHash,
 } from './assemble-kiosk-package.js';
 export type {
   KioskManifest,

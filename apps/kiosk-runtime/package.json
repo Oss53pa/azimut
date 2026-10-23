@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@azimut/core-model": "workspace:*",
-    "@azimut/engine-graph": "workspace:*"
+    "@azimut/engine-graph": "workspace:*",
+    "@azimut/engine-package": "workspace:*",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@azimut/testkit": "workspace:*"

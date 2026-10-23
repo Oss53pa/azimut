@@ -1,4 +1,5 @@
-export { loadKioskSite } from './load-kiosk-site.js';
+export { loadKioskSite, KIOSK_DATA_FILES } from './load-kiosk-site.js';
+export { openKioskPackage } from './open-kiosk-package.js';
 export type { KioskSite } from './load-kiosk-site.js';
 export { searchDestinations } from './search-destinations.js';
 export type { SearchResult } from './search-destinations.js';

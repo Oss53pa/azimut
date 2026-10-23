@@ -73,3 +73,21 @@ l'audit. Chaque lot qui les applique les cite par leur numéro.
   inscriptions par adresse et par tranche de 5 minutes, 150 rafraîchissements
   de session, 30 vérifications de code. Sur un projet hébergé, les mêmes
   limites se posent dans la configuration du service d'authentification.
+
+## Chaîne de fabrication et paquet de borne (lot 10)
+
+- **Le paquet de borne.** La borne n'ouvre un paquet que par
+  `openKioskPackage` : manifeste lu par un schéma strict, chaque fichier
+  confronté à son empreinte, empreinte du manifeste recalculée, fichiers de
+  données couverts par le manifeste. Un seul écart et le paquet est refusé,
+  avant toute lecture du site. Conformément à D-11, c'est l'empreinte seule :
+  elle prouve que le paquet est celui que son manifeste décrit, pas qui l'a
+  produit.
+- **Les dépendances livrées.** `pnpm audit:prod` refuse en intégration toute
+  faille connue, haute ou critique, dans les dépendances de production.
+  L'installation suit le verrou (`--frozen-lockfile`).
+- **Les versions forcées.** `pnpm.overrides` ne fait que corriger une faille
+  dans la même version majeure ; un essai le vérifie.
+- **Les outils de la chaîne.** Chaque action est épinglée par son empreinte,
+  avec sa version en commentaire, et `wrangler` est appelé dans une version
+  exacte. Une mise à jour est un changement explicite du dépôt.

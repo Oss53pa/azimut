@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Le cahier des charges consolidé est le seul document de référence, il
       # ne s'édite jamais depuis le code, et il est accompagné de son
@@ -53,10 +53,10 @@ jobs:
         # La version vient du champ packageManager de package.json.
         # La redonner ici ferait échouer l'action sur une double
         # spécification.
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
@@ -68,6 +68,12 @@ jobs:
       # soit sa forme. Le module n'a aucune dépendance (A2.2-4).
       - name: Détection de secrets
         run: pnpm check:secrets
+
+      # Lot 10 de l'audit : aucune faille connue, haute ou critique, dans ce qui
+      # est livré. L'outillage de développement n'entre dans aucun livrable ;
+      # son état est suivi à part (rapport du lot 10).
+      - name: Audit des dépendances livrées
+        run: pnpm audit:prod
 
       - name: Typecheck
         run: pnpm typecheck
@@ -281,13 +287,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: pnpm
@@ -379,12 +385,12 @@ jobs:
 
       # `wrangler` n'est pas une dépendance du dépôt : rien d'autre ne
       # l'emploie, et l'ajouter ferait entrer une bibliothèque tierce pour un
-      # seul appel (A2.2-4). La contrepartie est assumée : la version n'est pas
-      # figée. La figer est un mot à changer ici, le jour où l'on veut la
-      # tenir.
+      # seul appel (A2.2-4). Sa version est figée depuis le lot 10 de l'audit :
+      # un outil de déploiement qui change sans que le dépôt le dise est une
+      # pièce de la chaîne de fabrication que rien ne vérifie.
       - name: Deploy
         working-directory: apps/studio
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler deploy
+        run: npx --yes wrangler@4.152.0 deploy
