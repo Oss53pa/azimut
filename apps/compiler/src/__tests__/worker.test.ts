@@ -1,8 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import type { Job } from '../job.js';
 import { MemoryQueue } from '../queue.js';
-import { processNextJob } from '../worker.js';
+import { processNextJob, HANDLER_FAILED } from '../worker.js';
 import type { JobHandler } from '../worker.js';
+
+/**
+ * Lot 9 de l'audit : le détail d'un échec va au journal technique, que les
+ * essais recueillent ici au lieu de l'écrire sur la sortie d'erreur.
+ */
+const reported: unknown[] = [];
+const report = (_jobId: string, failure: unknown): void => { reported.push(failure); };
 
 function makeJob(overrides?: Partial<Job>): Job {
   return {
@@ -84,26 +91,26 @@ describe('processNextJob', () => {
     const handlers = new Map([['compile_artworks', handler]]);
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const afterFirst = await queue.getJob('job-001');
     expect(afterFirst?.state).toBe('queued');
     expect(afterFirst?.attempts).toBe(1);
 
     clock.advance(PAST_BACKOFF_MS);
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const afterSecond = await queue.getJob('job-001');
     expect(afterSecond?.state).toBe('queued');
     expect(afterSecond?.attempts).toBe(2);
 
     clock.advance(PAST_BACKOFF_MS);
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const afterThird = await queue.getJob('job-001');
     expect(afterThird?.state).toBe('failed');
     expect(afterThird?.attempts).toBe(3);
-    expect(afterThird?.error).toBe('boom');
+    expect(afterThird?.error).toBe(HANDLER_FAILED);
 
     expect(callCount).toBe(3);
 
@@ -131,9 +138,9 @@ describe('processNextJob', () => {
     const handlers = new Map([['compile_artworks', handler]]);
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
     clock.advance(PAST_BACKOFF_MS);
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('succeeded');
@@ -155,20 +162,20 @@ describe('processNextJob', () => {
     const handlers = new Map([['compile_artworks', handler]]);
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('failed');
-    expect(job?.error).toBe('fatal');
+    expect(job?.error).toBe(HANDLER_FAILED);
 
     const traces = await queue.getTraces('job-001');
     expect(traces).toHaveLength(1);
-    expect(traces[0]?.error).toBe('fatal');
+    expect(traces[0]?.error).toBe(HANDLER_FAILED);
     expect(traces[0]?.started_at).toBeInstanceOf(Date);
     expect(traces[0]?.finished_at).toBeInstanceOf(Date);
   });
 
-  it('captures non-Error thrown values as string', async () => {
+  it('keeps a stable code for a thrown string, and reports the value', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ max_attempts: 1 }));
 
@@ -178,11 +185,12 @@ describe('processNextJob', () => {
     const handlers = new Map([['compile_artworks', handler]]);
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('failed');
-    expect(job?.error).toBe('raw string error');
+    expect(job?.error).toBe(HANDLER_FAILED);
+    expect(reported.length).toBeGreaterThan(0);
   });
 
   it('handles handler returning empty object', async () => {
@@ -193,7 +201,7 @@ describe('processNextJob', () => {
     const handlers = new Map([['compile_artworks', handler]]);
     const clock = fixedClock(new Date('2024-01-01T01:00:00Z'));
 
-    await processNextJob({ queue, handlers, now: clock });
+    await processNextJob({ queue, handlers, now: clock, report });
 
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('succeeded');
@@ -216,21 +224,18 @@ describe('processNextJob', () => {
     expect(job?.error).toContain('No handler');
   });
 
-  it('captures thrown null as "null"', async () => {
+  it('keeps a stable code for a thrown null', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ max_attempts: 1 }));
     const handler: JobHandler = async () => {
       throw null;
     };
     const handlers = new Map([['compile_artworks', handler]]);
-    await processNextJob({
-      queue,
-      handlers,
-      now: fixedClock(new Date()),
-    });
+    await processNextJob({ queue, handlers, now: fixedClock(new Date()), report });
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('failed');
-    expect(job?.error).toBe('null');
+    expect(job?.error).toBe(HANDLER_FAILED);
+    expect(reported.length).toBeGreaterThan(0);
   });
 
   it('no-handler exhausts max_attempts through retry loop', async () => {
@@ -258,33 +263,49 @@ describe('processNextJob', () => {
     expect(await processNextJob(opts)).toBe(false);
   });
 
-  it('handler throws object coerced via String()', async () => {
+  it('keeps a stable code for a thrown object', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ max_attempts: 1 }));
     const handler: JobHandler = async () => {
       throw { code: 42 };
     };
     const handlers = new Map([['compile_artworks', handler]]);
-    await processNextJob({ queue, handlers, now: fixedClock(new Date()) });
+    await processNextJob({ queue, handlers, now: fixedClock(new Date()), report });
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('failed');
-    expect(job?.error).toBe('[object Object]');
+    expect(job?.error).toBe(HANDLER_FAILED);
+    expect(reported.length).toBeGreaterThan(0);
   });
 
-  it('captures thrown undefined as "undefined"', async () => {
+  it('keeps a stable code for a thrown undefined', async () => {
     const queue = new MemoryQueue();
     queue.enqueue(makeJob({ max_attempts: 1 }));
     const handler: JobHandler = async () => {
       throw undefined;
     };
     const handlers = new Map([['compile_artworks', handler]]);
-    await processNextJob({
-      queue,
-      handlers,
-      now: fixedClock(new Date()),
-    });
+    await processNextJob({ queue, handlers, now: fixedClock(new Date()), report });
     const job = await queue.getJob('job-001');
     expect(job?.state).toBe('failed');
-    expect(job?.error).toBe('undefined');
+    expect(job?.error).toBe(HANDLER_FAILED);
+    expect(reported.length).toBeGreaterThan(0);
+  });
+});
+
+describe('lot 9 : job.error ne porte jamais le message d’une exception', () => {
+  it('le message va au journal technique, le travail garde le code stable', async () => {
+    const queue = new MemoryQueue();
+    queue.enqueue(makeJob({ max_attempts: 1 }));
+    const secret = new Error('connexion postgres://azimut:motdepasse@hote/azimut refusée');
+    const handlers = new Map<string, JobHandler>([['compile_artworks', async () => { throw secret; }]]);
+    const seen: unknown[] = [];
+    await processNextJob({
+      queue, handlers, now: fixedClock(new Date('2024-01-01T01:00:00Z')),
+      report: (_id, failure) => { seen.push(failure); },
+    });
+    const job = await queue.getJob('job-001');
+    expect(job?.error).toBe(HANDLER_FAILED);
+    expect(JSON.stringify(await queue.getTraces('job-001'))).not.toContain('motdepasse');
+    expect(seen).toEqual([secret]);
   });
 });

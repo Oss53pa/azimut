@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { createConnection, createDb, deleteOrgFixture, provisionOrganization } from '@azimut/db';
 import { DbWorkerQueue, REQUESTER_CANNOT_READ } from '../db-queue.js';
-import { processNextJob } from '../worker.js';
+import { processNextJob, HANDLER_FAILED } from '../worker.js';
 import type { JobHandler } from '../worker.js';
 
 /**
@@ -138,11 +138,13 @@ describe('T-0.11 — le service prend les travaux de toutes les organisations', 
     };
     const options = (now: Date) => ({
       queue: queue(), handlers: new Map([['audit_site', handler]]), now: () => now,
+      report: () => undefined,
     });
 
+    // Lot 9 de l'audit : le travail garde un code stable, jamais le message.
     expect(await processNextJob(options(at(10)))).toBe(true);
     expect(await jobAs(USER_A, jobId))
-      .toMatchObject({ state: 'queued', attempts: 1, error: 'échec voulu' });
+      .toMatchObject({ state: 'queued', attempts: 1, error: HANDLER_FAILED });
 
     // D9.2 : cinq secondes avant la deuxième tentative.
     expect(await processNextJob(options(at(14)))).toBe(false);

@@ -34,6 +34,8 @@ export type BatchOptions = {
   readonly handler: JobHandler;
   readonly now: () => Date;
   readonly max_attempts: number;
+  /** Lot 9 de l'audit : le journal technique des échecs, transmis à l'exécution. */
+  readonly report?: (jobId: string, failure: unknown) => void;
 };
 
 function jobIdForItem(kind: JobKind, itemId: string): string {
@@ -93,7 +95,9 @@ export async function runBatch(
   const handlers = new Map<string, JobHandler>([
     [kind, handler],
   ]);
-  const workerOpts = { queue, handlers, now };
+  const workerOpts = options.report === undefined
+    ? { queue, handlers, now }
+    : { queue, handlers, now, report: options.report };
 
   while (await processNextJob(workerOpts)) {
     // drain queue

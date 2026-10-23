@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { runBatch } from '../batch.js';
 import type { BatchItem, BatchOptions } from '../batch.js';
 import { MemoryQueue } from '../queue.js';
-import type { JobHandler } from '../worker.js';
+import { HANDLER_FAILED, type JobHandler } from '../worker.js';
 import type { Job } from '../job.js';
 
 function makeQueuedJob(itemId: string, overrides?: Partial<Job>): Job {
@@ -43,6 +43,7 @@ function makeOptions(
     handler,
     now: fixedClock(new Date('2024-01-01T00:00:00Z')),
     max_attempts: 3,
+    report: () => undefined, // le détail des échecs ne sort pas sur la sortie d'erreur
     ...overrides,
   };
 }
@@ -159,7 +160,7 @@ describe('T-2.16 runBatch', () => {
 
     expect(report.failed).toBe(1);
     expect(report.results[0]?.status).toBe('failed');
-    expect(report.results[0]?.error).toBe('render error');
+    expect(report.results[0]?.error).toBe(HANDLER_FAILED);
   });
 
   it('handles empty batch', async () => {
@@ -301,7 +302,7 @@ describe('T-2.16 runBatch', () => {
     ).toBe('failed');
     expect(
       report.results.find((r) => r.item_id === 'fail-me')?.error,
-    ).toBe('selective failure');
+    ).toBe(HANDLER_FAILED);
   });
 
   it('is deterministic (INV-4)', async () => {
@@ -393,6 +394,6 @@ describe('T-2.16 runBatch', () => {
     const report = await runBatch(items, makeOptions(queue, handler));
     expect(report.created).toBe(0);
     expect(report.failed).toBe(1);
-    expect(report.results[0]?.error).toBe('boom');
+    expect(report.results[0]?.error).toBe(HANDLER_FAILED);
   });
 });
