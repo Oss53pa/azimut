@@ -7,6 +7,7 @@ import {
 } from '../postgrest-harness.js';
 import type { Harness } from '../postgrest-harness.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { provisionStatements } from '../provision-organization.js';
 
 /** La première valeur d'un décompte, ou l'échec plutôt qu'un zéro supposé. */
 function only<T>(rows: readonly T[]): T {
@@ -79,14 +80,16 @@ let client: Sql;
 let harness: Harness;
 
 /** La requête telle que l'application la forme : jeton en en-tête. */
-async function asUser(user: string | null, path: string, init: RequestInit = {}) {
+async function asUser(
+  user: string | null, path: string, init: RequestInit = {}, aal: 'aal1' | 'aal2' = 'aal2',
+) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Accept-Profile': 'azimut',
     'Content-Profile': 'azimut',
     ...(init.headers as Record<string, string> | undefined ?? {}),
   };
-  if (user !== null) headers['Authorization'] = `Bearer ${signToken(user)}`;
+  if (user !== null) headers['Authorization'] = `Bearer ${signToken(user, 'authenticated', aal)}`;
   return fetch(`${harness.url}${path}`, { ...init, headers });
 }
 
@@ -120,23 +123,24 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
       text => client.unsafe(text), text => client.unsafe(text), [ORG_A, ORG_B],
     );
 
-    const seeded = ['membership', 'organization', 'site'];
-    for (const table of seeded) {
-      await client.unsafe(`alter table azimut.${table} no force row level security`);
-    }
-    await client.unsafe(`
-      insert into azimut.organization(id,name,slug)
-        values ('${ORG_A}','A','a-${Date.now().toString(36)}'),
-               ('${ORG_B}','B','b-${Date.now().toString(36)}');
-      insert into azimut.membership(org_id,user_id,role)
-        values ('${ORG_A}','${ALICE}','admin'),('${ORG_B}','${BOB}','admin');
-      insert into azimut.site(id,org_id,name,country_code,timezone,active_langs)
-        values ('${SITE_A}','${ORG_A}','Site A','CI','Africa/Abidjan','{fr}'),
-               ('${SITE_B}','${ORG_B}','Site B','CI','Africa/Abidjan','{fr}');
-    `);
-    for (const table of seeded) {
-      await client.unsafe(`alter table azimut.${table} force row level security`);
-    }
+    // Le décor entre par le provisionnement et sous l'identité de chaque
+    // administrateur, sans lever le cloisonnement (A2.4).
+    await client.begin(async tx => {
+      for (const p of [
+        { id: ORG_A, name: 'A', slug: `a-${Date.now().toString(36)}`, adminId: ALICE },
+        { id: ORG_B, name: 'B', slug: `b-${Date.now().toString(36)}`, adminId: BOB },
+      ]) {
+        for (const text of provisionStatements(p)) await tx.unsafe(text);
+      }
+      await tx.unsafe('set local role authenticated');
+      for (const [user, org, site, name] of [
+        [ALICE, ORG_A, SITE_A, 'Site A'], [BOB, ORG_B, SITE_B, 'Site B'],
+      ] as const) {
+        await tx.unsafe(`select set_config('azimut.current_user_id', '${user}', true)`);
+        await tx.unsafe(`insert into azimut.site(id,org_id,name,country_code,timezone,active_langs)
+          values ('${site}','${org}','${name}','CI','Africa/Abidjan','{fr}')`);
+      }
+    });
 
     harness = await startPostgrest({
       binary,
@@ -231,6 +235,25 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
       `select count(*)::text as count from azimut.site where id = '${SITE_B}'`,
     ));
     expect(count).toBe('1');
+  });
+
+  /**
+   * A6.3 et O3 : un `admin` dont le jeton n'atteste pas un second facteur
+   * (`aal1`) ne lit ni ne compte rien de son organisation, et n'y écrit rien.
+   */
+  it('refuse tout à un admin sans second facteur', async () => {
+    const read = await asUser(ALICE, `/site?id=eq.${SITE_A}&select=id`, {}, 'aal1');
+    expect(await read.json()).toEqual([]);
+    const counted = await asUser(ALICE, '/site?select=id', { headers: { Prefer: 'count=exact' } }, 'aal1');
+    expect(counted.headers.get('content-range') ?? '').toMatch(/\/0$/);
+    const patch = await asUser(ALICE, `/site?id=eq.${SITE_A}`, {
+      method: 'PATCH', body: JSON.stringify({ name: 'Renommé sans second facteur' }),
+    }, 'aal1');
+    expect(patch.status).toBeLessThan(500);
+    const { name } = only(await observed<{ name: string }>(
+      `select name from azimut.site where id = '${SITE_A}'`,
+    ));
+    expect(name).toBe('Site A');
   });
 
   /**
