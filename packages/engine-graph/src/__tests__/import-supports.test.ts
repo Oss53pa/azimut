@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { importSupports } from '../import-supports.js';
+import { importSupports as importWith } from '../import-supports.js';
+import type { ImportSupportsOptions } from '../import-supports.js';
+import type { SiteData } from '@azimut/core-model';
 import { refMultilevel } from '@azimut/testkit';
+import { CSV_LIMITS } from './csv-limits.js';
+
+/** L'import aux bornes de référence ; les options de l'essai s'y ajoutent. */
+const importSupports = (site: SiteData, content: string, options: Partial<ImportSupportsOptions> = {}) =>
+  importWith(site, content, { limits: CSV_LIMITS, ...options });
 
 const HEADER = 'reference;typology;building;level;node_ref';
 

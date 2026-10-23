@@ -1,11 +1,13 @@
 import type { SiteData, Outcome, Finding } from '@azimut/core-model';
+import { parseColumnSpec, tableColumns } from '@azimut/core-model';
 import {
-  parseCsvLine,
   parseNumberDecl,
-  detectSeparator,
-  stripBom,
+  readCsv,
   detectColumns,
   isIsoDate,
+  cellOf,
+  cellFault,
+  type CsvLimits,
   type DecimalSeparator,
 } from './csv-utils.js';
 
@@ -25,9 +27,12 @@ import {
  */
 
 export type SupportCondition = 'good' | 'worn' | 'damaged' | 'missing';
-const CONDITION_VALUES: readonly SupportCondition[] = [
-  'good', 'worn', 'damaged', 'missing',
-];
+/** Les états que la base admet : l'énumération de `installed_support.condition`. */
+const CONDITION_VALUES = parseColumnSpec(tableColumns('installed_support')?.['condition'] ?? '=')
+  .values as readonly SupportCondition[];
+
+/** Les cellules qui peuvent tenir sur plusieurs lignes : le contenu observé. */
+const MULTILINE_FIELDS: ReadonlySet<string> = new Set(['content_fr', 'content_en']);
 
 export type DimensionsSource = 'default' | 'overridden';
 
@@ -70,6 +75,8 @@ export type ImportReport = {
 export type ImportSupportsOptions = {
   /** D4.1 — decimal separator declared in the import header. Default 'point'. */
   readonly decimalSeparator?: DecimalSeparator;
+  /** Lot 4 de l'audit : les bornes de l'import, lues dans la configuration. */
+  readonly limits: CsvLimits;
 };
 
 const SUPPORT_ALIASES: Record<string, readonly string[]> = {
@@ -207,28 +214,18 @@ function buildSupport(
 export function importSupports(
   site: SiteData,
   csvContent: string,
-  options: ImportSupportsOptions = {},
+  options: ImportSupportsOptions,
 ): Outcome<ImportReport> {
   const decimal: DecimalSeparator = options.decimalSeparator ?? 'point';
-  const cleaned = stripBom(csvContent);
-  const rawLines = cleaned.split(/\r?\n/).filter((l) => l.trim() !== '');
-
-  if (rawLines.length === 0) {
+  const read = readCsv(csvContent, options.limits);
+  if (!read.ok) {
     return {
       ok: false,
-      findings: [{
-        code: 'IMPORT.EMPTY_FILE',
-        severity: 'blocking',
-        entity: null,
-        params: {},
-        ruleRef: null,
-      }],
+      findings: [{ code: read.code, severity: 'blocking', entity: null, params: read.params, ruleRef: null }],
     };
   }
 
-  const headerLine = rawLines[0] as string;
-  const separator = detectSeparator(headerLine);
-  const headers = parseCsvLine(headerLine, separator);
+  const headers = read.header;
   const columnMap = detectColumns(headers, SUPPORT_ALIASES, REQUIRED_FIELDS);
 
   if (!columnMap) {
@@ -255,11 +252,21 @@ export function importSupports(
   const lines: ImportLineResult[] = [];
   const supports: ImportedSupport[] = [];
 
-  for (let i = 1; i < rawLines.length; i++) {
-    const fields = parseCsvLine(rawLines[i] as string, separator);
-    const row = i + 1;
-    const get = (f: string): string =>
-      (fields[colIndex.get(f) ?? -1] ?? '').trim();
+  for (const record of read.rows) {
+    const row = record.line;
+    const get = (f: string): string => cellOf(record.fields, colIndex.get(f));
+
+    // Lot 4 de l'audit (A6.3) : chaque cellule passe le contrôle de texte de
+    // la saisie avant d'être lue.
+    const fault = record.line === read.unterminatedLine ? 'unterminated_quote'
+      : [...colIndex.keys()].map(f => {
+        const found = cellFault(get(f), options.limits.maxChars, MULTILINE_FIELDS.has(f));
+        return found === null ? null : `${f} ${found}`;
+      }).find(f => f !== null) ?? null;
+    if (fault !== null) {
+      lines.push(rowInvalid(row, fault));
+      continue;
+    }
 
     const built = buildSupport({ get, row, decimal });
     if ('error' in built) {
@@ -311,7 +318,7 @@ export function importSupports(
   return {
     ok: true,
     value: {
-      total_rows: rawLines.length - 1,
+      total_rows: read.rows.length,
       imported: supports.length,
       pending: lines.filter((l) => l.status === 'pending').length,
       rejected: lines.filter((l) => l.status === 'rejected').length,
