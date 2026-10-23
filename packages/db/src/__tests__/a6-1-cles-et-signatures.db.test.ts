@@ -21,6 +21,7 @@ const ORG_B = 'a6100000-0000-0000-0000-0000000000b1';
 const ADMIN_A = 'a6100000-0000-0000-0000-00000000a001';
 const OWNER_REP_A = 'a6100000-0000-0000-0000-00000000a003';
 const ADMIN_B = 'a6100000-0000-0000-0000-00000000b001';
+const OWNER_REP_B = 'a6100000-0000-0000-0000-00000000b003';
 const FORGED = 'a6100000-0000-0000-0000-00000000f001';
 const ABSENT = 'a6100000-0000-0000-0000-0000000000f9';
 
@@ -68,7 +69,7 @@ async function failure(tx: Tx, ids: readonly string[], attempt: () => Promise<un
   }
 }
 
-/** A : un admin, un owner_rep et une épreuve en attente ; B : un admin, un site. */
+/** A : un admin, un owner_rep et une épreuve en attente ; B : un admin, un owner_rep, un site. */
 async function inRolledBack(check: (tx: Tx) => Promise<void>): Promise<void> {
   const done = new Error('annulation voulue');
   await sql.begin(async tx => {
@@ -94,6 +95,7 @@ async function inRolledBack(check: (tx: Tx) => Promise<void>): Promise<void> {
     await tx`insert into azimut.proof(id,org_id,face_id,version,storage_path)
              values (${PROOF_A},${ORG_A},${FACE_A},1,'epreuves/a.pdf')`;
     await as(tx, ADMIN_B);
+    await tx`select azimut.set_member(${ORG_B}, ${OWNER_REP_B}, 'owner_rep')`;
     await tx`insert into azimut.site(id,org_id,name,country_code,timezone)
              values (${SITE_B},${ORG_B},'Site B','FR','Europe/Paris')`;
     await tx`insert into azimut.building(id,org_id,site_id,name) values (${BUILDING_B},${ORG_B},${SITE_B},'Bâtiment B')`;
@@ -127,8 +129,10 @@ describe('A6.1 : une ligne de A ne se vise pas par clé étrangère depuis B', (
 
   it('une validation de B ne vise pas l’épreuve de A', async () => {
     await inRolledBack(async tx => {
+      // Le bon à tirer est décidé par l'owner_rep seul (0085).
+      await as(tx, OWNER_REP_B);
       const approve = (proofId: string) => () => tx`
-        insert into azimut.approval(org_id,proof_id,decision,reviewer_id) values (${ORG_B},${proofId},'approved',${ADMIN_B})`;
+        insert into azimut.approval(org_id,proof_id,decision,reviewer_id) values (${ORG_B},${proofId},'approved',${OWNER_REP_B})`;
       const foreign = await failure(tx, [PROOF_A, ABSENT], approve(PROOF_A));
       const absent = await failure(tx, [PROOF_A, ABSENT], approve(ABSENT));
       expect(foreign).toMatch(/^23503 \| /);
