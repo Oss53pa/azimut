@@ -127,6 +127,7 @@ non plus — elle n'en retire que les clés étrangères.
 0081_d5_d6_seuils_et_stockage
 0082_a6_3_validation_des_entrees
 0083_a12_3_journal_des_evenements
+0084_d5_debit_et_quotas
 ```
 
 ## Règle pour la suite
@@ -225,6 +226,23 @@ existe. Si la plateforme le fournit plus tard, ou si la migration l'annonce
 par un avertissement de droits : `SELECT azimut.install_storage();` sous un
 rôle d'administration.
 
+**Le débit et les quotas (0084).** Les écritures, les changements de
+membres, les créations d'organisation et les dépôts de travaux sont comptés
+par fenêtre dans `azimut.rate_counter`, sous le rôle sans connexion
+`azimut_rate`, avec les seuils de `security_setting` (`rate.*`, `job.*`). Un
+dépassement rend une erreur `rate_limited` que PostgREST traduit en 429 avec
+`Retry-After`, et laisse une ligne `rate_limited` au journal technique de la
+base. Une table créée plus tard reçoit, avec sa garde des entrées, son
+déclencheur de débit :
+
+```sql
+CREATE TRIGGER rate_write AFTER INSERT OR UPDATE OR DELETE ON azimut.<table>
+  FOR EACH STATEMENT EXECUTE FUNCTION azimut.rate_write();
+```
+
+Sur une plateforme où le rôle qui migre n'est pas super-utilisateur :
+`CREATE ROLE azimut_rate NOLOGIN; GRANT azimut_rate TO <rôle qui migre> WITH INHERIT TRUE;`
+
 **Le journal des événements (0083).** `audit_log` n'est écrit que par la
 base : des déclencheurs, sous le rôle sans connexion `azimut_audit`,
 journalisent les cinq événements d'A12.3 avec l'identité de la requête.
@@ -287,6 +305,8 @@ CREATE ROLE azimut_proof_review NOLOGIN;
 GRANT azimut_proof_review TO azimut;
 CREATE ROLE azimut_audit NOLOGIN;
 GRANT azimut_audit TO azimut;
+CREATE ROLE azimut_rate NOLOGIN;
+GRANT azimut_rate TO azimut;
 CREATE DATABASE azimut OWNER azimut;
 SQL
 
