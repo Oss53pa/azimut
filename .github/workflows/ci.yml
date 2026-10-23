@@ -64,6 +64,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Lot 1 de l'audit (A6.3) : aucun secret dans un fichier suivi, quelle que
+      # soit sa forme. Le module n'a aucune dépendance (A2.2-4).
+      - name: Détection de secrets
+        run: pnpm check:secrets
+
       - name: Typecheck
         run: pnpm typecheck
 
@@ -215,6 +220,12 @@ jobs:
       # Condition posée à l'autorisation d'axe-core : jamais dans un livrable.
       # La source est vérifiée par `pnpm test` ; ceci vérifie l'artefact, ce
       # qu'aucune lecture de source ne remplace.
+      # Lot 1 de l'audit : le livrable ne porte aucun secret. La seule clé
+      # admise est la clé publiable déclarée à la construction, et elle doit
+      # être de rôle `anon` ; ici, aucune n'est déclarée.
+      - name: Aucun secret dans les livrables
+        run: pnpm check:dist
+
       - name: axe-core n'est livré nulle part
         run: |
           set -euo pipefail
@@ -324,6 +335,12 @@ jobs:
       # Condition posée à l'autorisation d'axe-core : jamais dans un livrable.
       # La source est vérifiée par `pnpm test` ; ceci vérifie l'artefact, ce
       # qu'aucune lecture de source ne remplace.
+      # Lot 1 de l'audit : le livrable ne porte aucun secret. La seule clé
+      # admise est la clé publiable déclarée à la construction, et elle doit
+      # être de rôle `anon` ; ici, aucune n'est déclarée.
+      - name: Aucun secret dans les livrables
+        run: pnpm check:dist
+
       - name: axe-core n'est livré nulle part
         run: |
           set -euo pipefail
