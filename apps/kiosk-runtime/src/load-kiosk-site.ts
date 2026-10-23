@@ -91,6 +91,11 @@ function readObject(
   return value as Record<string, unknown>;
 }
 
+/** Les fichiers de données que la borne lit, et que le manifeste doit couvrir. */
+export const KIOSK_DATA_FILES: readonly string[] = [
+  'data/graph.json', 'data/directory.json', 'data/scene.json', 'data/site.json',
+];
+
 export function loadKioskSite(
   files: ReadonlyMap<string, Uint8Array>,
 ): KioskSite {
