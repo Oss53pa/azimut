@@ -96,7 +96,20 @@ const LABELS: Readonly<Record<ScheduleLang, ExportLabels>> = {
 // Tableur
 // ---------------------------------------------------------------------------
 
-function escapeCsvField(value: string): string {
+/**
+ * Une cellule qui commence par `=`, `+`, `-`, `@`, une tabulation ou un retour
+ * chariot serait lue comme une formule à l'ouverture dans un tableur
+ * (injection de formule, OWASP). Elle est préfixée d'une apostrophe. Un nombre
+ * signé reste un nombre.
+ */
+function neutralizeFormula(value: string): string {
+  return /^[=+\-@\t\r]/.test(value) && !/^[-+]?\d+(?:[.,]\d+)?$/.test(value)
+    ? `'${value}`
+    : value;
+}
+
+function escapeCsvField(raw: string): string {
+  const value = neutralizeFormula(raw);
   if (value.includes(';') || value.includes('"') || value.includes('\n')) {
     return `"${value.replace(/"/g, '""')}"`;
   }

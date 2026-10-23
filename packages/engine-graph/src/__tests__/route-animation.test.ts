@@ -148,3 +148,18 @@ describe('D6.2 — le parcours sur un plan orienté', () => {
     expect(JSON.stringify(north)).toBe(JSON.stringify(plain));
   });
 });
+
+describe('Audit, lot 6 — identifiants et couleurs échappés dans le SVG', () => {
+  it('un identifiant ou une couleur porteurs de balisage ne sortent pas de leur attribut', () => {
+    const hostile = 'n0"><script>alert(1)</script><g x="';
+    const evil = { ...scene, nodes: scene.nodes.map(n => (n.id === 'entree' ? { ...n, id: hostile } : n)) };
+    const out = renderRouteAnimation(
+      { path: [hostile, 'carrefour'] }, evil, [],
+      { ...options, theme: { ...options.theme, route: 'red"><script>alert(2)</script><g x="' } },
+    );
+    if (!out.ok) throw new Error('rendu attendu');
+    const svg = out.value.frames[0]?.svg ?? '';
+    expect(svg).not.toContain('<script');
+    expect(svg).toContain('data-node="n0&quot;&gt;&lt;script&gt;');
+  });
+});

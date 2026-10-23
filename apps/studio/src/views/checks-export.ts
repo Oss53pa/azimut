@@ -35,12 +35,25 @@ const COLUMNS = [
 ] as const;
 
 /**
+ * Une cellule qui commence par `=`, `+`, `-`, `@`, une tabulation ou un retour
+ * chariot serait lue comme une formule à l'ouverture dans un tableur
+ * (injection de formule, OWASP). Elle est préfixée d'une apostrophe. Un nombre
+ * signé reste un nombre.
+ */
+function neutralizeFormula(value: string): string {
+  return /^[=+\-@\t\r]/.test(value) && !/^[-+]?\d+(?:[.,]\d+)?$/.test(value)
+    ? `'${value}`
+    : value;
+}
+
+/**
  * Le point-virgule sépare les colonnes : une valeur qui en contient un, ou un
  * saut de ligne, casserait le fichier. Les valeurs concernées viennent du
  * catalogue et des identifiants, donc n'en portent pas aujourd'hui, mais s'en
  * remettre à cela reviendrait à parier sur la donnée à venir.
  */
-function escape(value: string): string {
+function escape(raw: string): string {
+  const value = neutralizeFormula(raw);
   return /[;"\n\r]/.test(value)
     ? `"${value.replace(/"/g, '""')}"`
     : value;

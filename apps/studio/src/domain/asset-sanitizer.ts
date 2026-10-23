@@ -17,6 +17,7 @@
  */
 
 import type { Finding } from '@azimut/core-model';
+import { rewriteSvg } from './svg-whitelist.js';
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -51,38 +52,6 @@ export type SanitizeResult =
   | { readonly ok: false; readonly finding: Finding };
 
 // ---------------------------------------------------------------------------
-// Dangerous patterns to remove
-// ---------------------------------------------------------------------------
-
-/** Event handler attributes (onclick, onload, etc.). */
-const EVENT_HANDLER_RE = /\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*')/gi;
-
-/** Script elements. */
-const SCRIPT_TAG_RE = /<script[\s>][\s\S]*?<\/script>/gi;
-
-/** JavaScript URLs. */
-const JS_URL_RE = /javascript\s*:/gi;
-
-/** External references (xlink:href to http/https/data). */
-const EXTERNAL_HREF_RE = /xlink:href\s*=\s*"(?:https?:|data:)[^"]*"/gi;
-const HREF_EXTERNAL_RE = /href\s*=\s*"(?:https?:|data:)[^"]*"/gi;
-
-/** XML external entities. */
-const ENTITY_RE = /<!ENTITY[^>]*>/gi;
-
-/** Metadata elements. */
-const METADATA_RE = /<metadata[\s>][\s\S]*?<\/metadata>/gi;
-
-/** Processing instructions (<?xml-stylesheet?>). */
-const PI_RE = /<\?[\s\S]*?\?>/g;
-
-/** ForeignObject (can contain HTML/scripts). */
-const FOREIGN_OBJECT_RE = /<foreignObject[\s>][\s\S]*?<\/foreignObject>/gi;
-
-/** Use elements pointing to external resources. */
-const USE_EXTERNAL_RE = /<use[^>]+(?:xlink:)?href\s*=\s*"(?:https?:)[^"]*"[^>]*\/?>/gi;
-
-// ---------------------------------------------------------------------------
 // Element counting
 // ---------------------------------------------------------------------------
 
@@ -99,9 +68,10 @@ function countElements(svg: string): number {
 /**
  * Sanitize an SVG string.
  *
- * Removes dangerous content while preserving vector geometry.
- * This is a client-side pass for preview; the server performs
- * the authoritative sanitization.
+ * Rewrites the SVG from a whitelist (`svg-whitelist.ts`) while preserving
+ * vector geometry: what the whitelist does not know is removed, what does not
+ * parse is refused. This is a client-side pass for preview; the server
+ * performs the authoritative sanitization.
  */
 export function sanitizeSvg(
   svgContent: string,
@@ -139,27 +109,22 @@ export function sanitizeSvg(
     };
   }
 
-  let clean = svgContent;
+  // Réécriture par liste blanche : rien n'est recopié tel quel du fichier reçu.
+  const rewritten = rewriteSvg(svgContent);
+  if (!rewritten.ok) {
+    return {
+      ok: false,
+      finding: {
+        code: 'ASSET.SANITIZATION_FAILED',
+        severity: 'blocking',
+        entity: null,
+        params: { reason: rewritten.reason },
+        ruleRef: 'E14.2',
+      },
+    };
+  }
 
-  // Remove dangerous content
-  clean = clean.replace(SCRIPT_TAG_RE, '');
-  clean = clean.replace(FOREIGN_OBJECT_RE, '');
-  clean = clean.replace(EVENT_HANDLER_RE, '');
-  clean = clean.replace(JS_URL_RE, '');
-  clean = clean.replace(EXTERNAL_HREF_RE, '');
-  clean = clean.replace(HREF_EXTERNAL_RE, '');
-  clean = clean.replace(ENTITY_RE, '');
-  clean = clean.replace(USE_EXTERNAL_RE, '');
-
-  // Remove metadata
-  clean = clean.replace(METADATA_RE, '');
-  clean = clean.replace(PI_RE, '');
-
-  // Raster image check — use a fresh regex each time to avoid
-  // lastIndex statefulness issues with global regexes.
-  const hasRaster = /<image[\s>][\s\S]*?(?:\/>|<\/image>)/i.test(clean);
-
-  if (config.forbidRaster && hasRaster) {
+  if (config.forbidRaster && rewritten.rasterFound) {
     return {
       ok: false,
       finding: {
@@ -172,9 +137,8 @@ export function sanitizeSvg(
     };
   }
 
-  // Remove raster images even if not forbidden (just strip them)
-  if (!config.forbidRaster && hasRaster) {
-    clean = clean.replace(/<image[\s>][\s\S]*?(?:\/>|<\/image>)/gi, '');
+  // Hors logo, une image en mode point est retirée, et le retrait est signalé.
+  if (rewritten.rasterFound) {
     warnings.push({
       code: 'ASSET.SANITIZATION_FAILED',
       severity: 'warning' as const,
@@ -184,5 +148,5 @@ export function sanitizeSvg(
     });
   }
 
-  return { ok: true, cleanSvg: clean, warnings };
+  return { ok: true, cleanSvg: rewritten.svg, warnings };
 }

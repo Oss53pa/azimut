@@ -79,3 +79,17 @@ describe('toChecksCsv', () => {
     expect(states).toEqual(['run', 'skipped', 'undeclared']);
   });
 });
+
+describe('Audit, lot 6 — injection de formule dans le tableur', () => {
+  it('une valeur qui commence par =, +, - ou @ est neutralisée ; un nombre signé reste un nombre', () => {
+    const csv = toChecksCsv({
+      ...BASE,
+      siteId: '=HYPERLINK("https://exemple.invalide","x")',
+      roster: { run: ['@SUM(A1)', '-12', '+3.5'], skipped: [], undeclared: [] },
+    });
+    expect(csv).toContain(`"'=HYPERLINK(""https://exemple.invalide"",""x"")"`);
+    expect(csv).toContain(";'@SUM(A1);run");
+    expect(csv).toContain(';-12;run');
+    expect(csv).toContain(';+3.5;run');
+  });
+});
