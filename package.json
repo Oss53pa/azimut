@@ -9,6 +9,8 @@
   "scripts": {
     "typecheck": "pnpm -r --parallel run typecheck && tsc -p tsconfig.config.json",
     "lint": "eslint . && node scripts/check-deps.js",
+    "check:secrets": "node scripts/secret-scan.mjs",
+    "check:dist": "node scripts/secret-scan.mjs --dist apps/studio/dist apps/kiosk-runtime/dist",
     "test": "vitest run",
     "test:visual": "vitest run tests/visual.test.ts",
     "test:db": "vitest run --config vitest.db.config.ts",
