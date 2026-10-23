@@ -29,7 +29,7 @@ import {
   type SiteRepository, type SiteSummary,
   type CountrySummary, type LegalEntitySummary,
 } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { loadWayfindingRegistry } from './postgrest-wayfinding.js';
 import { loadCharterRegistry } from './postgrest-charter.js';
 import { loadMaintenanceRegistry } from './postgrest-maintenance.js';
@@ -237,17 +237,17 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
     },
 
     async loadSite(siteId: string): Promise<SiteData> {
-      const siteRows = await query<SiteRow>(config, 'site', `id=eq.${siteId}`);
+      const siteRows = await query<SiteRow>(config, 'site', `${idEq('id', siteId)}`);
       const site = firstOrThrow(siteRows, 'site', siteId);
 
       const orgRows = await query<OrganizationRow>(
-        config, 'organization', `id=eq.${site.org_id}`,
+        config, 'organization', `${idEq('id', site.org_id)}`,
       );
       const organization = firstOrThrow(orgRows, 'organization', site.org_id);
 
       const [buildings, rulesBindings] = await Promise.all([
-        query<BuildingRow>(config, 'building', `site_id=eq.${siteId}`),
-        query<SiteRulesBindingRow>(config, 'site_rules_binding', `site_id=eq.${siteId}`),
+        query<BuildingRow>(config, 'building', `${idEq('site_id', siteId)}`),
+        query<SiteRulesBindingRow>(config, 'site_rules_binding', `${idEq('site_id', siteId)}`),
       ]);
       const levels = await queryIn<LevelRow>(
         config, 'level', 'building_id', buildings.map(b => b.id),
@@ -262,11 +262,11 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           queryIn<FootprintRow>(config, 'footprint', 'level_id', levelIds),
           queryIn<PlanSourceRow>(config, 'plan_source', 'level_id', levelIds),
           queryIn<NodeRow>(config, 'node', 'level_id', levelIds),
-          query<CategoryRow>(config, 'category', `org_id=eq.${site.org_id}`),
-          query<PictogramRow>(config, 'pictogram', `org_id=eq.${site.org_id}`),
-          query<TravelProfileRow>(config, 'travel_profile', `site_id=eq.${siteId}`),
-          query<SupportRow>(config, 'support', `site_id=eq.${siteId}`),
-          query<SupportTypologyRow>(config, 'support_typology', `org_id=eq.${site.org_id}`),
+          query<CategoryRow>(config, 'category', `${idEq('org_id', site.org_id)}`),
+          query<PictogramRow>(config, 'pictogram', `${idEq('org_id', site.org_id)}`),
+          query<TravelProfileRow>(config, 'travel_profile', `${idEq('site_id', siteId)}`),
+          query<SupportRow>(config, 'support', `${idEq('site_id', siteId)}`),
+          query<SupportTypologyRow>(config, 'support_typology', `${idEq('org_id', site.org_id)}`),
         ]);
 
       const footprintIds = footprints.map(f => f.id);
@@ -308,7 +308,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
           config, 'parking_space', 'footprint_id', footprints.map(f => f.id),
         ),
         // O11 — les fermetures temporaires du site.
-        query<TemporaryClosureRow>(config, 'temporary_closure', `site_id=eq.${siteId}`),
+        query<TemporaryClosureRow>(config, 'temporary_closure', `${idEq('site_id', siteId)}`),
       ]);
 
       return assembleSiteData({
@@ -347,7 +347,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // vides, et l'écran lirait « ce site ne déclare rien » au lieu de
       // « ce site ne vous est pas accessible ». L'adaptateur de référence
       // refuse déjà dans ce cas ; les deux doivent se comporter pareil.
-      const siteRows = await query<SiteRow>(config, 'site', `select=id&id=eq.${siteId}`);
+      const siteRows = await query<SiteRow>(config, 'site', `select=id&${idEq('id', siteId)}`);
       if (siteRows.length === 0) {
         throw new RepositoryError('not_found', `site: ${siteId}`);
       }
@@ -359,19 +359,19 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         // soit aussi dans le `select`, et la dépendre d'une syntaxe de jointure
         // non éprouvée ferait échouer la requête entière. Le filtre par clé
         // étrangère est déjà le mode employé partout ailleurs dans ce fichier.
-        query<CharterRow>(config, 'charter', `select=id&site_id=eq.${siteId}`),
+        query<CharterRow>(config, 'charter', `select=id&${idEq('site_id', siteId)}`),
         query<SiteFactRow>(
           config,
           'site_fact',
-          `select=id,key,value,status,source_ref,declared_at,declared_by,target_kind,target_id&site_id=eq.${siteId}`,
+          `select=id,key,value,status,source_ref,declared_at,declared_by,target_kind,target_id&${idEq('site_id', siteId)}`,
         ),
         query<SourceClaimRow>(
-          config, 'source_claim', `select=key,source,value,recorded_on&site_id=eq.${siteId}`,
+          config, 'source_claim', `select=key,source,value,recorded_on&${idEq('site_id', siteId)}`,
         ),
         query<DecisionRow>(
           config,
           'discrepancy_decision',
-          `select=key,decided_source,decided_by,decided_on&site_id=eq.${siteId}`,
+          `select=key,decided_source,decided_by,decided_on&${idEq('site_id', siteId)}`,
         ),
       ]);
 

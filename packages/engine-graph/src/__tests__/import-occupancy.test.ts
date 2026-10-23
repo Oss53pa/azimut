@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { importOccupancy } from '../import-occupancy.js';
+import { importOccupancy as importWith } from '../import-occupancy.js';
+import type { SiteData } from '@azimut/core-model';
 import { refMultilevel } from '@azimut/testkit';
+import { CSV_LIMITS } from './csv-limits.js';
+
+/** L'import aux bornes de référence. */
+const importOccupancy = (site: SiteData, content: string) => importWith(site, content, CSV_LIMITS);
 
 function csv(lines: string[]): string {
   return lines.join('\n');

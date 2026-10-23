@@ -18,8 +18,8 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
 }
 
 const BASE = {
-  site: [{ id: 'site-1' }],
-  ad_placement: [{ id: 'p1', code: 'AP-1', level_id: 'l1', node_id: null, typology_key: 'caisson', area_m2: '2.5' }],
+  site: [{ id: 'aaaa0002-0000-4000-8000-000000000001' }],
+  ad_placement: [{ id: 'aaaa0002-0000-4000-8000-000000000006', code: 'AP-1', level_id: 'aaaa0002-0000-4000-8000-000000000005', node_id: null, typology_key: 'caisson', area_m2: '2.5' }],
 };
 
 describe('H4 — régie, sites de référence', () => {
@@ -36,15 +36,15 @@ describe('H4 — régie, API REST', () => {
     const calls = stubTables({
       ...BASE,
       ad_booking: [
-        { id: 'b1', placement_id: 'p1', state: 'reserved', from_date: '2026-10-01', to_date: '2026-11-30', advertiser_name: 'A' },
-        { id: 'b2', placement_id: 'p1', state: 'reserved', from_date: '2026-11-01', to_date: '2027-01-31', advertiser_name: 'B' },
+        { id: 'aaaa0002-0000-4000-8000-000000000002', placement_id: 'aaaa0002-0000-4000-8000-000000000006', state: 'reserved', from_date: '2026-10-01', to_date: '2026-11-30', advertiser_name: 'A' },
+        { id: 'aaaa0002-0000-4000-8000-000000000003', placement_id: 'aaaa0002-0000-4000-8000-000000000006', state: 'reserved', from_date: '2026-11-01', to_date: '2027-01-31', advertiser_name: 'B' },
       ],
       ad_creative: [{
-        id: 'c1', placement_id: 'p1', format: 'pdf', resolution_dpi: 300, safe_zone_mm: 10, color_profile: 'CMYK',
+        id: 'aaaa0002-0000-4000-8000-000000000004', placement_id: 'aaaa0002-0000-4000-8000-000000000006', format: 'pdf', resolution_dpi: 300, safe_zone_mm: 10, color_profile: 'CMYK',
         weight_bytes: '1000', storage_path: null, sanitation: 'deferred', verdict: 'human_review', received_at: '2026-09-01T00:00:00Z',
       }],
     });
-    const data = await createPostgrestRepository(config).loadAdvertisingData('site-1');
+    const data = await createPostgrestRepository(config).loadAdvertisingData('aaaa0002-0000-4000-8000-000000000001');
     expect(calls.some(c => c.includes('/ad_placement?') && c.includes('deleted_at=is.null'))).toBe(true);
     expect(data.registry.placements[0]?.area_m2).toBe(2.5);
     // Le chevauchement s'est enregistré : c'est le garde qui le relèvera.
@@ -57,15 +57,15 @@ describe('H4 — régie, API REST', () => {
   it('échoue sur un état de réservation hors liste, au lieu d’écarter la ligne', async () => {
     stubTables({
       ...BASE,
-      ad_booking: [{ id: 'b1', placement_id: 'p1', state: 'free', from_date: '2026-10-01', to_date: '2026-11-30', advertiser_name: null }],
+      ad_booking: [{ id: 'aaaa0002-0000-4000-8000-000000000002', placement_id: 'aaaa0002-0000-4000-8000-000000000006', state: 'free', from_date: '2026-10-01', to_date: '2026-11-30', advertiser_name: null }],
     });
-    const error: unknown = await createPostgrestRepository(config).loadAdvertisingData('site-1').catch((e: unknown) => e);
+    const error: unknown = await createPostgrestRepository(config).loadAdvertisingData('aaaa0002-0000-4000-8000-000000000001').catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'request_failed').toBe(true);
   });
 
   it('refuse un site absent', async () => {
     stubTables({});
-    const error: unknown = await createPostgrestRepository(config).loadAdvertisingData('site-1').catch((e: unknown) => e);
+    const error: unknown = await createPostgrestRepository(config).loadAdvertisingData('aaaa0002-0000-4000-8000-000000000001').catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'not_found').toBe(true);
   });
 });

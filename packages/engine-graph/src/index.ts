@@ -138,6 +138,8 @@ export type {
   QuantityReport,
 } from './compute-quantities.js';
 export { importOccupancy } from './import-occupancy.js';
+export { parseCsvRecords, readCsv } from './csv-utils.js';
+export type { CsvLimits, CsvRecord, CsvRead } from './csv-utils.js';
 export type {
   ImportedOccupancy,
   OccupancyLineResult,

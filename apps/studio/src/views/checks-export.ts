@@ -1,4 +1,5 @@
 import type { Finding } from '@azimut/core-model';
+import { escapeCsvCell } from '@azimut/core-model';
 
 /**
  * Export de l'écran de validation.
@@ -34,20 +35,8 @@ const COLUMNS = [
   'site', 'ran_at', 'record', 'code', 'state', 'entity_kind', 'entity_id', 'rule_ref',
 ] as const;
 
-/**
- * Le point-virgule sépare les colonnes : une valeur qui en contient un, ou un
- * saut de ligne, casserait le fichier. Les valeurs concernées viennent du
- * catalogue et des identifiants, donc n'en portent pas aujourd'hui, mais s'en
- * remettre à cela reviendrait à parier sur la donnée à venir.
- */
-function escape(value: string): string {
-  return /[;"\n\r]/.test(value)
-    ? `"${value.replace(/"/g, '""')}"`
-    : value;
-}
-
 function row(cells: readonly string[]): string {
-  return cells.map(escape).join(';');
+  return cells.map(cell => escapeCsvCell(cell)).join(';');
 }
 
 export function toChecksCsv(input: ExportInput): string {

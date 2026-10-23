@@ -14,6 +14,7 @@
 import type { Finding, Outcome, Point } from '@azimut/core-model';
 import {
   POLYGON_MIN_AREA_M2, isSelfIntersecting, quantizePoint, signedArea,
+  FIELD_BOUNDS, normalizeText, textFault, charLength,
 } from '@azimut/core-model';
 
 /**
@@ -32,8 +33,8 @@ export const FOOTPRINT_KINDS = [
 export type FootprintKind = (typeof FOOTPRINT_KINDS)[number];
 
 /** M3 (partie M) : « Code de cellule | requis, unique par niveau, 1 à 20 caractères ». */
-export const UNIT_CODE_MIN = 1;
-export const UNIT_CODE_MAX = 20;
+export const UNIT_CODE_MIN = FIELD_BOUNDS['footprint.unit_code'].min;
+export const UNIT_CODE_MAX = FIELD_BOUNDS['footprint.unit_code'].max;
 
 export type FootprintDraft = {
   readonly vertices: readonly Point[];
@@ -84,7 +85,7 @@ export function acceptFootprint(
     ok: true,
     value: {
       vertices,
-      unitCode: draft.unitCode.trim(),
+      unitCode: normalizeText(draft.unitCode),
       kind: draft.kind,
       categoryId: draft.categoryId,
       areaM2: roundToOneDecimal(Math.abs(signedArea(vertices))),
@@ -108,10 +109,12 @@ function checkVertices(vertices: readonly Point[]): readonly Finding[] {
 }
 
 function checkUnitCode(code: string, existing: readonly string[]): readonly Finding[] {
-  const trimmed = code.trim();
-  if (trimmed.length < UNIT_CODE_MIN || trimmed.length > UNIT_CODE_MAX) {
+  // Lot 4 de l'audit (A6.3) : normaliser, puis refuser.
+  const trimmed = normalizeText(code);
+  const fault = textFault(trimmed, FIELD_BOUNDS['footprint.unit_code']);
+  if (fault !== null) {
     return [finding('DATA.UNIT_CODE_REQUIRED', {
-      length: trimmed.length, min: UNIT_CODE_MIN, max: UNIT_CODE_MAX,
+      length: charLength(trimmed), min: UNIT_CODE_MIN, max: UNIT_CODE_MAX, fault,
     })];
   }
   // L'unicité se juge sans la casse : « B12 » et « b12 » sont le même local

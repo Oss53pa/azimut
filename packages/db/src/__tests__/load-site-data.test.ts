@@ -147,9 +147,10 @@ describe('mapSupportFaceRow (A5.6)', () => {
     expect(f.langs).toBeUndefined();
   });
 
-  it('keeps only string entries in langs', () => {
-    const f = mapSupportFaceRow(faceRow({ langs: ['fr', 2, null] as unknown }));
-    expect(f.langs).toEqual(['fr']);
+  // Lot 4 de l'audit (A6.3) : une liste mal formée fait échouer la lecture, au
+  // lieu d'être filtrée en silence.
+  it('refuses langs that are not all strings', () => {
+    expect(() => mapSupportFaceRow(faceRow({ langs: ['fr', 2, null] as unknown }))).toThrow(/que des chaînes/);
   });
 });
 
@@ -189,11 +190,12 @@ describe('mapSupportVersionRow (A5.6)', () => {
     });
   });
 
-  it('falls back to draft for an unexpected state and omits null optionals', () => {
+  // Lot 4 de l'audit (A6.3) : un état inconnu n'est plus lu comme un brouillon.
+  it('refuses an unexpected state, and omits null optionals', () => {
+    expect(() => mapSupportVersionRow(verRow({ state: 'weird' }))).toThrow(/état de version/);
     const v = mapSupportVersionRow(verRow({
-      state: 'weird', artwork_path: null, content_hash: null, created_by: null,
+      state: 'draft', artwork_path: null, content_hash: null, created_by: null,
     }));
-    expect(v.state).toBe('draft');
     expect(v.artwork_path).toBeUndefined();
     expect(v.created_by).toBeUndefined();
   });

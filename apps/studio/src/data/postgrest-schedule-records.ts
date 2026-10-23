@@ -14,16 +14,16 @@
  * arrivent en objets là où le chemin d'écriture les avait posées en texte : la
  * lecture du tableau accepte les deux formes.
  */
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import type { ScheduleRecords } from './site-repository.js';
 
 type Row = Readonly<Record<string, unknown>> & { readonly id: string };
 
 export async function loadScheduleRecords(config: PostgrestConfig, siteId: string): Promise<ScheduleRecords> {
   const [schedules, validations, annotations] = await Promise.all([
-    query<Row>(config, 'message_schedule', `select=*&site_id=eq.${siteId}`),
-    query<Row>(config, 'graph_validation', `select=*&site_id=eq.${siteId}`),
-    query<Row>(config, 'review_annotation', `select=*&site_id=eq.${siteId}&deleted_at=is.null`),
+    query<Row>(config, 'message_schedule', `select=*&${idEq('site_id', siteId)}`),
+    query<Row>(config, 'graph_validation', `select=*&${idEq('site_id', siteId)}`),
+    query<Row>(config, 'review_annotation', `select=*&${idEq('site_id', siteId)}&deleted_at=is.null`),
   ]);
   const scheduleIds = schedules.map(s => s.id);
   const [lines, approvals, replies] = await Promise.all([

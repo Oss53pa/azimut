@@ -11,7 +11,7 @@
  */
 
 import type { MessageLine, MessageSchedule } from './message-schedule.js';
-import { codePointCompare } from '@azimut/core-model';
+import { codePointCompare, escapeCsvCell } from '@azimut/core-model';
 
 export type ScheduleLang = 'fr' | 'en';
 
@@ -96,13 +96,6 @@ const LABELS: Readonly<Record<ScheduleLang, ExportLabels>> = {
 // Tableur
 // ---------------------------------------------------------------------------
 
-function escapeCsvField(value: string): string {
-  if (value.includes(';') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
 type ExportRow = readonly string[];
 
 function rowsOfLine(line: MessageLine, labels: ExportLabels): readonly ExportRow[] {
@@ -143,7 +136,7 @@ export function messageScheduleToCsv(
   out.push([
     l.lineId, l.support, l.face, l.block, l.kind, l.level, l.decisionPoint,
     l.destination, l.direction, l.distance, l.textFr, l.textEn, l.stale,
-  ].map(escapeCsvField).join(';'));
+  ].map(cell => escapeCsvCell(cell)).join(';'));
 
   const ordered = [...schedule.lines].sort((a, b) =>
     codePointCompare(a.support_id, b.support_id) ||
@@ -153,7 +146,7 @@ export function messageScheduleToCsv(
 
   for (const line of ordered) {
     for (const row of rowsOfLine(line, l)) {
-      out.push(row.map(escapeCsvField).join(';'));
+      out.push(row.map(cell => escapeCsvCell(cell)).join(';'));
     }
   }
 

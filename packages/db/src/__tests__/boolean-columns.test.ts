@@ -18,14 +18,24 @@ function recordingDb(): TransactionalDb & { readonly queries: SQL[] } {
   return { ...executor, queries, transaction: fn => fn(executor) };
 }
 
-function edgeUpdate(accessible: string | boolean): EntityCommand {
-  const out = buildCommand({
-    operation: 'update', module: '01-socle', table: 'edge', id: 'arete', org_id: 'org',
-    timestamp: '2026-10-05T10:00:00.000Z',
-    before: { accessible: true }, after: { accessible },
-  });
+const EDGE_UPDATE = {
+  operation: 'update', module: '01-socle', table: 'edge', id: 'arete', org_id: 'org',
+  timestamp: '2026-10-05T10:00:00.000Z', before: { accessible: true },
+} as const;
+
+function edgeUpdate(accessible: boolean): EntityCommand {
+  const out = buildCommand({ ...EDGE_UPDATE, after: { accessible } });
   if (!out.ok) throw new Error(JSON.stringify(out.findings));
   return out.value;
+}
+
+/**
+ * La même commande avec une chaîne. `buildCommand` la refuse depuis le lot 4 ;
+ * elle est donc construite à la main, pour éprouver la défense propre du
+ * chemin d'écriture, qui ne suppose pas que l'appelant est passé par là.
+ */
+function rawEdgeUpdate(accessible: string): EntityCommand {
+  return { ...EDGE_UPDATE, after: { accessible }, groupKey: null };
 }
 
 describe('les colonnes booléennes du schéma', () => {
@@ -38,7 +48,8 @@ describe('les colonnes booléennes du schéma', () => {
 
   it('une chaîne pour une colonne booléenne est refusée, et rien ne s’écrit', async () => {
     const db = recordingDb();
-    const out = await applyCommands(db, { userId: 'u' }, [edgeUpdate('false')]);
+    expect(buildCommand({ ...EDGE_UPDATE, after: { accessible: 'false' } }).ok).toBe(false);
+    const out = await applyCommands(db, { userId: 'u' }, [rawEdgeUpdate('false')]);
     expect(out.ok).toBe(false);
     if (out.ok) return;
     expect(out.findings[0]?.code).toBe('EDIT.WRITE_REFUSED');

@@ -60,7 +60,7 @@ describe('E5.1 — commande d’écriture', () => {
   describe('R1 et R2 (partie L) — un module n’écrit que ce qu’il possède', () => {
     it('accepte une table que le module possède', () => {
       expect(ownsTable('01-socle', 'site')).toBe(true);
-      expect(built({ table: 'node' }).table).toBe('node');
+      expect(built({ table: 'node', after: { id: 'node-1', org_id: ORG, label: 'Accueil' } }).table).toBe('node');
     });
 
     /**
@@ -128,14 +128,14 @@ describe('E5.1 — réversibilité', () => {
   });
 
   it('l’inverse d’une mise à jour échange les deux états', () => {
-    const c = built({ operation: 'update', before: { name: 'A' }, after: { name: 'B' } });
+    const c = built({ operation: 'update', before: { name: 'Site A' }, after: { name: 'Site B' } });
     const inv = inverseCommand(c, T2);
-    expect(inv.before).toEqual({ name: 'B' });
-    expect(inv.after).toEqual({ name: 'A' });
+    expect(inv.before).toEqual({ name: 'Site B' });
+    expect(inv.after).toEqual({ name: 'Site A' });
   });
 
   it('l’inverse d’un inverse est la commande d’origine', () => {
-    const c = built({ operation: 'update', before: { name: 'A' }, after: { name: 'B' } });
+    const c = built({ operation: 'update', before: { name: 'Site A' }, after: { name: 'Site B' } });
     expect(inverseCommand(inverseCommand(c, T2), T)).toEqual(c);
   });
 
@@ -154,22 +154,30 @@ describe('M02.W8 (partie N) — les colonnes réellement changées', () => {
   it('ne retient que les colonnes dont la valeur diffère', () => {
     const c = built({
       operation: 'update',
-      before: { name: 'A', country_code: 'FR' },
-      after: { name: 'B', country_code: 'FR' },
+      before: { name: 'Site A', country_code: 'FR' },
+      after: { name: 'Site B', country_code: 'FR' },
     });
     expect(changedColumns(c)).toEqual(['name']);
   });
 
   it('une mise à jour qui ne change rien ne change rien', () => {
-    const c = built({ operation: 'update', before: { name: 'A' }, after: { name: 'A' } });
+    const c = built({ operation: 'update', before: { name: 'Site A' }, after: { name: 'Site A' } });
     expect(changedColumns(c)).toEqual([]);
   });
 
   it('rend un ordre stable, quel que soit l’ordre de saisie', () => {
-    const a = built({ operation: 'update', before: { b: '1', a: '1' }, after: { b: '2', a: '2' } });
-    const b = built({ operation: 'update', before: { a: '1', b: '1' }, after: { a: '2', b: '2' } });
+    const a = built({
+      operation: 'update',
+      before: { timezone: 'Europe/Paris', country_code: 'FR' },
+      after: { timezone: 'Africa/Abidjan', country_code: 'CI' },
+    });
+    const b = built({
+      operation: 'update',
+      before: { country_code: 'FR', timezone: 'Europe/Paris' },
+      after: { country_code: 'CI', timezone: 'Africa/Abidjan' },
+    });
     expect(changedColumns(a)).toEqual(changedColumns(b));
-    expect(changedColumns(a)).toEqual(['a', 'b']);
+    expect(changedColumns(a)).toEqual(['country_code', 'timezone']);
   });
 });
 

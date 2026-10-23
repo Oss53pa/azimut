@@ -33,42 +33,42 @@ describe('H6 — chantier, sites de référence', () => {
 describe('H6 — chantier, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
-    const error: unknown = await createPostgrestRepository(config).loadWorksiteRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadWorksiteRegistry('aaaa0009-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
-    expect(calls[0]).toContain('/site?select=id&id=eq.site-1');
+    expect(calls[0]).toContain('/site?select=id&id=eq.aaaa0009-0000-4000-8000-000000000001');
     expect(isRepositoryError(error) && error.failure === 'not_found').toBe(true);
   });
 
   it('replie les liaisons sur leur lot et leur créneau, sans compte stocké', async () => {
     stubTables({
-      site: [{ id: 'site-1' }],
+      site: [{ id: 'aaaa0009-0000-4000-8000-000000000001' }],
       fabrication_lot: [
-        { id: 'l2', code: 'B', manufacturer_name: 'F2', state: 'ordered' },
-        { id: 'l1', code: 'A', manufacturer_name: 'F1', state: 'delivered' },
+        { id: 'aaaa0009-0000-4000-8000-000000000005', code: 'B', manufacturer_name: 'F2', state: 'ordered' },
+        { id: 'aaaa0009-0000-4000-8000-000000000004', code: 'A', manufacturer_name: 'F1', state: 'delivered' },
       ],
-      lot_support: [{ lot_id: 'l1', support_id: 's2' }, { lot_id: 'l1', support_id: 's1' }],
+      lot_support: [{ lot_id: 'aaaa0009-0000-4000-8000-000000000004', support_id: 'aaaa0009-0000-4000-8000-000000000008' }, { lot_id: 'aaaa0009-0000-4000-8000-000000000004', support_id: 'aaaa0009-0000-4000-8000-000000000007' }],
       install_slot: [
-        { id: 'k2', zone_label: 'Z2', planned_on: null, night_work: false },
-        { id: 'k1', zone_label: 'Z1', planned_on: '2026-10-01', night_work: true },
+        { id: 'aaaa0009-0000-4000-8000-000000000003', zone_label: 'Z2', planned_on: null, night_work: false },
+        { id: 'aaaa0009-0000-4000-8000-000000000002', zone_label: 'Z1', planned_on: '2026-10-01', night_work: true },
       ],
-      slot_support: [{ slot_id: 'k1', support_id: 's1' }],
+      slot_support: [{ slot_id: 'aaaa0009-0000-4000-8000-000000000002', support_id: 'aaaa0009-0000-4000-8000-000000000007' }],
       install_reserve: [{
-        id: 'r1', support_id: 's1', lot_id: 'l1', observation_key: 'x', observed_by: 'o',
+        id: 'aaaa0009-0000-4000-8000-000000000006', support_id: 'aaaa0009-0000-4000-8000-000000000007', lot_id: 'aaaa0009-0000-4000-8000-000000000004', observation_key: 'x', observed_by: 'o',
         observed_at: '2026-09-01T00:00:00Z', lifted_at: null, photo_path: null,
       }],
     });
-    const registry = await createPostgrestRepository(config).loadWorksiteRegistry('site-1');
-    expect(registry.lots.map(l => [l.code, l.support_ids])).toEqual([['A', ['s1', 's2']], ['B', []]]);
-    expect(registry.slots.map(s => [s.id, s.support_ids.length])).toEqual([['k1', 1], ['k2', 0]]);
+    const registry = await createPostgrestRepository(config).loadWorksiteRegistry('aaaa0009-0000-4000-8000-000000000001');
+    expect(registry.lots.map(l => [l.code, l.support_ids])).toEqual([['A', ['aaaa0009-0000-4000-8000-000000000007', 'aaaa0009-0000-4000-8000-000000000008']], ['B', []]]);
+    expect(registry.slots.map(s => [s.id, s.support_ids.length])).toEqual([['aaaa0009-0000-4000-8000-000000000002', 1], ['aaaa0009-0000-4000-8000-000000000003', 0]]);
     expect(registry.reserves).toHaveLength(1);
   });
 
   it('échoue sur un état de lot hors liste, au lieu d’écarter la ligne', async () => {
     stubTables({
-      site: [{ id: 'site-1' }],
-      fabrication_lot: [{ id: 'l1', code: 'A', manufacturer_name: 'F', state: 'perdu' }],
+      site: [{ id: 'aaaa0009-0000-4000-8000-000000000001' }],
+      fabrication_lot: [{ id: 'aaaa0009-0000-4000-8000-000000000004', code: 'A', manufacturer_name: 'F', state: 'perdu' }],
     });
-    const error: unknown = await createPostgrestRepository(config).loadWorksiteRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadWorksiteRegistry('aaaa0009-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'request_failed').toBe(true);
   });

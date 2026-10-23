@@ -8,7 +8,7 @@
  * silence.
  */
 import { z } from 'zod';
-import { query } from '../data/postgrest-http.js';
+import { query, idEq } from '../data/postgrest-http.js';
 import type { PostgrestConfig } from '../data/postgrest-http.js';
 
 const MEMBER_ROLES = ['admin', 'designer', 'owner_rep', 'vendor', 'operator', 'auditor', 'marketing'] as const;
@@ -20,7 +20,7 @@ export type Membership = { readonly orgId: string; readonly role: MemberRole };
 export async function readMemberships(config: PostgrestConfig, userId: string): Promise<readonly Membership[]> {
   const parsedId = z.uuid().parse(userId);
   const rows = await query<unknown>(
-    config, 'membership', `select=org_id,role&user_id=eq.${parsedId}&order=org_id`);
+    config, 'membership', `select=org_id,role&${idEq('user_id', parsedId)}&order=org_id`);
   return rows.map(row => {
     const m = Membership.parse(row);
     return { orgId: m.org_id, role: m.role };

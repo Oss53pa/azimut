@@ -13,7 +13,7 @@ import {
   type CharterRule, type CharterLexiconEntry,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type CharterRow = {
@@ -61,11 +61,11 @@ export async function loadCharterRegistry(
 ): Promise<CharterRegistry> {
   // Le site d'abord, comme pour le vocabulaire : un site masqué par le
   // cloisonnement doit se lire « inaccessible », pas « n'a pas de charte ».
-  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&id=eq.${siteId}`);
+  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&${idEq('id', siteId)}`);
   if (sites.length === 0) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const charterRows = await query<CharterRow>(
-    config, 'charter', `select=id,name,version,created_at&site_id=eq.${siteId}`,
+    config, 'charter', `select=id,name,version,created_at&${idEq('site_id', siteId)}`,
   );
   const ids = charterRows.map(c => c.id);
   const [colorRows, typefaceRows, ruleRows, lexiconRows] = await Promise.all([

@@ -14,11 +14,13 @@
  * ensemble, sous un même groupe : un seul geste, une seule annulation.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand, listValue } from '@azimut/core-model';
+import {
+  buildCommand, listValue, FIELD_BOUNDS, normalizeText, textFault, charLength,
+} from '@azimut/core-model';
 
 /** M1 (partie M) : « requis, 2 à 120 caractères ». */
-export const SITE_NAME_MIN = 2;
-export const SITE_NAME_MAX = 120;
+export const SITE_NAME_MIN = FIELD_BOUNDS['site.name'].min;
+export const SITE_NAME_MAX = FIELD_BOUNDS['site.name'].max;
 
 export type SiteDraft = {
   readonly name: string;
@@ -143,7 +145,7 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
       after: {
         id: context.siteId,
         org_id: context.orgId,
-        name: draft.name.trim(),
+        name: normalizeText(draft.name),
         country_code: draft.countryCode,
         timezone: draft.timezone,
         legal_entity_id: draft.legalEntityId,
@@ -204,12 +206,16 @@ function rowsOf(draft: SiteDraft, context: CreationContext) {
 // ---------------------------------------------------------------------------
 
 function checkName(name: string, existing: readonly string[]): readonly Finding[] {
-  const trimmed = name.trim();
-  if (trimmed.length < SITE_NAME_MIN || trimmed.length > SITE_NAME_MAX) {
+  // Lot 4 de l'audit (A6.3) : normaliser, puis refuser. Un caractère de
+  // contrôle ou un forçage de direction est un nom refusé, comme sa longueur.
+  const trimmed = normalizeText(name);
+  const fault = textFault(trimmed, FIELD_BOUNDS['site.name']);
+  if (fault !== null) {
     return [finding('DATA.NAME_REQUIRED', {
-      length: trimmed.length,
+      length: charLength(trimmed),
       min: SITE_NAME_MIN,
       max: SITE_NAME_MAX,
+      fault,
     })];
   }
   // L'unicité se juge sur le nom normalisé : deux sites qui ne diffèrent que

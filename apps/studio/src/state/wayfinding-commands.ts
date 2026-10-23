@@ -11,7 +11,7 @@
  * quatre entités d'ici s'écrivent une par une.
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand } from '@azimut/core-model';
+import { buildCommand, FIELD_BOUNDS, normalizeText, textFault } from '@azimut/core-model';
 
 const MODULE = '02-wayfinding';
 
@@ -108,16 +108,16 @@ function nameRequired(params: Record<string, string | number>, id: string): Find
  * redondance : elle rend le refus lisible avant l'aller-retour, et la base
  * reste ce qui le garantit.
  */
-const ZONE_CODE_MAX = 8;
+const ZONE_CODE_MAX = FIELD_BOUNDS['orientation_zone.code'].max;
 
 export function createOrientationZone(
   draft: OrientationZoneDraft,
   write: WayfindingWrite,
 ): Outcome<readonly EntityCommand[]> {
   const findings: Finding[] = [];
-  const code = draft.code.trim();
+  const code = normalizeText(draft.code);
 
-  if (code === '' || code.length > ZONE_CODE_MAX) {
+  if (textFault(code, FIELD_BOUNDS['orientation_zone.code']) !== null) {
     findings.push(shapeRefusal('code', { code: draft.code, max: ZONE_CODE_MAX }, draft.id));
   }
   // N2.2 : « Requis dans chaque langue active. » Une zone sans nom anglais
@@ -134,8 +134,8 @@ export function createOrientationZone(
     after: {
       site_id: write.siteId,
       code,
-      name_fr: draft.nameFr.trim(),
-      name_en: draft.nameEn.trim(),
+      name_fr: normalizeText(draft.nameFr),
+      name_en: normalizeText(draft.nameEn),
       kind: draft.kind,
       footprint_ids: JSON.stringify(draft.footprintIds),
     },
@@ -166,7 +166,7 @@ export function createNamingRule(
     after: {
       site_id: write.siteId,
       target: draft.target,
-      pattern: draft.pattern.trim(),
+      pattern: normalizeText(draft.pattern),
       max_length: draft.maxLength,
       uniqueness_scope: draft.uniquenessScope,
     },

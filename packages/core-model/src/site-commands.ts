@@ -20,6 +20,7 @@ import {
 } from './module-ownership.js';
 import { safetyRegistryFaults, factKeyFaults, embeddedSvgFaults } from './command-checks.js';
 import { touchedColumns } from './row-values.js';
+import { commandValueFaults } from './input/command-values.js';
 import type { RowValues } from './row-values.js';
 import type { Outcome, Finding } from './outcome.js';
 
@@ -143,6 +144,11 @@ export function buildCommand(draft: CommandDraft): Outcome<EntityCommand> {
   findings.push(...safetyRegistryFaults(draft, before, after));
   findings.push(...factKeyFaults(draft, after));
   findings.push(...embeddedSvgFaults(draft, after));
+  for (const fault of commandValueFaults(draft.table, after)) {
+    findings.push(finding('EDIT.COMMAND_SHAPE_INVALID', {
+      operation: draft.operation, table: draft.table, column: fault.column, fault: fault.fault,
+    }, draft.id));
+  }
 
   if (findings.length > 0) return { ok: false, findings };
 

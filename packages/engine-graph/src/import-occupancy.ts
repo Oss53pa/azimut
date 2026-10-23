@@ -1,10 +1,7 @@
 import type { SiteData, Outcome, Finding, OccupancyStatus } from '@azimut/core-model';
-import {
-  parseCsvLine,
-  detectSeparator,
-  stripBom,
-  detectColumns,
-} from './csv-utils.js';
+import { FIELD_BOUNDS, parseColumnSpec, tableColumns, textFault } from '@azimut/core-model';
+import { readCsv, detectColumns, cellOf, cellFault } from './csv-utils.js';
+import type { CsvLimits } from './csv-utils.js';
 
 const OCCUPANCY_ALIASES: Record<string, readonly string[]> = {
   unit_code: ['unit_code', 'code_unite', 'code', 'unite', 'local'],
@@ -25,12 +22,10 @@ const REQUIRED_FIELDS: readonly string[] = [
   'occupancy_status',
 ];
 
-const VALID_STATUSES = new Set<string>([
-  'occupied',
-  'vacant',
-  'reserved',
-  'under_fit_out',
-]);
+/** Les statuts que la base admet : l'énumération de `destination.occupancy_status`. */
+const VALID_STATUSES = new Set<string>(
+  parseColumnSpec(tableColumns('destination')?.['occupancy_status'] ?? '=').values,
+);
 
 export type OccupancyLineResult = {
   readonly row: number;
@@ -88,6 +83,23 @@ function findNodeForUnit(
   return match?.id ?? null;
 }
 
+/** Le premier défaut d'une ligne : guillemet non refermé, puis cellule par cellule. */
+function rowFault(
+  unterminated: boolean,
+  colIndex: ReadonlyMap<string, number>,
+  get: (f: string) => string,
+  maxChars: number,
+): string | null {
+  if (unterminated) return 'unterminated_quote';
+  for (const field of colIndex.keys()) {
+    const fault = cellFault(get(field), maxChars);
+    if (fault !== null) return `${field} ${fault}`;
+  }
+  const unitCode = get('unit_code');
+  const bound = unitCode === '' ? null : textFault(unitCode, FIELD_BOUNDS['footprint.unit_code']);
+  return bound === null ? null : `unit_code ${bound}`;
+}
+
 function isValidDate(s: string): boolean {
   if (s === '') return true;
   return /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s));
@@ -96,26 +108,17 @@ function isValidDate(s: string): boolean {
 export function importOccupancy(
   site: SiteData,
   csvContent: string,
+  limits: CsvLimits,
 ): Outcome<OccupancyImportReport> {
-  const cleaned = stripBom(csvContent);
-  const rawLines = cleaned.split(/\r?\n/).filter((l) => l.trim() !== '');
-
-  if (rawLines.length === 0) {
+  const read = readCsv(csvContent, limits);
+  if (!read.ok) {
     return {
       ok: false,
-      findings: [{
-        code: 'IMPORT.EMPTY_FILE',
-        severity: 'blocking',
-        entity: null,
-        params: {},
-        ruleRef: null,
-      }],
+      findings: [{ code: read.code, severity: 'blocking', entity: null, params: read.params, ruleRef: null }],
     };
   }
 
-  const headerLine = rawLines[0] as string;
-  const separator = detectSeparator(headerLine);
-  const headers = parseCsvLine(headerLine, separator);
+  const headers = read.header;
   const columnMap = detectColumns(headers, OCCUPANCY_ALIASES, REQUIRED_FIELDS);
 
   if (!columnMap) {
@@ -141,14 +144,26 @@ export function importOccupancy(
   const lines: OccupancyLineResult[] = [];
   const seenCodes = new Set<string>();
 
-  for (let i = 1; i < rawLines.length; i++) {
-    const line = rawLines[i] as string;
-    const fields = parseCsvLine(line, separator);
-    const row = i + 1;
+  for (const record of read.rows) {
+    const row = record.line;
     const rowFindings: Finding[] = [];
 
-    const get = (f: string): string =>
-      (fields[colIndex.get(f) ?? -1] ?? '').trim();
+    const get = (f: string): string => cellOf(record.fields, colIndex.get(f));
+
+    // Lot 4 de l'audit (A6.3) : chaque cellule passe le contrôle de texte de
+    // la saisie, et le code d'unité la borne que le cahier lui fixe (M3, partie M).
+    const fault = rowFault(record.line === read.unterminatedLine, colIndex, get, limits.maxChars);
+    if (fault !== null) {
+      rowFindings.push({
+        code: 'IMPORT.ROW_INVALID',
+        severity: 'warning',
+        entity: null,
+        params: { row, reason: fault },
+        ruleRef: null,
+      });
+      lines.push({ row, status: 'rejected', entry: null, findings: rowFindings });
+      continue;
+    }
 
     const unitCode = get('unit_code');
     const building = get('building');
@@ -241,7 +256,7 @@ export function importOccupancy(
   return {
     ok: true,
     value: {
-      total_rows: rawLines.length - 1,
+      total_rows: read.rows.length,
       imported: lines.filter((l) => l.status === 'imported').length,
       pending: lines.filter((l) => l.status === 'pending').length,
       rejected: lines.filter((l) => l.status === 'rejected').length,

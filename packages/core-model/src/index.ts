@@ -366,6 +366,18 @@ export {
 } from './plan-legend.js';
 export type { LegendEntry } from './plan-legend.js';
 export { escapeXmlText, escapeXmlAttr } from './xml-escape.js';
+export { escapeCsvCell } from './csv-escape.js';
 export { validateSvg } from './svg/svg-validate.js';
 export type { SvgLimits, SvgRefusal, SvgValidation } from './svg/svg-validate.js';
 export type { SvgProfile } from './svg/svg-allowlist.js';
+export {
+  TEXT_FAULTS, normalizeText, charLength, characterFault, textFault, textInput,
+} from './input/text-input.js';
+export type { TextFault, TextBounds } from './input/text-input.js';
+export { FIELD_BOUNDS } from './input/field-bounds.js';
+export type { BoundedField } from './input/field-bounds.js';
+export {
+  COLUMN_KINDS, parseColumnSpec, readRowSchema, writeRowSchema,
+} from './input/column-spec.js';
+export type { ColumnKind, ColumnSpec, TableColumns } from './input/column-spec.js';
+export { INPUT_COLUMNS, tableColumns } from './input/input-columns.js';

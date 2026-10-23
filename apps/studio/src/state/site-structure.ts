@@ -14,11 +14,13 @@
  * inventée, et elle décide de la longueur des liaisons verticales (M01.S6).
  */
 import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
-import { buildCommand, roundMetres } from '@azimut/core-model';
+import {
+  buildCommand, roundMetres, FIELD_BOUNDS, normalizeText, textFault, charLength,
+} from '@azimut/core-model';
 
 /** M1bis : « Nom | texte | requis, 1 à 80 caractères, unique par site ». */
-export const BUILDING_NAME_MIN = 1;
-export const BUILDING_NAME_MAX = 80;
+export const BUILDING_NAME_MIN = FIELD_BOUNDS['building.name'].min;
+export const BUILDING_NAME_MAX = FIELD_BOUNDS['building.name'].max;
 
 export type BuildingDraft = {
   readonly name: string;
@@ -104,9 +106,11 @@ function checkName(
   min: number,
   max: number,
 ): readonly Finding[] {
-  const trimmed = name.trim();
-  if (trimmed.length < min || trimmed.length > max) {
-    return [finding('DATA.NAME_REQUIRED', { length: trimmed.length, min, max })];
+  // Lot 4 de l'audit (A6.3) : normaliser, puis refuser.
+  const trimmed = normalizeText(name);
+  const fault = textFault(trimmed, { min, max });
+  if (fault !== null) {
+    return [finding('DATA.NAME_REQUIRED', { length: charLength(trimmed), min, max, fault })];
   }
   const key = normalise(trimmed);
   return existing.some(other => normalise(other) === key)
@@ -130,7 +134,7 @@ export function acceptBuilding(
   return {
     ok: true,
     value: {
-      name: draft.name.trim(),
+      name: normalizeText(draft.name),
       independentAccess: draft.independentAccess,
       defaultEdgeWidthM: draft.defaultEdgeWidthM === null
         ? null
@@ -165,7 +169,7 @@ export function acceptLevel(
   return {
     ok: true,
     value: {
-      name: draft.name.trim(),
+      name: normalizeText(draft.name),
       ordinal: draft.ordinal ?? 0,
       // M1bis : « Altitude | numérique, mètres | requise, relative à
       // l'altitude de référence du site ». Aucune valeur par défaut : une
@@ -306,7 +310,7 @@ export function renameCommands(
     timestamp: write.timestamp,
     groupKey: `rename:${table}:${id}`,
     before: { name: before },
-    after: { name: after.trim() },
+    after: { name: normalizeText(after) },
   });
   return built.ok
     ? { ok: true, value: [built.value], warnings: [] }

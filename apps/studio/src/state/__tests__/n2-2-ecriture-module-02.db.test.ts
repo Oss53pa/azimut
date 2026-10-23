@@ -325,27 +325,32 @@ describe('M02.W4 et M02.W9 tenues par la base, et non par l’appelant', () => {
     if (!applied.ok) throw new Error(JSON.stringify(applied.findings));
   });
 
-  function rawLine(id: string, over: Readonly<Record<string, unknown>>): EntityCommand {
-    const out = buildCommand({
+  /**
+   * Une ligne écrite telle quelle, sans passer par `buildCommand` : ces essais
+   * éprouvent la base, qui ne suppose pas que l'appelant a filtré. Le modèle
+   * refuse lui-même deux de ces lignes depuis le lot 4, ce qui est vérifié.
+   */
+  function rawLine(id: string, over: Readonly<Record<string, string | number | boolean | null>>): EntityCommand {
+    return {
       operation: 'create', module: '02-wayfinding', table: 'message_line',
-      id, org_id: ORG,
+      id, org_id: ORG, before: null,
       after: {
         id, org_id: ORG, schedule_id: SCHEDULE, support_id: SUPPORT,
         face_index: 0, block_index: 0, content: '{}', pictogram_id: null,
         direction: 'ahead', information_level: 2, decision_point_id: NODE,
         stale: false, excluded: false, exclusion_reason: null,
         ...over,
-      } as Readonly<Record<string, string | number | boolean | null>>,
-      timestamp: T,
-    });
-    if (!out.ok) throw new Error(JSON.stringify(out.findings));
-    return out.value;
+      },
+      timestamp: T, groupKey: null,
+    };
   }
 
   it('refuse une ligne sans point de décision (M02.W4)', async () => {
     const applied = await applyCommands(db, { userId: ALICE }, [
       rawLine('a2000000-0000-0000-0000-000000000241', { decision_point_id: null }),
     ]);
+    expect(buildCommand(rawLine('a2000000-0000-0000-0000-000000000241', { decision_point_id: null })).ok)
+      .toBe(false);
     expect(applied.ok).toBe(false);
   });
 
@@ -362,6 +367,7 @@ describe('M02.W4 et M02.W9 tenues par la base, et non par l’appelant', () => {
     const applied = await applyCommands(db, { userId: ALICE }, [
       rawLine('a2000000-0000-0000-0000-000000000243', { direction: 'nord' }),
     ]);
+    expect(buildCommand(rawLine('a2000000-0000-0000-0000-000000000243', { direction: 'nord' })).ok).toBe(false);
     expect(applied.ok).toBe(false);
   });
 });

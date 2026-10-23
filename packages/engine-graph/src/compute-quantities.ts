@@ -1,5 +1,5 @@
 import type { SiteData, Outcome, Finding } from '@azimut/core-model';
-import { codePointCompare } from '@azimut/core-model';
+import { codePointCompare, escapeCsvCell } from '@azimut/core-model';
 
 export type PlacedSupport = {
   readonly id: string;
@@ -229,13 +229,6 @@ const CSV_LABELS: Readonly<Record<CsvLang, CsvLabels>> = {
   },
 };
 
-function escapeCsvField(value: string): string {
-  if (value.includes(';') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
-
 export function quantityReportToCsv(
   report: QuantityReport,
   lang: CsvLang = 'fr',
@@ -244,7 +237,7 @@ export function quantityReportToCsv(
   const lines: string[] = [];
 
   lines.push(
-    [l.type, l.typeName, l.count, l.faces].map(escapeCsvField).join(';'),
+    [l.type, l.typeName, l.count, l.faces].map(cell => escapeCsvCell(cell)).join(';'),
   );
   const sortedTypes = [...report.by_type].sort((a, b) =>
     codePointCompare(a.support_type_key, b.support_type_key),
@@ -257,14 +250,14 @@ export function quantityReportToCsv(
         String(t.count),
         String(t.face_count),
       ]
-        .map(escapeCsvField)
+        .map(cell => escapeCsvCell(cell))
         .join(';'),
     );
   }
 
   lines.push('');
   lines.push(
-    [l.building, l.count].map(escapeCsvField).join(';'),
+    [l.building, l.count].map(cell => escapeCsvCell(cell)).join(';'),
   );
   const sortedBuildings = [...report.by_building].sort((a, b) =>
     codePointCompare(a.building_id, b.building_id),
@@ -272,14 +265,14 @@ export function quantityReportToCsv(
   for (const b of sortedBuildings) {
     lines.push(
       [b.building_name, String(b.count)]
-        .map(escapeCsvField)
+        .map(cell => escapeCsvCell(cell))
         .join(';'),
     );
   }
 
   lines.push('');
   lines.push(
-    [l.level, l.count].map(escapeCsvField).join(';'),
+    [l.level, l.count].map(cell => escapeCsvCell(cell)).join(';'),
   );
   const sortedLevels = [...report.by_level].sort((a, b) =>
     codePointCompare(a.level_id, b.level_id),
@@ -287,7 +280,7 @@ export function quantityReportToCsv(
   for (const lvl of sortedLevels) {
     lines.push(
       [lvl.level_name, String(lvl.count)]
-        .map(escapeCsvField)
+        .map(cell => escapeCsvCell(cell))
         .join(';'),
     );
   }

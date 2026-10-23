@@ -297,3 +297,25 @@ describe('M1 (partie M) — le site naît avec un bâtiment et un niveau', () =>
     expect(a).toEqual(b);
   });
 });
+
+/**
+ * Lot 4 de l'audit (A6.3) : le nom est normalisé, puis refusé s'il porte ce
+ * qu'aucun nom ne doit porter. Le refus garde le code que M1 (partie M) donne au champ.
+ */
+describe('lot 4 : le nom du site, normalisé puis refusé', () => {
+  const RLO = String.fromCodePoint(0x202e);
+
+  it('refuse un forçage de direction et un caractère de contrôle', () => {
+    for (const name of [`Gare${RLO}eniL`, `Gare${String.fromCodePoint(7)}`]) {
+      const r = createSiteCommands({ ...DRAFT, name }, CONTEXT);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.findings[0]).toMatchObject({ code: 'DATA.NAME_REQUIRED' });
+    }
+  });
+
+  it('écrit le nom sous forme NFC, espaces de bord retirées', () => {
+    const r = createSiteCommands({ ...DRAFT, name: '  Gare de Genève ' }, CONTEXT);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.value.find(c => c.table === 'site')?.after?.['name']).toBe('Gare de Genève');
+  });
+});

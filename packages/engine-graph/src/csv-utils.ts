@@ -1,3 +1,5 @@
+import { normalizeText, characterFault, charLength } from '@azimut/core-model';
+
 export function normalizeDecimalSeparator(value: string): string {
   return value.replace(',', '.');
 }
@@ -37,6 +39,117 @@ export function isIsoDate(value: string): boolean {
   const d = new Date(`${value}T00:00:00Z`);
   return !Number.isNaN(d.getTime())
     && value === d.toISOString().slice(0, 10);
+}
+
+/** Un enregistrement du fichier, et la ligne physique où il commence. */
+export type CsvRecord = { readonly line: number; readonly fields: readonly string[] };
+
+/**
+ * Lot 4 de l'audit (A6.3) : les bornes d'un import de tableur. Ce sont des
+ * seuils de configuration (`import.csv.max_bytes`, `import.csv.max_rows`,
+ * `input.text.max_chars`), que l'appelant lit et transmet.
+ */
+export type CsvLimits = {
+  readonly maxBytes: number;
+  readonly maxRows: number;
+  readonly maxChars: number;
+};
+
+/**
+ * Découpe un texte en enregistrements, à la manière de la RFC 4180 : un champ
+ * entre guillemets peut porter le séparateur, un guillemet doublé et des fins
+ * de ligne. Chaque enregistrement garde la ligne physique où il commence, pour
+ * que le rapport désigne la bonne ligne. Un guillemet jamais refermé marque le
+ * dernier enregistrement (`unterminated`).
+ */
+export function parseCsvRecords(
+  text: string,
+  separator: string,
+): { readonly records: readonly CsvRecord[]; readonly unterminated: boolean } {
+  const records: CsvRecord[] = [];
+  let fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let line = 1;
+  let start = 1;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i] as string;
+    if (inQuotes) {
+      if (ch === '"' && text[i + 1] === '"') { current += '"'; i++; }
+      else if (ch === '"') inQuotes = false;
+      else { if (ch === '\n') line++; current += ch; }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === separator) {
+      fields.push(current); current = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      fields.push(current);
+      records.push({ line: start, fields });
+      fields = []; current = ''; line++; start = line;
+    } else {
+      current += ch;
+    }
+  }
+  if (current !== '' || fields.length > 0 || inQuotes) {
+    fields.push(current);
+    records.push({ line: start, fields });
+  }
+  return { records, unterminated: inQuotes };
+}
+
+export type CsvRead =
+  | {
+    readonly ok: true;
+    readonly header: readonly string[];
+    readonly rows: readonly CsvRecord[];
+    /** La ligne du dernier enregistrement, si son guillemet n'est jamais refermé. */
+    readonly unterminatedLine: number | null;
+  }
+  | { readonly ok: false; readonly code: 'IMPORT.EMPTY_FILE' | 'IMPORT.FILE_TOO_LARGE';
+    readonly params: Readonly<Record<string, number>> };
+
+/**
+ * Lit un import de tableur dans ses bornes : taille, puis nombre de lignes.
+ * Un fichier au-delà est refusé en entier, sans lecture partielle. Les
+ * enregistrements entièrement vides sont ignorés.
+ */
+export function readCsv(content: string, limits: CsvLimits): CsvRead {
+  const bytes = new TextEncoder().encode(content).length;
+  if (bytes > limits.maxBytes) {
+    return { ok: false, code: 'IMPORT.FILE_TOO_LARGE', params: { bytes, max_bytes: limits.maxBytes } };
+  }
+  const cleaned = stripBom(content);
+  const firstLine = cleaned.split(/\r?\n/, 1)[0] ?? '';
+  const { records, unterminated } = parseCsvRecords(cleaned, detectSeparator(firstLine));
+  const kept = records.filter(r => r.fields.some(f => f.trim() !== ''));
+  const [header, ...rows] = kept;
+  if (header === undefined) return { ok: false, code: 'IMPORT.EMPTY_FILE', params: {} };
+  if (rows.length > limits.maxRows) {
+    return { ok: false, code: 'IMPORT.FILE_TOO_LARGE', params: { rows: rows.length, max_rows: limits.maxRows } };
+  }
+  const last = kept[kept.length - 1];
+  return {
+    ok: true,
+    header: header.fields,
+    rows,
+    unterminatedLine: unterminated && last !== undefined ? last.line : null,
+  };
+}
+
+/**
+ * Le motif de refus d'une cellule normalisée, ou null : le même contrôle de
+ * texte que la saisie et que la base (caractères, forme NFC, plafond).
+ */
+export function cellFault(value: string, maxChars: number, multiline = false): string | null {
+  const fault = characterFault(value, multiline);
+  if (fault !== null) return fault;
+  return charLength(value) > maxChars ? 'too_long' : null;
+}
+
+/** La cellule d'un enregistrement, normalisée (espaces de bord, NFC). */
+export function cellOf(fields: readonly string[], index: number | undefined): string {
+  return normalizeText(fields[index ?? -1] ?? '');
 }
 
 export function parseCsvLine(line: string, separator: string): string[] {
