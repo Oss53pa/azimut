@@ -1,4 +1,4 @@
--- J3.4 — la couche d'esquisse : réfléchir sur le plan avant de modéliser.
+-- J3.4, la couche d'esquisse : réfléchir sur le plan avant de modéliser.
 --
 -- Les colonnes de J3.4, et celles que la règle générale de A5 donne à toute
 -- table métier : `updated_at`, et `deleted_at` puisque l'utilisateur retire un

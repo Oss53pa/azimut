@@ -1,4 +1,4 @@
--- H8 — le coût estimé d'un ordre de travaux passe en unité mineure entière
+-- H8 : le coût estimé d'un ordre de travaux passe en unité mineure entière
 -- (proposition de schéma, 3.4).
 --
 -- A5.7 déclare `estimated_cost numeric`, H8 impose l'entier d'unité mineure
@@ -6,7 +6,7 @@
 -- l'utilisateur du 26/09/2026 : H8 fait foi.
 --
 -- Transformation de données existantes (A2.2 nº 7), décidée. Chaque montant
--- est multiplié par 10 puissance l'exposant ISO 4217 de sa devise — pas par
+-- est multiplié par 10 puissance l'exposant ISO 4217 de sa devise, pas par
 -- cent partout : le franc CFA n'a pas de sous-unité. La migration refuse
 -- plutôt que d'approcher :
 --   - une devise absente de la table ci-dessous (exposant inconnu ici) ;
@@ -22,7 +22,7 @@
 -- ligne. FORCE est levé le temps de la recopie et rétabli avant la fin.
 --
 -- Atomicité : toute la migration tient dans un seul bloc DO, donc une seule
--- transaction, que le lanceur en ouvre une ou non — la CI applique chaque
+-- transaction, que le lanceur en ouvre une ou non, la CI applique chaque
 -- fichier par `psql -f`, sans transaction englobante. Un échec ne laisse ni
 -- colonne à moitié remplie ni FORCE levé, et la table des exposants, créée
 -- ON COMMIT DROP, vit jusqu'à la fin du bloc.

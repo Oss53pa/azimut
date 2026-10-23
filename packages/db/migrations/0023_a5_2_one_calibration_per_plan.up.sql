@@ -1,4 +1,4 @@
--- A5.2 — un fond de plan porte un calage, pas deux.
+-- A5.2 : un fond de plan porte un calage, pas deux.
 --
 -- Le modèle le dit depuis le début : « chacun est calé au plus une fois ».
 -- Rien ne l'empêchait. Deux calages du même fond donneraient deux conversions
@@ -7,7 +7,7 @@
 --
 -- Recaler un fond (M01.S9) met cette ligne à jour ; cela n'en ajoute pas une
 -- seconde. `calibrated_at` reste alors la date à laquelle le calage a été
--- établi, et ne suit pas la mise à jour — sinon « le premier calage » de M01.S1
+-- établi, et ne suit pas la mise à jour : sinon « le premier calage » de M01.S1
 -- se déplacerait à chaque recalage, et le contrôle du repère site
 -- (CALIB.ORIGIN_MISMATCH) désignerait un autre fond que celui qui a fixé le
 -- repère.

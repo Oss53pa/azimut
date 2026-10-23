@@ -1,4 +1,4 @@
--- A5.7 — la divergence se rattache au support, ou au nœud d'un point non
+-- A5.7 : la divergence se rattache au support, ou au nœud d'un point non
 -- couvert. Décision du 25/09/2026 sur la proposition de schéma (3.2),
 -- options 1 et 3 :
 --

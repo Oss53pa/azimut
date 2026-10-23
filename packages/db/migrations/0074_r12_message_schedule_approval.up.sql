@@ -1,4 +1,4 @@
--- R12 et H11 — `message_schedule_approval`, la trace des décisions sur un
+-- R12 et H11, `message_schedule_approval`, la trace des décisions sur un
 -- tableau des messages : approbation ou rejet.
 --
 -- H11 : « message_schedule_approval (id, org_id, schedule_id, user_id,

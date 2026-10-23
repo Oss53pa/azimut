@@ -1,4 +1,4 @@
--- J4 — l'annotation en révision : une remarque de relecture portée sur une
+-- J4, l'annotation en révision : une remarque de relecture portée sur une
 -- ligne du tableau des messages, une face, un support ou une zone, dans le
 -- circuit de validation (R7.4).
 --
@@ -11,7 +11,7 @@
 --   · trois états, ouverte, traitée, refusée ; une annotation ouverte bloque
 --     la clôture d'une revue (REVIEW.ANNOTATION_OPEN) ;
 --   · le texte se saisit au clavier ; le tracé au stylet, facultatif, est
---     gardé tel quel, comme l'esquisse (J0) — aucune reconnaissance
+--     gardé tel quel, comme l'esquisse (J0) : aucune reconnaissance
 --     d'écriture, décision de l'utilisateur ;
 --   · l'auteur est pris en base ; le fil de réponses a sa table.
 --

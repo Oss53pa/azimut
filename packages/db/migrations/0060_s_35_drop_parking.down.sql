@@ -32,7 +32,7 @@ CREATE INDEX idx_parking_org ON azimut.parking (org_id);
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.parking
   FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
 
--- A6.1 — toute table portant `org_id` porte sa politique, et elle est forcée.
+-- A6.1 : toute table portant `org_id` porte sa politique, et elle est forcée.
 ALTER TABLE azimut.parking ENABLE ROW LEVEL SECURITY;
 ALTER TABLE azimut.parking FORCE ROW LEVEL SECURITY;
 

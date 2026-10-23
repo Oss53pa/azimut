@@ -1,4 +1,4 @@
--- A5.11 — un fait du site peut désigner l'objet sur lequel il porte.
+-- A5.11 : un fait du site peut désigner l'objet sur lequel il porte.
 --
 -- « target_kind et target_id sont facultatifs. Renseignés, le fait porte sur
 -- cet objet, par exemple la capacité annoncée d'un parking donné ; vides, il

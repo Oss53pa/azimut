@@ -1,8 +1,8 @@
--- A5.2 — le calage décrit l'image, en pixels de l'image.
+-- A5.2 : le calage décrit l'image, en pixels de l'image.
 --
 -- Les deux colonnes portaient une origine en mètres : la position, dans le
--- repère site, de l'origine du fond. A5.2 décrit l'inverse — « origin_x_px,
--- origin_y_px : position, dans l'image, de l'origine du repère site » — et
+-- repère site, de l'origine du fond. A5.2 décrit l'inverse (« origin_x_px,
+-- origin_y_px : position, dans l'image, de l'origine du repère site ») et
 -- range ces colonnes parmi les seules en pixels que la base admette (M01.S2).
 --
 -- Ce n'est donc pas un renommage. Renommer aurait laissé des mètres sous un

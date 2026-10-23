@@ -1,4 +1,4 @@
--- H8 — les tables du module 09, budget (famille C de la proposition de
+-- H8 : les tables du module 09, budget (famille C de la proposition de
 -- schéma, 5.5).
 --
 -- Ni A5 ni la partie B ne définissent ces entités ; la proposition les tire

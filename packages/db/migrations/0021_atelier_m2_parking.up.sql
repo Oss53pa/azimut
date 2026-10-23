@@ -1,8 +1,8 @@
 -- Stationnement.
 --
 -- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
--- foi. A5.11 porte les faits du stationnement — « capacité annoncée d'un
--- parking » y est l'exemple même d'un fait du site — et ne décrit pas ces
+-- foi. A5.11 porte les faits du stationnement (« capacité annoncée d'un
+-- parking » y est l'exemple même d'un fait du site) et ne décrit pas ces
 -- objets. Le nom du fichier garde sa forme d'origine, pour la raison exposée
 -- dans ORDRE.md.
 --

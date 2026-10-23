@@ -1,4 +1,4 @@
--- A5.2 — la nature `parking_space` entre dans l'énumération des empreintes.
+-- A5.2 : la nature `parking_space` entre dans l'énumération des empreintes.
 --
 -- Section S8, règle S-35 : « Une place de stationnement est une empreinte de
 -- nature `parking_space`. Un parking est une zone de nature `parking`. Aucune

@@ -1,4 +1,4 @@
--- A5.6 — les colonnes héritées de support_face et support_content_block
+-- A5.6 : les colonnes héritées de support_face et support_content_block
 -- deviennent facultatives.
 --
 -- A5.6 identifie une face par `face_index` et un bloc par `block_index` ;

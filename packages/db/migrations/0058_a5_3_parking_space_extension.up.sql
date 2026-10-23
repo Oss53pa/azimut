@@ -1,4 +1,4 @@
--- A5.3 — `parking_space` devient l'extension d'une empreinte.
+-- A5.3: `parking_space` devient l'extension d'une empreinte.
 --
 -- ```sql
 -- parking_space (id, org_id, footprint_id, space_kind, row_label)
@@ -14,11 +14,11 @@
 -- statut, sa source et un rattachement à un parking. La section S8 a tranché :
 -- « une place de stationnement est une empreinte de nature `parking_space` »
 -- (S-35). La géométrie revient donc à l'empreinte, le rattachement à la zone
--- qui déclare ses empreintes, et le statut à personne — A5.2 n'en donne aucun
+-- qui déclare ses empreintes, et le statut à personne : A5.2 n'en donne aucun
 -- à `footprint`, et A5.11 pose le statut d'un fait sur `site_fact`.
 --
 -- **Migration destructrice.** Quatre colonnes disparaissent, dont deux qui ne
--- se reconstruisent pas : une géométrie de place et sa source. A2.2, point 7 —
+-- se reconstruisent pas : une géométrie de place et sa source. A2.2, point 7 :
 -- la table a été vérifiée vide avant ce commit, sur le seul instantané
 -- atteignable, et aucun chemin d'écriture du dépôt n'y insère. La migration
 -- s'arrête d'elle-même si elle trouve une ligne, ci-dessous.
@@ -28,7 +28,7 @@
 -- ensuite la renommer laisserait deux noms pour une table, et le second
 -- porterait une cicatrice que rien n'explique.
 
--- A2.2, point 7 — l'arrêt se produit avant toute modification.
+-- A2.2, point 7 : l'arrêt se produit avant toute modification.
 DO $$
 DECLARE
   lignes bigint;

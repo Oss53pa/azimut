@@ -4,8 +4,8 @@ Ce fichier fixe l'ordre. Il fait foi, et non le tri des noms de fichiers.
 
 ## Pourquoi il existe
 
-Quatre numéros sont portés par deux migrations chacun — `0018`, `0019`, `0020`
-et `0021` — parce que deux travaux ont avancé en parallèle et se sont rejoints
+Quatre numéros sont portés par deux migrations chacun (`0018`, `0019`, `0020`
+et `0021`) parce que deux travaux ont avancé en parallèle et se sont rejoints
 à la fusion. Le tri lexicographique les départage de fait, mais rien ne le
 disait, et un outil qui trierait autrement appliquerait le schéma dans un ordre
 différent.
@@ -28,14 +28,14 @@ liste ci-dessous. Il s'exécute une fois, avant `0001`, sur une base neuve qui
 n'est pas hébergée par une plateforme fournissant un schéma `auth`.
 
 Motif : `0002` et `0006` créent trois clés étrangères vers `auth.users`, que
-`0024` retire au titre de A2.4 — mais `0024` passe après, et sur une base neuve
+`0024` retire au titre de A2.4, mais `0024` passe après, et sur une base neuve
 `0002` échoue avant qu'elle n'ait la parole. Réécrire `0002` et `0006`
 corrigerait la cause, au prix de faire diverger toute base à jour de son
 registre d'application. Le préalable coûte moins cher et ne casse rien.
 
 Sur une plateforme qui fournit `auth`, ne rien exécuter : ce fichier ne doit
 jamais toucher la table de comptes d'un hébergeur, et `0024` ne la supprime pas
-non plus — elle n'en retire que les clés étrangères.
+non plus, elle n'en retire que les clés étrangères.
 
 ## L'ordre
 
@@ -322,7 +322,7 @@ DATABASE_URL='postgres://azimut@127.0.0.1:54332/azimut' pnpm seed:reference
 AZIMUT_TEST_DATABASE_URL='postgres://azimut@127.0.0.1:54332/azimut' pnpm test:db
 ```
 
-`pnpm seed:reference` verse les référentiels globaux depuis leurs fichiers —
+`pnpm seed:reference` verse les référentiels globaux depuis leurs fichiers,
 aujourd'hui les pays de Q9. Il s'exécute dans tous les environnements, à chaque
 déploiement, à la différence de `db:reset` qui refuse hors du local : un
 référentiel absent en production ferait refuser des créations de site pour une
@@ -362,7 +362,7 @@ plateforme, pas du produit.
 
 Le rôle n'a pas de mot de passe : la base de développement est jointe en
 `trust` depuis le bouclage. Sur une installation qui en demande un, il se pose
-localement et se porte dans `AZIMUT_TEST_POSTGREST_DB_URI` — jamais dans le
+localement et se porte dans `AZIMUT_TEST_POSTGREST_DB_URI` : jamais dans le
 dépôt, que A2.4 et A6.3 interdisent l'un et l'autre.
 
 ```
@@ -380,6 +380,6 @@ secret par défaut signerait avec une valeur connue de tout lecteur du dépôt.
 Sans `AZIMUT_TEST_POSTGREST`, la suite d'étanchéité se saute : c'est la
 tolérance d'un poste qui n'a pas le binaire, et elle s'arrête là. Une chaîne
 dont c'est le travail pose en plus `AZIMUT_REQUIRE_POSTGREST=1`, et un binaire
-manquant la fait alors échouer au lieu de la sauter — un essai qu'aucune chaîne
+manquant la fait alors échouer au lieu de la sauter : un essai qu'aucune chaîne
 n'exécute n'existe pas. La chaîne d'A13.2 le pose, et installe PostgREST
 12.2.3, version figée et empreinte vérifiée.

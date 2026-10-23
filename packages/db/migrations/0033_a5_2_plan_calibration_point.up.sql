@@ -1,8 +1,8 @@
--- A5.2 — les points de calage d'une source de plan.
+-- A5.2 : les points de calage d'une source de plan.
 --
 -- « Les points de calage permettent de rejouer le calage à l'identique. »
--- Sans eux, M2 critère 2 — « Le calage rejoué sur les mêmes points donne
--- exactement le même résultat » — est une promesse invérifiable : la base
+-- Sans eux, M2 critère 2 (« Le calage rejoué sur les mêmes points donne
+-- exactement le même résultat ») est une promesse invérifiable : la base
 -- garde l'échelle obtenue, jamais la mesure qui l'a produite.
 --
 -- Les coordonnées sont en pixels de l'image, et c'est la seconde des deux
@@ -10,7 +10,7 @@
 -- site.
 --
 -- `ordinal` ordonne les points, et l'unicité par calage empêche deux points
--- de porter le même rang — sans quoi « les mêmes points » n'aurait pas de
+-- de porter le même rang : sans quoi « les mêmes points » n'aurait pas de
 -- sens.
 
 CREATE TABLE azimut.plan_calibration_point (

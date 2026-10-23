@@ -1,4 +1,4 @@
--- A12.3 et M00.PL3 — `audit_log` en insertion seule, garanti en base.
+-- A12.3 et M00.PL3 : `audit_log` en insertion seule, garanti en base.
 --
 -- « Aucune modification et aucune suppression ne sont possibles, pour aucun
 -- rôle, administration comprise. » Jusqu'ici le journal n'en avait que le

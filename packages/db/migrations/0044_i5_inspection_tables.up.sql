@@ -1,4 +1,4 @@
--- I5.6 — les tournées d'inspection du module 08 (famille C de la proposition
+-- I5.6 : les tournées d'inspection du module 08 (famille C de la proposition
 -- de schéma, 5.4).
 --
 -- Ni A5 ni la partie B ne définissent ces entités ; la proposition les tire

@@ -1,4 +1,4 @@
--- A6.1 — un travail porte l'identité de son demandeur.
+-- A6.1 : un travail porte l'identité de son demandeur.
 --
 -- Le service de compilation lit la base sous cloisonnement forcé (0025). Sans
 -- identité, il ne voit rien : `loadSiteData` levait « organization not

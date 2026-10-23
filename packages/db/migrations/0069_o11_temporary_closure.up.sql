@@ -1,9 +1,9 @@
--- O11 — fermetures temporaires.
+-- O11: fermetures temporaires.
 --
 -- « Une fermeture temporaire porte une ou plusieurs arêtes, une date de début,
 -- une date de fin, un motif. » Modèle d'O11 :
 --   temporary_closure (id, org_id, site_id, edge_ids jsonb, from_at, to_at, reason)
--- Propriétaire : module 01, le socle (Q2) — elle modifie la disponibilité des
+-- Propriétaire : module 01, le socle (Q2), elle modifie la disponibilité des
 -- arêtes, qui sont des données du socle.
 --
 -- Les bornes sont des instants locaux du site (O4 : « plages de fermeture »

@@ -1,4 +1,4 @@
--- N2.2 — les six tables du module 02, wayfinding.
+-- N2.2 : les six tables du module 02, wayfinding.
 --
 -- Le module que L6 déclare non optionnel, et dont N4.6 fait le préalable dur
 -- de la signalétique, n'avait aucune donnée persistée : 843 lignes de moteur
@@ -101,7 +101,7 @@ CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.message_schedule
 
 -- ── message_line ──────────────────────────────────────────────────────────
 -- `decision_point_id` est NOT NULL : M02.W4, « une ligne sans justification est
--- une anomalie bloquante », et N2.7 critère 4 va plus loin — une telle ligne
+-- une anomalie bloquante », et N2.7 critère 4 va plus loin, une telle ligne
 -- ne peut pas être créée. La contrainte le rend vrai en base, pas seulement
 -- dans le moteur.
 --

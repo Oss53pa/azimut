@@ -1,4 +1,4 @@
--- A2.4 — retirer la dépendance à la plateforme d'hébergement.
+-- A2.4 : retirer la dépendance à la plateforme d'hébergement.
 --
 -- « Utiliser une fonctionnalité de la plateforme d'hébergement non disponible
 -- en installation autonome » est une interdiction permanente. Le socle en
@@ -6,13 +6,13 @@
 --
 --   · trois clés étrangères vers `auth.users`, table propre à la plateforme.
 --     Neuf migrations sur vingt-sept échouaient sans elle, en cascade, sur une
---     base autonome — vérifié, note du préalable K4 nº 7 ;
+--     base autonome : vérifié, note du préalable K4 nº 7 ;
 --   · la fonction `auth.uid()`, dont dépend toute politique de cloisonnement.
 --
 -- A5.1 spécifie `membership (id, org_id, user_id, role, created_at)` et ne
 -- donne aucune cible à `user_id`. Retirer ces renvois aligne donc le schéma
 -- sur le cahier, au lieu de l'en écarter, et n'invente aucune table de
--- comptes — ce qui relèverait de A2.2-2.
+-- comptes : ce qui relèverait de A2.2-2.
 --
 -- Aucune ligne n'est touchée : retirer une contrainte ne transforme pas une
 -- donnée (A2.2-7). Les colonnes, leur type et leur caractère obligatoire sont

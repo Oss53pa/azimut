@@ -1,4 +1,4 @@
--- T-2.14: Approval table — insert-only, no modification even by admin
+-- T-2.14: Approval table, insert-only, no modification even by admin
 
 CREATE TABLE azimut.approval (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -13,7 +13,7 @@ CREATE TABLE azimut.approval (
 CREATE INDEX idx_approval_org ON azimut.approval(org_id);
 CREATE INDEX idx_approval_proof ON azimut.approval(proof_id);
 
--- Block UPDATE — insert-only enforcement
+-- Block UPDATE: insert-only enforcement
 CREATE FUNCTION azimut.block_approval_modification()
 RETURNS trigger
 SECURITY DEFINER

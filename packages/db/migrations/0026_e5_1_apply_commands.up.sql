@@ -1,14 +1,14 @@
--- E5.1 et M12.A2 — le chemin d'écriture, atteignable depuis le poste.
+-- E5.1 et M12.A2 : le chemin d'écriture, atteignable depuis le poste.
 --
 -- `applyCommands` (packages/db/src/write-path.ts) est le chemin d'écriture
 -- côté serveur. Le poste, lui, parle à PostgREST et non à PostgreSQL : il ne
 -- peut pas ouvrir de transaction. Or M1 (partie M) veut qu'un site naisse avec
--- un bâtiment et un niveau — « un site sans niveau est un état inutile » — et
+-- un bâtiment et un niveau (« un site sans niveau est un état inutile ») et
 -- trois requêtes séparées laisseraient ce cas se produire au moindre incident.
 --
 -- A3.1 range les « fonctions serveur » parmi les tâches courtes : cette
--- fonction en est une. Elle ne porte aucune logique métier — les contrôles de
--- M1 sont tenus par l'atelier, avant l'appel — et n'applique que les trois
+-- fonction en est une. Elle ne porte aucune logique métier (les contrôles de
+-- M1 sont tenus par l'atelier, avant l'appel) et n'applique que les trois
 -- opérations élémentaires du modèle de commande.
 --
 -- Elle n'est pas SECURITY DEFINER : elle s'exécute avec les droits et les

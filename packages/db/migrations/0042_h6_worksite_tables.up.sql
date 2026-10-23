@@ -1,4 +1,4 @@
--- H6 — les tables du module 07, chantier et pose (famille C de la
+-- H6 : les tables du module 07, chantier et pose (famille C de la
 -- proposition de schéma, 5.3).
 --
 -- Ni A5 ni la partie B ne définissent ces entités ; la proposition les tire

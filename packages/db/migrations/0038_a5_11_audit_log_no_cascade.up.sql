@@ -1,4 +1,4 @@
--- A5.11 et A12.3 — `audit_log` refuse la suppression de son parent.
+-- A5.11 et A12.3 : `audit_log` refuse la suppression de son parent.
 --
 -- Troisième et dernière des tables en insertion seule aujourd'hui créées.
 -- `message_schedule_approval`, quatrième table nommée par A12.3, n'existe pas

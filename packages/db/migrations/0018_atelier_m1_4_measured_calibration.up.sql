@@ -1,4 +1,4 @@
--- Calage à n points, ajusté et mesuré — section M2 de la partie M.
+-- Calage à n points, ajusté et mesuré : section M2 de la partie M.
 --
 -- Écrite d'après un document antérieur à la consolidation, qui ne fait plus
 -- foi ; la méthode est depuis spécifiée au cahier des charges. Le nom du

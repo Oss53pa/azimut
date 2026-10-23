@@ -25,7 +25,7 @@ CREATE INDEX idx_vehicle_gate_org ON azimut.vehicle_gate (org_id);
 CREATE TRIGGER set_updated_at BEFORE UPDATE ON azimut.vehicle_gate
   FOR EACH ROW EXECUTE FUNCTION azimut.set_updated_at();
 
--- A6.1 — toute table portant `org_id` porte sa politique, et elle est forcée.
+-- A6.1 : toute table portant `org_id` porte sa politique, et elle est forcée.
 ALTER TABLE azimut.vehicle_gate ENABLE ROW LEVEL SECURITY;
 ALTER TABLE azimut.vehicle_gate FORCE ROW LEVEL SECURITY;
 

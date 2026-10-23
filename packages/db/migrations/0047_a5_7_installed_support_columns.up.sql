@@ -1,4 +1,4 @@
--- A5.7 — les colonnes de `installed_support` que la base n'avait pas
+-- A5.7, les colonnes de `installed_support` que la base n'avait pas
 -- (proposition de schéma, 3.1) : version posée, état constaté, et qui l'a
 -- relevé, quand.
 --

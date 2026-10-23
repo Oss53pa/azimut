@@ -1,4 +1,4 @@
--- A5.2 — les valeurs de `zone.kind` et de `opening.kind`.
+-- A5.2 : les valeurs de `zone.kind` et de `opening.kind`.
 --
 -- Les deux colonnes ont été créées en `text` libre par la migration 0003 :
 -- le schéma n'énumérait alors pas leurs valeurs, et en inventer aurait été

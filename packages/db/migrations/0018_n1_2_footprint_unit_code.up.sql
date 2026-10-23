@@ -1,4 +1,4 @@
--- N1.2 / N1.4 — code d'unité locative d'une empreinte.
+-- N1.2 / N1.4 : code d'unité locative d'une empreinte.
 --
 -- Requis quand la nature est « cell », unique par niveau (règle M01.S3). La
 -- colonne est nullable : une empreinte relevée avant que son code soit connu
@@ -17,7 +17,7 @@ ALTER TABLE azimut.footprint
 --
 -- Index partiel : il ne contraint que les cellules effectivement codées. La
 -- comparaison est insensible à la casse et aux espaces de bord, comme celle
--- des noms d'orientation — un lecteur de panneau ne distingue pas « C-104 »
+-- des noms d'orientation : un lecteur de panneau ne distingue pas « C-104 »
 -- de « c-104 ».
 CREATE UNIQUE INDEX uq_footprint_unit_code_per_level
   ON azimut.footprint (level_id, lower(btrim(unit_code)))

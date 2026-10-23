@@ -1,4 +1,4 @@
--- M01.S1 — date de l'opération de calage.
+-- M01.S1 : date de l'opération de calage.
 --
 -- « Le repère site est fixé au premier calage » : la règle est opposable, mais
 -- rien dans les données ne disait quel calage était le premier.

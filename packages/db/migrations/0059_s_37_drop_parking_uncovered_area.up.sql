@@ -1,4 +1,4 @@
--- S-37 — la surface non numérisée devient un fait, et sa table part.
+-- S-37 : la surface non numérisée devient un fait, et sa table part.
 --
 -- « Une surface de parking non numérisée se déclare comme telle : une empreinte
 -- de nature `parking_space` peut être marquée non numérisée, avec le nombre de
@@ -11,7 +11,7 @@
 -- source est `site_fact.source_ref`, et son statut `site_fact.status`.
 --
 -- **Ce qu'elle portait et que le fait ne porte pas** : `reason`, le motif
--- textuel — bord de page, calque absent, zone illisible. S-37 nomme « le nombre
+-- textuel, bord de page, calque absent, zone illisible. S-37 nomme « le nombre
 -- de places qu'elle est censée porter et sa source », et rien d'autre. La
 -- source d'un fait est le lieu prévu pour dire d'où vient la déclaration ; un
 -- motif libre en plus serait une colonne qu'aucune section ne demande.

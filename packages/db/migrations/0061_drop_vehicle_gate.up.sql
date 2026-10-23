@@ -1,6 +1,6 @@
 -- Retrait de `vehicle_gate` : rien ne la lit, et rien du socle ne la reprend.
 --
--- La table portait un portail ou un accès véhicule — code du plan source, rôle,
+-- La table portait un portail ou un accès véhicule : code du plan source, rôle,
 -- largeur, position, statut, source. Elle a été écrite avec le module de
 -- stationnement, avant que la section S8 ne dise ce que le socle porte du
 -- stationnement. S8 nomme deux objets, la zone et l'empreinte de place ; elle
@@ -10,8 +10,8 @@
 -- **Contrairement aux deux autres, celle-ci ne se reporte nulle part.**
 -- `parking` est devenue une zone, l'ancienne `parking_space` une extension
 -- d'empreinte ; un portail n'a ni équivalent ni remplaçant. Le besoin est réel
--- — un plan d'accueil qui montre par où l'on entre en voiture a quelque chose à
--- dire — et il est inscrit au registre des points ouverts : il reviendra avec
+-- (un plan d'accueil qui montre par où l'on entre en voiture a quelque chose à
+-- dire) et il est inscrit au registre des points ouverts : il reviendra avec
 -- les accès de livraison, qui poseront la même question et méritent une seule
 -- réponse.
 --

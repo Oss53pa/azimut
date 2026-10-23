@@ -1,7 +1,7 @@
 -- Rétablit la table des surfaces non couvertes, d'avant la règle S-37.
 --
 -- La table revient vide, et c'est tout ce que ce sens peut faire : les faits
--- `parking.undigitized_spaces` qui l'ont remplacée ne s'y reversent pas — ils
+-- `parking.undigitized_spaces` qui l'ont remplacée ne s'y reversent pas, ils
 -- ciblent une empreinte, quand la table pendait à un parking qui n'existe
 -- peut-être plus.
 --
@@ -21,7 +21,7 @@ CREATE TABLE azimut.parking_uncovered_area (
 CREATE INDEX idx_parking_uncovered_org ON azimut.parking_uncovered_area (org_id);
 CREATE INDEX idx_parking_uncovered_parking ON azimut.parking_uncovered_area (parking_id);
 
--- A6.1 — toute table portant `org_id` porte sa politique, et elle est forcée.
+-- A6.1 : toute table portant `org_id` porte sa politique, et elle est forcée.
 ALTER TABLE azimut.parking_uncovered_area ENABLE ROW LEVEL SECURITY;
 ALTER TABLE azimut.parking_uncovered_area FORCE ROW LEVEL SECURITY;
 

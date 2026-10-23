@@ -1,4 +1,4 @@
--- H4 — les tables du module 05, régie publicitaire (famille C de la
+-- H4 : les tables du module 05, régie publicitaire (famille C de la
 -- proposition de schéma, 5.1).
 --
 -- Ni A5 ni la partie B ne définissent ces entités ; la proposition les tire

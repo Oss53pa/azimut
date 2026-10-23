@@ -1,4 +1,4 @@
--- A5.3 — `graph_validation`, la trace des passages de la validation de
+-- A5.3 : `graph_validation`, la trace des passages de la validation de
 -- complétude du graphe.
 --
 -- Elle manquait, et son absence rendait la règle M02.W11 invérifiable : « Le

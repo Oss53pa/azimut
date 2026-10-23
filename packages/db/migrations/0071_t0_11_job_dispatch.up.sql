@@ -1,4 +1,4 @@
--- T-0.11 et D9.2 — la file des travaux en base, prise par le service de
+-- T-0.11 et D9.2 : la file des travaux en base, prise par le service de
 -- compilation sans lever le cloisonnement.
 --
 -- Le service prend les travaux de toutes les organisations ; sous FORCE ROW
@@ -6,8 +6,8 @@
 -- l'utilisatrice : des fonctions de prise, et rien d'autre. Le service tourne
 -- sous `azimut_compiler`, rôle sans aucun droit sur les tables. Il n'apprend
 -- de la file que l'identifiant, l'organisation, le type, le demandeur et le
--- nombre de tentatives d'un travail. Tout le reste — lecture du contenu, du
--- site, écriture du résultat, remise en file — se fait sous l'identité du
+-- nombre de tentatives d'un travail. Tout le reste (lecture du contenu, du
+-- site, écriture du résultat, remise en file) se fait sous l'identité du
 -- demandeur (0070), par les politiques ordinaires.
 --
 -- Pourquoi un second rôle. Une fonction SECURITY DEFINER s'exécute sous son

@@ -1,4 +1,4 @@
--- D11 Archive de livraison — table de persistance et extension des types de job.
+-- D11 Archive de livraison : table de persistance et extension des types de job.
 -- Additif : aucune donnée existante n'est détruite ni transformée.
 
 CREATE TABLE azimut.delivery_package (

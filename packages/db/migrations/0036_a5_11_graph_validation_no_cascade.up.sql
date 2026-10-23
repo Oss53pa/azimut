@@ -1,11 +1,11 @@
--- A5.11 et A12.3 — `graph_validation` refuse la suppression de son parent.
+-- A5.11 et A12.3 : `graph_validation` refuse la suppression de son parent.
 --
 -- A12.3 met cette table en insertion seule, garanti en base : aucune
 -- modification, aucune suppression, pour aucun rôle. A5.3 lui donnait
 -- pourtant `ON DELETE CASCADE` vers `site` et vers `organization`. Les deux
 -- ne tiennent pas ensemble : la cascade est une suppression, le déclencheur
 -- la refuse, et un site validé devenait indéboulonnable sans que rien ne dise
--- pourquoi — le refus venait d'un déclencheur, pas de la clé.
+-- pourquoi, le refus venait d'un déclencheur, pas de la clé.
 --
 -- A5.11 tranche : aucune clé étrangère vers `organization` ni vers `site` ne
 -- supprime en cascade, et les tables en insertion seule refusent la

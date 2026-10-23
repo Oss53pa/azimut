@@ -1,4 +1,4 @@
--- H5 — les tables du module 06, enseignes locataires (famille C de la
+-- H5 : les tables du module 06, enseignes locataires (famille C de la
 -- proposition de schéma, 5.2).
 --
 -- Ni A5 ni la partie B ne définissent ces entités ; la proposition les tire

@@ -1,4 +1,4 @@
--- A5.11 — aucune clé étrangère vers `organization` ni vers `site` ne supprime
+-- A5.11 : aucune clé étrangère vers `organization` ni vers `site` ne supprime
 -- en cascade.
 --
 -- Les trois migrations précédentes ont porté les tables en insertion seule,

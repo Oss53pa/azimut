@@ -1,4 +1,4 @@
--- A6.1 — rendre le cloisonnement par ligne effectif.
+-- A6.1 : rendre le cloisonnement par ligne effectif.
 --
 -- Constats du préalable K4 nº 7, établis sur une base réelle et consignés dans
 -- docs/note-prealable-k4-7-cloisonnement.md :
@@ -78,7 +78,7 @@ CREATE POLICY membership_own_rows ON azimut.membership
 --
 -- `organization` y figure : son `id` tient lieu d'org_id et elle porte déjà
 -- ses propres politiques. `rules_pack` et `rules_pack_rule` en sont exclues :
--- elles sont globales, sans org_id, et leur politique est en lecture seule —
+-- elles sont globales, sans org_id, et leur politique est en lecture seule,
 -- les forcer empêcherait le chargement d'un paquet de règles.
 DO $$
 DECLARE

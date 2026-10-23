@@ -1,7 +1,7 @@
--- A5.11 — `site_fact` alignée sur la table que la section déclare.
+-- A5.11 : `site_fact` alignée sur la table que la section déclare.
 --
 -- « site_fact (id, org_id, site_id, key, value jsonb, status, source_ref,
--- declared_by, declared_at) — status in ('existing','proposal','to_verify') ».
+-- declared_by, declared_at): status in ('existing','proposal','to_verify') ».
 --
 -- La table vient de la migration 0019, écrite d'après un document qui ne fait
 -- plus foi. La version 13 du consolidé a inscrit les faits du site en A5.11,
@@ -67,7 +67,7 @@ ALTER TABLE azimut.site_fact ADD COLUMN declared_by uuid;
 
 -- Le statut est requis : c'est tout l'objet de la colonne. Sans valeur par
 -- défaut non plus, pour la même raison qu'en A5.8 une règle absente n'est pas
--- une règle permissive — `existing` par défaut ferait passer toute proposition
+-- une règle permissive : `existing` par défaut ferait passer toute proposition
 -- pour un existant, ce que la règle interdit précisément.
 ALTER TABLE azimut.site_fact ADD COLUMN status text NOT NULL;
 

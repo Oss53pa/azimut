@@ -1,6 +1,6 @@
--- A5.8 — les sept natures de `charter_rule`, et non cinq.
+-- A5.8 : les sept natures de `charter_rule`, et non cinq.
 --
--- « charter_rule (id, org_id, charter_id, kind, params jsonb) — kind in
+-- « charter_rule (id, org_id, charter_id, kind, params jsonb): kind in
 -- ('adjacency_forbidden','min_logo_width','background_allowed','proportion',
 -- 'signature_usage','forbidden_character','max_sentence_words') ».
 --

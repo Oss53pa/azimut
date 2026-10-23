@@ -2,7 +2,7 @@
 --
 -- Ce sens-là détruit aussi, et plus lourdement : le rattachement d'une place à
 -- son empreinte disparaît, et le parking auquel la rendre n'existe plus comme
--- colonne. Une ligne ne se reconstruit pas. A2.2, point 7 — l'arrêt se produit
+-- colonne. Une ligne ne se reconstruit pas. A2.2, point 7 : l'arrêt se produit
 -- avant toute modification.
 --
 -- La migration inverse est écrite parce qu'une migration sans retour n'est pas

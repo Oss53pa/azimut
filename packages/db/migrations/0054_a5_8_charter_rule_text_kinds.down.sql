@@ -2,8 +2,8 @@
 --
 -- Le retour rétrécit la contrainte : il refuse de s'appliquer si des lignes
 -- portent l'une des deux natures qu'il retire, plutôt que d'échouer à
--- mi-course sur une contrainte non satisfaite. C'est le même garde qu'ailleurs
--- — la migration s'arrête et la question se pose à celui qui l'applique.
+-- mi-course sur une contrainte non satisfaite. C'est le même garde qu'ailleurs :
+-- la migration s'arrête et la question se pose à celui qui l'applique.
 
 DO $$
 BEGIN

@@ -1,4 +1,4 @@
--- A5.11 et A12.3 — `approval` refuse la suppression de ses parents.
+-- A5.11 et A12.3 : `approval` refuse la suppression de ses parents.
 --
 -- Même défaut que celui corrigé en 0036, et plus ancien : la table est en
 -- insertion seule depuis 0009, et ses deux clés supprimaient en cascade. Une

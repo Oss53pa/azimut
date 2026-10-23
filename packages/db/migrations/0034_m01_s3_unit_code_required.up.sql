@@ -1,9 +1,9 @@
--- M01.S3 — une empreinte de nature « cell » porte obligatoirement un code.
+-- M01.S3 : une empreinte de nature « cell » porte obligatoirement un code.
 --
 -- La migration 0018 a posé la colonne nullable et l'unicité par niveau ; le
 -- caractère requis restait tenu par le seul moteur, `DATA.UNIT_CODE_REQUIRED`.
--- A5.2 le porte au schéma — « unit_code : requis si kind = 'cell', unique par
--- niveau » — et la contrainte le rend vrai en base, pas seulement dans le
+-- A5.2 le porte au schéma (« unit_code : requis si kind = 'cell', unique par
+-- niveau ») et la contrainte le rend vrai en base, pas seulement dans le
 -- contrôle.
 --
 -- Un code fait d'espaces ne vaut pas un code : la contrainte le refuse comme

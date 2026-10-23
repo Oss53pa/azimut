@@ -1,12 +1,12 @@
--- A5.2 — une zone porte ses empreintes.
+-- A5.2 : une zone porte ses empreintes.
 --
 -- « footprint_ids : empreintes couvertes par la zone, appartenance déclarée et
 -- non calculée, comme pour la zone d'orientation de la partie H. »
 --
 -- La table `zone` n'avait ni géométrie ni liste d'empreintes. L'appartenance
 -- d'une empreinte à une zone n'était donc pas exprimable, et
--- `DATA.PARKING_SPACE_WITHOUT_ZONE` — « place de stationnement hors de toute
--- zone de nature `parking` » — n'était pas calculable. Cette colonne la rend
+-- `DATA.PARKING_SPACE_WITHOUT_ZONE` (« place de stationnement hors de toute
+-- zone de nature `parking` ») n'était pas calculable. Cette colonne la rend
 -- calculable.
 --
 -- **Déclarée, non calculée**, et la section le dit deux fois. C'est le choix
@@ -22,7 +22,7 @@
 -- même chose auraient fini par diverger.
 --
 -- **Aucune clé étrangère**, pour la raison qu'une liste en `jsonb` ne peut pas
--- en porter. La contrainte vérifie la forme — un tableau d'identifiants — non
+-- en porter. La contrainte vérifie la forme (un tableau d'identifiants) non
 -- l'existence des empreintes citées. Une empreinte supprimée laisse donc un
 -- identifiant orphelin dans la liste, et c'est aux contrôles de le voir.
 --

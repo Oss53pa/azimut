@@ -1,4 +1,4 @@
--- O4 et A5.2 — le fuseau horaire du site, requis.
+-- O4 et A5.2 : le fuseau horaire du site, requis.
 --
 -- N1.2 exprime les horaires d'ouverture d'un bâtiment « dans le fuseau du
 -- site », et la table n'en portait aucun : l'exigence référençait une donnée
@@ -11,7 +11,7 @@
 --
 -- NOT NULL sans valeur par défaut : aucune ligne n'existe, et en inventer une
 -- pour les lignes existantes ferait passer une supposition pour un fait. Si la
--- table portait des lignes, cette migration échouerait bruyamment — ce qui est
+-- table portait des lignes, cette migration échouerait bruyamment : ce qui est
 -- le comportement voulu.
 
 ALTER TABLE azimut.site ADD COLUMN timezone text NOT NULL;

@@ -1,4 +1,4 @@
--- M01.S2 — les coordonnées en pixels d'un point de calage portent le nom que
+-- M01.S2, les coordonnées en pixels d'un point de calage portent le nom que
 -- A5.2 leur donne : `image_x_px` et `image_y_px`.
 --
 -- `control_point` vient de la migration 0018, écrite d'après le complément

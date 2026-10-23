@@ -10,8 +10,8 @@
 -- registres. Il refusait donc le cas que la règle nomme comme légitime. Il est
 -- remplacé par deux index, un par registre.
 --
--- **La colonne `rules_pack_id`.** A5.4 la porte depuis l'origine — « standard_ref
--- et rules_pack_id sont requis si registry = 'safety' » — et la table ne l'avait
+-- **La colonne `rules_pack_id`.** A5.4 la porte depuis l'origine (« standard_ref
+-- et rules_pack_id sont requis si registry = 'safety' ») et la table ne l'avait
 -- pas. Sans elle, la portée « paquet de règles » n'a rien où s'accrocher. Elle
 -- entre nullable : la rendre requise pour le registre de sécurité est l'autre
 -- moitié de la phrase d'A5.4, et ferait refuser toute ligne existante qui ne
@@ -37,7 +37,7 @@ CREATE UNIQUE INDEX uq_pictogram_function_wayfinding
 -- deux organisations sur le même paquet ont chacune leur ligne, et une clé
 -- sans `org_id` refuserait la seconde. Et un index qui franchirait la frontière
 -- d'organisation laisserait l'organisation A apprendre, par le seul message de
--- conflit, qu'une ligne existe chez B — ce qu'A6.1 interdit, « y compris par
+-- conflit, qu'une ligne existe chez B : ce qu'A6.1 interdit, « y compris par
 -- message d'erreur ».
 --
 -- `NULLS NOT DISTINCT` : deux pictogrammes de sécurité sans paquet et de même

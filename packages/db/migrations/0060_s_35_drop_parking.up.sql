@@ -1,4 +1,4 @@
--- S-35 — un parking est une zone, et sa table part.
+-- S-35 : un parking est une zone, et sa table part.
 --
 -- « Une place de stationnement est une empreinte de nature `parking_space`. Un
 -- parking est une zone de nature `parking`. Ce sont les objets du socle,
@@ -22,8 +22,8 @@
 --
 -- **Le statut d'objet ne se reporte nulle part**, et c'est voulu. A5.11 le pose
 -- « là où le modèle le déclare » ; ni `zone` ni `footprint` ne le déclarent.
--- Ce qui reste de la règle — « un objet ou un fait de statut proposal ne
--- s'affiche jamais comme un existant » — vit sur le fait.
+-- Ce qui reste de la règle (« un objet ou un fait de statut proposal ne
+-- s'affiche jamais comme un existant ») vit sur le fait.
 --
 -- **Migration destructrice.** A2.2, point 7 : la table a été vérifiée vide sur
 -- le seul instantané atteignable, aucun chemin d'écriture du dépôt n'y insère,

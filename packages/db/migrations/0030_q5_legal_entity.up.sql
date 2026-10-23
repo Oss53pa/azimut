@@ -1,4 +1,4 @@
--- Q5 — l'entité juridique émettrice, et son rattachement au site.
+-- Q5 : l'entité juridique émettrice, et son rattachement au site.
 --
 -- Une facture est émise par une entité juridique, pas par une organisation :
 -- une société de gestion peut exploiter plusieurs sites détenus par des
@@ -8,7 +8,7 @@
 -- Facultative à la création du site, requise avant l'émission de sa première
 -- facture (Q5.2). La colonne est donc nullable : la rendre obligatoire
 -- empêcherait de modéliser un site avant d'avoir de quoi le facturer, ce que
--- Q5.2 refuse explicitement — « elle ne sert qu'à facturer, et n'est donc pas
+-- Q5.2 refuse explicitement, « elle ne sert qu'à facturer, et n'est donc pas
 -- un préalable au travail de conception ».
 
 CREATE TABLE azimut.legal_entity (

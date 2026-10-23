@@ -1,4 +1,4 @@
--- M01.S2 — une seule table de points de calage.
+-- M01.S2 : une seule table de points de calage.
 --
 -- « Seule exception, le calage d'une source de plan […] : ses points sont
 -- conservés en pixels de l'image, suffixe `_px`, dans les tables
