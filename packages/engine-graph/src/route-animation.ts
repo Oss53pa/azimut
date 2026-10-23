@@ -185,7 +185,7 @@ function frameSvg(
   }
   const theme = options.theme;
   const parts: string[] = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatSvg(options.width_px)} ${formatSvg(options.height_px)}" width="${formatSvg(options.width_px)}" height="${formatSvg(options.height_px)}" data-level="${run.level_id}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${formatSvg(options.width_px)} ${formatSvg(options.height_px)}" width="${formatSvg(options.width_px)}" height="${formatSvg(options.height_px)}" data-level="${escapeXmlAttr(run.level_id)}">`,
     `<rect width="100%" height="100%" fill="${escapeXmlAttr(theme.background)}"/>`,
   ];
   for (const print of [...levelPrints].sort((a, b) => codePointCompare(a.id, b.id))) {
