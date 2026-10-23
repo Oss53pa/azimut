@@ -71,18 +71,58 @@ function dictionaryBefore(text: string, streamIndex: number): string {
   return '';
 }
 
+/** Les bornes de lecture d'un PDF, lues en configuration (D-5) : jamais écrites ici. */
+export type PdfLimits = {
+  readonly maxInflatedBytes: number;
+  readonly maxPages: number;
+};
+
+/**
+ * Lot 5 de l'audit : un PDF qui dépasse une borne est refusé, jamais lu à
+ * moitié. Une bombe de décompression ne se décompresse que jusqu'à la borne.
+ */
+export class PdfLimitExceeded extends Error {
+  constructor(readonly limit: 'inflated' | 'pages') {
+    super(`PDF : borne dépassée (${limit})`);
+  }
+}
+
+/** Décompresse au plus `max` octets ; au-delà, abandonne et refuse. */
+async function inflateBounded(data: Uint8Array, max: number): Promise<Uint8Array> {
+  const reader = new Blob([new Uint8Array(data)]).stream()
+    .pipeThrough(new DecompressionStream('deflate')).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel();
+      throw new PdfLimitExceeded('inflated');
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) { out.set(chunk, offset); offset += chunk.byteLength; }
+  return out;
+}
+
 /** Le contenu décodé d'un flux, ou `null` s'il n'est pas décodable ici. */
-export async function decodePdfStream(stream: Pick<PdfStream, 'dict' | 'data'>): Promise<string | null> {
+export async function decodePdfStream(
+  stream: Pick<PdfStream, 'dict' | 'data'>,
+  maxInflatedBytes: number,
+): Promise<string | null> {
   const filter = /\/Filter\s*(\[[^\]]*\]|\/[A-Za-z0-9]+)/.exec(stream.dict)?.[1];
   const filters = filter === undefined ? [] : [...filter.matchAll(/\/([A-Za-z0-9]+)/g)].map(m => m[1]);
   if (filters.length === 0) return pdfText(stream.data);
   const flate = filters.length === 1 && (filters[0] === 'FlateDecode' || filters[0] === 'Fl');
   if (!flate || /\/Predictor\s*(?:[2-9]|\d\d)/.test(stream.dict)) return null;
   try {
-    const inflating = new Blob([new Uint8Array(stream.data)]).stream()
-      .pipeThrough(new DecompressionStream('deflate'));
-    return pdfText(new Uint8Array(await new Response(inflating).arrayBuffer()));
-  } catch {
+    return pdfText(await inflateBounded(stream.data, maxInflatedBytes));
+  } catch (error) {
+    if (error instanceof PdfLimitExceeded) throw error;
     return null;
   }
 }

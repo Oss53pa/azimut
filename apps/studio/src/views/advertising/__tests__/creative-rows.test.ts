@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import type { AdCreative } from '@azimut/core-model';
 import { receiveCreatives } from '../../../domain/ad-creative-intake.js';
+import { sanitizeConfigFrom } from '../../../domain/asset-sanitizer.js';
+import { REFERENCE_SECURITY_SETTINGS } from '../../../data/reference-security-settings.js';
 import { REFERENCE_ADVERTISING } from '../../../data/reference-advertising.js';
 import { creativeRows } from '../creative-rows.js';
 
@@ -34,9 +36,10 @@ describe('H4.6 — visuels enregistrés et visuels en réception', () => {
   });
 
   it('range le constat de réception sous chaque visuel reçu', () => {
-    const rows = creativeRows([], reception, receiveCreatives(reception, spec), spec);
+    const rows = creativeRows([], reception,
+      receiveCreatives(reception, spec, sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, false)), spec);
     expect(rows.every(r => r.origin === 'received')).toBe(true);
-    expect(rows.find(r => r.creative.id === 'cr-0261')?.clean_svg).not.toContain('<script');
+    expect(rows.find(r => r.creative.id === 'cr-0261')?.clean_svg).toBeUndefined();
   });
 
   it('ne tient pas pour assaini un visuel reçu sans constat', () => {

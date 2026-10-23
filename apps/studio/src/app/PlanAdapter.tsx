@@ -5,6 +5,7 @@ import { orgOfSession } from './session-identity.js';
 import { acceptPlanFile, unreadablePlanInspection } from '../state/plan-import.js';
 import type { PlanFile } from '../state/plan-import.js';
 import { inspectPlanContent } from '../state/plan-content.js';
+import { useSecuritySettings } from '../data/use-security-settings.js';
 import type { PlanInspection } from '../state/plan-content.js';
 import { calibrationCommands } from '../state/plan-calibration-commands.js';
 import { computeCalibration } from '../domain/plan-calibration.js';
@@ -52,8 +53,13 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   const [calibrated, setCalibrated] = useState(false);
   const [busy, setBusy] = useState(false);
 
+  // D-5 : les bornes du fond et de la lecture des PDF, lues en configuration.
+  const settings = useSecuritySettings();
+  const maxPlanBytes = settings?.['plan.max_bytes'] ?? null;
+
   function judge(file: PlanFile, inspection: PlanInspection): void {
-    const accepted = acceptPlanFile(file, inspection);
+    if (maxPlanBytes === null) return;
+    const accepted = acceptPlanFile(file, inspection, maxPlanBytes);
     if (!accepted.ok) {
       setFindings(accepted.findings);
       setWarnings([]);
@@ -73,8 +79,11 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
       findings={findings}
       warnings={warnings}
       busy={busy}
+      maxPlanBytes={maxPlanBytes}
       calibrated={calibrated}
       onPickFile={(plan, content) => {
+        if (settings === null) return;
+        const limits = { maxInflatedBytes: settings['pdf.max_inflated_bytes'], maxPages: settings['pdf.max_pages'] };
         const reading = ++contentReading.current;
         setWarnings([]);
         setPicked(null);
@@ -84,7 +93,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           .then(buffer => {
             const bytes = new Uint8Array(buffer);
             if (reading === contentReading.current) setContent(bytes);
-            return inspectPlanContent(bytes);
+            return inspectPlanContent(bytes, limits);
           })
           .catch(() => unreadablePlanInspection())
           .then(inspection => {

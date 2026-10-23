@@ -4,6 +4,8 @@ import type { Finding } from '@azimut/core-model';
 import { guardPlacementBookings, auditOptionExpiry, type BookingState } from '../domain/ad-planning.js';
 import { guardAdRulesPack } from '@azimut/engine-graph';
 import { receiveCreatives } from '../domain/ad-creative-intake.js';
+import { sanitizeConfigFrom } from '../domain/asset-sanitizer.js';
+import { useSecuritySettings } from '../data/use-security-settings.js';
 import { ATTACHED_AD_RULES_PACK } from '../domain/ad-rules-pack.js';
 import { EMPTY_ADVERTISING_DATA, loadAdvertising, useRegistry } from '../data/index.js';
 import { RegistryStatus } from './register/RegistryStatus.js';
@@ -61,6 +63,7 @@ type AdvertisingViewProps = {
 
 export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element {
   const { t } = useI18n();
+  const settings = useSecuritySettings();
   const today = observationDate();
   const months = useMemo(() => monthsFrom(today, 6), [today]);
   const state = useRegistry(loadAdvertising, EMPTY_ADVERTISING_DATA, siteKey);
@@ -95,8 +98,9 @@ export function AdvertisingView({ siteKey }: AdvertisingViewProps): JSX.Element 
    */
   // Sans fiche technique, rien ne se reçoit : aucune n'est inventée.
   const intakes = useMemo(
-    () => (spec === null ? [] : receiveCreatives(reception, spec)),
-    [reception, spec],
+    () => (spec === null ? [] : receiveCreatives(
+      reception, spec, settings === null ? null : sanitizeConfigFrom(settings, false))),
+    [reception, spec, settings],
   );
   const creatives = useMemo(
     () => creativeRows(registry.creatives, reception, intakes, spec),

@@ -10,7 +10,7 @@ import type { ErrorCode, Finding } from '@azimut/core-model';
 import { CALIBRATION_STEPS, blockingReason } from '../state/plan-calibration-steps.js';
 import type { CalibrationDraft, CalibrationStep } from '../state/plan-calibration-steps.js';
 import { CALIBRATION_SHORTCUTS } from '../state/calibration-shortcuts.js';
-import { MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
+import { ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
 import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
 import { ConsequenceDialog } from './ConsequenceDialog.js';
 
@@ -38,6 +38,11 @@ export type PlanCalibrationScreenProps = {
   readonly findings: readonly Finding[];
   readonly warnings: readonly Finding[];
   readonly busy: boolean;
+  /**
+   * La taille maximale d'un fond, lue en configuration (D-5) ; `null` tant
+   * qu'elle n'est pas lue, et le dépôt reste alors fermé.
+   */
+  readonly maxPlanBytes: number | null;
   readonly calibrated: boolean;
   /**
    * Le fichier déposé, décrit, et son contenu. M2 (partie M), version 27 :
@@ -138,13 +143,13 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
             <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-secondary)' }}>
               {t('calib.plan.accepted', {
                 formats: ACCEPTED_PLAN_FORMATS.map(f => f.key.toUpperCase()).join(', '),
-                megabytes: String(Math.round(MAX_PLAN_BYTES / (1024 * 1024))),
+                megabytes: props.maxPlanBytes === null ? '–' : String(Math.round(props.maxPlanBytes / (1024 * 1024))),
               })}
             </p>
             <input
               type="file"
               aria-label={t('calib.plan.field')}
-              disabled={busy}
+              disabled={busy || props.maxPlanBytes === null}
               onChange={event => {
                 const file = event.target.files?.[0];
                 if (file === undefined) return;

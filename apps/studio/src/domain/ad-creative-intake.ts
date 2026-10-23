@@ -1,6 +1,6 @@
 import type { Finding } from '@azimut/core-model';
 import { guardCreativeAgainstSpec, type Creative, type CreativeSpec } from './ad-creative-control.js';
-import { sanitizeSvg, DEFAULT_SANITIZE_CONFIG, type SanitizeConfig } from './asset-sanitizer.js';
+import { sanitizeSvg, type SanitizeConfig } from './asset-sanitizer.js';
 
 /**
  * N5.2 — réception d'un visuel d'annonceur, règles M05.R5 et M05.R6.
@@ -69,11 +69,13 @@ export type CreativeReception = {
 export function receiveCreative(
   reception: CreativeReception,
   spec: CreativeSpec,
-  config: SanitizeConfig = DEFAULT_SANITIZE_CONFIG,
+  config: SanitizeConfig | null,
 ): CreativeIntake {
   const { creative, payload } = reception;
 
-  if (payload.kind === 'svg') {
+  // Sans seuils lus, rien n'est assaini ici : le visuel attend, il n'est pas
+  // rendu (D-5 : l'absence de seuil ne vaut jamais « sans limite »).
+  if (payload.kind === 'svg' && config !== null) {
     const sanitized = sanitizeSvg(payload.source, config);
     if (!sanitized.ok) {
       return {
@@ -107,7 +109,7 @@ export function receiveCreative(
 export function receiveCreatives(
   receptions: readonly CreativeReception[],
   spec: CreativeSpec,
-  config: SanitizeConfig = DEFAULT_SANITIZE_CONFIG,
+  config: SanitizeConfig | null,
 ): readonly CreativeIntake[] {
   return receptions.map(reception => receiveCreative(reception, spec, config));
 }

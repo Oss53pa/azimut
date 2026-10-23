@@ -1,3 +1,4 @@
+import { REFERENCE_SECURITY_SETTINGS } from '../../data/reference-security-settings.js';
 import { deflateSync } from 'node:zlib';
 
 /**
@@ -71,3 +72,12 @@ export function onePagePdf(contents: readonly PdfStreamSpec[], externals: readon
     ...externals,
   ]);
 }
+
+/** Les bornes de lecture de référence (D-5), celles que la migration 0081 inscrit. */
+export const PDF_LIMITS = {
+  maxInflatedBytes: REFERENCE_SECURITY_SETTINGS['pdf.max_inflated_bytes'],
+  maxPages: REFERENCE_SECURITY_SETTINGS['pdf.max_pages'],
+} as const;
+
+/** La taille maximale d'un fond de référence (D-5, M2 de la partie M). */
+export const PLAN_MAX_BYTES = REFERENCE_SECURITY_SETTINGS['plan.max_bytes'];

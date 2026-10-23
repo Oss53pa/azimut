@@ -1,136 +1,53 @@
 import { describe, it, expect } from 'vitest';
-import {
-  sanitizeSvg,
-  DEFAULT_SANITIZE_CONFIG,
-  LOGO_SANITIZE_CONFIG,
-} from '../asset-sanitizer.js';
+import { sanitizeSvg, sanitizeConfigFrom } from '../asset-sanitizer.js';
 import type { SanitizeConfig } from '../asset-sanitizer.js';
+import { REFERENCE_SECURITY_SETTINGS } from '../../data/reference-security-settings.js';
 
-const safeSvg = '<svg xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="5"/></svg>';
+/** Les bornes de référence (D-5), celles que la migration 0081 inscrit. */
+const LIMITS = sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, false);
+const LOGO = sanitizeConfigFrom(REFERENCE_SECURITY_SETTINGS, true);
 
-describe('E14.2 — asset sanitization', () => {
-  describe('clean SVG passthrough', () => {
-    it('returns clean SVG unchanged', () => {
-      const result = sanitizeSvg(safeSvg);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).toContain('circle');
-      }
-    });
+const NS = 'xmlns="http://www.w3.org/2000/svg"';
+const safeSvg = `<svg ${NS}><circle cx="10" cy="10" r="5"/></svg>`;
+
+function refusal(svg: string, config: SanitizeConfig = LIMITS): string {
+  const result = sanitizeSvg(svg, config);
+  return result.ok ? 'accepté' : String(result.finding.params['reason']);
+}
+
+describe('E14.2 et D-7 : la réception d’un SVG', () => {
+  it('rend un SVG propre sous sa forme reconstruite', () => {
+    const result = sanitizeSvg(safeSvg, LIMITS);
+    expect(result).toEqual({ ok: true, cleanSvg: safeSvg, warnings: [] });
   });
 
-  describe('script removal', () => {
-    it('removes script elements', () => {
-      const dirty = '<svg><script>alert(1)</script><circle r="5"/></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('script');
-        expect(result.cleanSvg).toContain('circle');
-      }
-    });
-
-    it('removes event handlers', () => {
-      const dirty = '<svg><circle r="5" onclick="alert(1)"/></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('onclick');
-      }
-    });
-
-    it('removes javascript: URLs', () => {
-      const dirty = '<svg><a href="javascript:alert(1)"><text>click</text></a></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('javascript');
-      }
-    });
+  it('retire les métadonnées, sans refuser', () => {
+    const result = sanitizeSvg(`<svg ${NS}><metadata>Outil 1.0</metadata><circle r="5"/></svg>`, LIMITS);
+    expect(result.ok && result.cleanSvg).toBe(`<svg ${NS}><circle r="5"/></svg>`);
   });
 
-  describe('external reference removal', () => {
-    it('removes external xlink:href', () => {
-      const dirty = '<svg><use xlink:href="https://evil.com/sprite.svg"/></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('evil.com');
-      }
-    });
-
-    it('removes XML entities', () => {
-      const dirty = '<!ENTITY xxe SYSTEM "file:///etc/passwd"><svg><text>&xxe;</text></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('ENTITY');
-      }
-    });
+  it.each([
+    ['un script', `<svg ${NS}><script>alert(1)</script><circle r="5"/></svg>`, 'element'],
+    ['un gestionnaire d’événement', `<svg ${NS}><circle r="5" onclick="alert(1)"/></svg>`, 'attribute'],
+    ['un lien javascript', `<svg ${NS}><use href="javascript:alert(1)"/></svg>`, 'value'],
+    ['un lien externe', `<svg ${NS}><use xlink:href="http://evil.example/x.svg#a"/></svg>`, 'value'],
+    ['une entité déclarée', `<!DOCTYPE svg [<!ENTITY x "y">]><svg ${NS}><text>&x;</text></svg>`, 'doctype'],
+    ['un foreignObject', `<svg ${NS}><foreignObject><div/></foreignObject></svg>`, 'element'],
+  ])('refuse %s, le fichier entier', (_label, svg, reason) => {
+    expect(refusal(svg)).toBe(reason);
   });
 
-  describe('metadata removal', () => {
-    it('removes metadata elements', () => {
-      const dirty = '<svg><metadata><rdf:RDF>author info</rdf:RDF></metadata><circle r="5"/></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('metadata');
-        expect(result.cleanSvg).toContain('circle');
-      }
-    });
+  it('refuse au-delà des bornes de la configuration', () => {
+    expect(refusal(safeSvg, { ...LIMITS, maxFileSize: 10 })).toBe('file_too_large');
+    expect(refusal(safeSvg, { ...LIMITS, maxElements: 1 })).toBe('too_complex');
+    expect(refusal(`<svg ${NS}><g><g><circle/></g></g></svg>`, { ...LIMITS, maxDepth: 2 })).toBe('too_deep');
   });
 
-  describe('foreignObject removal', () => {
-    it('removes foreignObject (can contain HTML)', () => {
-      const dirty = '<svg><foreignObject><div>HTML content</div></foreignObject></svg>';
-      const result = sanitizeSvg(dirty);
-      expect(result.ok).toBe(true);
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('foreignObject');
-      }
-    });
-  });
-
-  describe('size limits', () => {
-    it('rejects files exceeding max size', () => {
-      const config: SanitizeConfig = { ...DEFAULT_SANITIZE_CONFIG, maxFileSize: 10 };
-      const result = sanitizeSvg(safeSvg, config);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.finding.code).toBe('ASSET.SANITIZATION_FAILED');
-        expect(result.finding.params['reason']).toBe('file_too_large');
-      }
-    });
-
-    it('rejects files exceeding max elements', () => {
-      const config: SanitizeConfig = { ...DEFAULT_SANITIZE_CONFIG, maxElements: 1 };
-      // safeSvg has svg + circle = 2 elements
-      const result = sanitizeSvg(safeSvg, config);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.finding.params['reason']).toBe('too_complex');
-      }
-    });
-  });
-
-  describe('raster in logo (E14.2)', () => {
-    it('rejects raster images in logo mode', () => {
-      const withImage = '<svg><image href="data:image/png;base64,..." width="100" height="100"/></svg>';
-      const result = sanitizeSvg(withImage, LOGO_SANITIZE_CONFIG);
-      expect(result.ok).toBe(false);
-      if (!result.ok) {
-        expect(result.finding.code).toBe('ASSET.RASTER_IN_LOGO');
-      }
-    });
-
-    it('allows raster images in non-logo mode', () => {
-      const withImage = '<svg><image href="test.png" width="100" height="100"/></svg>';
-      const result = sanitizeSvg(withImage, DEFAULT_SANITIZE_CONFIG);
-      // Either ok with warning or stripped — both acceptable
-      if (result.ok) {
-        expect(result.cleanSvg).not.toContain('image');
-      }
-    });
+  it('une image en mode point est refusée, sous le code du logo pour un logo', () => {
+    const withImage = `<svg ${NS}><image href="data:image/png;base64,AAAA" width="100" height="100"/></svg>`;
+    const logo = sanitizeSvg(withImage, LOGO);
+    expect(!logo.ok && logo.finding.code).toBe('ASSET.RASTER_IN_LOGO');
+    const creative = sanitizeSvg(withImage, LIMITS);
+    expect(!creative.ok && creative.finding.code).toBe('ASSET.SANITIZATION_FAILED');
   });
 });

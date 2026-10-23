@@ -24,7 +24,8 @@
  * formulaire qui s'invoque lui-même — est compté. Un tracé lu suffit à
  * conclure ; sans tracé, un seul objet non lu rend la page indéterminée.
  */
-import { decodePdfStream } from './pdf-streams.js';
+import { decodePdfStream, PdfLimitExceeded } from './pdf-streams.js';
+import type { PdfLimits } from './pdf-streams.js';
 import { dictionaryOfObject, readPdfDocument, resolveDictionary } from './pdf-objects.js';
 import type { PdfDocument } from './pdf-objects.js';
 import { countPdfPagesOf, listPdfPages } from './pdf-pages.js';
@@ -49,12 +50,16 @@ type Resources = ReadonlyMap<string, string> | null;
 /** Ce que le suivi d'une page a lu. Un formulaire invoqué deux fois ne se lit qu'une. */
 type Tally = { painted: number; unresolved: number; readonly forms: Set<number> };
 
-export async function readPdfPages(bytes: Uint8Array): Promise<PdfReading> {
-  const doc = await readPdfDocument(bytes);
+/** Lit les pages ; lève `PdfLimitExceeded` si le document dépasse une borne. */
+export async function readPdfPages(bytes: Uint8Array, limits: PdfLimits): Promise<PdfReading> {
+  const doc = await readPdfDocument(bytes, limits.maxInflatedBytes);
   const pageCount = countPdfPagesOf(doc);
   const pages = listPdfPages(doc);
+  if ((pageCount ?? 0) > limits.maxPages || (pages?.length ?? 0) > limits.maxPages) {
+    throw new PdfLimitExceeded('pages');
+  }
   if (pages === null) return { pageCount, pages: null };
-  const reader = new PageReader(doc);
+  const reader = new PageReader(doc, limits.maxInflatedBytes);
   const natures: PdfPageNature[] = [];
   for (const page of pages) natures.push(await reader.judge(page));
   return { pageCount, pages: natures };
@@ -63,7 +68,7 @@ export async function readPdfPages(bytes: Uint8Array): Promise<PdfReading> {
 class PageReader {
   private readonly decoded = new Map<number, Promise<string | null>>();
 
-  constructor(private readonly doc: PdfDocument) {}
+  constructor(private readonly doc: PdfDocument, private readonly maxInflatedBytes: number) {}
 
   async judge(page: number): Promise<PdfPageNature> {
     const tally: Tally = { painted: 0, unresolved: 0, forms: new Set() };
@@ -134,7 +139,7 @@ class PageReader {
     let pending = this.decoded.get(number);
     if (pending === undefined) {
       const stream = this.doc.objects.get(number)?.stream ?? null;
-      pending = stream === null ? Promise.resolve(null) : decodePdfStream(stream);
+      pending = stream === null ? Promise.resolve(null) : decodePdfStream(stream, this.maxInflatedBytes);
       this.decoded.set(number, pending);
     }
     return pending;

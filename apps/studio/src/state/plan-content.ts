@@ -1,5 +1,7 @@
 import type { Finding, PlanContentKind } from '@azimut/core-model';
 import { readPdfPages } from '../domain/pdf-page-nature.js';
+import { PdfLimitExceeded } from '../domain/pdf-streams.js';
+import type { PdfLimits } from '../domain/pdf-streams.js';
 import type { PdfPageNature } from '../domain/pdf-page-nature.js';
 import { countDxfGeometry, looksLikeTextDxf } from '../domain/dxf-geometry.js';
 import type { PlanFormatKey } from './plan-import.js';
@@ -47,6 +49,8 @@ export type PlanInspection = {
    * image ou un DXF. Vide quand l'arbre des pages d'un PDF ne se suit pas.
    */
   readonly pages: readonly PlanPrecision[];
+  /** Lot 5 de l'audit : la borne que le contenu dépasse, s'il en dépasse une. */
+  readonly limitExceeded?: 'inflated' | 'pages' | undefined;
 };
 
 /**
@@ -80,15 +84,20 @@ export function sniffPlanFormat(bytes: Uint8Array): PlanFormatKey | null {
   return null;
 }
 
-export async function inspectPlanContent(bytes: Uint8Array): Promise<PlanInspection> {
+export async function inspectPlanContent(bytes: Uint8Array, limits: PdfLimits): Promise<PlanInspection> {
   const format = sniffPlanFormat(bytes);
   switch (format) {
     case 'png':
     case 'jpg':
       return { format, pageCount: null, pages: ['raster'] };
     case 'pdf': {
-      const reading = await readPdfPages(bytes);
-      return { format, pageCount: reading.pageCount, pages: (reading.pages ?? []).map(pdfPagePrecision) };
+      try {
+        const reading = await readPdfPages(bytes, limits);
+        return { format, pageCount: reading.pageCount, pages: (reading.pages ?? []).map(pdfPagePrecision) };
+      } catch (error) {
+        if (error instanceof PdfLimitExceeded) return { format, pageCount: null, pages: [], limitExceeded: error.limit };
+        throw error;
+      }
     }
     case 'dxf': {
       const geometry = countDxfGeometry(bytes);
