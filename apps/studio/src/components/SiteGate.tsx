@@ -2,6 +2,7 @@ import { type JSX } from 'react';
 import { useI18n } from '../i18n/useI18n.js';
 import { sitesByName } from '../state/site-order.js';
 import { rulesPackLabel } from '../state/rules-pack-label.js';
+import { BrandLogo } from './BrandLogo.js';
 import type { AsyncState, RepositoryError, SiteRepository, SiteSummary } from '../data/index.js';
 import {
   Panel, StateBanner, Note, DataTable, Tag,
@@ -16,6 +17,9 @@ type SiteGateProps = {
   readonly onOpenSite: (siteId: string) => void;
   readonly onRetry: () => void;
 };
+
+/** Hauteur du logo vertical à l'accueil : 64 à 120 px selon le kit de marque. */
+const BRAND_LOGO_HEIGHT = 64;
 
 /**
  * Ce que l'application montre tant qu'aucun site n'est chargé.
@@ -69,6 +73,9 @@ export function SiteGate(
       padding: '48px 24px',
     }}>
       <div style={{ width: '100%', maxWidth: 720, display: 'grid', gap: SPACE.lg, alignContent: 'start' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: SPACE.xl }}>
+          <BrandLogo variant="vertical" height={BRAND_LOGO_HEIGHT} alt={t('shell.brand.logo')} />
+        </div>
         <div>
           <div style={{ ...LABEL_STYLE, marginBottom: SPACE.xs }}>{t('gate.eyebrow')}</div>
           <h1 style={{ margin: 0, fontSize: TEXT.title, fontWeight: 500, color: 'var(--text-primary)' }}>

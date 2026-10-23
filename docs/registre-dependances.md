@@ -47,16 +47,17 @@ par fichier. Elle s'exercerait sur des fichiers modifiés et redistribués ;
 axe-core n'est ni modifié ni redistribué, et n'entre dans aucun livrable. Le
 contrôle de non-livraison est donc aussi ce qui maintient cette situation.
 
-### Polices de l'interface : Dosis et Grand Hotel
+### Police de l'interface : Dosis
 
 | | |
 | --- | --- |
 | **Version** | Fichiers WOFF2 figés dans le dépôt, sous-ensembles latin et latin étendu, `packages/design-tokens/src/fonts/` |
-| **Portée** | Interface du studio seulement, déclarées dans `studio-theme.css` |
-| **Licence** | SIL Open Font License 1.1, texte joint à côté de chaque fichier (`OFL-dosis.txt`, `OFL-grand-hotel.txt`) |
+| **Portée** | Interface du studio seulement, déclarée dans `studio-theme.css` |
+| **Licence** | SIL Open Font License 1.1, texte joint à côté des fichiers (`OFL-dosis.txt`) |
 | **Distribuée** | Oui, avec l'interface. L'OFL l'autorise tant que la licence et la mention de droits accompagnent les fichiers |
 | **Autorisée le** | 25 septembre 2026, par le porteur du projet, avec l'adoption de la maquette « Azimut, logiciel autonome v2 » |
-| **Emploi** | Dosis pour tout le texte de l'interface (`--font-sans`), Grand Hotel pour le logotype seul (`--font-brand`) |
+| **Emploi** | Dosis pour tout le texte de l'interface (`--font-sans`) |
+| **Retrait** | Grand Hotel, qui ne servait qu'au logotype (`--font-brand`), est retirée le 17 octobre 2026 : le logotype est désormais le logo vectorisé du kit Atlas Studio (`apps/studio/public/brand/`), qui ne charge aucune police |
 
 **Ce qui n'est pas une dépendance.** Aucun paquet n'est ajouté et aucune
 requête ne part vers un service de polices : les fichiers sont servis par

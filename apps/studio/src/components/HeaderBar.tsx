@@ -5,6 +5,7 @@ import { useI18n } from '../i18n/useI18n.js';
 import { evaluatePublishGate } from '../publish-gate.js';
 import type { SiteSummary } from '../data/index.js';
 import type { ViewId } from '../views.js';
+import { BrandLogo } from './BrandLogo.js';
 import { Icon } from './Icon.js';
 import { ProjectSwitcher } from './ProjectSwitcher.js';
 import { SPACE, TEXT, BUTTON_STYLE, PRIMARY_BUTTON_STYLE, severityColor } from './ui/index.js';
@@ -27,6 +28,9 @@ const HEADER_STYLE: React.CSSProperties = {
   gap: SPACE.lg,
   flexShrink: 0,
 };
+
+/** Hauteur du logo horizontal dans la barre : 28 à 36 px selon le kit de marque. */
+const BRAND_LOGO_HEIGHT = 32;
 
 /**
  * Barre d'en-tête, dessinée sur la maquette « logiciel autonome v2 » :
@@ -70,11 +74,10 @@ export function HeaderBar({ onNavigate, onOpenSearch, sites, currentSiteId, onOp
         aria-label={t('shell.brand.home')}
         style={{
           border: 'none', background: 'transparent', cursor: 'pointer', padding: 0,
-          fontFamily: 'var(--font-brand)', fontSize: TEXT.title, fontWeight: 400,
-          color: 'var(--text-primary)', lineHeight: 1,
+          display: 'flex', alignItems: 'center',
         }}
       >
-        {t('header.product')}
+        <BrandLogo variant="horizontal" height={BRAND_LOGO_HEIGHT} alt={t('shell.brand.logo')} />
       </button>
       <ProjectSwitcher sites={sites} currentId={currentSiteId} onOpenSite={onOpenSite} onNavigate={onNavigate} />
       <div style={{ flex: 1 }} />
