@@ -23,18 +23,31 @@ export function asRecord(value: unknown): Record<string, unknown> | undefined {
     : undefined;
 }
 
+/**
+ * Une liste de chaînes, ou `undefined` pour une valeur qui n'est pas une
+ * liste. Un élément qui n'est pas une chaîne fait échouer la lecture : il
+ * n'est pas écarté en silence (lot 4 de l'audit, A6.3).
+ */
 export function asStringArray(value: unknown): readonly string[] | undefined {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : undefined;
+  if (!Array.isArray(value)) return undefined;
+  if (!value.every(item => typeof item === 'string')) {
+    throw new Error('ligne relue hors de sa forme : liste qui ne contient pas que des chaînes');
+  }
+  return value as readonly string[];
 }
 
 const VERSION_STATES: readonly SupportVersionState[] = [
   'draft', 'in_review', 'approved', 'superseded',
 ];
 
+/**
+ * L'état d'une version relue. Un état hors de la liste fait échouer la
+ * lecture : le changer en brouillon ferait relire comme modifiable une
+ * version peut-être approuvée (lot 4 de l'audit, A6.3).
+ */
 export function versionState(value: string): SupportVersionState {
-  return (VERSION_STATES as readonly string[]).includes(value)
-    ? (value as SupportVersionState)
-    : 'draft';
+  if (!(VERSION_STATES as readonly string[]).includes(value)) {
+    throw new Error(`ligne relue hors de sa forme : état de version « ${value} »`);
+  }
+  return value as SupportVersionState;
 }
