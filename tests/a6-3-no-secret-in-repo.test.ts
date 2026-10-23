@@ -1,13 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { resolve, dirname, relative } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  DECLARED, checkDist, findSecrets, isPlaceholder, jwtRole, trackedTextFiles,
+} from '../scripts/secret-scan.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '..');
 
 /**
- * A6.3 et A2.4 — aucun secret dans le dépôt.
+ * A6.3 et A2.4 : aucun secret dans le dépôt.
  *
  * « Aucun secret dans le dépôt, variables d'environnement uniquement, fichier
  * d'exemple sans valeur réelle », et parmi les interdictions permanentes :
@@ -15,119 +18,28 @@ const ROOT = resolve(HERE, '..');
  *
  * Deux secrets y ont vécu, tous deux dans le banc d'essai d'étanchéité : un
  * secret de signature de jetons écrit en clair, et un mot de passe de rôle
- * injecté dans une chaîne de connexion. Tous deux ont été défendus par le même
- * argument — ils sont jetables, ils ne servent qu'aux essais — et l'argument
- * ne tient pas : la règle ne distingue pas les secrets selon leur portée, et
- * c'est ainsi qu'un secret d'essai finit par servir ailleurs.
- *
- * Ce contrôle est ce qui manquait. Il lit le dépôt comme du texte, sans
- * l'exécuter, et cherche les deux formes exactes qui y sont passées.
+ * injecté dans une chaîne de connexion. Le lot 1 de l'audit étend le contrôle
+ * à tous les fichiers suivis par git, documentation et configuration
+ * comprises, et aux formes de clés reconnaissables à leur préfixe : jetons
+ * signés, clés du service de base, de paiement, d'accès cloud, de forge, clés
+ * privées. Le même module sert à la chaîne (`node scripts/secret-scan.mjs`)
+ * et au contrôle des livrables construits (`--dist`).
  */
+const files = trackedTextFiles(ROOT);
 
-/** Ce qui n'est pas du texte source, ou que le dépôt ne porte pas. */
-const SKIP_DIRS = new Set([
-  'node_modules', 'dist', '.git', 'test-results', 'playwright-report', 'coverage',
-]);
-
-const SCANNED = /\.(ts|tsx|js|mjs|cjs|json|ya?ml|sql|sh)$/;
-
-/**
- * Une chaîne de connexion portant un mot de passe en clair.
- *
- * Le motif cherche `://identifiant:quelque-chose@hôte`. Il ignore ce qui n'est
- * pas une valeur : un marqueur entre chevrons, une interpolation de modèle,
- * une lecture de variable d'environnement.
- */
-const URI_WITH_PASSWORD = /[a-z][a-z0-9+.-]*:\/\/[A-Za-z0-9_.-]+:([^@\s'"`$<{]+)@/g;
-
-/**
- * Une constante dont le nom annonce un secret, affectée à un littéral.
- *
- * Une affectation de la forme « nom finissant par SECRET, égale, littéral »,
- * et ses variantes en clé d’objet ou en variable de fichier de chaînes. Une
- * affectation vide, un marqueur ou une lecture d’environnement passent.
- */
-const ASSIGNED_SECRET =
-  /\b([A-Za-z_][A-Za-z0-9_]*(?:SECRET|PASSWORD|PASSWD|_TOKEN|_API_KEY|PRIVATE_KEY))\b\s*[:=]\s*(['"`])([^'"`\n]+)\2/g;
-
-/** Ce qu'un littéral peut valoir sans être un secret. */
-function isPlaceholder(value: string): boolean {
-  const trimmed = value.trim();
-  return trimmed === ''
-    // Un marqueur à remplacer : `<mot-de-passe>`, `{{ secret }}`, `…`.
-    || /^[<{]/.test(trimmed)
-    || trimmed.includes('${')
-    // Une lecture d'environnement, ou une référence de la chaîne d'intégration.
-    || trimmed.startsWith('process.env')
-    || trimmed.startsWith('secrets.')
-    // Un nom de variable annoncé, non sa valeur.
-    || /^[A-Z][A-Z0-9_]*$/.test(trimmed);
-}
-
-/**
- * Valeurs tolérées, et la raison — vérifiée, pas supposée.
- *
- * La tolérance porte sur la **valeur**, jamais sur le fichier : déclarer un
- * fichier le rendrait aveugle à tout secret qu'on y ajouterait ensuite.
- *
- * Aucune des trois n'authentifie quoi que ce soit. Deux sont les
- * contre-exemples de ce contrôle, qui doit reconnaître ce qu'il cherche ; la
- * troisième est le mot « clef », que `createRepository` reçoit pour éprouver
- * qu'une clé présente bascule le dépôt.
- */
-const DECLARED: Readonly<Record<string, string>> = {
-  motdepasse:
-    'Contre-exemple de ce contrôle : la chaîne de connexion qu’il doit reconnaître.',
-  'valeur-en-clair':
-    'Contre-exemple de ce contrôle : le secret affecté qu’il doit reconnaître.',
-  clef:
-    'Fixture de `createRepository` : le mot « clef », qui éprouve qu’une clé présente '
-    + 'bascule le dépôt du jeu de référence vers le dépôt réel. Elle n’ouvre rien.',
-};
-
-function sources(dir: string): string[] {
-  const out: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    if (SKIP_DIRS.has(entry)) continue;
-    const full = resolve(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...sources(full));
-    else if (SCANNED.test(entry)) out.push(full);
-  }
-  return out;
-}
-
-type Hit = { readonly where: string; readonly what: string };
-
-function scan(): readonly Hit[] {
-  const hits: Hit[] = [];
-  for (const file of sources(ROOT)) {
-    const where = relative(ROOT, file);
-    const body = readFileSync(file, 'utf-8');
-
-    for (const m of body.matchAll(URI_WITH_PASSWORD)) {
-      const password = m[1] ?? '';
-      if (isPlaceholder(password) || password in DECLARED) continue;
-      hits.push({ where, what: `chaîne de connexion avec mot de passe : ${m[0]}` });
+describe('A6.3 : aucun secret dans le dépôt', () => {
+  it('le balayage lit tous les fichiers suivis, documentation et configuration comprises', () => {
+    expect(files.length).toBeGreaterThan(1000);
+    for (const kind of ['.md', '.toml', '.example', '.yml', '.sql']) {
+      expect(files.some(f => f.path.endsWith(kind)), kind).toBe(true);
     }
-    for (const m of body.matchAll(ASSIGNED_SECRET)) {
-      const value = m[3] ?? '';
-      if (isPlaceholder(value) || value in DECLARED) continue;
-      hits.push({ where, what: `${m[1] ?? ''} affecté à un littéral` });
-    }
-  }
-  return hits;
-}
-
-describe('A6.3 — aucun secret dans le dépôt', () => {
-  const hits = scan();
-
-  it('le balayage lit quelque chose, sans quoi il ne prouverait rien', () => {
-    expect(sources(ROOT).length).toBeGreaterThan(200);
   });
 
-  it('aucune chaîne de connexion ni secret affecté en clair', () => {
+  it('aucun secret, quelle que soit sa forme', () => {
+    const hits = files.flatMap(f =>
+      findSecrets(f.text, { allowed: new Set(DECLARED.keys()) }).map(what => `${f.path} : ${what}`));
     expect(
-      hits.map(h => `${h.where} — ${h.what}`),
+      hits,
       'A6.3 : « Aucun secret dans le dépôt, variables d’environnement '
       + 'uniquement, fichier d’exemple sans valeur réelle. » A2.4 : « Committer '
       + 'un secret, une clé, une chaîne de connexion, un jeton. »\n'
@@ -135,32 +47,92 @@ describe('A6.3 — aucun secret dans le dépôt', () => {
     ).toEqual([]);
   });
 
-  /**
-   * Le contre-exemple : le contrôle reconnaît ce qu'il cherche. Sans lui, un
-   * motif devenu inopérant passerait pour un dépôt propre.
-   */
-  it('reconnaît les deux formes qu’il cherche', () => {
-    const uri = [...'postgres://authenticator:motdepasse@127.0.0.1:5433/azimut'
-      .matchAll(URI_WITH_PASSWORD)];
-    expect(uri).toHaveLength(1);
-    expect(isPlaceholder(uri[0]?.[1] ?? '')).toBe(false);
-
-    const assigned = [..."export const TEST_JWT_SECRET = 'valeur-en-clair';"
-      .matchAll(ASSIGNED_SECRET)];
-    expect(assigned).toHaveLength(1);
-    expect(isPlaceholder(assigned[0]?.[3] ?? '')).toBe(false);
-  });
-
   it('chaque tolérance porte une raison qui dit quelque chose', () => {
-    const thin = Object.entries(DECLARED)
-      .filter(([, why]) => why.trim().length < 40)
-      .map(([value]) => value);
+    const thin = [...DECLARED].filter(([, why]) => why.trim().length < 40).map(([value]) => value);
     expect(thin, `Raisons trop courtes :\n${thin.join('\n')}`).toHaveLength(0);
   });
+});
 
-  it('laisse passer un marqueur, une interpolation et une lecture d’environnement', () => {
-    for (const value of ['', '<mot-de-passe>', '${SECRET}', 'process.env.X', 'AZIMUT_TEST_JWT_SECRET']) {
+/**
+ * L'essai d'abus : des secrets factices, assemblés à l'exécution pour que le
+ * fichier lui-même n'en contienne aucun, sont tous reconnus. Sans lui, un
+ * motif devenu inopérant passerait pour un dépôt propre.
+ */
+describe('lot 1 : le contrôle reconnaît chaque forme de secret', () => {
+  const b64 = (o: unknown): string => Buffer.from(JSON.stringify(o)).toString('base64url');
+  const jwt = (role: string): string => [b64({ alg: 'HS256' }), b64({ role, iss: 'essai' }), 'c2lnbmF0dXJlZXNzYWk'].join('.');
+  const filler = 'A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8S9t0';
+
+  it.each([
+    ['un jeton de rôle service', jwt('service_role'), 'jeton signé (rôle service_role)'],
+    ['une clé secrète du service de base', `sb_${'secret'}_${filler}`, 'clé secrète du service de base'],
+    ['une clé de paiement', `sk_${'live'}_${filler}`, 'clé de paiement'],
+    ['une clé d’accès cloud', `AKIA${'ABCDEFGHIJKLMNOP'}`, 'clé d’accès cloud'],
+    ['un jeton de forge', `ghp_${filler}`, 'jeton de forge'],
+    ['une clé privée', `-----BEGIN ${'PRIVATE'} KEY-----`, 'clé privée'],
+    ['une chaîne de connexion', `postgres://azimut:${'s3cr3t'}@hote/azimut`, 'chaîne de connexion avec mot de passe'],
+    ['un secret affecté', `const API_${'TOKEN'} = 'x9y8z7';`, 'API_TOKEN affecté à un littéral'],
+  ])('reconnaît %s', (_label, text, expected) => {
+    expect(findSecrets(`avant ${text} après`)).toEqual([expected]);
+  });
+
+  it('lit le rôle d’un jeton, et admet dans un livrable la seule clé déclarée', () => {
+    expect(jwtRole(jwt('anon'))).toBe('anon');
+    const key = jwt('anon');
+    expect(findSecrets(`const k="${key}"`, { allowed: new Set([key]), mode: 'dist' })).toEqual([]);
+    expect(findSecrets(`const k="${jwt('anon')}x"`, { allowed: new Set([key]), mode: 'dist' })).toHaveLength(1);
+  });
+
+  it('dans un livrable, voit un jeton de service planté à côté de la clé publiable', () => {
+    const key = jwt('anon');
+    const bundle = [{ path: 'dist/a.js', text: `const k="${key}";` }, { path: 'dist/b.js', text: `x="${jwt('service_role')}"` }];
+    expect(checkDist(bundle, key)).toEqual(['dist/b.js : jeton signé (rôle service_role)']);
+    // Le contrôle ne garde aucun état d'un appel à l'autre.
+    expect(checkDist(bundle, key)).toHaveLength(1);
+    expect(checkDist([bundle[0] ?? { path: '', text: '' }], key)).toEqual([]);
+  });
+
+  it('refuse un livrable dont la clé configurée n’est pas publiable', () => {
+    expect(checkDist([], jwt('service_role'))[0]).toMatch(/pas une clé publiable/);
+  });
+
+  it('laisse passer un marqueur, une interpolation, une substitution et une lecture d’environnement', () => {
+    for (const value of ['', '<mot-de-passe>', '${SECRET}', '$(openssl rand -hex 32)', 'process.env.X', 'AZIMUT_TEST_JWT_SECRET']) {
       expect(isPlaceholder(value), value).toBe(true);
     }
+  });
+});
+
+/**
+ * Lot 1 : seules l'URL du service et la clé publiable entrent dans le studio,
+ * plus le nom de schéma que D-1 y admet ; et chaque variable lue par le code
+ * figure, sans valeur, dans le fichier d'exemple.
+ */
+describe('lot 1 : les variables d’environnement', () => {
+  const STUDIO_ALLOWED = new Set([
+    'VITE_AZIMUT_API_URL', 'VITE_AZIMUT_API_KEY', 'VITE_AZIMUT_AUTH_URL', 'VITE_AZIMUT_DB_SCHEMA',
+  ]);
+  const NAME = /\b((?:VITE|AZIMUT)_[A-Z0-9_]+|DATABASE_URL|CHROMIUM_PATH)\b/g;
+  const code = files.filter(f => /^(apps|packages|scripts)\/.*\.(ts|tsx|js|mjs)$/.test(f.path)
+    || f.path === 'playwright.config.ts');
+  const example = readFileSync(resolve(ROOT, '.env.example'), 'utf8');
+
+  it('le studio ne lit que les variables admises en VITE_', () => {
+    const read = new Set(code.filter(f => f.path.startsWith('apps/studio/'))
+      .flatMap(f => [...f.text.matchAll(/\bVITE_[A-Z0-9_]+\b/g)].map(m => m[0])));
+    expect([...read].filter(n => !STUDIO_ALLOWED.has(n)).sort()).toEqual([]);
+  });
+
+  it('chaque variable lue par le code figure au fichier d’exemple', () => {
+    const declared = new Set([...example.matchAll(/^([A-Z][A-Z0-9_]*)=/gm)].map(m => m[1]));
+    const read = new Set(code.flatMap(f => [...f.text.matchAll(NAME)].map(m => m[1] ?? '')));
+    const missing = [...read].filter(n => !declared.has(n) && !n.endsWith('_')).sort();
+    expect(missing).toEqual([]);
+  });
+
+  it('le fichier d’exemple ne porte aucune valeur réelle', () => {
+    const values = [...example.matchAll(/^[A-Z][A-Z0-9_]*=(.*)$/gm)].map(m => (m[1] ?? '').trim());
+    const real = values.filter(v => v !== '' && !/^(azimut|local)$/.test(v) && !/<[a-z-]+>/.test(v));
+    expect(real).toEqual([]);
   });
 });
