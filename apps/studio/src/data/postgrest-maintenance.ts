@@ -13,7 +13,7 @@ import {
   type MaintenanceRegistry, type Money, type InstalledSupport, type RecordedDivergence, type WorkOrder,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type InstalledRow = {
@@ -78,17 +78,17 @@ export async function loadMaintenanceRegistry(
 ): Promise<MaintenanceRegistry> {
   // Le site d'abord : un site masqué par le cloisonnement doit se lire
   // « inaccessible », pas « rien n'est posé ».
-  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&id=eq.${siteId}`);
+  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&${idEq('id', siteId)}`);
   if (sites.length === 0) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const [supports, orderRows] = await Promise.all([
-    query<{ readonly id: string }>(config, 'support', `select=id&site_id=eq.${siteId}`),
+    query<{ readonly id: string }>(config, 'support', `select=id&${idEq('site_id', siteId)}`),
     query<WorkOrderRow>(
       config, 'work_order',
-      `select=id,scope,estimated_cost_minor,currency,state,created_at,closed_at&site_id=eq.${siteId}`,
+      `select=id,scope,estimated_cost_minor,currency,state,created_at,closed_at&${idEq('site_id', siteId)}`,
     ),
   ]);
-  const buildings = await query<{ readonly id: string }>(config, 'building', `select=id&site_id=eq.${siteId}`);
+  const buildings = await query<{ readonly id: string }>(config, 'building', `select=id&${idEq('site_id', siteId)}`);
   const levels = await queryIn<{ readonly id: string }>(config, 'level', 'building_id', buildings.map(b => b.id));
   const supportIds = supports.map(s => s.id);
   const [installedRows, nodes, bySupport] = await Promise.all([

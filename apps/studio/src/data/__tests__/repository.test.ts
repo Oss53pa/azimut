@@ -91,11 +91,11 @@ describe('Dépôt lu par l’API REST', () => {
 
   it('rend les paquets de chaque site depuis la table de rattachement', async () => {
     const answers: Record<string, unknown[]> = {
-      site: [{ id: 's1', org_id: 'o1', name: 'Un', country_code: 'FR' },
-        { id: 's2', org_id: 'o1', name: 'Deux', country_code: 'FR' }],
+      site: [{ id: 'aaaa0010-0000-4000-8000-000000000001', org_id: 'aaaa0010-0000-4000-8000-000000000003', name: 'Un', country_code: 'FR' },
+        { id: 'aaaa0010-0000-4000-8000-000000000002', org_id: 'aaaa0010-0000-4000-8000-000000000003', name: 'Deux', country_code: 'FR' }],
       site_rules_binding: [
-        { id: 'b1', org_id: 'o1', site_id: 's1', rules_pack_id: 'p-socle', role: 'base' },
-        { id: 'b2', org_id: 'o1', site_id: 's1', rules_pack_id: 'p-pays', role: 'overlay' },
+        { id: 'aaaa0010-0000-4000-8000-000000000004', org_id: 'aaaa0010-0000-4000-8000-000000000003', site_id: 'aaaa0010-0000-4000-8000-000000000001', rules_pack_id: 'aaaa0010-0000-4000-8000-000000000006', role: 'base' },
+        { id: 'aaaa0010-0000-4000-8000-000000000005', org_id: 'aaaa0010-0000-4000-8000-000000000003', site_id: 'aaaa0010-0000-4000-8000-000000000001', rules_pack_id: 'aaaa0010-0000-4000-8000-000000000007', role: 'overlay' },
       ],
     };
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
@@ -105,7 +105,7 @@ describe('Dépôt lu par l’API REST', () => {
 
     const sites = await createPostgrestRepository(config).listSites();
     expect(sites.map(s => [s.id, s.rules_bindings.map(b => `${b.role}:${b.rules_pack_id}`)]))
-      .toEqual([['s1', ['base:p-socle', 'overlay:p-pays']], ['s2', []]]);
+      .toEqual([['aaaa0010-0000-4000-8000-000000000001', ['base:aaaa0010-0000-4000-8000-000000000006', 'overlay:aaaa0010-0000-4000-8000-000000000007']], ['aaaa0010-0000-4000-8000-000000000002', []]]);
   });
 
   it('remonte un droit refusé en NET.FORBIDDEN', async () => {
@@ -163,15 +163,15 @@ describe('Vocabulaire du site', () => {
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
       calls.push(url);
       let body = '[]';
-      if (url.includes('/site?')) body = '[{"id":"site-1"}]';
-      else if (url.includes('/charter?')) body = '[{"id":"ch-1"}]';
+      if (url.includes('/site?')) body = '[{"id":"aaaa0010-0000-4000-8000-000000000008"}]';
+      else if (url.includes('/charter?')) body = '[{"id":"aaaa0010-0000-4000-8000-000000000009"}]';
       return Promise.resolve(new Response(body, { status: 200 }));
     }));
 
-    await createPostgrestRepository(config).loadVocabulary('site-1');
+    await createPostgrestRepository(config).loadVocabulary('aaaa0010-0000-4000-8000-000000000008');
 
-    expect(calls.some(u => u.includes('/charter?select=id&site_id=eq.site-1'))).toBe(true);
-    expect(calls.some(u => u.includes('/lexicon_term?charter_id=in.(ch-1)'))).toBe(true);
+    expect(calls.some(u => u.includes('/charter?select=id&site_id=eq.aaaa0010-0000-4000-8000-000000000008'))).toBe(true);
+    expect(calls.some(u => u.includes('/lexicon_term?charter_id=in.(aaaa0010-0000-4000-8000-000000000009)'))).toBe(true);
     // La forme imbriquée exigerait la ressource dans le `select` ; on ne s'y fie pas.
     expect(calls.some(u => u.includes('charter.site_id'))).toBe(false);
   });
@@ -180,7 +180,7 @@ describe('Vocabulaire du site', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
       new Response('', { status: 403, statusText: 'Forbidden' }),
     ));
-    await expect(createPostgrestRepository(config).loadVocabulary('site-1')).rejects.toSatisfy(
+    await expect(createPostgrestRepository(config).loadVocabulary('aaaa0010-0000-4000-8000-000000000008')).rejects.toSatisfy(
       (e: unknown) => isRepositoryError(e) && e.failure === 'forbidden',
     );
   });
@@ -189,11 +189,11 @@ describe('Vocabulaire du site', () => {
     const calls: string[] = [];
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
       calls.push(url);
-      const body = url.includes('/site?') ? '[{"id":"site-1"}]' : '[]';
+      const body = url.includes('/site?') ? '[{"id":"aaaa0010-0000-4000-8000-000000000008"}]' : '[]';
       return Promise.resolve(new Response(body, { status: 200 }));
     }));
 
-    await createPostgrestRepository(config).loadVocabulary('site-1');
+    await createPostgrestRepository(config).loadVocabulary('aaaa0010-0000-4000-8000-000000000008');
     expect(calls.some(u => u.includes('site_fact_forbidden_word'))).toBe(false);
   });
 });
@@ -214,11 +214,11 @@ describe('Vocabulaire : les pièges attrapés en revue', () => {
     const calls: string[] = [];
     vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) => {
       calls.push(url);
-      const body = url.includes('/site?') ? '[{"id":"site-1"}]' : '[]';
+      const body = url.includes('/site?') ? '[{"id":"aaaa0010-0000-4000-8000-000000000008"}]' : '[]';
       return Promise.resolve(new Response(body, { status: 200 }));
     }));
 
-    await createPostgrestRepository(config).loadVocabulary('site-1');
-    expect(calls[0]).toContain('/site?select=id&id=eq.site-1');
+    await createPostgrestRepository(config).loadVocabulary('aaaa0010-0000-4000-8000-000000000008');
+    expect(calls[0]).toContain('/site?select=id&id=eq.aaaa0010-0000-4000-8000-000000000008');
   });
 });

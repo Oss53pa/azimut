@@ -12,7 +12,7 @@ import {
   type WayfindingRegistry, type OrientationZone, type NamingRule, type InformationLevelBinding,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type SiteOrgRow = { readonly id: string; readonly org_id: string };
@@ -54,21 +54,21 @@ export async function loadWayfindingRegistry(
 ): Promise<WayfindingRegistry> {
   // Le site d'abord, comme pour le vocabulaire : un site masqué par le
   // cloisonnement doit se lire « inaccessible », pas « ne déclare rien ».
-  const sites = await query<SiteOrgRow>(config, 'site', `select=id,org_id&id=eq.${siteId}`);
+  const sites = await query<SiteOrgRow>(config, 'site', `select=id,org_id&${idEq('id', siteId)}`);
   const site = sites[0];
   if (site === undefined) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const [zoneRows, ruleRows, typologyRows] = await Promise.all([
     query<ZoneRow>(
       config, 'orientation_zone',
-      `select=id,code,name_fr,name_en,kind,footprint_ids&site_id=eq.${siteId}&order=code.asc`,
+      `select=id,code,name_fr,name_en,kind,footprint_ids&${idEq('site_id', siteId)}&order=code.asc`,
     ),
     query<NamingRuleRow>(
       config, 'naming_rule',
-      `select=id,target,pattern,max_length,uniqueness_scope&site_id=eq.${siteId}&order=target.asc,id.asc`,
+      `select=id,target,pattern,max_length,uniqueness_scope&${idEq('site_id', siteId)}&order=target.asc,id.asc`,
     ),
     // Les typologies appartiennent à l'organisation, pas au site.
-    query<TypologyRow>(config, 'support_typology', `select=id,key&org_id=eq.${site.org_id}`),
+    query<TypologyRow>(config, 'support_typology', `select=id,key&${idEq('org_id', site.org_id)}`),
   ]);
 
   const levelRows = await queryIn<InformationLevelRow>(

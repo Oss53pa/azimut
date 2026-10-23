@@ -12,7 +12,7 @@ import {
   type WorksiteRegistry, type FabricationLot, type InstallSlot, type RecordedReserve,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type LotRow = { readonly id: string; readonly code: string; readonly manufacturer_name: string; readonly state: string };
@@ -52,12 +52,12 @@ export async function loadWorksiteRegistry(
 ): Promise<WorksiteRegistry> {
   // Le site d'abord : un site masqué par le cloisonnement doit se lire
   // « inaccessible », pas « aucun chantier ».
-  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&id=eq.${siteId}`);
+  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&${idEq('id', siteId)}`);
   if (sites.length === 0) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const [lotRows, slotRows] = await Promise.all([
-    query<LotRow>(config, 'fabrication_lot', `select=id,code,manufacturer_name,state&site_id=eq.${siteId}`),
-    query<SlotRow>(config, 'install_slot', `select=id,zone_label,planned_on,night_work&site_id=eq.${siteId}`),
+    query<LotRow>(config, 'fabrication_lot', `select=id,code,manufacturer_name,state&${idEq('site_id', siteId)}`),
+    query<SlotRow>(config, 'install_slot', `select=id,zone_label,planned_on,night_work&${idEq('site_id', siteId)}`),
   ]);
   const lotIds = lotRows.map(l => l.id);
   const [lotSupports, slotSupports, reserveRows] = await Promise.all([

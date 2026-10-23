@@ -18,14 +18,14 @@ function stubTables(bodies: Readonly<Record<string, unknown[]>>): string[] {
 }
 
 const BASE = {
-  site: [{ id: 'site-1' }],
-  support: [{ id: 'sup-1' }, { id: 'sup-2' }],
-  building: [{ id: 'b-1' }],
-  level: [{ id: 'l-1' }],
-  node: [{ id: 'n-1' }],
+  site: [{ id: 'aaaa0006-0000-4000-8000-000000000001' }],
+  support: [{ id: 'aaaa0006-0000-4000-8000-000000000009' }, { id: 'aaaa0006-0000-4000-8000-000000000010' }],
+  building: [{ id: 'aaaa0006-0000-4000-8000-000000000002' }],
+  level: [{ id: 'aaaa0006-0000-4000-8000-000000000007' }],
+  node: [{ id: 'aaaa0006-0000-4000-8000-000000000008' }],
   installed_support: [
-    { id: 'i2', support_id: 'sup-1', installed_at: '2026-05-01T00:00:00Z', photo_path: null, installer_notes: null, installed_version: 2, condition: 'worn', surveyed_by: null, surveyed_at: '2026-06-01T00:00:00Z' },
-    { id: 'i1', support_id: 'sup-1', installed_at: '2026-02-01T00:00:00Z', photo_path: 'p.jpg', installer_notes: 'posé', installed_version: null, condition: null, surveyed_by: null, surveyed_at: null },
+    { id: 'aaaa0006-0000-4000-8000-000000000006', support_id: 'aaaa0006-0000-4000-8000-000000000009', installed_at: '2026-05-01T00:00:00Z', photo_path: null, installer_notes: null, installed_version: 2, condition: 'worn', surveyed_by: null, surveyed_at: '2026-06-01T00:00:00Z' },
+    { id: 'aaaa0006-0000-4000-8000-000000000005', support_id: 'aaaa0006-0000-4000-8000-000000000009', installed_at: '2026-02-01T00:00:00Z', photo_path: 'p.jpg', installer_notes: 'posé', installed_version: null, condition: null, surveyed_by: null, surveyed_at: null },
   ],
 };
 
@@ -45,9 +45,9 @@ describe('A5.7 — parc posé, sites de référence', () => {
 describe('A5.7 — parc posé, API REST', () => {
   it('vérifie le site avant de lire les tables, et refuse un site absent', async () => {
     const calls = stubTables({});
-    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
-    expect(calls[0]).toContain('/site?select=id&id=eq.site-1');
+    expect(calls[0]).toContain('/site?select=id&id=eq.aaaa0006-0000-4000-8000-000000000001');
     expect(isRepositoryError(error) && error.failure === 'not_found').toBe(true);
   });
 
@@ -55,24 +55,24 @@ describe('A5.7 — parc posé, API REST', () => {
     stubTables({
       ...BASE,
       divergence: [
-        { id: 'd1', support_id: 'sup-1', node_id: null, installed_support_id: 'i1', kind: 'damaged', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: { notes: 'Rayure' } },
-        { id: 'd2', support_id: null, node_id: 'n-1', installed_support_id: null, kind: 'missing', detected_at: '2026-06-01T00:00:00Z', resolved_at: null, detail: null },
+        { id: 'aaaa0006-0000-4000-8000-000000000003', support_id: 'aaaa0006-0000-4000-8000-000000000009', node_id: null, installed_support_id: 'aaaa0006-0000-4000-8000-000000000005', kind: 'damaged', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: { notes: 'Rayure' } },
+        { id: 'aaaa0006-0000-4000-8000-000000000004', support_id: null, node_id: 'aaaa0006-0000-4000-8000-000000000008', installed_support_id: null, kind: 'missing', detected_at: '2026-06-01T00:00:00Z', resolved_at: null, detail: null },
       ],
       work_order: [
-        { id: 'w1', scope: { supports: ['sup-1'] }, estimated_cost_minor: 125050, currency: 'EUR', state: 'issued', created_at: '2026-03-02T00:00:00Z', closed_at: null },
-        { id: 'w2', scope: null, estimated_cost_minor: null, currency: 'EUR', state: 'draft', created_at: '2026-07-01T00:00:00Z', closed_at: null },
+        { id: 'aaaa0006-0000-4000-8000-000000000011', scope: { supports: ['aaaa0006-0000-4000-8000-000000000009'] }, estimated_cost_minor: 125050, currency: 'EUR', state: 'issued', created_at: '2026-03-02T00:00:00Z', closed_at: null },
+        { id: 'aaaa0006-0000-4000-8000-000000000012', scope: null, estimated_cost_minor: null, currency: 'EUR', state: 'draft', created_at: '2026-07-01T00:00:00Z', closed_at: null },
       ],
     });
 
-    const registry = await createPostgrestRepository(config).loadMaintenanceRegistry('site-1');
-    expect(registry.installed.map(i => i.id)).toEqual(['i1', 'i2']);
+    const registry = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001');
+    expect(registry.installed.map(i => i.id)).toEqual(['aaaa0006-0000-4000-8000-000000000005', 'aaaa0006-0000-4000-8000-000000000006']);
     expect(registry.installed[1]?.condition).toBe('worn');
     // Le stub rend la table entière aux deux lectures, par support et par
     // nœud : chaque divergence n'est gardée qu'une fois.
-    expect(registry.divergences.map(d => d.id)).toEqual(['d2', 'd1']);
-    expect(registry.divergences[0]?.node_id).toBe('n-1');
+    expect(registry.divergences.map(d => d.id)).toEqual(['aaaa0006-0000-4000-8000-000000000004', 'aaaa0006-0000-4000-8000-000000000003']);
+    expect(registry.divergences[0]?.node_id).toBe('aaaa0006-0000-4000-8000-000000000008');
     expect(registry.divergences[1]?.detail).toEqual({ notes: 'Rayure' });
-    expect(registry.work_orders.map(w => w.id)).toEqual(['w2', 'w1']);
+    expect(registry.work_orders.map(w => w.id)).toEqual(['aaaa0006-0000-4000-8000-000000000012', 'aaaa0006-0000-4000-8000-000000000011']);
     expect(registry.work_orders[1]?.estimated_cost).toEqual({ minor: 125050, currency: 'EUR' });
     expect(registry.work_orders[0]?.estimated_cost).toBeNull();
   });
@@ -80,9 +80,9 @@ describe('A5.7 — parc posé, API REST', () => {
   it('échoue sur une nature de divergence hors liste, au lieu d’écarter la ligne', async () => {
     stubTables({
       ...BASE,
-      divergence: [{ id: 'd1', support_id: 'sup-1', node_id: null, installed_support_id: null, kind: 'inconnue', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: null }],
+      divergence: [{ id: 'aaaa0006-0000-4000-8000-000000000003', support_id: 'aaaa0006-0000-4000-8000-000000000009', node_id: null, installed_support_id: null, kind: 'inconnue', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: null }],
     });
-    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'request_failed').toBe(true);
   });
@@ -90,9 +90,9 @@ describe('A5.7 — parc posé, API REST', () => {
   it('échoue sur un détail de divergence qui n’est pas un objet', async () => {
     stubTables({
       ...BASE,
-      divergence: [{ id: 'd1', support_id: 'sup-1', node_id: null, installed_support_id: null, kind: 'damaged', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: 'texte' }],
+      divergence: [{ id: 'aaaa0006-0000-4000-8000-000000000003', support_id: 'aaaa0006-0000-4000-8000-000000000009', node_id: null, installed_support_id: null, kind: 'damaged', detected_at: '2026-03-01T00:00:00Z', resolved_at: null, detail: 'texte' }],
     });
-    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'request_failed').toBe(true);
   });
@@ -100,9 +100,9 @@ describe('A5.7 — parc posé, API REST', () => {
   it('échoue sur un état d’ordre de travaux hors liste', async () => {
     stubTables({
       ...BASE,
-      work_order: [{ id: 'w1', scope: null, estimated_cost_minor: null, currency: 'EUR', state: 'archived', created_at: '2026-03-02T00:00:00Z', closed_at: null }],
+      work_order: [{ id: 'aaaa0006-0000-4000-8000-000000000011', scope: null, estimated_cost_minor: null, currency: 'EUR', state: 'archived', created_at: '2026-03-02T00:00:00Z', closed_at: null }],
     });
-    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('site-1')
+    const error: unknown = await createPostgrestRepository(config).loadMaintenanceRegistry('aaaa0006-0000-4000-8000-000000000001')
       .catch((e: unknown) => e);
     expect(isRepositoryError(error) && error.failure === 'request_failed').toBe(true);
   });

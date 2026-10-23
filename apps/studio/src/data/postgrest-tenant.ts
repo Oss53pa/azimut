@@ -11,7 +11,7 @@ import {
   type TenantRegistry, type TenantSignRegulation, type TenantSignDossier, type TenantSignPart,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type RegulationRow = {
@@ -40,17 +40,17 @@ function strings(table: string, column: string, value: unknown): readonly string
 export async function loadTenantRegistry(config: PostgrestConfig, siteId: string): Promise<TenantRegistry> {
   // Le site d'abord : un site masqué par le cloisonnement doit se lire
   // « inaccessible », pas « aucun dossier ».
-  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&id=eq.${siteId}`);
+  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&${idEq('id', siteId)}`);
   if (sites.length === 0) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const [regulationRows, dossierRows] = await Promise.all([
     query<RegulationRow>(
       config, 'tenant_sign_regulation',
-      `select=id,effective_from,max_height_mm,max_overhang_mm,allowed_materials,allowed_lighting,forbidden_features&site_id=eq.${siteId}`,
+      `select=id,effective_from,max_height_mm,max_overhang_mm,allowed_materials,allowed_lighting,forbidden_features&${idEq('site_id', siteId)}`,
     ),
     query<DossierRow>(
       config, 'tenant_sign_dossier',
-      `select=id,destination_id,state,submitted_on,height_mm,overhang_mm,material,lighting,features&site_id=eq.${siteId}`,
+      `select=id,destination_id,state,submitted_on,height_mm,overhang_mm,material,lighting,features&${idEq('site_id', siteId)}`,
     ),
   ]);
   const partRows = await queryIn<PartRow>(config, 'tenant_sign_part', 'dossier_id', dossierRows.map(d => d.id));

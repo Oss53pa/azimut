@@ -11,7 +11,7 @@ import {
   type AdPlacement, type AdBooking, type AdOption, type AdCreative,
 } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, queryIn, type PostgrestConfig } from './postgrest-http.js';
+import { query, queryIn, type PostgrestConfig, idEq } from './postgrest-http.js';
 import type { AdvertisingData } from './advertising-data.js';
 import { codePointCompare } from '@azimut/core-model';
 
@@ -44,12 +44,12 @@ function finite(table: string, column: string, value: number | string): number {
 export async function loadAdvertisingData(config: PostgrestConfig, siteId: string): Promise<AdvertisingData> {
   // Le site d'abord : un site masqué par le cloisonnement doit se lire
   // « inaccessible », pas « aucun emplacement ».
-  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&id=eq.${siteId}`);
+  const sites = await query<{ readonly id: string }>(config, 'site', `select=id&${idEq('id', siteId)}`);
   if (sites.length === 0) throw new RepositoryError('not_found', `site: ${siteId}`);
 
   const placementRows = await query<PlacementRow>(
     config, 'ad_placement',
-    `select=id,code,level_id,node_id,typology_key,area_m2&site_id=eq.${siteId}&deleted_at=is.null`,
+    `select=id,code,level_id,node_id,typology_key,area_m2&${idEq('site_id', siteId)}&deleted_at=is.null`,
   );
   const ids = placementRows.map(p => p.id);
   const [bookingRows, optionRows, creativeRows] = await Promise.all([

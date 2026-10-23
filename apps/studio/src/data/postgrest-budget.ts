@@ -8,7 +8,7 @@
  */
 import type { BudgetRegistry, BudgetLine, CostReference, Money } from '@azimut/core-model';
 import { RepositoryError } from './site-repository.js';
-import { query, type PostgrestConfig } from './postgrest-http.js';
+import { query, type PostgrestConfig, idEq } from './postgrest-http.js';
 import { codePointCompare } from '@azimut/core-model';
 
 type CostRow = {
@@ -45,7 +45,7 @@ function money(table: string, minor: number | string | null, currency: string | 
 export async function loadBudgetRegistry(config: PostgrestConfig, siteId: string): Promise<BudgetRegistry> {
   // Le site d'abord ; son organisation porte les coûts de référence.
   const sites = await query<{ readonly id: string; readonly org_id: string }>(
-    config, 'site', `select=id,org_id&id=eq.${siteId}`,
+    config, 'site', `select=id,org_id&${idEq('id', siteId)}`,
   );
   const site = sites[0];
   if (site === undefined) throw new RepositoryError('not_found', `site: ${siteId}`);
@@ -53,11 +53,11 @@ export async function loadBudgetRegistry(config: PostgrestConfig, siteId: string
   const [costRows, lineRows] = await Promise.all([
     query<CostRow>(
       config, 'cost_reference',
-      `select=id,typology_key,substrate_key,manufacturer_name,unit_cost_minor,currency,since&org_id=eq.${site.org_id}`,
+      `select=id,typology_key,substrate_key,manufacturer_name,unit_cost_minor,currency,since&${idEq('org_id', site.org_id)}`,
     ),
     query<LineRow>(
       config, 'budget_line',
-      `select=id,phase_key,lot_id,estimated_minor,quoted_minor,actual_minor,currency&site_id=eq.${siteId}`,
+      `select=id,phase_key,lot_id,estimated_minor,quoted_minor,actual_minor,currency&${idEq('site_id', siteId)}`,
     ),
   ]);
 
