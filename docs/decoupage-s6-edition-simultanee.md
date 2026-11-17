@@ -53,9 +53,10 @@ section 4 doit être tranchée avant de commencer.
 | Lot | Objet | Taille | Dépend de | Inconnue principale | État |
 | --- | --- | --- | --- | --- | --- |
 | S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Bloqué, Q4 |
-| S6.1 | Modèle de commande unique, propageable | M | — | écart réel entre les deux modèles | Prêt |
-| S6.2 | Journal des commandes validées en base | L | S6.1 | ordre total par niveau, cloisonnement | Bloqué, Q1 |
-| S6.3 | Moteur d'application des commandes distantes | M | S6.1 | refus d'une commande périmée sans fusion | Prêt |
+| S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
+| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Bloqué, Q6, Q7 |
+| S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Bloqué, Q1 |
+| S6.3 | Moteur d'application des commandes distantes | M | S6.1a | refus d'une commande périmée sans fusion | Prêt |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Bloqué, Q1, Q2 |
 | S6.5 | Revalidation après propagation et barrière | M | S6.3 | coût de la revalidation à chaque commande | Bloqué, Q5 |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Bloqué, Q4 |
@@ -74,15 +75,30 @@ cloisonnement par organisation, puis demande l'arbitrage. Elle ne choisit pas.
 
 ### S6.1 Modèle de commande unique
 
-S-19 propage « les commandes validées de E5.1 ». Deux formes coexistent
-aujourd'hui ; une seule peut circuler. Le lot rapproche `Command` de
-`EntityCommand`, qui porte déjà l'organisation, la table, le module émetteur
-et le contrôle de propriété. Il ajoute ce que la propagation exige : un
-identifiant de commande fourni par l'appelant et la version de l'objet sur
-laquelle la commande a été validée. Ces deux champs ne touchent pas la base.
+S-19 propage « les commandes validées de E5.1 ». Deux formes coexistent ; une
+seule peut circuler. Le lot se scinde en deux à l'examen.
 
-Acceptation : toute commande émise par l'éditeur se sérialise puis se
-désérialise à l'identique, et son inverse reste calculable.
+**S6.1a, fait le 17 novembre 2026.** `EntityCommand` voyage : écriture
+déterministe et relecture validée par schéma, qui rejoue `buildCommand` à la
+réception. Fichier `packages/core-model/src/command-wire.ts`.
+
+Deux ajouts prévus ci-dessus sont abandonnés, et pourquoi :
+
+- **la version d'objet** est inutile. Une commande porte déjà son état
+  `before`. La comparer à l'état courant suffit à refuser une commande
+  périmée en S6.3, sans colonne de version que A5 ne prévoit pas ;
+- **l'identifiant de commande** dépend du journal S6.2. Le reporter là évite
+  de modifier tous les constructeurs de commande pour un champ que rien
+  ne lit encore.
+
+**S6.1b, bloqué, Q6 et Q7.** L'éditeur d'habillage émet `Command<DocumentPatch>`,
+un état de document entier ciblé sur le site, qui ne se traduit pas en
+commandes de ligne. Les obstacles sont dans le modèle de données, pas dans le
+code.
+
+Acceptation de S6.1a : une commande écrite se relit à l'identique, son inverse
+aussi ; une commande reçue qui viole le schéma, la propriété unique ou le
+registre de sécurité est refusée.
 
 ### S6.2 Journal des commandes validées
 
@@ -147,7 +163,7 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 ### Ordre
 
-S6.1 et S6.3 peuvent commencer sans aucune décision. Tout le reste attend au
+S6.1a est fait. S6.3 peut commencer sans aucune décision. Tout le reste attend au
 moins une réponse de la section 4. S6.9 attend en plus L4.4.
 
 ---
@@ -184,6 +200,26 @@ fait pas.
 cause, et S10 n'ajoute aucun code pour cela. Faut-il un code dédié, ou les
 codes de validation existants portant les identifiants de commandes en
 paramètre ?
+
+**Q6. Habillage absent de la base, A2.2 cas 2.** `decoration_layer` et
+`decoration_shape` sont définies en E9.3 et attribuées au module 01 par L3.
+Elles n'ont pourtant aucune migration, et ne figurent pas dans `OWNED_TABLES`.
+Une commande d'habillage n'a donc aucune ligne à viser. Faut-il créer ces
+tables, dans un lot distinct de S6 ?
+
+**Q7. Écarts entre l'éditeur et E9.3, A2.2 cas 2.** Trois points du document
+d'habillage n'ont pas de colonne en E9.3 :
+
+- l'ordre de superposition des formes, que l'éditeur tient pour le site entier
+  et que `decoration_shape` ne porte pas ;
+- le style de forme (remplissage, trait, épaisseur, opacité), réduit à
+  `style_role` en E9.3 ;
+- l'identifiant de forme, dérivé du document (`dec-1`, `dec-2`…) pour le
+  déterminisme (E4.4). Deux postes qui créent une forme en même temps
+  dérivent le même identifiant : en édition simultanée, il y a collision. La
+  base attend en outre un `uuid`.
+
+Le troisième point oppose le déterminisme d'E4.4 à l'unicité qu'exige S6.
 
 ---
 

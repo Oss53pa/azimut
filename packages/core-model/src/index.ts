@@ -355,6 +355,11 @@ export type {
   EntityCommand,
   CommandDraft,
 } from './site-commands.js';
+export {
+  MAX_WIRE_COMMAND_LENGTH,
+  serializeCommand,
+  parseCommand,
+} from './command-wire.js';
 export { RETIRED_CODES } from './error-catalog.js';
 export { segmentsProperlyIntersect, isSelfIntersecting, pointInPolygon } from './geometry.js';
 export {
