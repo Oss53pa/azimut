@@ -32,6 +32,9 @@ export type SqlReader = (text: string) => Promise<ReadonlyArray<Record<string, u
  */
 const INSERT_ONLY = [
   'audit_log', 'approval', 'graph_validation', 'message_schedule_approval',
+  // S6.2, migration 0078 : en insertion seule par décision d'Oss53pa, hors
+  // de la liste d'A12.3.
+  'command_journal',
 ] as const;
 
 const ROOT = 'organization';

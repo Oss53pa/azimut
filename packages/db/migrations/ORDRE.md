@@ -121,6 +121,7 @@ non plus — elle n'en retire que les clés étrangères.
 0075_a6_1_membership_closed
 0076_a6_2_roles_in_policies
 0077_a6_2_delegated_decisions
+0078_s6_2_command_journal
 ```
 
 ## Règle pour la suite

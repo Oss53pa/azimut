@@ -246,6 +246,36 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
       expect(response.status).toBeGreaterThanOrEqual(400);
     }
   });
+
+  /**
+   * S6.2, migration 0078 — le chemin d'écriture journalisé, par le chemin de
+   * l'application. Aucun des deux essais n'écrit au journal : une ligne de
+   * journal ne se supprime pas, et le décor de cette suite se retire.
+   */
+  function journaled(site: string, before: Record<string, string>) {
+    const command = {
+      operation: 'update', module: '01-socle', table: 'site', id: site, org_id: ORG_A,
+      before, after: { name: 'Renommé' }, timestamp: '2026-11-21T10:00:00.000Z', groupKey: null,
+    };
+    return asUser(ALICE, '/rpc/apply_journaled_commands', {
+      method: 'POST',
+      body: JSON.stringify({ p_site_id: site, p_level_id: null, p_commands: [command] }),
+    });
+  }
+
+  it('rend une commande périmée en statut 409, sans l’appliquer', async () => {
+    const response = await journaled(SITE_A, { name: 'Un autre nom' });
+    expect(response.status).toBe(409);
+    const kept = await asUser(ALICE, `/site?id=eq.${SITE_A}&select=name`);
+    expect(await kept.json()).toEqual([{ name: 'Site A' }]);
+  });
+
+  it('ne distingue pas un site de l’autre organisation d’un site absent', async () => {
+    const other = await journaled(SITE_B, { name: 'Site B' });
+    const absent = await journaled('00000000-0000-4000-8000-000000000000', { name: 'Site B' });
+    expect(other.status).toBe(absent.status);
+    expect(await other.json()).toEqual(await absent.json());
+  });
 });
 
 /**

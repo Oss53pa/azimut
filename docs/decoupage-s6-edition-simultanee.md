@@ -55,12 +55,12 @@ section 4 doit être tranchée avant de commencer.
 | S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Fait |
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
 | S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Prêt, Q6 et Q7 tranchées |
-| S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Prêt, Q1 tranchée |
+| S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
-| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Après S6.2 |
-| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Après S6.2 |
-| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Après S6.2 |
-| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Après S6.2 |
+| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Prêt |
+| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
+| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Prêt |
+| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Après S6.6 |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Après S6.6 |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
@@ -107,9 +107,34 @@ registre de sécurité est refusée.
 
 ### S6.2 Journal des commandes validées
 
-Table en insertion seule, cloisonnée par ligne, ordonnée par niveau. Elle sert
-la propagation, la revalidation qui nomme les commandes en cause (S-21) et
-l'arbitrage hors ligne. **Aucune table de ce type n'existe en A5 ni en S9.**
+Table en insertion seule, cloisonnée par ligne. Elle sert la propagation, la
+revalidation qui nomme les commandes en cause (S-21) et l'arbitrage hors
+ligne. **Aucune table de ce type n'existe en A5 ni en S9.**
+
+**Fait le 21 novembre 2026**, migration `0078_s6_2_command_journal`. La suite
+est numérotée par site et non par niveau (Q1 bis) : une commande de site,
+d'annuaire ou une liaison verticale n'a pas de niveau.
+
+Constat qui a façonné le lot : `apply_commands` (0026) n'examine jamais
+`before`, et la dernière écriture gagne. Le journal n'est donc pas écrit à
+côté d'elle mais par une fonction nouvelle, `apply_journaled_commands`, qui
+en une transaction sérialise les écritures du site, applique chaque commande
+sous la condition de son `before` comparé dans le type de la colonne, et
+inscrit ce qui a été appliqué. Une commande périmée fait échouer l'appel en
+`PT409`, que PostgREST rend en 409. `apply_commands` reste inchangée.
+
+Limites connues, non traitées dans ce lot :
+
+- le garde qui réserve l'insertion au journal à la fonction repose sur un
+  réglage de transaction. PostgREST n'expose aucun moyen de le poser, mais une
+  connexion SQL directe sous le rôle applicatif le pourrait ;
+- sous les politiques, une modification refusée à un `auditor` ressort en
+  409, comme une commande périmée, et non en refus d'accès ;
+- la sérialisation par site n'est pas éprouvée par deux connexions
+  concurrentes : un tel essai laisserait au journal des lignes que rien ne
+  peut retirer ;
+- aucune limitation de débit sur l'appel, qui passe par PostgREST comme les
+  autres écritures.
 
 ### S6.3 Moteur d'application des commandes distantes
 
@@ -175,7 +200,8 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 ### Ordre
 
 S6.0, S6.1a et S6.3 sont faits. Depuis les décisions du 21 novembre, S6.1b
-et S6.2 sont prêts ; S6.4 à S6.8 suivent S6.2. S6.9 attend L4.4.
+et S6.2 étaient prêts ; S6.2 est fait. S6.1b, S6.4, S6.5 et S6.6 peuvent
+commencer ; S6.7 et S6.8 suivent S6.6. S6.9 attend L4.4.
 
 ---
 
@@ -187,7 +213,7 @@ du cahier : elles sont signalées à l'éditeur, section 5.
 
 | Question | Décision |
 | --- | --- |
-| Q1 | Trois tables : `command_journal`, en insertion seule, avec un numéro d'ordre par niveau ; `object_lock`, le verrou ferme avec expiration ; `level_presence`, qui est sur le niveau, sa sélection, sa zone et sa dernière activité. Toutes cloisonnées par organisation |
+| Q1 | Trois tables : `command_journal`, en insertion seule, avec un numéro d'ordre par site (Q1 bis, même jour) ; `object_lock`, le verrou ferme avec expiration ; `level_presence`, qui est sur le niveau, sa sélection, sa zone et sa dernière activité. Toutes cloisonnées par organisation |
 | Q2 | Verrou ferme, refusé en base aux autres. Il tombe à la fin du geste, ou à une expiration courte renouvelée pendant le geste. Aucun passage en force |
 | Q3 | La pile d'annulation est conservée. Annuler émet la commande inverse, propagée comme les autres ; si l'objet a changé ailleurs, c'est un conflit présenté par S6.3 |
 | Q4 | Interrogation périodique du journal par PostgREST, intervalle en constante nommée. Voie recommandée par S6.0 |
