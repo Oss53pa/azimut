@@ -51,7 +51,7 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Fait |
 | AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Prêt |
 | AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Après AUTH.3 |
-| AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Prêt |
+| AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Fait, migration 0080 |
 | AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
 | AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Après AUTH.4, QA3 tranchée |
 
@@ -96,6 +96,16 @@ d'assurance. Une politique restrictive sur chaque table portant `org_id` peut
 donc refuser toute lecture et toute écriture aux membres `admin` ou
 `owner_rep` dont la session n'a pas le second facteur. C'est le même motif
 que les politiques de l'`auditor` en 0076.
+
+**Fait le 21 novembre 2026**, migration `0080_a6_3_mfa_required`.
+`session_meets_mfa()` lit le niveau d'assurance du jeton que PostgREST pose ;
+`org_ids_lacking_mfa()` rend les organisations où la session est `admin` ou
+`owner_rep` sans second facteur ; chaque table portant `org_id` les refuse.
+Une session serveur, qui pose elle-même `azimut.current_user_id`, n'y est
+pas tenue : elle n'a pas de jeton et peut déjà se donner toute identité.
+
+Éprouvé avec le vrai service : un `admin` en `aal1` ne lit rien ; il enrôle
+un facteur TOTP, le vérifie, et son jeton `aal2` lui rend son organisation.
 
 ---
 

@@ -79,14 +79,21 @@ let client: Sql;
 let harness: Harness;
 
 /** La requête telle que l'application la forme : jeton en en-tête. */
-async function asUser(user: string | null, path: string, init: RequestInit = {}) {
+/**
+ * Les deux utilisateurs de la suite sont `admin` : ils présentent le second
+ * facteur, sans quoi 0080 leur refuse tout. Le refus lui-même s'éprouve plus
+ * bas, avec `aal1`.
+ */
+async function asUser(
+  user: string | null, path: string, init: RequestInit = {}, aal: 'aal1' | 'aal2' = 'aal2',
+) {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     'Accept-Profile': 'azimut',
     'Content-Profile': 'azimut',
     ...(init.headers as Record<string, string> | undefined ?? {}),
   };
-  if (user !== null) headers['Authorization'] = `Bearer ${signToken(user)}`;
+  if (user !== null) headers['Authorization'] = `Bearer ${signToken(user, 'authenticated', aal)}`;
   return fetch(`${harness.url}${path}`, { ...init, headers });
 }
 
@@ -268,6 +275,24 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
     expect(response.status).toBe(409);
     const kept = await asUser(ALICE, `/site?id=eq.${SITE_A}&select=name`);
     expect(await kept.json()).toEqual([{ name: 'Site A' }]);
+  });
+
+  /**
+   * A6.3 et O3, migration 0080 — un `admin` sans second facteur ne lit ni
+   * n'écrit rien de son organisation. Le même utilisateur, une fois le facteur
+   * vérifié, lit son site.
+   */
+  it('refuse tout à un admin dont la session n’a pas le second facteur', async () => {
+    const without = await asUser(ALICE, `/site?id=eq.${SITE_A}&select=id`, {}, 'aal1');
+    expect(without.status).toBe(200);
+    expect(await without.json()).toEqual([]);
+    const written = await asUser(ALICE, `/site?id=eq.${SITE_A}`, {
+      method: 'PATCH', body: JSON.stringify({ name: 'Sans second facteur' }),
+      headers: { Prefer: 'return=representation' },
+    }, 'aal1');
+    expect(await written.json()).toEqual([]);
+    const withFactor = await asUser(ALICE, `/site?id=eq.${SITE_A}&select=id`);
+    expect(await withFactor.json()).toEqual([{ id: SITE_A }]);
   });
 
   it('ne rend rien du journal d’un site de l’autre organisation', async () => {

@@ -60,14 +60,21 @@ export type Harness = {
   readonly stop: () => Promise<void>;
 };
 
-/** Un jeton d'accès, tel que la plateforme en délivre un. */
-export function signToken(userId: string, role = 'authenticated'): string {
+/**
+ * Un jeton d'accès, tel que la plateforme en délivre un.
+ *
+ * `aal` est le niveau d'assurance que le service d'authentification inscrit :
+ * `aal1` après la seule phrase de passe, `aal2` après le second facteur. Un
+ * `admin` ou un `owner_rep` en `aal1` ne lit rien de son organisation (0080).
+ */
+export function signToken(userId: string, role = 'authenticated', aal: 'aal1' | 'aal2' = 'aal1'): string {
   const encode = (value: unknown): string =>
     Buffer.from(JSON.stringify(value)).toString('base64url');
   const head = encode({ alg: 'HS256', typ: 'JWT' });
   const body = encode({
     sub: userId,
     role,
+    aal,
     exp: Math.floor(Date.now() / 1000) + 3600,
   });
   const signature = createHmac('sha256', testJwtSecret())
