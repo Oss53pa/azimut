@@ -275,6 +275,14 @@ du cahier : elles sont signalées à l'éditeur, section 5.
 | Q6 | Tables d'habillage créées selon E9.3, plus deux colonnes sur `decoration_shape` : `z_order int` et `style jsonb`, rôles seulement, aucune couleur |
 | Q7 | Identifiant de forme : un `uuid` tiré par l'appelant à la création. Le rejeu reste déterministe, l'identifiant étant inscrit dans la commande |
 
+Décisions du même jour sur les obstacles de S6.6b :
+
+| Question | Décision |
+| --- | --- |
+| Q9 | Le lot d'authentification passe d'abord : connexion au poste et identité tirée du jeton, à la place de `session-identity.ts`. Préalable à S6.4, S6.6b et S6.7 |
+| Q10 | La décision Q7 s'étend à tout l'atelier : `newId` tire un `uuid` aléatoire. Le rejeu reste déterministe, l'identifiant étant inscrit dans la commande |
+| Q11 | Un essai sur base réelle par famille de commande, sur une base jetable, avant de brancher l'atelier sur le chemin journalisé |
+
 La durée d'expiration du verrou (Q2) et l'intervalle d'interrogation (Q4) sont
 des constantes nommées sans origine normative. Leurs valeurs initiales se
 fixent au lot qui les emploie et se mesurent selon D13.
