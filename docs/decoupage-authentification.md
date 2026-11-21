@@ -47,13 +47,13 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | Lot | Objet | Taille | Dépend de | État |
 | --- | --- | --- | --- | --- |
 | AUTH.0 | Aligner la contrainte des rôles sur A5.1 (`marketing`) | S | — | Fait, migration 0079 |
-| AUTH.1 | Journal des changements de rôle en base | S | — | Bloqué, QA4 |
-| AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Bloqué, QA2 |
-| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Bloqué, QA1 |
+| AUTH.1 | Journal des changements de rôle en base | M | — | Bloqué, QA5 |
+| AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Prêt, QA2 tranchée |
+| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Après AUTH.2, QA1 tranchée |
 | AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Après AUTH.3 |
 | AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Après AUTH.2 |
 | AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
-| AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Bloqué, QA3 |
+| AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Après AUTH.4, QA3 tranchée |
 
 Les lots AUTH.0 à AUTH.6 suffisent à débloquer S6.4, S6.6b et S6.7. AUTH.7
 peut suivre, comme le cahier le place à l'incrément 4 avec L4.1.
@@ -121,6 +121,34 @@ changement anonyme ; ou admettre au journal un auteur vide pour les seuls
 actes d'exploitation, marqués comme tels.
 
 ---
+
+## 4 bis. Décisions d'Oss53pa, 21 novembre 2026
+
+| Question | Décision |
+| --- | --- |
+| QA1 | `@supabase/auth-js`, version figée, inscrit au registre des dépendances |
+| QA2 | Le service d'authentification de Supabase entre en CI, version et empreinte figées |
+| QA3 | Les actes d'administration d'O3 vivent dans une fonction serveur Supabase ; la clé de service ne quitte pas le serveur |
+| QA4 | Tout changement de rattachement exige l'identité de son auteur ; un changement anonyme est refusé en base |
+
+**QA5. Le journal des rôles contre les décors d'essai, apparu le 21 novembre
+2026.** Journaliser chaque changement de `membership` dans `audit_log`, table
+en insertion seule, a deux effets que QA4 ne tranchait pas :
+
+- 21 fichiers d'essai rattachent ou retirent des membres sans poser
+  d'identité. Avec l'identité exigée, tous échouent ;
+- plusieurs suites committent leur décor puis le retirent (`a10-4`,
+  `write-path`, d'autres). Chaque retrait de membre laisserait au journal une
+  ligne que rien ne peut supprimer, et `deleteOrgFixture`, qui refuse de
+  retirer une organisation dont une table en insertion seule porte encore des
+  lignes, échouerait ensuite à chaque exécution.
+
+Il faut donc soit faire passer toutes ces suites en transactions annulées,
+ce qui revient à réécrire les décors de 21 fichiers, soit réserver le journal
+aux changements faits sous le rôle applicatif, ce qui laisse les actes
+d'exploitation non journalisés, soit attendre la fonction serveur de QA3 : elle
+deviendrait alors la seule voie d'écriture de `membership`, et c'est elle qui
+journaliserait.
 
 ## 5. Ce que cette note ne fait pas
 
