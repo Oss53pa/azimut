@@ -5,6 +5,7 @@
  * wayfinding — les emploie sans que le fichier de l'adaptateur grossisse.
  */
 import { RepositoryError, failureForStatus } from './site-repository.js';
+import { bearerToken } from '../auth/access-token.js';
 
 export type PostgrestConfig = {
   /** Racine de l'API REST, sans barre oblique finale. */
@@ -32,7 +33,7 @@ export async function query<Row>(
     response = await fetch(url, {
       headers: {
         apikey: config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
+        Authorization: `Bearer ${bearerToken(config.apiKey)}`,
         'Accept-Profile': config.schema,
         Accept: 'application/json',
       },

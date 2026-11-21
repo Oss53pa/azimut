@@ -22,6 +22,7 @@ import { parseCommand } from '@azimut/core-model';
 import type { EntityCommand, Finding } from '@azimut/core-model';
 import type { SinkConfig } from './postgrest-sink.js';
 import type { JournaledWrite } from './journaled-sink.js';
+import { bearerToken } from '../auth/access-token.js';
 
 /**
  * Intervalle d'interrogation. Constante technique, sans origine normative :
@@ -92,7 +93,7 @@ export async function readJournalSince(
     response = await fetchImpl(`${config.url}/command_journal?${search.toString()}`, {
       headers: {
         apikey: config.apiKey,
-        Authorization: `Bearer ${config.accessToken ?? config.apiKey}`,
+        Authorization: `Bearer ${config.accessToken ?? bearerToken(config.apiKey)}`,
         'Accept-Profile': config.schema,
         Accept: 'application/json',
       },

@@ -47,6 +47,32 @@ par fichier. Elle s'exercerait sur des fichiers modifiés et redistribués ;
 axe-core n'est ni modifié ni redistribué, et n'entre dans aucun livrable. Le
 contrôle de non-livraison est donc aussi ce qui maintient cette situation.
 
+### @supabase/auth-js
+
+| | |
+| --- | --- |
+| **Version** | 2.119.0, exacte, figée au fichier de verrouillage. Publiée le 4 novembre 2026 |
+| **Portée** | `dependencies` de `apps/studio`, une seule déclaration |
+| **Licence** | MIT |
+| **Distribuée** | Oui, dans le paquet du studio servi au navigateur |
+| **Dépendances propres** | `tslib` seule |
+| **Autorisée le** | 21 novembre 2026, par Oss53pa (décision QA1, `docs/decoupage-authentification.md`) |
+| **Emploi** | Client du service d'authentification de Supabase : connexion, rafraîchissement du jeton, et, pour AUTH.6, second facteur |
+
+**Motif de l'autorisation.** Le code qui tient une session — rafraîchissement
+du jeton, facteurs, défis — est un code de sécurité. L'écrire à la main est
+le risque qu'OWASP ASVS, cible d'A6.3, demande d'éviter. Le client officiel
+seul est retenu, sans le reste de `supabase-js` : l'atelier lit la base par
+PostgREST et n'a pas besoin du reste.
+
+**Disponibilité en installation autonome (A3.4).** Le client parle au service
+d'authentification de la distribution Supabase autonome, le même que la CI
+éprouve depuis AUTH.2. Aucun service géré n'est requis.
+
+**Analyse de vulnérabilités à l'ajout (D16).** `pnpm audit --prod` ne relève
+rien pour ce paquet. Il relève une vulnérabilité élevée sur `zod` 4.5.4,
+antérieure à cet ajout et sans lien avec lui.
+
 ### Polices de l'interface : Dosis et Grand Hotel
 
 | | |

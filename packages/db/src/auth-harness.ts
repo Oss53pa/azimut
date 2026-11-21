@@ -45,6 +45,10 @@ export async function startAuthService(options: {
       GOTRUE_EXTERNAL_EMAIL_ENABLED: 'true',
       GOTRUE_DISABLE_SIGNUP: 'false',
       GOTRUE_LOG_LEVEL: 'error',
+      // Les en-têtes que `@supabase/auth-js` envoie depuis un navigateur. Sans
+      // passerelle devant lui, le service autonome les refuse par défaut à la
+      // requête préalable CORS, et la connexion échoue avant d'avoir lieu.
+      GOTRUE_CORS_ALLOWED_HEADERS: 'apikey,x-client-info,x-supabase-api-version',
     },
     stdio: 'ignore',
   });

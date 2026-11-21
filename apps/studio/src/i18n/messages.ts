@@ -47,6 +47,7 @@ import { OPERATIONS_MAINTENANCE_FR, OPERATIONS_MAINTENANCE_EN } from './messages
 import { PRODUCTION_DATA_FR, PRODUCTION_DATA_EN } from './messages/production-data.js';
 import { CLOSURES_FR, CLOSURES_EN } from './messages/closures.js';
 import { CLIENTS_FR, CLIENTS_EN } from './messages/clients.js';
+import { AUTH_FR, AUTH_EN } from './messages/auth.js';
 import { FORM_NOTICES_FR, FORM_NOTICES_EN } from './messages/form-notices.js';
 import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js';
 import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
@@ -88,6 +89,7 @@ export const MESSAGES_FR = {
   ...PRODUCTION_DATA_FR,
   ...CLOSURES_FR,
   ...CLIENTS_FR,
+  ...AUTH_FR,
   ...FORM_NOTICES_FR,
   ...SUPPORT_FACES_FR,
   ...FACE_BLOCKS_FR,
@@ -132,6 +134,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...PRODUCTION_DATA_EN,
   ...CLOSURES_EN,
   ...CLIENTS_EN,
+  ...AUTH_EN,
   ...FORM_NOTICES_EN,
   ...SUPPORT_FACES_EN,
   ...FACE_BLOCKS_EN,

@@ -15,6 +15,10 @@
     "./reference": {
       "types": "./src/reference/index.ts",
       "import": "./src/reference/index.ts"
+    },
+    "./harness": {
+      "types": "./src/harness.ts",
+      "import": "./src/harness.ts"
     }
   },
   "dependencies": {

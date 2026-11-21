@@ -24,21 +24,27 @@ export type TextFieldProps = {
   readonly maxLength?: number | undefined;
   readonly disabled?: boolean | undefined;
   readonly autoFocus?: boolean | undefined;
+  /** Le type de saisie : texte par défaut ; adresse ou phrase de passe pour la connexion. */
+  readonly inputType?: 'text' | 'email' | 'password' | undefined;
+  /** L'aide du navigateur à la saisie, par exemple `current-password`. */
+  readonly autoComplete?: string | undefined;
 };
 
 export function TextField({
   label, value, onChange, error, hint, maxLength, disabled = false, autoFocus = false,
+  inputType = 'text', autoComplete,
 }: TextFieldProps): JSX.Element {
   return (
     <FieldShell label={label} error={error} hint={hint}>
       {({ inputId, describedBy }) => (
         <input
           id={inputId}
-          type="text"
+          type={inputType}
           value={value}
           disabled={disabled}
           maxLength={maxLength}
           autoFocus={autoFocus}
+          autoComplete={autoComplete}
           aria-invalid={error !== undefined}
           aria-describedby={describedBy}
           onChange={e => { onChange(e.target.value); }}

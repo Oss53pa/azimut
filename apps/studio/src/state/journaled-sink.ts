@@ -22,6 +22,7 @@ import type { EntityCommand, Outcome } from '@azimut/core-model';
 import type { CommandSink } from './command-store.js';
 import type { SinkConfig } from './postgrest-sink.js';
 import { refusal } from './postgrest-sink.js';
+import { bearerToken } from '../auth/access-token.js';
 
 /** Ce que la base a inscrit au journal pour un appel réussi. */
 export type JournaledWrite = {
@@ -58,7 +59,7 @@ export function createJournaledSink(
         method: 'POST',
         headers: {
           apikey: config.apiKey,
-          Authorization: `Bearer ${config.accessToken ?? config.apiKey}`,
+          Authorization: `Bearer ${config.accessToken ?? bearerToken(config.apiKey)}`,
           'Content-Profile': config.schema,
           'Content-Type': 'application/json',
         },

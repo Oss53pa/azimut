@@ -16,6 +16,7 @@
     "@azimut/engine-graph": "workspace:*",
     "@azimut/engine-layout": "workspace:*",
     "@azimut/testkit": "workspace:*",
+    "@supabase/auth-js": "2.119.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

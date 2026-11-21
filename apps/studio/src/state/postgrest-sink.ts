@@ -13,6 +13,7 @@
  */
 import type { EntityCommand, Outcome, Finding } from '@azimut/core-model';
 import type { CommandSink } from './command-store.js';
+import { bearerToken } from '../auth/access-token.js';
 
 export type SinkConfig = {
   /** Racine de l'API PostgREST. */
@@ -41,7 +42,7 @@ export function createPostgrestSink(
         method: 'POST',
         headers: {
           apikey: config.apiKey,
-          Authorization: `Bearer ${config.accessToken ?? config.apiKey}`,
+          Authorization: `Bearer ${config.accessToken ?? bearerToken(config.apiKey)}`,
           'Content-Profile': config.schema,
           'Content-Type': 'application/json',
         },

@@ -49,7 +49,7 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | AUTH.0 | Aligner la contrainte des rôles sur A5.1 (`marketing`) | S | — | Fait, migration 0079 |
 | AUTH.1 | Journal des changements de rôle en base | M | — | Bloqué, QA5 |
 | AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Fait |
-| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Prêt |
+| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Fait |
 | AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Après AUTH.3 |
 | AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Fait, migration 0080 |
 | AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
@@ -86,6 +86,30 @@ réel comme auteur.
 
 Non vérifié : l'exécution de ces étapes par la CI elle-même. Le script et la
 suite ont tourné ici, contre les mêmes binaires.
+
+### AUTH.3, fait le 21 novembre 2026
+
+`@supabase/auth-js` 2.119.0, inscrit au registre. Avec
+`VITE_AZIMUT_AUTH_URL`, l'atelier demande une connexion avant tout écran
+(`apps/studio/src/auth/AuthGate.tsx`) ; sans elle, il reste en mode local, et
+les essais de bout en bout parcourent ce mode. Toutes les requêtes — lectures,
+émetteurs, journal — présentent le jeton de la session au lieu de la clé
+publiable (`access-token.ts`). La session se garde dans le stockage de
+l'onglet et meurt avec lui. Un refus du service se dit d'un seul message ;
+une requête qui n'aboutit pas se dit « service injoignable », sans accuser la
+saisie.
+
+Éprouvé par le code de l'atelier contre le vrai service et le vrai PostgREST,
+puis dans un navigateur : connexion, site lu, session gardée au rechargement,
+déconnexion.
+
+**À savoir pour le déploiement.** Sans passerelle devant lui, le service
+autonome refuse à la requête préalable CORS les en-têtes que le client envoie.
+Il faut lui donner `GOTRUE_CORS_ALLOWED_HEADERS=apikey,x-client-info,x-supabase-api-version`.
+Dans une installation Supabase complète, la passerelle s'en charge.
+
+Reste à AUTH.4 : `session-identity.ts` donne encore l'organisation et le rôle
+écrits en dur.
 
 ### AUTH.5, pourquoi en base
 
