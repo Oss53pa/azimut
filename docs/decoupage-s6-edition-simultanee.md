@@ -52,14 +52,14 @@ section 4 doit être tranchée avant de commencer.
 
 | Lot | Objet | Taille | Dépend de | Inconnue principale | État |
 | --- | --- | --- | --- | --- | --- |
-| S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Bloqué, Q4 |
+| S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Fait |
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
 | S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Bloqué, Q6, Q7 |
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Bloqué, Q1 |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Bloqué, Q1, Q2 |
 | S6.5 | Revalidation après propagation et barrière | M | S6.3 | coût de la revalidation à chaque commande | Bloqué, Q5 |
-| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Bloqué, Q4 |
+| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Bloqué, Q1, Q4 |
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Bloqué, Q1 |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3 | articulation avec E5.3 | Bloqué, Q3 |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
@@ -72,6 +72,11 @@ dans la distribution autonome : le service de diffusion de l'installation
 Supabase autonome, ou une écoute de la base relayée par le service existant.
 Elle mesure pour chacune la reprise après coupure, l'ordre de livraison et le
 cloisonnement par organisation, puis demande l'arbitrage. Elle ne choisit pas.
+
+**Faite le 21 novembre 2026**, `docs/note-s6-0-transport-propagation.md`.
+Sans mesure, faute de base et de service de diffusion dans cette session. Elle
+recommande l'interrogation périodique du journal, sans dépendance nouvelle, et
+laisse Q4 ouverte.
 
 ### S6.1 Modèle de commande unique
 
@@ -169,7 +174,7 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 ### Ordre
 
-S6.1a et S6.3 sont faits. Tout le reste attend au
+S6.0, S6.1a et S6.3 sont faits. Tout le reste attend au
 moins une réponse de la section 4. S6.9 attend en plus L4.4.
 
 ---
@@ -197,10 +202,11 @@ Si oui, l'annulation disparaît en pratique dès que deux personnes travaillent.
 Si non, il faut dire quelles entrées restent annulables quand une commande
 distante a touché le même objet.
 
-**Q4. Transport, A2.2 cas 4.** Le studio n'a aucun client de diffusion. Toute
-voie de propagation en direct demande soit une bibliothèque nouvelle, soit un
-protocole implanté à la main. L'exploration S6.0 prépare ce choix, elle ne le
-fait pas.
+**Q4. Transport, A2.2 cas 4.** Le studio n'a aucun client de diffusion.
+L'exploration S6.0 compare trois voies. Seul le service de diffusion de
+Supabase exige une bibliothèque nouvelle. Le relais de `LISTEN` ajoute un point
+d'entrée exposé. L'interrogation périodique du journal n'exige ni l'un ni
+l'autre, et c'est la voie recommandée. Le choix reste à Oss53pa.
 
 **Q5. Code d'anomalie, A2.2 cas 3.** S-21 exige de nommer les commandes en
 cause, et S10 n'ajoute aucun code pour cela. Faut-il un code dédié, ou les
