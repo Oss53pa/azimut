@@ -122,6 +122,7 @@ non plus — elle n'en retire que les clés étrangères.
 0076_a6_2_roles_in_policies
 0077_a6_2_delegated_decisions
 0078_s6_2_command_journal
+0079_a6_2_marketing_role
 ```
 
 ## Règle pour la suite
