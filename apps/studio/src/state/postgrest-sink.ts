@@ -81,7 +81,12 @@ export function commandPayload(command: EntityCommand) {
   };
 }
 
-function refusal(commands: readonly EntityCommand[], cause: string): Finding {
+/**
+ * Le refus d'un émetteur. `cause` est le statut HTTP, ou `transport` : le
+ * message de la base ne remonte jamais (A6.1). Exporté pour l'émetteur
+ * journalisé de S6.2, qui refuse de la même façon.
+ */
+export function refusal(commands: readonly EntityCommand[], cause: string): Finding {
   const first = commands[0];
   return {
     code: 'EDIT.WRITE_REFUSED',

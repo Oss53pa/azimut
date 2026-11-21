@@ -59,9 +59,9 @@ section 4 doit être tranchée avant de commencer.
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Prêt |
 | S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
-| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Prêt |
-| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Après S6.6 |
-| S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Après S6.6 |
+| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
+| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Prêt |
+| S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
 
@@ -174,6 +174,33 @@ commande perdue ni appliquée deux fois après une coupure, et aucune commande
 d'une autre organisation reçue, testé comme un canal indirect de fuite au même
 titre que les autres essais d'étanchéité.
 
+**Fait le 21 novembre 2026**, `apps/studio/src/state/journaled-sink.ts` et
+`apps/studio/src/state/journal-follower.ts` :
+
+- un émetteur qui écrit par `apply_journaled_commands` et rend les numéros
+  que le journal a donnés à ses commandes ;
+- une lecture du journal après un curseur, chaque commande relue par
+  `parseCommand` ;
+- un curseur pur, qui écarte une entrée déjà reçue, avance sans les rendre
+  sur les écritures du poste, et s'arrête avant un trou ;
+- une interrogation périodique (`JOURNAL_POLL_INTERVAL_MS`, 1 000 ms), qui
+  n'avance pas après un échec et attend le retour d'une écriture en vol.
+
+Par PostgREST : le journal d'un site d'une autre organisation se lit comme
+celui d'un site absent.
+
+**Ce que S6.6 ne fait pas.** Rien dans l'atelier n'appelle encore ces
+fonctions. Le poste tient ses données comme un `SiteData` chargé, pas comme
+l'état de lignes qu'applique S6.3. Les brancher est un lot à part :
+
+| Lot | Objet | Taille | Dépend de |
+| --- | --- | --- | --- |
+| S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6 |
+
+Un essai de bout en bout entre deux postes reste à S6.10 : sur la base
+d'essai partagée, il laisserait au journal des lignes que rien ne peut
+retirer. Il demande une base jetable.
+
 ### S6.7 Présence
 
 Utilisateurs présents sur le niveau, leur sélection et leur zone de travail.
@@ -201,7 +228,7 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 S6.0, S6.1a et S6.3 sont faits. Depuis les décisions du 21 novembre, S6.1b
 et S6.2 étaient prêts ; S6.2 est fait. S6.1b, S6.4, S6.5 et S6.6 peuvent
-commencer ; S6.7 et S6.8 suivent S6.6. S6.9 attend L4.4.
+commencer ; S6.6 est fait. S6.7 et S6.8 sont prêts. S6.9 attend L4.4.
 
 ---
 

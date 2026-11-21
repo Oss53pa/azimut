@@ -270,6 +270,14 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
     expect(await kept.json()).toEqual([{ name: 'Site A' }]);
   });
 
+  it('ne rend rien du journal d’un site de l’autre organisation', async () => {
+    const path = (site: string) => `/command_journal?site_id=eq.${site}&seq=gt.0&select=seq`;
+    const other = await asUser(ALICE, path(SITE_B));
+    const absent = await asUser(ALICE, path('00000000-0000-4000-8000-000000000000'));
+    expect(other.status).toBe(200);
+    expect(await other.json()).toEqual(await absent.json());
+  });
+
   it('ne distingue pas un site de l’autre organisation d’un site absent', async () => {
     const other = await journaled(SITE_B, { name: 'Site B' });
     const absent = await journaled('00000000-0000-4000-8000-000000000000', { name: 'Site B' });
