@@ -54,14 +54,14 @@ section 4 doit être tranchée avant de commencer.
 | --- | --- | --- | --- | --- | --- |
 | S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Fait |
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
-| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Bloqué, Q6, Q7 |
-| S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Bloqué, Q1 |
+| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Prêt, Q6 et Q7 tranchées |
+| S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Prêt, Q1 tranchée |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
-| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Bloqué, Q1, Q2 |
-| S6.5 | Revalidation après propagation et barrière | M | S6.3 | coût de la revalidation à chaque commande | Bloqué, Q5 |
-| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Bloqué, Q1, Q4 |
-| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Bloqué, Q1 |
-| S6.8 | Annulation en présence de commandes distantes | M | S6.3 | articulation avec E5.3 | Bloqué, Q3 |
+| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Après S6.2 |
+| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Après S6.2 |
+| S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Après S6.2 |
+| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Après S6.2 |
+| S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Après S6.6 |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
 
@@ -174,10 +174,30 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 ### Ordre
 
-S6.0, S6.1a et S6.3 sont faits. Tout le reste attend au
-moins une réponse de la section 4. S6.9 attend en plus L4.4.
+S6.0, S6.1a et S6.3 sont faits. Depuis les décisions du 21 novembre, S6.1b
+et S6.2 sont prêts ; S6.4 à S6.8 suivent S6.2. S6.9 attend L4.4.
 
 ---
+
+## 3 bis. Décisions d'Oss53pa, 21 novembre 2026
+
+Réponses données en session aux questions de la section 4. Elles valent
+jusqu'à ce que l'éditeur les reporte au cahier. Trois s'écartent de la lettre
+du cahier : elles sont signalées à l'éditeur, section 5.
+
+| Question | Décision |
+| --- | --- |
+| Q1 | Trois tables : `command_journal`, en insertion seule, avec un numéro d'ordre par niveau ; `object_lock`, le verrou ferme avec expiration ; `level_presence`, qui est sur le niveau, sa sélection, sa zone et sa dernière activité. Toutes cloisonnées par organisation |
+| Q2 | Verrou ferme, refusé en base aux autres. Il tombe à la fin du geste, ou à une expiration courte renouvelée pendant le geste. Aucun passage en force |
+| Q3 | La pile d'annulation est conservée. Annuler émet la commande inverse, propagée comme les autres ; si l'objet a changé ailleurs, c'est un conflit présenté par S6.3 |
+| Q4 | Interrogation périodique du journal par PostgREST, intervalle en constante nommée. Voie recommandée par S6.0 |
+| Q5 | Codes de validation existants, portant en paramètre les identifiants des commandes en cause. Aucun code nouveau |
+| Q6 | Tables d'habillage créées selon E9.3, plus deux colonnes sur `decoration_shape` : `z_order int` et `style jsonb`, rôles seulement, aucune couleur |
+| Q7 | Identifiant de forme : un `uuid` tiré par l'appelant à la création. Le rejeu reste déterministe, l'identifiant étant inscrit dans la commande |
+
+La durée d'expiration du verrou (Q2) et l'intervalle d'interrogation (Q4) sont
+des constantes nommées sans origine normative. Leurs valeurs initiales se
+fixent au lot qui les emploie et se mesurent selon D13.
 
 ## 4. Questions à trancher avant développement (A2.2)
 
@@ -256,10 +276,19 @@ Signalés à l'éditeur. Aucune des deux versions n'est appliquée en attendant.
    présence et verrou consultatif à la place ».** S6 lève cette exclusion.
 3. **E19, point 4, la déclare « hors périmètre ».** Même contradiction.
 4. **T-1.16, O et G4.2 contre S-20**, voir Q2.
+5. **Décisions d'Oss53pa qui s'écartent de la lettre du cahier**, à reporter
+   par l'éditeur :
+   - Q2 contredit G4.2 (« Aucun verrou dur ») et l'acceptation de T-1.16
+     (« Aucun verrou ne bloque sans recours ») ; le recours restant est
+     l'expiration ;
+   - Q3 précise E5.3 : une propagation n'est pas une synchronisation qui vide
+     la pile ;
+   - Q6 ajoute deux colonnes à `decoration_shape`, absentes d'E9.3 ;
+   - Q1 crée trois tables absentes de A5 et de S9.
 
 ---
 
 ## 6. Ce que cette note ne fait pas
 
-Elle ne donne aucune durée (G1.1, G10 point 1). Elle ne tranche aucune des
-questions de la section 4. Elle n'autorise aucun lot bloqué à commencer.
+Elle ne donne aucune durée (G1.1, G10 point 1). Elle ne tranche elle-même
+aucune question : les réponses de la section 3 bis sont celles d'Oss53pa.
