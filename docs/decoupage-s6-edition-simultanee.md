@@ -224,6 +224,32 @@ obstacles, dont aucun ne relève de S6 :
    cette famille finira en 409. Seul un parcours sur base réelle, famille de
    commande par famille, le dira.
 
+**Q11, essais par famille, 21 novembre 2026**
+(`apps/studio/src/state/__tests__/q11-fidelite-before.db.test.ts`). Le site
+est relu par PostgREST et par le dépôt du studio, chaque commande est
+construite par le constructeur de l'atelier, puis appliquée par
+`apply_journaled_commands` dans une transaction annulée. Aucun faux conflit
+pour les huit familles éprouvées :
+
+| Famille | Constructeur | Résultat |
+| --- | --- | --- |
+| Renommer un bâtiment, un niveau | `renameCommands` | accepté |
+| Supprimer un niveau vide | `deleteLevelCommands` | accepté |
+| Déplacer un nœud, longueurs comprises | `updateNodeCommands` | accepté |
+| Modifier une arête | `updateEdgeCommands` | accepté |
+| Rayer une empreinte | `strikeFootprints` | accepté |
+| Annuler la création d'empreintes | `inverseCommand` | accepté |
+| Annuler la création du graphe | `inverseCommand` | accepté |
+
+L'essai mord : un `before` faux y est refusé en `PT409`.
+
+Restent à éprouver, faute de décor dans cet essai : le calage
+(`calibrationCommands` en modification), le code d'un support
+(`setSupportCode`), l'esquisse (`eraseCommands`, `layerVisibilityCommand`),
+l'état d'une annotation (`setStateCommand`) et les transitions du tableau des
+messages (`transitionCommands`). S6.6b peut se brancher pour les familles
+éprouvées ; les autres le seront avant d'y passer.
+
 Un essai de bout en bout entre deux postes reste à S6.10 : sur la base
 d'essai partagée, il laisserait au journal des lignes que rien ne peut
 retirer. Il demande une base jetable.
