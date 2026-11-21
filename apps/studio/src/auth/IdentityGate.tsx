@@ -14,13 +14,16 @@ import type { PostgrestConfig } from '../data/postgrest-http.js';
 import { SessionIdentityContext, identityOf } from './identity.js';
 import type { Membership } from './identity.js';
 import { loadMemberships } from './load-memberships.js';
+import { MfaGate } from './MfaGate.js';
+import type { GoTrueClient } from '@supabase/auth-js';
 
 type Load =
   | { readonly status: 'loading' }
   | { readonly status: 'failed' }
   | { readonly status: 'ready'; readonly memberships: readonly Membership[] };
 
-export function IdentityGate({ config, userId, children }: {
+export function IdentityGate({ client, config, userId, children }: {
+  readonly client: GoTrueClient;
   readonly config: PostgrestConfig;
   readonly userId: string;
   readonly children: ReactNode;
@@ -63,7 +66,10 @@ export function IdentityGate({ config, userId, children }: {
         <h1 style={{ ...LABEL_STYLE, margin: 0 }}>{t('auth.identity.choose')}</h1>
         {memberships.map(m => (
           <Button key={m.orgId} rank="secondary" onClick={() => { setChosen(m.orgId); }}>
-            {t('auth.identity.option', { org: m.orgName, role: t(`auth.role.${m.role}`) })}
+            {t('auth.identity.option', {
+              org: m.orgName === '' ? t('auth.identity.unnamed') : m.orgName,
+              role: t(`auth.role.${m.role}`),
+            })}
           </Button>
         ))}
       </section>
@@ -77,7 +83,7 @@ export function IdentityGate({ config, userId, children }: {
           <Button rank="secondary" onClick={() => { setChosen(null); }}>{t('auth.identity.switch')}</Button>
         </div>
       )}
-      {children}
+      <MfaGate client={client}>{children}</MfaGate>
     </SessionIdentityContext.Provider>
   );
 }

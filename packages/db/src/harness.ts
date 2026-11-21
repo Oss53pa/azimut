@@ -10,3 +10,4 @@ export { startPostgrest, signToken, installPlatformStubs, testJwtSecret } from '
 export type { Harness } from './postgrest-harness.js';
 export { startAuthService } from './auth-harness.js';
 export type { AuthService } from './auth-harness.js';
+export { totpNow } from './totp.js';

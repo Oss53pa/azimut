@@ -52,7 +52,7 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Fait |
 | AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Fait |
 | AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Fait, migration 0080 |
-| AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
+| AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Fait |
 | AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Après AUTH.4, QA3 tranchée |
 
 Les lots AUTH.0 à AUTH.6 suffisent à débloquer S6.4, S6.6b et S6.7. AUTH.7
@@ -122,6 +122,23 @@ liste des sites ceux de toutes ses organisations, et la base refusera toute
 écriture sur un site d'une autre organisation que celle choisie. Filtrer la
 liste par l'organisation choisie relève de L4.1, multi-organisations complet,
 placé à l'incrément 4.
+
+### AUTH.6, fait le 21 novembre 2026
+
+Un `admin` ou un `owner_rep` connecté passe par l'écran du second facteur
+avant l'atelier (`auth/MfaGate.tsx`) : sans facteur, il en enrôle un, TOTP,
+par code QR ou clé saisie à la main ; avec un facteur, il saisit son code. Le
+jeton `aal2` que délivre alors le service devient le jeton de toutes les
+requêtes. Les autres rôles ne voient pas cet écran. Le code QR est rendu par
+une balise d'image, jamais inséré comme balisage.
+
+Éprouvé contre le vrai service, puis dans un navigateur : écran affiché,
+code QR chargé, code faux refusé, code calculé depuis la clé affichée
+accepté, site lu ensuite.
+
+Le nom d'une organisation où le membre est `admin` ne se lit pas en `aal1`
+(0080) ; l'écran de choix d'organisation affiche alors « organisation
+protégée par le second facteur ».
 
 ### AUTH.5, pourquoi en base
 

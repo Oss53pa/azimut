@@ -2,12 +2,12 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
 import type { Sql } from 'postgres';
 import { existsSync } from 'node:fs';
-import { createHmac } from 'node:crypto';
 import { startPostgrest } from '../postgrest-harness.js';
 import type { Harness } from '../postgrest-harness.js';
 import { startAuthService } from '../auth-harness.js';
 import type { AuthService } from '../auth-harness.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { totpNow } from '../totp.js';
 import { enrolFixtureMembers, withdrawFixtureMembers } from '../fixture-membership.js';
 
 /**
@@ -70,22 +70,6 @@ async function sites(token: string | null): Promise<Response> {
   return fetch(`${rest.url}/site?select=id&order=id`, { headers });
 }
 
-
-/** Le code TOTP courant d'un secret en base 32 (RFC 6238 : SHA-1, 30 s, 6 chiffres). */
-function totp(secret: string): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let bits = '';
-  for (const char of secret.replace(/=+$/, '').toUpperCase()) {
-    bits += alphabet.indexOf(char).toString(2).padStart(5, '0');
-  }
-  const key = Buffer.from((bits.match(/.{8}/g) ?? []).map(b => Number.parseInt(b, 2)));
-  const counter = Buffer.alloc(8);
-  counter.writeBigUInt64BE(BigInt(Math.floor(Date.now() / 30_000)));
-  const digest = createHmac('sha1', key).update(counter).digest();
-  const offset = (digest[digest.length - 1] ?? 0) & 0x0f;
-  const code = (digest.readUInt32BE(offset) & 0x7fffffff) % 1_000_000;
-  return String(code).padStart(6, '0');
-}
 
 async function authCall(path: string, token: string, body: unknown): Promise<Record<string, unknown>> {
   const response = await fetch(`${auth.url}${path}`, {
@@ -181,7 +165,7 @@ describe.runIf(runnable)('AUTH.2 — connexion réelle', () => {
     const secret = String((factor['totp'] as Record<string, unknown>)['secret']);
     const challenge = await authCall(`/factors/${factorId}/challenge`, session.access_token, {});
     const verified = await authCall(`/factors/${factorId}/verify`, session.access_token, {
-      challenge_id: challenge['id'], code: totp(secret),
+      challenge_id: challenge['id'], code: totpNow(secret),
     });
     const strong = String(verified['access_token']);
 

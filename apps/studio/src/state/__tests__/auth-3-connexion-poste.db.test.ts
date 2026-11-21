@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import { createConnection, deleteOrgFixture, enrolFixtureMembers } from '@azimut/db';
-import { startAuthService, startPostgrest } from '@azimut/db/harness';
+import { startAuthService, startPostgrest, totpNow } from '@azimut/db/harness';
 import type { AuthService, Harness } from '@azimut/db/harness';
 import type { GoTrueClient } from '@supabase/auth-js';
 import { createAuthClient } from '../../auth/auth-config.js';
@@ -10,6 +10,7 @@ import { signInFailureOf } from '../../auth/use-auth-session.js';
 import { query } from '../../data/postgrest-http.js';
 import { isRepositoryError } from '../../data/site-repository.js';
 import { loadMemberships } from '../../auth/load-memberships.js';
+import { mfaStep, qrImageSource } from '../../auth/mfa-step.js';
 
 /**
  * AUTH.3 et AUTH.4 — le code de connexion du studio, contre le vrai service et le vrai
@@ -44,6 +45,7 @@ let auth: AuthService;
 let rest: Harness;
 let gotrue: GoTrueClient;
 let email: string;
+let adminEmail: string;
 
 describe.runIf(runnable)('AUTH.3 — la connexion du poste', () => {
   beforeAll(async () => {
@@ -73,7 +75,15 @@ describe.runIf(runnable)('AUTH.3 — la connexion du poste', () => {
     for (const table of ['organization', 'site']) {
       await client.unsafe(`alter table azimut.${table} force row level security`);
     }
-    await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: ORG, userId, role: 'designer' }]);
+    adminEmail = `admin-${Date.now().toString(36)}@example.invalid`;
+    const adminSignup = await gotrue.signUp({ email: adminEmail, password: PASSWORD });
+    expect(adminSignup.error).toBeNull();
+    await gotrue.signOut();
+
+    await enrolFixtureMembers(text => client.unsafe(text), [
+      { orgId: ORG, userId, role: 'designer' },
+      { orgId: ORG, userId: adminSignup.data.user?.id ?? '', role: 'admin' },
+    ]);
   }, 60_000);
 
   afterAll(async () => {
@@ -104,6 +114,46 @@ describe.runIf(runnable)('AUTH.3 — la connexion du poste', () => {
         .toEqual([{ orgId: ORG, orgName: 'Poste', role: 'designer' }]);
     } finally {
       release();
+    }
+  });
+
+  /**
+   * AUTH.6 — l'administrateur passe par l'écran du second facteur. Le client
+   * de l'atelier enrôle un facteur TOTP, le vérifie ; avant, la base ne lui
+   * rend rien (0080), après, son site.
+   */
+  it('un admin enrôle son second facteur, et n’accède à son site qu’ensuite', async () => {
+    const { data, error } = await gotrue.signInWithPassword({ email: adminEmail, password: PASSWORD });
+    expect(error).toBeNull();
+    let token = data.session?.access_token ?? null;
+    const release = setAccessTokenSource(() => token);
+    try {
+      const level = await gotrue.mfa.getAuthenticatorAssuranceLevel();
+      const factors = await gotrue.mfa.listFactors();
+      expect(mfaStep({
+        actor: 'admin', currentLevel: level.data?.currentLevel ?? null,
+        verifiedFactors: factors.data?.totp.length ?? 0,
+      })).toBe('enroll');
+      expect(await query(config(), 'site', 'select=id')).toEqual([]);
+
+      const enrolled = await gotrue.mfa.enroll({ factorType: 'totp' });
+      expect(enrolled.error).toBeNull();
+      const factorId = enrolled.data?.id ?? '';
+      expect(qrImageSource(enrolled.data?.totp.qr_code ?? '')).not.toBeNull();
+
+      const verified = await gotrue.mfa.challengeAndVerify({
+        factorId, code: totpNow(enrolled.data?.totp.secret ?? ''),
+      });
+      expect(verified.error).toBeNull();
+      token = (await gotrue.getSession()).data.session?.access_token ?? null;
+
+      const after = await gotrue.mfa.getAuthenticatorAssuranceLevel();
+      expect(mfaStep({ actor: 'admin', currentLevel: after.data?.currentLevel ?? null, verifiedFactors: 1 }))
+        .toBe('none');
+      expect(await query(config(), 'site', 'select=id')).toEqual([{ id: SITE }]);
+    } finally {
+      release();
+      await gotrue.signOut();
     }
   });
 

@@ -53,7 +53,7 @@ function SignedInOnly({ client, children }: {
       </div>
       {config === null
         ? <StateBanner severity="blocking" message={t('auth.identity.failed')} />
-        : <IdentityGate config={config} userId={state.userId}>{children}</IdentityGate>}
+        : <IdentityGate client={client} config={config} userId={state.userId}>{children}</IdentityGate>}
     </>
   );
 }
