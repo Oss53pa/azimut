@@ -167,6 +167,28 @@ jobs:
           tar -xJf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP"
           "$RUNNER_TEMP/postgrest" --version
 
+      # AUTH.2, décision QA2 d'Oss53pa (21 novembre 2026) : la connexion réelle
+      # s'éprouve sur une installation autonome (A3.4). Le service
+      # d'authentification de Supabase est téléchargé comme PostgREST, version
+      # figée et empreinte vérifiée ; ses migrations sont livrées avec lui.
+      - name: Installer le service d'authentification
+        run: |
+          set -euo pipefail
+          version=v2.177.0
+          empreinte=fa48b1c1df11576c87b23e7f189ac6f01cd95265244eed7ff8a4e647858a0428
+          archive=auth-$version-x86.tar.gz
+          mkdir -p "$RUNNER_TEMP/auth"
+          curl -sSfL -o "$RUNNER_TEMP/auth/$archive" \
+            "https://github.com/supabase/auth/releases/download/$version/$archive"
+          echo "$empreinte  $RUNNER_TEMP/auth/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/auth/$archive" -C "$RUNNER_TEMP/auth"
+          "$RUNNER_TEMP/auth/auth" version
+
+      # Une base distincte : le schéma `auth` du service ne cohabite pas avec
+      # celui, réduit, de `bootstrap-standalone.sql`.
+      - name: Monter la base avec le service d'authentification
+        run: scripts/monter-base-authentification.sh "$RUNNER_TEMP/auth/auth" 127.0.0.1:54332
+
       - name: RLS tests
         env:
           AZIMUT_TEST_DATABASE_URL: postgres://azimut@127.0.0.1:54332/azimut
@@ -179,6 +201,13 @@ jobs:
           # Sans la déclaration, un binaire manquant la ferait sauter en
           # silence ; avec elle, il la fait échouer.
           AZIMUT_REQUIRE_POSTGREST: '1'
+          # AUTH.2 : la base montée par le service d'authentification, et les
+          # chaînes de ses deux rôles. Aucun mot de passe, comme plus haut.
+          AZIMUT_TEST_AUTH_DATABASE_URL: postgres://azimut@127.0.0.1:54332/azimut_auth
+          AZIMUT_TEST_AUTH_DB_URI: postgres://supabase_auth_admin@127.0.0.1:54332/azimut_auth
+          AZIMUT_TEST_AUTH_POSTGREST_DB_URI: postgres://authenticator@127.0.0.1:54332/azimut_auth
+          AZIMUT_TEST_AUTH_BINARY: ${{ runner.temp }}/auth/auth
+          AZIMUT_REQUIRE_AUTH: '1'
         run: pnpm test:rls
 
       - name: Determinism tests

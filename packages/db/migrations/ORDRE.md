@@ -251,3 +251,29 @@ dont c'est le travail pose en plus `AZIMUT_REQUIRE_POSTGREST=1`, et un binaire
 manquant la fait alors échouer au lieu de la sauter — un essai qu'aucune chaîne
 n'exécute n'existe pas. La chaîne d'A13.2 le pose, et installe PostgREST
 12.2.3, version figée et empreinte vérifiée.
+
+## Connexion réelle, avec le service d'authentification
+
+AUTH.2 éprouve une connexion délivrée par le service d'authentification de
+Supabase, et non un jeton signé par le banc. Ce service installe son propre
+schéma `auth`, qui ne cohabite pas avec celui de `bootstrap-standalone.sql` :
+la suite tourne donc sur une seconde base, `azimut_auth`, où le service migre
+son schéma avant le corpus, et où le préalable ne passe pas.
+
+```
+scripts/monter-base-authentification.sh /chemin/vers/auth 127.0.0.1:54332
+```
+
+Le binaire du service est celui de la version 2.177.0, que la chaîne
+télécharge et vérifie par son empreinte ; ses migrations sont livrées à côté de
+lui. La suite demande, en plus des variables de PostgREST :
+
+```
+AZIMUT_TEST_AUTH_DATABASE_URL=postgres://azimut@127.0.0.1:54332/azimut_auth
+AZIMUT_TEST_AUTH_DB_URI=postgres://supabase_auth_admin@127.0.0.1:54332/azimut_auth
+AZIMUT_TEST_AUTH_POSTGREST_DB_URI=postgres://authenticator@127.0.0.1:54332/azimut_auth
+AZIMUT_TEST_AUTH_BINARY=/chemin/vers/auth
+```
+
+Sans elles, la suite se saute ; la chaîne pose `AZIMUT_REQUIRE_AUTH=1`, et un
+service manquant la fait alors échouer.

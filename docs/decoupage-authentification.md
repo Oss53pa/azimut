@@ -48,10 +48,10 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | --- | --- | --- | --- | --- |
 | AUTH.0 | Aligner la contrainte des rôles sur A5.1 (`marketing`) | S | — | Fait, migration 0079 |
 | AUTH.1 | Journal des changements de rôle en base | M | — | Bloqué, QA5 |
-| AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Prêt, QA2 tranchée |
-| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Après AUTH.2, QA1 tranchée |
+| AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Fait |
+| AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Prêt |
 | AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Après AUTH.3 |
-| AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Après AUTH.2 |
+| AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Prêt |
 | AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
 | AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Après AUTH.4, QA3 tranchée |
 
@@ -68,6 +68,24 @@ table portant `org_id`, et sur les cinq tables en insertion seule, le refus
 porté par leurs politiques de lecture et d'insertion, comme pour l'`auditor`
 en 0076. Seule la lecture de ses propres rattachements lui reste. Les droits
 de P9 se poseront avec ce module.
+
+### AUTH.2, fait le 21 novembre 2026
+
+Le service d'authentification de Supabase, version 2.177.0, empreinte
+vérifiée, entre en CI. `scripts/monter-base-authentification.sh` monte une
+seconde base, `azimut_auth` : le service y migre son schéma `auth`, puis le
+corpus s'applique sans le préalable de `bootstrap-standalone.sql`, avec lequel
+ce schéma ne cohabite pas. Les 83 migrations passent sur ce schéma réel.
+
+L'essai `auth-2-connexion-reelle` obtient un jeton du service et le présente
+à PostgREST : le jeton porte l'identité, le rôle et le niveau d'assurance
+(`aal`) ; cette identité ne voit que son organisation ; sans jeton, rien ne se
+lit ; une phrase de passe fausse n'obtient rien. Vérifié aussi à la main : une
+écriture par `apply_journaled_commands` sous ce jeton inscrit l'identifiant
+réel comme auteur.
+
+Non vérifié : l'exécution de ces étapes par la CI elle-même. Le script et la
+suite ont tourné ici, contre les mêmes binaires.
 
 ### AUTH.5, pourquoi en base
 
