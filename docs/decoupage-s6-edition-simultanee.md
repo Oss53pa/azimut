@@ -195,7 +195,34 @@ l'état de lignes qu'applique S6.3. Les brancher est un lot à part :
 
 | Lot | Objet | Taille | Dépend de |
 | --- | --- | --- | --- |
-| S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6 |
+| S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6, Q9 à Q11 |
+
+**S6.6b, bloqué le 21 novembre 2026.** L'examen du poste a montré quatre
+obstacles, dont aucun ne relève de S6 :
+
+1. **Aucune session authentifiée** (Q9). L'atelier écrit sous la clé
+   publique, avec une organisation et un rôle écrits en dur
+   (`apps/studio/src/app/session-identity.ts`). `apply_journaled_commands`
+   prend l'auteur dans `current_user_id()`, vide sans session : toute
+   écriture journalisée échouerait. La présence (S6.7) et le verrou (S6.4)
+   demandent la même identité.
+2. **Identifiants de ligne prévisibles et communs à tous les postes** (Q10).
+   `newId` de `useTrancheSession` rend `00000000-0000-4000-8000-<compteur>`,
+   compteur repris des lignes chargées. Deux postes sur le même site tirent
+   le même identifiant ; deux sites, même d'organisations différentes, aussi,
+   puisque la clé primaire est globale. La seconde création échoue alors sur
+   l'unicité, et cet échec dit qu'une ligne de ce numéro existe ailleurs
+   (A6.1, canal indirect). C'est le problème de Q7, étendu à tout l'atelier.
+3. **Un refus est mis en file comme une coupure.** `writeToSession` met en
+   file toute commande que l'émetteur refuse, et la renvoie au retour du
+   réseau. Une commande périmée (409) repartirait à chaque reconnexion,
+   refusée à chaque fois. Le poste doit distinguer le conflit de la coupure.
+4. **Fidélité de `before` non éprouvée** (Q11). Les lignes de la session
+   viennent du modèle (`sessionFromSite`), pas de la base. Une valeur que le
+   modèle arrondit ou transforme — un réel converti en double, une géométrie
+   quantifiée — ne correspondra pas à la base, et chaque modification de
+   cette famille finira en 409. Seul un parcours sur base réelle, famille de
+   commande par famille, le dira.
 
 Un essai de bout en bout entre deux postes reste à S6.10 : sur la base
 d'essai partagée, il laisserait au journal des lignes que rien ne peut
