@@ -219,21 +219,3 @@ export function resumeDecision(
   if (saved === null || saved.rows.length === 0) return { kind: 'rien' };
   return openInTab ? { kind: 'poursuivre', state: saved } : { kind: 'proposer', state: saved };
 }
-
-/**
- * Le rang du dernier identifiant local d'un état repris.
- *
- * Les identifiants de session sont tirés en suite — `…-000000000001`, puis
- * `…-000000000002`. Reprendre un état sans reprendre ce compteur ferait
- * réécrire les lignes déjà là au lieu d'en ajouter : la reprise perdrait
- * exactement ce qu'elle prétend sauver.
- */
-export function highestLocalRank(rows: readonly StoredRow[]): number {
-  let highest = 0;
-  for (const row of rows) {
-    const match = /^00000000-0000-4000-8000-([0-9a-f]{12})$/.exec(row.id);
-    if (match?.[1] === undefined) continue;
-    highest = Math.max(highest, Number.parseInt(match[1], 16));
-  }
-  return highest;
-}

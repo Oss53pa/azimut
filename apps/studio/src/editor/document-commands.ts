@@ -5,9 +5,11 @@
  * before and after it (E5.1). Applying `before` undoes the operation,
  * applying `after` redoes it, so no command needs an inverse routine.
  *
- * Identifiers are derived from the document itself, never from a clock
- * or a random source, so replaying the same operations on the same
- * document yields the same ids (invariant 4, E4.4).
+ * Shape identifiers are drawn by the caller, as a uuid, at creation
+ * (decisions Q7 and Q10 of `docs/decoupage-s6-edition-simultanee.md`). A
+ * command carries the identifiers it creates, so replaying the same
+ * commands yields the same ids (invariant 4, E4.4). Deriving them from the
+ * document gave two concurrent editors the same identifier.
  */
 
 import type { Command } from './command.js';
@@ -29,24 +31,8 @@ export const CMD_SHAPE_REORDER = 'document.shape.reorder';
 export const CMD_SHAPE_PASTE = 'document.shape.paste';
 
 // ---------------------------------------------------------------------------
-// Identifier derivation
+// Layers
 // ---------------------------------------------------------------------------
-
-const SHAPE_ID_PREFIX = 'dec-';
-
-/**
- * Next shape identifier, derived from the identifiers already present.
- * Deterministic: the same document always yields the same next id.
- */
-export function nextShapeId(doc: EditorDocument, offset = 0): string {
-  let highest = 0;
-  for (const shape of doc.shapes) {
-    if (!shape.id.startsWith(SHAPE_ID_PREFIX)) continue;
-    const suffix = Number.parseInt(shape.id.slice(SHAPE_ID_PREFIX.length), 10);
-    if (Number.isInteger(suffix) && suffix > highest) highest = suffix;
-  }
-  return `${SHAPE_ID_PREFIX}${String(highest + offset + 1)}`;
-}
 
 /** Identifier of the default habillage layer of a level (E9.3). */
 export function defaultLayerId(levelId: string): string {

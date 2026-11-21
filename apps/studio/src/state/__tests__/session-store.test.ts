@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   EMPTY_SESSION, applyToSession, rowsOf, countOf, storageKey,
   saveSession, readSession, clearSession, writeToSession, flushQueue,
-  resumeDecision, markOpenInTab, isOpenInTab, highestLocalRank,
+  resumeDecision, markOpenInTab, isOpenInTab,
 } from '../session-store.js';
 import type { SessionState } from '../session-store.js';
 import { buildCommand } from '@azimut/core-model';
@@ -222,14 +222,5 @@ describe('E5.4 — la reprise, et ce qui la distingue d’une navigation', () =>
     // Un onglet qui ne peut pas se marquer n'est jamais réputé ouvert : la
     // question est posée, ce qui est le comportement sûr.
     expect(isOpenInTab(site, null)).toBe(false);
-  });
-
-  it('le rang du dernier identifiant local est repris, sans quoi la suite réécrit', () => {
-    expect(highestLocalRank([])).toBe(0);
-    expect(highestLocalRank([
-      { table: 'node', id: '00000000-0000-4000-8000-000000000001', values: {} },
-      { table: 'edge', id: '00000000-0000-4000-8000-00000000000b', values: {} },
-      { table: 'node', id: 'un-identifiant-du-depot', values: {} },
-    ])).toBe(11);
   });
 });

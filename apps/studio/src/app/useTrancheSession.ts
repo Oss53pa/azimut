@@ -16,7 +16,6 @@ import type { EntityCommand, Outcome } from '@azimut/core-model';
 import {
   EMPTY_SESSION, writeToSession, flushQueue, saveSession, countOf,
   readSession, clearSession, resumeDecision, markOpenInTab, isOpenInTab,
-  highestLocalRank,
 } from '../state/session-store.js';
 import type { SessionState } from '../state/session-store.js';
 import {
@@ -132,7 +131,6 @@ export function useTrancheSession(
   // L'état courant, lisible sans attendre un rendu : une écriture doit partir
   // du dernier état écrit, et non de celui que React a rendu en dernier.
   const current = useRef<SessionState>(EMPTY_SESSION);
-  const counter = useRef(0);
   const storage = useMemo(
     () => (typeof localStorage === 'undefined' ? null : localStorage),
     [],
@@ -154,14 +152,9 @@ export function useTrancheSession(
   }, []);
   const store = useRef<StoreState>(EMPTY_STORE);
 
-  /**
-   * Prend un état pour état courant. Le compteur d'identifiants reprend après
-   * le dernier rang écrit, sans quoi la commande suivante réécrirait une ligne
-   * reprise au lieu d'en créer une.
-   */
+  /** Prend un état pour état courant. */
   const adopt = useCallback((next: SessionState): void => {
     current.current = next;
-    counter.current = Math.max(counter.current, highestLocalRank(next.rows));
     setState(next);
   }, []);
 
@@ -294,14 +287,13 @@ export function useTrancheSession(
     return result.applied && result.outcome.ok;
   }, [sink]);
 
-  const newId = useCallback((): string => {
-    counter.current += 1;
-    // Déterministe, et suffisant pour une session : les identifiants réels
-    // viennent du dépôt. Un tirage au sort ici rendrait le parcours
-    // irreproductible, contre INV-4.
-    const n = counter.current.toString(16).padStart(12, '0');
-    return `00000000-0000-4000-8000-${n}`;
-  }, []);
+  // Q10, décision d'Oss53pa du 21 novembre 2026 : un uuid tiré ici, à la
+  // création. Un compteur rendait le même identifiant à tous les postes et à
+  // tous les sites, la clé primaire étant globale : deux créations se
+  // heurtaient, et l'échec disait qu'une ligne de ce numéro existait
+  // ailleurs (A6.1). Le rejeu reste déterministe (INV-4, E4.4) : l'identifiant
+  // est inscrit dans la commande, jamais recalculé.
+  const newId = useCallback((): string => crypto.randomUUID(), []);
 
   return {
     state,

@@ -13,7 +13,6 @@ import {
   defaultLayerId,
   deleteShapesCommand,
   moveShapesCommand,
-  nextShapeId,
   reorderShapesCommand,
 } from '../document-commands.js';
 
@@ -37,31 +36,6 @@ function docWith(shapes: readonly DecorationShape[]): EditorDocument {
 }
 
 describe('E5 — document commands', () => {
-  describe('identifier derivation', () => {
-    it('starts at one on an empty document', () => {
-      expect(nextShapeId(emptyDocument('site-1'))).toBe('dec-1');
-    });
-
-    it('continues past the highest existing identifier', () => {
-      expect(nextShapeId(docWith([shape('dec-1', 0), shape('dec-7', 1)]))).toBe('dec-8');
-    });
-
-    it('ignores identifiers that do not follow the scheme', () => {
-      expect(nextShapeId(docWith([shape('imported-x', 0)]))).toBe('dec-1');
-    });
-
-    it('offsets so a multi-shape paste gets distinct identifiers', () => {
-      const doc = docWith([shape('dec-3', 0)]);
-      expect([0, 1, 2].map(i => nextShapeId(doc, i)))
-        .toEqual(['dec-4', 'dec-5', 'dec-6']);
-    });
-
-    it('is derived from the document, never from a clock or a random source', () => {
-      const doc = docWith([shape('dec-2', 0)]);
-      expect(nextShapeId(doc)).toBe(nextShapeId(doc));
-    });
-  });
-
   describe('defaultLayer (E9.3)', () => {
     it('is visible, printable and unlocked', () => {
       expect(LAYER.visible).toBe(true);

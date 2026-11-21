@@ -25,7 +25,6 @@ import {
   defaultLayer,
   deleteShapesCommand,
   moveShapesCommand,
-  nextShapeId,
   reorderShapesCommand,
   CMD_SHAPE_PASTE,
 } from './document-commands.js';
@@ -45,6 +44,8 @@ export type UseEditorOperationsOptions = {
   readonly selectedIds: readonly string[];
   /** ISO-8601 timestamp source. Injected so tests can replay (E4.4). */
   readonly now?: (() => string) | undefined;
+  /** Tire l'identifiant d'une forme créée ; un uuid par défaut (Q7). */
+  readonly newId?: (() => string) | undefined;
   /** Called after an operation, to announce its result (E6.3). */
   readonly onAnnounce?: ((message: string) => void) | undefined;
 };
@@ -64,6 +65,10 @@ export type EditorOperations = {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+function defaultNewId(): string {
+  return crypto.randomUUID();
+}
 
 function defaultNow(): string {
   return new Date().toISOString();
@@ -99,7 +104,7 @@ export function useEditorOperations(
 ): EditorOperations {
   const {
     documentApi, orgId, siteId, levelId, selectedIds,
-    now = defaultNow, onAnnounce,
+    now = defaultNow, newId = defaultNewId, onAnnounce,
   } = options;
   const { document, execute } = documentApi;
   const { t } = useI18n();
@@ -120,7 +125,7 @@ export function useEditorOperations(
     if (geometry === null) return;
 
     const shape: DecorationShape = {
-      id: nextShapeId(document),
+      id: newId(),
       orgId,
       layerId: layer.id,
       kind: kindForGeometry(geometry),
@@ -135,7 +140,7 @@ export function useEditorOperations(
     if (command === null) return;
     execute(command);
     announce(t('editor.announce.created'));
-  }, [document, execute, orgId, layer, now, announce, t]);
+  }, [document, execute, orgId, layer, now, newId, announce, t]);
 
   // ---- Deletion ----
 
@@ -184,7 +189,7 @@ export function useEditorOperations(
     const shapes = shapesFromClipboard(result.items, result.offset, {
       orgId,
       layerId: layer.id,
-      idAt: (index: number) => nextShapeId(document, index),
+      idAt: () => newId(),
     });
     const command = createShapesCommand(
       document, shapes, layer, now(), CMD_SHAPE_PASTE,
@@ -192,7 +197,7 @@ export function useEditorOperations(
     if (command === null) return;
     execute(command);
     announce(t('editor.announce.pasted', { count: shapes.length }));
-  }, [document, execute, orgId, layer, now, announce, t]);
+  }, [document, execute, orgId, layer, now, newId, announce, t]);
 
   const cut = useCallback((ids: readonly string[]) => {
     const command = deleteShapesCommand(document, ids, now());

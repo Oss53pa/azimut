@@ -32,7 +32,6 @@ import {
   defaultLayer,
   deleteShapesCommand,
   moveShapesCommand,
-  nextShapeId,
   reorderShapesCommand,
 } from '../document-commands.js';
 import { geometryFromCommandData, kindForGeometry, shapeBounds } from '../shape-geometry.js';
@@ -127,7 +126,9 @@ function drawShape(
   if (geometry === null) return state;
 
   const shape: DecorationShape = {
-    id: nextShapeId(state.document),
+    // L'identifiant est fourni, comme l'appelant le tire (Q7) : rejouer les
+    // mêmes commandes rend les mêmes identifiants.
+    id: `dec-${String(state.document.shapes.length + 1)}`,
     orgId: ORG,
     layerId: LAYER.id,
     kind: kindForGeometry(geometry),
