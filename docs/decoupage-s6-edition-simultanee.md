@@ -56,7 +56,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
 | S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Bloqué, Q6, Q7 |
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par niveau, cloisonnement | Bloqué, Q1 |
-| S6.3 | Moteur d'application des commandes distantes | M | S6.1a | refus d'une commande périmée sans fusion | Bloqué, Q8 |
+| S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Bloqué, Q1, Q2 |
 | S6.5 | Revalidation après propagation et barrière | M | S6.3 | coût de la revalidation à chaque commande | Bloqué, Q5 |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Bloqué, Q4 |
@@ -108,14 +108,20 @@ l'arbitrage hors ligne. **Aucune table de ce type n'existe en A5 ni en S9.**
 
 ### S6.3 Moteur d'application des commandes distantes
 
-Fonction pure : état courant plus commande distante donnent un nouvel état ou
-un refus. Une commande dont la version d'origine ne correspond plus à l'état
-est refusée, jamais fusionnée (concurrence optimiste au niveau de l'objet,
-L4.4). Sans horloge, sans réseau, sans tirage aléatoire (A9).
+**Fait le 21 novembre 2026**, `packages/core-model/src/remote-commands.ts`.
 
-Acceptation : deux clients qui reçoivent les mêmes commandes dans le même ordre
-produisent des états strictement identiques. Une commande périmée est refusée
-et l'état reste inchangé.
+Fonction pure : état des lignes d'une organisation plus commande reçue donnent
+un nouvel état, ou un conflit avec l'état inchangé. L'état `before` de la
+commande sert de condition, colonne par colonne. Aucune fusion. Une commande
+d'une autre organisation est refusée par `EDIT.WRITE_REFUSED` (A6.1). Sans
+horloge, sans réseau, sans tirage aléatoire (A9).
+
+Trois motifs de conflit : création d'une ligne existante, modification ou
+suppression d'une ligne absente, colonne de `before` changée depuis.
+
+Acceptation : deux postes qui reçoivent les mêmes commandes dans le même ordre
+obtiennent le même état. Une commande en conflit laisse l'état inchangé et
+porte les deux versions.
 
 ### S6.4 Verrou ferme
 
@@ -163,7 +169,7 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 ### Ordre
 
-S6.1a est fait. S6.3 attend Q8. Tout le reste attend au
+S6.1a et S6.3 sont faits. Tout le reste attend au
 moins une réponse de la section 4. S6.9 attend en plus L4.4.
 
 ---
@@ -221,15 +227,16 @@ d'habillage n'ont pas de colonne en E9.3 :
 
 Le troisième point oppose le déterminisme d'E4.4 à l'unicité qu'exige S6.
 
-**Q8. Code de la commande périmée, A2.2 cas 3.** S6.3 refuse une commande dont
-l'état `before` n'est plus celui de l'objet. A7 exige un refus « portant un
-code du catalogue », et le catalogue n'en a aucun pour ce cas : ni S10, ni
-L4.4, qui pose pourtant la même concurrence optimiste. D2.2 veut que le code
-soit inscrit au cahier dans le même commit, et le cahier ne s'édite pas
-depuis le code. Aucun code existant ne convient : D2.1 interdit d'en employer
-un dans un autre sens. Proposition à l'éditeur : `EDIT.COMMAND_STALE`,
-bloquant, « commande fondée sur un état de l'objet qui n'est plus le sien »,
-commun à S6.3 et à L4.4.
+**Q8. Code de la commande périmée, levée sans code nouveau.** Un code ne
+pouvait pas entrer au dépôt : `tests/catalogue-consolide.test.ts` lit le cahier
+et refuse tout code qui n'y figure pas. S6.3 ne lève donc pas d'anomalie pour
+une commande périmée. Il rend un résultat de conflit, état inchangé, portant
+la version courante et la commande reçue, conformément à L4.4 : « les conflits
+réels sont arbitrés par l'utilisateur avec les deux versions présentées ». Un
+conflit n'est pas une entrée invalide au sens de A7 : la commande est bien
+formée, l'objet a changé. Si l'éditeur veut tout de même un code, par exemple
+pour journaliser les conflits, la proposition `EDIT.COMMAND_STALE` reste
+valable.
 
 ---
 

@@ -360,6 +360,8 @@ export {
   serializeCommand,
   parseCommand,
 } from './command-wire.js';
+export { applyRemoteCommand, emptyRowStore, rowOf } from './remote-commands.js';
+export type { RowStore, RemoteApplication, ConflictReason } from './remote-commands.js';
 export { RETIRED_CODES } from './error-catalog.js';
 export { segmentsProperlyIntersect, isSelfIntersecting, pointInPolygon } from './geometry.js';
 export {
