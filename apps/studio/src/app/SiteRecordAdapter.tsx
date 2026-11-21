@@ -1,7 +1,7 @@
 import { type JSX, useState } from 'react';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { rowsOf } from '../state/session-store.js';
 import type { StoredRow } from '../state/session-store.js';
 import { text, numeric, boolean } from '../state/row-values.js';
@@ -34,6 +34,7 @@ export function SiteRecordScreenAdapter({ session, siteId }: {
   readonly session: TrancheSession;
   readonly siteId: string;
 }): JSX.Element {
+  const identity = useSessionIdentity();
   const [findings, setFindings] = useState<readonly Finding[]>([]);
   const [buildingForm, setBuildingForm] = useState<BuildingForm | null>(null);
   const [levelForm, setLevelForm] = useState<LevelForm | null>(null);
@@ -42,7 +43,7 @@ export function SiteRecordScreenAdapter({ session, siteId }: {
   const { lang } = useI18n();
   const buildings = readStructure(session, lang);
   const siteName = text(rowsOf(session.state, 'site')[0]?.values ?? {}, 'name') ?? siteId;
-  const write = { orgId: ORG_OF_SESSION, siteId, timestamp: session.now() };
+  const write = { orgId: identity.orgId, siteId, timestamp: session.now() };
 
   function namesOf(table: 'building' | 'level', exceptId: string): readonly string[] {
     return rowsOf(session.state, table)

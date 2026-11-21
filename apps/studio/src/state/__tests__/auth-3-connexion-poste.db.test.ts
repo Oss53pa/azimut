@@ -9,9 +9,10 @@ import { setAccessTokenSource } from '../../auth/access-token.js';
 import { signInFailureOf } from '../../auth/use-auth-session.js';
 import { query } from '../../data/postgrest-http.js';
 import { isRepositoryError } from '../../data/site-repository.js';
+import { loadMemberships } from '../../auth/load-memberships.js';
 
 /**
- * AUTH.3 — le code de connexion du studio, contre le vrai service et le vrai
+ * AUTH.3 et AUTH.4 — le code de connexion du studio, contre le vrai service et le vrai
  * PostgREST (base de `scripts/monter-base-authentification.sh`).
  *
  * Ce qui s'éprouve : le client de `auth-config.ts` obtient une session ; posé
@@ -98,6 +99,9 @@ describe.runIf(runnable)('AUTH.3 — la connexion du poste', () => {
     try {
       const rows = await query<{ id: string }>(config(), 'site', 'select=id&order=id');
       expect(rows).toEqual([{ id: SITE }]);
+      // AUTH.4 — l'organisation et le rôle viennent du rattachement, et du seul.
+      expect(await loadMemberships(config(), data.session?.user.id ?? ''))
+        .toEqual([{ orgId: ORG, orgName: 'Poste', role: 'designer' }]);
     } finally {
       release();
     }

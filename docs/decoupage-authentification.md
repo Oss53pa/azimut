@@ -50,7 +50,7 @@ réinitialisation et le départ. [Probable] Avec O3, l'ensemble est XL et doit
 | AUTH.1 | Journal des changements de rôle en base | M | — | Bloqué, QA5 |
 | AUTH.2 | Service d'authentification en CI, sur installation autonome | M | — | Fait |
 | AUTH.3 | Connexion et déconnexion au poste ; jeton porté par toutes les requêtes | M | AUTH.2 | Fait |
-| AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Après AUTH.3 |
+| AUTH.4 | Identité, organisation et rôle lus de la session, à la place de `session-identity.ts` | M | AUTH.3 | Fait |
 | AUTH.5 | Double authentification exigée **en base** pour `admin` et `owner_rep` | M | AUTH.2 | Fait, migration 0080 |
 | AUTH.6 | Enrôlement et vérification de la double authentification au poste | M | AUTH.3, AUTH.5 | Après AUTH.5 |
 | AUTH.7 | Invitation, activation, réinitialisation, désactivation (O3) | L | AUTH.4 | Après AUTH.4, QA3 tranchée |
@@ -108,8 +108,20 @@ autonome refuse à la requête préalable CORS les en-têtes que le client envoi
 Il faut lui donner `GOTRUE_CORS_ALLOWED_HEADERS=apikey,x-client-info,x-supabase-api-version`.
 Dans une installation Supabase complète, la passerelle s'en charge.
 
-Reste à AUTH.4 : `session-identity.ts` donne encore l'organisation et le rôle
-écrits en dur.
+### AUTH.4, fait le 21 novembre 2026
+
+Les écrans écrivent sous l'organisation et le rôle du rattachement de
+l'utilisateur, lus dans `membership` (`auth/identity.ts`,
+`auth/IdentityGate.tsx`). Sans rattachement, l'écran le dit et n'ouvre rien
+(T-0.5). Avec un seul, il est retenu d'office ; avec plusieurs, l'utilisateur
+choisit et peut revenir sur son choix. Les valeurs écrites en dur ne servent
+plus qu'au mode local.
+
+**Limite connue.** Un utilisateur de plusieurs organisations voit dans la
+liste des sites ceux de toutes ses organisations, et la base refusera toute
+écriture sur un site d'une autre organisation que celle choisie. Filtrer la
+liste par l'organisation choisie relève de L4.1, multi-organisations complet,
+placé à l'incrément 4.
 
 ### AUTH.5, pourquoi en base
 

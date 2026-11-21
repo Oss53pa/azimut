@@ -9,10 +9,12 @@
  */
 import { type JSX, type ReactNode, useMemo } from 'react';
 import type { GoTrueClient } from '@supabase/auth-js';
-import { Button, SPACE, TEXT } from '../components/ui/index.js';
+import { Button, StateBanner, SPACE, TEXT } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
 import { useAuthSession } from './use-auth-session.js';
 import { LoginScreen } from './LoginScreen.js';
+import { IdentityGate } from './IdentityGate.js';
+import { appPostgrestConfig } from '../data/config.js';
 
 export function AuthGate({ client, children }: {
   readonly client: GoTrueClient | null;
@@ -29,6 +31,9 @@ function SignedInOnly({ client, children }: {
   const { t } = useI18n();
   const session = useAuthSession(client);
   const { state } = session;
+  // Construite une fois : un objet neuf à chaque rendu relancerait la lecture
+  // des rattachements.
+  const config = useMemo(() => appPostgrestConfig(), []);
   const bar = useMemo(() => ({
     display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: SPACE.sm,
     padding: `${String(SPACE.xs)}px ${String(SPACE.md)}px`, fontSize: TEXT.small,
@@ -46,7 +51,9 @@ function SignedInOnly({ client, children }: {
         <span>{t('auth.signed_in_as', { email: state.email })}</span>
         <Button rank="secondary" onClick={() => { void session.signOut(); }}>{t('auth.sign_out')}</Button>
       </div>
-      {children}
+      {config === null
+        ? <StateBanner severity="blocking" message={t('auth.identity.failed')} />
+        : <IdentityGate config={config} userId={state.userId}>{children}</IdentityGate>}
     </>
   );
 }

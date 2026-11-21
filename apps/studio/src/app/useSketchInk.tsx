@@ -10,7 +10,7 @@ import {
   eraseCommands, layerVisibilityCommand, readSketch, sketchStrokeCommands, strokesTouched,
 } from '../state/sketch.js';
 import type { SketchColor, SketchStroke } from '../state/sketch.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import type { TrancheSession } from './useTrancheSession.js';
 
 /**
@@ -58,6 +58,7 @@ export function useSketchInk(
   session: TrancheSession, levelId: string, onNotice: (notice: UiMessageKey | null) => void,
   onPromote?: SketchPromotion,
 ): SketchInk {
+  const identity = useSessionIdentity();
   const [active, setActiveState] = useState(false);
   const setActive = (next: boolean): void => {
     setActiveState(next);
@@ -85,7 +86,7 @@ export function useSketchInk(
 
   function setVisible(next: boolean): void {
     if (sketch.layer === null) return;
-    const built = layerVisibilityCommand(sketch.layer, next, { orgId: ORG_OF_SESSION, timestamp: session.now() });
+    const built = layerVisibilityCommand(sketch.layer, next, { orgId: identity.orgId, timestamp: session.now() });
     if (built.ok) write([built.value]);
   }
 
@@ -97,7 +98,7 @@ export function useSketchInk(
       if (sketch.layer?.locked === true) { onNotice('ink.sketch.locked'); return; }
       const touched = strokesTouched(points, sketch.strokes, ERASER_REACH_PX / pxPerMeter);
       if (touched.length === 0) { onNotice('ink.sketch.nothing_erased'); return; }
-      const out = eraseCommands(touched, { orgId: ORG_OF_SESSION, timestamp: session.now() });
+      const out = eraseCommands(touched, { orgId: identity.orgId, timestamp: session.now() });
       if (out.ok) { onNotice(null); write(out.value); }
       return;
     }
@@ -116,7 +117,7 @@ export function useSketchInk(
         id: session.newId(), tool: pen, color,
         points: points.map((p, i) => ({ x_m: p.x_m, y_m: p.y_m, p: detail.pressures[i] ?? 0 })),
       },
-      { orgId: ORG_OF_SESSION, siteId: session.siteId, levelId, timestamp },
+      { orgId: identity.orgId, siteId: session.siteId, levelId, timestamp },
     );
     if (out.ok) { onNotice(null); write(out.value); }
   }

@@ -9,6 +9,7 @@
 import { createReferenceRepository } from './reference-repository.js';
 import { createPostgrestRepository } from './postgrest-repository.js';
 import type { SiteRepository } from './site-repository.js';
+import type { PostgrestConfig } from './postgrest-http.js';
 
 export type DataSourceEnv = {
   readonly VITE_AZIMUT_API_URL?: string | undefined;
@@ -43,6 +44,22 @@ export function createRepository(env: DataSourceEnv): SiteRepository {
       ? DEFAULT_SCHEMA
       : trimmed(env.VITE_AZIMUT_DB_SCHEMA),
   });
+}
+
+/**
+ * La configuration de l'API REST, ou `null` sans URL ou sans clé. AUTH.4 en a
+ * besoin pour lire les rattachements de l'utilisateur, hors du dépôt de site.
+ */
+export function postgrestConfigFrom(env: DataSourceEnv): PostgrestConfig | null {
+  const url = trimmed(env.VITE_AZIMUT_API_URL).replace(/\/+$/, '');
+  const apiKey = trimmed(env.VITE_AZIMUT_API_KEY);
+  if (url === '' || apiKey === '') return null;
+  const schema = trimmed(env.VITE_AZIMUT_DB_SCHEMA);
+  return { url, apiKey, schema: schema === '' ? DEFAULT_SCHEMA : schema };
+}
+
+export function appPostgrestConfig(): PostgrestConfig | null {
+  return postgrestConfigFrom(import.meta.env as DataSourceEnv);
 }
 
 /** Dépôt de l'application, construit une fois depuis l'environnement de build. */

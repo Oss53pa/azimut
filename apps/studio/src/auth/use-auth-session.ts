@@ -18,7 +18,7 @@ import type { SignInInput } from './sign-in-input.js';
 export type AuthState =
   | { readonly status: 'loading' }
   | { readonly status: 'signed-out' }
-  | { readonly status: 'signed-in'; readonly email: string };
+  | { readonly status: 'signed-in'; readonly userId: string; readonly email: string };
 
 export type SignInFailure = 'failed' | 'unavailable';
 
@@ -41,7 +41,7 @@ export function signInFailureOf(status: number | undefined): SignInFailure {
 function stateOf(session: Session | null): AuthState {
   return session === null
     ? { status: 'signed-out' }
-    : { status: 'signed-in', email: session.user.email ?? '' };
+    : { status: 'signed-in', userId: session.user.id, email: session.user.email ?? '' };
 }
 
 export function useAuthSession(client: GoTrueClient): AuthSession {

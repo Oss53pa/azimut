@@ -1,7 +1,7 @@
 import { type JSX, useRef, useState } from 'react';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { acceptPlanFile, unreadablePlanInspection } from '../state/plan-import.js';
 import type { PlanFile } from '../state/plan-import.js';
 import { inspectPlanContent } from '../state/plan-content.js';
@@ -32,6 +32,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
   readonly siteId: string;
   readonly levelId: string;
 }): JSX.Element {
+  const identity = useSessionIdentity();
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   // Les deux points sont tenus coordonnée par coordonnée : une abscisse saisie
   // avant son ordonnée doit rester affichée, et ne fait pas encore un point.
@@ -166,7 +167,7 @@ export function PlanScreenAdapter({ session, siteId, levelId }: {
           const commands = calibrationCommands(draft.plan, measured.value, {
             site: {}, proposed: { x_m: 0, y_m: 0 },
           }, {
-            orgId: ORG_OF_SESSION,
+            orgId: identity.orgId,
             siteId,
             levelId,
             planSourceId,

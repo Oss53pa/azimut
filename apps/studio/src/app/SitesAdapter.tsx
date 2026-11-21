@@ -13,7 +13,7 @@ import type { CountrySummary, LegalEntitySummary } from '../data/index.js';
 import { useSiteCreation } from '../state/use-site-creation.js';
 import { appSink } from '../state/app-sink.js';
 import type { CommandSink } from '../state/command-store.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { ClientsSection } from './ClientsSection.js';
 
 /**
@@ -26,6 +26,7 @@ import { ClientsSection } from './ClientsSection.js';
  * l'essai d'accessibilité de M8 (partie M) ne pouvait pas l'analyser.
  */
 export function SitesAdapter(): JSX.Element {
+  const identity = useSessionIdentity();
   const { t, lang } = useI18n();
   const [current, setCurrent] = useState('');
   const repository = useMemo(() => appRepository(), []);
@@ -71,7 +72,7 @@ export function SitesAdapter(): JSX.Element {
   );
 
   const creation = useSiteCreation(sink, {
-    orgId: ORG_OF_SESSION,
+    orgId: identity.orgId,
     newId: () => crypto.randomUUID(),
     now: () => new Date().toISOString(),
     existingNames: sites.map(site => site.name),
@@ -128,7 +129,7 @@ export function SitesAdapter(): JSX.Element {
       )}
 
       <ClientsSection
-        orgId={ORG_OF_SESSION}
+        orgId={identity.orgId}
         entities={entityState}
         countries={countries}
         sink={sink}

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Finding, Level, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { acceptVerticalLink } from '../state/graph-vertical-link.js';
 import { graphCommands } from '../state/graph-commands.js';
 import { inheritedEdgeWidthM } from '../state/edge-width.js';
@@ -46,6 +46,7 @@ export type VerticalLinkTool = {
 };
 
 export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
+  const identity = useSessionIdentity();
   const [targetLevelId, setTargetLevelId] = useState('');
   const [targetNodeId, setTargetNodeId] = useState('');
   const [kind, setKind] = useState<VerticalLinkKind>('elevator');
@@ -159,7 +160,7 @@ export function useVerticalLinkTool(session: TrancheSession): VerticalLinkTool {
         accessible: outcome.value.accessible,
         capacity: outcome.value.capacity,
       }],
-      { orgId: ORG_OF_SESSION, levelId: context.levelId, timestamp: session.now() },
+      { orgId: identity.orgId, levelId: context.levelId, timestamp: session.now() },
       `vertical-link:${edgeId}`,
       // M01.S10 : l'arête qui franchit une limite de bâtiment part avec sa
       // ligne, dans le même geste. Les écrire en deux temps laisserait entre

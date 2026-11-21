@@ -12,7 +12,7 @@ import { LevelBar } from '../screens/LevelBar.js';
 import { levelsOfSession } from '../state/session-scope.js';
 import { buildingNames } from '../state/session-buildings.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
-import { ACTOR_OF_SESSION, ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { appSink } from '../state/app-sink.js';
 import { appRepository } from '../data/index.js';
 import { loadSiteSession } from './site-session-loader.js';
@@ -32,6 +32,7 @@ import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
  * corrigés ici, ils attendent l'incrément qui les appelle.
  */
 export function TrancheRouter(): JSX.Element {
+  const identity = useSessionIdentity();
   const route = useCurrentRoute();
   if (route.screen === 'legacy') return <Shell />;
   if (route.screen === 'sites') return <SitesAdapter />;
@@ -39,7 +40,7 @@ export function TrancheRouter(): JSX.Element {
   // porte sur le site, non sur un niveau. Il n'entre donc pas dans l'atelier,
   // dont les quatre écrans partagent une session par niveau.
   if (route.screen === 'messages') {
-    return <MessageTableAdapter siteId={route.siteId} actor={ACTOR_OF_SESSION} />;
+    return <MessageTableAdapter siteId={route.siteId} actor={identity.actor} />;
   }
   // Les quatre écrans d'atelier partagent une session : sans cela le parcours
   // de M8 (partie M) n'en serait pas un, chaque écran repartant de zéro.
@@ -49,6 +50,7 @@ export function TrancheRouter(): JSX.Element {
 function TrancheWorkspace({ route }: {
   readonly route: WorkshopRoute;
 }): JSX.Element {
+  const identity = useSessionIdentity();
   const { t } = useI18n();
   const levelId = 'levelId' in route ? route.levelId : '';
   // Le chemin d'écriture réel dès que le dépôt est configuré. Sans
@@ -64,7 +66,7 @@ function TrancheWorkspace({ route }: {
     [repository, route.siteId]);
 
   const session = useTrancheSession({
-    orgId: ORG_OF_SESSION,
+    orgId: identity.orgId,
     siteId: route.siteId,
     levelId,
   }, remote, load);

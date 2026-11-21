@@ -1,11 +1,12 @@
 /**
- * L'identité sous laquelle le parcours s'exécute, tant qu'aucune session
- * d'authentification n'est ouverte.
+ * L'identité du mode local : sans base ni service d'authentification, le
+ * parcours s'exécute sous cette organisation, celle des sites de référence,
+ * et sous ce rôle.
  *
- * Elle est nommée ici plutôt que devinée à chaque écran. Le cloisonnement réel
- * reste tenu par la base (A6.1) : ces valeurs ne le remplacent pas, elles
- * permettent au parcours d'exister avant lui. Ni l'une ni l'autre n'est un
- * secret ni une donnée client, au sens d'A2.4.
+ * Avec une session, l'identité vient des rattachements de l'utilisateur
+ * (AUTH.4, `auth/identity.ts`) et ces valeurs ne servent plus. Le
+ * cloisonnement réel reste tenu par la base (A6.1). Ni l'une ni l'autre n'est
+ * un secret ni une donnée client, au sens d'A2.4.
  */
 
 /** L'organisation de la session. */

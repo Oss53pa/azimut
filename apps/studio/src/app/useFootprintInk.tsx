@@ -12,7 +12,7 @@ import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { footprintsOfLevel } from '../state/session-scope.js';
 import { usePlanBackground } from './usePlanBackground.js';
 import { strikeFootprints } from '../state/footprint-strike.js';
-import { ORG_OF_SESSION } from './session-identity.js';
+import { useSessionIdentity } from '../auth/identity.js';
 import { useSketchInk } from './useSketchInk.js';
 import { useStrictness } from '../editor/ink/use-strictness.js';
 import type { TrancheSession } from './useTrancheSession.js';
@@ -47,6 +47,7 @@ export function useFootprintInk(
   vertices: readonly Point[],
   onVertices: (vertices: readonly Point[]) => void,
 ): FootprintInk {
+  const identity = useSessionIdentity();
   const { t } = useI18n();
   const [arbitration, setArbitration] = useState<FootprintArbitration | null>(null);
   const [ghost, setGhost] = useState<readonly Point[] | null>(null);
@@ -66,7 +67,7 @@ export function useFootprintInk(
     if (out.kind === 'strike') {
       setArbitration(null); setGhost(null);
       const struck = strikeFootprints(session.state.rows, out.footprintIds, {
-        orgId: ORG_OF_SESSION, timestamp: session.now(),
+        orgId: identity.orgId, timestamp: session.now(),
       });
       if (struck.kind === 'referenced') {
         setMessage({
