@@ -225,30 +225,31 @@ obstacles, dont aucun ne relève de S6 :
    commande par famille, le dira.
 
 **Q11, essais par famille, 21 novembre 2026**
-(`apps/studio/src/state/__tests__/q11-fidelite-before.db.test.ts`). Le site
-est relu par PostgREST et par le dépôt du studio, chaque commande est
-construite par le constructeur de l'atelier, puis appliquée par
-`apply_journaled_commands` dans une transaction annulée. Aucun faux conflit
-pour les huit familles éprouvées :
+(`apps/studio/src/state/__tests__/q11-fidelite-before.db.test.ts`). Le site,
+son esquisse et le circuit du tableau des messages sont relus par PostgREST
+et le dépôt du studio ; chaque commande est construite par le constructeur
+de l'atelier, puis appliquée par `apply_journaled_commands` dans une
+transaction annulée. Aucun faux conflit, pour toutes les familles qu'un
+écran de l'atelier écrit :
 
-| Famille | Constructeur | Résultat |
-| --- | --- | --- |
-| Renommer un bâtiment, un niveau | `renameCommands` | accepté |
-| Supprimer un niveau vide | `deleteLevelCommands` | accepté |
-| Déplacer un nœud, longueurs comprises | `updateNodeCommands` | accepté |
-| Modifier une arête | `updateEdgeCommands` | accepté |
-| Rayer une empreinte | `strikeFootprints` | accepté |
-| Annuler la création d'empreintes | `inverseCommand` | accepté |
-| Annuler la création du graphe | `inverseCommand` | accepté |
+| Famille | Constructeur | Écran | Résultat |
+| --- | --- | --- | --- |
+| Renommer un bâtiment, un niveau | `renameCommands` | fiche du site | accepté |
+| Supprimer un niveau vide | `deleteLevelCommands` | fiche du site | accepté |
+| Déplacer un nœud, longueurs comprises | `updateNodeCommands` | graphe | accepté |
+| Modifier une arête | `updateEdgeCommands` | graphe | accepté |
+| Rayer une empreinte | `strikeFootprints` | empreintes | accepté |
+| Annuler la création d'empreintes, du graphe | `inverseCommand` | pile d'annulation | accepté |
+| Masquer une couche d'esquisse, gommer un trait | `layerVisibilityCommand`, `eraseCommands` | esquisse | accepté |
+| Clore une annotation de révision | `setStateCommand` | tableau des messages | accepté |
+| Émettre le tableau pour revue | `transitionCommands` | tableau des messages | accepté |
+| Caler un plan, origine comprise, puis l'annuler | `calibrationCommands`, `inverseCommand` | calage | accepté |
 
 L'essai mord : un `before` faux y est refusé en `PT409`.
 
-Restent à éprouver, faute de décor dans cet essai : le calage
-(`calibrationCommands` en modification), le code d'un support
-(`setSupportCode`), l'esquisse (`eraseCommands`, `layerVisibilityCommand`),
-l'état d'une annotation (`setStateCommand`) et les transitions du tableau des
-messages (`transitionCommands`). S6.6b peut se brancher pour les familles
-éprouvées ; les autres le seront avant d'y passer.
+Non éprouvé : `setSupportCode`, qu'aucun écran n'appelle encore. Il le sera
+quand un écran l'emploiera. Q11 est close pour l'atelier : S6.6b peut se
+brancher.
 
 Un essai de bout en bout entre deux postes reste à S6.10 : sur la base
 d'essai partagée, il laisserait au journal des lignes que rien ne peut

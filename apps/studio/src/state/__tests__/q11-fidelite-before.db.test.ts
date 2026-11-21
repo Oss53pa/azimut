@@ -19,6 +19,14 @@ import type { EdgeEndpoint } from '../graph-input.js';
 import { updateEdgeCommands, updateNodeCommands } from '../graph-update-commands.js';
 import { deleteLevelCommands, renameCommands } from '../site-structure.js';
 import { strikeFootprints } from '../footprint-strike.js';
+import { eraseCommands, layerVisibilityCommand, readSketch, sketchStrokeCommands } from '../sketch.js';
+import { annotateCommands, readAnnotations, setStateCommand } from '../review-annotation.js';
+import { readSchedule } from '../message-schedule-read.js';
+import { transitionCommands } from '../message-schedule-transitions.js';
+import { calibrationCommands } from '../plan-calibration-commands.js';
+import type { AcceptedPlan } from '../plan-import.js';
+import { computeCalibration } from '../../domain/plan-calibration.js';
+import type { SessionState } from '../session-store.js';
 
 /**
  * Q11 — décision d'Oss53pa du 21 novembre 2026 : avant de brancher l'atelier
@@ -55,6 +63,15 @@ const FOOTPRINT_2 = 'd1100000-0000-4000-8000-0000000000c2';
 const NODE_A = 'd1100000-0000-4000-8000-0000000000e1';
 const NODE_B = 'd1100000-0000-4000-8000-0000000000e2';
 const EDGE = 'd1100000-0000-4000-8000-0000000000e3';
+const ZONE = 'd1100000-0000-4000-8000-0000000000f1';
+const ANNOTATION = 'd1100000-0000-4000-8000-0000000000f2';
+const SCHEDULE = 'd1100000-0000-4000-8000-0000000000f3';
+const SKETCH_LAYER = 'd1100000-0000-4000-8000-0000000000f4';
+const SKETCH_STROKE = 'd1100000-0000-4000-8000-0000000000f5';
+const PLAN_SOURCE = 'd1100000-0000-4000-8000-0000000000f6';
+const CALIBRATION = 'd1100000-0000-4000-8000-0000000000f7';
+const POINT_A = 'd1100000-0000-4000-8000-0000000000f8';
+const POINT_B = 'd1100000-0000-4000-8000-0000000000f9';
 const T = '2026-11-21T10:00:00.000Z';
 const API_KEY = 'cle-publiable-du-banc';
 
@@ -63,6 +80,7 @@ let db: ReturnType<typeof createDb>;
 let rest: Harness;
 let site: SiteData;
 let rows: readonly StoredRow[];
+let session: SessionState;
 let createdFootprints: readonly EntityCommand[] = [];
 let createdGraph: readonly EntityCommand[] = [];
 
@@ -151,8 +169,34 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
       ],
       [{ id: EDGE, edge: edge.value }], [], { orgId: ORG, levelId: LEVEL, timestamp: T }, 'graphe:1',
     ));
-    const written = await applyCommands(db, { userId: USER }, [...decor, ...createdFootprints, ...createdGraph]);
+    const sketch = commands(sketchStrokeCommands(
+      { newId: SKETCH_LAYER, name: 'Esquisse' },
+      { id: SKETCH_STROKE, tool: 'pencil', color: 'graphite', points: [{ x_m: 0, y_m: 0, p: 0.5 }, { x_m: 1.25, y_m: 0.75, p: 0.5 }] },
+      { orgId: ORG, siteId: SITE, levelId: LEVEL, timestamp: T },
+    ));
+    const written = await applyCommands(db, { userId: USER }, [...decor, ...createdFootprints, ...createdGraph, ...sketch]);
     if (!written.ok) throw new Error(written.findings.map(f => f.code).join(', '));
+
+    // La zone et le tableau des messages n'ont pas de constructeur dans
+    // l'atelier : ils entrent par la base, comme l'exploitation les poserait.
+    for (const table of ['zone', 'message_schedule']) {
+      await client.unsafe(`alter table azimut.${table} no force row level security`);
+    }
+    await client`insert into azimut.zone(id, org_id, level_id, name, kind)
+                 values (${ZONE}, ${ORG}, ${LEVEL}, 'Galerie', 'commercial')`;
+    await client`insert into azimut.message_schedule(id, org_id, site_id, version, state, generated_at, inputs_hash)
+                 values (${SCHEDULE}, ${ORG}, ${SITE}, 1, 'draft', ${T}, 'sha256:entrees')`;
+    for (const table of ['zone', 'message_schedule']) {
+      await client.unsafe(`alter table azimut.${table} force row level security`);
+    }
+    const annotated = annotateCommands(
+      [{ id: ANNOTATION, anchor: { kind: 'zone', id: ZONE } }],
+      { body: 'Vérifier la hauteur.', ink: null },
+      { orgId: ORG, siteId: SITE, timestamp: T },
+    );
+    if (annotated.kind !== 'written') throw new Error(`annotation : ${annotated.kind}`);
+    const noted = await applyCommands(db, { userId: USER }, annotated.commands);
+    if (!noted.ok) throw new Error(noted.findings.map(f => f.code).join(', '));
 
     // La relecture, par le chemin du poste. L'identité du jeton se lit par
     // `auth.uid()`, que la plateforme fournit et que le banc pose.
@@ -160,11 +204,13 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
     rest = await startPostgrest({ binary: postgrestBinary, dbUri: postgrestDbUri, port: 3994 });
     const release = setAccessTokenSource(() => signToken(USER));
     try {
-      site = await createPostgrestRepository({ url: rest.url, apiKey: API_KEY, schema: 'azimut' }).loadSite(SITE);
+      const repository = createPostgrestRepository({ url: rest.url, apiKey: API_KEY, schema: 'azimut' });
+      site = await repository.loadSite(SITE);
+      session = sessionFromSite(site, await repository.loadSketch(SITE), await repository.loadScheduleRecords(SITE));
     } finally {
       release();
     }
-    rows = sessionFromSite(site).rows;
+    rows = session.rows;
   }, 60_000);
 
   afterAll(async () => {
@@ -228,6 +274,61 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
     const struck = strikeFootprints(rows, [FOOTPRINT_2], { orgId: ORG, timestamp: T });
     if (struck.kind !== 'deleted') throw new Error(`rayure : ${struck.kind}`);
     expect(await journaled(struck.commands)).toBe('accepté');
+  });
+
+  it('masquer une couche d’esquisse', async () => {
+    const { layer } = readSketch(rows, LEVEL);
+    if (layer === null) throw new Error('couche absente de la session');
+    const built = layerVisibilityCommand(layer, false, { orgId: ORG, timestamp: T });
+    expect(await journaled(commands(built.ok ? { ...built, value: [built.value] } : built))).toBe('accepté');
+  });
+
+  it('gommer un trait d’esquisse', async () => {
+    const { strokes } = readSketch(rows, LEVEL);
+    expect(strokes.map(st => st.id)).toEqual([SKETCH_STROKE]);
+    expect(await journaled(commands(eraseCommands([SKETCH_STROKE], { orgId: ORG, timestamp: T }))))
+      .toBe('accepté');
+  });
+
+  it('clore une annotation de révision', async () => {
+    const annotation = readAnnotations(rows).find(a => a.id === ANNOTATION);
+    if (annotation === undefined) throw new Error('annotation absente de la session');
+    const command = setStateCommand(annotation, 'resolved', { orgId: ORG, timestamp: T });
+    if (command === null) throw new Error('aucune commande');
+    expect(await journaled([command])).toBe('accepté');
+  });
+
+  it('émettre le tableau des messages pour revue', async () => {
+    const read = readSchedule(session, SITE);
+    if (read === null) throw new Error('tableau absent de la session');
+    expect(await journaled(commands(transitionCommands(
+      'submit_for_review',
+      { id: read.scheduleId, schedule: read.schedule },
+      { findings: [], graphValidated: true, rulesPackBound: true, openAnnotationIds: [], rejectionReason: null },
+      null,
+      { orgId: ORG, timestamp: T, decisionId: 'd1100000-0000-4000-8000-0000000000fa' },
+    )))).toBe('accepté');
+  });
+
+  it('caler un plan, origine du repère comprise, puis l’annuler', async () => {
+    const plan: AcceptedPlan = {
+      format: 'pdf', mediaType: 'application/pdf', byteSize: 2048, page: 1, contentKind: 'raster',
+    };
+    const computed = computeCalibration({
+      a: { x_px: 0, y_px: 0 }, b: { x_px: 200, y_px: 0 }, real_distance_m: 20, north_azimuth_deg: 12,
+    });
+    if (!computed.ok) throw new Error('calage');
+    const calibrate = commands(calibrationCommands(plan, computed.value, {
+      site: site.site, proposed: { x_m: 12.5, y_m: -3.25 },
+    }, {
+      orgId: ORG, siteId: SITE, levelId: LEVEL, planSourceId: PLAN_SOURCE, calibrationId: CALIBRATION,
+      storagePath: 'plans/q11/rdc.pdf',
+      points: [{ id: POINT_A, point: { x_px: 0, y_px: 0 } }, { id: POINT_B, point: { x_px: 200, y_px: 0 } }],
+      referenceDistanceM: 20, timestamp: T,
+    }));
+    expect(calibrate.some(c => c.table === 'site' && c.operation === 'update')).toBe(true);
+    const undo = [...calibrate].reverse().map(c => inverseCommand(c, T));
+    expect(await journaled([...calibrate, ...undo])).toBe('accepté');
   });
 
   it('annuler la création des empreintes', async () => {
