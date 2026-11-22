@@ -9,6 +9,7 @@ import { RenameField } from './RenameField.js';
 import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
 import { SyncIndicator } from './SyncIndicator.js';
+import { PresenceIndicator } from './PresenceIndicator.js';
 import { WorkshopBody } from './WorkshopBody.js';
 
 /**
@@ -110,7 +111,7 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
       <WorkshopBody
         gap={SPACE.md}
         statusBar={(
-            <StatusBar items={status}><SyncIndicator /></StatusBar>
+            <StatusBar items={status}><SyncIndicator /><PresenceIndicator /></StatusBar>
         )}
       >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: SPACE.md }}>

@@ -14,6 +14,7 @@ import { MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
 import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
 import { ConsequenceDialog } from './ConsequenceDialog.js';
 import { SyncIndicator } from './SyncIndicator.js';
+import { PresenceIndicator } from './PresenceIndicator.js';
 import { WorkshopBody } from './WorkshopBody.js';
 
 /**
@@ -124,7 +125,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
               <span style={{ color: 'var(--text-muted)' }}>
                 {CALIBRATION_SHORTCUTS.map(s => `${s.key} ${t(s.labelKey)}`).join(' · ')}
               </span>
-              <SyncIndicator />
+              <SyncIndicator /><PresenceIndicator />
             </StatusBar>
         )}
       >

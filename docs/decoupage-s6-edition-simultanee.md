@@ -387,11 +387,36 @@ sur les quatre écrans, avec une et deux organisations.
 Non traité : l'indicateur n'est pas posé dans les écrans de la coquille, qui
 n'ont pas de barre d'état.
 
-**S6.7b, présence : débloqué par Q12 et Q13, après le lot de mise en page (Q14).** G4.2 veut « leur nom et l'heure
-de leur dernière modification ». Le modèle ne porte aucun nom d'utilisateur :
-`membership` n'a que `user_id` et le rôle, et A5 ne définit ni profil ni
-nom affiché. La forme de la sélection et de la zone de travail n'est pas
-définie non plus dans A5. Questions posées à Oss53pa.
+**S6.7b, présence sur un niveau, faite le 22 novembre 2026** (décisions Q1,
+Q12, Q13). Migration 0081 : `membership.display_name`, la table
+`level_presence` (sélection et zone validées par schéma en base, heure de
+présence posée par la base), `touch_presence`, `leave_presence` et
+`level_presence_list` ; une présence non renouvelée depuis 30 secondes sort
+de la liste, et l'heure de la dernière modification se lit dans le journal
+(INV-1). Le nom d'un collègue passe par `member_label`, passage étroit qui ne
+rouvre pas `membership` en lecture directe (0075). Le poste s'annonce sur le
+niveau ouvert, se renouvelle toutes les 10 secondes, lit les présents toutes
+les 3 secondes, et se retire en partant (`app/useLevelPresence.ts`) ; la
+barre d'état des écrans d'atelier les nomme, avec l'heure de leur dernière
+modification (`screens/PresenceIndicator.tsx`).
+
+Éprouvé sur base réelle (`packages/db/src/__tests__/s6-7-presence.db.test.ts`,
+10 essais) et dans un navigateur à deux postes : l'arrivée d'un collègue
+paraît en 2,3 s environ, son nom affiché en 3 s, sa modification en 2,8 s,
+son départ en 3,1 s.
+
+Décisions prises sous les règles existantes, à confirmer :
+- l'`auditor` voit qui est présent mais ne s'annonce pas : 0076 lui retire
+  toute écriture, et les essais de garde l'exigent de toute table portant
+  `org_id` ;
+- aucune clé vers `auth.users` (A2.4, 0024) : un utilisateur parti sort de
+  la liste faute de rattachement, et sa ligne expire.
+
+Reste à faire, S6.7c : publier la sélection et la zone de travail depuis
+chaque écran, et les dessiner chez les autres (S-22). La base les accepte et
+les rend déjà ; le poste annonce pour l'instant une sélection vide. Aucun
+écran ne saisit encore `display_name` : c'est AUTH.7.
+
 
 ### S6.8 Annulation en présence de commandes distantes
 

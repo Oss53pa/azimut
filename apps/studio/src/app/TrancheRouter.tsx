@@ -23,6 +23,8 @@ import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 import { SyncStatusContext } from '../context/sync-status.js';
+import { PresenceContext } from '../context/presence.js';
+import { useLevelPresence } from './useLevelPresence.js';
 
 /**
  * F15 — `app/`, la composition des écrans.
@@ -72,6 +74,8 @@ function TrancheWorkspace({ route }: {
     siteId: route.siteId,
     levelId,
   }, remote, load, journal);
+  // S6.7b — qui d'autre a ce niveau ouvert (G4.2).
+  const presence = useLevelPresence(journal, levelId);
 
   // E5.4 — la reprise se pose par-dessus l'écran, qui reste visible derrière.
   // Cacher le travail pendant qu'on demande quoi en faire priverait
@@ -100,6 +104,7 @@ function TrancheWorkspace({ route }: {
 
   return (
     <SyncStatusContext.Provider value={session.sync}>
+    <PresenceContext.Provider value={presence}>
       {/* F5.1 — l'atelier remplit la hauteur que le cadre lui laisse. */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/*
@@ -133,6 +138,7 @@ function TrancheWorkspace({ route }: {
         />
       )}
       </div>
+    </PresenceContext.Provider>
     </SyncStatusContext.Provider>
   );
 }
