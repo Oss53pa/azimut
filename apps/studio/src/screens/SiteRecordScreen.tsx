@@ -8,6 +8,7 @@ import { useI18n } from '../i18n/useI18n.js';
 import { RenameField } from './RenameField.js';
 import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
+import { SyncIndicator } from './SyncIndicator.js';
 
 /**
  * M1bis (partie M) — fiche de site, bâtiments et niveaux.
@@ -231,7 +232,7 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
           </div>
         )}
 
-        <StatusBar items={status} />
+        <StatusBar items={status}><SyncIndicator /></StatusBar>
       </div>
     </ScreenStates>
   );

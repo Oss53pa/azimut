@@ -17,6 +17,7 @@ import { AxisFields } from './AxisFields.js';
 import type { AxisReport } from './AxisFields.js';
 import { VerticalLinkFields } from './VerticalLinkFields.js';
 import type { VerticalLinkFieldsProps } from './VerticalLinkFields.js';
+import { SyncIndicator } from './SyncIndicator.js';
 
 /**
  * M4 (partie M) — écran de saisie du graphe.
@@ -318,7 +319,7 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
 
         {props.tool === 'vertical_link' && <VerticalLinkFields {...props.verticalLink} />}
 
-        <StatusBar items={status} />
+        <StatusBar items={status}><SyncIndicator /></StatusBar>
       </div>
     </ScreenStates>
   );

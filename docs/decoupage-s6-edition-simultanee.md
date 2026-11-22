@@ -60,7 +60,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Prêt |
 | S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
-| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Prêt |
+| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | S6.7a fait ; S6.7b bloqué (nom affiché absent de A5) |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
@@ -350,6 +350,34 @@ retirer. Il demande une base jetable.
 
 Utilisateurs présents sur le niveau, leur sélection et leur zone de travail.
 Couvre au passage la présence de G4.2, jamais construite.
+
+**S6.7a, indicateur de synchronisation (F5.2), fait le 22 novembre 2026.**
+La barre d'état des quatre écrans d'atelier porte l'état de synchronisation
+(`state/sync-status.ts`, `screens/SyncIndicator.tsx`), un seul à la fois, le
+plus grave d'abord : locale (aucune base), gestes en attente d'envoi, sans
+suivi (base sans session), journal injoignable, à jour. Vérifié contre les
+services réels : PostgREST coupé, l'indicateur passe à « journal
+injoignable » en 770 ms environ ; rétabli, il revient à « à jour » en 760 ms
+environ.
+
+Corrigé au passage : le suivi du journal de l'atelier ne démarrait jamais si
+la première lecture de la tête échouait, et rien ne le disait. Il la retente
+désormais à chaque interrogation, comme la coquille (S6.6c), et l'échec
+s'affiche.
+
+Constaté, non traité, en attente de décision : la barre d'état n'est pas
+visible sans défilement sur les écrans à canevas (graphe, empreintes) à
+1366 × 768. Aucun conteneur de l'atelier n'a de hauteur bornée, du corps de
+page au canevas ; la page mesure 1042 pixels pour une fenêtre de 768. F5.2
+veut la barre « en permanence ». La corriger reprend la mise en page de la
+racine de l'atelier et des quatre écrans (F5.1). L'indicateur n'est pas
+posé non plus dans les écrans de la coquille, qui n'ont pas de barre d'état.
+
+**S6.7b, présence : bloqué, A2.2 cas 2.** G4.2 veut « leur nom et l'heure
+de leur dernière modification ». Le modèle ne porte aucun nom d'utilisateur :
+`membership` n'a que `user_id` et le rôle, et A5 ne définit ni profil ni
+nom affiché. La forme de la sélection et de la zone de travail n'est pas
+définie non plus dans A5. Questions posées à Oss53pa.
 
 ### S6.8 Annulation en présence de commandes distantes
 

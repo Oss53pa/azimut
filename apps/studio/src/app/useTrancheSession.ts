@@ -26,6 +26,8 @@ import type { StoreState } from '../state/command-store.js';
 import { canReceive } from '../state/journal-session.js';
 import { useJournalFollow } from './useJournalFollow.js';
 import type { JournalBinding } from './useJournalFollow.js';
+import { syncStatusOf } from '../state/sync-status.js';
+import type { SyncStatus } from '../state/sync-status.js';
 
 /** L'organisation et le site du parcours, fournis par l'appelant. */
 export type SessionContext = {
@@ -91,6 +93,8 @@ export type TrancheSession = {
    */
   readonly planImages: ReadonlyMap<string, PlanImage>;
   readonly keepPlanImage: (planSourceId: string, image: PlanImage) => void;
+  /** F5.2 — l'état de synchronisation, pour la barre d'état. */
+  readonly sync: SyncStatus;
 };
 
 /** Le contenu d'un plan importé, tel que lu à l'import. */
@@ -183,10 +187,17 @@ export function useTrancheSession(
   }, [load, receive]);
 
   const isResumePending = useCallback(() => resumePending.current, []);
-  const follow = useJournalFollow({
+  const { wrap: followWrap, readFailing } = useJournalFollow({
     journal, current, resumePending: isResumePending, adopt: receive, reload,
   });
-  const sendOut = useMemo(() => follow.wrap(send), [follow, send]);
+  const sendOut = useMemo(() => followWrap(send), [followWrap, send]);
+  const remote = send !== LOCAL_ONLY;
+  const followed = journal !== undefined;
+  const queued = state.queued.length;
+  const sync = useMemo(
+    () => syncStatusOf({ remote, followed, queued, readFailing }),
+    [remote, followed, queued, readFailing],
+  );
 
   // E5.4 — à l'ouverture d'un écran, l'état local est relu. Ce qu'on en fait
   // dépend de qui l'a laissé là : cet onglet, ou une session interrompue.
@@ -352,5 +363,6 @@ export function useTrancheSession(
     now: useCallback(() => new Date().toISOString(), []),
     planImages,
     keepPlanImage,
+    sync,
   };
 }

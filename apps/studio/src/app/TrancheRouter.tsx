@@ -22,6 +22,7 @@ import { GraphScreenAdapter } from './GraphAdapter.js';
 import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
+import { SyncStatusContext } from '../context/sync-status.js';
 
 /**
  * F15 — `app/`, la composition des écrans.
@@ -98,7 +99,7 @@ function TrancheWorkspace({ route }: {
   }, [session]);
 
   return (
-    <>
+    <SyncStatusContext.Provider value={session.sync}>
       {/*
         F7 (partie F) — un site vide et un site illisible ne se ressemblent
         pas. Quand le dépôt n'a pas pu être lu, l'atelier le dit au lieu de
@@ -129,7 +130,7 @@ function TrancheWorkspace({ route }: {
           onDiscard={session.discardResume}
         />
       )}
-    </>
+    </SyncStatusContext.Provider>
   );
 }
 

@@ -11,6 +11,7 @@ import { FOOTPRINT_TOOLS, FOOTPRINT_SHORTCUTS } from '../state/footprint-shortcu
 import type { FootprintTool } from '../state/footprint-shortcuts.js';
 import { FOOTPRINT_KINDS, UNIT_CODE_MAX } from '../state/footprint-input.js';
 import type { FootprintKind } from '../state/footprint-input.js';
+import { SyncIndicator } from './SyncIndicator.js';
 
 /**
  * M3 (partie M) — écran de tracé des empreintes.
@@ -182,6 +183,7 @@ export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
             {FOOTPRINT_SHORTCUTS.map(s =>
               `${s.ctrl ? 'Ctrl+' : ''}${s.key} ${t(s.labelKey)}`).join(' · ')}
           </span>
+          <SyncIndicator />
         </StatusBar>
       </div>
     </ScreenStates>

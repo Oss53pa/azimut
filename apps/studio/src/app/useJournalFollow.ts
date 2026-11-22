@@ -14,7 +14,7 @@
  * Sans liaison au journal — mode local, ou session sans identité — le crochet
  * ne fait rien, et l'émetteur passe tel quel.
  */
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MutableRefObject } from 'react';
 import {
   pollJournal, readJournalHead, readJournalSince, startCursor, trackOwnWrites,
@@ -37,48 +37,61 @@ export function useJournalFollow(options: {
   readonly resumePending: () => boolean;
   readonly adopt: (next: SessionState) => void;
   readonly reload: () => Promise<void>;
-}): { readonly wrap: (send: Send) => Send } {
+}): {
+  readonly wrap: (send: Send) => Send;
+  /** F5.2 — la dernière lecture du journal a échoué. */
+  readonly readFailing: boolean;
+} {
   const { journal, current, resumePending, adopt, reload } = options;
   const cursor = useRef<JournalCursor | null>(null);
   const inFlight = useRef(0);
+  const [readFailing, setReadFailing] = useState(false);
 
-  const resync = useCallback(async (): Promise<void> => {
-    if (journal === undefined) return;
+  const resync = useCallback(async (): Promise<boolean> => {
+    if (journal === undefined) return false;
     const head = await readJournalHead(journal.config, journal.siteId);
-    if (head === null) return;
+    if (head === null) return false;
     await reload();
     cursor.current = startCursor(journal.siteId, head);
+    return true;
   }, [journal, reload]);
 
   useEffect(() => {
     if (journal === undefined) return;
-    let stop: () => void = () => undefined;
-    let live = true;
-    void (async () => {
-      await resync();
-      if (!live || cursor.current === null) return;
-      stop = pollJournal({
-        read: after => readJournalSince(journal.config, journal.siteId, after),
-        cursor: () => cursor.current ?? startCursor(journal.siteId),
-        busy: () => inFlight.current > 0,
-        onStep: step => {
-          if (!canReceive(current.current, resumePending())) return;
-          if (step.gap) { void resync(); return; }
-          if (step.received.length > 0) adopt(applyReceived(current.current, step.received));
-          cursor.current = step.cursor;
-        },
-        onFailure: failure => {
-          // Une commande qui ne se relit pas ne se saute pas : le site est relu.
-          if (failure.cause === 'command') void resync();
-        },
-      });
-    })();
-    return () => { live = false; stop(); };
+    cursor.current = null;
+    // Tant qu'aucun curseur n'est posé, chaque interrogation retente la
+    // lecture de la tête : un premier échec ne laisse pas le poste sourd.
+    const stop = pollJournal({
+      read: async after => {
+        if (cursor.current === null) {
+          return (await resync())
+            ? { ok: true, entries: [] }
+            : { ok: false, cause: 'head', findings: [] };
+        }
+        return readJournalSince(journal.config, journal.siteId, after);
+      },
+      cursor: () => cursor.current ?? startCursor(journal.siteId),
+      busy: () => inFlight.current > 0,
+      onStep: step => {
+        setReadFailing(false);
+        if (cursor.current === null) return;
+        if (!canReceive(current.current, resumePending())) return;
+        if (step.gap) { void resync(); return; }
+        if (step.received.length > 0) adopt(applyReceived(current.current, step.received));
+        cursor.current = step.cursor;
+      },
+      onFailure: failure => {
+        setReadFailing(true);
+        // Une commande qui ne se relit pas ne se saute pas : le site est relu.
+        if (failure.cause === 'command') void resync();
+      },
+    });
+    return stop;
   }, [journal, current, resumePending, adopt, resync]);
 
   const wrap = useCallback((send: Send): Send => (
     journal === undefined ? send : trackOwnWrites(send, cursor, inFlight)
   ), [journal]);
 
-  return { wrap };
+  return { wrap, readFailing };
 }
