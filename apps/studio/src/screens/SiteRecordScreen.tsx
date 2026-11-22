@@ -9,6 +9,7 @@ import { RenameField } from './RenameField.js';
 import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
 import { SyncIndicator } from './SyncIndicator.js';
+import { WorkshopBody } from './WorkshopBody.js';
 
 /**
  * M1bis (partie M) — fiche de site, bâtiments et niveaux.
@@ -106,7 +107,12 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
       }}
       skeleton={<StateBanner severity="info" message={t('record.loading')} />}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md }}>
+      <WorkshopBody
+        gap={SPACE.md}
+        statusBar={(
+            <StatusBar items={status}><SyncIndicator /></StatusBar>
+        )}
+      >
         <div style={{ display: 'flex', alignItems: 'baseline', gap: SPACE.md }}>
           <h1 style={{ margin: 0, fontSize: TEXT.section, fontWeight: 500 }}>
             {props.siteName}
@@ -231,9 +237,7 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
             </Button>
           </div>
         )}
-
-        <StatusBar items={status}><SyncIndicator /></StatusBar>
-      </div>
+      </WorkshopBody>
     </ScreenStates>
   );
 }

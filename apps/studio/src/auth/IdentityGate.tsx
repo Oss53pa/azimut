@@ -5,7 +5,8 @@
  * T-0.5 : « un utilisateur sans organisation ne voit rien. » Sans
  * rattachement, l'écran le dit au lieu d'ouvrir un atelier vide. Avec un
  * seul, il est retenu d'office ; avec plusieurs, l'utilisateur choisit, et
- * peut revenir sur son choix.
+ * peut revenir sur son choix. Le choix est gardé pour l'onglet
+ * (`chosen-org.ts`) : ouvrir un lien ne le redemande pas.
  */
 import { type JSX, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Button, StateBanner, SPACE, TEXT, LABEL_STYLE } from '../components/ui/index.js';
@@ -14,6 +15,7 @@ import type { PostgrestConfig } from '../data/postgrest-http.js';
 import { SessionIdentityContext, identityOf } from './identity.js';
 import type { Membership } from './identity.js';
 import { loadMemberships } from './load-memberships.js';
+import { readChosenOrg, writeChosenOrg } from './chosen-org.js';
 import { MfaGate } from './MfaGate.js';
 import type { GoTrueClient } from '@supabase/auth-js';
 
@@ -30,7 +32,13 @@ export function IdentityGate({ client, config, userId, children }: {
 }): JSX.Element {
   const { t } = useI18n();
   const [load, setLoad] = useState<Load>({ status: 'loading' });
-  const [chosen, setChosen] = useState<string | null>(null);
+  // Présélection gardée pour l'onglet : une simple commodité, revalidée
+  // ci-dessous contre les rattachements relus en base.
+  const [chosen, setChosenState] = useState<string | null>(() => readChosenOrg(userId));
+  const setChosen = (orgId: string | null): void => {
+    writeChosenOrg(userId, orgId);
+    setChosenState(orgId);
+  };
 
   useEffect(() => {
     let live = true;

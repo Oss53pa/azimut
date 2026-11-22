@@ -377,6 +377,13 @@ fenêtre est trop basse. Mesuré : barre d'état en vue à 1366 × 768 et
 1920 × 1080, sans chevauchement à 1366 × 600. Le parcours e2e de F5.2 exige
 désormais la barre dans la fenêtre sur les quatre écrans.
 
+Mesuré ensuite avec une session ouverte, barre d'authentification et bouton
+de changement d'organisation au-dessus de l'atelier : l'écran de calage
+perdait sa barre d'état d'un pixel, sa barre étant au bout d'un contenu qui
+grandit. Le calage et la fiche du site passent par `screens/WorkshopBody.tsx`
+: le contenu défile, la barre d'état reste au bas de la zone. Barre en vue
+sur les quatre écrans, avec une et deux organisations.
+
 Non traité : l'indicateur n'est pas posé dans les écrans de la coquille, qui
 n'ont pas de barre d'état.
 

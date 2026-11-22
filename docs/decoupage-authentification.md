@@ -117,6 +117,13 @@ l'utilisateur, lus dans `membership` (`auth/identity.ts`,
 choisit et peut revenir sur son choix. Les valeurs écrites en dur ne servent
 plus qu'au mode local.
 
+**Corrigé le 22 novembre 2026.** Le choix d'organisation était redemandé à
+chaque chargement de page : ouvrir un lien vers un écran obligeait à choisir
+à nouveau. Il est désormais gardé pour l'onglet (`auth/chosen-org.ts`,
+`sessionStorage`, par utilisateur), et ne sert qu'à présélectionner un
+rattachement relu en base ; une valeur qui n'en désigne aucun est ignorée.
+« Changer d'organisation » l'efface. Vérifié dans un navigateur.
+
 **Limite connue.** Un utilisateur de plusieurs organisations voit dans la
 liste des sites ceux de toutes ses organisations, et la base refusera toute
 écriture sur un site d'une autre organisation que celle choisie. Filtrer la

@@ -14,6 +14,7 @@ import { MAX_PLAN_BYTES, ACCEPTED_PLAN_FORMATS } from '../state/plan-import.js';
 import type { PlanFile, ReplacementVerdict } from '../state/plan-import.js';
 import { ConsequenceDialog } from './ConsequenceDialog.js';
 import { SyncIndicator } from './SyncIndicator.js';
+import { WorkshopBody } from './WorkshopBody.js';
 
 /**
  * M2 (partie M) — écran d'import et de calage de plan.
@@ -116,7 +117,17 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
       }}
       skeleton={<StateBanner severity="info" message={t('calib.loading')} />}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.lg }}>
+      <WorkshopBody
+        gap={SPACE.lg}
+        statusBar={(
+            <StatusBar items={status}>
+              <span style={{ color: 'var(--text-muted)' }}>
+                {CALIBRATION_SHORTCUTS.map(s => `${s.key} ${t(s.labelKey)}`).join(' · ')}
+              </span>
+              <SyncIndicator />
+            </StatusBar>
+        )}
+      >
         <StepTrail current={step} />
 
         {/*
@@ -304,14 +315,7 @@ export function PlanCalibrationScreen(props: PlanCalibrationScreenProps): JSX.El
             onCancel={() => { props.onCancelReplacement?.(); }}
           />
         )}
-
-        <StatusBar items={status}>
-          <span style={{ color: 'var(--text-muted)' }}>
-            {CALIBRATION_SHORTCUTS.map(s => `${s.key} ${t(s.labelKey)}`).join(' · ')}
-          </span>
-          <SyncIndicator />
-        </StatusBar>
-      </div>
+      </WorkshopBody>
     </ScreenStates>
   );
 }
