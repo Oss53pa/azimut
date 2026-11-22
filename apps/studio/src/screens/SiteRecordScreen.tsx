@@ -5,6 +5,7 @@ import {
 } from '../components/ui/index.js';
 import type { ScreenState, StatusItem } from '../components/ui/index.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { RenameField } from './RenameField.js';
 import { getErrorMessage } from '@azimut/core-model';
 import type { ErrorCode, Finding } from '@azimut/core-model';
 
@@ -136,10 +137,10 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
           <Panel key={building.id} title={building.name}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, padding: SPACE.md }}>
               <div style={{ display: 'flex', gap: SPACE.sm, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                <TextField
+                <RenameField
                   label={t('record.building.name')}
                   value={building.name}
-                  onChange={name => { props.onRename('building', building.id, name); }}
+                  onCommit={name => { props.onRename('building', building.id, name); }}
                 />
                 <Toggle
                   label={t('record.building.independent_access')}
@@ -161,10 +162,10 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
                   key={level.id}
                   style={{ display: 'flex', gap: SPACE.sm, alignItems: 'flex-end', flexWrap: 'wrap' }}
                 >
-                  <TextField
+                  <RenameField
                     label={t('record.level.name')}
                     value={level.name}
-                    onChange={name => { props.onRename('level', level.id, name); }}
+                    onCommit={name => { props.onRename('level', level.id, name); }}
                   />
                   <NumericField
                     label={t('record.level.ordinal')}

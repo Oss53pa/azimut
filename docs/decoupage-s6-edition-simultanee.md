@@ -246,10 +246,14 @@ moins d'une seconde.
 
 Limites constatées, non traitées :
 
-- **S-19 n'est pas tenue par le renommage.** La fiche du site écrit à chaque
-  frappe (`onChange`) : chaque lettre devient une commande propagée. Il faut
-  écrire à la validation du champ (sortie ou Entrée). À traiter avant de
-  livrer l'édition simultanée.
+- ~~S-19 n'est pas tenue par le renommage.~~ **Corrigé le 22 novembre
+  2026** (`screens/RenameField.tsx`) : le champ garde un brouillon et n'écrit
+  qu'à Entrée ou à la sortie ; Échap rend le nom en place. Vérifié dans un
+  navigateur à deux postes : un renommage de quatre caractères inscrit une
+  seule commande au journal, et l'autre poste ne voit rien pendant la frappe.
+  Les autres champs de l'atelier étaient déjà conformes : le panneau du
+  graphe écrit sur « Appliquer », le calage et la liaison verticale par
+  formulaire.
 - Les écrans de la coquille qui écrivent par `use-command-write` (fermetures,
   faces, blocs libres) restent sur `apply_commands` : leurs écritures ne sont
   ni journalisées ni contrôlées contre un état périmé.

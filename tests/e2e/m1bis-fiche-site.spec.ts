@@ -76,6 +76,33 @@ test.describe('M1bis (partie M) — la fiche de site', () => {
     await expect(page.getByText(/Niveaux\s*4|Levels\s*4/)).toBeVisible();
   });
 
+  /**
+   * S-19 — « jamais un geste en cours ni une saisie caractère par
+   * caractère ». Le renommage n'écrit qu'à la validation : pendant la
+   * frappe, le panneau garde l'ancien nom ; Entrée valide ; Échap rend le nom
+   * en place.
+   */
+  test('le renommage n’écrit qu’à la validation du champ', async ({ page }) => {
+    await page.goto(RECORD);
+    await ready(page);
+    await addBuilding(page, 'Bâtiment A');
+
+    const field = page.getByLabel(/Nom du bâtiment|Building name/).first();
+    await field.click();
+    await field.press('End');
+    await field.pressSequentially(' Nord');
+    await expect(page.getByRole('heading', { name: 'Bâtiment A Nord' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Bâtiment A', exact: true })).toBeVisible();
+
+    await field.press('Enter');
+    await expect(page.getByRole('heading', { name: 'Bâtiment A Nord' })).toBeVisible();
+
+    await field.pressSequentially(' bis');
+    await field.press('Escape');
+    await expect(field).toHaveValue('Bâtiment A Nord');
+    await expect(page.getByRole('heading', { name: 'Bâtiment A Nord bis' })).toHaveCount(0);
+  });
+
   /** Critère 2. */
   test('deux niveaux de même rang dans un bâtiment sont refusés', async ({ page }) => {
     await page.goto(RECORD);

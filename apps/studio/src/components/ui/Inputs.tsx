@@ -28,11 +28,15 @@ export type TextFieldProps = {
   readonly inputType?: 'text' | 'email' | 'password' | undefined;
   /** L'aide du navigateur à la saisie, par exemple `current-password`. */
   readonly autoComplete?: string | undefined;
+  /** Sortie du champ : un champ qui écrit à la validation y écrit. */
+  readonly onBlur?: (() => void) | undefined;
+  /** Touche pressée dans le champ, par son nom (`Enter`, `Escape`…). */
+  readonly onKey?: ((key: string) => void) | undefined;
 };
 
 export function TextField({
   label, value, onChange, error, hint, maxLength, disabled = false, autoFocus = false,
-  inputType = 'text', autoComplete,
+  inputType = 'text', autoComplete, onBlur, onKey,
 }: TextFieldProps): JSX.Element {
   return (
     <FieldShell label={label} error={error} hint={hint}>
@@ -45,6 +49,8 @@ export function TextField({
           maxLength={maxLength}
           autoFocus={autoFocus}
           autoComplete={autoComplete}
+          onBlur={onBlur}
+          onKeyDown={onKey === undefined ? undefined : e => { onKey(e.key); }}
           aria-invalid={error !== undefined}
           aria-describedby={describedBy}
           onChange={e => { onChange(e.target.value); }}
