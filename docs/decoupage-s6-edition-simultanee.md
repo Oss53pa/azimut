@@ -195,7 +195,7 @@ l'état de lignes qu'applique S6.3. Les brancher est un lot à part :
 
 | Lot | Objet | Taille | Dépend de |
 | --- | --- | --- | --- |
-| S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6, Q9 à Q11 |
+| S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6, Q9 à Q11 — fait |
 
 **S6.6b, bloqué le 21 novembre 2026.** L'examen du poste a montré quatre
 obstacles, dont aucun ne relève de S6 :
@@ -223,6 +223,37 @@ obstacles, dont aucun ne relève de S6 :
    quantifiée — ne correspondra pas à la base, et chaque modification de
    cette famille finira en 409. Seul un parcours sur base réelle, famille de
    commande par famille, le dira.
+
+**S6.6b, fait le 22 novembre 2026.** Avec une session authentifiée,
+l'atelier et le tableau des messages écrivent par `apply_journaled_commands`
+et suivent le journal du site (`app/useSiteWriter.ts`,
+`app/useJournalFollow.ts`, `state/journal-session.ts`). Les commandes des
+autres postes sont rejouées sur la session ; un saut de numéro ou une
+commande illisible fait relire le site. Rien n'est reçu tant qu'un travail
+local attend en file ou qu'un choix de reprise n'est pas tranché (S6.9).
+
+Un refus définitif de la base (4xx) ne part plus en file : la session reste
+telle qu'avant le geste, le refus est rendu à l'écran, et une commande
+périmée (409) fait relire le site. Une coupure ou une erreur serveur restent
+mises en file (E5.3).
+
+Éprouvé par deux postes réels, chacun sous son jeton, par PostgREST : ce que
+l'un écrit, l'autre le reçoit ; un poste ne reçoit pas le sien ; de deux
+gestes concurrents, le second est refusé sans file ni trace locale ; les deux
+finissent sur l'état de la base. Puis dans un navigateur, deux personnes
+connectées : le renommage d'un bâtiment par l'une paraît chez l'autre en
+moins d'une seconde.
+
+Limites constatées, non traitées :
+
+- **S-19 n'est pas tenue par le renommage.** La fiche du site écrit à chaque
+  frappe (`onChange`) : chaque lettre devient une commande propagée. Il faut
+  écrire à la validation du champ (sortie ou Entrée). À traiter avant de
+  livrer l'édition simultanée.
+- Les écrans de la coquille qui écrivent par `use-command-write` (fermetures,
+  faces, blocs libres) restent sur `apply_commands` : leurs écritures ne sont
+  ni journalisées ni contrôlées contre un état périmé.
+- Aucun indicateur de synchronisation dans la barre d'état (F5).
 
 **Q11, essais par famille, 21 novembre 2026**
 (`apps/studio/src/state/__tests__/q11-fidelite-before.db.test.ts`). Le site,

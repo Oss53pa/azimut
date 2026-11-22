@@ -117,9 +117,9 @@ async function play(): Promise<Replay> {
   // L'émetteur applique à l'état local. Il ne lit ni horloge ni réseau : le
   // rejeu doit dépendre de la seule séquence.
   const sink = async (commands: readonly EntityCommand[]): Promise<Outcome<unknown>> => {
-    session = await writeToSession(session, commands, async () => ({
+    session = (await writeToSession(session, commands, async () => ({
       ok: true, value: null, warnings: [],
-    }));
+    }))).state;
     return { ok: true, value: null, warnings: [] };
   };
 
@@ -192,9 +192,9 @@ describe('E5.2 — annuler puis rétablir rend un état identique', () => {
     let session: SessionState = EMPTY_SESSION;
     let store: StoreState = EMPTY_STORE;
     const sink = async (commands: readonly EntityCommand[]): Promise<Outcome<unknown>> => {
-      session = await writeToSession(session, commands, async () => ({
+      session = (await writeToSession(session, commands, async () => ({
         ok: true, value: null, warnings: [],
-      }));
+      }))).state;
       return { ok: true, value: null, warnings: [] };
     };
 

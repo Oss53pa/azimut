@@ -13,7 +13,7 @@ import { levelsOfSession } from '../state/session-scope.js';
 import { buildingNames } from '../state/session-buildings.js';
 import { MessageTableAdapter } from './MessageTableAdapter.js';
 import { useSessionIdentity } from '../auth/identity.js';
-import { appSink } from '../state/app-sink.js';
+import { useSiteWriter } from './useSiteWriter.js';
 import { appRepository } from '../data/index.js';
 import { loadSiteSession } from './site-session-loader.js';
 import { PlanScreenAdapter } from './PlanAdapter.js';
@@ -53,10 +53,11 @@ function TrancheWorkspace({ route }: {
   const identity = useSessionIdentity();
   const { t } = useI18n();
   const levelId = 'levelId' in route ? route.levelId : '';
-  // Le chemin d'écriture réel dès que le dépôt est configuré. Sans
-  // configuration, `appSink` rend `null` et la session retombe sur son
-  // émetteur local — le cas hors ligne de M8 (partie M) critère 3.
-  const remote = useMemo(() => appSink() ?? undefined, []);
+  // Le chemin d'écriture réel dès que le dépôt est configuré, journalisé dès
+  // qu'une session est ouverte (S6.6b). Sans configuration, la session
+  // retombe sur son émetteur local — le cas hors ligne de M8 (partie M)
+  // critère 3.
+  const { remote, journal } = useSiteWriter(route.siteId, levelId);
 
   // E5.4 — le second terme du choix de reprise : ce que le dépôt porte.
   const repository = useMemo(() => appRepository(), []);
@@ -69,7 +70,7 @@ function TrancheWorkspace({ route }: {
     orgId: identity.orgId,
     siteId: route.siteId,
     levelId,
-  }, remote, load);
+  }, remote, load, journal);
 
   // E5.4 — la reprise se pose par-dessus l'écran, qui reste visible derrière.
   // Cacher le travail pendant qu'on demande quoi en faire priverait

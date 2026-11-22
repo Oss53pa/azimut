@@ -3,7 +3,7 @@ import { useTrancheSession } from './useTrancheSession.js';
 import { loadSiteSession } from './site-session-loader.js';
 import { appRepository } from '../data/index.js';
 import { useSessionIdentity } from '../auth/identity.js';
-import { appSink } from '../state/app-sink.js';
+import { useSiteWriter } from './useSiteWriter.js';
 import { rowsOf } from '../state/session-store.js';
 import { readSchedule, scheduleVersions } from '../state/message-schedule-read.js';
 import {
@@ -53,13 +53,14 @@ export function MessageTableAdapter({ siteId, actor }: {
   readonly actor: ScheduleActor;
 }): JSX.Element {
   const identity = useSessionIdentity();
-  // Même émetteur que l'atelier : réel si le dépôt est configuré, local sinon.
-  const remote = useMemo(() => appSink() ?? undefined, []);
+  // Même émetteur que l'atelier : réel si le dépôt est configuré, local sinon,
+  // journalisé avec une session (S6.6b).
+  const { remote, journal } = useSiteWriter(siteId, '');
   // R12 — ce que le dépôt porte du site et de son tableau, comme l'atelier.
   const repository = useMemo(() => appRepository(), []);
   const load = useCallback(() => loadSiteSession(repository, siteId), [repository, siteId]);
   const session = useTrancheSession(
-    { orgId: identity.orgId, siteId, levelId: '' }, remote, load);
+    { orgId: identity.orgId, siteId, levelId: '' }, remote, load, journal);
   const [filters, setFilters] = useState<ScheduleFilters>(NO_FILTERS);
   const [grouping, setGrouping] = useState<Grouping>('support');
   const [selection, setSelection] = useState<TableSelection>(NO_SELECTION);

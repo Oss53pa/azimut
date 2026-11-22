@@ -23,6 +23,9 @@ import {
   canUndo, canRedo,
 } from '../state/command-store.js';
 import type { StoreState } from '../state/command-store.js';
+import { canReceive } from '../state/journal-session.js';
+import { useJournalFollow } from './useJournalFollow.js';
+import type { JournalBinding } from './useJournalFollow.js';
 
 /** L'organisation et le site du parcours, fournis par l'appelant. */
 export type SessionContext = {
@@ -126,6 +129,8 @@ export function useTrancheSession(
   context: SessionContext,
   send: (commands: readonly EntityCommand[]) => Promise<Outcome<unknown>> = LOCAL_ONLY,
   load?: SessionLoader,
+  /** S6.6b — la liaison au journal du site, pour l'édition simultanée. */
+  journal?: JournalBinding,
 ): TrancheSession {
   const [state, setState] = useState<SessionState>(EMPTY_SESSION);
   // L'état courant, lisible sans attendre un rendu : une écriture doit partir
@@ -151,12 +156,37 @@ export function useTrancheSession(
     setPlanImages(previous => new Map(previous).set(planSourceId, image));
   }, []);
   const store = useRef<StoreState>(EMPTY_STORE);
+  const resumePending = useRef(false);
 
   /** Prend un état pour état courant. */
   const adopt = useCallback((next: SessionState): void => {
     current.current = next;
     setState(next);
   }, []);
+
+  // S6.6b — ce qu'un autre poste a écrit entre dans la session, et la session
+  // est sauvegardée comme après un geste (E5.4).
+  const receive = useCallback((next: SessionState): void => {
+    adopt(next);
+    saveSession(context.siteId, next, storage);
+  }, [adopt, context.siteId, storage]);
+
+  /** Relit le site, sans jamais écraser un travail local en attente. */
+  const reload = useCallback(async (): Promise<void> => {
+    if (load === undefined) return;
+    try {
+      const fresh = await load();
+      if (fresh !== null && canReceive(current.current, resumePending.current)) receive(fresh);
+    } catch {
+      // Le site reste tel qu'il est ; l'interrogation suivante réessaiera.
+    }
+  }, [load, receive]);
+
+  const isResumePending = useCallback(() => resumePending.current, []);
+  const follow = useJournalFollow({
+    journal, current, resumePending: isResumePending, adopt: receive, reload,
+  });
+  const sendOut = useMemo(() => follow.wrap(send), [follow, send]);
 
   // E5.4 — à l'ouverture d'un écran, l'état local est relu. Ce qu'on en fait
   // dépend de qui l'a laissé là : cet onglet, ou une session interrompue.
@@ -171,7 +201,7 @@ export function useTrancheSession(
       isOpenInTab(context.siteId, tabStorage),
     );
     if (decision.kind === 'poursuivre') adopt(decision.state);
-    if (decision.kind === 'proposer') setPendingResume(decision.state);
+    if (decision.kind === 'proposer') { resumePending.current = true; setPendingResume(decision.state); }
     if (decision.kind === 'rien') markOpenInTab(context.siteId, tabStorage);
 
     if (load === undefined) return;
@@ -191,6 +221,7 @@ export function useTrancheSession(
 
   const acceptResume = useCallback((): void => {
     if (pendingResume !== null) adopt(pendingResume);
+    resumePending.current = false;
     setPendingResume(null);
     markOpenInTab(context.siteId, tabStorage);
   }, [adopt, context.siteId, pendingResume, tabStorage]);
@@ -200,6 +231,7 @@ export function useTrancheSession(
     // repart de l'état du dépôt — vide tant que le dépôt ne porte rien.
     clearSession(context.siteId, storage);
     adopt(stored.current);
+    resumePending.current = false;
     setPendingResume(null);
     markOpenInTab(context.siteId, tabStorage);
   }, [adopt, context.siteId, storage, tabStorage]);
@@ -208,7 +240,7 @@ export function useTrancheSession(
   useEffect(() => {
     const onOnline = (): void => {
       void (async () => {
-        const { state: flushedState } = await flushQueue(current.current, send);
+        const { state: flushedState } = await flushQueue(current.current, sendOut);
         current.current = flushedState;
         setState(flushedState);
         // E5.3 — « La pile d'annulation est vidée à la synchronisation. Ce qui
@@ -228,7 +260,7 @@ export function useTrancheSession(
       window.removeEventListener('online', onOnline);
       window.removeEventListener('offline', onOffline);
     };
-  }, [send]);
+  }, [sendOut]);
 
   /**
    * L'émetteur que le magasin de commandes appelle.
@@ -241,13 +273,19 @@ export function useTrancheSession(
   const sink = useCallback(async (
     commands: readonly EntityCommand[],
   ): Promise<Outcome<unknown>> => {
-    const written = await writeToSession(current.current, commands, send);
+    const { state: written, refused } = await writeToSession(current.current, commands, sendOut);
+    if (refused !== null) {
+      // S6.6b — un refus définitif laisse la session telle qu'avant le geste.
+      // Une commande périmée dit que le site a changé ailleurs : il est relu.
+      if (refused.some(f => f.params['cause'] === '409')) void reload();
+      return { ok: false, findings: [...refused] };
+    }
     current.current = written;
     saveSession(context.siteId, written, storage);
     markOpenInTab(context.siteId, tabStorage);
     setState(written);
     return { ok: true, value: null, warnings: [] };
-  }, [context.siteId, send, storage, tabStorage]);
+  }, [context.siteId, sendOut, reload, storage, tabStorage]);
 
   const write = useCallback(async (commands: readonly EntityCommand[]): Promise<boolean> => {
     const queuedBefore = current.current.queued.length;
@@ -255,16 +293,16 @@ export function useTrancheSession(
     store.current = result.state;
     setStore(result.state);
     // Rien ne reste en file quand l'envoi a abouti ; sinon il repartira à la
-    // synchronisation, et l'écran le dit.
-    return current.current.queued.length === queuedBefore;
+    // synchronisation, et l'écran le dit. Un refus définitif n'a rien écrit.
+    return result.outcome.ok && current.current.queued.length === queuedBefore;
   }, [sink]);
 
   const record = useCallback(async (
     commands: readonly EntityCommand[],
   ): Promise<boolean> => {
     const queuedBefore = current.current.queued.length;
-    await sink(commands);
-    return current.current.queued.length === queuedBefore;
+    const out = await sink(commands);
+    return out.ok && current.current.queued.length === queuedBefore;
   }, [sink]);
 
   const undo = useCallback(async (): Promise<boolean> => {

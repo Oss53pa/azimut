@@ -14,6 +14,7 @@
  * invérifiable sur un poste nu.
  */
 import { createPostgrestSink } from './postgrest-sink.js';
+import type { SinkConfig } from './postgrest-sink.js';
 import { DEFAULT_SCHEMA } from '../data/config.js';
 import type { DataSourceEnv } from '../data/config.js';
 import type { CommandSink } from './command-store.js';
@@ -30,14 +31,22 @@ function trimmed(value: string | undefined): string {
  * écriture.
  */
 export function createSink(env: DataSourceEnv): CommandSink | null {
+  const config = sinkConfigFrom(env);
+  return config === null ? null : createPostgrestSink(config);
+}
+
+/** La configuration de l'émetteur, ou `null` sans URL ou sans clé. */
+export function sinkConfigFrom(env: DataSourceEnv): SinkConfig | null {
   const url = trimmed(env.VITE_AZIMUT_API_URL).replace(/\/+$/, '');
   const apiKey = trimmed(env.VITE_AZIMUT_API_KEY);
   if (url === '' || apiKey === '') return null;
-
   const schema = trimmed(env.VITE_AZIMUT_DB_SCHEMA);
-  return createPostgrestSink({
-    url, apiKey, schema: schema === '' ? DEFAULT_SCHEMA : schema,
-  });
+  return { url, apiKey, schema: schema === '' ? DEFAULT_SCHEMA : schema };
+}
+
+/** La configuration de l'émetteur de l'application. */
+export function appSinkConfig(): SinkConfig | null {
+  return sinkConfigFrom(import.meta.env as DataSourceEnv);
 }
 
 /** L'émetteur de l'application, construit depuis l'environnement de build. */

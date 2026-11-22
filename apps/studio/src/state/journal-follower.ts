@@ -135,6 +135,50 @@ function entryOf(
   return { ok: true, value: { seq: seq as number, authorId, command: parsed.value } };
 }
 
+/**
+ * Le dernier numéro du journal du site, ou `null` si la lecture a échoué. Un
+ * site sans entrée rend 0.
+ *
+ * Le poste le lit avant de relire le site : une commande inscrite entre les
+ * deux est alors à la fois dans le site relu et dans la suite du journal, et
+ * l'appliquer deux fois ne change rien, puisqu'elle porte ses valeurs.
+ */
+export async function readJournalHead(
+  config: SinkConfig,
+  siteId: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<number | null> {
+  if (!UUID.test(siteId)) return null;
+  const search = new URLSearchParams({
+    select: 'seq', site_id: `eq.${siteId}`, order: 'seq.desc', limit: '1',
+  });
+  try {
+    const response = await fetchImpl(`${config.url}/command_journal?${search.toString()}`, {
+      headers: {
+        apikey: config.apiKey,
+        Authorization: `Bearer ${config.accessToken ?? bearerToken(config.apiKey)}`,
+        'Accept-Profile': config.schema,
+        Accept: 'application/json',
+      },
+    });
+    if (!response.ok) return null;
+    const rows = await response.json() as unknown;
+    if (!Array.isArray(rows)) return null;
+    if (rows.length === 0) return 0;
+    const seq = (rows[0] as Record<string, unknown> | null)?.['seq'];
+    return Number.isSafeInteger(seq) && (seq as number) > 0 ? seq as number : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ce qu'un émetteur journalisé rend en cas de succès. */
+export function isJournaledWrite(value: unknown): value is JournaledWrite {
+  if (typeof value !== 'object' || value === null) return false;
+  const { lastSeq, count } = value as Record<string, unknown>;
+  return Number.isSafeInteger(lastSeq) && Number.isSafeInteger(count);
+}
+
 export type FollowStep = {
   readonly cursor: JournalCursor;
   /** Les commandes des autres postes, à appliquer dans cet ordre. */

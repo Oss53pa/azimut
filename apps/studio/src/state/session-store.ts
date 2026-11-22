@@ -13,7 +13,7 @@
  * E5.3 : ce qui est écrit hors ligne attend en file, et part à la
  * synchronisation. La pile d'annulation est alors vidée.
  */
-import type { EntityCommand, Outcome } from '@azimut/core-model';
+import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
 
 /** Une ligne telle que le magasin la garde : la table, l'identifiant, l'état. */
 export type StoredRow = {
@@ -126,27 +126,55 @@ export function clearSession(siteId: string, storage: Storage | null): void {
 // ---------------------------------------------------------------------------
 
 /**
+ * Un refus que renvoyer ne changera pas : la base a répondu, et dit non.
+ *
+ * Les émetteurs portent en cause le statut HTTP (`postgrest-sink.ts`). Un
+ * statut 4xx — commande périmée (409), accès refusé (403), commande mal formée
+ * (400) — se reproduirait à chaque envoi. Une coupure, une erreur du serveur
+ * (5xx) ou un refus sans cause sont, eux, des absences de réponse : E5.3 veut
+ * que le travail attende en file.
+ */
+export function isDefinitiveRefusal(findings: readonly Finding[]): boolean {
+  return findings.some(f => {
+    const cause = f.params['cause'];
+    return typeof cause === 'string' && /^4\d\d$/.test(cause);
+  });
+}
+
+export type WriteResult = {
+  readonly state: SessionState;
+  /** Le refus définitif de la base, ou `null` si le geste est écrit ou en file. */
+  readonly refused: readonly Finding[] | null;
+};
+
+/**
  * Écrit une suite de commandes.
  *
  * Hors ligne, elles entrent en file et l'état local avance : M8 (partie M)
  * critère 3 veut que « le même parcours soit réalisable hors ligne ». En
- * ligne, elles partent, et n'entrent en file que si l'envoi échoue — sans
- * quoi une coupure au milieu du parcours perdrait le travail.
+ * ligne, elles partent, et n'entrent en file que si l'envoi n'a pas abouti —
+ * sans quoi une coupure au milieu du parcours perdrait le travail.
+ *
+ * Un refus définitif (S6.6b) ne se met pas en file : renvoyée à chaque
+ * reconnexion, une commande périmée serait refusée à chaque fois. L'état local
+ * reste alors celui d'avant le geste, et le refus est rendu.
  */
 export async function writeToSession(
   state: SessionState,
   commands: readonly EntityCommand[],
   send: (commands: readonly EntityCommand[]) => Promise<Outcome<unknown>>,
-): Promise<SessionState> {
+): Promise<WriteResult> {
   let next = state;
   for (const command of commands) next = applyToSession(next, command);
 
   if (!state.online) {
-    return { ...next, queued: [...next.queued, ...commands] };
+    return { state: { ...next, queued: [...next.queued, ...commands] }, refused: null };
   }
 
   const sent = await send(commands);
-  return sent.ok ? next : { ...next, queued: [...next.queued, ...commands] };
+  if (sent.ok) return { state: next, refused: null };
+  if (isDefinitiveRefusal(sent.findings)) return { state, refused: sent.findings };
+  return { state: { ...next, queued: [...next.queued, ...commands] }, refused: null };
 }
 
 /**

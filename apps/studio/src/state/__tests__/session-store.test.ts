@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   EMPTY_SESSION, applyToSession, rowsOf, countOf, storageKey,
   saveSession, readSession, clearSession, writeToSession, flushQueue,
-  resumeDecision, markOpenInTab, isOpenInTab,
+  resumeDecision, markOpenInTab, isOpenInTab, isDefinitiveRefusal,
 } from '../session-store.js';
 import type { SessionState } from '../session-store.js';
 import { buildCommand } from '@azimut/core-model';
@@ -131,13 +131,13 @@ describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
   const offline: SessionState = { ...EMPTY_SESSION, online: false };
 
   it('hors ligne, l’état local avance et les commandes entrent en file', async () => {
-    const state = await writeToSession(offline, [cmd('site', 's1')], ACCEPTS);
+    const { state } = await writeToSession(offline, [cmd('site', 's1')], ACCEPTS);
     expect(countOf(state, 'site')).toBe(1);
     expect(state.queued.length).toBe(1);
   });
 
   it('en ligne, rien n’entre en file', async () => {
-    const state = await writeToSession(EMPTY_SESSION, [cmd('site', 's1')], ACCEPTS);
+    const { state } = await writeToSession(EMPTY_SESSION, [cmd('site', 's1')], ACCEPTS);
     expect(state.queued).toEqual([]);
   });
 
@@ -146,13 +146,41 @@ describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
    * qui échoue met la commande en file, comme si l'on était hors ligne.
    */
   it('un envoi refusé met la commande en file', async () => {
-    const state = await writeToSession(EMPTY_SESSION, [cmd('site', 's1')], REFUSES);
+    const { state } = await writeToSession(EMPTY_SESSION, [cmd('site', 's1')], REFUSES);
     expect(state.queued.length).toBe(1);
     expect(countOf(state, 'site')).toBe(1);
   });
 
+  /**
+   * S6.6b — un refus définitif de la base ne part pas en file : renvoyée à
+   * chaque reconnexion, une commande périmée serait refusée à chaque fois.
+   */
+  it('un refus définitif ne met rien en file, et laisse l’état d’avant le geste', async () => {
+    for (const cause of ['409', '403', '400']) {
+      const refuses = async (): Promise<Outcome<unknown>> => ({
+        ok: false,
+        findings: [{ code: 'EDIT.WRITE_REFUSED', severity: 'blocking', entity: null, params: { cause }, ruleRef: 'A6.1' }],
+      });
+      const { state, refused } = await writeToSession(EMPTY_SESSION, [cmd('site', 's1')], refuses);
+      expect(state.queued, cause).toEqual([]);
+      expect(countOf(state, 'site'), cause).toBe(0);
+      expect(refused?.[0]?.params['cause']).toBe(cause);
+    }
+  });
+
+  it('une coupure ou une erreur du serveur mettent en file', () => {
+    const with_ = (cause?: string) => [{
+      code: 'EDIT.WRITE_REFUSED', severity: 'blocking' as const, entity: null,
+      params: cause === undefined ? {} : { cause }, ruleRef: 'A6.1',
+    }];
+    expect(isDefinitiveRefusal(with_('transport'))).toBe(false);
+    expect(isDefinitiveRefusal(with_('503'))).toBe(false);
+    expect(isDefinitiveRefusal(with_())).toBe(false);
+    expect(isDefinitiveRefusal(with_('409'))).toBe(true);
+  });
+
   it('la synchronisation vide la file et repasse en ligne', async () => {
-    const written = await writeToSession(offline, [cmd('site', 's1'), cmd('level', 'l1')], ACCEPTS);
+    const { state: written } = await writeToSession(offline, [cmd('site', 's1'), cmd('level', 'l1')], ACCEPTS);
     const { state, flushed } = await flushQueue(written, ACCEPTS);
     expect(flushed).toBe(2);
     expect(state.queued).toEqual([]);
@@ -164,7 +192,7 @@ describe('M8 (partie M) critère 3 — hors ligne et synchronisation', () => {
    * que personne ne sait décrire.
    */
   it('une synchronisation refusée laisse la file entière', async () => {
-    const written = await writeToSession(offline, [cmd('site', 's1'), cmd('level', 'l1')], ACCEPTS);
+    const { state: written } = await writeToSession(offline, [cmd('site', 's1'), cmd('level', 'l1')], ACCEPTS);
     const { state, flushed } = await flushQueue(written, REFUSES);
     expect(flushed).toBe(0);
     expect(state.queued.length).toBe(2);
