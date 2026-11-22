@@ -109,7 +109,7 @@ export function useGraphInk(inputs: GraphInkInputs): {
 
   return {
     zone: view => (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, height: '100%' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.sm, flex: '1 0 auto' }}>
         <GraphView {...view} ink={ink} frame={frame} viewKey={`graphe:${levelId}`}
           sketch={{
             strokes: sketch.strokes, selected: sketch.selected,

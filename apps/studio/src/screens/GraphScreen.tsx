@@ -159,8 +159,8 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
       }}
       skeleton={<StateBanner severity="info" message={t('graph.loading')} />}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, minHeight: 0 }}>
-        <div style={{ display: 'flex', gap: SPACE.md, minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flex: 1, gap: SPACE.md, minHeight: 0 }}>
           <Toolbar
             label={t('graph.toolbar')}
             items={tools}
@@ -168,102 +168,106 @@ export function GraphScreen(props: GraphScreenProps): JSX.Element {
             onSelect={id => { props.onTool(id as GraphTool); }}
           />
 
-          <div style={{ flex: 1, minWidth: 0 }}>{props.children}</div>
+          {/* F5.1 — la zone de travail prend la hauteur qui reste ; ce qui la suit garde la sienne. */}
+          <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: SPACE.md }}>{props.children}</div>
 
-          <Panel title={t('graph.properties')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
-              {props.selection === null && (
-                <p style={{ margin: 0, color: 'var(--text-muted)' }}>{t('graph.no_selection')}</p>
-              )}
-              {props.selection !== null && (
-                <Button
-                  rank="primary"
-                  onClick={props.onApplyProperties}
-                  disabled={!props.propertiesDirty}
-                >
-                  {t('graph.action.apply')}
-                </Button>
-              )}
+          {/* F5.1 — le panneau défile en lui-même, la zone de travail garde sa hauteur. */}
+          <div style={{ overflowY: 'auto', minHeight: 0 }}>
+            <Panel title={t('graph.properties')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
+                {props.selection === null && (
+                  <p style={{ margin: 0, color: 'var(--text-muted)' }}>{t('graph.no_selection')}</p>
+                )}
+                {props.selection !== null && (
+                  <Button
+                    rank="primary"
+                    onClick={props.onApplyProperties}
+                    disabled={!props.propertiesDirty}
+                  >
+                    {t('graph.action.apply')}
+                  </Button>
+                )}
 
-              {props.selection?.kind === 'node' && (
-                <>
-                  <SelectField
-                    label={t('graph.node.kind')}
-                    value={props.selection.nodeKind}
-                    options={NODE_KINDS.map(kind => ({ value: kind, label: t(nodeKindKey(kind)) }))}
-                    onChange={value => { props.onNodeKind(value as NodeKind); }}
-                  />
-                  <TextField
-                    label={t('graph.node.label')}
-                    value={props.selection.label}
-                    onChange={props.onNodeLabel}
-                    hint={t('graph.node.label.hint')}
-                  />
-                  <NumericField
-                    label={t('graph.node.x')}
-                    unit={t('unit.metre')}
-                    value={props.selection.position.x_m}
-                    step={0.001}
-                    onChange={value => { props.onNodePosition('x_m', value); }}
-                  />
-                  <NumericField
-                    label={t('graph.node.y')}
-                    unit={t('unit.metre')}
-                    value={props.selection.position.y_m}
-                    step={0.001}
-                    onChange={value => { props.onNodePosition('y_m', value); }}
-                  />
-                </>
-              )}
+                {props.selection?.kind === 'node' && (
+                  <>
+                    <SelectField
+                      label={t('graph.node.kind')}
+                      value={props.selection.nodeKind}
+                      options={NODE_KINDS.map(kind => ({ value: kind, label: t(nodeKindKey(kind)) }))}
+                      onChange={value => { props.onNodeKind(value as NodeKind); }}
+                    />
+                    <TextField
+                      label={t('graph.node.label')}
+                      value={props.selection.label}
+                      onChange={props.onNodeLabel}
+                      hint={t('graph.node.label.hint')}
+                    />
+                    <NumericField
+                      label={t('graph.node.x')}
+                      unit={t('unit.metre')}
+                      value={props.selection.position.x_m}
+                      step={0.001}
+                      onChange={value => { props.onNodePosition('x_m', value); }}
+                    />
+                    <NumericField
+                      label={t('graph.node.y')}
+                      unit={t('unit.metre')}
+                      value={props.selection.position.y_m}
+                      step={0.001}
+                      onChange={value => { props.onNodePosition('y_m', value); }}
+                    />
+                  </>
+                )}
 
-              {props.selection?.kind === 'edge' && (
-                <>
-                  <NumericField
-                    label={t('graph.edge.width')}
-                    unit={t('unit.metre')}
-                    value={props.selection.widthM}
-                    step={0.01}
-                    min={0.01}
-                    onChange={props.onEdgeWidth}
-                  />
-                  <NumericField
-                    label={t('graph.edge.slope')}
-                    unit={t('unit.percent')}
-                    value={props.selection.slopePct}
-                    step={0.1}
-                    min={SLOPE_MIN_PCT}
-                    max={SLOPE_MAX_PCT}
-                    onChange={props.onEdgeSlope}
-                  />
-                  <Toggle
-                    label={t('graph.edge.accessible')}
-                    checked={props.selection.accessible}
-                    onChange={props.onEdgeAccessible}
-                  />
-                  <SelectField
-                    label={t('graph.edge.direction')}
-                    value={props.selection.direction}
-                    options={EDGE_DIRECTIONS.map(d => ({ value: d, label: t(directionKey(d)) }))}
-                    onChange={value => { props.onEdgeDirection(value as EdgeDirection); }}
-                  />
-                  <Toggle
-                    label={t('graph.edge.evacuation')}
-                    checked={props.selection.evacuationRoute}
-                    onChange={props.onEdgeEvacuation}
-                  />
-                  {/* M4 (partie M) : jamais saisissable, recalculée à tout déplacement. */}
-                  <NumericField
-                    label={t('graph.edge.length')}
-                    unit={t('unit.metre')}
-                    value={props.selection.lengthM}
-                    onChange={() => { /* lecture seule */ }}
-                    computed
-                    hint={t('graph.edge.length.hint')}
-                  />
-                </>
-              )}
-            </div>
-          </Panel>
+                {props.selection?.kind === 'edge' && (
+                  <>
+                    <NumericField
+                      label={t('graph.edge.width')}
+                      unit={t('unit.metre')}
+                      value={props.selection.widthM}
+                      step={0.01}
+                      min={0.01}
+                      onChange={props.onEdgeWidth}
+                    />
+                    <NumericField
+                      label={t('graph.edge.slope')}
+                      unit={t('unit.percent')}
+                      value={props.selection.slopePct}
+                      step={0.1}
+                      min={SLOPE_MIN_PCT}
+                      max={SLOPE_MAX_PCT}
+                      onChange={props.onEdgeSlope}
+                    />
+                    <Toggle
+                      label={t('graph.edge.accessible')}
+                      checked={props.selection.accessible}
+                      onChange={props.onEdgeAccessible}
+                    />
+                    <SelectField
+                      label={t('graph.edge.direction')}
+                      value={props.selection.direction}
+                      options={EDGE_DIRECTIONS.map(d => ({ value: d, label: t(directionKey(d)) }))}
+                      onChange={value => { props.onEdgeDirection(value as EdgeDirection); }}
+                    />
+                    <Toggle
+                      label={t('graph.edge.evacuation')}
+                      checked={props.selection.evacuationRoute}
+                      onChange={props.onEdgeEvacuation}
+                    />
+                    {/* M4 (partie M) : jamais saisissable, recalculée à tout déplacement. */}
+                    <NumericField
+                      label={t('graph.edge.length')}
+                      unit={t('unit.metre')}
+                      value={props.selection.lengthM}
+                      onChange={() => { /* lecture seule */ }}
+                      computed
+                      hint={t('graph.edge.length.hint')}
+                    />
+                  </>
+                )}
+              </div>
+            </Panel>
+          </div>
         </div>
 
         {props.findings.map(finding => (

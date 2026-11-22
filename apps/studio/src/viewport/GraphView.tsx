@@ -35,6 +35,13 @@ import { useI18n } from '../i18n/useI18n.js';
 /** La fenêtre de dessin. Fixe : le redimensionnement vient avec la vue libre. */
 const VIEWPORT: Viewport = { width_px: 640, height_px: 420 };
 
+/**
+ * F5.1 — hauteur plancher de la vue quand l'écran la serre. Constante de mise
+ * en page, sans origine normative : en dessous, la colonne défile plutôt que
+ * d'écraser la vue.
+ */
+const VIEW_MIN_HEIGHT_PX = 320;
+
 /** Demi-côté d'un nœud, en pixels. Constante nommée, jamais dispersée. */
 const NODE_RADIUS_PX = 7;
 
@@ -142,7 +149,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
   }, [props.nodes, view]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 0 auto' }}>
     {props.sketch?.toolbar}
     {props.ink !== undefined && (
       <ZoneViewControls onZoomIn={() => { zone.zoomBy(1); }} onZoomOut={() => { zone.zoomBy(-1); }} onRefit={zone.refit} />
@@ -153,7 +160,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
       aria-label={t('graph.view.label')}
       viewBox={`0 0 ${String(VIEWPORT.width_px)} ${String(VIEWPORT.height_px)}`}
       style={{
-        width: '100%', height: '100%',
+        width: '100%', flex: '1 1 0px', minHeight: VIEW_MIN_HEIGHT_PX,
         background: 'var(--surface-canvas)',
         border: '1px solid var(--border-strong)',
         ...(props.ink === undefined ? {} : { touchAction: 'none' }),

@@ -17,9 +17,16 @@ export function App(): JSX.Element {
   const auth = useMemo(() => appAuthClient(), []);
   return (
     <I18nProvider defaultLang={langFromLocation(window.location.search)}>
-      <AuthGate client={auth}>
-        <TrancheRouter />
-      </AuthGate>
+      {/*
+        F5.1 et F5.2 — le cadre prend la hauteur de la fenêtre. L'atelier y
+        remplit ce qui reste sous les barres, sa barre d'état toujours en
+        vue ; les autres écrans défilent dans le cadre.
+      */}
+      <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'auto' }}>
+        <AuthGate client={auth}>
+          <TrancheRouter />
+        </AuthGate>
+      </div>
     </I18nProvider>
   );
 }

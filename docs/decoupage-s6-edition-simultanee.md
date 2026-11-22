@@ -365,15 +365,22 @@ la première lecture de la tête échouait, et rien ne le disait. Il la retente
 désormais à chaque interrogation, comme la coquille (S6.6c), et l'échec
 s'affiche.
 
-Constaté, non traité, en attente de décision : la barre d'état n'est pas
-visible sans défilement sur les écrans à canevas (graphe, empreintes) à
-1366 × 768. Aucun conteneur de l'atelier n'a de hauteur bornée, du corps de
-page au canevas ; la page mesure 1042 pixels pour une fenêtre de 768. F5.2
-veut la barre « en permanence ». La corriger reprend la mise en page de la
-racine de l'atelier et des quatre écrans (F5.1). L'indicateur n'est pas
-posé non plus dans les écrans de la coquille, qui n'ont pas de barre d'état.
+**Mise en page F5.1, faite le 22 novembre 2026 (décision Q14).** La barre
+d'état tombait sous la fenêtre sur les écrans à canevas : aucun conteneur de
+l'atelier n'avait de hauteur bornée, et la page mesurait 1042 pixels pour une
+fenêtre de 768. Le cadre de l'application prend maintenant la hauteur de la
+fenêtre ; l'atelier remplit ce qui reste sous les barres ; le canevas du
+graphe prend la hauteur libre, avec un plancher de 320 pixels sous lequel sa
+colonne défile ; les panneaux de propriétés défilent en eux-mêmes ; la zone
+des empreintes garde sa hauteur fixe, dont son repère dépend, et défile si la
+fenêtre est trop basse. Mesuré : barre d'état en vue à 1366 × 768 et
+1920 × 1080, sans chevauchement à 1366 × 600. Le parcours e2e de F5.2 exige
+désormais la barre dans la fenêtre sur les quatre écrans.
 
-**S6.7b, présence : bloqué, A2.2 cas 2.** G4.2 veut « leur nom et l'heure
+Non traité : l'indicateur n'est pas posé dans les écrans de la coquille, qui
+n'ont pas de barre d'état.
+
+**S6.7b, présence : débloqué par Q12 et Q13, après le lot de mise en page (Q14).** G4.2 veut « leur nom et l'heure
 de leur dernière modification ». Le modèle ne porte aucun nom d'utilisateur :
 `membership` n'a que `user_id` et le rôle, et A5 ne définit ni profil ni
 nom affiché. La forme de la sélection et de la zone de travail n'est pas
@@ -428,6 +435,14 @@ Décisions du même jour sur les obstacles de S6.6b :
 | Q9 | Le lot d'authentification passe d'abord : connexion au poste et identité tirée du jeton, à la place de `session-identity.ts`. Préalable à S6.4, S6.6b et S6.7 |
 | Q10 | La décision Q7 s'étend à tout l'atelier : `newId` tire un `uuid` aléatoire. Le rejeu reste déterministe, l'identifiant étant inscrit dans la commande |
 | Q11 | Un essai sur base réelle par famille de commande, sur une base jetable, avant de brancher l'atelier sur le chemin journalisé |
+
+Décisions d'Oss53pa du 22 novembre 2026, sur les obstacles de S6.7b :
+
+| Question | Décision |
+| --- | --- |
+| Q12 | Le nom affiché vient d'une colonne `display_name` sur `membership`, par organisation, saisie par l'administrateur (AUTH.7). Vide : seul le rôle s'affiche. Rien n'est lu dans `auth.users` |
+| Q13 | La sélection d'un collègue est une liste bornée de références `{table, id}` ; sa zone de travail, le rectangle de son cadrage en mètres du repère du niveau (x, y, largeur, hauteur). Les deux sont validés par schéma en base |
+| Q14 | La barre d'état hors fenêtre se corrige dans un lot à part (F5.1), avant S6.7b |
 
 La durée d'expiration du verrou (Q2) et l'intervalle d'interrogation (Q4) sont
 des constantes nommées sans origine normative. Leurs valeurs initiales se

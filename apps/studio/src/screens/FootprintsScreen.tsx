@@ -112,8 +112,8 @@ export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
       }}
       skeleton={<StateBanner severity="info" message={t('fp.loading')} />}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, minHeight: 0 }}>
-        <div style={{ display: 'flex', gap: SPACE.md, alignItems: 'stretch', minHeight: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, flex: 1, minHeight: 0 }}>
+        <div style={{ display: 'flex', flex: 1, gap: SPACE.md, alignItems: 'stretch', minHeight: 0 }}>
           <Toolbar
             label={t('fp.toolbar')}
             items={tools}
@@ -121,49 +121,53 @@ export function FootprintsScreen(props: FootprintsScreenProps): JSX.Element {
             onSelect={id => { props.onTool(id as FootprintTool); }}
           />
 
-          <div style={{ flex: 1, minWidth: 0 }}>
+          {/* F5.1 — la zone a une hauteur fixe (son repère en dépend) : trop haute, elle défile en elle-même. */}
+          <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflowY: 'auto' }}>
             {props.children}
           </div>
 
-          <Panel title={t('fp.properties')}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
-              <TextField
-                label={t('fp.field.code')}
-                value={props.unitCode}
-                onChange={props.onUnitCode}
-                maxLength={UNIT_CODE_MAX}
-                error={messageFor('DATA.UNIT_CODE_REQUIRED', 'DATA.CODE_DUPLICATE')}
-              />
+          {/* F5.1 — le panneau défile en lui-même, la zone de travail garde sa hauteur. */}
+          <div style={{ overflowY: 'auto', minHeight: 0 }}>
+            <Panel title={t('fp.properties')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, padding: SPACE.md, minWidth: 260 }}>
+                <TextField
+                  label={t('fp.field.code')}
+                  value={props.unitCode}
+                  onChange={props.onUnitCode}
+                  maxLength={UNIT_CODE_MAX}
+                  error={messageFor('DATA.UNIT_CODE_REQUIRED', 'DATA.CODE_DUPLICATE')}
+                />
 
-              <SelectField
-                label={t('fp.field.kind')}
-                value={props.kind}
-                options={FOOTPRINT_KINDS.map(kind => ({
-                  value: kind,
-                  label: t(kindKey(kind)),
-                }))}
-                onChange={value => { props.onKind(value as FootprintKind); }}
-              />
+                <SelectField
+                  label={t('fp.field.kind')}
+                  value={props.kind}
+                  options={FOOTPRINT_KINDS.map(kind => ({
+                    value: kind,
+                    label: t(kindKey(kind)),
+                  }))}
+                  onChange={value => { props.onKind(value as FootprintKind); }}
+                />
 
-              {/* M7.3 (partie M) : calculée, lecture seule, et dite telle. */}
-              <NumericField
-                label={t('fp.field.area')}
-                unit={t('unit.square_metre')}
-                value={props.areaM2}
-                onChange={() => { /* lecture seule */ }}
-                computed
-              />
+                {/* M7.3 (partie M) : calculée, lecture seule, et dite telle. */}
+                <NumericField
+                  label={t('fp.field.area')}
+                  unit={t('unit.square_metre')}
+                  value={props.areaM2}
+                  onChange={() => { /* lecture seule */ }}
+                  computed
+                />
 
-              <VertexTable vertices={vertices} onVertex={props.onVertex} />
+                <VertexTable vertices={vertices} onVertex={props.onVertex} />
 
-              <SeriesFields
-                series={props.series}
-                onSeries={props.onSeries}
-                reference={props.seriesReference}
-                onDuplicate={props.onDuplicate}
-              />
-            </div>
-          </Panel>
+                <SeriesFields
+                  series={props.series}
+                  onSeries={props.onSeries}
+                  reference={props.seriesReference}
+                  onDuplicate={props.onDuplicate}
+                />
+              </div>
+            </Panel>
+          </div>
         </div>
 
         <Anomalies findings={findings} lang={lang} severity="blocking" />

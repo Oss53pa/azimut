@@ -63,7 +63,7 @@ export function ScreenStates({
 }: ScreenStatesProps): JSX.Element {
   if (state.kind === 'empty' && emptyKeepsContent) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, flex: 1, minHeight: 0 }}>
         {invitation !== undefined && (
           <StateBanner severity="info" message={invitation.message}>
             <Button rank="primary" onClick={invitation.onAction}>
@@ -112,7 +112,9 @@ export function ScreenStates({
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md }}>
+    // F5.1 — dans un parent en colonne de hauteur bornée, l'écran la remplit ;
+    // ailleurs, ces deux propriétés sont sans effet.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: SPACE.md, flex: 1, minHeight: 0 }}>
       {state.kind === 'offline' && (
         // F7 : « Bandeau permanent, indication de ce qui reste possible. »
         <StateBanner severity="warning" message={state.stillPossible} />

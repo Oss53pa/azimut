@@ -100,6 +100,8 @@ function TrancheWorkspace({ route }: {
 
   return (
     <SyncStatusContext.Provider value={session.sync}>
+      {/* F5.1 — l'atelier remplit la hauteur que le cadre lui laisse. */}
+      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/*
         F7 (partie F) — un site vide et un site illisible ne se ressemblent
         pas. Quand le dépôt n'a pas pu être lu, l'atelier le dit au lieu de
@@ -130,6 +132,7 @@ function TrancheWorkspace({ route }: {
           onDiscard={session.discardResume}
         />
       )}
+      </div>
     </SyncStatusContext.Provider>
   );
 }
