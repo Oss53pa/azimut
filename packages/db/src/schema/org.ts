@@ -14,6 +14,9 @@ export const membership = azimut.table('membership', {
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   user_id: uuid('user_id').notNull(),
   role: text('role').notNull(),
+  // S6.7b, 0081 (décision Q12) : le nom sous lequel les collègues voient ce
+  // membre. Vide, seul le rôle s'affiche.
+  display_name: text('display_name'),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex('membership_org_user').on(t.org_id, t.user_id),

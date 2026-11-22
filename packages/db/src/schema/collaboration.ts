@@ -1,4 +1,4 @@
-import { uuid, timestamp, bigint, jsonb, index, unique } from 'drizzle-orm/pg-core';
+import { uuid, timestamp, bigint, jsonb, index, unique, primaryKey } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
@@ -22,4 +22,24 @@ export const commandJournal = azimut.table('command_journal', {
 }, (t) => [
   unique('command_journal_site_seq').on(t.site_id, t.seq),
   index('idx_command_journal_org').on(t.org_id),
+  index('idx_command_journal_level_author').on(t.level_id, t.author_id, t.recorded_at),
+]);
+
+/**
+ * S6.7b — la présence sur un niveau (migration 0081).
+ *
+ * S'écrit par `touch_presence` et `leave_presence`, se lit par
+ * `level_presence_list` : jamais par Drizzle. L'heure de présence est posée
+ * par la base.
+ */
+export const levelPresence = azimut.table('level_presence', {
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  level_id: uuid('level_id').notNull().references(() => level.id, { onDelete: 'cascade' }),
+  user_id: uuid('user_id').notNull().default(sql`azimut.current_user_id()`),
+  selection: jsonb('selection').notNull().default(sql`'[]'::jsonb`),
+  zone: jsonb('zone'),
+  seen_at: timestamp('seen_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ columns: [t.level_id, t.user_id] }),
+  index('idx_level_presence_org').on(t.org_id),
 ]);
