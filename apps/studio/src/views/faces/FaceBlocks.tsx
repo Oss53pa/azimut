@@ -7,7 +7,8 @@ import {
 import { useSiteData } from '../../context/useSiteData.js';
 import { useI18n } from '../../i18n/useI18n.js';
 import type { UiMessageKey } from '../../i18n/messages.js';
-import { SelectField, TextField, Button, Note, SPACE, TEXT, LABEL_STYLE, type Option } from '../../components/ui/index.js';
+import { SelectField, TextField, Button, Note, StateBanner, SPACE, TEXT, LABEL_STYLE, type Option } from '../../components/ui/index.js';
+import { blockChangedUnder } from './draft-base.js';
 import type { CommandWrite } from '../../state/use-command-write.js';
 import { codePointCompare } from '@azimut/core-model';
 
@@ -54,7 +55,11 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   const langs = faceLangs(site, face);
   const [slot, setSlot] = useState('');
   const [texts, setTexts] = useState<FreeTexts>({});
-  const [editing, setEditing] = useState<{ readonly id: string; readonly texts: FreeTexts } | null>(null);
+  // S6.6c — le bloc tel qu'il était au début de la saisie : c'est lui que la
+  // commande donne pour état antérieur, non le bloc relu.
+  const [editing, setEditing] = useState<{
+    readonly id: string; readonly base: ContentBlockInstance; readonly texts: FreeTexts;
+  } | null>(null);
   const inactive = write.readonly || write.busy;
 
   const blocks = site.content_blocks
@@ -82,8 +87,8 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
     void write.send(asList(outcome), 'faceblocks.added').then(ok => { if (ok) { setTexts({}); setSlot(''); } });
   }
 
-  function save(block: ContentBlockInstance, next: FreeTexts): void {
-    void write.send(asList(updateFreeTextCommand(site, face, block, next, now())), 'faceblocks.saved')
+  function save(base: ContentBlockInstance, next: FreeTexts): void {
+    void write.send(asList(updateFreeTextCommand(site, face, base, next, now())), 'faceblocks.saved')
       .then(ok => { if (ok) setEditing(null); });
   }
 
@@ -104,7 +109,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
             {isEnterableBlockKind(b.kind) && (
               <span style={{ display: 'flex', gap: SPACE.xs }}>
                 {editing?.id !== b.id && (
-                  <Button rank="quiet" disabled={inactive} onClick={() => { setEditing({ id: b.id, texts: readFreeTexts(b) }); }}>
+                  <Button rank="quiet" disabled={inactive} onClick={() => { write.clear(); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
                     {t('faceblocks.edit')}
                   </Button>
                 )}
@@ -121,9 +126,16 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
           {editing?.id === b.id
             ? (
               <div style={{ display: 'grid', gap: SPACE.sm }}>
-                <TextFields langs={langs} texts={editing.texts} onChange={next => { setEditing({ id: b.id, texts: next }); }} disabled={inactive} />
+                {blockChangedUnder(editing.base, b) && (
+                  <StateBanner severity="warning" message={t('faceblocks.changed')}>
+                    <Button rank="secondary" onClick={() => { write.clear(); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
+                      {t('faceblocks.restart')}
+                    </Button>
+                  </StateBanner>
+                )}
+                <TextFields langs={langs} texts={editing.texts} onChange={next => { setEditing({ ...editing, texts: next }); }} disabled={inactive} />
                 <span style={{ display: 'flex', gap: SPACE.xs }}>
-                  <Button rank="secondary" disabled={inactive} onClick={() => { save(b, editing.texts); }}>{t('faceblocks.save')}</Button>
+                  <Button rank="secondary" disabled={inactive} onClick={() => { save(editing.base, editing.texts); }}>{t('faceblocks.save')}</Button>
                   <Button rank="quiet" onClick={() => { setEditing(null); }}>{t('faceblocks.cancel')}</Button>
                 </span>
               </div>

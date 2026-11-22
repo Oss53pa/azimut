@@ -291,9 +291,26 @@ fermetures : la fermeture déclarée par l'une paraît chez l'autre en 250 ms
 environ, le retrait par la seconde disparaît chez la première en 760 ms
 environ, et le journal porte deux commandes pour ces deux gestes.
 
-Constaté, non expliqué : au premier passage navigateur, le poste à deux
-organisations a journalisé un 404 en console. Trois relances instrumentées,
-qui listent toute réponse en erreur des deux postes, n'en ont montré aucun.
+Le 404 vu en console au premier passage navigateur est `favicon.ico`, que
+l'aperçu de construction ne sert pas : aucun appel à l'API n'est en cause.
+
+**Défaut introduit par la relecture, corrigé le 22 novembre 2026.** Relire le
+site sous un formulaire ouvert neutralisait le contrôle d'état : le
+formulaire des faces et la réécriture d'un texte libre tiraient leur
+`before` du site relu, si bien qu'un brouillon commencé avant l'écriture
+d'un autre poste passait par-dessus elle, sans refus. Chaque brouillon garde
+désormais l'état sur lequel il est parti (`views/faces/draft-base.ts`) et
+c'est lui qui sert de `before`. Quand l'objet change sous le brouillon,
+l'écran le dit et propose de repartir de la version actuelle ; enregistrer
+sans repartir est refusé en 409, et la saisie reste à l'écran. Vérifié dans
+un navigateur à deux postes : l'avertissement paraît en 770 ms environ,
+l'enregistrement du brouillon périmé est refusé, la base garde l'écriture
+de l'autre poste, et l'enregistrement après « repartir » passe.
+
+Les retraits (fermeture, bloc) et les déclarations ne sont pas concernés : un
+retrait porte sur la ligne affichée au moment du clic, une déclaration n'a
+pas d'état antérieur. Le verrou ferme de S-20 (S6.4) rendra ce cas
+impossible au lieu de le refuser après coup.
 
 Non éprouvés : `declareFaceCommand` et `declareBlockCommand`, des créations,
 dont le `before` est vide et que le contrôle d'état ne touche donc pas.

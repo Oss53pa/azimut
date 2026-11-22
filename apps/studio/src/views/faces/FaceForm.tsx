@@ -2,11 +2,12 @@ import { type JSX, useState } from 'react';
 import { asList, declareFaceCommand, updateFaceCommand, supportTypologyOf } from '@azimut/core-model';
 import { useSiteData } from '../../context/useSiteData.js';
 import { useI18n } from '../../i18n/useI18n.js';
-import { SelectField, MultiChoice, Button, SPACE, type Option } from '../../components/ui/index.js';
+import { SelectField, MultiChoice, Button, StateBanner, SPACE, type Option } from '../../components/ui/index.js';
 import type { CommandWrite } from '../../state/use-command-write.js';
 import { FindingList } from '../message-schedule/FindingList.js';
 import { NoticeList } from '../message-schedule/NoticeList.js';
 import type { FaceSlot } from './face-slots.js';
+import { faceChangedUnder } from './draft-base.js';
 
 /** La valeur du sélecteur qui laisse la face suivre le gabarit de la typologie. */
 const INHERITED = '';
@@ -25,6 +26,17 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
   const { t } = useI18n();
   const [template, setTemplate] = useState(slot.face?.template_key ?? INHERITED);
   const [langs, setLangs] = useState<readonly string[]>(slot.face?.langs ?? []);
+  // S6.6c — la face sur laquelle le brouillon est parti : c'est elle que la
+  // commande donne pour état antérieur, non la face relue.
+  const [base, setBase] = useState(slot.face);
+  const changed = faceChangedUnder(base, slot.face);
+
+  function restart(): void {
+    setBase(slot.face);
+    setTemplate(slot.face?.template_key ?? INHERITED);
+    setLangs(slot.face?.langs ?? []);
+    write.clear();
+  }
 
   // Les gabarits de la typologie du support d'abord ; tous, si aucun ne lui est propre.
   const typology = supportTypologyOf(site.support_types, slot.support);
@@ -42,13 +54,13 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
   function submit(): void {
     const draft = { template_key: template === INHERITED ? null : template, langs };
     const timestamp = new Date().toISOString();
-    if (slot.face === undefined) {
+    if (base === undefined) {
       const outcome = declareFaceCommand(site, slot.support.id, slot.faceIndex, draft, {
         newId: () => crypto.randomUUID(), timestamp,
       });
       void write.send(asList(outcome), 'supportfaces.form.declared');
     } else {
-      void write.send(asList(updateFaceCommand(site, slot.face, draft, timestamp)), 'supportfaces.form.saved');
+      void write.send(asList(updateFaceCommand(site, base, draft, timestamp)), 'supportfaces.form.saved');
     }
   }
 
@@ -70,11 +82,16 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
         hint={t('supportfaces.form.langs.hint')}
         disabled={inactive}
       />
+      {changed && (
+        <StateBanner severity="warning" message={t('supportfaces.form.changed')}>
+          <Button rank="secondary" onClick={restart}>{t('supportfaces.form.restart')}</Button>
+        </StateBanner>
+      )}
       <FindingList findings={write.findings} empty="" />
       <NoticeList notices={write.notices} />
       <div>
         <Button rank="primary" onClick={submit} disabled={inactive}>
-          {slot.face === undefined ? t('supportfaces.form.declare') : t('supportfaces.form.save')}
+          {base === undefined ? t('supportfaces.form.declare') : t('supportfaces.form.save')}
         </Button>
       </div>
     </section>
