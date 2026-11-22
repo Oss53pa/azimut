@@ -19,7 +19,7 @@
  * `applyRemoteCommand` (S6.3), chez l'appelant.
  */
 import { parseCommand } from '@azimut/core-model';
-import type { EntityCommand, Finding } from '@azimut/core-model';
+import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
 import type { SinkConfig } from './postgrest-sink.js';
 import type { JournaledWrite } from './journaled-sink.js';
 import { bearerToken } from '../auth/access-token.js';
@@ -170,6 +170,33 @@ export async function readJournalHead(
   } catch {
     return null;
   }
+}
+
+/** Un émetteur, vu de qui suit le journal. */
+export type JournalSend = (commands: readonly EntityCommand[]) => Promise<Outcome<unknown>>;
+
+/**
+ * Enveloppe un émetteur pour que le suivi reconnaisse les écritures de ce
+ * poste : le compteur `inFlight` suspend l'interrogation tant qu'une écriture
+ * est en vol, et les numéros rendus sont inscrits au curseur.
+ */
+export function trackOwnWrites(
+  send: JournalSend,
+  cursor: { current: JournalCursor | null },
+  inFlight: { current: number },
+): JournalSend {
+  return async commands => {
+    inFlight.current += 1;
+    try {
+      const out = await send(commands);
+      if (out.ok && isJournaledWrite(out.value) && cursor.current !== null) {
+        cursor.current = recordOwnWrite(cursor.current, out.value);
+      }
+      return out;
+    } finally {
+      inFlight.current -= 1;
+    }
+  };
 }
 
 /** Ce qu'un émetteur journalisé rend en cas de succès. */

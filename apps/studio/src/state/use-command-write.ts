@@ -3,14 +3,15 @@
  * qui écrivent par commande (fermetures, faces, blocs libres).
  *
  * Une commande refusée avant envoi rend ses anomalies, et ses refus de saisie
- * sans code (D2.2) ; acceptée, elle part
- * vers `apply_commands` et le site se relit depuis le dépôt, qui reste la
- * source de vérité. Sans base configurée, rien ne part et `readonly` le dit :
+ * sans code (D2.2) ; acceptée, elle part par l'émetteur de la coquille —
+ * `apply_journaled_commands` sous une session ouverte (S6.6c), `apply_commands`
+ * sinon — et le site se relit depuis le dépôt, qui reste la source de vérité. Sans base configurée, rien ne part et `readonly` le dit :
  * l'écran se désactive plutôt que de simuler une écriture en mémoire.
  */
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
 import type { EntityCommand, Finding, FormNotice, FormOutcome } from '@azimut/core-model';
 import { useSiteReload } from '../context/useSiteReload.js';
+import { SiteSinkContext } from '../context/site-writer.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import { appSink } from './app-sink.js';
 
@@ -30,9 +31,17 @@ export type CommandWrite = {
   readonly clear: () => void;
 };
 
+function isStaleRefusal(finding: Finding): boolean {
+  return finding.code === 'EDIT.WRITE_REFUSED' && finding.params['cause'] === '409';
+}
+
 export function useCommandWrite(): CommandWrite {
   const reload = useSiteReload();
-  const sink = useMemo(() => appSink(), []);
+  // S6.6c — la coquille fournit son émetteur, journalisé dès qu'une session
+  // est ouverte. Hors coquille (essais d'écran), il se construit ici.
+  const provided = useContext(SiteSinkContext);
+  const own = useMemo(() => (provided === undefined ? appSink() : null), [provided]);
+  const sink = provided === undefined ? own : provided;
   const [findings, setFindings] = useState<readonly Finding[]>([]);
   const [notices, setNotices] = useState<readonly FormNotice[]>([]);
   const [warnings, setWarnings] = useState<readonly Finding[]>([]);
@@ -48,7 +57,13 @@ export function useCommandWrite(): CommandWrite {
     setBusy(true);
     const result = await sink(outcome.value);
     setBusy(false);
-    if (!result.ok) { setFindings(result.findings); return false; }
+    if (!result.ok) {
+      setFindings(result.findings);
+      // Une commande périmée (S6.2) : l'écran se relit pour montrer ce qu'un
+      // autre poste a écrit entre-temps. Le refus reste affiché.
+      if (result.findings.some(isStaleRefusal)) reload();
+      return false;
+    }
     setFindings([]);
     setWarnings(outcome.warnings);
     setDone(doneKey);

@@ -1,6 +1,8 @@
 import { type JSX, useEffect, useMemo, useState } from 'react';
 import type { ViewId } from '../views.js';
 import { SiteDataProvider } from '../context/SiteDataContext.js';
+import { SiteSinkContext } from '../context/site-writer.js';
+import { useShellJournal } from '../state/use-shell-journal.js';
 import { I18nProvider } from '../i18n/index.js';
 import {
   appRepository, useSite, useSiteList, useSiteVocabularyLoad, useWayfindingRegistryLoad,
@@ -50,6 +52,9 @@ export function Shell(): JSX.Element {
   const site = useSite(repository, siteId);
   const vocabulary = useSiteVocabularyLoad(repository, siteId);
   const wayfinding = useWayfindingRegistryLoad(repository, siteId);
+  // S6.6c — l'émetteur des écrans de la coquille, et le suivi du journal du
+  // site ouvert : ce qu'un autre poste écrit relit le site ici.
+  const sink = useShellJournal(site.state.status === 'ready' ? siteId : '', site.refresh);
 
   // Aucun site ouvert : le premier de la liste l'est, pour que l'application
   // s'ouvre sur du contenu plutôt que sur un choix vide.
@@ -111,6 +116,7 @@ export function Shell(): JSX.Element {
       wayfinding={wayfinding.state}
       onReload={site.refresh}
     >
+      <SiteSinkContext.Provider value={sink}>
       <I18nProvider>
         <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
           <HeaderBar
@@ -155,6 +161,7 @@ export function Shell(): JSX.Element {
           )}
         </div>
       </I18nProvider>
+      </SiteSinkContext.Provider>
     </SiteDataProvider>
   );
 }

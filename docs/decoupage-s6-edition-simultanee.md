@@ -196,6 +196,7 @@ l'état de lignes qu'applique S6.3. Les brancher est un lot à part :
 | Lot | Objet | Taille | Dépend de |
 | --- | --- | --- | --- |
 | S6.6b | Intégration au poste : émettre par l'émetteur journalisé, suivre le journal, appliquer par S6.3, recharger les vues | L | S6.6, Q9 à Q11 — fait |
+| S6.6c | Écrans de la coquille (fermetures, faces, blocs libres) sur le journal | M | S6.6b — fait |
 
 **S6.6b, bloqué le 21 novembre 2026.** L'examen du poste a montré quatre
 obstacles, dont aucun ne relève de S6 :
@@ -254,10 +255,48 @@ Limites constatées, non traitées :
   Les autres champs de l'atelier étaient déjà conformes : le panneau du
   graphe écrit sur « Appliquer », le calage et la liaison verticale par
   formulaire.
-- Les écrans de la coquille qui écrivent par `use-command-write` (fermetures,
-  faces, blocs libres) restent sur `apply_commands` : leurs écritures ne sont
-  ni journalisées ni contrôlées contre un état périmé.
+- ~~Les écrans de la coquille qui écrivent par `use-command-write` (fermetures,
+  faces, blocs libres) restent sur `apply_commands`.~~ **Traité par S6.6c**,
+  ci-dessous.
 - Aucun indicateur de synchronisation dans la barre d'état (F5).
+
+**S6.6c, fait le 22 novembre 2026.** La coquille fournit aux écrans qui
+écrivent par `use-command-write` leur émetteur (`context/site-writer.ts`) et
+suit le journal du site ouvert (`state/use-shell-journal.ts`). Avec une
+session authentifiée, ces écrans écrivent par `apply_journaled_commands`.
+Ils ne tiennent pas de session de commandes : une écriture d'un autre poste
+fait relire le site, sans passer par « chargement », au lieu d'être rejouée.
+Un saut de numéro ou une commande illisible font de même. La tête du journal
+se lit avant toute relecture, et la première se retente à chaque
+interrogation tant qu'elle échoue. Une commande périmée est refusée en 409 :
+le refus reste affiché et l'écran se relit. L'enveloppe qui reconnaît les
+écritures du poste (`trackOwnWrites`) est partagée avec l'atelier.
+
+La coquille et l'atelier ne sont jamais montés ensemble (route `legacy`
+contre écrans d'atelier) : un seul suivi interroge à la fois.
+
+Éprouvé sur base réelle par PostgREST
+(`state/__tests__/s6-6c-coquille.db.test.ts`), avec le `before` tiré du site
+relu par le dépôt du studio, comme l'écran le construit :
+
+| Famille | Constructeur | Écran | Résultat |
+| --- | --- | --- | --- |
+| Déclarer, retirer une fermeture | `declareClosureCommand`, `withdrawClosureCommand` | fermetures | accepté |
+| Modifier une face | `updateFaceCommand` | faces des supports | accepté |
+| Réécrire un texte libre, retirer un bloc | `updateFreeTextCommand`, `withdrawBlockCommand` | faces des supports | accepté |
+| Retirer un bloc depuis un site non relu | `withdrawBlockCommand` | faces des supports | refusé en 409, accepté après relecture |
+
+Puis dans un navigateur, deux personnes connectées sur l'écran des
+fermetures : la fermeture déclarée par l'une paraît chez l'autre en 250 ms
+environ, le retrait par la seconde disparaît chez la première en 760 ms
+environ, et le journal porte deux commandes pour ces deux gestes.
+
+Constaté, non expliqué : au premier passage navigateur, le poste à deux
+organisations a journalisé un 404 en console. Trois relances instrumentées,
+qui listent toute réponse en erreur des deux postes, n'en ont montré aucun.
+
+Non éprouvés : `declareFaceCommand` et `declareBlockCommand`, des créations,
+dont le `before` est vide et que le contrôle d'état ne touche donc pas.
 
 **Q11, essais par famille, 21 novembre 2026**
 (`apps/studio/src/state/__tests__/q11-fidelite-before.db.test.ts`). Le site,

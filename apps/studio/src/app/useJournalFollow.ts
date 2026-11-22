@@ -16,11 +16,10 @@
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
-import type { EntityCommand, Outcome } from '@azimut/core-model';
 import {
-  isJournaledWrite, pollJournal, readJournalHead, readJournalSince, recordOwnWrite, startCursor,
+  pollJournal, readJournalHead, readJournalSince, startCursor, trackOwnWrites,
 } from '../state/journal-follower.js';
-import type { JournalCursor } from '../state/journal-follower.js';
+import type { JournalCursor, JournalSend } from '../state/journal-follower.js';
 import { applyReceived, canReceive } from '../state/journal-session.js';
 import type { SinkConfig } from '../state/postgrest-sink.js';
 import type { SessionState } from '../state/session-store.js';
@@ -30,7 +29,7 @@ export type JournalBinding = {
   readonly siteId: string;
 };
 
-type Send = (commands: readonly EntityCommand[]) => Promise<Outcome<unknown>>;
+type Send = JournalSend;
 
 export function useJournalFollow(options: {
   readonly journal: JournalBinding | undefined;
@@ -77,21 +76,9 @@ export function useJournalFollow(options: {
     return () => { live = false; stop(); };
   }, [journal, current, resumePending, adopt, resync]);
 
-  const wrap = useCallback((send: Send): Send => {
-    if (journal === undefined) return send;
-    return async commands => {
-      inFlight.current += 1;
-      try {
-        const out = await send(commands);
-        if (out.ok && isJournaledWrite(out.value) && cursor.current !== null) {
-          cursor.current = recordOwnWrite(cursor.current, out.value);
-        }
-        return out;
-      } finally {
-        inFlight.current -= 1;
-      }
-    };
-  }, [journal]);
+  const wrap = useCallback((send: Send): Send => (
+    journal === undefined ? send : trackOwnWrites(send, cursor, inFlight)
+  ), [journal]);
 
   return { wrap };
 }

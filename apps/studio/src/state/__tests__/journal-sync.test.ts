@@ -3,7 +3,7 @@ import { buildCommand, serializeCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
 import { createJournaledSink } from '../journaled-sink.js';
 import {
-  follow, pollJournal, readJournalSince, recordOwnWrite, startCursor,
+  follow, pollJournal, readJournalSince, recordOwnWrite, startCursor, trackOwnWrites,
 } from '../journal-follower.js';
 import type { JournalCursor, JournalEntry, ReadOutcome } from '../journal-follower.js';
 
@@ -210,5 +210,44 @@ describe('S6.6 — l’interrogation', () => {
     stop();
     await next();
     expect(queue.length).toBe(0);
+  });
+});
+
+describe('S6.6c — l’émetteur suivi', () => {
+  it('suspend l’interrogation pendant l’écriture et inscrit ses numéros', async () => {
+    const cursor: { current: JournalCursor | null } = { current: startCursor(SITE, 4) };
+    const inFlight = { current: 0 };
+    let seenInFlight = -1;
+    const send = trackOwnWrites(async () => {
+      seenInFlight = inFlight.current;
+      return { ok: true, value: { lastSeq: 6, count: 2 }, warnings: [] };
+    }, cursor, inFlight);
+
+    const out = await send([cmd('a'), cmd('b')]);
+    expect(out.ok).toBe(true);
+    expect(seenInFlight).toBe(1);
+    expect(inFlight.current).toBe(0);
+    expect([...(cursor.current?.own ?? [])]).toEqual([5, 6]);
+    // Relues, les deux entrées font avancer le curseur sans être rendues.
+    const cur = cursor.current;
+    if (cur === null) throw new Error('curseur');
+    expect(follow(cur, [entry(5), entry(6)]).received).toEqual([]);
+  });
+
+  it('un refus n’inscrit rien et libère l’interrogation', async () => {
+    const cursor: { current: JournalCursor | null } = { current: startCursor(SITE, 4) };
+    const inFlight = { current: 0 };
+    const send = trackOwnWrites(async () => ({ ok: false, findings: [] }), cursor, inFlight);
+    expect((await send([cmd('a')])).ok).toBe(false);
+    expect(inFlight.current).toBe(0);
+    expect(cursor.current?.own.size).toBe(0);
+  });
+
+  it('sans curseur posé, l’écriture passe sans rien inscrire', async () => {
+    const cursor: { current: JournalCursor | null } = { current: null };
+    const inFlight = { current: 0 };
+    const send = trackOwnWrites(async () => ({ ok: true, value: { lastSeq: 1, count: 1 }, warnings: [] }), cursor, inFlight);
+    expect((await send([cmd('a')])).ok).toBe(true);
+    expect(cursor.current).toBeNull();
   });
 });
