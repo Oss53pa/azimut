@@ -2,11 +2,13 @@ import { type JSX, useEffect, useState } from 'react';
 import type { Finding, NodeKind, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
 import { useSessionIdentity } from '../auth/identity.js';
+import { useEditLock } from './useEditLock.js';
 import { acceptNode, acceptEdge } from '../state/graph-input.js';
 import type { EdgeRemedy } from '../state/graph-input.js';
 import { acceptAxis } from '../state/graph-axis.js';
 import { graphCommands } from '../state/graph-commands.js';
-import { point, structured, text } from '../state/row-values.js';
+import { text } from '../state/row-values.js';
+import { positionOf } from './graph-rows.js';
 import { readSessionGraph } from '../state/session-graph.js';
 import { levelsOfSession } from '../state/session-scope.js';
 import { inheritedEdgeWidthM } from '../state/edge-width.js';
@@ -60,6 +62,10 @@ export function GraphScreenAdapter({ session, levelId }: {
   // depuis le graphe à la sélection, puis vit sa vie jusqu'à l'application.
   const [chosen, setChosen] = useState<GraphSelection | null>(null);
   const [dirty, setDirty] = useState(false);
+  // S6.4 — l'objet en cours d'édition est verrouillé pour les autres ; tenu
+  // par un autre, le geste est refusé et le panneau revient à la base.
+  const lock = useEditLock(chosen === null ? null : { table: chosen.kind, id: chosen.id }, dirty,
+    () => { if (chosen !== null) select(chosen); });
   // M4 (partie M) : la correction que le refus propose. Elle était calculée
   // par `acceptEdge` et jetée, l'écran recevant `null` en toute circonstance.
   const [remedy, setRemedy] = useState<EdgeRemedy | null>(null);
@@ -211,7 +217,7 @@ export function GraphScreenAdapter({ session, levelId }: {
         setDirty(true);
         setSelection(s => (s?.kind === 'edge' ? { ...s, evacuationRoute } : s));
       }}
-      findings={[...findings, ...link.findings]}
+      findings={[...findings, ...lock.findings, ...session.refusal, ...link.findings]}
       remedy={remedy}
       // M4 (partie M) : « Refus, avec proposition de créer la liaison. » La
       // proposition ouvre l'outil qui la crée, et ne se contente pas de la
@@ -383,15 +389,4 @@ export function GraphScreenAdapter({ session, levelId }: {
       </>
     </GraphScreen>
   );
-}
-
-/**
- * La position d'un nœud, telle que la ligne la porte.
- *
- * `null` quand elle ne se lit pas. L'appelant le dit plutôt que de poser
- * l'origine : une arête tracée depuis une position inventée serait écrite en
- * base, et rien ne la distinguerait d'une arête saisie.
- */
-function positionOf(row: StoredRow): Point | null {
-  return point(structured(row.values, 'position'));
 }

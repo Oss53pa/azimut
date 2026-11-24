@@ -12,7 +12,7 @@
  * (E5.3).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { EntityCommand, Outcome } from '@azimut/core-model';
+import type { EntityCommand, Finding, Outcome } from '@azimut/core-model';
 import {
   EMPTY_SESSION, writeToSession, flushQueue, saveSession, countOf,
   readSession, clearSession, resumeDecision, markOpenInTab, isOpenInTab,
@@ -95,6 +95,8 @@ export type TrancheSession = {
   readonly keepPlanImage: (planSourceId: string, image: PlanImage) => void;
   /** F5.2 — l'état de synchronisation, pour la barre d'état. */
   readonly sync: SyncStatus;
+  /** S6.4 — le refus du dernier geste écrit, vide après un geste accepté. */
+  readonly refusal: readonly Finding[];
 };
 
 /** Le contenu d'un plan importé, tel que lu à l'import. */
@@ -137,6 +139,7 @@ export function useTrancheSession(
   journal?: JournalBinding,
 ): TrancheSession {
   const [state, setState] = useState<SessionState>(EMPTY_SESSION);
+  const [refusal, setRefusal] = useState<readonly Finding[]>([]);
   // L'état courant, lisible sans attendre un rendu : une écriture doit partir
   // du dernier état écrit, et non de celui que React a rendu en dernier.
   const current = useRef<SessionState>(EMPTY_SESSION);
@@ -289,8 +292,10 @@ export function useTrancheSession(
       // S6.6b — un refus définitif laisse la session telle qu'avant le geste.
       // Une commande périmée dit que le site a changé ailleurs : il est relu.
       if (refused.some(f => f.params['cause'] === '409')) void reload();
+      setRefusal(refused);
       return { ok: false, findings: [...refused] };
     }
+    setRefusal([]);
     current.current = written;
     saveSession(context.siteId, written, storage);
     markOpenInTab(context.siteId, tabStorage);
@@ -364,5 +369,6 @@ export function useTrancheSession(
     planImages,
     keepPlanImage,
     sync,
+    refusal,
   };
 }

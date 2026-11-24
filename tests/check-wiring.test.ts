@@ -57,8 +57,6 @@ const DECLARED_NOT_WIRED: Readonly<Record<string, string>> = {
     'I5.2 — droits par module souscrit. Le studio n’a pas de notion de souscription active.',
   auditVectorImports:
     'G7.2 — reprise de fichiers vectoriels en référence de fond. L’écran d’import n’existe pas.',
-  guardObjectEdit:
-    'G4.2 — verrou consultatif de quinze minutes sur un objet en cours d’édition. L’édition concurrente n’est pas construite.',
 };
 
 function walk(dir: string): string[] {

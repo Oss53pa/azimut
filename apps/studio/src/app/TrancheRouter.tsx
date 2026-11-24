@@ -25,6 +25,7 @@ import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 import { SyncStatusContext } from '../context/sync-status.js';
 import { PresenceContext, PresencePublishContext } from '../context/presence.js';
 import { useLevelPresence } from './useLevelPresence.js';
+import { ObjectLockContext } from './useEditLock.js';
 
 /**
  * F15 — `app/`, la composition des écrans.
@@ -106,6 +107,7 @@ function TrancheWorkspace({ route }: {
     <SyncStatusContext.Provider value={session.sync}>
     <PresenceContext.Provider value={presence.present}>
     <PresencePublishContext.Provider value={presence.publish}>
+    <ObjectLockContext.Provider value={journal?.config ?? null}>
       {/* F5.1 — l'atelier remplit la hauteur que le cadre lui laisse. */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/*
@@ -139,6 +141,7 @@ function TrancheWorkspace({ route }: {
         />
       )}
       </div>
+    </ObjectLockContext.Provider>
     </PresencePublishContext.Provider>
     </PresenceContext.Provider>
     </SyncStatusContext.Provider>

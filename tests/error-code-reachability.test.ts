@@ -46,6 +46,8 @@ const CATALOGUE_FILES = [
  * lèvent pas en écrivant du code.
  */
 const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
+  'EDIT.LOCK_OVERRIDDEN':
+    'G4.2 — passage en force d’un verrou consultatif. S6.4 le remplace par un verrou ferme, sans passage en force (décision Q2 d’Oss53pa) : aucun chemin ne le lève.',
   'LAYOUT.LANG_VARIANT_MISSING':
     'Jumeau côté composition de GRAPH.DESTINATION_NAME_MISSING, que validateDirectory lève. ' +
     'renderFace compose une langue à la fois et ne confronte pas son contenu à la liste des langues actives du site.',

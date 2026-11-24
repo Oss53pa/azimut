@@ -89,6 +89,17 @@ export function commandPayload(command: EntityCommand) {
  */
 export function refusal(commands: readonly EntityCommand[], cause: string): Finding {
   const first = commands[0];
+  // S6.4, décision Q5 : un objet tenu par un autre (423) se dit par le code
+  // existant de T-1.16, et non par un refus d'écriture générique.
+  if (cause === '423') {
+    return {
+      code: 'EDIT.OBJECT_LOCKED',
+      severity: 'warning',
+      entity: first !== undefined ? { kind: 'command', id: first.id } : null,
+      params: { commands: commands.length, cause },
+      ruleRef: 'S-20',
+    };
+  }
   return {
     code: 'EDIT.WRITE_REFUSED',
     severity: 'blocking',
