@@ -126,6 +126,7 @@ non plus — elle n'en retire que les clés étrangères.
 0080_a6_3_mfa_required
 0081_s6_7_level_presence
 0082_a5_point_positions
+0083_s6_4_object_lock
 ```
 
 ## Règle pour la suite

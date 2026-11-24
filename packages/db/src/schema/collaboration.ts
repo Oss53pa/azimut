@@ -1,4 +1,4 @@
-import { uuid, timestamp, bigint, jsonb, index, unique, primaryKey } from 'drizzle-orm/pg-core';
+import { uuid, text, timestamp, bigint, jsonb, index, unique, primaryKey } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { azimut } from './azimut.js';
 import { organization } from './org.js';
@@ -42,4 +42,23 @@ export const levelPresence = azimut.table('level_presence', {
 }, (t) => [
   primaryKey({ columns: [t.level_id, t.user_id] }),
   index('idx_level_presence_org').on(t.org_id),
+]);
+
+/**
+ * S6.4 — le verrou ferme (migration 0083).
+ *
+ * Se pose par `acquire_object_lock`, se lève par `release_object_lock`, se
+ * lit par `live_object_locks` : jamais par Drizzle. Le refus d'écrire un
+ * objet tenu par un autre est un déclencheur de chaque table métier.
+ */
+export const objectLock = azimut.table('object_lock', {
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  target_table: text('target_table').notNull(),
+  target_id: uuid('target_id').notNull(),
+  holder_id: uuid('holder_id').notNull().default(sql`azimut.current_user_id()`),
+  acquired_at: timestamp('acquired_at', { withTimezone: true }).notNull().defaultNow(),
+  expires_at: timestamp('expires_at', { withTimezone: true }).notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.target_table, t.target_id] }),
+  index('idx_object_lock_org').on(t.org_id),
 ]);
