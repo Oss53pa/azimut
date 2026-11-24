@@ -220,7 +220,7 @@ describe('loadSiteData (full path, stubbed db)', () => {
       }]],
       [node, [{
         id: 'n-1', org_id: 'org-1', level_id: 'l-1', kind: 'decision',
-        position: { x: 0, y: 0, z: 0 }, label: 'hall',
+        position: { x_m: 0, y_m: 0 }, label: 'hall',
       }]],
       [support, [row({
         id: 'sup-1', site_id: 'site-1', node_id: 'n-1',

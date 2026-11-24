@@ -125,6 +125,7 @@ non plus — elle n'en retire que les clés étrangères.
 0079_a6_2_marketing_role
 0080_a6_3_mfa_required
 0081_s6_7_level_presence
+0082_a5_point_positions
 ```
 
 ## Règle pour la suite

@@ -220,7 +220,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await callAs(ALICE, [
       ...commands,
       ...[n1, n2].map(id => ({ operation: 'create', table: 'node', id,
-        after: { id, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } })),
+        after: { id, org_id: ORG, level_id: level, kind: 'junction', position: '{"x_m":0,"y_m":0}' } })),
       { operation: 'create', table: 'edge', id: edgeId,
         after: { id: edgeId, org_id: ORG, from_node_id: n1, to_node_id: n2, width_m: '2', length_m: '5' } },
     ]);
@@ -271,7 +271,7 @@ describe('apply_commands — le chemin d’écriture du poste', () => {
     await callAs(ALICE, [
       ...commands,
       { operation: 'create', table: 'node', id: node,
-        after: { id: node, org_id: ORG, level_id: level, kind: 'junction', position: '{"x":0,"y":0}' } },
+        after: { id: node, org_id: ORG, level_id: level, kind: 'junction', position: '{"x_m":0,"y_m":0}' } },
       { operation: 'create', table: 'support', id: support,
         after: { id: support, org_id: ORG, site_id: site, node_id: node, kind: 'directional' } },
       { operation: 'create', table: 'support_face', id: face,
