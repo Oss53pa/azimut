@@ -199,8 +199,8 @@ d'un bâtiment ou d'un niveau (`RenameField`, fiche du site), le formulaire
 des faces et la réécriture d'un texte libre verrouillent leur objet le temps
 de la saisie ; tenu par un autre, la saisie est rendue et le refus s'affiche
 près du champ. La coquille fournit le contexte du verrou quand sa session
-est suivie. Vérifié dans un navigateur à deux postes pour le renommage et le
-formulaire des faces ; le texte libre ne l'est que par le code.
+est suivie. Vérifié dans un navigateur à deux postes pour le renommage, le formulaire
+des faces et la réécriture d'un texte libre.
 
 Limites :
 - les empreintes et le calage n'ont pas de panneau d'édition à verrouiller :
