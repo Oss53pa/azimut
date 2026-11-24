@@ -24,6 +24,39 @@ entrait donc dans le modèle sans coordonnées.
 | --- | --- |
 | Q15 | `node.position` et `opening.position` : objet `{x_m, y_m}` à deux nombres, toute autre clé refusée. Contrainte posée NOT VALID : les lignes existantes ne sont ni lues ni transformées, une requête de relevé les liste. Les décors d'essai fautifs sont corrigés. Fait par 0082 |
 | Q16 | Les autres colonnes sont traitées dans un lot dédié, après S6.4 : forme tirée du cahier ou du code, question à Oss53pa là où A5 ne dit rien, contraintes NOT VALID |
+| Q17 | `message_line.content` : le cahier (N2.2, R5) attend une valeur par langue, le code écrit `{block_kind, entries[…]}` avec le texte par langue imbriqué. L'écart est signalé à l'éditeur ; la base contraint la forme que le code écrit, pour fermer l'entrée libre sans casser le tableau des messages |
+| Q18 | `footprint.geometry` : A5.2 s'applique, contrairement au choix de 0057. Contrainte en base : `{vertices: [{x_m, y_m}…]}`, au moins 3 sommets, fermeture implicite (premier sommet non répété, comme le code), aucun côté qui en croise un autre. NOT VALID, avec relevé |
+| Q19 | Les colonnes sans forme ni au cahier ni au code reçoivent le type de leur contenant et une borne de taille ; le contenu se fixe au lot qui les emploiera. Chacune est signalée à l'éditeur |
+| Q21 | `footprint.geometry` : 1 000 sommets au plus. Le test d'auto-intersection coûte de l'ordre de n² ; mesuré en local, 81 ms à 500 sommets, 296 ms à 1 000, 1,2 s à 2 000, 2,6 s à 3 000. Sans borne, une écriture de 1 Mio occuperait la base plusieurs minutes. Constante de forme, sans origine normative, signalée à l'éditeur |
+| Q20 | `support_content_block.config`, colonne héritée que rien ne lit ni n'écrit : figée à NULL (NOT VALID), sans destruction ; son retrait se décidera après relevé |
+
+Appliqué par analogie, sans question nouvelle, et signalé à Oss53pa : les
+colonnes dont seul le code fixe la forme reçoivent le traitement de Q19
+(contenant et taille), comme celles qui n'en ont aucune ; seules les formes
+fixées par le cahier, ou tranchées par Q17 et Q18, reçoivent une contrainte
+de contenu. La borne de taille est celle du transport des commandes
+(`MAX_WIRE_COMMAND_LENGTH`, 1 048 576), et non une valeur nouvelle.
+
+## Inventaire, 24 novembre 2026
+
+Établi colonne par colonne, cahier contre code (verdict entre parenthèses) :
+
+- fixée par le cahier : `support_content_block.free_text` (N4.2),
+  `orientation_zone.footprint_ids` (N2.2), `rules_pack_rule.params` (D3.3),
+  `graph_validation.findings` (A7, rattachement inféré) ;
+- contradiction cahier-code : `message_line.content` (Q17),
+  `footprint.geometry` (Q18) ;
+- fixée par le code seul : `building.opening_hours`, `support_face.langs`,
+  `job.payload`, `job.result`, `route_cache.path`,
+  `travel_profile.excluded_edge_kinds` (dont les valeurs sont des natures de
+  nœud, ce que le nom ne dit pas), deux natures sur sept de
+  `charter_rule.params` ;
+- sans forme : `edge.availability`, `travel_profile.weights`,
+  `legal_entity.address`, `kiosk.hardware_profile`,
+  `kiosk_telemetry.payload`, `work_order.scope`, `divergence.detail`,
+  `support_content_block.binding` ;
+- ouverte par conception : `audit_log.before`, `audit_log.after` ;
+- héritée : `support_content_block.config` (Q20).
 
 ## 0082, fait le 24 novembre 2026
 
@@ -59,3 +92,32 @@ travel_profile.weights              work_order.scope
 Restent 24 après 0082. Le lot dédié doit aussi relire le lecteur
 (`assemble-site-data.ts`) : une ligne antérieure à une contrainte NOT VALID
 peut encore être mal formée.
+
+## 0084, fait le 24 novembre 2026
+
+Les 24 colonnes portent une contrainte, posée NOT VALID :
+
+- contenu, selon le cahier ou une décision : `footprint.geometry`
+  (polygone simple, 3 à 1 000 sommets, sans côté nul ni croisement),
+  `message_line.content` (Q17), `support_content_block.free_text` (une valeur
+  non vide par langue, `fr` ou `en`), `orientation_zone.footprint_ids`
+  (identifiants), `graph_validation.findings` (code et gravité de A7),
+  `rules_pack_rule.params` (textes, nombres, booléens) ;
+- `support_content_block.config` ne prend plus que sa valeur par défaut
+  `'{}'`. Q20 disait « figée à NULL » ; la colonne est NOT NULL, de valeur par
+  défaut `'{}'`, et aucune ligne n'en porte d'autre : la contrainte tient
+  l'intention de Q20 (plus rien ne s'y écrit, rien n'est détruit) sans retirer
+  le NOT NULL ;
+- contenant et taille pour les autres.
+
+Le relevé, sur la base d'essai, ne trouve aucune ligne existante qui
+échouerait à l'une des contraintes de 0084 ; seule `node_position_point`
+(0082) reste à reprendre, sur d'anciens décors d'essai.
+
+Éprouvé par `packages/db/src/__tests__/a5-jsonb-validation.db.test.ts`, dont
+une garde de catalogue : aucune colonne `jsonb` du schéma sans contrainte.
+L'essai mord : sans la contrainte des empreintes, deux essais tombent.
+
+Reste : le lecteur (`assemble-site-data.ts`) transtype encore sans valider ;
+une ligne antérieure aux contraintes peut être mal formée. Le `zod` en
+application que demande A5.2 pour les empreintes n'est pas posé non plus.
