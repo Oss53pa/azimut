@@ -9,6 +9,8 @@ import { useI18n } from '../../i18n/useI18n.js';
 import type { UiMessageKey } from '../../i18n/messages.js';
 import { SelectField, TextField, Button, Note, StateBanner, SPACE, TEXT, LABEL_STYLE, type Option } from '../../components/ui/index.js';
 import { blockChangedUnder } from './draft-base.js';
+import { useEditLock } from '../../state/use-edit-lock.js';
+import { FindingList } from '../message-schedule/FindingList.js';
 import type { CommandWrite } from '../../state/use-command-write.js';
 import { codePointCompare } from '@azimut/core-model';
 
@@ -61,6 +63,13 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
     readonly id: string; readonly base: ContentBlockInstance; readonly texts: FreeTexts;
   } | null>(null);
   const inactive = write.readonly || write.busy;
+  // S6.4 — réécrire un texte libre verrouille son bloc pour les autres, le
+  // temps de la saisie ; tenu par un autre, la saisie est abandonnée.
+  // La cible est le dernier bloc touché, et non le bloc en saisie : après un
+  // refus, la saisie est abandonnée et le refus doit rester lisible.
+  const [touched, setTouched] = useState<string | null>(null);
+  const lock = useEditLock(touched === null ? null : { table: 'support_content_block', id: touched },
+    editing !== null && editing.id === touched, () => { setEditing(null); });
 
   const blocks = site.content_blocks
     .filter(b => b.face_id === face.id)
@@ -101,6 +110,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
   return (
     <section style={{ padding: '12px 16px', display: 'grid', gap: SPACE.sm }} aria-label={t('faceblocks.title')}>
       <h3 style={{ ...LABEL_STYLE, margin: 0 }}>{t('faceblocks.title')}</h3>
+      <FindingList findings={lock.findings} empty="" />
       {blocks.length === 0 && <p style={{ margin: 0, fontSize: TEXT.small, color: 'var(--text-muted)' }}>{t('faceblocks.none')}</p>}
       {blocks.map(b => (
         <div key={b.id} style={{ display: 'grid', gap: SPACE.xs }}>
@@ -109,7 +119,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
             {isEnterableBlockKind(b.kind) && (
               <span style={{ display: 'flex', gap: SPACE.xs }}>
                 {editing?.id !== b.id && (
-                  <Button rank="quiet" disabled={inactive} onClick={() => { write.clear(); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
+                  <Button rank="quiet" disabled={inactive} onClick={() => { write.clear(); setTouched(b.id); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
                     {t('faceblocks.edit')}
                   </Button>
                 )}
@@ -128,7 +138,7 @@ export function FaceBlocks({ face, write }: FaceBlocksProps): JSX.Element {
               <div style={{ display: 'grid', gap: SPACE.sm }}>
                 {blockChangedUnder(editing.base, b) && (
                   <StateBanner severity="warning" message={t('faceblocks.changed')}>
-                    <Button rank="secondary" onClick={() => { write.clear(); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
+                    <Button rank="secondary" onClick={() => { write.clear(); setTouched(b.id); setEditing({ id: b.id, base: b, texts: readFreeTexts(b) }); }}>
                       {t('faceblocks.restart')}
                     </Button>
                   </StateBanner>

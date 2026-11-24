@@ -10,14 +10,11 @@
  * mode local, ou session sans identité — rien n'est posé et rien n'est
  * refusé.
  */
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import type { Finding } from '@azimut/core-model';
-import { LOCK_RENEW_MS, acquireLock, releaseLock } from '../state/object-lock-client.js';
-import type { LockTarget } from '../state/object-lock-client.js';
-import type { SinkConfig } from '../state/postgrest-sink.js';
-
-/** La configuration du verrou, fournie par la session d'atelier ; `null` hors session. */
-export const ObjectLockContext = createContext<SinkConfig | null>(null);
+import { LOCK_RENEW_MS, acquireLock, releaseLock } from './object-lock-client.js';
+import type { LockTarget } from './object-lock-client.js';
+import { ObjectLockContext } from '../context/object-lock.js';
 
 export function useEditLock(
   target: LockTarget | null,

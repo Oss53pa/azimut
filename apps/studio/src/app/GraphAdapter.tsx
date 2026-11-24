@@ -2,7 +2,7 @@ import { type JSX, useEffect, useState } from 'react';
 import type { Finding, NodeKind, Point } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
 import { useSessionIdentity } from '../auth/identity.js';
-import { useEditLock } from './useEditLock.js';
+import { useEditLock } from '../state/use-edit-lock.js';
 import { acceptNode, acceptEdge } from '../state/graph-input.js';
 import type { EdgeRemedy } from '../state/graph-input.js';
 import { acceptAxis } from '../state/graph-axis.js';

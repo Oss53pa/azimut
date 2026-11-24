@@ -25,8 +25,13 @@ import {
 } from './journal-follower.js';
 import type { JournalCursor } from './journal-follower.js';
 import { createPostgrestSink } from './postgrest-sink.js';
+import type { SinkConfig } from './postgrest-sink.js';
 
-export function useShellJournal(siteId: string, refresh: () => void): CommandSink | null {
+export function useShellJournal(siteId: string, refresh: () => void): {
+  readonly sink: CommandSink | null;
+  /** S6.4 — la configuration du verrou ferme, quand la session est suivie. */
+  readonly lockConfig: SinkConfig | null;
+} {
   const { userId } = useSessionIdentity();
   const config = useMemo(() => appSinkConfig(), []);
   const followed = config !== null && userId !== null && siteId !== '';
@@ -79,5 +84,5 @@ export function useShellJournal(siteId: string, refresh: () => void): CommandSin
     return stop;
   }, [followed, config, siteId, resync, refresh]);
 
-  return sink;
+  return { sink, lockConfig: followed ? config : null };
 }

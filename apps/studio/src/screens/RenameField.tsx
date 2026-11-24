@@ -9,16 +9,32 @@
  *
  * Tant que le champ n'est pas en cours de saisie, il suit le nom que la
  * session porte : un renommage fait sur un autre poste y paraît.
+ *
+ * S6.4 — la saisie est un geste : elle verrouille l'objet tant qu'elle dure.
  */
 import { type JSX, useState } from 'react';
+import { getErrorMessage } from '@azimut/core-model';
 import { TextField } from '../components/ui/index.js';
+import { useI18n } from '../i18n/useI18n.js';
+import { useEditLock } from '../state/use-edit-lock.js';
+import type { LockTarget } from '../state/object-lock-client.js';
 
-export function RenameField({ label, value, onCommit }: {
+export function RenameField({ label, value, onCommit, lock }: {
   readonly label: string;
   readonly value: string;
   readonly onCommit: (name: string) => void;
+  /**
+   * S6.4 — l'objet que le champ renomme. La saisie le verrouille pour les
+   * autres ; tenu par un autre, la saisie est rendue et le champ le dit.
+   */
+  readonly lock?: LockTarget | undefined;
 }): JSX.Element {
+  const { lang } = useI18n();
   const [draft, setDraft] = useState<string | null>(null);
+  const editLock = useEditLock(lock ?? null, draft !== null, () => { setDraft(null); });
+  const locked = editLock.refused
+    ? getErrorMessage('EDIT.OBJECT_LOCKED', lang === 'en' ? 'en' : 'fr') ?? 'EDIT.OBJECT_LOCKED'
+    : undefined;
 
   function commit(): void {
     if (draft !== null && draft !== value) onCommit(draft);
@@ -30,6 +46,7 @@ export function RenameField({ label, value, onCommit }: {
       label={label}
       value={draft ?? value}
       onChange={setDraft}
+      error={locked}
       onBlur={commit}
       onKey={key => {
         if (key === 'Enter') commit();

@@ -25,7 +25,7 @@ import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 import { SyncStatusContext } from '../context/sync-status.js';
 import { PresenceContext, PresencePublishContext } from '../context/presence.js';
 import { useLevelPresence } from './useLevelPresence.js';
-import { ObjectLockContext } from './useEditLock.js';
+import { ObjectLockContext } from '../context/object-lock.js';
 
 /**
  * F15 — `app/`, la composition des écrans.

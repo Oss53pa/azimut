@@ -149,6 +149,7 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
                   label={t('record.building.name')}
                   value={building.name}
                   onCommit={name => { props.onRename('building', building.id, name); }}
+                  lock={{ table: 'building', id: building.id }}
                 />
                 <Toggle
                   label={t('record.building.independent_access')}
@@ -174,6 +175,7 @@ export function SiteRecordScreen(props: SiteRecordScreenProps): JSX.Element {
                     label={t('record.level.name')}
                     value={level.name}
                     onCommit={name => { props.onRename('level', level.id, name); }}
+                    lock={{ table: 'level', id: level.id }}
                   />
                   <NumericField
                     label={t('record.level.ordinal')}

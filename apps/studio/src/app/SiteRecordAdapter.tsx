@@ -139,7 +139,7 @@ export function SiteRecordScreenAdapter({ session, siteId }: {
       state={buildings.length === 0 ? { kind: 'empty' } : { kind: 'ready' }}
       siteName={siteName}
       buildings={buildings}
-      findings={findings}
+      findings={[...findings, ...session.refusal]}
       buildingForm={buildingForm}
       onOpenBuildingForm={() => { setBuildingForm(EMPTY_BUILDING); setLevelForm(null); }}
       onBuildingField={setBuildingForm}

@@ -8,6 +8,7 @@ import { FindingList } from '../message-schedule/FindingList.js';
 import { NoticeList } from '../message-schedule/NoticeList.js';
 import type { FaceSlot } from './face-slots.js';
 import { faceChangedUnder } from './draft-base.js';
+import { useEditLock } from '../../state/use-edit-lock.js';
 
 /** La valeur du sélecteur qui laisse la face suivre le gabarit de la typologie. */
 const INHERITED = '';
@@ -30,6 +31,11 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
   // commande donne pour état antérieur, non la face relue.
   const [base, setBase] = useState(slot.face);
   const changed = faceChangedUnder(base, slot.face);
+  // S6.4 — modifier une face déclarée la verrouille pour les autres, le temps
+  // du geste ; tenue par un autre, le formulaire revient à la base.
+  const editing = base !== undefined
+    && (template !== (base.template_key ?? INHERITED) || JSON.stringify(langs) !== JSON.stringify(base.langs ?? []));
+  const lock = useEditLock(base === undefined ? null : { table: 'support_face', id: base.id }, editing, () => { restart(); });
 
   function restart(): void {
     setBase(slot.face);
@@ -87,7 +93,7 @@ export function FaceForm({ slot, write }: FaceFormProps): JSX.Element {
           <Button rank="secondary" onClick={restart}>{t('supportfaces.form.restart')}</Button>
         </StateBanner>
       )}
-      <FindingList findings={write.findings} empty="" />
+      <FindingList findings={[...lock.findings, ...write.findings]} empty="" />
       <NoticeList notices={write.notices} />
       <div>
         <Button rank="primary" onClick={submit} disabled={inactive}>

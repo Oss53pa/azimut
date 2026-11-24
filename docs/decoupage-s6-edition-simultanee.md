@@ -57,7 +57,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Prêt, Q6 et Q7 tranchées |
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
-| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait (graphe) ; autres écrans à brancher |
+| S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait |
 | S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
@@ -194,11 +194,18 @@ postes : le second est refusé 255 ms après avoir commencé à modifier le nœu
 que le premier édite, son panneau revient à la base ; une fois le premier
 enregistré, le second modifie sans refus.
 
+**Branché sur les autres gestes d'édition, le 24 novembre 2026.** Le renommage
+d'un bâtiment ou d'un niveau (`RenameField`, fiche du site), le formulaire
+des faces et la réécriture d'un texte libre verrouillent leur objet le temps
+de la saisie ; tenu par un autre, la saisie est rendue et le refus s'affiche
+près du champ. La coquille fournit le contexte du verrou quand sa session
+est suivie. Vérifié dans un navigateur à deux postes pour le renommage et le
+formulaire des faces ; le texte libre ne l'est que par le code.
+
 Limites :
-- seul le panneau des propriétés du graphe verrouille. La fiche du site
-  (renommage), les empreintes, le calage et les écrans de la coquille n'ont
-  pas encore de geste verrouillé : leurs écritures restent protégées par le
-  contrôle d'état (409), pas par le verrou ;
+- les empreintes et le calage n'ont pas de panneau d'édition à verrouiller :
+  leurs gestes sont des commandes d'un seul tenant, protégées par le contrôle
+  d'état (409) et refusées en 423 si l'objet est tenu par un autre ;
 - le refus ne nomme pas le détenteur ; le calque de présence le montre, sur
   l'objet qu'il a sélectionné ;
 - les objets tenus par d'autres ne sont pas marqués avant qu'on y touche
