@@ -23,7 +23,7 @@ import { ValidationScreenAdapter } from './ValidationAdapter.js';
 import { SitesAdapter } from './SitesAdapter.js';
 import { SiteRecordScreenAdapter } from './SiteRecordAdapter.js';
 import { SyncStatusContext } from '../context/sync-status.js';
-import { PresenceContext } from '../context/presence.js';
+import { PresenceContext, PresencePublishContext } from '../context/presence.js';
 import { useLevelPresence } from './useLevelPresence.js';
 
 /**
@@ -104,7 +104,8 @@ function TrancheWorkspace({ route }: {
 
   return (
     <SyncStatusContext.Provider value={session.sync}>
-    <PresenceContext.Provider value={presence}>
+    <PresenceContext.Provider value={presence.present}>
+    <PresencePublishContext.Provider value={presence.publish}>
       {/* F5.1 — l'atelier remplit la hauteur que le cadre lui laisse. */}
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
       {/*
@@ -138,6 +139,7 @@ function TrancheWorkspace({ route }: {
         />
       )}
       </div>
+    </PresencePublishContext.Provider>
     </PresenceContext.Provider>
     </SyncStatusContext.Provider>
   );

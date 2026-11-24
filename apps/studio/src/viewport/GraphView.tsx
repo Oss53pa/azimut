@@ -13,6 +13,8 @@ import type { ViewPoint, Viewport } from './view-transform.js';
 import { SketchStrokes } from '../screens/SketchStrokes.js';
 import type { SketchStroke } from '../state/sketch.js';
 import { useI18n } from '../i18n/useI18n.js';
+import { PresenceOverlay } from './PresenceOverlay.js';
+import { usePresenceReport } from './use-presence-report.js';
 
 /**
  * F15, `viewport/` — la zone de travail du graphe.
@@ -147,6 +149,17 @@ export function GraphView(props: GraphViewProps): JSX.Element {
     for (const node of props.nodes) at.set(node.id, toView(node.position, view, VIEWPORT));
     return at;
   }, [props.nodes, view]);
+  // S6.7c — ce que ce poste sélectionne et regarde, publié aux autres.
+  const mine = useMemo(
+    () => (props.selected === null ? [] : [{ table: props.selected.kind, id: props.selected.id }]),
+    [props.selected]);
+  usePresenceReport(mine, view, VIEWPORT);
+  const edgeEnds = (id: string): readonly [ViewPoint, ViewPoint] | undefined => {
+    const edge = props.edges.find(e => e.id === id);
+    const from = edge === undefined ? undefined : placed.get(edge.from_node_id);
+    const to = edge === undefined ? undefined : placed.get(edge.to_node_id);
+    return from === undefined || to === undefined ? undefined : [from, to];
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: '1 0 auto' }}>
@@ -253,6 +266,7 @@ export function GraphView(props: GraphViewProps): JSX.Element {
         <path d={livePath} fill="none" stroke="var(--text-primary)" strokeWidth={1.5}
           strokeLinecap="round" strokeLinejoin="round" pointerEvents="none" />
       )}
+      <PresenceOverlay project={p => toView(p, view, VIEWPORT)} nodeAt={id => placed.get(id)} edgeEnds={edgeEnds} />
     </svg>
     </div>
   );

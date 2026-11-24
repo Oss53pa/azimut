@@ -60,7 +60,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Prêt |
 | S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
-| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | S6.7a fait ; S6.7b bloqué (nom affiché absent de A5) |
+| S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
@@ -412,10 +412,31 @@ Décisions prises sous les règles existantes, à confirmer :
 - aucune clé vers `auth.users` (A2.4, 0024) : un utilisateur parti sort de
   la liste faute de rattachement, et sa ligne expire.
 
-Reste à faire, S6.7c : publier la sélection et la zone de travail depuis
-chaque écran, et les dessiner chez les autres (S-22). La base les accepte et
-les rend déjà ; le poste annonce pour l'instant une sélection vide. Aucun
-écran ne saisit encore `display_name` : c'est AUTH.7.
+**S6.7c, sélection et zone de travail visibles, faite le 24 novembre 2026**
+(S-22). L'écran du graphe publie ce qu'il sélectionne (nœud ou arête) et le
+rectangle que sa vue montre, arrondi au centimètre (`viewport/presence-zone.ts`,
+`viewport/use-presence-report.ts`) ; l'écran des empreintes, qui n'a pas de
+sélection, publie sa zone. La session annonce 400 ms après le dernier
+changement, et à chaque renouvellement. Chez les autres, un calque dessine la
+zone de chacun en pointillé, son nom, et cercle ou double ce qu'il a
+sélectionné (`viewport/PresenceOverlay.tsx`), dans l'accent secondaire du
+thème : les couleurs d'état restent à leur sens (F2.2). Le calque ne prend pas
+le pointeur, et il est caché aux lecteurs d'écran, la barre d'état nommant les
+mêmes présents.
+
+Vérifié dans un navigateur à deux postes : la zone de l'un paraît chez
+l'autre dès l'ouverture, un nœud sélectionné est cerclé et nommé en 2,3 s
+environ, et le calque disparaît au départ en 2,8 s.
+
+Non vérifié dans un navigateur : le doublement d'une arête sélectionnée. Le
+décor d'essai portait des nœuds écrits à la main dans un format de position
+que le modèle ne lit pas, et leur arête ne s'affichait pas.
+
+Constaté, non traité : la base accepte une position de nœud mal formée (des
+clés `x` et `y` au lieu de `x_m` et `y_m`) ; aucune validation par schéma ne
+la refuse.
+
+Aucun écran ne saisit encore `display_name` : c'est AUTH.7.
 
 
 ### S6.8 Annulation en présence de commandes distantes

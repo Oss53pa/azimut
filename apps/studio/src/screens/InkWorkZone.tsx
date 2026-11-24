@@ -10,6 +10,8 @@ import { BackdropControls } from './BackdropControls.js';
 import { recallBackdrop, rememberBackdrop } from '../viewport/backdrop-settings.js';
 import type { BackdropSettings } from '../viewport/backdrop-settings.js';
 import { browserStore } from '../viewport/view-memory.js';
+import { PresenceOverlay } from '../viewport/PresenceOverlay.js';
+import { usePresenceReport } from '../viewport/use-presence-report.js';
 import { imageToWorld } from '../domain/plan-placement.js';
 import type { PlanPlacement } from '../domain/plan-placement.js';
 import { useStrokeCapture } from '../editor/ink/use-stroke-capture.js';
@@ -83,6 +85,8 @@ function pathOf(points: readonly Point[], view: ViewState, viewport: Viewport, c
   return closed ? `${d} Z` : d;
 }
 
+const NO_SELECTION: readonly never[] = [];
+
 export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
   const { t } = useI18n();
   const host = useRef<HTMLDivElement>(null);
@@ -111,6 +115,8 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
     memoryKey: props.viewKey, viewport, fitTo: anchor.length > 0 ? anchor : opening, surface,
   });
   const { view } = zone;
+  // S6.7c — l'écran des empreintes n'a pas de sélection : il publie sa zone.
+  usePresenceReport(NO_SELECTION, view, viewport);
 
   // J1.4 — opacité du fond et formes tracées, mémorisées par zone et niveau.
   const [backdrop, setBackdrop] = useState<BackdropSettings>(() => recallBackdrop(props.viewKey, browserStore()));
@@ -181,6 +187,7 @@ export function InkWorkZone(props: InkWorkZoneProps): JSX.Element {
             <path d={pathOf(live, view, viewport, false)} fill="none"
               stroke="var(--text-primary)" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
           )}
+          <PresenceOverlay project={p => toView(p, view, viewport)} />
         </svg>
       </div>
       {props.recognized !== null && (
