@@ -19,7 +19,7 @@ import type { MutableRefObject } from 'react';
 import {
   pollJournal, readJournalHead, readJournalSince, startCursor, trackOwnWrites,
 } from '../state/journal-follower.js';
-import type { JournalCursor, JournalSend } from '../state/journal-follower.js';
+import type { JournalCursor, JournalEntry, JournalSend } from '../state/journal-follower.js';
 import { applyReceived, canReceive } from '../state/journal-session.js';
 import type { SinkConfig } from '../state/postgrest-sink.js';
 import type { SessionState } from '../state/session-store.js';
@@ -36,13 +36,15 @@ export function useJournalFollow(options: {
   readonly current: MutableRefObject<SessionState>;
   readonly resumePending: () => boolean;
   readonly adopt: (next: SessionState) => void;
+  /** S6.5 — l'état d'avant, d'après, et ce qui a été reçu. */
+  readonly onReceived?: (before: SessionState, after: SessionState, received: readonly JournalEntry[]) => void;
   readonly reload: () => Promise<void>;
 }): {
   readonly wrap: (send: Send) => Send;
   /** F5.2 — la dernière lecture du journal a échoué. */
   readonly readFailing: boolean;
 } {
-  const { journal, current, resumePending, adopt, reload } = options;
+  const { journal, current, resumePending, adopt, reload, onReceived } = options;
   const cursor = useRef<JournalCursor | null>(null);
   const inFlight = useRef(0);
   const [readFailing, setReadFailing] = useState(false);
@@ -77,7 +79,12 @@ export function useJournalFollow(options: {
         if (cursor.current === null) return;
         if (!canReceive(current.current, resumePending())) return;
         if (step.gap) { void resync(); return; }
-        if (step.received.length > 0) adopt(applyReceived(current.current, step.received));
+        if (step.received.length > 0) {
+          const before = current.current;
+          const after = applyReceived(before, step.received);
+          adopt(after);
+          onReceived?.(before, after, step.received);
+        }
         cursor.current = step.cursor;
       },
       onFailure: failure => {
@@ -87,7 +94,7 @@ export function useJournalFollow(options: {
       },
     });
     return stop;
-  }, [journal, current, resumePending, adopt, resync]);
+  }, [journal, current, resumePending, adopt, resync, onReceived]);
 
   const wrap = useCallback((send: Send): Send => (
     journal === undefined ? send : trackOwnWrites(send, cursor, inFlight)

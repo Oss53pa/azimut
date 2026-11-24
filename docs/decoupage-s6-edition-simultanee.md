@@ -58,7 +58,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait |
-| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Prêt |
+| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Fait au poste ; barrière en base à décider |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
@@ -217,6 +217,47 @@ Rejoue `validateGraph` après chaque commande appliquée. En cas d'incohérence,
 la publication est bloquée par `publish-gate.ts` et les commandes en cause sont
 nommées. Le coût d'une validation complète à chaque commande est à mesurer
 selon le protocole D13 avant de retenir une validation incrémentale.
+
+**S6.5, fait le 24 novembre 2026** (S-21, décision Q5). À chaque lot de
+commandes reçues d'autres postes, la validation du graphe est rejouée avant et
+après ; les anomalies bloquantes apparues avec le lot sont retenues, chacune
+portant en paramètre les numéros au journal des commandes en cause
+(`state/propagation-findings.ts`). Une commande est en cause si elle porte sur
+l'objet de l'anomalie ou si l'une de ses valeurs le cite ; si aucune ne le
+touche, le lot entier est nommé. Une anomalie retenue tombe dès qu'une
+validation suivante ne la montre plus. Aucun code nouveau.
+
+Dans l'atelier, la session rejoue la validation sur ses lignes
+(`app/usePropagationCheck.ts`) ; dans la coquille, qui relit le site au lieu
+de rejouer les commandes, le site d'avant et le site relu sont comparés
+(`state/use-shell-propagation.ts`). Les deux affichent le même bandeau
+(`components/PropagationBanner.tsx`) : combien d'anomalies, quelles commandes,
+et que la publication attend une nouvelle validation.
+
+La publication était déjà fermée : l'émission du tableau des messages exige un
+passage de validation réussi pour l'empreinte actuelle du graphe (M02.W11),
+qu'une propagation qui touche le graphe change ; la porte de `publish-gate.ts`
+rejoue la validation sur le site relu.
+
+Vérifié dans un navigateur à deux postes : un nœud isolé posé par l'un fait
+paraître chez l'autre, dans l'atelier comme dans la coquille, le bandeau
+nommant la commande de création (n° 17 et 18, puis n° 19, relus au journal).
+
+**Mesure D13** (médiane de 5 exécutions, la première écartée ; Node 22, 4
+cœurs Xeon à 2,1 GHz, en mémoire, sans rendu) : `validateGraph` coûte 0,036 ms
+sur `ref-minimal`, 0,062 ms sur `ref-multilevel`, 0,213 ms sur `ref-retail`
+(26 nœuds, 29 arêtes). Le contrôle valide deux fois par lot. La validation
+complète est retenue ; une validation incrémentale ne se justifie pas sur ces
+sites. Ils sont petits : la mesure se reprend au premier site réel modélisé,
+comme D13 le prévoit pour toute cible.
+
+**Constaté, non traité, à décider** : le blocage de l'émission n'est tenu qu'au
+poste. Aucune garde en base ne contrôle le passage d'un tableau des messages
+en revue ou en émission ; un client qui écrit directement `message_schedule`
+passe outre. Et la trace `graph_validation` est écrite par le poste lui-même :
+la base ne peut pas en croire le « passé » sans rejouer la validation, qui
+n'existe qu'en TypeScript. Le tenir en base suppose une validation par le
+service (travail du compilateur) ou une décision de modèle.
 
 ### S6.6 Diffusion en direct
 

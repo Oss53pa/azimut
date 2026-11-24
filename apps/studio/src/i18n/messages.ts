@@ -53,6 +53,7 @@ import { SUPPORT_FACES_FR, SUPPORT_FACES_EN } from './messages/support-faces.js'
 import { FACE_BLOCKS_FR, FACE_BLOCKS_EN } from './messages/face-blocks.js';
 import { SYNC_STATUS_FR, SYNC_STATUS_EN } from './messages/sync-status.js';
 import { PRESENCE_FR, PRESENCE_EN } from './messages/presence.js';
+import { PROPAGATION_FR, PROPAGATION_EN } from './messages/propagation.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -97,6 +98,7 @@ export const MESSAGES_FR = {
   ...FACE_BLOCKS_FR,
   ...SYNC_STATUS_FR,
   ...PRESENCE_FR,
+  ...PROPAGATION_FR,
 } as const;
 
 export type UiMessageKey = keyof typeof MESSAGES_FR;
@@ -144,6 +146,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...FACE_BLOCKS_EN,
   ...SYNC_STATUS_EN,
   ...PRESENCE_EN,
+  ...PROPAGATION_EN,
 };
 
 export const UI_MESSAGES: Readonly<Record<string, Readonly<Record<UiMessageKey, string>>>> = {

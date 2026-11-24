@@ -26,6 +26,7 @@ import type { StoreState } from '../state/command-store.js';
 import { canReceive } from '../state/journal-session.js';
 import { useJournalFollow } from './useJournalFollow.js';
 import type { JournalBinding } from './useJournalFollow.js';
+import { usePropagationCheck } from './usePropagationCheck.js';
 import { syncStatusOf } from '../state/sync-status.js';
 import type { SyncStatus } from '../state/sync-status.js';
 
@@ -97,6 +98,8 @@ export type TrancheSession = {
   readonly sync: SyncStatus;
   /** S6.4 — le refus du dernier geste écrit, vide après un geste accepté. */
   readonly refusal: readonly Finding[];
+  /** S6.5 — les incohérences du graphe introduites par des commandes reçues. */
+  readonly propagation: readonly Finding[];
 };
 
 /** Le contenu d'un plan importé, tel que lu à l'import. */
@@ -190,8 +193,10 @@ export function useTrancheSession(
   }, [load, receive]);
 
   const isResumePending = useCallback(() => resumePending.current, []);
+  const propagation = usePropagationCheck();
   const { wrap: followWrap, readFailing } = useJournalFollow({
     journal, current, resumePending: isResumePending, adopt: receive, reload,
+    onReceived: propagation.onReceived,
   });
   const sendOut = useMemo(() => followWrap(send), [followWrap, send]);
   const remote = send !== LOCAL_ONLY;
@@ -370,5 +375,6 @@ export function useTrancheSession(
     keepPlanImage,
     sync,
     refusal,
+    propagation: propagation.findings,
   };
 }

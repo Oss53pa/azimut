@@ -15,7 +15,7 @@
  * chemin d'avant (`apply_commands`), et aucun suivi : le journal est lu sous
  * l'identité du membre.
  */
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSessionIdentity } from '../auth/identity.js';
 import { appSinkConfig } from './app-sink.js';
 import type { CommandSink } from './command-store.js';
@@ -23,7 +23,7 @@ import { createJournaledSink } from './journaled-sink.js';
 import {
   pollJournal, readJournalHead, readJournalSince, startCursor, trackOwnWrites,
 } from './journal-follower.js';
-import type { JournalCursor } from './journal-follower.js';
+import type { JournalCursor, JournalEntry } from './journal-follower.js';
 import { createPostgrestSink } from './postgrest-sink.js';
 import type { SinkConfig } from './postgrest-sink.js';
 
@@ -31,12 +31,18 @@ export function useShellJournal(siteId: string, refresh: () => void): {
   readonly sink: CommandSink | null;
   /** S6.4 — la configuration du verrou ferme, quand la session est suivie. */
   readonly lockConfig: SinkConfig | null;
+  /** S6.5 — les commandes reçues depuis la dernière relecture prise en compte. */
+  readonly received: readonly JournalEntry[];
+  /** Les déclare prises en compte. */
+  readonly clearReceived: () => void;
 } {
   const { userId } = useSessionIdentity();
   const config = useMemo(() => appSinkConfig(), []);
   const followed = config !== null && userId !== null && siteId !== '';
   const cursor = useRef<JournalCursor | null>(null);
   const inFlight = useRef(0);
+  const [received, setReceived] = useState<readonly JournalEntry[]>([]);
+  const clearReceived = useCallback(() => { setReceived([]); }, []);
 
   const sink = useMemo((): CommandSink | null => {
     if (config === null) return null;
@@ -75,7 +81,10 @@ export function useShellJournal(siteId: string, refresh: () => void): {
         if (cursor.current === null) return;
         if (step.gap) { void resync(); return; }
         cursor.current = step.cursor;
-        if (step.received.length > 0) refresh();
+        if (step.received.length > 0) {
+          setReceived(previous => [...previous, ...step.received]);
+          refresh();
+        }
       },
       onFailure: failure => {
         if (failure.cause === 'command') void resync();
@@ -84,5 +93,5 @@ export function useShellJournal(siteId: string, refresh: () => void): {
     return stop;
   }, [followed, config, siteId, resync, refresh]);
 
-  return { sink, lockConfig: followed ? config : null };
+  return { sink, lockConfig: followed ? config : null, received, clearReceived };
 }

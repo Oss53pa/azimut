@@ -4,6 +4,8 @@ import { SiteDataProvider } from '../context/SiteDataContext.js';
 import { SiteSinkContext } from '../context/site-writer.js';
 import { ObjectLockContext } from '../context/object-lock.js';
 import { useShellJournal } from '../state/use-shell-journal.js';
+import { useShellPropagation } from '../state/use-shell-propagation.js';
+import { PropagationBanner } from './PropagationBanner.js';
 import { I18nProvider } from '../i18n/index.js';
 import {
   appRepository, useSite, useSiteList, useSiteVocabularyLoad, useWayfindingRegistryLoad,
@@ -55,7 +57,9 @@ export function Shell(): JSX.Element {
   const wayfinding = useWayfindingRegistryLoad(repository, siteId);
   // S6.6c — l'émetteur des écrans de la coquille, et le suivi du journal du
   // site ouvert : ce qu'un autre poste écrit relit le site ici.
-  const { sink, lockConfig } = useShellJournal(site.state.status === 'ready' ? siteId : '', site.refresh);
+  const { sink, lockConfig, received, clearReceived } = useShellJournal(site.state.status === 'ready' ? siteId : '', site.refresh);
+  // S6.5, S-21 — les anomalies du graphe introduites par des commandes reçues.
+  const propagation = useShellPropagation(site.state.status === 'ready' ? site.state.value : null, received, clearReceived);
 
   // Aucun site ouvert : le premier de la liste l'est, pour que l'application
   // s'ouvre sur du contenu plutôt que sur un choix vide.
@@ -128,6 +132,7 @@ export function Shell(): JSX.Element {
             currentSiteId={siteId}
             onOpenSite={openSite}
           />
+          <PropagationBanner findings={propagation} />
           <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
             <Sidebar
               currentView={currentView}
