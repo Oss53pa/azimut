@@ -9,7 +9,7 @@
  * Le schéma n'est pas `public` : chaque requête le nomme par l'en-tête
  * `Accept-Profile`, ce qui évite de dépendre du schéma par défaut du service.
  */
-import { assembleSiteData, mapRulesBindingRows } from '@azimut/db/mapping';
+import { StoredRowUnreadable, assembleSiteData, mapRulesBindingRows } from '@azimut/db/mapping';
 import type {
   BuildingLinkRow, BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
   FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
@@ -311,7 +311,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         query<TemporaryClosureRow>(config, 'temporary_closure', `site_id=eq.${siteId}`),
       ]);
 
-      return assembleSiteData({
+      return readableSite(() => assembleSiteData({
         organization,
         site,
         rules_bindings: rulesBindings,
@@ -338,7 +338,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         zones,
         parking_spaces: parkingSpaces,
         temporary_closures: temporaryClosures,
-      });
+      }));
     },
 
     async loadVocabulary(siteId: string): Promise<SiteVocabulary> {
@@ -506,4 +506,20 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       }));
     },
   };
+}
+
+/**
+ * Une ligne que le lecteur ne sait pas relire (0082, 0084) est une défaillance
+ * de dépôt, comme toute réponse illisible : le site ne s'ouvre pas à moitié.
+ * Le détail nomme la table et la ligne, jamais leur contenu.
+ */
+function readableSite(assemble: () => SiteData): SiteData {
+  try {
+    return assemble();
+  } catch (cause) {
+    if (cause instanceof StoredRowUnreadable) {
+      throw new RepositoryError('unreadable', `${cause.table} · ${cause.rowId}`);
+    }
+    throw cause;
+  }
 }

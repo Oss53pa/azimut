@@ -43,6 +43,8 @@ export const DATA_SOURCE_FR = {
   'repo.failure.not_found.hint': 'Elle a pu être supprimée. Revenez à la liste des sites.',
   'repo.failure.offline': 'Poste hors ligne.',
   'repo.failure.offline.hint': 'Les sites déjà ouverts restent consultables. La création attend le retour du réseau.',
+  'repo.failure.unreadable': 'Le site contient une donnée enregistrée illisible.',
+  'repo.failure.unreadable.hint': 'Le site ne s’ouvre pas à moitié. Un administrateur doit reprendre la ligne indiquée.',
   // M1 (partie M) — formulaire de création d'un site. F10 : le libellé dit ce
   // que fait l'action, et le message d'erreur ce qu'il faut corriger.
   'sites.create.open': 'Nouveau site',
@@ -112,6 +114,8 @@ export const DATA_SOURCE_EN: Readonly<Record<keyof typeof DATA_SOURCE_FR, string
   'repo.failure.not_found.hint': 'It may have been deleted. Go back to the site list.',
   'repo.failure.offline': 'Workstation offline.',
   'repo.failure.offline.hint': 'Sites already open stay readable. Creation waits for the network.',
+  'repo.failure.unreadable': 'The site holds an unreadable stored record.',
+  'repo.failure.unreadable.hint': 'The site does not open halfway. An administrator must fix the record shown.',
   'sites.create.open': 'New site',
   'sites.create.title': 'New site',
   'sites.create.name': 'Site name',

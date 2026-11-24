@@ -188,6 +188,9 @@ export const REPOSITORY_FAILURES = [
   'forbidden',
   'not_found',
   'offline',
+  // Une ligne enregistrée que le lecteur ne sait pas relire (0082, 0084).
+  // Le dépôt a répondu : ni la connexion ni le droit ne sont en cause.
+  'unreadable',
 ] as const;
 export type RepositoryFailure = (typeof REPOSITORY_FAILURES)[number];
 
@@ -215,6 +218,7 @@ export const FAILURE_SCREEN_STATE: Readonly<Record<RepositoryFailure, ScreenStat
   forbidden: 'permission_denied',
   'not_found': 'error',
   offline: 'offline',
+  unreadable: 'error',
 };
 
 /** Une défaillance d'accès à la donnée. */

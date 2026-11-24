@@ -8,6 +8,7 @@
  *
  * Ce module est pur : aucune entrée-sortie, aucune horloge, aucun `node:`.
  */
+import { pointOrRefuse, polygonOrRefuse } from './stored-shapes.js';
 import {
   readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
   isParkingSpaceKind, isPlanContentKind,
@@ -165,7 +166,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     id: f.id,
     org_id: f.org_id,
     level_id: f.level_id,
-    geometry: f.geometry as Footprint['geometry'],
+    geometry: polygonOrRefuse('footprint', f.id, 'geometry', f.geometry),
     // La colonne est du texte ; le CHECK de la migration 0019 la restreint aux
     // cinq natures de N1.2. La restriction de type est donc adossée à une
     // contrainte de la base, comme pour `node.kind` ou `occupancy_status`.
@@ -190,7 +191,7 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
     org_id: n.org_id,
     level_id: n.level_id,
     kind: n.kind as NodeKind,
-    position: n.position as GraphNode['position'],
+    position: pointOrRefuse('node', n.id, 'position', n.position),
     label: n.label,
   }));
 

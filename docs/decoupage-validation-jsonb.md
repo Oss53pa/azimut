@@ -118,6 +118,27 @@ Le relevé, sur la base d'essai, ne trouve aucune ligne existante qui
 une garde de catalogue : aucune colonne `jsonb` du schéma sans contrainte.
 L'essai mord : sans la contrainte des empreintes, deux essais tombent.
 
-Reste : le lecteur (`assemble-site-data.ts`) transtype encore sans valider ;
-une ligne antérieure aux contraintes peut être mal formée. Le `zod` en
-application que demande A5.2 pour les empreintes n'est pas posé non plus.
+## Le lecteur, fait le 24 novembre 2026
+
+`assemble-site-data.ts` relit `node.position` et `footprint.geometry` au lieu
+de les transtyper (`packages/db/src/mapping/stored-shapes.ts`). Une ligne mal
+formée, antérieure aux contraintes NOT VALID, fait refuser la construction du
+site : la ligne 626 du cahier exclut tout résultat partiel, et le précédent de
+`DATA.VOCABULARY_UNREADABLE`, retiré par l'éditeur, range une donnée illisible
+parmi les défaillances de dépôt (F7). Aucun code nouveau au catalogue.
+
+Le dépôt du studio la présente comme telle : la défaillance `unreadable`, qui
+mène à l'état d'erreur de F7, avec son propre texte (« Le site contient une
+donnée enregistrée illisible ») et, à l'ouverture, la table et l'identifiant de
+la ligne à reprendre, jamais son contenu. La première version passait par
+`request_failed`, et l'écran disait « Le dépôt n'a pas répondu. Vérifiez la
+connexion » : faux, et de nature à faire chercher une panne réseau. Vu dans un
+navigateur, corrigé.
+
+Effet à connaître : un site qui porte une seule ligne illisible ne s'ouvre
+plus. Le relevé de 0084 n'en trouve aucune hors d'anciens décors d'essai.
+
+Reste : le contrôle porte sur la forme des deux colonnes que le lecteur
+transtypait ; la simplicité du polygone relève du moteur géométrique. Le `zod`
+en application que demande A5.2 n'est pas posé en tant que tel : le relecteur
+en tient le rôle à la lecture, et la base à l'écriture.

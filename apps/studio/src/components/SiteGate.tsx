@@ -96,6 +96,9 @@ export function SiteGate(
             severity={failure.failure === 'offline' ? 'warning' : 'blocking'}
             message={t(`repo.failure.${failure.failure}`)}
             hint={t(`repo.failure.${failure.failure}.hint`)}
+            // La ligne illisible, par sa table et son identifiant : ce qu'un
+            // administrateur doit reprendre. Jamais son contenu.
+            code={failure.failure === 'unreadable' ? failure.detail : undefined}
           />
         )}
 
