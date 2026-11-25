@@ -498,7 +498,8 @@ modification (`screens/PresenceIndicator.tsx`).
 paraît en 2,3 s environ, son nom affiché en 3 s, sa modification en 2,8 s,
 son départ en 3,1 s.
 
-Décisions prises sous les règles existantes, à confirmer :
+Décisions prises sous les règles existantes, confirmées par Oss53pa le
+25 novembre 2026 (« la meilleure pratique ») :
 - l'`auditor` voit qui est présent mais ne s'annonce pas : 0076 lui retire
   toute écriture, et les essais de garde l'exigent de toute table portant
   `org_id` ;
@@ -560,7 +561,7 @@ Le geste en conflit reste au sommet de la pile : rien ne s'efface sans que
 l'utilisateur le demande. Il peut fermer la présentation, ou écarter le geste,
 ce qui rend les gestes précédents à l'annulation ; leur `before` les garde, à
 leur tour, de s'appliquer sur un objet qui a changé. Ce choix d'écran n'est
-pas dans Q3 ; il est à confirmer.
+pas dans Q3 ; Oss53pa l'a confirmé le 25 novembre 2026.
 
 Éprouvé : 23 essais purs (`undo-conflict`, `command-store`), et 2 essais à
 deux postes par PostgREST et le journal (`s6-8-annulation-distante`), qui

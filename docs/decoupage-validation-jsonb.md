@@ -107,7 +107,9 @@ Les 24 colonnes portent une contrainte, posée NOT VALID :
   `'{}'`. Q20 disait « figée à NULL » ; la colonne est NOT NULL, de valeur par
   défaut `'{}'`, et aucune ligne n'en porte d'autre : la contrainte tient
   l'intention de Q20 (plus rien ne s'y écrit, rien n'est détruit) sans retirer
-  le NOT NULL ;
+  le NOT NULL. Lecture confirmée par Oss53pa le 25 novembre 2026 : aucune
+  migration de schéma pour une colonne que son retrait, après relevé,
+  rendra sans objet ;
 - contenant et taille pour les autres.
 
 Le relevé, sur la base d'essai, ne trouve aucune ligne existante qui
