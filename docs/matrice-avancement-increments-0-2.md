@@ -1,6 +1,7 @@
 # Matrice d'avancement — incréments 0, 1 et 2
 
-Établie le 25 novembre 2026, sur la branche `claude/azimut-partie-g-points-ouverts-cqpff0`
+Établie le 25 novembre 2026, mise à jour le même jour après l'ajout des sites
+`ref-health`, `ref-transit` et `ref-campus` (C1), sur la branche `claude/azimut-partie-g-points-ouverts-cqpff0`
 (commit b80e26d, CI 225 verte). Confrontée au cahier des charges consolidé, partie B,
 et à lui seul. Elle ne fait pas foi : le cahier seul fait foi.
 
@@ -48,7 +49,7 @@ vides.
 | T-0.7 Jetons de thème | tenue | `no-hardcoded-colors`, `contrast.test.ts` | l'analyse ne voit ni `hsl()`, ni hex à 8 chiffres, ni couleurs nommées |
 | T-0.8 Paquets de règles | tenue | `loader-guard`, `resolve-rule` | deux codes pour un même défaut selon la voie de chargement |
 | T-0.9 Génération PDF | partielle | déterminisme : `export-pdf.test.ts` | conformité PDF/X par outil tiers absente ; décision à confirmer par Oss53pa |
-| T-0.10 Trousse de test | partielle | 5 sites en mémoire, `svg-compare` | `ref-health`, `ref-transit`, `ref-campus` manquent (C1) ; aucun chargement en base ; empreintes non figées |
+| T-0.10 Trousse de test | partielle | les sept sites de C1 en mémoire (`sites.test.ts`, `c1-sites-sante-transport-campus.test.ts`), `svg-compare` | aucun chargement en base ; empreintes non figées |
 | T-0.11 Service de compilation | tenue | `db-queue.db.test.ts`, `worker.test.ts` | ni conteneur (A3.1) ni déploiement — prérequis de toute fusion |
 | T-0.12 Auto-hébergement | partielle, faible | base nue, PostgREST et service d'authentification en CI | aucun passage quotidien ; e2e non joués sur l'instance ; ni Storage ni fonctions |
 | T-0.13 Composants et états | partielle, faible | focus visible seulement | liste fermée de F6, sept états, non-régression visuelle : à faire |
@@ -71,7 +72,7 @@ vides.
 | T-1.6 Complétude | tenue | `n1-7-3-cas-et-contre-exemple`, `validate-graph` | — |
 | T-1.7 Annuaire | tenue | `validate-directory`, `validate-graph` | — |
 | T-1.8 Bibliothèques | partielle | gardes du moteur : `library-safety-guards`, `inv3-…` | refus en base non éprouvé par un essai `.db` ; jeux sectoriels préchargés absents |
-| T-1.9 Profils | partielle | `travel-profiles` sur un seul site | éprouver sur chaque site de référence (trois manquent) |
+| T-1.9 Profils | partielle | `c1-sites-sante-transport-campus.test.ts` : les deux propriétés sur chaque site de référence valide qui porte le profil, de chaque entrée à chaque destination ; l'essai mord | `ref-minimal`, `ref-retail` et `ref-adversarial` ne portent pas les deux profils |
 | T-1.10 Moteur de parcours | partielle | `compute-route`, `edge-closures` | invalidation sélective du cache non tenue (empreinte du site entier) |
 | T-1.11 Points de décision | partielle | `decision-points` (`toContain`) | listes attendues exactes par site ; un nœud de passage sur une chaîne y est consacré point de décision — à confronter à la règle « une seule issue » |
 | T-1.12 Audits | tenue | `audit.test.ts`, `audit-accessibility-evacuation` | — |
@@ -125,3 +126,11 @@ dépôt, et non atteignable en l'état (braille, PDF validé, composition, actif
    leur décor (`organization`, et `object_lock` dans `s6-10-convergence`). CLAUDE.md
    interdit de contourner le cloisonnement, y compris en essai. À trancher : pratique
    admise pour amorcer un décor, ou décor à poser autrement.
+7. « Service ouvert en continu » (C1, `ref-health`) : une plage horaire ne
+   s'écrit que de 00:00 à 23:59, sans 24:00 ni franchissement de minuit, et un
+   bâtiment sans horaires déclarés n'est pas un bâtiment ouvert sans
+   interruption. Le modèle ne sait pas le dire ; l'hôpital ne déclare rien.
+8. « Pointes de charge » et « flux séparés » (C1, `ref-transit`, `ref-health`) :
+   le graphe ne porte que la capacité des liaisons verticales, et un profil
+   n'exclut que des natures de nœud, jamais une arête. Les hypothèses de flux
+   (`flow_hypothesis`, module 03) ne sont pas dans `SiteData`.

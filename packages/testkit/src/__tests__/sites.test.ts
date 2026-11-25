@@ -12,7 +12,7 @@ import { siteOrigin, firstCalibration } from '@azimut/core-model';
 
 describe('reference sites', () => {
   it('loads all reference sites', () => {
-    expect(allReferenceSites.size).toBe(5);
+    expect(allReferenceSites.size).toBe(8);
     expect(allReferenceSites.get('ref-minimal')).toBe(refMinimal);
     expect(allReferenceSites.get('ref-broken')).toBe(refBroken);
     expect(allReferenceSites.get('ref-adversarial')).toBe(refAdversarial);

@@ -5,6 +5,9 @@ export {
   refAdversarial,
   refMultilevel,
   refRetail,
+  refHealth,
+  refTransit,
+  refCampus,
 } from './sites/index.js';
 export { siteChecksum, stableChecksum } from './checksum.js';
 export { compareSvg, assertSvgEqual } from './svg-compare.js';
