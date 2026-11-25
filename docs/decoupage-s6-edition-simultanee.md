@@ -54,7 +54,7 @@ section 4 doit être tranchée avant de commencer.
 | --- | --- | --- | --- | --- | --- |
 | S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Fait |
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
-| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Prêt, Q6 et Q7 tranchées |
+| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Fait ; branchement de l'éditeur à part (S6.1c) |
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait |
@@ -100,6 +100,43 @@ Deux ajouts prévus ci-dessus sont abandonnés, et pourquoi :
 un état de document entier ciblé sur le site, qui ne se traduit pas en
 commandes de ligne. Les obstacles sont dans le modèle de données, pas dans le
 code.
+
+**S6.1b, fait le 25 novembre 2026** (décisions Q6, Q7, Q11). Migration
+`0086_e9_3_decoration` : `decoration_layer` et `decoration_shape` selon E9.3,
+plus `z_order` et `style` sur la forme (Q6). La base tient la forme de la
+géométrie (polygone, polyligne, rectangle, ellipse, référence de symbole, en
+mètres) et du style (deux rôles de charte, une épaisseur, une opacité) : une
+couleur à la place d'un rôle est refusée. La nature suit la géométrie comme
+l'éditeur la dérive ; le groupe, qu'E9.3 nomme sans en définir la géométrie,
+n'est contraint que par la forme de celle-ci. Un déclencheur refuse une
+couche rattachée au niveau d'un autre site, et une forme rattachée à la
+couche d'une autre organisation : une clé étrangère ne voit pas les
+organisations. Cloisonnement, rôles, MFA et verrou ferme comme toute table
+du module 01.
+
+La traduction (`editor/decoration-commands.ts`) fait d'un
+`Command<DocumentPatch>` des commandes de ligne : création, suppression avec
+la ligne entière, modification des seules colonnes changées. L'ordre de
+superposition devient le rang `z_order` ; une forme non touchée dont le rang
+change reçoit une modification de ce seul rang. `editor/decoration-rows.ts`
+relit les lignes ; une ligne illisible est comptée, jamais devinée.
+
+L'identifiant de la couche par défaut d'un niveau était `layer-default-…`,
+que la colonne `uuid` refuse. Il devient un uuid dérivé du niveau (gabarit
+version 8 de la RFC 9562, empreinte SHA-256) : tous les postes nomment la
+même couche de la même façon, et deux postes qui ouvrent l'habillage d'un
+niveau en même temps n'en créent pas deux. Le second voit sa création
+refusée en 409, et la relit. Les formes restent tirées au hasard (Q7).
+
+Éprouvé : 6 essais de la migration (`e9-3-habillage`), 15 de la traduction et
+de la relecture, et 3 sur base réelle par PostgREST et le journal
+(`s6-1b-habillage`) : créer, déplacer, réordonner, supprimer puis annuler par
+l'inverse, et relire chaque fois le document de l'éditeur à l'identique.
+
+**Reste, S6.1c** : l'éditeur d'habillage (`EditorView`) n'est encore relié à
+aucune session ni à aucun dépôt ; il tient son document en mémoire. Le relier
+à l'émetteur journalisé, à la relecture et à la pile de S6.8 est un lot à
+part.
 
 Acceptation de S6.1a : une commande écrite se relit à l'identique, son inverse
 aussi ; une commande reçue qui viole le schéma, la propriété unique ou le

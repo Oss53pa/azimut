@@ -46,6 +46,9 @@ describe('E5 — document commands', () => {
     it('derives its id from the level, so a level has exactly one', () => {
       expect(LAYER.id).toBe(defaultLayerId('level-0'));
       expect(defaultLayerId('level-1')).not.toBe(LAYER.id);
+      // S6.1b — un uuid, que la base accepte, le même sur tous les postes.
+      expect(LAYER.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-8[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+      expect(defaultLayerId('level-0')).toBe(LAYER.id);
     });
   });
 

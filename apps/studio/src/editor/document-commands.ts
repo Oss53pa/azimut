@@ -19,6 +19,7 @@ import type { DecorationLayer, DecorationShape } from './scene-objects.js';
 import type { DocumentPatch, EditorDocument, ShapeSlot } from './editor-document.js';
 import { capturePatch, documentOrder, findShape } from './editor-document.js';
 import { translateShape } from './shape-geometry.js';
+import { empreinte } from '@azimut/core-model';
 
 // ---------------------------------------------------------------------------
 // Command types
@@ -34,9 +35,22 @@ export const CMD_SHAPE_PASTE = 'document.shape.paste';
 // Layers
 // ---------------------------------------------------------------------------
 
-/** Identifier of the default habillage layer of a level (E9.3). */
+/**
+ * Identifier of the default habillage layer of a level (E9.3).
+ *
+ * A uuid, as `decoration_layer.id` requires (migration 0086), derived from
+ * the level rather than drawn: every workstation names the same default
+ * layer the same way, so two of them opening a level's habillage at once
+ * write one layer, not two (S6.1b). Name-based, in the RFC 9562 version 8
+ * layout: the first 128 bits of the level's canonical fingerprint (D7.2,
+ * the product's one hashing path), version and variant bits set.
+ */
 export function defaultLayerId(levelId: string): string {
-  return `layer-default-${levelId}`;
+  const hex = empreinte({ default_decoration_layer_of: levelId }).slice('sha256:'.length, 'sha256:'.length + 32).split('');
+  hex[12] = '8';
+  hex[16] = ((parseInt(hex[16] ?? '0', 16) & 0x3) | 0x8).toString(16);
+  const h = hex.join('');
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
 }
 
 /**

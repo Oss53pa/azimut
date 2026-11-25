@@ -97,6 +97,9 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
     // statut, section A5.11 ». La table était rangée parmi celles sans
     // propriétaire, faute d'y avoir été inscrite ; elle l'est.
     'site_fact',
+    // E9.3, L3 et Q6 (S6.1b, migration 0086) : l'habillage appartient au
+    // module 01, qui en tient les couches et les formes.
+    'decoration_layer', 'decoration_shape',
     // Q2, version 18 : « parking_space | 01 Socle | Extension d'une empreinte
     // de place, section A5.3 ». La table était rangée parmi celles sans
     // propriétaire, quand elle portait une place autonome hors du cahier des

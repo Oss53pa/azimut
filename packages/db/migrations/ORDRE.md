@@ -129,6 +129,7 @@ non plus — elle n'en retire que les clés étrangères.
 0083_s6_4_object_lock
 0084_a5_jsonb_validation
 0085_m02_w11_validation_barrier
+0086_e9_3_decoration
 ```
 
 ## Règle pour la suite
