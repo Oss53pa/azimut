@@ -61,7 +61,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Fait ; barrière tenue par la base (`docs/decoupage-barriere-validation.md`) |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
-| S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
+| S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Fait |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
 | S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
 
@@ -539,6 +539,39 @@ une propagation continue, cette règle vide la pile à chaque commande d'un autr
 utilisateur, et l'annulation devient inutilisable en édition simultanée. Le lot
 attend la réponse à Q3.
 
+**S6.8, fait le 25 novembre 2026** (décision Q3). La pile n'est vidée qu'au
+retour du réseau, quand la file part (E5.3) ; recevoir des commandes d'autres
+postes ne la touche pas. Annuler et rétablir passent par l'émetteur journalisé
+de tout geste : la commande inverse entre au journal, et les autres postes la
+reçoivent comme les autres.
+
+Si l'objet a changé ailleurs, c'est la base qui en juge : elle compare chaque
+colonne de `before` dans le type de la colonne et refuse en 409 (0078). Rien
+n'est écrit. Le poste relit alors le site et situe le conflit en rejouant les
+commandes refusées par le moteur S6.3 (`state/undo-conflict.ts`) ; l'atelier
+le présente avec les deux versions, colonne par colonne
+(`components/UndoConflictBanner.tsx`). Avant d'entrer dans S6.3, chaque
+valeur est ramenée à une forme commune : une commande porte des textes
+(`"1.4"`, une position en texte JSON, un horodatage en `Z`), le site relu des
+nombres, des objets et des horodatages en `+00:00`. Sans cela, la position
+d'un nœud apparaissait comme changée à chaque conflit ; l'essai le montre.
+
+Le geste en conflit reste au sommet de la pile : rien ne s'efface sans que
+l'utilisateur le demande. Il peut fermer la présentation, ou écarter le geste,
+ce qui rend les gestes précédents à l'annulation ; leur `before` les garde, à
+leur tour, de s'appliquer sur un objet qui a changé. Ce choix d'écran n'est
+pas dans Q3 ; il est à confirmer.
+
+Éprouvé : 23 essais purs (`undo-conflict`, `command-store`), et 2 essais à
+deux postes par PostgREST et le journal (`s6-8-annulation-distante`), qui
+mordent. Limites :
+
+- un refus 409 sans écart visible sur le site relu (clé étrangère vers une
+  ligne écrite ailleurs, ou site non relu parce qu'une file attend) se
+  présente comme « non situé » ;
+- l'objet se nomme par sa table et son identifiant, pas par son libellé ;
+- aucun arbitrage « écrire quand même » : il relève de L4.4.
+
 ### S6.9 Session hors ligne et retour
 
 S-23 renvoie à l'arbitrage des conflits déjà spécifié, c'est-à-dire au lot
@@ -554,7 +587,7 @@ stricte des états finaux et le blocage de la publication dans le dernier cas.
 
 S6.0, S6.1a et S6.3 sont faits. Depuis les décisions du 21 novembre, S6.1b
 et S6.2 étaient prêts ; S6.2 est fait. S6.1b, S6.4, S6.5 et S6.6 peuvent
-commencer ; S6.6 est fait. S6.7 et S6.8 sont prêts. S6.9 attend L4.4.
+commencer ; S6.4, S6.5, S6.6, S6.7 et S6.8 sont faits. S6.9 attend L4.4.
 
 ---
 

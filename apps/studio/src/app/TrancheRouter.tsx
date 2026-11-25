@@ -26,6 +26,7 @@ import { SyncStatusContext } from '../context/sync-status.js';
 import { PresenceContext, PresencePublishContext } from '../context/presence.js';
 import { useLevelPresence } from './useLevelPresence.js';
 import { PropagationBanner } from '../components/PropagationBanner.js';
+import { UndoConflictBanner } from '../components/UndoConflictBanner.js';
 import { ObjectLockContext } from '../context/object-lock.js';
 
 /**
@@ -121,6 +122,12 @@ function TrancheWorkspace({ route }: {
       )}
       {/* S6.5, S-21 — ce que des commandes reçues ont rendu incohérent. */}
       <PropagationBanner findings={session.propagation} />
+      {/* S6.8 — une annulation refusée parce que l'objet a changé ailleurs. */}
+      <UndoConflictBanner
+        conflict={session.undoConflict}
+        onDismiss={session.dismissUndoConflict}
+        onDiscard={session.discardUndoConflict}
+      />
       {/*
         T-1.5 — les niveaux du site, et le passage de l'un à l'autre. Posé ici
         et non dans un écran : les quatre écrans d'atelier portent sur un

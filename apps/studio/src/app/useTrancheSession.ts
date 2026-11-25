@@ -19,14 +19,15 @@ import {
 } from '../state/session-store.js';
 import type { SessionState } from '../state/session-store.js';
 import {
-  EMPTY_STORE, dispatch, undo as undoLast, redo as redoLast, afterSync,
-  canUndo, canRedo,
+  EMPTY_STORE, dispatch, afterSync, canUndo, canRedo,
 } from '../state/command-store.js';
 import type { StoreState } from '../state/command-store.js';
 import { canReceive } from '../state/journal-session.js';
 import { useJournalFollow } from './useJournalFollow.js';
 import type { JournalBinding } from './useJournalFollow.js';
 import { usePropagationCheck } from './usePropagationCheck.js';
+import { useSessionUndo } from './useSessionUndo.js';
+import type { UndoConflict } from '../state/undo-conflict.js';
 import { syncStatusOf } from '../state/sync-status.js';
 import type { SyncStatus } from '../state/sync-status.js';
 
@@ -66,6 +67,11 @@ export type TrancheSession = {
   readonly undo: () => Promise<boolean>;
   /** Rétablit le dernier geste annulé (E5.2). */
   readonly redo: () => Promise<boolean>;
+  /** S6.8 — l'annulation refusée parce que l'objet a changé ailleurs. */
+  readonly undoConflict: UndoConflict | null;
+  readonly dismissUndoConflict: () => void;
+  /** Écarte le geste en conflit de la pile, sans rien écrire. */
+  readonly discardUndoConflict: () => void;
   /**
    * L'état local trouvé à la réouverture, tant que l'utilisateur n'a pas
    * tranché. `null` le reste du temps (E5.4).
@@ -328,25 +334,8 @@ export function useTrancheSession(
     return out.ok && current.current.queued.length === queuedBefore;
   }, [sink]);
 
-  const undo = useCallback(async (): Promise<boolean> => {
-    const result = await undoLast(store.current, sink, new Date().toISOString());
-    store.current = result.state;
-    setStore(result.state);
-    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
-    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
-    // si quelque chose a bougé.
-    return result.applied && result.outcome.ok;
-  }, [sink]);
-
-  const redo = useCallback(async (): Promise<boolean> => {
-    const result = await redoLast(store.current, sink, new Date().toISOString());
-    store.current = result.state;
-    setStore(result.state);
-    // `applied` et non le seul verdict du puits : une pile vide n'est plus un
-    // refus mais un geste qui n'a pas eu lieu, et l'appelant attend de savoir
-    // si quelque chose a bougé.
-    return result.applied && result.outcome.ok;
-  }, [sink]);
+  const clearRefusal = useCallback((): void => { setRefusal([]); }, []);
+  const history = useSessionUndo({ store, setStore, sink, current, reload, clearRefusal });
 
   // Q10, décision d'Oss53pa du 21 novembre 2026 : un uuid tiré ici, à la
   // création. Un compteur rendait le même identifiant à tous les postes et à
@@ -363,8 +352,11 @@ export function useTrancheSession(
     store: storeState,
     canUndo: canUndo(storeState),
     canRedo: canRedo(storeState),
-    undo,
-    redo,
+    undo: history.undo,
+    redo: history.redo,
+    undoConflict: history.conflict,
+    dismissUndoConflict: history.dismiss,
+    discardUndoConflict: history.discard,
     pendingResume,
     loadFailed,
     acceptResume,

@@ -109,6 +109,11 @@ export type UndoOutcome = {
   readonly state: StoreState;
   readonly applied: boolean;
   readonly outcome: Outcome<unknown>;
+  /**
+   * S6.8 — les commandes envoyées, dans l'ordre d'envoi ; vide quand la pile
+   * était vide. Un refus les rend, pour que le conflit se situe.
+   */
+  readonly attempted: readonly EntityCommand[];
 };
 
 /**
@@ -129,7 +134,7 @@ export async function undo(
 ): Promise<UndoOutcome> {
   const entry = state.undoStack[state.undoStack.length - 1];
   if (entry === undefined) {
-    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] } };
+    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] }, attempted: [] };
   }
 
   const inverses = [...entry.commands]
@@ -137,7 +142,7 @@ export async function undo(
     .map(c => inverseCommand(c, timestamp));
 
   const outcome = await sink(inverses);
-  if (!outcome.ok) return { state, applied: false, outcome };
+  if (!outcome.ok) return { state, applied: false, outcome, attempted: inverses };
 
   return {
     state: {
@@ -147,6 +152,7 @@ export async function undo(
     },
     applied: true,
     outcome,
+    attempted: inverses,
   };
 }
 
@@ -158,12 +164,12 @@ export async function redo(
 ): Promise<UndoOutcome> {
   const entry = state.redoStack[state.redoStack.length - 1];
   if (entry === undefined) {
-    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] } };
+    return { state, applied: false, outcome: { ok: true, value: null, warnings: [] }, attempted: [] };
   }
 
   const replayed = entry.commands.map(c => ({ ...c, timestamp }));
   const outcome = await sink(replayed);
-  if (!outcome.ok) return { state, applied: false, outcome };
+  if (!outcome.ok) return { state, applied: false, outcome, attempted: replayed };
 
   return {
     state: {
@@ -173,7 +179,22 @@ export async function redo(
     },
     applied: true,
     outcome,
+    attempted: replayed,
   };
+}
+
+/**
+ * S6.8 — écarte le geste du sommet d'une pile, sans rien écrire.
+ *
+ * Seul l'utilisateur le demande, devant un conflit présenté : le geste ne
+ * s'annule plus, l'objet ayant changé ailleurs, et le laisser au sommet
+ * bloquerait tous ceux d'en dessous. Les gestes plus anciens restent ; leur
+ * `before` les gardera de s'appliquer sur un objet qui a changé.
+ */
+export function discardTop(state: StoreState, side: 'undo' | 'redo'): StoreState {
+  return side === 'undo'
+    ? { ...state, undoStack: state.undoStack.slice(0, -1) }
+    : { ...state, redoStack: state.redoStack.slice(0, -1) };
 }
 
 export function canUndo(state: StoreState): boolean {

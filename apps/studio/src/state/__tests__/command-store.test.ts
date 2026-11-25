@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
 import {
-  EMPTY_STORE, UNDO_DEPTH, dispatch, undo, redo, afterSync, canUndo, canRedo,
+  EMPTY_STORE, UNDO_DEPTH, dispatch, undo, redo, afterSync, canUndo, canRedo, discardTop,
 } from '../command-store.js';
 import type { StoreState, CommandSink } from '../command-store.js';
 
@@ -199,5 +199,46 @@ describe('E5.3 — la synchronisation vide la pile', () => {
     const r = await undo(afterSync(state), sink, '2026-09-21T10:00:05.000Z');
     expect(r.applied).toBe(false);
     expect(r.outcome.ok).toBe(true);
+  });
+});
+
+/**
+ * S6.8, décision Q3 — un refus rend les commandes envoyées, pour que le
+ * conflit se situe ; seul l'utilisateur écarte un geste de la pile.
+ */
+describe('S6.8 — le geste refusé, et son retrait', () => {
+  const T2 = '2026-09-21T10:00:05.000Z';
+
+  it('un refus rend les inverses envoyées, et la pile intacte', async () => {
+    const { sink } = accepting();
+    const after = await apply(EMPTY_STORE, sink, [cmd('s1', 'g'), cmd('s2', 'g')]);
+    const r = await undo(after.state, refusing, T2);
+    expect(r.applied).toBe(false);
+    expect(r.attempted.map(c => [c.id, c.operation])).toEqual([['s2', 'delete'], ['s1', 'delete']]);
+    expect(r.state).toEqual(after.state);
+  });
+
+  it('une pile vide n’envoie rien', async () => {
+    const { sink } = accepting();
+    expect((await undo(EMPTY_STORE, sink, T2)).attempted).toEqual([]);
+    expect((await redo(EMPTY_STORE, sink, T2)).attempted).toEqual([]);
+  });
+
+  it('écarter retire le seul sommet de la pile visée, sans rien écrire', async () => {
+    const { sink, seen } = accepting();
+    let state = (await apply(EMPTY_STORE, sink, [cmd('s1')])).state;
+    state = (await apply(state, sink, [cmd('s2')])).state;
+    state = (await apply(state, sink, [cmd('s3')])).state;
+    state = (await undo(state, sink, T2)).state;
+    const written = seen.length;
+
+    const fromUndo = discardTop(state, 'undo');
+    expect(fromUndo.undoStack.map(e => e.commands[0]?.id)).toEqual(['s1']);
+    expect(fromUndo.redoStack).toEqual(state.redoStack);
+
+    const fromRedo = discardTop(state, 'redo');
+    expect(fromRedo.redoStack).toEqual([]);
+    expect(fromRedo.undoStack).toEqual(state.undoStack);
+    expect(seen.length).toBe(written);
   });
 });
