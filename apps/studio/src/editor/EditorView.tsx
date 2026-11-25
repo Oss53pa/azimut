@@ -39,7 +39,8 @@ import { StatusBar } from './StatusBar.js';
 import { useRenderBudget } from './use-render-budget.js';
 import { LevelTabs } from './LevelTabs.js';
 import type { ToolId, ToolState } from './tool-state.js';
-import { useEditorDocument } from './use-editor-document.js';
+import { useDecorationStore } from '../state/use-decoration-store.js';
+import { DecorationNotices } from './DecorationNotices.js';
 import { useEditorOperations } from './use-editor-operations.js';
 import {
   levelSceneObjects,
@@ -110,7 +111,9 @@ export function EditorView(): JSX.Element {
   );
 
   // ---- Document and history (E5) ----
-  const documentApi = useEditorDocument(site.site.id);
+  // S6.1c — l'habillage se lit au dépôt et s'y écrit par l'émetteur de la
+  // coquille ; sans dépôt, il reste en mémoire.
+  const documentApi = useDecorationStore(site);
   const { document, undo, redo, canUndo, canRedo } = documentApi;
 
   const operations = useEditorOperations({
@@ -242,6 +245,7 @@ export function EditorView(): JSX.Element {
         selectedId={selectedLevel}
         onSelect={handleLevelChange}
       />
+      <DecorationNotices store={documentApi} />
 
       <div style={{ flex: 1, minHeight: 0 }}>
         {selectedLevel !== '' ? (

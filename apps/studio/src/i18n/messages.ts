@@ -56,6 +56,7 @@ import { PRESENCE_FR, PRESENCE_EN } from './messages/presence.js';
 import { PROPAGATION_FR, PROPAGATION_EN } from './messages/propagation.js';
 import { SERVICE_VALIDATION_FR, SERVICE_VALIDATION_EN } from './messages/service-validation.js';
 import { UNDO_CONFLICT_FR, UNDO_CONFLICT_EN } from './messages/undo-conflict.js';
+import { DECORATION_STORE_FR, DECORATION_STORE_EN } from './messages/decoration-store.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -102,6 +103,7 @@ export const MESSAGES_FR = {
   ...PRESENCE_FR,
   ...PROPAGATION_FR,
   ...UNDO_CONFLICT_FR,
+  ...DECORATION_STORE_FR,
   ...SERVICE_VALIDATION_FR,
 } as const;
 
@@ -152,6 +154,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...PRESENCE_EN,
   ...PROPAGATION_EN,
   ...UNDO_CONFLICT_EN,
+  ...DECORATION_STORE_EN,
   ...SERVICE_VALIDATION_EN,
 };
 

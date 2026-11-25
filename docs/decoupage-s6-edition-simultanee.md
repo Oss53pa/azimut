@@ -54,7 +54,7 @@ section 4 doit être tranchée avant de commencer.
 | --- | --- | --- | --- | --- | --- |
 | S6.0 | Exploration bornée du transport de propagation | S | — | compatibilité avec l'installation autonome (A3.4) | Fait |
 | S6.1a | Commande d'entité transportable et relue sous validation | S | — | aucune | Fait |
-| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Fait ; branchement de l'éditeur à part (S6.1c) |
+| S6.1b | Habillage exprimé en commandes d'entité | M | S6.1a | modèle de l'habillage | Fait, éditeur branché (S6.1c) |
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait |
@@ -133,10 +133,35 @@ de la relecture, et 3 sur base réelle par PostgREST et le journal
 (`s6-1b-habillage`) : créer, déplacer, réordonner, supprimer puis annuler par
 l'inverse, et relire chaque fois le document de l'éditeur à l'identique.
 
-**Reste, S6.1c** : l'éditeur d'habillage (`EditorView`) n'est encore relié à
-aucune session ni à aucun dépôt ; il tient son document en mémoire. Le relier
-à l'émetteur journalisé, à la relecture et à la pile de S6.8 est un lot à
-part.
+**S6.1c, fait le 25 novembre 2026.** L'éditeur d'habillage se lit au dépôt
+et s'y écrit (`state/use-decoration-store.ts`, `data/postgrest-decoration.ts`).
+Il garde l'interface de `useEditorDocument`. Un geste est traduit et confié à
+l'émetteur de la coquille, journalisé dès qu'une session est ouverte ; il
+n'entre au document et à la pile que s'il a été écrit, puis le document est
+relu. Une commande reçue d'un autre poste fait relire le site à la coquille
+(S6.6c), et l'habillage avec lui. Annuler écrit l'inverse du geste par le
+même chemin (Q3) ; la pile n'est pas vidée par les commandes reçues ; un refus
+409 laisse le geste dans la pile, fait relire l'habillage et le dit
+(`editor/DecorationNotices.tsx`). Les gestes partent l'un après l'autre. Sans
+dépôt configuré, le document reste en mémoire, comme avant.
+
+Éprouvé dans un navigateur, à deux postes, sur la pile locale (service
+d'authentification, PostgREST, base du banc) : un rectangle tracé par l'un
+paraît chez l'autre, se relit après rechargement, et son annulation part au
+journal en suppression et disparaît chez l'autre. Les 18 essais de bout en
+bout de l'éditeur sans dépôt passent.
+
+Limites :
+
+- un geste s'affiche une fois écrit, pas avant : un aller-retour au dépôt ;
+- l'ordre de superposition d'un geste est celui que le poste connaissait :
+  une forme créée ailleurs entre-temps peut partager un rang, départagé par
+  l'identifiant ;
+- aucun verrou ferme n'est pris sur une forme pendant le geste (S6.4 ne
+  couvre que le graphe, le renommage et les faces) ;
+- le conflit d'annulation n'est pas présenté avec ses deux versions, comme
+  dans l'atelier (S6.8) : l'éditeur dit le refus, sans le détail ;
+- la pile est celle de l'éditeur ; un rechargement la vide, comme avant.
 
 Acceptation de S6.1a : une commande écrite se relit à l'identique, son inverse
 aussi ; une commande reçue qui viole le schéma, la propriété unique ou le
