@@ -202,11 +202,14 @@ describe('E5.2 — annuler puis rétablir rend un état identique', () => {
     const afterFirst = session.rows;
 
     ({ state: store } = await dispatch(store, sink, graphGesture(3)));
+    const afterSecond = session.rows;
     ({ state: store } = await undo(store, sink, T0));
     expect(session.rows).toEqual(afterFirst);
 
+    // T-1.2b — l'état complet, et non un décompte : le rétablissement rend
+    // exactement l'état d'après le geste.
     ({ state: store } = await redo(store, sink, T0));
-    expect(session.rows.filter(r => r.table === 'node')).toHaveLength(2);
+    expect(session.rows).toEqual(afterSecond);
   });
 
   it('la pile est vidée à la synchronisation (E5.3)', () => {

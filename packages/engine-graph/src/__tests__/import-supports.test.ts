@@ -24,6 +24,7 @@ describe('D4.1 importSupports', () => {
 
     it('optional fields default to null when absent', () => {
       const result = importSupports(refMultilevel, csv(['S-1;DIR;A;RDC;n-ml-hall']));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       const s = result.value.supports[0];
       expect(s?.substrate).toBeNull();
@@ -43,6 +44,7 @@ describe('D4.1 importSupports', () => {
 
     it('rejects a row with an empty obligatory field', () => {
       const result = importSupports(refMultilevel, csv([';DIR;A;RDC;n-ml-hall']));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
       expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
@@ -55,6 +57,7 @@ describe('D4.1 importSupports', () => {
         refMultilevel,
         'reference;typology;building;level\nS-1;DIR;A;RDC',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
       const f = result.value.lines[0]?.findings[0];
@@ -67,6 +70,7 @@ describe('D4.1 importSupports', () => {
         refMultilevel,
         'reference;typology;building;level;x_m;y_m\nS-1;DIR;A;RDC;12.5;4.0',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
       const s = result.value.supports[0];
@@ -77,6 +81,7 @@ describe('D4.1 importSupports', () => {
 
     it('puts an unknown node_ref in pending with IMPORT.NODE_NOT_FOUND', () => {
       const result = importSupports(refMultilevel, csv(['S-1;DIR;A;RDC;n-nope']));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.pending).toBe(1);
       expect(result.value.rejected).toBe(0);
@@ -94,6 +99,7 @@ describe('D4.1 importSupports', () => {
         'reference;typology;building;level;node_ref;width_mm;height_mm\n'
         + 'S-1;DIR;A;RDC;n-ml-hall;600;1200',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       const s = result.value.supports[0];
       expect(s?.dimensions_source).toBe('overridden');
@@ -109,6 +115,7 @@ describe('D4.1 importSupports', () => {
         'reference;typology;building;level;node_ref;condition\n'
         + 'S-1;DIR;A;RDC;n-ml-hall;worn',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.supports[0]?.condition).toBe('worn');
     });
@@ -119,6 +126,7 @@ describe('D4.1 importSupports', () => {
         'reference;typology;building;level;node_ref;condition\n'
         + 'S-1;DIR;A;RDC;n-ml-hall;broken',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
       expect(result.value.lines[0]?.findings[0]?.code).toBe('IMPORT.ROW_INVALID');
@@ -130,6 +138,7 @@ describe('D4.1 importSupports', () => {
         'reference;typology;building;level;node_ref;installed_at\n'
         + 'S-1;DIR;A;RDC;n-ml-hall;01/02/2026',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
     });
@@ -140,6 +149,7 @@ describe('D4.1 importSupports', () => {
         'reference;typology;building;level;node_ref;installed_at\n'
         + 'S-1;DIR;A;RDC;n-ml-hall;2026-02-01',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.supports[0]?.installed_at).toBe('2026-02-01');
     });
@@ -153,6 +163,7 @@ describe('D4.1 importSupports', () => {
         + 'S-1;DIR;A;RDC;n-ml-hall;3,5',
         { decimalSeparator: 'comma' },
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.supports[0]?.reading_distance_m).toBe(3.5);
     });
@@ -164,6 +175,7 @@ describe('D4.1 importSupports', () => {
         + 'S-1;DIR;A;RDC;n-ml-hall;3,5',
         { decimalSeparator: 'point' },
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.rejected).toBe(1);
     });
@@ -189,6 +201,7 @@ describe('D4.1 importSupports', () => {
         refMultilevel,
         'typologie;batiment;niveau;reference;noeud\nDIR;A;RDC;S-1;n-ml-hall',
       );
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
       expect(result.value.supports[0]?.reference).toBe('S-1');
@@ -196,6 +209,7 @@ describe('D4.1 importSupports', () => {
 
     it('strips a UTF-8 BOM', () => {
       const result = importSupports(refMultilevel, '﻿' + csv(['S-1;DIR;A;RDC;n-ml-hall']));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
     });
@@ -215,6 +229,7 @@ describe('D4.1 importSupports', () => {
         ';DIR;A;RDC;n-ml-hall',
         'S-3;DIR;A;RDC;n-nope',
       ]));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.total_rows).toBe(3);
       expect(result.value.lines).toHaveLength(3);
@@ -228,6 +243,7 @@ describe('D4.1 importSupports', () => {
         'S-1;DIR;A;RDC;n-ml-hall',
         'S-1;DIR;A;RDC;n-ml-entrance',
       ]));
+      expect(result.ok).toBe(true);
       if (!result.ok) return;
       expect(result.value.imported).toBe(1);
       expect(result.value.rejected).toBe(1);

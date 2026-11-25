@@ -16,7 +16,7 @@ describe('RouteCache', () => {
   });
 
   it('computes and caches a route', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(r1.ok).toBe(true);
@@ -32,7 +32,7 @@ describe('RouteCache', () => {
   });
 
   it('different from/to produce different cache entries', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     // Reverse direction
@@ -41,7 +41,7 @@ describe('RouteCache', () => {
   });
 
   it('invalidateAll clears the cache', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -50,22 +50,23 @@ describe('RouteCache', () => {
   });
 
   it('invalidateForEdge removes only matching routes', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
 
     // Get an edge from the route
+    expect(r.ok).toBe(true);
     if (!r.ok) return;
     const edgeId = r.value.edges[0];
-    if (!edgeId) return;
+    if (!edgeId) throw new Error('décor de l’essai absent');
 
     cache.invalidateForEdge(edgeId);
     expect(cache.size).toBe(0);
   });
 
   it('invalidateForEdge preserves routes not using that edge', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -82,7 +83,7 @@ describe('RouteCache', () => {
   });
 
   it('recomputes when graph changes (hash mismatch)', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(r1.ok).toBe(true);
@@ -106,7 +107,7 @@ describe('RouteCache', () => {
   });
 
   it('is deterministic (INV-4)', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const c1 = new RouteCache();
     const c2 = new RouteCache();
     const r1 = c1.computeOrGet(refMinimal, profile, entrance.id, dest.id);
@@ -115,7 +116,7 @@ describe('RouteCache', () => {
   });
 
   it('self-route (from === to) is cached with zero edges', () => {
-    if (!entrance) return;
+    if (!entrance) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r = cache.computeOrGet(refMinimal, profile, entrance.id, entrance.id);
     expect(r.ok).toBe(true);
@@ -127,15 +128,16 @@ describe('RouteCache', () => {
   });
 
   it('self-route is immune to invalidateForEdge', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, entrance.id);
     const r = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(2);
 
+    expect(r.ok).toBe(true);
     if (!r.ok) return;
     const edgeId = r.value.edges[0];
-    if (!edgeId) return;
+    if (!edgeId) throw new Error('décor de l’essai absent');
 
     // Invalidating the edge removes the normal route but not the self-route
     cache.invalidateForEdge(edgeId);
@@ -143,16 +145,17 @@ describe('RouteCache', () => {
   });
 
   it('selective invalidation with multiple routes', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     // Cache forward and reverse routes
     const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     cache.computeOrGet(refMinimal, profile, dest.id, entrance.id);
     expect(cache.size).toBe(2);
 
+    expect(r1.ok).toBe(true);
     if (!r1.ok) return;
     const edgeId = r1.value.edges[0];
-    if (!edgeId) return;
+    if (!edgeId) throw new Error('décor de l’essai absent');
 
     // Both routes likely share the same edge, so both get invalidated
     cache.invalidateForEdge(edgeId);
@@ -161,7 +164,7 @@ describe('RouteCache', () => {
   });
 
   it('different profiles produce separate cache entries for same from/to', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const profile2: TravelProfile = { ...profile, id: 'profile-alt' };
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
@@ -170,7 +173,7 @@ describe('RouteCache', () => {
   });
 
   it('recomputes when vertical_links change', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -196,7 +199,7 @@ describe('RouteCache', () => {
   });
 
   it('computeOrGet after invalidateAll rebuilds the cache', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r1 = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -211,7 +214,7 @@ describe('RouteCache', () => {
   });
 
   it('recomputes when edge accessible flag changes', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -230,7 +233,7 @@ describe('RouteCache', () => {
   });
 
   it('recomputes when node level_id changes', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(cache.size).toBe(1);
@@ -250,14 +253,14 @@ describe('RouteCache', () => {
   });
 
   it('invalidateForEdge works on second edge of multi-edge route', () => {
-    if (!entrance || !dest) return;
+    if (!entrance || !dest) throw new Error('décor de l’essai absent');
     const cache = new RouteCache();
     const r = cache.computeOrGet(refMinimal, profile, entrance.id, dest.id);
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     // Use the last edge instead of the first
     const lastEdge = r.value.edges[r.value.edges.length - 1];
-    if (!lastEdge) return;
+    if (!lastEdge) throw new Error('décor de l’essai absent');
     cache.invalidateForEdge(lastEdge);
     expect(cache.size).toBe(0);
   });

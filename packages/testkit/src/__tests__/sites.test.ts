@@ -289,3 +289,30 @@ describe('A5.2 — un calage par fond de plan', () => {
     });
   }
 });
+
+/**
+ * T-0.10 — « empreinte stable ». Calculée deux fois dans le même processus,
+ * elle ne prouvait que le déterminisme d'un appel. Figée ici, elle prouve
+ * qu'un site de référence n'a pas changé sans qu'on le dise : modifier un
+ * site oblige à mettre à jour cette table, dans le même lot, et à dire
+ * pourquoi.
+ */
+const FROZEN: Readonly<Record<string, string>> = {
+  'ref-minimal': 'sha256:352c0a4669b39cefaa64afe9c6a1717ac5a5e417cdfcf8471e6e3a973c0270cf',
+  'ref-broken': 'sha256:61da90c317cdd60ebd22a52926ee5588bc0225e09fd87092ba0b894bb860adac',
+  'ref-adversarial': 'sha256:217758baa5e07e795857930854c0f07c9be8a42afb1dd8a946ab6ca3a641480e',
+  'ref-multilevel': 'sha256:3387da1fc380664b3db450ce1288c9bb930ac970f7cc83087c5da43931a3d44b',
+  'ref-retail': 'sha256:5b16cfbb43e6c1d25121b0863be6ab760d15768af53552e4ff8e6905f7431906',
+  'ref-health': 'sha256:ae0c39a326b739013e6d4b2e7fb0f4c0da28949b7fa84abec3ffb954a00f3a5a',
+  'ref-transit': 'sha256:9c9518aa5df88f97c61127026e7e5cc8c616baf27483a6ca826c2cc827508196',
+  'ref-campus': 'sha256:cf7b5fb8b34f56cff798697639245d64cb7abb216dfd077b604e8f6ba867b933',
+};
+
+describe('T-0.10 — les empreintes des sites de référence sont figées', () => {
+  it('chaque site a la sienne, et aucune n’est orpheline', () => {
+    expect([...allReferenceSites.keys()].sort()).toEqual(Object.keys(FROZEN).sort());
+  });
+  for (const [key, site] of allReferenceSites) {
+    it(key, () => { expect(siteChecksum(site)).toBe(FROZEN[key]); });
+  }
+});
