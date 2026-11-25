@@ -62,3 +62,19 @@ export const objectLock = azimut.table('object_lock', {
   primaryKey({ columns: [t.target_table, t.target_id] }),
   index('idx_object_lock_org').on(t.org_id),
 ]);
+
+/**
+ * M02.W11 tenue par la base (migration 0085) : la révision du graphe d'un
+ * site, et la dernière révision validée par le service. Écrite par la base
+ * seule (déclencheurs, `record_service_validation`) : jamais par Drizzle.
+ */
+export const graphRevision = azimut.table('graph_revision', {
+  site_id: uuid('site_id').primaryKey().references(() => site.id, { onDelete: 'cascade' }),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'cascade' }),
+  revision: bigint('revision', { mode: 'number' }).notNull().default(0),
+  changed_at: timestamp('changed_at', { withTimezone: true }).notNull().defaultNow(),
+  validated_revision: bigint('validated_revision', { mode: 'number' }),
+  validation_id: uuid('validation_id'),
+}, (t) => [
+  index('idx_graph_revision_org').on(t.org_id),
+]);

@@ -351,6 +351,7 @@ export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   job: 'A5.10, file de travaux. Infrastructure, non métier.',
   audit_log: 'A5.10 et A12.3, journal d’audit en insertion seule. X4 le distingue du journal d’activité du module 11, sans l’y ranger.',
   command_journal: 'S6.2, journal des commandes validées, décision d’Oss53pa du 21 novembre 2026. Infrastructure de propagation : aucun module ne l’écrit, seule la fonction `apply_journaled_commands` y inscrit ce que la base a appliqué. Absente de A5 et de S9, signalée à l’éditeur.',
+  graph_revision: 'M02.W11 tenue par la base, décisions d’Oss53pa QB0 à QB4. Révision du graphe et dernière révision validée par le service : la base seule l’écrit, par déclencheurs et `record_service_validation`. Absente de A5, signalée à l’éditeur.',
   object_lock: 'S6.4, verrou ferme, décisions d’Oss53pa Q1, Q2 et Q5. État éphémère du poste, non métier : seules `acquire_object_lock` et `release_object_lock` l’écrivent. Absente de A5 et de S9, signalée à l’éditeur.',
   level_presence: 'S6.7b, présence sur un niveau, décisions d’Oss53pa Q1, Q12 et Q13. État éphémère du poste, non métier : aucun module ne l’écrit, seules `touch_presence` et `leave_presence` le font. Absente de A5 et de S9, signalée à l’éditeur.',
   support: 'Scindée entre les modules 02 et 04, colonne par colonne (L0). Voir `SUPPORT_COLUMN_OWNER` : elle a deux propriétaires, pas aucun.',

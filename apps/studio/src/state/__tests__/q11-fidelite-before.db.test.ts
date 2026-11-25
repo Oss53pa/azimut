@@ -110,7 +110,7 @@ function endpoint(id: string, x: number): EdgeEndpoint {
  * Applique par le chemin journalisé, sous l'identité de l'utilisateur, et
  * annule. Rend le refus de la base, ou « accepté ».
  */
-async function journaled(cmds: readonly EntityCommand[]): Promise<string> {
+async function journaled(cmds: readonly EntityCommand[], withServicePassage = false): Promise<string> {
   const wire = cmds.map(c => {
     const out = serializeCommand(c);
     if (!out.ok) throw new Error('écriture');
@@ -120,6 +120,20 @@ async function journaled(cmds: readonly EntityCommand[]): Promise<string> {
   let verdict = 'accepté';
   await client.begin(async tx => {
     await tx`select set_config('azimut.current_user_id', ${USER}, true)`;
+    // M02.W11 tenue par la base (0085) : la soumission d'un tableau exige un
+    // passage du service valant pour la révision actuelle du graphe. Le banc
+    // se connecte sous un rôle membre de celui du service ; il pose le
+    // passage comme le ferait le travail `audit_site`, dans cette transaction
+    // annulée, qui ne laisse rien.
+    if (withServicePassage) {
+      const [run] = await tx<{ id: string }[]>`
+        insert into azimut.graph_validation(org_id, site_id, graph_hash, ran_at, passed, blocking_count, warning_count)
+        values (${ORG}, ${SITE}, 'sha256:service', ${T}, true, 0, 0) returning id`;
+      const [rev] = await tx<{ revision: string }[]>`
+        select revision::text from azimut.graph_revision where site_id = ${SITE}`;
+      if (run === undefined || rev === undefined) throw new Error('passage du service');
+      await tx`select azimut.record_service_validation(${SITE}, ${rev.revision}::bigint, ${run.id})`;
+    }
     await tx`set local role authenticated`;
     try {
       await tx.savepoint(async sp => {
@@ -197,6 +211,7 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
     if (annotated.kind !== 'written') throw new Error(`annotation : ${annotated.kind}`);
     const noted = await applyCommands(db, { userId: USER }, annotated.commands);
     if (!noted.ok) throw new Error(noted.findings.map(f => f.code).join(', '));
+
 
     // La relecture, par le chemin du poste. L'identité du jeton se lit par
     // `auth.uid()`, que la plateforme fournit et que le banc pose.
@@ -307,7 +322,7 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
       { findings: [], graphValidated: true, rulesPackBound: true, openAnnotationIds: [], rejectionReason: null },
       null,
       { orgId: ORG, timestamp: T, decisionId: 'd1100000-0000-4000-8000-0000000000fa' },
-    )))).toBe('accepté');
+    )), true)).toBe('accepté');
   });
 
   it('caler un plan, origine du repère comprise, puis l’annuler', async () => {

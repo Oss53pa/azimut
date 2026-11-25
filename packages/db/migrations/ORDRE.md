@@ -128,6 +128,7 @@ non plus — elle n'en retire que les clés étrangères.
 0082_a5_point_positions
 0083_s6_4_object_lock
 0084_a5_jsonb_validation
+0085_m02_w11_validation_barrier
 ```
 
 ## Règle pour la suite
