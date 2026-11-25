@@ -63,7 +63,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Fait |
 | S6.9 | Session hors ligne et retour | L | L4.4, S6.3 | dépend d'un lot non construit | Bloqué, L4.4 |
-| S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Après les autres |
+| S6.10 | Essai de convergence à deux clients | M | S6.2 à S6.7 | instance autonome en intégration continue | Fait ; hors ligne en conflit attend S6.9 |
 
 ### S6.0 Exploration du transport
 
@@ -645,6 +645,36 @@ L4.4. Ce lot ne peut pas précéder L4.4.
 Deux clients sur une instance autonome (A3.4) : séquences concurrentes, coupure
 réseau, verrou expiré, incohérence topologique provoquée. Exige l'égalité
 stricte des états finaux et le blocage de la publication dans le dernier cas.
+
+**Fait le 25 novembre 2026**, `apps/studio/src/state/__tests__/s6-10-convergence.db.test.ts`,
+sur l'instance que monte la chaîne (PostgreSQL et PostgREST, sans plateforme),
+par les fonctions que l'atelier assemble. L'égalité est stricte : chaque
+poste, sans relecture finale, porte les lignes du bâtiment, des nœuds et des
+arêtes telles que la base les rend, valeurs ramenées à une forme commune.
+
+1. Séquences concurrentes : 40 gestes tirés d'une graine fixe, renommages et
+   déplacements par le geste réel de l'atelier (`updateNodeCommands`), chaque
+   poste écrivant sur ce qu'il croit, parfois sans avoir lu l'autre. L'essai
+   exige des refus 409 et des écritures ; un refus fait relire, comme
+   l'atelier.
+2. Coupure réseau : une file hors ligne part au retour et converge. Une file
+   en conflit n'écrase pas la base et ne se perd pas : elle reste, et le
+   poste ne reçoit plus. Son arbitrage est S6.9 (L4.4) ; faute de lui,
+   l'essai fait repartir le poste de l'état du dépôt.
+3. Verrou expiré : refus 423 sous le verrou ; une fois tombé, l'autre poste
+   écrit, et le poste revenu est refusé en 409 puis relit.
+4. Incohérence topologique : une arête retirée laisse un nœud orphelin ; le
+   poste qui reçoit la commande lève `GRAPH.NODE_ORPHAN`, et la base refuse
+   en 412 l'émission du tableau des messages, la révision validée par le
+   service n'étant plus celle du graphe.
+
+Mutation : un poste qui ignore une commande reçue sur deux fait échouer les
+épreuves 1 et 2.
+
+Constat en écrivant l'essai : la longueur d'une arête relue est recalculée
+depuis les positions (`assemble-site-data`), et c'est le geste de
+déplacement qui l'écrit. Un déplacement écrit sans ce geste laisse les postes
+sur une longueur que la relecture ne rend plus.
 
 ### Ordre
 
