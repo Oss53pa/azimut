@@ -58,7 +58,7 @@ section 4 doit être tranchée avant de commencer.
 | S6.2 | Journal des commandes validées en base | L | S6.1a | ordre total par site, cloisonnement | Fait |
 | S6.3 | Moteur d'application des commandes distantes | M | S6.1a | conflit constaté sans fusion | Fait |
 | S6.4 | Verrou ferme, en base | M | S6.2 | autorisation en base, pas seulement à l'écran | Fait |
-| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Fait au poste ; barrière en base à décider |
+| S6.5 | Revalidation après propagation et barrière | M | S6.2, S6.3 | coût de la revalidation à chaque commande | Fait ; barrière tenue par la base (`docs/decoupage-barriere-validation.md`) |
 | S6.6 | Diffusion en direct | M | S6.0, S6.2 | reprise après coupure sans perte ni doublon | Fait, sans intégration au poste (S6.6b) |
 | S6.7 | Présence, sélection, zone de travail | M | S6.6 | nature éphémère ou persistée | Fait (S6.7a, S6.7b, S6.7c) |
 | S6.8 | Annulation en présence de commandes distantes | M | S6.3, S6.6 | articulation avec E5.3 | Prêt |
@@ -251,7 +251,8 @@ complète est retenue ; une validation incrémentale ne se justifie pas sur ces
 sites. Ils sont petits : la mesure se reprend au premier site réel modélisé,
 comme D13 le prévoit pour toute cible.
 
-**Constaté, non traité, à décider** : le blocage de l'émission n'est tenu qu'au
+**Traité le 25 novembre 2026** (`docs/decoupage-barriere-validation.md`,
+migration 0085) — le constat d'origine suit. Le blocage de l'émission n'était tenu qu'au
 poste. Aucune garde en base ne contrôle le passage d'un tableau des messages
 en revue ou en émission ; un client qui écrit directement `message_schedule`
 passe outre. Et la trace `graph_validation` est écrite par le poste lui-même :

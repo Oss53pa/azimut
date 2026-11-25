@@ -251,7 +251,11 @@ END;
 $$;
 
 REVOKE ALL ON FUNCTION azimut.record_service_validation(uuid, bigint, uuid) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION azimut.record_service_validation(uuid, bigint, uuid) TO azimut_compiler;
+-- Le droit d'exécution ne garde rien : le service écrit sous l'identité du
+-- demandeur, rôle `authenticated` compris. La garde est dans la fonction,
+-- `session_is_compiler()`, qui lit le rôle de connexion, que `SET ROLE` ne
+-- change pas : une connexion de PostgREST est refusée.
+GRANT EXECUTE ON FUNCTION azimut.record_service_validation(uuid, bigint, uuid) TO azimut_compiler, authenticated;
 
 -- ── 5. La garde de la soumission (QB4) ─────────────────────────────────────
 --

@@ -5,6 +5,8 @@ import { DbWorkerQueue } from './db-queue.js';
 import { createKioskPackageJobHandler, dbLoadSite } from './kiosk-package-job.js';
 import { MAX_ATTEMPTS } from './queue.js';
 import type { JobHandler, WorkerLoopOptions } from './worker.js';
+import { createAuditSiteJobHandler } from './audit-site-job.js';
+import { loadSiteSnapshotAs, recordServicePassage } from '@azimut/db';
 
 /**
  * T-0.11 — l'assemblage du service de compilation sur la base.
@@ -92,6 +94,13 @@ export function serviceHandlers(
   db: ReturnType<typeof createDb>,
 ): ReadonlyMap<string, JobHandler> {
   return new Map<string, JobHandler>([
+    // M02.W11 tenue par la base (0085, QB2) : l'audit inscrit le passage de
+    // validation du graphe que la soumission du tableau des messages exige.
+    ['audit_site', createAuditSiteJobHandler({
+      loadSnapshot: (orgId, siteId, requester) => loadSiteSnapshotAs(db, requester, orgId, siteId),
+      recordPassage: (requester, passage) => recordServicePassage(db, requester, passage),
+      now: () => new Date(),
+    })],
     ['build_kiosk_package', createKioskPackageJobHandler({
       loadSite: dbLoadSite(db),
       bundleStore: fileSystemAssetStore(config.kioskBundleDir),

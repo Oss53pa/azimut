@@ -1,4 +1,4 @@
-import { type JSX, useState } from 'react';
+import { type JSX, useContext, useEffect, useState } from 'react';
 import { computeGraphHash, validateGraph } from '@azimut/engine-graph';
 import type { Finding } from '@azimut/core-model';
 import type { TrancheSession } from './useTrancheSession.js';
@@ -8,6 +8,8 @@ import { writeGraphValidation } from '../state/graph-validation-commands.js';
 import { NEVER_RUN } from '../state/validation-report.js';
 import type { ValidationState } from '../state/validation-report.js';
 import { ValidationScreen } from '../screens/ValidationScreen.js';
+import { ObjectLockContext } from '../context/object-lock.js';
+import { useServiceValidation } from './useServiceValidation.js';
 
 /**
  * M5 (partie M) — « Relancer | Recalcule, affiche la durée réelle, enregistre
@@ -33,6 +35,21 @@ export function ValidationScreenAdapter({ session, siteId }: {
 }): JSX.Element {
   const identity = useSessionIdentity();
   const [validation, setValidation] = useState<ValidationState>(NEVER_RUN);
+  // B5 (0085, QB0) — sous une session ouverte, la validation qui compte est
+  // celle du service : l'écran la demande. Sans base, le calcul reste au poste
+  // (M8, partie M, critère 3), et rien n'est écrit en base.
+  const service = useServiceValidation({
+    config: useContext(ObjectLockContext),
+    orgId: identity.orgId,
+    siteId,
+    onPassage: (findings, ranAt, durationMs) => { setValidation({ kind: 'ran', findings, ranAt, durationMs }); },
+    refresh: session.refresh,
+  });
+  const notice = service.notice;
+  useEffect(() => {
+    // Une demande sans issue ne laisse pas l'écran en « en cours ».
+    if (notice === 'failed' || notice === 'unavailable' || notice === 'waiting') setValidation(NEVER_RUN);
+  }, [notice]);
 
   return (
     <ValidationScreen
@@ -40,7 +57,13 @@ export function ValidationScreenAdapter({ session, siteId }: {
       validation={validation}
       coverageRatePct={null}
       rulesPack={null}
+      serviceNotice={notice}
       onRun={() => {
+        if (service.available) {
+          setValidation({ kind: 'running', startedAt: session.now() });
+          service.request();
+          return;
+        }
         const started = performance.now();
         const { scope, unreadable } = graphScopeFromSession(session.state);
         const findings: Finding[] = [];

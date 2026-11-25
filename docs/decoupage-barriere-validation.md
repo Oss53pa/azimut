@@ -56,3 +56,45 @@ lue avec le site qu'il a validé ; la garde compare.
 | QB2 | Le travail `audit_site`, déjà dans A5.10 et qui rejoue déjà `validateGraph`, écrit en plus le passage de `graph_validation`. Aucune nature nouvelle |
 | QB3 | Sans préférence d'Oss53pa. Retenu, comme conséquence de QB0 : les passages écrits par des postes restent en base (insertion seule, rien n'est détruit) mais ne comptent plus ; seul un passage du service ouvre la soumission. Chaque site en cours sera revalidé une fois |
 | QB4 | La garde ne contrôle que la soumission, `draft` → `in_review`, comme M02.W11 et R12 |
+
+## B1 à B5, faits le 25 novembre 2026
+
+**Base (0085).** `graph_revision` compte toute écriture d'un nœud, d'une arête
+ou d'une liaison verticale, par déclencheurs, et porte la dernière révision
+validée par le service avec le passage qui l'atteste. Seul le service peut
+l'enregistrer : `record_service_validation` exige une session du service
+(`session_is_compiler`, rôle de connexion, que `SET ROLE` ne change pas). Une
+garde refuse en `PT412` (HTTP 412) la soumission `draft` → `in_review` tant que
+la révision validée n'est pas la révision actuelle avec un passage réussi. Les
+passages écrits par des postes restent en base et ne comptent plus (QB3).
+Aucune table existante n'est modifiée ; `graph_validation` est inchangée.
+
+**Service (B3).** Le travail `audit_site` est branché dans le service : il lit
+le site et la révision de son graphe dans un même instantané (REPEATABLE READ,
+lecture seule), sous l'identité du demandeur, fait l'audit, valide le graphe,
+calcule l'empreinte, inscrit le passage et l'enregistre
+(`apps/compiler/src/audit-site-job.ts`, `packages/db/src/service-validation.ts`).
+
+**Poste (B5).** Sous une session ouverte, « Lancer la validation » demande le
+travail au service, en suit l'état, relit le passage du service et relit la
+session (`app/useServiceValidation.ts`) ; l'écran dit si la demande est en
+file, en cours, sans réponse après deux minutes, ou en échec. Sans base, le
+calcul reste au poste (M8, partie M, critère 3). Un refus 412 se dit
+`GRAPH.NOT_VALIDATED`, le code de R12.
+
+**Éprouvé.** Base : 7 essais (`m02-w11-barriere`), qui mordent : sans la garde,
+quatre refus tombent. Service : 4 essais de bout en bout (`audit-site-job`),
+dont l'ouverture de la soumission après le passage et sa fermeture après une
+modification du graphe. Navigateur, service lancé en local contre la base du
+banc : la demande part, le travail réussit, l'écran affiche le passage du
+service en 2,5 secondes environ.
+
+## À savoir avant toute fusion vers `master`
+
+**Le service de compilation n'est déployé nulle part.** La chaîne ne publie que
+le studio (Cloudflare) ; le service Node que A3 prévoit (`apps/compiler`) n'a
+ni hôte ni étape de déploiement dans ce dépôt. Sans lui, aucun travail n'est
+traité, et la garde de 0085 ferme la soumission de tout tableau des messages.
+Cette branche ne doit pas rejoindre `master` avant que le service tourne
+contre la base de production. Les travaux existants (paquets de borne,
+livrables) sont dans le même cas.

@@ -91,6 +91,17 @@ export function refusal(commands: readonly EntityCommand[], cause: string): Find
   const first = commands[0];
   // S6.4, décision Q5 : un objet tenu par un autre (423) se dit par le code
   // existant de T-1.16, et non par un refus d'écriture générique.
+  // M02.W11 tenue par la base (0085) : une soumission refusée faute de passage
+  // du service valant pour le graphe actuel (412) se dit par le code de R12.
+  if (cause === '412') {
+    return {
+      code: 'GRAPH.NOT_VALIDATED',
+      severity: 'blocking',
+      entity: first !== undefined ? { kind: 'command', id: first.id } : null,
+      params: { commands: commands.length, cause },
+      ruleRef: 'M02.W11',
+    };
+  }
   if (cause === '423') {
     return {
       code: 'EDIT.OBJECT_LOCKED',

@@ -26,6 +26,8 @@ export type ValidationScreenProps = {
   readonly coverageRatePct: number | null;
   readonly rulesPack: { readonly key: string; readonly version: string } | null;
   readonly onRun: () => void;
+  /** B5 — où en est la demande faite au service, quand c'est lui qui valide. */
+  readonly serviceNotice?: 'queued' | 'running' | 'failed' | 'waiting' | 'unavailable' | null | undefined;
   readonly onOpen: (entity: { readonly kind: string; readonly id: string }) => void;
   readonly onExport: () => void;
 };
@@ -76,8 +78,15 @@ export function ValidationScreen(props: ValidationScreenProps): JSX.Element {
           </div>
         )}
 
-        {presentation.kind === 'progress' && (
+        {presentation.kind === 'progress' && (props.serviceNotice ?? null) === null && (
           <StateBanner severity="info" message={t('valid.running')} />
+        )}
+
+        {(props.serviceNotice ?? null) !== null && (
+          <StateBanner
+            severity={props.serviceNotice === 'failed' || props.serviceNotice === 'unavailable' ? 'blocking' : 'info'}
+            message={t(`valid.service.${props.serviceNotice ?? 'queued'}`)}
+          />
         )}
 
         {presentation.kind === 'clean' && (

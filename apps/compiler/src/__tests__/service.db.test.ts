@@ -135,11 +135,13 @@ describe('T-0.11 — le service assemblé sur la base', () => {
   });
 
   it('un travail sans gestionnaire est remis en file avec la raison, sans arrêter le service', async () => {
-    const id = await enqueue('audit_site', { mode: 'complet' });
+    // `audit_site` a son gestionnaire depuis B3 (0085) ; `import_roster` n'en
+    // a toujours pas dans le service.
+    const id = await enqueue('import_roster', {});
 
     expect(await processNextJob(loop())).toBe(true);
 
     expect(await job(id)).toMatchObject({ state: 'queued', attempts: 1 });
-    expect(String((await job(id))?.['error'])).toMatch(/No handler registered for job kind: audit_site/);
+    expect(String((await job(id))?.['error'])).toMatch(/No handler registered for job kind: import_roster/);
   });
 });

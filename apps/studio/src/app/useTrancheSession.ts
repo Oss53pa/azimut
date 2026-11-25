@@ -100,6 +100,8 @@ export type TrancheSession = {
   readonly refusal: readonly Finding[];
   /** S6.5 — les incohérences du graphe introduites par des commandes reçues. */
   readonly propagation: readonly Finding[];
+  /** B5 — relit le site, sans écraser un travail local en attente. */
+  readonly refresh: () => Promise<void>;
 };
 
 /** Le contenu d'un plan importé, tel que lu à l'import. */
@@ -376,5 +378,6 @@ export function useTrancheSession(
     sync,
     refusal,
     propagation: propagation.findings,
+    refresh: reload,
   };
 }
