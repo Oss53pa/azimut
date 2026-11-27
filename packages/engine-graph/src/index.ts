@@ -36,6 +36,8 @@ export type { DocumentTextReport } from './audit-bound-text.js';
 export { buildDocumentBindings } from './document-bindings.js';
 export type { DocumentBindings } from './document-bindings.js';
 export { reconcile } from './reconciliation.js';
+export { reconciliationToCsv, csvCell } from './reconciliation-export.js';
+export type { ReconciliationLang } from './reconciliation-export.js';
 export type {
   SurveyedSupport,
   ExpectedSupport,

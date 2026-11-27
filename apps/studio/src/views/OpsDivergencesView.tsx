@@ -1,10 +1,12 @@
 import { type JSX, useMemo, useState } from 'react';
 import type { ReconciliationLine } from '@azimut/engine-graph';
+import { reconciliationToCsv } from '@azimut/engine-graph';
+import { downloadText } from '../components/download.js';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
 import type { UiMessageKey } from '../i18n/messages.js';
 import {
-  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner,
+  DataTable, RegisterLayout, Inspector, InspectorEmpty, Tag, StateBanner, Button,
   type Column, type RegisterFilter,
 } from '../components/ui/index.js';
 import { divergenceReport } from './operations/divergence.js';
@@ -111,8 +113,21 @@ export function OpsDivergencesView({ siteKey }: OpsDivergencesViewProps): JSX.El
       />
     );
 
+  // T-1.14 — le rapport exporté, chaque ligne par l'identifiant de son
+  // entité, le libellé en plus.
+  const exportReport = (): void => {
+    downloadText(
+      `rapprochement-${site.site.id}.csv`,
+      'text/csv',
+      reconciliationToCsv(report, lang === 'en' ? 'en' : 'fr', entityLabel),
+    );
+  };
+
   return (
     <div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <Button rank="secondary" onClick={exportReport} disabled={rows.length === 0}>{t('opsdiv.export')}</Button>
+      </div>
       <RegisterLayout
         title={t('opsdiv.title')}
         summary={t('opsdiv.summary', {

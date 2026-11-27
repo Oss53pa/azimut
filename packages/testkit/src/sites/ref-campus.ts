@@ -86,7 +86,7 @@ const WEEK = { from: '08:00', to: '20:00' };
 export const refCampus: SiteData = {
   organization: { id: ORG, name: 'Test Organisation', slug: 'test-org' },
   site: {
-    id: SITE, org_id: ORG, name: 'Campus de référence', country_code: 'FR', timezone: 'Europe/Paris',
+    id: SITE, org_id: ORG, name: 'Site universitaire de référence', country_code: 'FR', timezone: 'Europe/Paris',
     origin_x_m: -20, origin_y_m: -200, active_langs: ['fr', 'en'], reference_elevation_m: 160,
   },
   rules_bindings: [{ id: 'rb-cp-base', rules_pack_id: 'rp-test-0001', role: 'base' }],

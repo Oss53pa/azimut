@@ -305,7 +305,7 @@ const FROZEN: Readonly<Record<string, string>> = {
   'ref-retail': 'sha256:5b16cfbb43e6c1d25121b0863be6ab760d15768af53552e4ff8e6905f7431906',
   'ref-health': 'sha256:ae0c39a326b739013e6d4b2e7fb0f4c0da28949b7fa84abec3ffb954a00f3a5a',
   'ref-transit': 'sha256:9c9518aa5df88f97c61127026e7e5cc8c616baf27483a6ca826c2cc827508196',
-  'ref-campus': 'sha256:cf7b5fb8b34f56cff798697639245d64cb7abb216dfd077b604e8f6ba867b933',
+  'ref-campus': 'sha256:d35a2032a9d6c6103e060a435b67695a79abffe9bebf80bf36bdb72033211d2f',
 };
 
 describe('T-0.10 — les empreintes des sites de référence sont figées', () => {

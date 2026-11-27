@@ -25,9 +25,9 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 | Incrément | Tâches | Tenues | Partielles | Absentes | Avancement prouvé | Critère de sortie |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0. Fondations | 16 | 5 | 11 | 0 | ≈ 60 % | chaîne et étanchéité en place |
-| 1. Audit de signalétique | 19 | 10 | 9 | 0 | ≈ 75 % (≈ 65 % atteignable dans le studio) | hors dépôt, non atteint |
+| 1. Audit de signalétique | 19 | 11 | 8 | 0 | ≈ 75 % (≈ 65 % atteignable dans le studio) | hors dépôt, non atteint |
 | 2. Production des supports | 20 | 6 | 12 | 2 | ≈ 50 à 55 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **21** | **32** | **2** | **≈ 62 %** | |
+| **0 à 2** | **55** | **22** | **31** | **2** | **≈ 62 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
 pondérée par le nombre de tâches. Barème simple (tenue 1, partielle 0,5) : 66 %, 74 %,
@@ -77,7 +77,7 @@ vides.
 | T-1.11 Points de décision | partielle | `decision-points` (`toContain`) | listes attendues exactes par site ; un nœud de passage sur une chaîne y est consacré point de décision — à confronter à la règle « une seule issue » |
 | T-1.12 Audits | tenue | `audit.test.ts`, `audit-accessibility-evacuation` | — |
 | T-1.13 Reprise de carnet | partielle | `import-supports` (chaque garde précédée de son affirmation) | non branché dans le studio ; azimut absent, encodages |
-| T-1.14 Rapprochement | partielle | `reconciliation` | export absent |
+| T-1.14 Rapprochement | tenue | `reconciliation` ; export : `reconciliation-export.test.ts` (identifiant sur chaque ligne, reproductible, aucune formule de tableur), `t-1-14-export-rapprochement.spec` (téléchargement depuis l'écran) | — |
 | T-1.15 Écran de conception | partielle | `a11y-axe.spec` (M1 à M5, R) | écrans d'audit non analysés |
 | T-1.16 Présence et verrou (S6) | tenue | `s6-4-verrou-ferme.db`, `s6-7-presence.db`, `s6-10-convergence.db` | contradictions T-1.16, G4.2, S-20 à reporter par l'éditeur |
 

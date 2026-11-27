@@ -32,6 +32,7 @@ export const OPERATIONS_REGISTER_FR = {
   'opsincidents.note': "Un constat bloquant appelle une intervention. L'ordre de travaux, décidé par une personne, n'a pas encore de moteur.",
 
   'opsdiv.title': 'Divergences',
+  'opsdiv.export': 'Exporter le rapport (tableur)',
   'opsdiv.summary': '{count} divergence(s) · {superfluous} support(s) superflu(s) · {uncovered} point(s) non couvert(s)',
   'opsdiv.filter.all': 'Toutes',
   'opsdiv.shown': '{count} divergence(s)',
@@ -81,6 +82,7 @@ export const OPERATIONS_REGISTER_EN: Readonly<Record<keyof typeof OPERATIONS_REG
   'opsincidents.note': 'A blocking observation calls for an intervention. The work order, decided by a person, has no engine yet.',
 
   'opsdiv.title': 'Divergences',
+  'opsdiv.export': 'Export the report (spreadsheet)',
   'opsdiv.summary': '{count} divergence(s) · {superfluous} superfluous support(s) · {uncovered} uncovered point(s)',
   'opsdiv.filter.all': 'All',
   'opsdiv.shown': '{count} divergence(s)',
