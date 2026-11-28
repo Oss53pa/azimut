@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { createConnection, createDb, applyCommands, enrolFixtureMembers } from '@azimut/db';
+import { createConnection, createDb, applyCommands, enrolFixtureMembers, withFixtureRole } from '@azimut/db';
 import { startPostgrest, signToken, installPlatformStubs } from '@azimut/db/harness';
 import type { Harness } from '@azimut/db/harness';
 import type { ColumnValue, EntityCommand, Outcome } from '@azimut/core-model';
@@ -181,10 +181,8 @@ describe.runIf(runnable)('S6.10 — convergence à deux clients', () => {
   beforeAll(async () => {
     client = createConnection(dsn);
     db = createDb(dsn);
-    await client.unsafe('alter table azimut.organization no force row level security');
-    await client`insert into azimut.organization(id,name,slug) values (${ORG},'S6.10','s6-10-convergence')
-                 on conflict (id) do nothing`;
-    await client.unsafe('alter table azimut.organization force row level security');
+    await withFixtureRole(client, tx => tx`insert into azimut.organization(id,name,slug) values (${ORG},'S6.10','s6-10-convergence')
+                 on conflict (id) do nothing`);
     await enrolFixtureMembers(text => client.unsafe(text), [
       { orgId: ORG, userId: POSTE_A, role: 'designer' },
       { orgId: ORG, userId: POSTE_B, role: 'designer' },
@@ -273,9 +271,7 @@ describe.runIf(runnable)('S6.10 — convergence à deux clients', () => {
     expect(await write(b, update(b, 'node', J2, { label: 'B sous verrou' }))).toBe('423');
     const staleA = update(a, 'node', J2, { label: 'A après coupure' });
     // Le poste A est coupé : son verrou n'est plus renouvelé, et tombe.
-    await client.unsafe('alter table azimut.object_lock no force row level security');
-    await client`update azimut.object_lock set acquired_at = now() - interval '2 minutes', expires_at = now() - interval '1 second' where target_id = ${J2}`;
-    await client.unsafe('alter table azimut.object_lock force row level security');
+    await withFixtureRole(client, tx => tx`update azimut.object_lock set acquired_at = now() - interval '2 minutes', expires_at = now() - interval '1 second' where target_id = ${J2}`);
     expect(await write(b, update(b, 'node', J2, { label: 'B après expiration' }))).toBe('écrit');
     expect(await write(a, staleA)).toBe('409');
     await expectConverged();

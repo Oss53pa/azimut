@@ -7,6 +7,7 @@ import type { EntityCommand } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { loadSiteData } from '../load-site-data.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { withFixtureRole } from '../fixture-role.js';
 
 /**
  * N1.7, critère 1 : « Un site modélisé se recharge à l'identique, géométrie et
@@ -91,24 +92,19 @@ beforeAll(async () => {
   client = postgres(URL);
   db = drizzle(client);
 
-  // La suite se rejoue : elle part d'un état connu. L'amorçage de
-  // l'organisation contourne les politiques, comme le ferait un import
-  // d'administration, et les rétablit aussitôt.
+  // La suite se rejoue : elle part d'un état connu. L'organisation et son
+  // premier membre s'amorcent sous le rôle de décor du banc, comme le ferait un
+  // import d'administration, sans que le schéma change de posture.
   //
   // A5.11, version 7 : supprimer le site n'emporte plus ce qu'il porte — la
   // cascade a disparu, et le refus prendrait sa place. Le décor se retire
   // dans l'ordre de dépendance, calculé depuis le schéma.
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
 
-  const seeded = ['membership', 'organization'];
-  for (const table of seeded) {
-    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
-  }
-  await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG},'A','a') on conflict (id) do nothing`);
-  await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG},${USER},'admin') on conflict do nothing`);
-  for (const table of seeded) {
-    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} force row level security`);
-  }
+  await withFixtureRole(client, async tx => {
+    await tx`insert into azimut.organization(id,name,slug) values (${ORG},'A','a') on conflict (id) do nothing`;
+    await tx`insert into azimut.membership(org_id,user_id,role) values (${ORG},${USER},'admin') on conflict do nothing`;
+  });
 });
 
 afterAll(async () => {

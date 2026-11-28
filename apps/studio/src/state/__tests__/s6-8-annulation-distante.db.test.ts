@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { createConnection, createDb, applyCommands, enrolFixtureMembers } from '@azimut/db';
+import { createConnection, createDb, applyCommands, enrolFixtureMembers, withFixtureRole } from '@azimut/db';
 import { startPostgrest, signToken, installPlatformStubs } from '@azimut/db/harness';
 import type { Harness } from '@azimut/db/harness';
 import type { EntityCommand, Outcome } from '@azimut/core-model';
@@ -129,10 +129,8 @@ describe.runIf(runnable)('S6.8 — annuler pendant que d’autres postes écrive
   beforeAll(async () => {
     client = createConnection(dsn);
     db = createDb(dsn);
-    await client.unsafe('alter table azimut.organization no force row level security');
-    await client`insert into azimut.organization(id,name,slug) values (${ORG},'S6.8','s6-8-annulation')
-                 on conflict (id) do nothing`;
-    await client.unsafe('alter table azimut.organization force row level security');
+    await withFixtureRole(client, tx => tx`insert into azimut.organization(id,name,slug) values (${ORG},'S6.8','s6-8-annulation')
+                 on conflict (id) do nothing`);
     await enrolFixtureMembers(text => client.unsafe(text), [
       { orgId: ORG, userId: POSTE_A, role: 'designer' },
       { orgId: ORG, userId: POSTE_B, role: 'designer' },

@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
 import { buildCommand, serializeCommand } from '@azimut/core-model';
 import { enrolFixtureMembers } from '../fixture-membership.js';
+import { inFixtureRole } from '../fixture-role.js';
 
 /**
  * S6.7b, migration 0081 — la présence sur un niveau.
@@ -55,10 +56,8 @@ async function inRolledBack(check: (tx: postgres.TransactionSql) => Promise<void
       { orgId: OTHER_ORG, userId: STRANGER, role: 'admin' },
     ]);
     // Q12 — le nom affiché se saisit par le chemin d'administration ; ici, par
-    // la connexion propriétaire, la table hors contrainte le temps de l'écrire.
-    await tx.unsafe('alter table azimut.membership no force row level security');
-    await tx`update azimut.membership set display_name = 'Camille' where user_id = ${COLLEAGUE}`;
-    await tx.unsafe('alter table azimut.membership force row level security');
+    // le rôle de décor du banc, le temps de l'écrire.
+    await inFixtureRole(tx, () => tx`update azimut.membership set display_name = 'Camille' where user_id = ${COLLEAGUE}`);
     for (const [org, site, building, level] of [
       [ORG, SITE, BUILDING, LEVEL], [OTHER_ORG, OTHER_SITE, OTHER_BUILDING, OTHER_LEVEL],
     ] as const) {

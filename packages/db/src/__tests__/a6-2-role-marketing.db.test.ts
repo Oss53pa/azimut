@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
 import { enrolFixtureMembers } from '../fixture-membership.js';
+import { FIXTURE_ROLE } from '../fixture-role.js';
 
 /**
  * A5.1 et A6.2 — le rôle `marketing` sur une base réelle (0079).
@@ -81,7 +82,7 @@ describe('0079 — le rôle marketing', () => {
       let message = 'accepté';
       try {
         await tx.savepoint(async sp => {
-          await sp`alter table azimut.membership no force row level security`;
+          await sp.unsafe(`set local role ${FIXTURE_ROLE}`);
           await sp`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${KEEPER},'stagiaire')`;
         });
       } catch (e: unknown) {

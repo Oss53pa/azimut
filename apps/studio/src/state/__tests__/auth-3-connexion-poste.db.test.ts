@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
-import { createConnection, deleteOrgFixture, enrolFixtureMembers } from '@azimut/db';
+import { createConnection, deleteOrgFixture, enrolFixtureMembers, asFixture } from '@azimut/db';
 import { startAuthService, startPostgrest, totpNow } from '@azimut/db/harness';
 import type { AuthService, Harness } from '@azimut/db/harness';
 import type { GoTrueClient } from '@supabase/auth-js';
@@ -61,20 +61,14 @@ describe.runIf(runnable)('AUTH.3 — la connexion du poste', () => {
     await gotrue.signOut();
 
     await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, OTHER_ORG]);
-    for (const table of ['organization', 'site']) {
-      await client.unsafe(`alter table azimut.${table} no force row level security`);
-    }
-    await client.unsafe(`
+    await client.unsafe(asFixture(`
       insert into azimut.organization(id,name,slug)
         values ('${ORG}','Poste','auth3-${Date.now().toString(36)}'),
                ('${OTHER_ORG}','Autre','auth3b-${Date.now().toString(36)}');
       insert into azimut.site(id,org_id,name,country_code,timezone)
         values ('${SITE}','${ORG}','Site','FR','Europe/Paris'),
-               ('${OTHER_SITE}','${OTHER_ORG}','Autre site','FR','Europe/Paris');
-    `);
-    for (const table of ['organization', 'site']) {
-      await client.unsafe(`alter table azimut.${table} force row level security`);
-    }
+               ('${OTHER_SITE}','${OTHER_ORG}','Autre site','FR','Europe/Paris')
+    `));
     adminEmail = `admin-${Date.now().toString(36)}@example.invalid`;
     const adminSignup = await gotrue.signUp({ email: adminEmail, password: PASSWORD });
     expect(adminSignup.error).toBeNull();

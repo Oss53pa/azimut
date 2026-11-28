@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, applyCommands, deleteOrgFixture } from '@azimut/db';
+import { createConnection, createDb, applyCommands, deleteOrgFixture, withFixtureRole } from '@azimut/db';
 import { buildCommand } from '@azimut/core-model';
 import type { EntityCommand } from '@azimut/core-model';
 import type { MessageLine, MessageSchedule } from '@azimut/engine-graph';
@@ -94,20 +94,16 @@ beforeAll(async () => {
   await deleteOrgFixture(
     text => client.unsafe(text), text => client.unsafe(text), [ORG, ORG_B]);
 
-  // L'organisation et l'adhésion s'amorcent hors politique, comme le ferait un
-  // import d'administration : sans adhésion, personne n'a d'identité à poser.
-  // Le cloisonnement est rétabli aussitôt, et tout le reste de la suite passe
-  // par lui.
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} no force row level security`;
-  }
-  await client`insert into azimut.organization(id,name,slug)
-    values (${ORG},'A','a'),(${ORG_B},'B','b') on conflict (id) do nothing`;
-  await client`insert into azimut.membership(org_id,user_id,role)
-    values (${ORG},${ALICE},'admin'),(${ORG_B},${BOB},'admin') on conflict do nothing`;
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} force row level security`;
-  }
+  // L'organisation et l'adhésion s'amorcent sous le rôle de décor du banc,
+  // comme le ferait un import d'administration : sans adhésion, personne n'a
+  // d'identité à poser. Le schéma ne change pas de posture, et tout le reste
+  // de la suite passe par le cloisonnement.
+  await withFixtureRole(client, async tx => {
+    await tx`insert into azimut.organization(id,name,slug)
+      values (${ORG},'A','a'),(${ORG_B},'B','b') on conflict (id) do nothing`;
+    await tx`insert into azimut.membership(org_id,user_id,role)
+      values (${ORG},${ALICE},'admin'),(${ORG_B},${BOB},'admin') on conflict do nothing`;
+  });
 
   alice = await reserveAs(ALICE);
   bob = await reserveAs(BOB);

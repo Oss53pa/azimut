@@ -17,6 +17,8 @@
  * elle s'arrête devant les tables en insertion seule au lieu d'y toucher.
  */
 
+import { asFixture } from './fixture-role.js';
+
 /** Exécute une requête déjà formée. Un pilote quelconque s'y adapte. */
 export type SqlRunner = (text: string) => Promise<unknown>;
 
@@ -63,50 +65,45 @@ export async function deleteOrgFixture(
   const toClear = order.filter(table => !isInsertOnly(table));
 
   // `organization` ne porte pas `org_id` : elle est la racine, et se retire en
-  // dernier, une fois que plus rien ne la référence. Les tables en insertion
-  // seule entrent dans la bascule sans entrer dans les suppressions : leur
-  // décompte doit se lire hors cloisonnement, sans quoi il rendrait zéro et le
-  // retrait échouerait plus loin, sur une clé, au lieu de se signaler ici.
+  // dernier, une fois que plus rien ne la référence. Le contrôle des tables en
+  // insertion seule et les suppressions forment une seule chaîne, sous le rôle
+  // de décor du banc (`fixture-role.ts`) : hors cloisonnement sans que le
+  // schéma change de posture, et d'un bloc — un contrôle qui échoue n'a rien
+  // retiré.
   const visited = [...toClear, ROOT];
-  const forced = await forcedTables(read, [...order, ROOT]);
-  for (const table of forced) {
-    await run(`alter table azimut.${table} no force row level security`);
-  }
-  try {
-    await assertInsertOnlyEmpty(read, order, ids);
-    for (const table of toClear) {
-      await run(`delete from azimut.${table} where org_id in (${ids})`);
-    }
-    await run(`delete from azimut.${ROOT} where id in (${ids})`);
-  } finally {
-    for (const table of forced) {
-      await run(`alter table azimut.${table} force row level security`);
-    }
-  }
+  await run(asFixture([
+    insertOnlyGuard(order, ids),
+    ...toClear.map(table => `delete from azimut.${identifier(table)} where org_id in (${ids})`),
+    `delete from azimut.${ROOT} where id in (${ids})`,
+  ].join(';\n')));
   return visited;
+}
+
+const IDENTIFIER = /^[a-z_][a-z0-9_]*$/;
+
+/** Un nom de table lu au catalogue, vérifié avant d'entrer dans une chaîne. */
+function identifier(table: string): string {
+  if (!IDENTIFIER.test(table)) throw new Error(`nom de table inattendu : ${table}`);
+  return table;
 }
 
 function isInsertOnly(table: string): boolean {
   return (INSERT_ONLY as readonly string[]).includes(table);
 }
 
-async function assertInsertOnlyEmpty(
-  read: SqlReader, order: readonly string[], ids: string,
-): Promise<void> {
-  for (const table of order) {
-    if (!isInsertOnly(table)) continue;
-    const rows = await read(
-      `select count(*)::int as n from azimut.${table} where org_id in (${ids})`,
-    );
-    const n = rows[0]?.['n'];
-    if (typeof n === 'number' && n > 0) {
-      throw new Error(
-        `azimut.${table} porte ${n} ligne(s) de ce décor. A12.3 en interdit la `
-        + `suppression : seule la purge d'O15 les retire. Le décor doit employer `
-        + `une organisation qui lui est propre.`,
-      );
-    }
-  }
+/**
+ * A12.3 — un bloc qui refuse le retrait si une table en insertion seule porte
+ * encore des lignes du décor. Il s'exécute sous le rôle de décor, sans quoi le
+ * décompte rendrait zéro et le retrait échouerait plus loin, sur une clé, au
+ * lieu de se signaler ici.
+ */
+function insertOnlyGuard(order: readonly string[], ids: string): string {
+  const checks = order.filter(isInsertOnly).map(table => `
+    select count(*) into n from azimut.${identifier(table)} where org_id in (${ids});
+    if n > 0 then
+      raise exception 'azimut.${table} porte % ligne(s) de ce décor. A12.3 en interdit la suppression : seule la purge d''O15 les retire. Le décor doit employer une organisation qui lui est propre.', n;
+    end if;`).join('');
+  return `do $guard$ declare n int; begin ${checks} end $guard$`;
 }
 
 async function orgScopedTables(read: SqlReader): Promise<readonly string[]> {
@@ -173,17 +170,4 @@ export function dependencyOrder(
   }
   const seen = new Set(order);
   return [...order, ...tables.filter(t => !seen.has(t)).sort()];
-}
-
-async function forcedTables(
-  read: SqlReader, tables: readonly string[],
-): Promise<readonly string[]> {
-  if (tables.length === 0) return [];
-  const names = tables.map(t => `'${t}'`).join(',');
-  const rows = await read(`
-    select c.relname from pg_class c
-    join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'azimut' and c.relforcerowsecurity and c.relname in (${names})
-    order by c.relname`);
-  return rows.map(row => String(row['relname']));
 }

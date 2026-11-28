@@ -7,6 +7,7 @@ import {
 } from '../postgrest-harness.js';
 import type { Harness } from '../postgrest-harness.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { asFixture, withFixtureRole } from '../fixture-role.js';
 
 /** La première valeur d'un décompte, ou l'échec plutôt qu'un zéro supposé. */
 function only<T>(rows: readonly T[]): T {
@@ -104,18 +105,14 @@ async function asUser(
  * tout le monde, et la connexion de l'essai ne porte aucune identité : elle ne
  * voit donc rien, pas même ce qu'elle vient d'écrire. C'est exactement ce
  * qu'on veut du cloisonnement, et c'est ce qui rend un constat direct
- * impossible sans lever la contrainte le temps de le prendre.
+ * impossible sous ce rôle.
  *
- * La lever ici ne relâche rien : la requête sous PostgREST a déjà eu lieu, et
- * c'est elle qu'on juge. Ce qui suit ne fait que regarder le résultat.
+ * Le constat se prend donc sous le rôle de décor du banc (`fixture-role.ts`),
+ * sans que le schéma change de posture : la requête sous PostgREST a déjà eu
+ * lieu, et c'est elle qu'on juge. Ce qui suit ne fait que regarder le résultat.
  */
 async function observed<T>(query: string): Promise<readonly T[]> {
-  await client.unsafe('alter table azimut.site no force row level security');
-  try {
-    return await client.unsafe<T[]>(query);
-  } finally {
-    await client.unsafe('alter table azimut.site force row level security');
-  }
+  return withFixtureRole(client, tx => tx.unsafe<T[]>(query));
 }
 
 describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’application', () => {
@@ -127,11 +124,7 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
       text => client.unsafe(text), text => client.unsafe(text), [ORG_A, ORG_B],
     );
 
-    const seeded = ['membership', 'organization', 'site'];
-    for (const table of seeded) {
-      await client.unsafe(`alter table azimut.${table} no force row level security`);
-    }
-    await client.unsafe(`
+    await client.unsafe(asFixture(`
       insert into azimut.organization(id,name,slug)
         values ('${ORG_A}','A','a-${Date.now().toString(36)}'),
                ('${ORG_B}','B','b-${Date.now().toString(36)}');
@@ -139,11 +132,8 @@ describe.runIf(runnable)('A10.4 — étanchéité par le chemin de l’applicati
         values ('${ORG_A}','${ALICE}','admin'),('${ORG_B}','${BOB}','admin');
       insert into azimut.site(id,org_id,name,country_code,timezone,active_langs)
         values ('${SITE_A}','${ORG_A}','Site A','CI','Africa/Abidjan','{fr}'),
-               ('${SITE_B}','${ORG_B}','Site B','CI','Africa/Abidjan','{fr}');
-    `);
-    for (const table of seeded) {
-      await client.unsafe(`alter table azimut.${table} force row level security`);
-    }
+               ('${SITE_B}','${ORG_B}','Site B','CI','Africa/Abidjan','{fr}')
+    `));
 
     harness = await startPostgrest({
       binary,

@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import postgres from 'postgres';
+import { FIXTURE_ROLE } from '../fixture-role.js';
 
 /**
  * Migration 0084, lot Q16 — la base valide la forme des colonnes `jsonb`
@@ -127,7 +128,7 @@ describe('0084 — les contraintes sont posées sur leurs tables', () => {
     const done = new Error('annulation voulue');
     let code = 'accepté';
     await sql.begin(async tx => {
-      await tx.unsafe('alter table azimut.footprint no force row level security');
+      await tx.unsafe(`set local role ${FIXTURE_ROLE}`);
       try {
         await tx.savepoint(async sp => {
           await sp`insert into azimut.footprint(org_id, level_id, unit_code, kind, geometry)

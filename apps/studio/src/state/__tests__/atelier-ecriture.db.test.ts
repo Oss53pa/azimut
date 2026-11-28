@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, applyCommands, deleteOrgFixture } from '@azimut/db';
+import { createConnection, createDb, applyCommands, deleteOrgFixture, withFixtureRole } from '@azimut/db';
 import type { EntityCommand, Outcome, Point } from '@azimut/core-model';
 import { calibrationCommands } from '../plan-calibration-commands.js';
 import type { CalibrationWrite, OriginProposal } from '../plan-calibration-commands.js';
@@ -85,16 +85,12 @@ beforeAll(async () => {
 
   await cleanup();
 
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} no force row level security`;
-  }
-  await client`insert into azimut.organization(id,name,slug)
-    values (${ORG},'Atelier','atelier-ecriture')`;
-  await client`insert into azimut.membership(org_id,user_id,role)
-    values (${ORG},${ALICE},'admin')`;
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} force row level security`;
-  }
+  await withFixtureRole(client, async tx => {
+    await tx`insert into azimut.organization(id,name,slug)
+      values (${ORG},'Atelier','atelier-ecriture')`;
+    await tx`insert into azimut.membership(org_id,user_id,role)
+      values (${ORG},${ALICE},'admin')`;
+  });
 
   alice = await reserveAs(ALICE);
 
@@ -305,14 +301,12 @@ const SITE_V = 'c3000000-0000-0000-0000-000000000101';
 
 describe('M5 (partie M) — le passage de validation s’enregistre', () => {
   it('écrit un passage, avec l’empreinte du graphe validé', async () => {
-    await client`alter table azimut.membership no force row level security`;
-    await client`alter table azimut.organization no force row level security`;
-    await client`insert into azimut.organization(id,name,slug)
-      values (${ORG_V},'Validation','atelier-validation') on conflict (id) do nothing`;
-    await client`insert into azimut.membership(org_id,user_id,role)
-      values (${ORG_V},${ALICE},'admin') on conflict do nothing`;
-    await client`alter table azimut.organization force row level security`;
-    await client`alter table azimut.membership force row level security`;
+    await withFixtureRole(client, async tx => {
+      await tx`insert into azimut.organization(id,name,slug)
+        values (${ORG_V},'Validation','atelier-validation') on conflict (id) do nothing`;
+      await tx`insert into azimut.membership(org_id,user_id,role)
+        values (${ORG_V},${ALICE},'admin') on conflict do nothing`;
+    });
 
     const held = await reserveAs(ALICE);
     try {

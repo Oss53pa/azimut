@@ -207,6 +207,28 @@ raison qui n'a rien de métier.
 `pnpm test:rls` lance la même suite : c'est elle que ce script annonçait sans
 l'avoir.
 
+## Rôle de décor du banc
+
+Question 6 de la matrice, décision d'Oss53pa du 28 novembre 2026. Un essai sur
+base pose son décor (organisation, premier membre, lignes de départ) et le
+retire hors du cloisonnement : aucun membre n'existe encore pour l'écrire. Il
+ne le fait plus en levant `FORCE ROW LEVEL SECURITY`, ce qui changeait la
+posture du schéma pour toutes les suites en cours. Il bascule, le temps d'une
+instruction et par `SET LOCAL`, vers le rôle `azimut_fixture`.
+
+Ce rôle passe outre le cloisonnement (`BYPASSRLS`), ne porte que des droits de
+données, et n'a ni modification, ni suppression, ni vidage sur les tables en
+insertion seule (A12.3). Aucune migration ne le crée : le montage du banc le
+pose, après les migrations, sur chaque base d'essai.
+
+```
+scripts/role-decor.sh postgres://postgres@127.0.0.1:5433 azimut
+```
+
+Un banc qui ne l'a pas monté échoue à la première bascule. Hors migrations,
+`tests/no-rls-posture-change.test.ts` refuse toute instruction qui lève
+`FORCE`, désactive le cloisonnement ou touche une politique.
+
 ## Étanchéité par PostgREST
 
 A10.4 nº 2 veut l'étanchéité « y compris par canal indirect », et A6.1 nomme

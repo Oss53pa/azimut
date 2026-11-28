@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
-import { createConnection, createDb, applyCommands, enrolFixtureMembers } from '@azimut/db';
+import { createConnection, createDb, applyCommands, enrolFixtureMembers, withFixtureRole } from '@azimut/db';
 import { startPostgrest, signToken, installPlatformStubs } from '@azimut/db/harness';
 import type { Harness } from '@azimut/db/harness';
 import { inverseCommand } from '@azimut/core-model';
@@ -99,10 +99,8 @@ describe.runIf(runnable)('S6.1b — l’habillage écrit et relu par le journal'
   beforeAll(async () => {
     client = createConnection(dsn);
     db = createDb(dsn);
-    await client.unsafe('alter table azimut.organization no force row level security');
-    await client`insert into azimut.organization(id,name,slug) values (${ORG},'S6.1b','s6-1b-habillage')
-                 on conflict (id) do nothing`;
-    await client.unsafe('alter table azimut.organization force row level security');
+    await withFixtureRole(client, tx => tx`insert into azimut.organization(id,name,slug) values (${ORG},'S6.1b','s6-1b-habillage')
+                 on conflict (id) do nothing`);
     await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: ORG, userId: DESIGNER, role: 'designer' }]);
     const decor = [
       { table: 'site', id: SITE, after: { id: SITE, org_id: ORG, name: 'Site habillé', country_code: 'FR', timezone: 'Europe/Paris' } },

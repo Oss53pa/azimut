@@ -7,6 +7,7 @@ import {
 } from '@azimut/core-model';
 import { applyCommands } from '../write-path.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { withFixtureRole } from '../fixture-role.js';
 
 /**
  * A6.1, second test obligatoire — « un utilisateur de l'organisation A ne peut
@@ -48,15 +49,10 @@ beforeAll(async () => {
   await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text),
     [ORG_A, ORG_B]);
 
-  const seeded = ['membership', 'organization'];
-  for (const table of seeded) {
-    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} no force row level security`);
-  }
-  await db.execute(sql`insert into azimut.organization(id,name,slug) values (${ORG_A},'A','a'),(${ORG_B},'B','b')`);
-  await db.execute(sql`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${ALICE},'admin'),(${ORG_B},${BOB},'admin')`);
-  for (const table of seeded) {
-    await db.execute(sql`alter table ${sql.identifier('azimut')}.${sql.identifier(table)} force row level security`);
-  }
+  await withFixtureRole(client, async tx => {
+    await tx`insert into azimut.organization(id,name,slug) values (${ORG_A},'A','a'),(${ORG_B},'B','b')`;
+    await tx`insert into azimut.membership(org_id,user_id,role) values (${ORG_A},${ALICE},'admin'),(${ORG_B},${BOB},'admin')`;
+  });
 
 });
 afterAll(async () => { await client.end(); });

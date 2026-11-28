@@ -7,6 +7,7 @@ import type { Harness } from '../postgrest-harness.js';
 import { startAuthService } from '../auth-harness.js';
 import type { AuthService } from '../auth-harness.js';
 import { deleteOrgFixture } from '../fixture-cleanup.js';
+import { asFixture } from '../fixture-role.js';
 import { totpNow } from '../totp.js';
 import { enrolFixtureMembers, withdrawFixtureMembers } from '../fixture-membership.js';
 
@@ -99,20 +100,14 @@ describe.runIf(runnable)('AUTH.2 — connexion réelle', () => {
     session = await (await signIn(PASSWORD)).json() as Session;
 
     await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG, OTHER_ORG]);
-    for (const table of ['organization', 'site']) {
-      await client.unsafe(`alter table azimut.${table} no force row level security`);
-    }
-    await client.unsafe(`
+    await client.unsafe(asFixture(`
       insert into azimut.organization(id,name,slug)
         values ('${ORG}','Connectée','auth2-${Date.now().toString(36)}'),
                ('${OTHER_ORG}','Autre','auth2b-${Date.now().toString(36)}');
       insert into azimut.site(id,org_id,name,country_code,timezone)
         values ('${SITE}','${ORG}','Site','FR','Europe/Paris'),
-               ('${OTHER_SITE}','${OTHER_ORG}','Autre site','FR','Europe/Paris');
-    `);
-    for (const table of ['organization', 'site']) {
-      await client.unsafe(`alter table azimut.${table} force row level security`);
-    }
+               ('${OTHER_SITE}','${OTHER_ORG}','Autre site','FR','Europe/Paris')
+    `));
     await enrolFixtureMembers(text => client.unsafe(text), [
       { orgId: ORG, userId: session.user.id, role: 'designer' },
     ]);

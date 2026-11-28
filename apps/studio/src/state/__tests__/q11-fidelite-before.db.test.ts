@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { existsSync } from 'node:fs';
 import {
-  createConnection, createDb, applyCommands, deleteOrgFixture, enrolFixtureMembers,
+  createConnection, createDb, applyCommands, deleteOrgFixture, enrolFixtureMembers, withFixtureRole,
 } from '@azimut/db';
 import { startPostgrest, signToken, installPlatformStubs } from '@azimut/db/harness';
 import type { Harness } from '@azimut/db/harness';
@@ -153,9 +153,7 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
     client = createConnection(dsn);
     db = createDb(dsn);
     await deleteOrgFixture(text => client.unsafe(text), text => client.unsafe(text), [ORG]);
-    await client.unsafe('alter table azimut.organization no force row level security');
-    await client`insert into azimut.organization(id,name,slug) values (${ORG},'Q11','q11-fidelite')`;
-    await client.unsafe('alter table azimut.organization force row level security');
+    await withFixtureRole(client, tx => tx`insert into azimut.organization(id,name,slug) values (${ORG},'Q11','q11-fidelite')`);
     await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: ORG, userId: USER, role: 'designer' }]);
 
     // Le décor s'écrit par le chemin d'écriture et par les constructeurs de
@@ -193,16 +191,12 @@ describe.runIf(runnable)('Q11 — fidélité de before, famille par famille', ()
 
     // La zone et le tableau des messages n'ont pas de constructeur dans
     // l'atelier : ils entrent par la base, comme l'exploitation les poserait.
-    for (const table of ['zone', 'message_schedule']) {
-      await client.unsafe(`alter table azimut.${table} no force row level security`);
-    }
-    await client`insert into azimut.zone(id, org_id, level_id, name, kind)
-                 values (${ZONE}, ${ORG}, ${LEVEL}, 'Galerie', 'commercial')`;
-    await client`insert into azimut.message_schedule(id, org_id, site_id, version, state, generated_at, inputs_hash)
-                 values (${SCHEDULE}, ${ORG}, ${SITE}, 1, 'draft', ${T}, 'sha256:entrees')`;
-    for (const table of ['zone', 'message_schedule']) {
-      await client.unsafe(`alter table azimut.${table} force row level security`);
-    }
+    await withFixtureRole(client, async tx => {
+      await tx`insert into azimut.zone(id, org_id, level_id, name, kind)
+                   values (${ZONE}, ${ORG}, ${LEVEL}, 'Galerie', 'commercial')`;
+      await tx`insert into azimut.message_schedule(id, org_id, site_id, version, state, generated_at, inputs_hash)
+                   values (${SCHEDULE}, ${ORG}, ${SITE}, 1, 'draft', ${T}, 'sha256:entrees')`;
+    });
     const annotated = annotateCommands(
       [{ id: ANNOTATION, anchor: { kind: 'zone', id: ZONE } }],
       { body: 'Vérifier la hauteur.', ink: null },

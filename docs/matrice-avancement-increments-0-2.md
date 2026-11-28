@@ -46,7 +46,7 @@ T-2.7, T-2.10 et T-2.13 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 
 | T-0.3 Base et migrations | partielle | migrations appliquées sur base vide en CI ; `scripts/migrations-aller-retour.sh`, étape de la CI : tout à l'aller, tout au retour, de nouveau à l'aller, schéma identique (3 408 éléments) — il a trouvé et fait corriger deux retours cassés (0006, 0025) | `db:reset` n'est éprouvé que dans ses refus |
 | T-0.4 Schéma A5.1, A5.2 | partielle | `a5-jsonb-validation.db`, `a5-positions-point.db`, `a6-2-role-marketing.db`, `a5-contraintes-insertion.db` (volume, code d'unité, nature d'empreinte, langues, origine, calage, sens et boucle d'arête, liaison verticale) | `edge.width_m > 0` et une borne sur `ordinal` n'existent pas en base, et A5 ne les pose pas |
 | T-0.5 Authentification et rôles | partielle | `auth-2-connexion-reelle.db`, `a6-2-roles-en-base.db` | journalisation des changements de rôle (QA5) ; utilisateur authentifié sans rattachement non éprouvé |
-| T-0.6 Cloisonnement | partielle | `test:rls` en CI, `a10-4-etancheite-postgrest.db` | pas de cas négatif de couverture ; temps de réponse ; sondes par clé étrangère |
+| T-0.6 Cloisonnement | partielle | `test:rls` en CI, `a10-4-etancheite-postgrest.db` ; aucun essai ne change la posture du schéma (`no-rls-posture-change`) | pas de cas négatif de couverture ; temps de réponse ; sondes par clé étrangère |
 | T-0.7 Jetons de thème | tenue | `no-hardcoded-colors`, `contrast.test.ts` | l'analyse ne voit ni `hsl()`, ni hex à 8 chiffres, ni couleurs nommées |
 | T-0.8 Paquets de règles | tenue | `loader-guard`, `resolve-rule` | deux codes pour un même défaut selon la voie de chargement |
 | T-0.9 Génération PDF | partielle | déterminisme : `export-pdf.test.ts` | conformité PDF/X par outil tiers absente ; décision à confirmer par Oss53pa |
@@ -123,10 +123,10 @@ dépôt, et non atteignable en l'état (braille, PDF validé, composition, actif
    catalogue — T-2.6.
 4. Bibliothèque de symboles d'habillage, sans table en E9.3 — T-2.18.
 5. Règle du degré 2 des points de décision — T-1.11.
-6. Plusieurs essais sur base lèvent un instant `FORCE ROW LEVEL SECURITY` pour poser
-   leur décor (`organization`, et `object_lock` dans `s6-10-convergence`). CLAUDE.md
-   interdit de contourner le cloisonnement, y compris en essai. À trancher : pratique
-   admise pour amorcer un décor, ou décor à poser autrement.
+6. ~~Essais qui lèvent `FORCE ROW LEVEL SECURITY` pour poser leur décor.~~ Tranchée
+   le 28 novembre 2026 : rôle de décor du banc, `azimut_fixture`, créé hors migrations
+   par `scripts/role-decor.sh` ; les 23 fichiers concernés basculent vers lui par
+   `SET LOCAL ROLE` ; `tests/no-rls-posture-change.test.ts` interdit tout retour.
 7. « Service ouvert en continu » (C1, `ref-health`) : une plage horaire ne
    s'écrit que de 00:00 à 23:59, sans 24:00 ni franchissement de minuit, et un
    bâtiment sans horaires déclarés n'est pas un bâtiment ouvert sans

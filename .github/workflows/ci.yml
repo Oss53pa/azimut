@@ -125,6 +125,8 @@ jobs:
           done
           # Après les migrations : le schéma n'existait pas avant elles.
           psql "$base" -v ON_ERROR_STOP=1 -q -c 'GRANT USAGE ON SCHEMA azimut TO anon'
+          # Question 6 : le rôle de décor du banc, hors migrations.
+          scripts/role-decor.sh postgres://postgres@127.0.0.1:54332 azimut
           echo "Base montée : $(ls packages/db/migrations/0*.up.sql | wc -l) migrations appliquées."
 
       # T-0.3 — « une migration est réversible à l'aller et au retour ». Sur une
@@ -193,7 +195,9 @@ jobs:
       # Une base distincte : le schéma `auth` du service ne cohabite pas avec
       # celui, réduit, de `bootstrap-standalone.sql`.
       - name: Monter la base avec le service d'authentification
-        run: scripts/monter-base-authentification.sh "$RUNNER_TEMP/auth/auth" 127.0.0.1:54332
+        run: |
+          scripts/monter-base-authentification.sh "$RUNNER_TEMP/auth/auth" 127.0.0.1:54332
+          scripts/role-decor.sh postgres://postgres@127.0.0.1:54332 azimut_auth
 
       - name: RLS tests
         env:

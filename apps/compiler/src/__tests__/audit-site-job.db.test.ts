@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import {
-  createConnection, createDb, enrolFixtureMembers, loadSiteSnapshotAs, recordServicePassage,
+  createConnection, createDb, enrolFixtureMembers, loadSiteSnapshotAs, recordServicePassage, withFixtureRole,
 } from '@azimut/db';
 import { createAuditSiteJobHandler } from '../audit-site-job.js';
 import type { Job } from '../job.js';
@@ -71,10 +71,8 @@ describe.runIf(URL !== '')('B3 — le travail audit_site inscrit le passage du s
   beforeAll(async () => {
     client = createConnection(URL);
     db = createDb(URL);
-    await client.unsafe('alter table azimut.organization no force row level security');
-    await client`insert into azimut.organization(id,name,slug) values (${ORG},'B3','b3-audit-site')
-                 on conflict (id) do nothing`;
-    await client.unsafe('alter table azimut.organization force row level security');
+    await withFixtureRole(client, tx => tx`insert into azimut.organization(id,name,slug) values (${ORG},'B3','b3-audit-site')
+                 on conflict (id) do nothing`);
     await enrolFixtureMembers(text => client.unsafe(text), [{ orgId: ORG, userId: DESIGNER, role: 'designer' }]);
     await client.begin(async tx => {
       await tx`select set_config('azimut.current_user_id', ${DESIGNER}, true)`;

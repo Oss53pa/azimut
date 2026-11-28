@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { createConnection, createDb, applyCommands, deleteOrgFixture } from '@azimut/db';
+import { createConnection, createDb, applyCommands, deleteOrgFixture, withFixtureRole } from '@azimut/db';
 import { createSiteCommands } from '../site-creation.js';
 import { commandPayload } from '../postgrest-sink.js';
 import type { CreationContext, SiteDraft } from '../site-creation.js';
@@ -92,18 +92,15 @@ beforeAll(async () => {
     (id, key, version, jurisdiction, effective_from, source_ref, checksum)
     values (${PACK}, 'essai-m1', '0.0.0', 'XX', '2026-01-01', 'essai', 'essai')`;
 
-  // L'organisation et l'adhésion s'amorcent hors politique, comme le ferait un
-  // import d'administration : sans adhésion, personne n'a d'identité à poser.
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} no force row level security`;
-  }
-  await client`insert into azimut.organization(id,name,slug)
-    values (${ORG},'Création','creation-m1')`;
-  await client`insert into azimut.membership(org_id,user_id,role)
-    values (${ORG},${ALICE},'admin')`;
-  for (const table of ['membership', 'organization']) {
-    await client`alter table azimut.${client(table)} force row level security`;
-  }
+  // L'organisation et l'adhésion s'amorcent sous le rôle de décor du banc,
+  // comme le ferait un import d'administration : sans adhésion, personne n'a
+  // d'identité à poser.
+  await withFixtureRole(client, async tx => {
+    await tx`insert into azimut.organization(id,name,slug)
+      values (${ORG},'Création','creation-m1')`;
+    await tx`insert into azimut.membership(org_id,user_id,role)
+      values (${ORG},${ALICE},'admin')`;
+  });
 
   alice = await reserveAs(ALICE);
 });
