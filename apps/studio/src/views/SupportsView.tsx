@@ -1,3 +1,4 @@
+import { CarnetImportPanel } from './supports/CarnetImportPanel.js';
 import { type JSX, useMemo, useState } from 'react';
 import { useSiteData } from '../context/useSiteData.js';
 import { useI18n } from '../i18n/useI18n.js';
@@ -131,6 +132,11 @@ export function SupportsView({ onNavigate }: SupportsViewProps): JSX.Element {
 
       <UntypedSupportsBanner assumedTypeKey={site.support_types[0]?.key ?? ''} />
       <MetricRow metrics={metrics} />
+
+      {/* T-1.13 — la reprise d'un carnet existant. */}
+      <div style={{ marginTop: SPACE.lg }}>
+        <CarnetImportPanel />
+      </div>
 
       <div style={{ marginTop: SPACE.lg }}>
         <Panel title={t('supports.panel.types')} note={t('supports.panel.types.note')} padded={false}>

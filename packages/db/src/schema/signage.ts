@@ -28,7 +28,9 @@ export const support = azimut.table('support', {
   node_id: uuid('node_id').notNull().references(() => node.id, { onDelete: 'cascade' }),
   // A5.6 : typologie de l'instance. Additif, nullable — cf. migration 0015.
   typology_id: uuid('typology_id').references(() => supportTypology.id, { onDelete: 'set null' }),
-  kind: text('kind').notNull(),
+  // Colonne de 0006 que A5.6 ne nomme pas ; facultative depuis 0087 (QI6),
+  // rien ne l'écrit plus.
+  kind: text('kind'),
   azimuth_deg: numeric('azimuth_deg').notNull().default('0'),
   height_m: numeric('height_m'),
   width_m: numeric('width_m'),

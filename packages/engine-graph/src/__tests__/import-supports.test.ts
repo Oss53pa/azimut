@@ -30,7 +30,7 @@ describe('D4.1 importSupports', () => {
       expect(s?.substrate).toBeNull();
       expect(s?.condition).toBeNull();
       expect(s?.content_fr).toBeNull();
-      expect(s?.dimensions_source).toBe('default');
+      expect(s?.dimensions_source).toBe('computed');
     });
   });
 

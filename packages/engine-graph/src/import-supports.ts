@@ -29,7 +29,8 @@ const CONDITION_VALUES: readonly SupportCondition[] = [
   'good', 'worn', 'damaged', 'missing',
 ];
 
-export type DimensionsSource = 'default' | 'overridden';
+/** A5.6 — `computed` par défaut ; une saisie de cotes bascule en `overridden`. */
+export type DimensionsSource = 'computed' | 'overridden';
 
 export type ImportedSupport = {
   readonly reference: string;
@@ -181,7 +182,7 @@ function buildSupport(
 
   // D4.1 — declaring width_mm/height_mm overrides the typology default.
   const dimensionsSource: DimensionsSource =
-    width.value !== null || height.value !== null ? 'overridden' : 'default';
+    width.value !== null || height.value !== null ? 'overridden' : 'computed';
 
   return {
     reference,

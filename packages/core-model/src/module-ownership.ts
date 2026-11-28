@@ -167,6 +167,9 @@ export const SUPPORT_COLUMN_OWNER: Readonly<Record<string, ModuleKey>> = {
   azimuth_deg: '02-wayfinding',
   typology_id: '02-wayfinding',
   reading_distance_m: '02-wayfinding',
+  // QI7, décision d'Oss53pa du 27 novembre 2026 : le registre (sécurité ou
+  // orientation) suit l'implantation, tiré de la typologie choisie.
+  registry: '02-wayfinding',
   // Signalétique : cotes. Le substrat et la fixation lui reviennent aussi,
   // et leurs colonnes n'existent pas encore non plus.
   width_mm: '04-signaletique',
@@ -213,8 +216,9 @@ export const SUPPORT_CONTEXT_MANDATE =
   'D3.5 — portée de règle, entre `supportRegistry` et `sectorKey` dans l’ordre de spécificité.';
 
 /**
- * Colonnes d'identité et de rattachement de `support`, que le socle écrit à la
- * création et que ni 02 ni 04 ne modifient ensuite.
+ * Colonnes d'identité et de rattachement de `support`. Écrites à la création
+ * seulement, par le module qui crée la ligne (`SUPPORT_CREATOR`) ; aucune
+ * commande ne les modifie ensuite.
  */
 export const SUPPORT_IDENTITY_COLUMNS: readonly string[] = [
   'id', 'org_id', 'site_id', 'created_at', 'updated_at', 'deleted_at',
@@ -229,14 +233,22 @@ export const SUPPORT_IDENTITY_COLUMNS: readonly string[] = [
 export const SPLIT_OWNERSHIP_TABLE = 'support';
 
 /**
+ * QI5, décision d'Oss53pa du 27 novembre 2026 : le wayfinding crée la ligne
+ * `support`. Poser un support est une décision d'orientation (L0) ; les cotes
+ * viennent ensuite par une commande du module 04, dans le même geste. L0 ne
+ * le disait pas ; c'est signalé à l'éditeur.
+ */
+export const SUPPORT_CREATOR: ModuleKey = '02-wayfinding';
+
+/**
  * Le module qui possède une colonne de `support`, ou `null` si L0 ne la nomme
  * pas.
  *
  * Une colonne sans propriétaire déclaré n'appartient à personne : elle n'est
- * écrite par aucune commande. C'est le cas aujourd'hui de `kind`, et des
- * colonnes d'identité, que L0 réserve à la création — laquelle n'a pas encore
- * de module émetteur. Le silence se lit donc comme un refus, jamais comme une
- * permission.
+ * écrite par aucune commande. C'est le cas de `kind`, facultative depuis 0087
+ * (QI6). Les colonnes d'identité n'ont pas non plus de propriétaire : seul
+ * `SUPPORT_CREATOR` les écrit, et seulement à la création. Le silence se lit
+ * donc comme un refus, jamais comme une permission.
  */
 export function supportColumnOwner(column: string): ModuleKey | null {
   return SUPPORT_COLUMN_OWNER[column] ?? null;

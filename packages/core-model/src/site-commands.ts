@@ -16,7 +16,7 @@
  */
 import type { ModuleKey } from './module-ownership.js';
 import {
-  OWNED_TABLES, SPLIT_OWNERSHIP_TABLE, ownsSupportColumn,
+  OWNED_TABLES, SPLIT_OWNERSHIP_TABLE, SUPPORT_CREATOR, SUPPORT_IDENTITY_COLUMNS, ownsSupportColumn,
 } from './module-ownership.js';
 import { safetyRegistryFaults, factKeyFaults } from './command-checks.js';
 import { touchedColumns } from './row-values.js';
@@ -191,8 +191,11 @@ function ownershipFaults(
   if (draft.operation === 'delete') {
     return [{ ...base, column: '*' }];
   }
+  // QI5 — à la création, le module qui crée la ligne écrit aussi son identité.
+  const creating = draft.operation === 'create' && draft.module === SUPPORT_CREATOR;
   return touchedColumns(draft.before ?? null, draft.after ?? null)
-    .filter(column => !ownsSupportColumn(draft.module, column))
+    .filter(column => !ownsSupportColumn(draft.module, column)
+      && !(creating && SUPPORT_IDENTITY_COLUMNS.includes(column)))
     .map(column => ({ ...base, column }));
 }
 

@@ -58,8 +58,6 @@ const DECLARED_NOT_RAISED: Readonly<Record<string, string>> = {
   'IMPORT.UNIT_AMBIGUOUS':
     'Les deux importeurs écrits (supports, occupation) lisent des colonnes sans unité. ' +
     'L’import vectoriel de D4, qui rencontrerait le cas, n’est pas un moteur.',
-  'IMPORT.ENCODING_UNSUPPORTED':
-    'Même raison : les importeurs reçoivent du texte déjà décodé, l’encodage se joue en amont.',
   'INK.SHAPE_NOT_RECOGNIZED':
     'Couche d’esquisse et saisie à l’encre, partie J, non construite.',
   'PICTO.SAFETY_EDIT_DENIED':

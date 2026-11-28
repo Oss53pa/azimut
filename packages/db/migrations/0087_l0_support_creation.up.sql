@@ -1,0 +1,17 @@
+-- Reprise du carnet existant (T-1.13), décisions d'Oss53pa du 27 novembre 2026
+-- (`docs/decoupage-reprise-carnet.md`) :
+--
+--   QI5 — le module 02 (wayfinding) crée la ligne `support`, colonnes
+--         d'identité comprises : poser un support est une décision
+--         d'orientation (L0) ;
+--   QI6 — `support.kind`, colonne de 0006 que A5.6 ne nomme pas et qu'aucun
+--         calcul ne lit, devient facultative : rien ne l'écrit plus ;
+--   QI7 — `support.registry` est écrit par le module 02 à la création.
+--
+-- QI5 et QI7 sont des règles de commande (`module-ownership.ts`), sans effet
+-- sur le schéma. Seule QI6 en a un.
+--
+-- Additive : une contrainte relâchée. Aucune ligne existante n'est lue ni
+-- transformée (A2.2, point 7). Le retrait de la colonne se décidera après
+-- relevé, comme pour `support_content_block.config` (Q20).
+ALTER TABLE azimut.support ALTER COLUMN kind DROP NOT NULL;
