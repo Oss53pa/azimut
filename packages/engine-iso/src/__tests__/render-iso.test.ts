@@ -395,3 +395,40 @@ describe('renderIsoView — edge-case geometry', () => {
     expect(result.value.svg).toMatch(/tok-wall/);
   });
 });
+
+/**
+ * T-2.7 — « Un changement d'occupant ne demande aucun redécoupage », et les
+ * zones cliquables « sont dérivées, jamais stockées comme géométrie
+ * indépendante ».
+ */
+describe('T-2.7 — les zones cliquables suivent la géométrie, pas l’occupant', () => {
+  it('changer d’occupant ne change aucune zone cliquable', () => {
+    const before = renderIsoView(refMultilevel, ['lvl-ml-rdc', 'lvl-ml-r1'], defaultOptions);
+    const first = refMultilevel.destinations[0];
+    if (first === undefined) throw new Error('ref-multilevel sans destination');
+    const moved = {
+      ...refMultilevel,
+      // L'occupant en place sort, un autre entre dans la même cellule.
+      destinations: [
+        { ...first, valid_to: '2026-06-30' },
+        { ...first, id: 'dest-nouvel-occupant', occupant_name: 'Nouvel occupant', valid_from: '2026-07-01' },
+        ...refMultilevel.destinations.slice(1).map(d => ({ ...d, occupant_name: `${d.occupant_name} (repris)` })),
+      ],
+    };
+    const after = renderIsoView(moved, ['lvl-ml-rdc', 'lvl-ml-r1'], defaultOptions);
+    if (!before.ok || !after.ok) throw new Error('rendu refusé');
+    expect(before.value.hitZones.length).toBeGreaterThan(0);
+    expect(after.value.hitZones).toEqual(before.value.hitZones);
+  });
+
+  it('aucune table du schéma ne stocke de zone cliquable', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const { resolve, dirname } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
+    const dir = resolve(dirname(fileURLToPath(import.meta.url)), '../../../db/migrations');
+    const files = readdirSync(dir).filter(f => f.endsWith('.up.sql'));
+    expect(files.length).toBeGreaterThan(80);
+    const offenders = files.filter(f => /CREATE TABLE[^(]*\b\w*(hit_zone|hit_area|clickable)\w*/i.test(readFileSync(resolve(dir, f), 'utf-8')));
+    expect(offenders).toEqual([]);
+  });
+});

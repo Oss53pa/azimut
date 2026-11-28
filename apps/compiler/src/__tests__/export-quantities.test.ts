@@ -83,15 +83,12 @@ describe('createExportQuantitiesHandler', () => {
     expect(result['cross_check_ok']).toBe(true);
   });
 
-  it('handles missing supports in payload', async () => {
+  it('refuses a payload without a support list (T-2.13)', async () => {
     const handler = createExportQuantitiesHandler(context);
-    const job = makeJob({});
-
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
+    await expect(handler(makeJob({}))).rejects.toThrow(/liste des supports absente/);
   });
 
-  it('filters invalid support entries', async () => {
+  it('refuses the whole job on a malformed support entry (T-2.13, zero gap)', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({
       supports: [
@@ -102,8 +99,7 @@ describe('createExportQuantitiesHandler', () => {
       ],
     });
 
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(1);
+    await expect(handler(job)).rejects.toThrow(/3 support\(s\) mal formé\(s\)/);
   });
 
   it('works with multilevel site', async () => {
@@ -172,21 +168,13 @@ describe('createExportQuantitiesHandler', () => {
     expect(r1).toStrictEqual(r2);
   });
 
-  it('treats non-array supports as empty (string input)', async () => {
+  it('refuses a non-array support list (string or number)', async () => {
     const handler = createExportQuantitiesHandler(context);
-    const job = makeJob({ supports: 'not-an-array', lang: 'fr' });
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
+    await expect(handler(makeJob({ supports: 'not-an-array', lang: 'fr' }))).rejects.toThrow(/liste des supports absente/);
+    await expect(handler(makeJob({ supports: 42, lang: 'fr' }))).rejects.toThrow(/liste des supports absente/);
   });
 
-  it('treats non-array supports as empty (number input)', async () => {
-    const handler = createExportQuantitiesHandler(context);
-    const job = makeJob({ supports: 42, lang: 'fr' });
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
-  });
-
-  it('filters partial support: id present but node_id is number', async () => {
+  it('refuses partial support: id present but node_id is number', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({
       supports: [
@@ -195,12 +183,10 @@ describe('createExportQuantitiesHandler', () => {
       ],
       lang: 'fr',
     });
-    const result = await handler(job);
-    // Only sup-2 passes the type guard
-    expect(result['total_supports']).toBe(1);
+    await expect(handler(job)).rejects.toThrow(/1 support\(s\) mal formé\(s\)/);
   });
 
-  it('filters partial support: support_type_key missing', async () => {
+  it('refuses partial support: support_type_key missing', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({
       supports: [
@@ -208,27 +194,24 @@ describe('createExportQuantitiesHandler', () => {
       ],
       lang: 'fr',
     });
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
+    await expect(handler(job)).rejects.toThrow(/1 support\(s\) mal formé\(s\)/);
   });
 
-  it('filters support with numeric id', async () => {
+  it('refuses support with numeric id', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({
       supports: [{ id: 123, node_id: 'n-entrance', support_type_key: 'directional' }],
       lang: 'fr',
     });
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
+    await expect(handler(job)).rejects.toThrow(/1 support\(s\) mal formé\(s\)/);
   });
 
-  it('filters nested array items in supports', async () => {
+  it('refuses nested array items in supports', async () => {
     const handler = createExportQuantitiesHandler(context);
     const job = makeJob({
       supports: [['sup-1', 'n-entrance', 'directional']],
       lang: 'fr',
     });
-    const result = await handler(job);
-    expect(result['total_supports']).toBe(0);
+    await expect(handler(job)).rejects.toThrow(/1 support\(s\) mal formé\(s\)/);
   });
 });

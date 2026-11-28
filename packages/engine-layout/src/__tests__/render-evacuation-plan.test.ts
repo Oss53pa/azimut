@@ -37,6 +37,13 @@ function siteWithEmptyLevel(id: string, name = 'Vide', ordinal = 99) {
 }
 
 describe('T-2.10 renderEvacuationPlan', () => {
+  it('refuse explicitement un site sans paquet de règles rattaché, et ne produit rien', () => {
+    expect(refMultilevel.rules_bindings.length).toBeGreaterThan(0);
+    const result = renderEvacuationPlan({ ...refMultilevel, rules_bindings: [] }, 'lvl-ml-rdc', defaultOptions);
+    expect(result.ok).toBe(false);
+    expect(result.ok ? [] : result.findings.map(f => [f.code, f.ruleRef])).toEqual([['RULES.PACK_NOT_BOUND', 'T-2.10']]);
+  });
+
   it('returns error for unknown level', () => {
     const result = renderEvacuationPlan(refMultilevel, 'nonexistent', defaultOptions);
     expect(result.ok).toBe(false);

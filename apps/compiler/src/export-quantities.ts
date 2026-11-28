@@ -18,25 +18,29 @@ export type ExportQuantitiesResult = {
   readonly lang: CsvLang;
 };
 
-function parsePlacedSupports(
-  raw: unknown,
-): PlacedSupport[] {
-  if (!Array.isArray(raw)) return [];
+/**
+ * Les supports du travail. T-2.13 : « les totaux se recoupent avec le nombre
+ * de supports en base. Écart nul exigé, pas toléré. » Une entrée mal formée
+ * n'est donc pas écartée — le total paraîtrait juste en en ayant perdu une —,
+ * elle fait échouer le travail entier, qui dit combien il en a refusé.
+ */
+function parsePlacedSupports(raw: unknown): PlacedSupport[] {
+  if (!Array.isArray(raw)) throw new Error('export_quantities : liste des supports absente');
   const result: PlacedSupport[] = [];
+  let refused = 0;
   for (const item of raw) {
-    if (
-      typeof item === 'object' &&
-      item !== null &&
-      typeof (item as Record<string, unknown>)['id'] === 'string' &&
-      typeof (item as Record<string, unknown>)['node_id'] === 'string' &&
-      typeof (item as Record<string, unknown>)['support_type_key'] === 'string'
-    ) {
-      result.push({
-        id: (item as Record<string, unknown>)['id'] as string,
-        node_id: (item as Record<string, unknown>)['node_id'] as string,
-        support_type_key: (item as Record<string, unknown>)['support_type_key'] as string,
-      });
+    const record = typeof item === 'object' && item !== null ? item as Record<string, unknown> : null;
+    const id = record?.['id'];
+    const nodeId = record?.['node_id'];
+    const typeKey = record?.['support_type_key'];
+    if (typeof id === 'string' && typeof nodeId === 'string' && typeof typeKey === 'string') {
+      result.push({ id, node_id: nodeId, support_type_key: typeKey });
+    } else {
+      refused += 1;
     }
+  }
+  if (refused > 0) {
+    throw new Error(`export_quantities : ${String(refused)} support(s) mal formé(s), aucun total produit`);
   }
   return result;
 }

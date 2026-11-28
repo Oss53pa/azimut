@@ -24,15 +24,16 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 
 | Incrément | Tâches | Tenues | Partielles | Absentes | Avancement prouvé | Critère de sortie |
 | --- | --- | --- | --- | --- | --- | --- |
-| 0. Fondations | 16 | 5 | 11 | 0 | ≈ 60 % | chaîne et étanchéité en place |
-| 1. Audit de signalétique | 19 | 12 | 7 | 0 | ≈ 75 % (≈ 65 % atteignable dans le studio) | hors dépôt, non atteint |
-| 2. Production des supports | 20 | 6 | 12 | 2 | ≈ 50 à 55 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **23** | **30** | **2** | **≈ 62 %** | |
+| 0. Fondations | 16 | 5 | 11 | 0 | ≈ 62 % | chaîne et étanchéité en place |
+| 1. Audit de signalétique | 19 | 12 | 7 | 0 | ≈ 82 % | hors dépôt, non atteint |
+| 2. Production des supports | 20 | 9 | 9 | 2 | ≈ 60 % | hors dépôt, non atteint |
+| **0 à 2** | **55** | **26** | **27** | **2** | **≈ 68 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
-pondérée par le nombre de tâches. Barème simple (tenue 1, partielle 0,5) : 66 %, 74 %,
-60 %. Les chiffres retenus sont plus bas parce que plusieurs partielles sont presque
-vides.
+pondérée par le nombre de tâches. Les chiffres retenus restent sous le barème simple
+(tenue 1, partielle 0,5 : 66 %, 82 %, 68 %) parce que plusieurs partielles sont
+presque vides. Révisés le 28 novembre 2026 après les lots T-1.13, T-1.14, T-1.15,
+T-2.7, T-2.10 et T-2.13 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 %.
 
 ---
 
@@ -94,13 +95,13 @@ n'est pas complète dans le studio (import du carnet, rapprochement exportable).
 | T-2.4 Dimensions | partielle | `required-face-format`, `face-format` | saisie manuelle dans le studio ; preuve que le constat bloque |
 | T-2.5 Contrôles | partielle | lisibilité, contraste, lexique, destinations | adjacence chromatique (attend une règle de paquet, A2.2) ; garde générique sur `ruleRef` |
 | T-2.6 Registre de sécurité | partielle | `inv3-registre-securite-cloisonne` | un code distinct par nature de tentative : le catalogue n'en a pas (A2.2, catalogue) |
-| T-2.7 Isométrie | partielle | `painter-sort`, `hit-zones` | changement d'occupant sans redécoupage ; preuve de non-stockage |
+| T-2.7 Isométrie | tenue | `painter-sort`, `hit-zones` ; `render-iso.test.ts` : un changement d'occupant laisse les zones cliquables identiques, et aucune table ne stocke de zone | — |
 | T-2.8 Plan simplifié | partielle, faible | `render-floor-plan` | disponibilité, contraste au calcul, densité mesurée |
 | T-2.9 Plans muraux | tenue | `build-wall-plans`, `render-oriented-plan` | — |
-| T-2.10 Évacuation | partielle | refus dans l'écran seul | refus dans le moteur et son essai |
+| T-2.10 Évacuation | tenue | `render-evacuation-plan.test.ts` : sans paquet rattaché, le moteur refuse en `RULES.PACK_NOT_BOUND` et ne produit rien | — |
 | T-2.11 Tactile et braille | absente | — | standard de transcription non tranché (C4, A2.2) |
 | T-2.12 PDF | partielle | déterminisme : `export-pdf` | validateur tiers en CI ; profils par substrat |
-| T-2.13 Quantitatif | partielle | `compute-quantities`, CSV | recoupement avec la base ; les supports mal formés sont écartés en silence |
+| T-2.13 Quantitatif | tenue | `compute-quantities`, CSV ; `t-2-13-quantitatif.db.test.ts` : total, faces et niveaux égaux au décompte de la base ; `export-quantities.test.ts` : une entrée mal formée fait échouer le travail au lieu d'être écartée | — |
 | T-2.14 Versions et BAT | tenue (critère) | `a12-3-insertion-seule.db` | transitions d'état non branchées sur une écriture |
 | T-2.15 Rendu de face | partielle | `tests/visual.test.ts` (une face) | tous les gabarits, tous les sites |
 | T-2.16 Compilation en lot | partielle | `batch.test.ts` (gestionnaire factice) | mesure sur 300 compilations réelles |

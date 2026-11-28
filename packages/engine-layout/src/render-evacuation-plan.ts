@@ -112,6 +112,21 @@ export function renderEvacuationPlan(
   levelId: string,
   options: EvacuationPlanOptions,
 ): Outcome<{ svg: string; stats: EvacuationStats }> {
+  // T-2.10 — « ne peut être produit que sous un paquet de règles rattaché.
+  // Refus explicite si absent. » Le refus est ici, dans le moteur, et non dans
+  // le seul écran : aucun appelant ne produit le plan sans paquet.
+  if (site.rules_bindings.length === 0) {
+    return {
+      ok: false,
+      findings: [{
+        code: 'RULES.PACK_NOT_BOUND',
+        severity: 'blocking',
+        entity: { kind: 'site', id: site.site.id },
+        params: { deliverable: 'evacuation_plan' },
+        ruleRef: 'T-2.10',
+      }],
+    };
+  }
   const level = site.levels.find((l) => l.id === levelId);
   if (!level) {
     return {
