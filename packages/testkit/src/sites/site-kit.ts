@@ -107,8 +107,25 @@ export function siteKit(siteId: string, day: string) {
   return { node, level, edges, link, buildingLink, source, calibration, footprint, volume, destination, names, profile };
 }
 
-/** Ce qu'aucun des trois sites ne porte : la production des supports. */
+/**
+ * T-2.15 — le gabarit directionnel du banc, le même que celui de
+ * `ref-multilevel` : la non-régression visuelle porte sur chaque gabarit de
+ * chaque site de référence, et un site sans gabarit n'y entrerait pas.
+ */
+export const DIRECTIONAL_TEMPLATE: SiteData['face_templates'][number] = {
+  id: 'ftpl-dir-front',
+  org_id: ORG,
+  support_type_key: 'directional',
+  side: 'front',
+  name: 'Directionnel standard',
+  blocks: [
+    { kind: 'header', ordinal: 0, region: { x_pct: 0, y_pct: 0, w_pct: 100, h_pct: 20 }, config: {} },
+    { kind: 'destination_list', ordinal: 1, region: { x_pct: 0, y_pct: 20, w_pct: 100, h_pct: 80 }, config: {} },
+  ],
+};
+
+/** Ce qu'aucun des trois sites ne porte : la production des supports, hors gabarit. */
 export const NO_SIGNAGE = {
   support_types: [], supports: [], support_faces: [], content_blocks: [],
-  support_versions: [], face_templates: [], parking_spaces: [],
+  support_versions: [], face_templates: [DIRECTIONAL_TEMPLATE], parking_spaces: [],
 } as const satisfies Partial<SiteData>;

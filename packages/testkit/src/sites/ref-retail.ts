@@ -1,5 +1,6 @@
 import type { SiteData } from '@azimut/core-model';
 import { REF_RETAIL_GRAPH } from './ref-retail-graph.js';
+import { DIRECTIONAL_TEMPLATE } from './site-kit.js';
 
 /**
  * C1 — site de référence `ref-retail`.
@@ -217,7 +218,9 @@ export const refRetail: SiteData = {
   support_faces: [],
   content_blocks: [],
   support_versions: [],
-  face_templates: [],
+  // T-2.15 — le gabarit du banc, pour que la non-régression visuelle couvre
+  // ce site aussi.
+  face_templates: [DIRECTIONAL_TEMPLATE],
   parking_spaces: [],
 };
 

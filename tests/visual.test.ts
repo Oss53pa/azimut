@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { refMultilevel } from '@azimut/testkit';
+import { allReferenceSites, refMultilevel } from '@azimut/testkit';
 import { renderFloorPlan } from '@azimut/engine-layout';
 import type { FloorPlanOptions, FloorPlanTheme } from '@azimut/engine-layout';
 import { renderOrientedPlan } from '@azimut/engine-layout';
@@ -8,7 +8,7 @@ import { renderEvacuationPlan } from '@azimut/engine-layout';
 import type { EvacuationPlanOptions, EvacuationTheme } from '@azimut/engine-layout';
 import { renderIsoView } from '@azimut/engine-iso';
 import type { IsoOptions, IsoTheme, IsoMultiLevelMode } from '@azimut/engine-iso';
-import { renderFace, resolveFaceContent } from '@azimut/engine-graph';
+import { deriveDecisionPoints, renderFace, resolveFaceContent } from '@azimut/engine-graph';
 import type { FaceTheme, RenderFaceOptions } from '@azimut/engine-graph';
 import type { FaceTemplate, TravelProfile } from '@azimut/core-model';
 
@@ -279,6 +279,47 @@ describe('Visual regression — face renders per active language (D12.2)', () =>
       if (!resolved.ok) return;
       const svg = renderFace(resolved.value, { ...faceOpts, lang });
       expect(svg).toMatchSnapshot();
+    });
+  }
+});
+
+/**
+ * T-2.15 — « non-régression visuelle sur l'ensemble des gabarits et des sites
+ * de référence ». Chaque site de référence, chaque gabarit qu'il porte, chaque
+ * point de décision du profil standard, chaque langue active : un gabarit ou
+ * un site ajouté demain entre dans l'essai sans qu'on le retouche.
+ */
+describe('Visual regression — every template on every reference site (T-2.15)', () => {
+  const cases: { site: string; template: string; node: string; lang: string }[] = [];
+  for (const [key, site] of allReferenceSites) {
+    const profile = site.travel_profiles.find(p => p.key === 'standard');
+    if (profile === undefined || site.face_templates.length === 0) continue;
+    const points = deriveDecisionPoints(site, profile, site.destinations);
+    const nodes = points.ok ? [...new Set(points.value.map(dp => dp.node_id))].sort() : [];
+    const langs = [...new Set(site.destination_names.map(dn => dn.lang))].sort();
+    for (const template of [...site.face_templates].sort((a, b) => (a.id < b.id ? -1 : 1))) {
+      for (const node of nodes) for (const lang of langs) cases.push({ site: key, template: template.id, node, lang });
+    }
+  }
+
+  it('the matrix is not empty, and every template of every site is in it', () => {
+    expect(cases.length).toBeGreaterThan(0);
+    for (const [key, site] of allReferenceSites) {
+      for (const template of site.face_templates) {
+        expect(cases.some(c => c.site === key && c.template === template.id), `${key} / ${template.id}`).toBe(true);
+      }
+    }
+  });
+
+  for (const c of cases) {
+    it(`${c.site} · ${c.template} · ${c.node} [${c.lang}]`, () => {
+      const site = allReferenceSites.get(c.site);
+      const template = site?.face_templates.find(t => t.id === c.template);
+      const profile = site?.travel_profiles.find(p => p.key === 'standard');
+      if (site === undefined || template === undefined || profile === undefined) throw new Error('cas introuvable');
+      const resolved = resolveFaceContent(site, template, c.node, profile);
+      if (!resolved.ok) throw new Error(resolved.findings.map(f => f.code).join(','));
+      expect(renderFace(resolved.value, { ...faceOpts, lang: c.lang })).toMatchSnapshot();
     });
   }
 });

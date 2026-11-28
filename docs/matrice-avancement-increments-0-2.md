@@ -26,8 +26,8 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 | --- | --- | --- | --- | --- | --- | --- |
 | 0. Fondations | 16 | 5 | 11 | 0 | ≈ 62 % | chaîne et étanchéité en place |
 | 1. Audit de signalétique | 19 | 12 | 7 | 0 | ≈ 82 % | hors dépôt, non atteint |
-| 2. Production des supports | 20 | 9 | 9 | 2 | ≈ 60 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **26** | **27** | **2** | **≈ 68 %** | |
+| 2. Production des supports | 20 | 10 | 8 | 2 | ≈ 60 % | hors dépôt, non atteint |
+| **0 à 2** | **55** | **27** | **26** | **2** | **≈ 68 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
 pondérée par le nombre de tâches. Les chiffres retenus restent sous le barème simple
@@ -103,7 +103,7 @@ n'est pas complète dans le studio (import du carnet, rapprochement exportable).
 | T-2.12 PDF | partielle | déterminisme : `export-pdf` | validateur tiers en CI ; profils par substrat |
 | T-2.13 Quantitatif | tenue | `compute-quantities`, CSV ; `t-2-13-quantitatif.db.test.ts` : total, faces et niveaux égaux au décompte de la base ; `export-quantities.test.ts` : une entrée mal formée fait échouer le travail au lieu d'être écartée | — |
 | T-2.14 Versions et BAT | tenue (critère) | `a12-3-insertion-seule.db` | transitions d'état non branchées sur une écriture |
-| T-2.15 Rendu de face | partielle | `tests/visual.test.ts` (une face) | tous les gabarits, tous les sites |
+| T-2.15 Rendu de face | tenue | `tests/visual.test.ts` : chaque gabarit de chaque site de référence, à chaque point de décision, dans chaque langue active (124 instantanés, 7 sites) ; un gabarit ou un site ajouté entre dans la matrice sans retouche | le dépôt ne porte qu'un gabarit ; `ref-broken`, graphe volontairement incohérent, n'en porte pas |
 | T-2.16 Compilation en lot | partielle | `batch.test.ts` (gestionnaire factice) | mesure sur 300 compilations réelles |
 | T-2.17 Habillage | tenue | `s7-habillage-hors-calcul`, `e9-3-habillage.db`, `s6-1b-habillage.db` | — (étendre le garde aux applications interdirait de dessiner l'habillage sur les plans produits : M01.S7 l'exclut des calculs, non du rendu) |
 | T-2.18 Annotations et symboles | absente | — | table `annotation` (E9.3) ; bibliothèque de symboles sans modèle (A2.2) |

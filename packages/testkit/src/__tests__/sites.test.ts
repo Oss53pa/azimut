@@ -300,12 +300,12 @@ describe('A5.2 — un calage par fond de plan', () => {
 const FROZEN: Readonly<Record<string, string>> = {
   'ref-minimal': 'sha256:352c0a4669b39cefaa64afe9c6a1717ac5a5e417cdfcf8471e6e3a973c0270cf',
   'ref-broken': 'sha256:61da90c317cdd60ebd22a52926ee5588bc0225e09fd87092ba0b894bb860adac',
-  'ref-adversarial': 'sha256:217758baa5e07e795857930854c0f07c9be8a42afb1dd8a946ab6ca3a641480e',
+  'ref-adversarial': 'sha256:6b991b9ba516c1380be53542d8d9c8ff486e3eee9d2e08c276af9a4e70079a4f',
   'ref-multilevel': 'sha256:3387da1fc380664b3db450ce1288c9bb930ac970f7cc83087c5da43931a3d44b',
-  'ref-retail': 'sha256:5b16cfbb43e6c1d25121b0863be6ab760d15768af53552e4ff8e6905f7431906',
-  'ref-health': 'sha256:ae0c39a326b739013e6d4b2e7fb0f4c0da28949b7fa84abec3ffb954a00f3a5a',
-  'ref-transit': 'sha256:9c9518aa5df88f97c61127026e7e5cc8c616baf27483a6ca826c2cc827508196',
-  'ref-campus': 'sha256:d35a2032a9d6c6103e060a435b67695a79abffe9bebf80bf36bdb72033211d2f',
+  'ref-retail': 'sha256:596f43bede6a1504be4f0015b59074e6d107c1d4fbb164a8b5744501f4441cdf',
+  'ref-health': 'sha256:db6b662df5750ef6f44b8470c97f42f19ec3607864e84db5ecc7b2744b844014',
+  'ref-transit': 'sha256:dac627dc644450e233bc9422571d3d242fe5202acb7fbe3d94c6826491bae977',
+  'ref-campus': 'sha256:f88520c143c8e695c5e0c2535f9e8bc7e97d6f7f749609632634ce01fa6d3f40',
 };
 
 describe('T-0.10 — les empreintes des sites de référence sont figées', () => {

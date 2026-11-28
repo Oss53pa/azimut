@@ -1,4 +1,5 @@
 import type { SiteData } from '@azimut/core-model';
+import { DIRECTIONAL_TEMPLATE } from './site-kit.js';
 
 const LONG_NAME_FR = 'Service de consultation spécialisée en oto-rhino-laryngologie et chirurgie cervico-faciale';
 const LONG_NAME_EN = 'Specialized consultation department for otorhinolaryngology and cervico-facial surgery';
@@ -264,6 +265,8 @@ export const refAdversarial: SiteData = {
   support_faces: [],
   content_blocks: [],
   support_versions: [],
-  face_templates: [],
+  // T-2.15 — le gabarit du banc : les noms très longs des deux langues sont
+  // le cas de débordement que la non-régression visuelle doit figer.
+  face_templates: [DIRECTIONAL_TEMPLATE],
   parking_spaces: [],
 };
