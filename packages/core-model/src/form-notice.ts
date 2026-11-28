@@ -33,6 +33,9 @@ export const FORM_NOTICE_KEYS = [
   'form.free_text.empty',
   'form.free_text.lang.outside_face',
   'form.free_text.lang.missing',
+  // T-1.3 — volume d'une empreinte.
+  'form.volume.base.required',
+  'form.volume.material.required',
 ] as const;
 export type FormNoticeKey = (typeof FORM_NOTICE_KEYS)[number];
 

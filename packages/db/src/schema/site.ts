@@ -86,13 +86,25 @@ export const footprint = azimut.table('footprint', {
   index('idx_footprint_org').on(t.org_id),
 ]);
 
+/**
+ * T-1.3 — la liste fermée des matières (0088). Globale, en lecture seule pour
+ * l'application ; posée par migration.
+ */
+export const volumeMaterial = azimut.table('volume_material', {
+  key: text('key').primaryKey(),
+  name_fr: text('name_fr').notNull(),
+  name_en: text('name_en').notNull(),
+  ordinal: integer('ordinal').notNull().unique(),
+  source_ref: text('source_ref').notNull(),
+});
+
 export const volume = azimut.table('volume', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
   footprint_id: uuid('footprint_id').notNull().references(() => footprint.id, { onDelete: 'cascade' }),
   base_elevation_m: numeric('base_elevation_m').notNull(),
   height_m: numeric('height_m').notNull(),
-  material_key: text('material_key').notNull(),
+  material_key: text('material_key').notNull().references(() => volumeMaterial.key, { onDelete: 'restrict', onUpdate: 'restrict' }),
   // K2.1 — manual painter order; null by default, overrides the computed sort.
   render_order: integer('render_order'),
 }, (t) => [

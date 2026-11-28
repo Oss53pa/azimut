@@ -61,6 +61,8 @@ export function sessionRowsFromSite(site: SiteData): readonly StoredRow[] {
     ...rowsFor('plan_source', site.plan_sources),
     ...rowsFor('plan_calibration', site.plan_calibrations),
     ...rowsFor('footprint', site.footprints),
+    // T-1.3 — les volumes des empreintes, que l'atelier des empreintes saisit.
+    ...rowsFor('volume', site.volumes),
     ...rowsFor('node', site.graph.nodes),
     ...rowsFor('edge', site.graph.edges),
     ...rowsFor('vertical_link', site.graph.vertical_links),

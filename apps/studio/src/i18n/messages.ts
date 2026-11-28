@@ -58,6 +58,7 @@ import { SERVICE_VALIDATION_FR, SERVICE_VALIDATION_EN } from './messages/service
 import { UNDO_CONFLICT_FR, UNDO_CONFLICT_EN } from './messages/undo-conflict.js';
 import { DECORATION_STORE_FR, DECORATION_STORE_EN } from './messages/decoration-store.js';
 import { CARNET_IMPORT_FR, CARNET_IMPORT_EN } from './messages/carnet-import.js';
+import { VOLUME_FR, VOLUME_EN } from './messages/volume.js';
 
 export const MESSAGES_FR = {
   ...CHROME_FR,
@@ -106,6 +107,7 @@ export const MESSAGES_FR = {
   ...UNDO_CONFLICT_FR,
   ...DECORATION_STORE_FR,
   ...CARNET_IMPORT_FR,
+  ...VOLUME_FR,
   ...SERVICE_VALIDATION_FR,
 } as const;
 
@@ -158,6 +160,7 @@ export const MESSAGES_EN: Readonly<Record<UiMessageKey, string>> = {
   ...UNDO_CONFLICT_EN,
   ...DECORATION_STORE_EN,
   ...CARNET_IMPORT_EN,
+  ...VOLUME_EN,
   ...SERVICE_VALIDATION_EN,
 };
 

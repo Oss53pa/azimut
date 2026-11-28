@@ -13,6 +13,7 @@ import type { StoredRow } from '../state/session-store.js';
 import { FootprintsScreen } from '../screens/FootprintsScreen.js';
 import { useFootprintInk } from './useFootprintInk.js';
 import type { SeriesDraft } from '../screens/FootprintsScreen.js';
+import { VolumePanel } from '../screens/VolumePanel.js';
 
 /**
  * M3 (partie M) — l'adaptateur du tracé des empreintes.
@@ -185,35 +186,40 @@ export function FootprintsScreenAdapter({ session, levelId }: {
     return () => { window.removeEventListener('keydown', onKey); };
   });
 
+  // T-1.3 — le volume d'une empreinte se saisit sous le tracé, sur le même
+  // niveau : une empreinte fermée en reçoit un sans changer d'écran.
   return (
-    <FootprintsScreen
-      state={drawn === 0 ? { kind: 'empty' } : { kind: 'ready' }}
-      tool={tool}
-      onTool={setTool}
-      vertices={vertices}
-      onVertex={(index, axis, value) => {
-        setVertices(previous => previous.map((v, i) =>
-          i === index ? { ...v, [axis]: value ?? 0 } : v));
-      }}
-      unitCode={unitCode}
-      onUnitCode={setUnitCode}
-      kind={kind}
-      onKind={setKind}
-      areaM2={null}
-      findings={findings}
-      warnings={warnings}
-      footprintCount={drawn}
-      onClose={close}
-      onAbandon={() => { setVertices(DEFAULT_FOOTPRINT); setFindings([]); ink.settle(); }}
-      series={series}
-      onSeries={(field, value) => {
-        setSeries(previous => ({ ...previous, [field]: value ?? 0 }));
-      }}
-      seriesReference={reference?.unitCode ?? null}
-      onDuplicate={duplicate}
-    >
-      {ink.zone}
-    </FootprintsScreen>
+    <>
+      <FootprintsScreen
+        state={drawn === 0 ? { kind: 'empty' } : { kind: 'ready' }}
+        tool={tool}
+        onTool={setTool}
+        vertices={vertices}
+        onVertex={(index, axis, value) => {
+          setVertices(previous => previous.map((v, i) =>
+            i === index ? { ...v, [axis]: value ?? 0 } : v));
+        }}
+        unitCode={unitCode}
+        onUnitCode={setUnitCode}
+        kind={kind}
+        onKind={setKind}
+        areaM2={null}
+        findings={findings}
+        warnings={warnings}
+        footprintCount={drawn}
+        onClose={close}
+        onAbandon={() => { setVertices(DEFAULT_FOOTPRINT); setFindings([]); ink.settle(); }}
+        series={series}
+        onSeries={(field, value) => {
+          setSeries(previous => ({ ...previous, [field]: value ?? 0 }));
+        }}
+        seriesReference={reference?.unitCode ?? null}
+        onDuplicate={duplicate}
+      >
+        {ink.zone}
+      </FootprintsScreen>
+      <VolumePanel session={session} levelId={levelId} />
+    </>
   );
 }
 

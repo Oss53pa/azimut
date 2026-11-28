@@ -15,6 +15,7 @@
  * écrit à la main : Q9.2 l'interdit.
  */
 import file from './country.json';
+import materialFile from './volume-material.json';
 
 export type CountryReference = {
   readonly code: string;
@@ -37,3 +38,22 @@ export const COUNTRIES: readonly CountryReference[] = file.countries;
 export function timezonesOf(code: string): readonly string[] {
   return COUNTRIES.find(country => country.code === code)?.timezones ?? [];
 }
+
+
+/**
+ * T-1.3 — la liste fermée des matières d'un volume (décision d'Oss53pa du
+ * 28 novembre 2026). La migration 0088 la pose en base ; ce fichier la sert au
+ * studio sur un poste sans base. `t-1-3-matiere.db.test.ts` vérifie que les
+ * deux concordent.
+ */
+export type VolumeMaterialReference = {
+  readonly key: string;
+  readonly name_fr: string;
+  readonly name_en: string;
+  readonly ordinal: number;
+};
+
+export const VOLUME_MATERIAL_SOURCE_REF: string = materialFile.source_ref;
+
+/** Les matières, dans l'ordre du fichier. */
+export const VOLUME_MATERIALS: readonly VolumeMaterialReference[] = materialFile.materials;

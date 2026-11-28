@@ -84,6 +84,15 @@ describe('A5.2 — le socle', () => {
     });
   });
 
+  it('T-1.3 : une matière hors de la liste fermée est refusée (0088)', async () => {
+    await inRolledBack(async tx => {
+      const volume = (material: string) => (sp: Tx) =>
+        sp`insert into azimut.volume(org_id,footprint_id,base_elevation_m,height_m,material_key) values (${ORG},${FOOTPRINT},0,3,${material})`;
+      expect(await codeOf(tx, volume('unspecified'))).toBe('accepté');
+      expect(await codeOf(tx, volume('marbre'))).toBe('23503');
+    });
+  });
+
   it('une cellule sans code d’unité est refusée ; une circulation n’en demande pas', async () => {
     await inRolledBack(async tx => {
       const fp = (kind: string, code: string | null) => (sp: Tx) =>

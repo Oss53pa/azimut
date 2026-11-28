@@ -350,6 +350,7 @@ export const DEGRADATION_WHEN_ABSENT: Readonly<Record<ModuleKey, string>> = {
  */
 export const TABLES_WITHOUT_DECLARED_OWNER: Readonly<Record<string, string>> = {
   country: 'Q9 et Q2 : référentiel global des pays, sans org_id, rangé à la plateforme numérotée 00. Aucune saisie ne l’écrit : il reste sans propriétaire déclaré tant qu’il n’est chargé que par migration.',
+  volume_material: 'T-1.3, décision d’Oss53pa du 28 novembre 2026 : liste fermée des matières d’un volume, globale, sans org_id. Posée par migration (0088), aucune saisie ne l’écrit.',
   organization: 'A5.1, accès et cloisonnement. N’appartient à aucun module : c’est la frontière dans laquelle les modules vivent.',
   membership: 'A5.1, même motif que `organization`.',
   rules_pack: 'A5.9 et D3. Paquet de règles, donnée versionnée globale, sans org_id ; aucune fiche de L3 ne le range.',

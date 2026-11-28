@@ -1,0 +1,13 @@
+{
+  "source_ref": "Décision d'Oss53pa du 28 novembre 2026 (T-1.3, liste fermée des matières)",
+  "materials": [
+    { "key": "concrete", "name_fr": "Béton", "name_en": "Concrete", "ordinal": 1 },
+    { "key": "masonry", "name_fr": "Maçonnerie", "name_en": "Masonry", "ordinal": 2 },
+    { "key": "glass", "name_fr": "Verre", "name_en": "Glass", "ordinal": 3 },
+    { "key": "metal", "name_fr": "Métal", "name_en": "Metal", "ordinal": 4 },
+    { "key": "wood", "name_fr": "Bois", "name_en": "Wood", "ordinal": 5 },
+    { "key": "plaster", "name_fr": "Plâtre et cloison", "name_en": "Plaster and partition", "ordinal": 6 },
+    { "key": "vegetation", "name_fr": "Végétal", "name_en": "Vegetation", "ordinal": 7 },
+    { "key": "unspecified", "name_fr": "Non précisée", "name_en": "Unspecified", "ordinal": 8 }
+  ]
+}

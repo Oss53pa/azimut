@@ -23,6 +23,8 @@ export const FORM_NOTICES_FR: Readonly<Record<FormNoticeKey, string>> = {
   'form.free_text.empty': 'Saisir le texte dans au moins une langue de la face.',
   'form.free_text.lang.outside_face': 'Texte saisi dans une langue que la face ne porte pas.',
   'form.free_text.lang.missing': 'Une langue de la face reste sans texte.',
+  'form.volume.base.required': 'Indiquer l’altitude de base du volume, en mètres.',
+  'form.volume.material.required': 'Choisir la matière du volume, ou « Non précisée ».',
 };
 
 export const FORM_NOTICES_EN: Readonly<Record<FormNoticeKey, string>> = {
@@ -42,4 +44,6 @@ export const FORM_NOTICES_EN: Readonly<Record<FormNoticeKey, string>> = {
   'form.free_text.empty': 'Enter the text in at least one of the face’s languages.',
   'form.free_text.lang.outside_face': 'Text entered in a language the face does not carry.',
   'form.free_text.lang.missing': 'One of the face’s languages has no text.',
+  'form.volume.base.required': 'Enter the volume’s base elevation, in metres.',
+  'form.volume.material.required': 'Choose the volume’s material, or “Unspecified”.',
 };

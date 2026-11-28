@@ -131,6 +131,7 @@ non plus — elle n'en retire que les clés étrangères.
 0085_m02_w11_validation_barrier
 0086_e9_3_decoration
 0087_l0_support_creation
+0088_t1_3_volume_material
 ```
 
 ## Règle pour la suite

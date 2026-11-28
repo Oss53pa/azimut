@@ -25,15 +25,15 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 | Incrément | Tâches | Tenues | Partielles | Absentes | Avancement prouvé | Critère de sortie |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0. Fondations | 16 | 5 | 11 | 0 | ≈ 62 % | chaîne et étanchéité en place |
-| 1. Audit de signalétique | 19 | 12 | 7 | 0 | ≈ 82 % | hors dépôt, non atteint |
+| 1. Audit de signalétique | 19 | 13 | 6 | 0 | ≈ 84 % | hors dépôt, non atteint |
 | 2. Production des supports | 20 | 10 | 8 | 2 | ≈ 60 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **27** | **26** | **2** | **≈ 68 %** | |
+| **0 à 2** | **55** | **28** | **25** | **2** | **≈ 69 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
 pondérée par le nombre de tâches. Les chiffres retenus restent sous le barème simple
-(tenue 1, partielle 0,5 : 66 %, 82 %, 68 %) parce que plusieurs partielles sont
+(tenue 1, partielle 0,5 : 66 %, 84 %, 68 %) parce que plusieurs partielles sont
 presque vides. Révisés le 28 novembre 2026 après les lots T-1.13, T-1.14, T-1.15,
-T-2.7, T-2.10 et T-2.13 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 %.
+T-2.7, T-2.10 et T-2.13, puis après T-1.3 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 %.
 
 ---
 
@@ -67,7 +67,7 @@ T-2.7, T-2.10 et T-2.13 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 
 | T-1.2b Commandes et annulation | tenue | `e4-4-rejeu-commandes` (état complet après annulation et après rétablissement), `command-store`, S6.8 | — |
 | T-1.2c Outils métier | partielle | axe : `graph-axis`, `m4-axe.spec` | division, fusion, décalage, report : hors atelier, sans contrôle de saisie ni arbitrage des attributs |
 | T-1.2d Magnétisme | tenue (moteur) | `snap.test.ts`, `snap-integration` | branché dans l'éditeur d'habillage seul, pas dans M3 et M4 |
-| T-1.3 Volumes | partielle | moteur : `validate-geometry` ; base : `a5-contraintes-insertion.db` | aucun écran de saisie ; valeurs par défaut du niveau absentes |
+| T-1.3 Volumes | tenue | moteur : `validate-geometry` ; saisie : `volume-input` (base du niveau, hauteur par écart au niveau suivant, aucune sur le dernier), `t-1-3-volumes.spec` ; base : `a5-contraintes-insertion.db` (hauteur, matière hors liste), `t-1-3-matiere.db` (liste et fichier concordent), `t-1-3-volume.db` (création, modification, refus par le journal) | ordre de tracé manuel (`render_order`, K2.1) sans saisie |
 | T-1.4 Graphe | tenue | `graph-input`, `m4-proprietes.spec` | — |
 | T-1.5 Liaisons verticales | tenue | `checks-structure`, `t-1-5-liaison-verticale.spec` | — |
 | T-1.6 Complétude | tenue | `n1-7-3-cas-et-contre-exemple`, `validate-graph` | — |
