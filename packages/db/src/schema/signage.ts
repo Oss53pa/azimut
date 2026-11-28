@@ -17,6 +17,23 @@ export const supportTypology = azimut.table('support_typology', {
   index('idx_support_typology_org').on(t.org_id),
 ]);
 
+/**
+ * T-0.10 — les faces d'une typologie (0089, décision d'Oss53pa du 28 novembre
+ * 2026) : un côté et une taille par défaut, en millimètres.
+ */
+export const supportTypologyFace = azimut.table('support_typology_face', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),
+  typology_id: uuid('typology_id').notNull().references(() => supportTypology.id, { onDelete: 'cascade' }),
+  side: text('side').notNull(),
+  default_width_mm: integer('default_width_mm').notNull(),
+  default_height_mm: integer('default_height_mm').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index('idx_support_typology_face_org').on(t.org_id),
+]);
+
 export const support = azimut.table('support', {
   id: uuid('id').primaryKey().defaultRandom(),
   org_id: uuid('org_id').notNull().references(() => organization.id, { onDelete: 'restrict' }),

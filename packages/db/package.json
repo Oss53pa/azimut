@@ -36,6 +36,7 @@
     "db:seed:reference": "node scripts/seed-reference.js"
   },
   "devDependencies": {
+    "@azimut/testkit": "workspace:*",
     "@types/node": "^26.4.1",
     "drizzle-kit": "^0.31.10"
   }

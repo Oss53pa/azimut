@@ -14,7 +14,7 @@ export {
   travelProfile, routeCache, decisionPoint,
 } from './directory.js';
 export {
-  supportTypology, support, supportFace, supportContentBlock, supportVersion,
+  supportTypology, supportTypologyFace, support, supportFace, supportContentBlock, supportVersion,
   proof, approval, installedSupport, divergence, workOrder,
 } from './signage.js';
 export {

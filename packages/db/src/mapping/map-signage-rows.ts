@@ -10,19 +10,28 @@ import type {
   Support, SupportType, SupportFace, ContentBlockInstance, SupportVersion,
   DimensionsSource,
   } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 import type {
-  SupportRow, SupportTypologyRow, SupportFaceRow,
+  SupportRow, SupportTypologyRow, SupportTypologyFaceRow, SupportFaceRow,
   SupportContentBlockRow, SupportVersionRow,
 } from './row-types.js';
 import { num, isoString, asRecord, asStringArray, versionState } from './row-scalars.js';
 
 /**
- * A5.6 — la base ne stocke aucune dimension par défaut au niveau de la
- * typologie : elles vivent sur l'instance. `faces` reste donc vide, et
- * l'appelant retombe sur les dimensions de l'instance puis sur une taille
- * de face par défaut.
+ * A5.6 et T-0.10 (0089) — la typologie et ses faces, chacune avec sa taille
+ * par défaut. Les dimensions de l'instance priment quand elles sont saisies.
+ * Une typologie sans ligne de face rend une liste vide, que le contrôle des
+ * supports signale (DATA.SUPPORT_FACE_COUNT_MISMATCH).
  */
-export function mapSupportTypologyRow(row: SupportTypologyRow): SupportType {
+export function mapSupportTypologyRow(
+  row: SupportTypologyRow, faceRows: readonly SupportTypologyFaceRow[],
+): SupportType {
+  // Les faces n'ont pas d'identifiant au modèle : leur ordre est celui de leur
+  // côté, comme les moteurs les lisent (A9).
+  const faces = faceRows
+    .filter(f => f.typology_id === row.id)
+    .map(f => ({ side: f.side, default_width_mm: f.default_width_mm, default_height_mm: f.default_height_mm }))
+    .sort((a, b) => codePointCompare(a.side, b.side));
   return {
     id: row.id,
     org_id: row.org_id,
@@ -30,7 +39,7 @@ export function mapSupportTypologyRow(row: SupportTypologyRow): SupportType {
     name: row.name,
     face_count: row.face_count,
     ...(row.template_key !== null ? { template_key: row.template_key } : {}),
-    faces: [],
+    faces,
   };
 }
 

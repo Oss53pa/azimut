@@ -250,6 +250,15 @@ export type SupportTypologyRow = {
   readonly template_key: string | null;
 };
 
+export type SupportTypologyFaceRow = {
+  readonly id: string;
+  readonly org_id: string;
+  readonly typology_id: string;
+  readonly side: string;
+  readonly default_width_mm: number;
+  readonly default_height_mm: number;
+};
+
 export type SupportFaceRow = {
   readonly id: string;
   readonly org_id: string;
@@ -325,6 +334,8 @@ export type SiteRowSet = {
   readonly travel_profiles: readonly TravelProfileRow[];
   readonly supports: readonly SupportRow[];
   readonly support_typologies: readonly SupportTypologyRow[];
+  /** T-0.10 (0089) — les faces des typologies de l'organisation. */
+  readonly support_typology_faces: readonly SupportTypologyFaceRow[];
   readonly support_faces: readonly SupportFaceRow[];
   readonly content_blocks: readonly SupportContentBlockRow[];
   readonly support_versions: readonly SupportVersionRow[];

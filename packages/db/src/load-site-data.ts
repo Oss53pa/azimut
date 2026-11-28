@@ -14,7 +14,7 @@ import {
   travelProfile,
 } from './schema/directory.js';
 import {
-  support, supportTypology, supportFace, supportContentBlock, supportVersion,
+  support, supportTypology, supportTypologyFace, supportFace, supportContentBlock, supportVersion,
 } from './schema/signage.js';
 import { assembleSiteData } from './mapping/index.js';
 import { setSessionIdentity } from './write-path.js';
@@ -134,6 +134,12 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
       : Promise.resolve([]),
   ]);
 
+  // T-0.10 (0089) — les faces des typologies, sans quoi chaque typologie lue
+  // en base serait refusée et ne produirait aucune ligne de message.
+  const typologyIds = typologyRows.map((t) => t.id);
+  const typologyFaceRows = typologyIds.length > 0
+    ? await db.select().from(supportTypologyFace).where(inArray(supportTypologyFace.typology_id, typologyIds))
+    : [];
   const faceIds = faceRows.map((f) => f.id);
   const blockRows = faceIds.length > 0
     ? await db.select().from(supportContentBlock).where(inArray(supportContentBlock.face_id, faceIds))
@@ -176,6 +182,7 @@ export async function loadSiteData<TSchema extends Record<string, unknown> = Rec
     travel_profiles: tpRows,
     supports: supportRows,
     support_typologies: typologyRows,
+    support_typology_faces: typologyFaceRows,
     support_faces: faceRows,
     content_blocks: blockRows,
     support_versions: versionRows,

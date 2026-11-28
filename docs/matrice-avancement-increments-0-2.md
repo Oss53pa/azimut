@@ -24,16 +24,16 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 
 | Incrément | Tâches | Tenues | Partielles | Absentes | Avancement prouvé | Critère de sortie |
 | --- | --- | --- | --- | --- | --- | --- |
-| 0. Fondations | 16 | 5 | 11 | 0 | ≈ 62 % | chaîne et étanchéité en place |
+| 0. Fondations | 16 | 6 | 10 | 0 | ≈ 65 % | chaîne et étanchéité en place |
 | 1. Audit de signalétique | 19 | 13 | 6 | 0 | ≈ 84 % | hors dépôt, non atteint |
 | 2. Production des supports | 20 | 10 | 8 | 2 | ≈ 60 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **28** | **25** | **2** | **≈ 69 %** | |
+| **0 à 2** | **55** | **29** | **24** | **2** | **≈ 70 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
 pondérée par le nombre de tâches. Les chiffres retenus restent sous le barème simple
-(tenue 1, partielle 0,5 : 66 %, 84 %, 68 %) parce que plusieurs partielles sont
+(tenue 1, partielle 0,5 : 69 %, 84 %, 68 %) parce que plusieurs partielles sont
 presque vides. Révisés le 28 novembre 2026 après les lots T-1.13, T-1.14, T-1.15,
-T-2.7, T-2.10 et T-2.13, puis après T-1.3 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 %.
+T-2.7, T-2.10 et T-2.13, puis après T-1.3 et T-0.10 ; au premier relevé : 60 %, 75 %, 50 à 55 %, total 62 %.
 
 ---
 
@@ -50,7 +50,7 @@ T-2.7, T-2.10 et T-2.13, puis après T-1.3 ; au premier relevé : 60 %, 75 %, 50
 | T-0.7 Jetons de thème | tenue | `no-hardcoded-colors`, `contrast.test.ts` | l'analyse ne voit ni `hsl()`, ni hex à 8 chiffres, ni couleurs nommées |
 | T-0.8 Paquets de règles | tenue | `loader-guard`, `resolve-rule` | deux codes pour un même défaut selon la voie de chargement |
 | T-0.9 Génération PDF | partielle | déterminisme : `export-pdf.test.ts` | conformité PDF/X par outil tiers absente ; décision à confirmer par Oss53pa |
-| T-0.10 Trousse de test | partielle | les sept sites de C1 en mémoire, empreintes figées (`sites.test.ts`), `svg-compare` | aucun chargement d'un site de référence en base |
+| T-0.10 Trousse de test | tenue | les huit sites en mémoire, empreintes figées (`sites.test.ts`), `svg-compare` ; en base : `t-0-10-sites-en-base.db`, chaque site écrit puis relu par `loadSiteData`, empreinte identique, listes triées (A9) ; `ref-broken` refusé par la base, décision d'Oss53pa | — |
 | T-0.11 Service de compilation | tenue | `db-queue.db.test.ts`, `worker.test.ts` | ni conteneur (A3.1) ni déploiement — prérequis de toute fusion |
 | T-0.12 Auto-hébergement | partielle, faible | base nue, PostgREST et service d'authentification en CI | aucun passage quotidien ; e2e non joués sur l'instance ; ni Storage ni fonctions |
 | T-0.13 Composants et états | partielle, faible | focus visible seulement | liste fermée de F6, sept états, non-régression visuelle : à faire |

@@ -17,10 +17,9 @@ export type SupportTypeFace = {
 /**
  * A support typology (A5.6 `support_typology`) — the template of a physical
  * support model. `template_key` binds it to a face template. `faces` carries
- * the typology's default face sizes, a convenience seed for composition: the
- * authoritative per-support dimensions live on the `Support` instance (A5.6),
- * so a typology loaded from the database (which stores no per-face default)
- * simply has no `faces` and the instance dimensions, then a fallback, apply.
+ * the typology's default face sizes, stored one row per side in
+ * `support_typology_face` (0089, T-0.10) and read back ordered by side. The
+ * per-support dimensions on the `Support` instance win when they are set.
  */
 export type SupportType = {
   readonly id: string;

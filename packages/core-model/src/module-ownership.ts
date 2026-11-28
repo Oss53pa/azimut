@@ -125,7 +125,7 @@ export const OWNED_TABLES: Readonly<Record<ModuleKey, readonly string[]>> = {
   ],
   '03-parcours': ['travel_profile', 'route_cache', 'decision_point'],
   '04-signaletique': [
-    'support_typology', 'support_face', 'support_content_block',
+    'support_typology', 'support_typology_face', 'support_face', 'support_content_block',
     'support_version', 'proof', 'approval', 'pictogram',
   ],
   '05-regie': ['ad_placement', 'ad_booking', 'ad_option', 'ad_creative'],

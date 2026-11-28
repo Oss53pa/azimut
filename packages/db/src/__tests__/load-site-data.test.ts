@@ -111,16 +111,29 @@ describe('mapSupportTypologyRow (A5.6)', () => {
     face_count: 1, template_key: 'ftpl-dir', ...overrides,
   } as typeof supportTypology.$inferSelect);
 
-  it('maps a typology row, template_key included, with no default faces', () => {
-    const t = mapSupportTypologyRow(typRow());
+  it('maps a typology row, template_key included; without face rows, faces stay empty', () => {
+    const t = mapSupportTypologyRow(typRow(), []);
     expect(t).toStrictEqual({
       id: 'typ-1', org_id: 'org-1', key: 'directional', name: 'Directionnel',
       face_count: 1, template_key: 'ftpl-dir', faces: [],
     });
   });
 
+  it('T-0.10 (0089) : carries its own faces only, ordered by side', () => {
+    const face = (id: string, typology: string, side: string) => ({
+      id, org_id: 'org-1', typology_id: typology, side, default_width_mm: 400, default_height_mm: 1200,
+    });
+    const t = mapSupportTypologyRow(typRow({ face_count: 2 }), [
+      face('f-1', 'typ-1', 'front'), face('f-2', 'typ-2', 'front'), face('f-3', 'typ-1', 'back'),
+    ]);
+    expect(t.faces).toStrictEqual([
+      { side: 'back', default_width_mm: 400, default_height_mm: 1200 },
+      { side: 'front', default_width_mm: 400, default_height_mm: 1200 },
+    ]);
+  });
+
   it('omits template_key when the column is null', () => {
-    expect(mapSupportTypologyRow(typRow({ template_key: null })).template_key).toBeUndefined();
+    expect(mapSupportTypologyRow(typRow({ template_key: null }), []).template_key).toBeUndefined();
   });
 });
 

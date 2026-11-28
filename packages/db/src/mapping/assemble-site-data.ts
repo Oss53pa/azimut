@@ -13,6 +13,7 @@ import {
   readActiveLangs, readOpeningHours, computeEdgeLengths, isSiteZoneKind,
   isParkingSpaceKind, isPlanContentKind,
 } from '@azimut/core-model';
+import { codePointCompare } from '@azimut/core-model';
 import type {
   FootprintKind,
   SiteData,
@@ -317,32 +318,42 @@ export function assembleSiteData(rows: SiteRowSet): SiteData {
   // A5.8 — les paquets du site, depuis la table qui fait foi.
   const rulesBindings: SiteRulesBinding[] = mapRulesBindingRows(rows.rules_bindings);
 
+  // A9 — « itération sur une structure dont l'ordre n'est pas garanti : trier
+  // explicitement avant ». La base ne garantit aucun ordre de lecture, et le
+  // compilateur consomme ce modèle : chaque liste sort triée par identifiant,
+  // par points de code. T-0.10 l'a montré, deux lectures d'un même site
+  // pouvaient sinon différer.
   return {
     organization,
     site,
-    rules_bindings: rulesBindings,
-    buildings,
-    levels,
-    plan_sources: planSources,
-    plan_calibrations: planCalibrations,
-    footprints,
-    volumes,
+    rules_bindings: byId(rulesBindings),
+    buildings: byId(buildings),
+    levels: byId(levels),
+    plan_sources: byId(planSources),
+    plan_calibrations: byId(planCalibrations),
+    footprints: byId(footprints),
+    volumes: byId(volumes),
     graph: {
-      nodes, edges, vertical_links: verticalLinks, building_links: buildingLinks,
+      nodes: byId(nodes), edges: byId(edges), vertical_links: byId(verticalLinks), building_links: byId(buildingLinks),
     },
-    categories,
-    pictograms,
-    destinations,
-    destination_names: destinationNames,
-    travel_profiles: travelProfiles,
-    support_types: rows.support_typologies.map(mapSupportTypologyRow),
-    supports: rows.supports.map(mapSupportRow),
-    support_faces: rows.support_faces.map(mapSupportFaceRow),
-    content_blocks: rows.content_blocks.map(mapContentBlockRow),
-    support_versions: rows.support_versions.map(mapSupportVersionRow),
+    categories: byId(categories),
+    pictograms: byId(pictograms),
+    destinations: byId(destinations),
+    destination_names: byId(destinationNames),
+    travel_profiles: byId(travelProfiles),
+    support_types: byId(rows.support_typologies.map(t => mapSupportTypologyRow(t, rows.support_typology_faces))),
+    supports: byId(rows.supports.map(mapSupportRow)),
+    support_faces: byId(rows.support_faces.map(mapSupportFaceRow)),
+    content_blocks: byId(rows.content_blocks.map(mapContentBlockRow)),
+    support_versions: byId(rows.support_versions.map(mapSupportVersionRow)),
     face_templates: [],
-    zones,
-    parking_spaces: parkingSpaces,
-    temporary_closures: mapClosureRows(rows.temporary_closures ?? []),
+    zones: byId(zones),
+    parking_spaces: byId(parkingSpaces),
+    temporary_closures: byId(mapClosureRows(rows.temporary_closures ?? [])),
   };
+}
+
+/** Une liste triée par identifiant, par points de code (A9). */
+function byId<T extends { readonly id: string }>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) => codePointCompare(a.id, b.id));
 }

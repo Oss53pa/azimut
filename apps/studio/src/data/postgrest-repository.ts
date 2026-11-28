@@ -14,7 +14,7 @@ import type {
   BuildingLinkRow, BuildingRow, CategoryRow, DestinationNameRow, DestinationRow, EdgeRow,
   FootprintRow, LevelRow, NodeRow, OrganizationRow, PictogramRow,
   PlanCalibrationRow, PlanSourceRow, SiteRow, SiteRulesBindingRow,
-  SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyRow,
+  SupportContentBlockRow, SupportFaceRow, SupportRow, SupportTypologyFaceRow, SupportTypologyRow,
   SupportVersionRow, TravelProfileRow, VerticalLinkRow, VolumeRow,
   ZoneRow, ParkingSpaceRow, TemporaryClosureRow,
 } from '@azimut/db/mapping';
@@ -298,7 +298,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
       // A5.2 — les zones du socle, qui pendent au niveau comme les empreintes
       // qu'elles déclarent couvrir. Section S8 : un parking est une zone, et
       // c'est par ici que les contrôles du domaine `PARK` le voient.
-      const [contentBlocks, zones, parkingSpaces, temporaryClosures] = await Promise.all([
+      const [contentBlocks, zones, parkingSpaces, temporaryClosures, typologyFaces] = await Promise.all([
         queryIn<SupportContentBlockRow>(
           config, 'support_content_block', 'face_id', supportFaces.map(f => f.id),
         ),
@@ -309,6 +309,8 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         ),
         // O11 — les fermetures temporaires du site.
         query<TemporaryClosureRow>(config, 'temporary_closure', `site_id=eq.${siteId}`),
+        // T-0.10 (0089) — les faces des typologies de l'organisation.
+        queryIn<SupportTypologyFaceRow>(config, 'support_typology_face', 'typology_id', typologies.map(t => t.id)),
       ]);
 
       return readableSite(() => assembleSiteData({
@@ -332,6 +334,7 @@ export function createPostgrestRepository(config: PostgrestConfig): SiteReposito
         travel_profiles: travelProfiles,
         supports,
         support_typologies: typologies,
+        support_typology_faces: typologyFaces,
         support_faces: supportFaces,
         content_blocks: contentBlocks,
         support_versions: supportVersions,

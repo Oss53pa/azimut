@@ -132,6 +132,7 @@ non plus — elle n'en retire que les clés étrangères.
 0086_e9_3_decoration
 0087_l0_support_creation
 0088_t1_3_volume_material
+0089_t0_10_support_typology_face
 ```
 
 ## Règle pour la suite
