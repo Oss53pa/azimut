@@ -109,6 +109,9 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // `reserveAs` pose le rôle pour la session : la connexion rendue au pool le
+  // garderait, et le nettoyage qui suit s'exécuterait sous `authenticated`.
+  await alice`reset role`;
   await alice.release();
   await cleanup();
   await client`delete from azimut.rules_pack where id = ${PACK}`;
