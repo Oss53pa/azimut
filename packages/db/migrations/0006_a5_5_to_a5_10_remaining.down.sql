@@ -1,3 +1,6 @@
+-- La clé de `site` vers `rules_pack` tombe d'abord : la table qu'elle vise
+-- tombe plus bas (aller-retour complet des migrations, T-0.3).
+ALTER TABLE azimut.site DROP CONSTRAINT IF EXISTS fk_site_rules_pack;
 DROP TABLE IF EXISTS azimut.audit_log;
 DROP TABLE IF EXISTS azimut.job;
 DROP TABLE IF EXISTS azimut.kiosk_telemetry;
@@ -21,4 +24,3 @@ DROP TABLE IF EXISTS azimut.support;
 DROP TABLE IF EXISTS azimut.decision_point;
 DROP TABLE IF EXISTS azimut.route_cache;
 DROP TABLE IF EXISTS azimut.travel_profile;
-ALTER TABLE azimut.site DROP CONSTRAINT IF EXISTS fk_site_rules_pack;

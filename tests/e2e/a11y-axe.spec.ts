@@ -323,6 +323,35 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
     });
   }
 
+  /**
+   * T-1.15 — les écrans d'audit de la coquille, que l'audit d'avancement
+   * trouvait hors de l'analyse : occupants, supports, audit de couverture,
+   * profils, évacuation. Ils s'ouvrent depuis la barre latérale ; la langue se
+   * choisit au bandeau.
+   */
+  const AUDIT_SCREENS = [
+    { module: { fr: 'Socle du site', en: 'Site foundation' }, label: { fr: 'Occupants', en: 'Occupants' } },
+    { module: { fr: 'Socle du site', en: 'Site foundation' }, label: { fr: 'Supports', en: 'Supports' } },
+    { module: { fr: 'Wayfinding', en: 'Wayfinding' }, label: { fr: 'Audit', en: 'Audit' } },
+    { module: { fr: 'Parcours', en: 'Customer flows' }, label: { fr: 'Profils', en: 'Profiles' } },
+    { module: { fr: 'Signalétique', en: 'Signage production' }, label: { fr: 'Évacuation', en: 'Evacuation' } },
+  ] as const;
+  for (const lang of LANGS) {
+    for (const screen of AUDIT_SCREENS) {
+      test(`T-1.15 ${screen.label.fr}, état nominal, ${lang}`, async ({ page }) => {
+        await page.goto('/');
+        if (lang === 'en') await page.getByRole('button', { name: 'en', exact: true }).click();
+        const screens = lang === 'fr' ? `Écrans du module ${screen.module.fr}` : `Screens of module ${screen.module.en}`;
+        await page.getByRole('button', { name: screens }).click();
+        await page.getByRole('button', { name: screen.label[lang], exact: true }).first().click();
+        // L'écran est bien ouvert : le fil d'Ariane le nomme. Sans cela,
+        // l'analyse porterait sur l'accueil et passerait sans rien éprouver.
+        await expect(page.getByRole('listitem').filter({ hasText: screen.label[lang] }).and(page.locator('[aria-current="page"]'))).toBeVisible();
+        await check(page, `T-1.15 ${screen.label.fr}`, 'nominal', lang);
+      });
+    }
+  }
+
   test.afterAll(() => {
     const path = resolve(HERE, '..', '..', 'docs', 'releve-axe.json');
     mkdirSync(dirname(path), { recursive: true });
@@ -330,7 +359,7 @@ test.describe('M8 (partie M) critère 5 — aucune violation détectable automat
       mesure: 'M8 (partie M) critère 5 — absence de violation détectable automatiquement',
       outil: 'axe-core, dépendance de développement, jamais livrée',
       regles: WCAG_A_AA,
-      portee: 'Les cinq écrans de la partie M, leurs deux boîtes de dialogue et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.',
+      portee: 'Les cinq écrans de la partie M, leurs deux boîtes de dialogue, l’écran du tableau des messages de la partie R et les cinq écrans d’audit de T-1.15, dans leurs états atteignables, en français et en anglais.',
       limite: 'L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.',
       incomplets: incompletes,
     }, null, 2)}\n`, 'utf8');

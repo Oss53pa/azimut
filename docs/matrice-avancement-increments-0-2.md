@@ -25,9 +25,9 @@ Les suites n'ont pas été rejouées pour cette matrice ; elles passent en CI (r
 | Incrément | Tâches | Tenues | Partielles | Absentes | Avancement prouvé | Critère de sortie |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0. Fondations | 16 | 5 | 11 | 0 | ≈ 60 % | chaîne et étanchéité en place |
-| 1. Audit de signalétique | 19 | 11 | 8 | 0 | ≈ 75 % (≈ 65 % atteignable dans le studio) | hors dépôt, non atteint |
+| 1. Audit de signalétique | 19 | 12 | 7 | 0 | ≈ 75 % (≈ 65 % atteignable dans le studio) | hors dépôt, non atteint |
 | 2. Production des supports | 20 | 6 | 12 | 2 | ≈ 50 à 55 % | hors dépôt, non atteint |
-| **0 à 2** | **55** | **22** | **31** | **2** | **≈ 62 %** | |
+| **0 à 2** | **55** | **23** | **30** | **2** | **≈ 62 %** | |
 
 Pondération : chaque tâche reçoit la part de ses critères prouvés, puis la moyenne est
 pondérée par le nombre de tâches. Barème simple (tenue 1, partielle 0,5) : 66 %, 74 %,
@@ -41,8 +41,8 @@ vides.
 | Tâche | État | Preuve | Reste |
 | --- | --- | --- | --- |
 | T-0.1 Squelette | tenue | CI `typecheck`, `lint`, `scripts/check-deps.js` | le contrôle ne lit que les `package.json`, pas les imports ; aucun cas négatif |
-| T-0.2 Chaîne | partielle | `ci.yml`, neuf étapes dans l'ordre | aucune preuve d'échec si une étape manque ; certaines suites se sautent encore sans garde (`m02-w11-barriere`, `audit-site-job`) |
-| T-0.3 Base et migrations | partielle | migrations appliquées sur base vide en CI | aucun essai up → down → up ; `db:reset` n'est éprouvé que dans ses refus |
+| T-0.2 Chaîne | partielle | `ci.yml`, neuf étapes dans l'ordre ; `tests/db-suites-guarded.test.ts` : toute variable qu'une suite sur base lit est vérifiée par une garde armée en CI | aucune preuve d'échec si une étape manque |
+| T-0.3 Base et migrations | partielle | migrations appliquées sur base vide en CI ; `scripts/migrations-aller-retour.sh`, étape de la CI : tout à l'aller, tout au retour, de nouveau à l'aller, schéma identique (3 408 éléments) — il a trouvé et fait corriger deux retours cassés (0006, 0025) | `db:reset` n'est éprouvé que dans ses refus |
 | T-0.4 Schéma A5.1, A5.2 | partielle | `a5-jsonb-validation.db`, `a5-positions-point.db`, `a6-2-role-marketing.db`, `a5-contraintes-insertion.db` (volume, code d'unité, nature d'empreinte, langues, origine, calage, sens et boucle d'arête, liaison verticale) | `edge.width_m > 0` et une borne sur `ordinal` n'existent pas en base, et A5 ne les pose pas |
 | T-0.5 Authentification et rôles | partielle | `auth-2-connexion-reelle.db`, `a6-2-roles-en-base.db` | journalisation des changements de rôle (QA5) ; utilisateur authentifié sans rattachement non éprouvé |
 | T-0.6 Cloisonnement | partielle | `test:rls` en CI, `a10-4-etancheite-postgrest.db` | pas de cas négatif de couverture ; temps de réponse ; sondes par clé étrangère |
@@ -78,7 +78,7 @@ vides.
 | T-1.12 Audits | tenue | `audit.test.ts`, `audit-accessibility-evacuation` | — |
 | T-1.13 Reprise de carnet | partielle | `import-supports`, `carnet-import`, `carnet-file`, `t-1-13-carnet.db`, `t-1-13-reprise-carnet.spec` : rapport ligne à ligne, lignes valides écrites, azimut absent en attente, encodage non UTF-8 refusé (`docs/decoupage-reprise-carnet.md`) | la photographie, lot à part (QI4) |
 | T-1.14 Rapprochement | tenue | `reconciliation` ; export : `reconciliation-export.test.ts` (identifiant sur chaque ligne, reproductible, aucune formule de tableur), `t-1-14-export-rapprochement.spec` (téléchargement depuis l'écran) | — |
-| T-1.15 Écran de conception | partielle | `a11y-axe.spec` (M1 à M5, R) | écrans d'audit non analysés |
+| T-1.15 Écran de conception | tenue | `a11y-axe.spec` : M1 à M5, R, et les cinq écrans d'audit (occupants, supports, audit, profils, évacuation), en français et en anglais | — |
 | T-1.16 Présence et verrou (S6) | tenue | `s6-4-verrou-ferme.db`, `s6-7-presence.db`, `s6-10-convergence.db` | contradictions T-1.16, G4.2, S-20 à reporter par l'éditeur |
 
 Critère de sortie, « deux audits vendus et payés » : hors dépôt. La chaîne de l'audit

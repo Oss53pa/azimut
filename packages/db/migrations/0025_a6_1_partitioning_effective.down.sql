@@ -1,6 +1,18 @@
 -- Retour en arrière de 0024. Ne restitue pas un état sûr : il rouvre la
 -- frontière d'organisation. N'est là que pour la symétrie du corpus.
 
+-- La politique non récursive de `membership` que 0025 pose, et les deux
+-- qu'elle remplace, telles que 0007 les écrivait. Sans ce retour, la politique
+-- restait accrochée à `current_user_id()`, et le retour de 0024 échouait
+-- (aller-retour complet des migrations, T-0.3).
+DROP POLICY IF EXISTS membership_own_rows ON azimut.membership;
+CREATE POLICY membership_select ON azimut.membership
+  FOR SELECT TO authenticated
+  USING (org_id IN (SELECT azimut.user_org_ids()));
+CREATE POLICY membership_manage ON azimut.membership
+  FOR ALL TO authenticated
+  USING (org_id IN (SELECT azimut.user_org_ids()));
+
 DROP TRIGGER IF EXISTS guard_approval_truncate ON azimut.approval;
 DROP FUNCTION IF EXISTS azimut.block_approval_truncate();
 

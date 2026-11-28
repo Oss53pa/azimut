@@ -9,7 +9,7 @@
     "wcag22a",
     "wcag22aa"
   ],
-  "portee": "Les cinq écrans de la partie M, leurs deux boîtes de dialogue et l’écran du tableau des messages de la partie R, dans leurs états atteignables, en français et en anglais.",
+  "portee": "Les cinq écrans de la partie M, leurs deux boîtes de dialogue, l’écran du tableau des messages de la partie R et les cinq écrans d’audit de T-1.15, dans leurs états atteignables, en français et en anglais.",
   "limite": "L’absence de violation détectable n’atteste pas la conformité AA, qui relève de l’audit externe du lot 4.7.",
   "incomplets": [
     {
@@ -100,6 +100,152 @@
       "elements": [
         "td[rowspan=\"1\"]:nth-child(1) > span > span:nth-child(1)",
         "tr:nth-child(2) > td:nth-child(1) > span > span:nth-child(1)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Occupants",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Réalisation\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > div",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(1) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Livrables\"] > div",
+        "section[aria-label=\"Livrables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Supports",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Réalisation\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > div",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(1) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Livrables\"] > div",
+        "section[aria-label=\"Livrables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Audit",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Livrables\"] > div",
+        "section[aria-label=\"Livrables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Profils",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Livrables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Évacuation",
+      "etat": "nominal",
+      "langue": "fr",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Exploitation\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Livrables\"] > div",
+        "section[aria-label=\"Livrables\"] > ul > li > div > button > span:nth-child(2)",
+        "text[x=\"322.667\"]",
+        "text[x=\"24\"]"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Occupants",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Delivery\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > div",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(1) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Deliverables\"] > div",
+        "section[aria-label=\"Deliverables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Supports",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Delivery\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > div",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(1) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Deliverables\"] > div",
+        "section[aria-label=\"Deliverables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Audit",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Deliverables\"] > div",
+        "section[aria-label=\"Deliverables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Profils",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Deliverables\"] > ul > li > div > button > span:nth-child(2)"
+      ]
+    },
+    {
+      "ecran": "T-1.15 Évacuation",
+      "etat": "nominal",
+      "langue": "en",
+      "regle": "color-contrast",
+      "aide": "Elements must meet minimum color contrast ratio thresholds",
+      "elements": [
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(2) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(3) > div > button:nth-child(1) > span:nth-child(2)",
+        "section[aria-label=\"Operations\"] > ul > li:nth-child(4) > div > button > span:nth-child(2)",
+        "section[aria-label=\"Deliverables\"] > div",
+        "section[aria-label=\"Deliverables\"] > ul > li > div > button > span:nth-child(2)",
+        "text[x=\"322.667\"]",
+        "text[x=\"24\"]"
       ]
     }
   ]

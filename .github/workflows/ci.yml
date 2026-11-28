@@ -127,6 +127,12 @@ jobs:
           psql "$base" -v ON_ERROR_STOP=1 -q -c 'GRANT USAGE ON SCHEMA azimut TO anon'
           echo "Base montée : $(ls packages/db/migrations/0*.up.sql | wc -l) migrations appliquées."
 
+      # T-0.3 — « une migration est réversible à l'aller et au retour ». Sur une
+      # base jetable distincte : tout à l'aller, tout au retour, de nouveau tout
+      # à l'aller, et le schéma doit être identique ligne à ligne.
+      - name: Aller-retour des migrations
+        run: scripts/migrations-aller-retour.sh postgres://postgres@127.0.0.1:54332 postgres://azimut@127.0.0.1:54332
+
       # A6.3 : « Aucun secret dans le dépôt, variables d'environnement
       # uniquement. » Le secret de signature du banc d'essai est donc tiré ici,
       # à chaque exécution, et n'existe nulle part dans le dépôt. Il ne sert
