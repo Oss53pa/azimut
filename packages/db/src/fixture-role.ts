@@ -1,4 +1,6 @@
 import type postgres from 'postgres';
+import { sql } from 'drizzle-orm';
+import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
 /**
  * Le rôle de décor du banc d'essai — question 6 de la matrice, décision
@@ -64,4 +66,23 @@ export async function inFixtureRole<T>(
   const out = await work();
   await tx.unsafe(BACK);
   return out;
+}
+
+/**
+ * Un décor écrit et lu dans une transaction toujours annulée, sous le rôle de
+ * décor : ce que `work` rend est rendu, rien de ce qu'il a écrit ne reste.
+ */
+export async function inRolledBackFixture<T>(
+  db: PostgresJsDatabase,
+  work: (tx: Parameters<Parameters<PostgresJsDatabase['transaction']>[0]>[0]) => Promise<T>,
+): Promise<T> {
+  const rolledBack = new Error('annulation voulue');
+  let out: { readonly value: T } | null = null;
+  await db.transaction(async tx => {
+    await tx.execute(sql.raw(SWITCH));
+    out = { value: await work(tx) };
+    throw rolledBack;
+  }).catch((e: unknown) => { if (e !== rolledBack) throw e; });
+  if (out === null) throw new Error('décor annulé sans résultat');
+  return (out as { readonly value: T }).value;
 }

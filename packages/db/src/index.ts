@@ -19,4 +19,5 @@ export { deleteOrgFixture, dependencyOrder } from './fixture-cleanup.js';
 export type { SqlRunner, SqlReader } from './fixture-cleanup.js';
 export { enrolFixtureMembers, withdrawFixtureMembers } from './fixture-membership.js';
 export type { FixtureMember } from './fixture-membership.js';
-export { FIXTURE_ROLE, asFixture, withFixtureRole, inFixtureRole } from './fixture-role.js';
+export { FIXTURE_ROLE, asFixture, withFixtureRole, inFixtureRole, inRolledBackFixture } from './fixture-role.js';
+export { referenceUuid, writeReferenceSite } from './fixture-site.js';

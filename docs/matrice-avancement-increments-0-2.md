@@ -89,7 +89,7 @@ n'est pas complète dans le studio (import du carnet, rapprochement exportable).
 
 | Tâche | État | Preuve | Reste |
 | --- | --- | --- | --- |
-| T-2.1 Typologies | tenue (mince) | `validate-supports` | une typologie ajoutée jusqu'à la face compilée |
+| T-2.1 Typologies | tenue | `validate-supports` ; `t-2-1-typologie-ajoutee.db` : une typologie posée en donnée seule, relue en base avec ses faces (0089), acceptée par le contrôle, deux faces au tableau des messages, rendue à la taille qu'elle déclare | aucun écran de saisie des typologies, et N4.5 n'en prévoit pas |
 | T-2.2 Gabarits | tenue | `compile-template` | — |
 | T-2.3 Résolution | tenue | `compute-staleness`, `content-hash-peremption`, `resolve-face` | — |
 | T-2.4 Dimensions | partielle | `required-face-format`, `face-format` | saisie manuelle dans le studio ; preuve que le constat bloque |
